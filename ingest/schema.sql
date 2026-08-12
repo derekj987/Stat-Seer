@@ -274,6 +274,22 @@ drop trigger if exists no_update_odds on odds_snapshots;
 create trigger no_update_odds before update or delete on odds_snapshots
     for each row execute function block_mutation();
 
+-- =====================================================================
+-- BACKEND WRITER PRIVILEGES. The append-only revokes above never granted
+-- service_role its write privilege, so the ingest pipeline (which connects
+-- as service_role via the secret key) cannot insert. Grant it here.
+-- INSERT/SELECT everywhere it writes; UPDATE/DELETE only on the mutable
+-- tables. The four append-only tables get INSERT/SELECT ONLY — immutability
+-- stays enforced by both the absent grant and the block_mutation() trigger.
+-- =====================================================================
+grant select, insert on
+    players, player_alias_queue, practice_reports, pressers,
+    presser_extractions, coach_credibility, odds_snapshots,
+    prediction_ledger, prediction_results
+    to service_role;
+grant update, delete on players, player_alias_queue, coach_credibility to service_role;
+grant usage, select on all sequences in schema public to service_role;
+
 -- Read-only public calibration report. This is the trust artefact.
 create or replace view public_calibration as
 select
