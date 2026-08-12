@@ -192,6 +192,11 @@ create table if not exists odds_snapshots (
 create index if not exists odds_event_idx  on odds_snapshots (event_id, market, book);
 create index if not exists odds_time_idx   on odds_snapshots (snapshot_at);
 create index if not exists odds_week_idx   on odds_snapshots (season, week);
+-- Idempotency: a re-run of the same capture must not double-insert. `nulls not
+-- distinct` (PG15+) is required so h2h rows, where outcome_point is NULL, still
+-- dedupe. Pairs with the ingester's Prefer: resolution=ignore-duplicates.
+create unique index if not exists odds_snapshots_dedupe on odds_snapshots
+    (snapshot_at, event_id, book, market, outcome_name, outcome_point) nulls not distinct;
 
 -- The closing line: last PRE_KICKOFF snapshot before commence_time.
 create or replace view closing_lines as
