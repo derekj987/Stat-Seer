@@ -197,6 +197,26 @@ def snapshot_time_from_events(events):
     return max(stamps) if stamps else None
 
 
+def filter_commence_window(rows, within_min, now_iso=None):
+    """Keep only rows whose game kicks off within the next `within_min` minutes.
+    Used by the pre-kickoff sweep to capture a tight closing line without writing
+    every upcoming game on every 15-minute run. `now_iso` is injectable for tests."""
+    from datetime import datetime, timezone, timedelta
+
+    if now_iso is None:
+        now = datetime.now(timezone.utc)
+    else:
+        now = datetime.fromisoformat(now_iso.replace("Z", "+00:00"))
+    horizon = now + timedelta(minutes=within_min)
+
+    kept = []
+    for r in rows:
+        kickoff = datetime.fromisoformat(r["commence_time"].replace("Z", "+00:00"))
+        if now <= kickoff <= horizon:
+            kept.append(r)
+    return kept
+
+
 # ------------------------------------------------------------------- live fetch
 def fetch_live(api_key, markets, regions, odds_format="american"):
     """One GET. Returns (status, headers, events, credit) where credit is a dict of
