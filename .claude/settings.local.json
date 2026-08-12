@@ -20,7 +20,12 @@
       "PowerShell($py = \"C:\\\\Users\\\\joann\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe\"; $env:SSL_CERT_FILE = & $py -c \"import certifi; print\\(certifi.where\\(\\)\\)\"; & $py analysis\\\\fetch_data.py; Write-Output \"exit=$LASTEXITCODE\")",
       "PowerShell($py = \"C:\\\\Users\\\\joann\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe\"; $env:SSL_CERT_FILE = & $py -c \"import certifi; print\\(certifi.where\\(\\)\\)\"; & $py analysis\\\\fetch_data.py 2>&1 | Select-String -Pattern 'tstats_2025|failing|All data'; Write-Output \"exit=$LASTEXITCODE\")",
       "PowerShell($py = \"C:\\\\Users\\\\joann\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe\"; $env:SSL_CERT_FILE = & $py -c \"import certifi; print\\(certifi.where\\(\\)\\)\"; & $py analysis\\\\spread_fundamentals.py; Write-Output \"exit=$LASTEXITCODE\")",
-      "PowerShell($py = \"C:\\\\Users\\\\joann\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe\"; $env:SSL_CERT_FILE = & $py -c \"import certifi; print\\(certifi.where\\(\\)\\)\"; Push-Location analysis; & $py spread_fundamentals.py; $code=$LASTEXITCODE; Pop-Location; Write-Output \"exit=$code\")"
+      "PowerShell($py = \"C:\\\\Users\\\\joann\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe\"; $env:SSL_CERT_FILE = & $py -c \"import certifi; print\\(certifi.where\\(\\)\\)\"; Push-Location analysis; & $py spread_fundamentals.py; $code=$LASTEXITCODE; Pop-Location; Write-Output \"exit=$code\")",
+      "Bash(git check-ignore *)",
+      "Bash(git config *)",
+      "Bash(git branch *)",
+      "Bash(git commit -q -m ' *)",
+      "Bash(git add *)"
     ]
   }
 }
