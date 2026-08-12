@@ -1,0 +1,24 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/practice-reports",
+      "schedule": "0 21,23 * 9-12,1 3,4,5"
+    },
+    {
+      "path": "/api/cron/pressers",
+      "schedule": "30 22 * 9-12,1 *"
+    },
+    {
+      "path": "/api/cron/odds-scheduled",
+      "schedule": "0 9,21 * * *"
+    },
+    {
+      "path": "/api/cron/odds-pre-kickoff",
+      "schedule": "*/15 16-23 * 9-12,1 0,1,4"
+    },
+    {
+      "path": "/api/cron/grade-predictions",
+      "schedule": "0 12 * 9-12,1 2"
+    }
+  ]
+}

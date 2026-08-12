@@ -1,0 +1,37 @@
+# ---- SECRETS. Never commit these.
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+secrets/
+
+# ---- Data (regenerable via analysis/fetch_data.py)
+data/
+*.csv
+*.csv.gz
+*.parquet
+!docs/**/*.csv
+
+# ---- Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# ---- Node / Next.js / Expo
+node_modules/
+.next/
+out/
+.expo/
+dist/
+build/
+
+# ---- Vercel
+.vercel
+
+# ---- OS
+.DS_Store
+Thumbs.db

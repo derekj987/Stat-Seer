@@ -1,0 +1,381 @@
+# Product Idea Tracker
+
+Running log of every idea, its status, and the reasoning.
+Last updated: Aug 10, 2026.
+
+---
+
+## Core vision
+
+An AI/ML-led sports betting **advice** app — not a sportsbook. NFL first, then MLB,
+NHL, soccer.
+
+**Primary differentiator: being the most trustworthy source in the category.**
+
+Trust interpreted as *verifiable* trust — published probabilities, published track
+record including the bad stretches, calibration users can check.
+
+Target experience: click a game, see what the model thinks and **why**, with each
+clause traceable to a model input the user can check.
+
+---
+
+# App architecture — three sections
+
+This is now the main organizing principle. The separation exists because each
+section is true in a different way, and collapsing them into one composite
+confidence score destroys all three.
+
+## 1. The Board — line-aware
+
+**Question it answers: where is the price wrong?**
+
+| Feature | Status |
+|---|---|
+| Best number across books (line shopping) | Highest trust-per-effort. Not a model. |
+| Key-number flags | Built. Half point at 3 is worth ~9% vs ~3% at 4.5. |
+| Alternate-line fair pricing | Built (`alt_lines_v2.py`) |
+| Market coherence check | Built (`odds_audit_v2.py`) |
+| Parlay correlation detection | Designed, not built |
+| Line movement display | Available from the board; **cannot be modelled** (see dependencies) |
+
+This is where the actionable value is, and almost none of it requires prediction.
+On the three Week 1 games sitting on -3, shopping for -2.5 is worth ~9 points of
+win probability — larger than any model edge honestly claimable.
+
+## 2. The Model — line-blind
+
+**Question it answers: what does the data say on its own?**
+
+Derek's framing was "non-biased, not influenced by sportsbooks." One correction:
+the market is not a source of bias, it is the most accurate available forecast.
+Measured directly — line-blind model MAE 10.15 vs market 9.89, market's advantage
+significant at p=0.034. A line-blind model is not *unbiased*; it is *less
+informed*.
+
+Its real job is to be the **honest measurement instrument**. A model that never
+sees the line cannot unconsciously anchor to it, so its published track record is
+a genuine test of skill. That is the trust engine.
+
+**Non-negotiables:**
+- Predictions published and locked before kickoff (calibration ledger)
+- Calibration tracked publicly
+- Stated plainly as less accurate than the market
+- Large disagreements flagged as *investigate the model*, not *bet it*
+
+**Risk to avoid:** presenting it as purer advice. If users read "unbiased" and
+follow it over The Board, they do measurably worse.
+
+## 3. Context — neither
+
+**Question it answers: what should I understand about this game?**
+
+Accurate football analysis that helps people think, explicitly labeled as **not a
+pick driver**. Trend analysis, weather, referee crews, injury burden, implied
+totals, line movement.
+
+Every number here is true, sourced, and useful. None of it is an edge. Showing it
+*without* claiming predictive power is what builds credibility rather than
+spending it.
+
+**The design rule: panels inform, they do not vote.** Five analysis panels feeding
+a composite score looks like the most sophisticated product in the category while
+being, mathematically, a coin flip with a dashboard. Combining zero-edge signals
+produces zero edge — but the appearance of rigor rises sharply. That is the exact
+machine the competition runs.
+
+---
+
+# Ideas: accepted and in the build
+
+| # | Idea | Section | Status |
+|---|---|---|---|
+| 1 | Weather shown under each game | Context | Ship early. Lead with **wind** (>15mph), not temperature. |
+| 2 | Weather forecast *distribution* | Model | **The one live lead.** Market under-adjusts ~1.3 pts of total at 15+ mph. |
+| 3 | Practice participation trajectory | Model | Needs new collection — **cannot be backfilled**. Start scraping this season. |
+| 4 | Coordinator/coach presser mining | Model | Strongest idea raised. Extract *statements* about usage, not sentiment. |
+| 5 | Per-coach credibility scoring | Model | Novel asset. Compounds every season. |
+| 6 | Contract data → opportunity model | Model | Reframed: contracts predict *opportunity*, not effort. |
+| 7 | Snap/touch share model | Model | **Build 1 complete.** +5.9% over persistence; +8.2% on change weeks. |
+| 8 | Live odds feeds | Board | Blocking dependency. |
+| 9 | Confidence tiers | Board + Model | Must be edge **and** uncertainty. Honest output is mostly "no bet." |
+| 10 | Best-number-across-books | Board | Highest trust-per-effort. |
+| 11 | Alternate-line fair pricing | Board | Engine built. |
+| 12 | Player prop module | Model | Deferred by decision. **Where the tiers will actually fire.** |
+| 18 | Referee crew statistics | Context | Tested — display only. Penalty rates persistent (r=+0.267), outcomes are noise. |
+| 19 | **Trend analysis** | Context | Tested — see below. Framework is correct about football, produces no edge. |
+
+# Ideas: modified
+
+| # | Idea | Disposition |
+|---|---|---|
+| 13 | Media sentiment | Redirected. Criticism follows bad performance, already in the stats. Beat coverage *does* leak usage info — that is the extractable part. |
+| 14 | "Motivation scale" from contracts | Reframed. The pattern is regression to the mean, not motivation. |
+| 15 | "Move the line to +7.5" | Reframed to fair-price comparison. Buying points changes variance, not edge. |
+| 16 | Parlay recommendations | Reframed to correlation detection. |
+| 20 | "Unbiased, no-Vegas section" | Reframed to The Model — an honest measurement instrument, not purer advice. |
+
+# Ideas: declined
+
+| # | Idea | Reason |
+|---|---|---|
+| 17 | Legal/domestic issue flag | **Legal:** an anonymized severity score on a named player is a specific accusation with sourcing stripped out — worse exposure, not better. **Statistical:** 5–15 heterogeneous cases a season; "Severity: High" would be a fabricated number borrowing credibility from real output beside it. **Brand:** a trust-first app that monetizes a player's divorce doesn't survive the first screenshot. Replaced by **availability facts** — suspended, exempt list, expected to miss time. |
+
+---
+
+# Language decisions
+
+| Term | Decision |
+|---|---|
+| **"Safe"** | **Never use.** Over 45.5 instead of 48.5 isn't safe — it's 58.9% instead of 49.5% at a price that makes EV roughly identical. "Safe" implies risk reduction; what happens is variance reduction. Users size bets on that word. |
+| "Best bet" | Only with a published probability beside it. |
+| "Lock", "can't lose", "free money" | Never. |
+| Stale line display | Always timestamp: "line as of 5:00 PM ET." |
+| "Unbiased" (for The Model) | Avoid. It's line-blind, not unbiased — and measurably less accurate. |
+
+---
+
+# Trend analysis — tested
+
+21 streak and momentum angles. **Zero clear the vig.**
+
+| Angle | n | ATS | 95% CI | p |
+|---|---|---|---|---|
+| On 3-game losing streak — back them | 759 | 52.8% | [49.3, 56.4] | 0.127 |
+| After losing by 21+ — back them | 1,129 | 51.8% | [48.9, 54.7] | 0.234 |
+| **Losing streak, week 12+ ("needs a win")** | 1,431 | **48.9%** | [46.3, 51.5] | 0.428 |
+| On 4+ game win streak — fade them | 996 | 50.8% | [47.7, 53.9] | 0.635 |
+| Hot by 3-game EPA — back them | 800 | 51.1% | [47.7, 54.6] | 0.548 |
+
+## The framework's two claims, both tested
+
+| Trailing signal | r with next game | r with ATS margin |
+|---|---|---|
+| 1-game margin | +0.122 | +0.006 |
+| 3-game margin | +0.197 | +0.014 |
+| 5-game margin | +0.236 | +0.020 |
+| 1-game net EPA | +0.133 | +0.001 |
+| 3-game net EPA | +0.194 | −0.001 |
+| **5-game net EPA** | **+0.254** | +0.024 |
+
+**"Three to five games is more meaningful" — VALIDATED.** Longer windows predict
+better, monotonically.
+
+**"Usage trends beat results trends" — VALIDATED, modestly.** EPA edges margin at
+the 5-game window (+0.254 vs +0.236).
+
+**But the ATS column is ~zero for every row.** The framework is accurate football
+analysis that produces no betting edge, because the closing line already contains
+it. This is the sharpest single illustration of the Board/Model/Context split, and
+the reason trend analysis belongs in Context.
+
+---
+
+# The game-line model — validation record
+
+| Sample | n | Market MAE | Model MAE | Model ATS |
+|---|---|---|---|---|
+| Week 1 only | 159 | 9.97 | **9.73** | **58.5%** |
+| Weeks 1–2 | 319 | 9.36 | 9.47 | 56.7% |
+| Weeks 1–4 | 635 | 9.84 | 10.04 | 55.4% |
+| Weeks 1–6 | 925 | **9.85** | 10.07 | 54.8% |
+
+**The advantage flips sign as the sample grows.** ATS decays monotonically
+58.5 → 54.8, CI lower bound stuck near 51.6%, never clearing 52.38%.
+
+Distinguishing 55% from break-even at 80% power needs ~2,842 games. Week 1 supplies
+16/season — **177 seasons.** A Week-1-specific model cannot be validated, ever.
+
+## Two recommended fixes, tested and rejected
+
+Weeks 1–6, 2017–2025, n=833:
+
+| Model | Market MAE | Model MAE | Diff | p |
+|---|---|---|---|---|
+| A. Margin | 9.89 | 10.15 | +0.26 | 0.034 |
+| B. EPA-based | 9.89 | 10.16 | +0.27 | 0.032 |
+| C. EPA + luck-adjusted | 9.89 | **10.23** | **+0.35** | **0.010** |
+
+Both fixes made it *worse*, and the market's advantage more significant. Reason:
+EPA-based luck-adjusted ratings are table stakes, not an edge — every sharp shop
+runs them. Making the model more sophisticated moves it toward the market's number;
+the remaining deviation is noise, not insight.
+
+**Calibration note:** turnover margin persistence is r = **+0.214**, not zero. It
+is partly skill, so stripping all of it over-corrects — which is why model C is
+worst. Regress it partially.
+
+---
+
+# Alternate lines (buy points)
+
+Principle: **the app computes fair price; it does not recommend moving the line.**
+
+```
+base line   WAS +4.5    -110        true 49.7%   fair +101
+alternate   WAS +7.5    book -240   true 61.5%   fair -160   OVERPRICED by 80c
+```
+
+Buying +3 → +4 is worth **+6.0 points** of win probability. From +4.5 → +5.5 it's
+**+1.8**. Same point, triple the value, because one crosses 3. Books often price
+point-buying flat; an engine that knows key numbers finds real value.
+
+---
+
+# Parlays
+
+**parlay EV = Π(1 + EV_i) − 1.** Parlays are **leverage** — they multiply per-leg
+edge in whichever direction it points.
+
+| Per-leg EV | 4 legs | 10 legs |
+|---|---|---|
+| -110, no edge | -19.4% | **-41.7%** |
+| exactly fair | 0.0% | 0.0% |
+| +3% edge | +12.6% | **+34.4%** |
+
+Buying points does not rescue a parlay — the probability gain is already paid for.
+
+**Where parlays genuinely become +EV: correlation mispricing.** Books often price
+same-game legs as independent:
+
+| Correlation | True joint P | Book implied | Edge |
+|---|---|---|---|
+| 0.30 | 37.5% | 30.3% | **+24%** |
+| 0.60 | 45.1% | 30.3% | +49% |
+
+Requirements: fair price per leg, correlation estimate, true parlay probability
+shown next to payout, and **never present a longer parlay as higher confidence.**
+
+**Deliberate decision required:** parlay hold runs far above straight-bet hold, and
+parlay volume is disproportionately associated with problem gambling. A trust-first
+brand needs a stated position, not a default.
+
+---
+
+# Technical stack
+
+| Layer | Choice |
+|---|---|
+| Database | Supabase (Postgres) |
+| API / hosting | Vercel |
+| Mobile build/test | Expo |
+| Mobile frontend | React Native |
+| Web frontend | Next.js |
+
+**Batch-precompute the models.** Python models don't run in Next.js. Compute on a
+schedule, write to Supabase, serve from Postgres.
+
+**The calibration ledger is the most important schema decision in the app.**
+Write-once, append-only, timestamped before kickoff, UPDATE grants revoked at the
+database level — not enforced in application code. If past predictions can be
+edited, the track record is worth nothing, and it *is* the differentiator. Build
+this table before the model that fills it.
+
+**No dedicated worker needed** at the chosen cadence — Vercel Cron handles it.
+**No table partitioning needed** under ~10M rows/season.
+
+**Verify app-store policy early.** Gambling-adjacent apps face specific review
+requirements around age gating and geo-restriction. Read current Apple/Google
+guidelines before going deep on Expo builds.
+
+---
+
+# Odds ingestion schedule
+
+| Window | Cadence | Purpose |
+|---|---|---|
+| Baseline, every day | 5:00 AM + 5:00 PM ET | display |
+| ~20 min before each kickoff wave | one poll per wave | **closing line capture** |
+
+5:00 PM catches the day's practice reports. **Event-anchored, not day-of-week** —
+Week 1 2026 has no Saturday game; Weeks 16–18 do.
+
+**Why the pre-kickoff poll matters:** NFL inactives drop 90 minutes before
+kickoff. An 11:00 AM poll for a 1:00 PM slate misses it, and the next poll lands
+after kickoff. Without it, "closing line" means a T-2h line, biasing the CLV metric
+the trust proposition rests on.
+
+Volume: ~1.5M rows/season, ~0.15 GB. (30-second polling would be 2.5B rows.)
+
+---
+
+# Blocking dependencies
+
+**One acquisition unblocks three features.** Prop history, opening lines, and
+betting splits are all the same purchase: **timestamped multi-book odds history.**
+
+| # | Dependency | Unblocks |
+|---|---|---|
+| 1 | **Timestamped multi-book odds history** | Prop validation, line movement modelling, reverse line movement, CLV measurement, cross-book disagreement |
+| 2 | Stage A availability model | The whole player pipeline (currently conditioned on being active) |
+| 3 | Daily practice report scraping | Practice trajectory. **Start now or lose the season.** |
+| 4 | Presser transcript corpus | Coordinator mining, per-coach credibility. Start in parallel. |
+| 5 | Coordinator history (needs scraping) | The one coaching test not yet run |
+
+---
+
+# Open tests
+
+| Test | Status |
+|---|---|
+| Does media criticism predict beyond recent stats? | Open. Derek's read against mine. |
+| Offensive line continuity | P1, highest-value untested roster item |
+| New offensive/defensive coordinator | P1. Head coaches showed exactly nothing (49.9% every split) |
+| Fourth-down aggressiveness by coach | P1 |
+| Pace of play differential | P1 |
+| Travel distance and time zones | P1, computable today |
+| Look-ahead / let-down spots | P1, computable today |
+| Wind forecast vs realized | P1 — the live lead |
+| How much lines move in the final 2 hours | Needs intraday odds |
+
+Full prioritized list with data requirements in `ATTRIBUTE_CATALOG.md`.
+
+---
+
+# Standing discipline
+
+A candidate enters **the model** only if it clears all three:
+
+1. Observable and recorded historically
+2. Plausible mechanism, stated in advance
+3. Improves results **against the closing line**, out of sample
+
+Fails any one → it can be **Context**, not a model feature.
+
+Rules earned the hard way during this design work:
+
+- **Never define an evaluation stratum using the outcome** or a competitor's error.
+- **Any model whose base case shows free money has a bug.** Enforce a sanity check
+  that efficient lines price near 50%.
+- **Use empirical distributions, not Gaussians,** anywhere key numbers matter.
+- **Count your tests.** 31 attribute tests produce ~1.5 false positives at p<0.05.
+- **Hold out later weeks by default.** A p-value on the sample a hypothesis was
+  born in is not validation. The Week 1 model looked like a 58.5% system until the
+  sample grew.
+- **Test the variance before ranking.** If crew-to-crew spread ≈ binomial
+  expectation, the leaderboard is noise — and a leaderboard is exactly what a
+  betting app is tempted to display.
+
+**Business model note:** affiliate revenue pays you when users bet more, which is
+structurally opposed to saying "sit this one out." Subscription revenue aligns with
+honest advice but grows slower. Decide this before the confidence tiers ship.
+
+---
+
+# Error log
+
+Seven cases where the data contradicted an assertion. Recorded because these are
+the failure modes that produce confident, wrong betting products.
+
+| # | Error | How it surfaced |
+|---|---|---|
+| 1 | Claimed snap-share edge was at the *back* of the depth chart | Proportional error showed it's the middle (35–60%) |
+| 2 | Stratified by persistence's own error | Clean signal/no-signal split contradicted it — two wasted model variants |
+| 3 | Normal-margin model flagged 15 of 16 games as incoherent | Empirical curve showed the model was low at every spread |
+| 4 | Moneylines entered backwards for 5 road favorites | Coherence checker flagged impossible values |
+| 5 | Asserted lower totals → favorites win more | 60.0% vs 61.1%, slightly opposite, n.s. |
+| 6 | Alternate-line window ±1.5 showed free money at the base bet | Sanity check that efficient lines price ~50% |
+| 7 | Called turnover margin "mostly luck" | r = +0.214, partly skill — over-corrected model C |
+
+**Four of seven were caught by automated checks rather than review. Build the
+checks into the pipeline, not the review process.**

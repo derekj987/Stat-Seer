@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -o '^ODDS_API_KEY=.\\\\{0,4\\\\}' .env)",
+      "Bash(python -c \"import requests; print\\('requests ok'\\)\")",
+      "Bash(py --version)",
+      "PowerShell(Get-Command python,python3,py -ErrorAction SilentlyContinue | Select-Object Name,Source; Write-Output \"--- key ---\"; $k=\\(Get-Content .env | Where-Object {$_ -match '^ODDS_API_KEY='}\\); Write-Output \\(\"keyline_len=\" + $k.Length\\))",
+      "PowerShell(try { $out = & python.exe -c \"import sys; print\\(sys.version\\)\" 2>&1; Write-Output \"RESULT: $out\" } catch { Write-Output \"ERR: $_\" })",
+      "PowerShell(& python.exe odds_probe.py; Write-Output \"exit=$LASTEXITCODE\")",
+      "PowerShell(Get-Command winget -ErrorAction SilentlyContinue)",
+      "PowerShell(winget --version 2>&1)",
+      "PowerShell(winget install --id Python.Python.3.12 -e --source winget --accept-package-agreements --accept-source-agreements --scope user 2>&1)",
+      "PowerShell(& \"C:\\\\Users\\\\joann\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe\" odds_probe.py; Write-Output \"exit=$LASTEXITCODE\")",
+      "PowerShell(& \"C:\\\\Users\\\\joann\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe\" odds_probe.py 2>&1)",
+      "PowerShell($out = & \"C:\\\\Users\\\\joann\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe\" odds_probe.py; Write-Output \"exit=$LASTEXITCODE\"; Write-Output \"--- status + save line ---\"; $out | Select-String -Pattern 'HTTP STATUS|Raw body saved'; Write-Output \"--- fixture size ---\"; \\(Get-Item fixtures\\\\odds_v4_raw.json\\).Length; Write-Output \"--- games returned ---\"; \\(Get-Content fixtures\\\\odds_v4_raw.json -Raw | ConvertFrom-Json\\).Count)",
+      "Bash(grep -n -E '^\\\\.env$|^\\\\.env\\\\b|/\\\\.env' .gitignore)",
+      "PowerShell($py = \"C:\\\\Users\\\\joann\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe\"; & $py -c \"import importlib.util as u; [print\\(m, bool\\(u.find_spec\\(m\\)\\)\\) for m in ['numpy','pandas','scipy','sklearn']]\")",
+      "PowerShell($py = \"C:\\\\Users\\\\joann\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe\"; & $py -m pip install --quiet --disable-pip-version-check pandas numpy scipy 2>&1 | Select-Object -Last 5; Write-Output \"exit=$LASTEXITCODE\"; & $py -c \"import pandas, numpy, scipy; print\\('pandas', pandas.__version__, '| numpy', numpy.__version__, '| scipy', scipy.__version__\\)\")",
+      "PowerShell($py = \"C:\\\\Users\\\\joann\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe\"; & $py analysis\\\\fetch_data.py; Write-Output \"exit=$LASTEXITCODE\")",
+      "PowerShell($py = \"C:\\\\Users\\\\joann\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe\"; $env:SSL_CERT_FILE = & $py -c \"import certifi; print\\(certifi.where\\(\\)\\)\"; & $py analysis\\\\fetch_data.py; Write-Output \"exit=$LASTEXITCODE\")",
+      "PowerShell($py = \"C:\\\\Users\\\\joann\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe\"; $env:SSL_CERT_FILE = & $py -c \"import certifi; print\\(certifi.where\\(\\)\\)\"; & $py analysis\\\\fetch_data.py 2>&1 | Select-String -Pattern 'tstats_2025|failing|All data'; Write-Output \"exit=$LASTEXITCODE\")",
+      "PowerShell($py = \"C:\\\\Users\\\\joann\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe\"; $env:SSL_CERT_FILE = & $py -c \"import certifi; print\\(certifi.where\\(\\)\\)\"; & $py analysis\\\\spread_fundamentals.py; Write-Output \"exit=$LASTEXITCODE\")",
+      "PowerShell($py = \"C:\\\\Users\\\\joann\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe\"; $env:SSL_CERT_FILE = & $py -c \"import certifi; print\\(certifi.where\\(\\)\\)\"; Push-Location analysis; & $py spread_fundamentals.py; $code=$LASTEXITCODE; Pop-Location; Write-Output \"exit=$code\")"
+    ]
+  }
+}
