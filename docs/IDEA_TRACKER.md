@@ -1,7 +1,7 @@
 # Product Idea Tracker
 
 Running log of every idea, its status, and the reasoning.
-Last updated: Aug 10, 2026.
+Last updated: Aug 12, 2026.
 
 ---
 
@@ -92,7 +92,7 @@ machine the competition runs.
 |---|---|---|---|
 | 1 | Weather shown under each game | Context | Ship early. Lead with **wind** (>15mph), not temperature. |
 | 2 | Weather forecast *distribution* | Model | **The one live lead.** Market under-adjusts ~1.3 pts of total at 15+ mph. |
-| 3 | Practice participation trajectory | Model | Needs new collection — **cannot be backfilled**. Start scraping this season. |
+| 3 | Practice participation trajectory | Model | **Cannot be backfilled** — capture live this season. Source decided **licensed feed, not scraping** (Aug 12): nfl.com has no free documented endpoint and a silent-zero scrape is the worst risk for a non-backfillable, trust-critical field. Sportradar has the exact data but is ~$10k/mo; evaluating cheaper vendors (SportsDataIO, Rolling Insights, The Injury Expertz) that must be confirmed to carry *daily* practice participation. |
 | 4 | Coordinator/coach presser mining | Model | Strongest idea raised. Extract *statements* about usage, not sentiment. |
 | 5 | Per-coach credibility scoring | Model | Novel asset. Compounds every season. |
 | 6 | Contract data → opportunity model | Model | Reframed: contracts predict *opportunity*, not effort. |
@@ -120,6 +120,14 @@ machine the competition runs.
 | # | Idea | Reason |
 |---|---|---|
 | 17 | Legal/domestic issue flag | **Legal:** an anonymized severity score on a named player is a specific accusation with sourcing stripped out — worse exposure, not better. **Statistical:** 5–15 heterogeneous cases a season; "Severity: High" would be a fabricated number borrowing credibility from real output beside it. **Brand:** a trust-first app that monetizes a player's divorce doesn't survive the first screenshot. Replaced by **availability facts** — suspended, exempt list, expected to miss time. |
+
+---
+
+# Ideas: raised, parked
+
+| # | Idea | Section (likely) | Notes |
+|---|---|---|---|
+| 21 | **Fan/community sentiment mining** — parse team subreddits, fan forums, message boards for how fans feel about their team and specific players (Derek, Aug 12) | Context by default; Model-candidate only if a factual signal is isolable | Derek's rationale: fans discuss depth chart, who's returning from injury, which rookie/draft pick may break out early — potential weekly betting insight. **Discipline caveat (parallels #13 media sentiment):** aggregate *sentiment* is almost certainly already priced and will read as noise. The extractable part, if any, is the same as pressers/beat writers — **factual usage/availability leakage** (depth-chart buzz, snap-count expectations, injury-return chatter), which can surface *before* markets post props for secondary players. Enters The Model only if a specific, observable, pre-stated signal beats the closing line out of sample; otherwise it stays Context. **Data/eng reality:** heavy NLP/LLM extraction, spam/brigade filtering, and selection bias (loud fans ≠ informed fans) — non-trivial. **Parked** until odds + practice + props pipelines are live. |
 
 ---
 
