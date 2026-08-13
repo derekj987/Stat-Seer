@@ -84,7 +84,7 @@ def game_card(g):
         if s["key"]:
             is_key = True
             num, cost = s["key"]
-            note = f'<span class="keytag">key {int(num)} · ½pt ≈ {cost:.0f}%</span>'
+            note = f'<span class="keytag">on {int(num)} · ½pt ≈ {cost:.0f}%</span>'
         spr_html = market_html("Spread", left, right, note)
 
     t = g["total"]
@@ -108,7 +108,7 @@ def game_card(g):
             f'vs 27-yr {100*c["emp"]:.0f}% · hold {100*c["hold"]:.1f}%</span></div>')
 
     card_cls = "game key" if is_key else "game"
-    badge = ('<span class="badge">KEY NUMBER</span>' if is_key else "")
+    badge = ('<span class="badge">SWEET SPOT</span>' if is_key else "")
     return (f'<article class="{card_cls}">'
             f'<header class="game__head"><span class="matchup">{esc(g["away"])}'
             f'<span class="at">@</span>{esc(g["home"])}</span>'
@@ -140,14 +140,14 @@ def page(board, week, season):
   <header class="masthead">
     <div class="brand">
       <span class="brand__mark">VALUE&nbsp;FINDER</span>
-      <span class="brand__sub">Line shopping &amp; key numbers · Week {week}, {season}</span>
+      <span class="brand__sub">Line shopping &amp; sweet spots · Week {week}, {season}</span>
     </div>
     <div class="asof">lines as of<br><b>{esc(fmt_snapshot(snap)) if snap else 'n/a'}</b></div>
   </header>
 
   <section class="stats" aria-label="summary">
     {stat(f'+{avg_edge:.2f}%', 'avg shopping edge / side')}
-    {stat(key_games, 'games on a key number')}
+    {stat(key_games, 'sweet-spot games')}
     {stat(f'{coherent_n}/{len(cohs)}' if cohs else '—', 'priced fair vs history')}
     {stat(10, 'books compared')}
   </section>
@@ -158,7 +158,8 @@ def page(board, week, season):
 
   <footer class="foot">
     <p><b>No model. No pick.</b> Value Finder shows the best available number across
-    books, where a half-point sits on a key number, and a fair-price check — the
+    books, where a half-point sits on a sweet spot (a 3 or 7, worth the most), and a
+    fair-price check — the
     de-vigged price vs. how a favorite of that spread has actually done over 27
     seasons. "Fair" is the honest, expected result: the market is a sharp forecast
     and there is rarely free money. A moderate price-vs-history gap is era drift, not

@@ -306,7 +306,7 @@ def render(board, week):
             flag = ""
             if s["key"]:
                 num, cost = s["key"]
-                flag = f"   *** KEY NUMBER {int(num)} — half point ~{cost:.0f}% ***"
+                flag = f"   *** SWEET SPOT {int(num)} — half point ~{cost:.0f}% ***"
             print(f"  SPR  {g['home']} {hp:+g} ({fmt_odds(hpr)}) {book_label(hb)}   "
                   f"{g['away']} {ap:+g} ({fmt_odds(apr)}) {book_label(ab)}{flag}")
         # total
