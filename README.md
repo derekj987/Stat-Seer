@@ -1,4 +1,4 @@
-# NFL Advice App
+# StatSeer
 
 Statistical analysis and betting advice for NFL games. **Advice only — not a
 sportsbook.**

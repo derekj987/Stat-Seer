@@ -7,8 +7,9 @@ deep, then points you at the right reference file.
 
 ## What this is
 
-An **NFL betting advice app** — not a sportsbook. Analyzes spreads, totals, and
-player props and produces statistical analysis with reasoning attached.
+**StatSeer** is an **NFL betting advice app** — not a sportsbook. It analyzes
+spreads, totals, and player props and produces statistical analysis with
+reasoning attached.
 
 **The differentiator is verifiable trust**: published probabilities, published
 track record including bad stretches, calibration anyone can check. Not
