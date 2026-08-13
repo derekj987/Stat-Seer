@@ -196,6 +196,14 @@ async function pg(path: string): Promise<unknown[]> {
   return (await res.json()) as unknown[];
 }
 
+/** The min/max NFL week that currently has any odds captured, for the week nav. */
+export async function weekRange(season = 2026): Promise<{ min: number; max: number } | null> {
+  const lo = (await pg(`?season=eq.${season}&select=week&order=week.asc&limit=1`)) as { week: number }[];
+  const hi = (await pg(`?season=eq.${season}&select=week&order=week.desc&limit=1`)) as { week: number }[];
+  if (!lo.length || !hi.length) return null;
+  return { min: lo[0].week, max: hi[0].week };
+}
+
 /** One complete snapshot of the week's odds (pinned to the latest full sweep,
  * so it's whole and under the 1000-row cap). Mirrors the_board.fetch_week. */
 export async function fetchWeek(week: number, season = 2026): Promise<OddsRow[]> {

@@ -89,8 +89,23 @@ body{background:var(--bg);color:var(--ink);
 .foot{margin-top:30px;padding-top:18px;border-top:1px solid var(--line)}
 .foot p{max-width:70ch;color:var(--muted);font-size:13px;margin:0}
 .foot b{color:var(--ink)}
+.weeknav{display:flex;align-items:center;gap:12px;margin:20px 0 4px;min-width:0}
+.weeknav__label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--muted);font-weight:600;flex:0 0 auto}
+.weeknav__list{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;min-width:0}
+.weeknav__w{flex:0 0 auto;min-width:34px;text-align:center;padding:6px 10px;
+  border-radius:8px;border:1px solid var(--line);background:var(--surface);
+  color:var(--muted);font-family:var(--font-mono);font-size:13px;font-weight:600;
+  text-decoration:none}
+.weeknav__w:hover{border-color:var(--accent);color:var(--accent)}
+.weeknav__w.active{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.weeknav__w:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.game.skeleton{min-height:150px;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@media (prefers-reduced-motion:reduce){.game.skeleton{animation:none}}
 @media (max-width:640px){
   .stats{grid-template-columns:repeat(2,1fr)}
   .mkt{grid-template-columns:56px 1fr;grid-template-rows:auto auto}
   .mkt__note{grid-column:2;text-align:left}
+  .masthead{gap:12px}
 }

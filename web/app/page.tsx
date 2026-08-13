@@ -1,8 +1,7 @@
-import { fetchWeek, buildBoard, fmtOdds, type Game, type Line } from "@/lib/board";
+import { fetchWeek, weekRange, buildBoard, fmtOdds, type Game, type Line } from "@/lib/board";
 
-export const revalidate = 120; // ISR: rebuild at most every 2 minutes
+export const revalidate = 120; // fetch-level ISR: refresh Supabase reads every 2 min
 
-const WEEK = 1;
 const SEASON = 2026;
 
 const kickFmt = new Intl.DateTimeFormat("en-US", {
@@ -17,6 +16,11 @@ const snapFmt = new Intl.DateTimeFormat("en-US", {
 });
 const et = (iso: string, f: Intl.DateTimeFormat) => f.format(new Date(iso)) + " ET";
 
+function fmtPt(p: number | null): string {
+  if (p === null) return "";
+  return p > 0 ? `+${p}` : String(p);
+}
+
 function LineChip({ label, line, best }: { label: string; line: Line; best?: boolean }) {
   const book =
     line.books.length === 1 ? (
@@ -30,6 +34,28 @@ function LineChip({ label, line, best }: { label: string; line: Line; best?: boo
       <span className="odds">{fmtOdds(line.price)}</span>
       {book}
     </div>
+  );
+}
+
+function WeekNav({ min, max, current }: { min: number; max: number; current: number }) {
+  const weeks = [];
+  for (let w = min; w <= max; w++) weeks.push(w);
+  return (
+    <nav className="weeknav" aria-label="Select week">
+      <span className="weeknav__label">Week</span>
+      <div className="weeknav__list">
+        {weeks.map((w) => (
+          <a
+            key={w}
+            href={`/?week=${w}`}
+            className={w === current ? "weeknav__w active" : "weeknav__w"}
+            aria-current={w === current ? "page" : undefined}
+          >
+            {w}
+          </a>
+        ))}
+      </div>
+    </nav>
   );
 }
 
@@ -98,29 +124,39 @@ function GameCard({ g }: { g: Game }) {
   );
 }
 
-function fmtPt(p: number | null): string {
-  if (p === null) return "";
-  return p > 0 ? `+${p}` : String(p);
+function Shell({ children, sub }: { children: React.ReactNode; sub: string }) {
+  return (
+    <main className="wrap">
+      <header className="masthead">
+        <div className="brand">
+          <span className="brand__mark">VALUE&nbsp;FINDER</span>
+          <span className="brand__sub">{sub}</span>
+        </div>
+      </header>
+      {children}
+    </main>
+  );
 }
 
-export default async function Page() {
-  let board: Game[] = [];
-  let error: string | null = null;
+export default async function Page({ searchParams }: PageProps<"/">) {
+  const sp = await searchParams;
+
+  let range: { min: number; max: number } | null = null;
   try {
-    board = buildBoard(await fetchWeek(WEEK, SEASON));
+    range = await weekRange(SEASON);
   } catch (e) {
-    error = e instanceof Error ? e.message : String(e);
+    return <Shell sub="Line shopping & sweet spots"><p className="foot">Couldn&apos;t load odds: {e instanceof Error ? e.message : String(e)}</p></Shell>;
+  }
+  if (!range) {
+    return <Shell sub="Line shopping & sweet spots"><p className="foot">No odds captured yet. Once the capture job has run, games will appear here.</p></Shell>;
   }
 
-  if (error) {
-    return (
-      <main className="wrap">
-        <h1 className="brand__mark">VALUE&nbsp;FINDER</h1>
-        <p className="foot">Couldn&apos;t load odds: {error}</p>
-      </main>
-    );
-  }
+  const requested = typeof sp.week === "string" ? parseInt(sp.week, 10) : NaN;
+  const week = Number.isFinite(requested)
+    ? Math.min(range.max, Math.max(range.min, requested))
+    : range.min;
 
+  const board = buildBoard(await fetchWeek(week, SEASON));
   const snap = board[0]?.snapshot ?? "";
   const edges = board.flatMap((g) => Object.values(g.ml).map((s) => s.edge));
   const avgEdge = edges.length ? edges.reduce((a, b) => a + b, 0) / edges.length : 0;
@@ -133,34 +169,44 @@ export default async function Page() {
       <header className="masthead">
         <div className="brand">
           <span className="brand__mark">VALUE&nbsp;FINDER</span>
-          <span className="brand__sub">Line shopping &amp; sweet spots · Week {WEEK}, {SEASON}</span>
+          <span className="brand__sub">Line shopping &amp; sweet spots · Week {week}, {SEASON}</span>
         </div>
-        <div className="asof">
-          lines as of<br />
-          <b>{snap ? et(snap, snapFmt) : "n/a"}</b>
-        </div>
+        {snap && (
+          <div className="asof">
+            lines as of<br />
+            <b>{et(snap, snapFmt)}</b>
+          </div>
+        )}
       </header>
 
-      <section className="stats" aria-label="summary">
-        <div className="stat"><span className="stat__v">+{avgEdge.toFixed(2)}%</span><span className="stat__l">avg shopping edge / side</span></div>
-        <div className="stat"><span className="stat__v">{keyGames}</span><span className="stat__l">sweet-spot games</span></div>
-        <div className="stat"><span className="stat__v">{cohs.length ? `${fairN}/${cohs.length}` : "—"}</span><span className="stat__l">priced fair vs history</span></div>
-        <div className="stat"><span className="stat__v">10</span><span className="stat__l">books compared</span></div>
-      </section>
+      <WeekNav min={range.min} max={range.max} current={week} />
 
-      <section className="grid">
-        {board.map((g) => <GameCard key={g.eventId} g={g} />)}
-      </section>
+      {board.length === 0 ? (
+        <p className="foot">No odds captured for Week {week} yet.</p>
+      ) : (
+        <>
+          <section className="stats" aria-label="summary">
+            <div className="stat"><span className="stat__v">+{avgEdge.toFixed(2)}%</span><span className="stat__l">avg shopping edge / side</span></div>
+            <div className="stat"><span className="stat__v">{keyGames}</span><span className="stat__l">sweet-spot games</span></div>
+            <div className="stat"><span className="stat__v">{cohs.length ? `${fairN}/${cohs.length}` : "—"}</span><span className="stat__l">priced fair vs history</span></div>
+            <div className="stat"><span className="stat__v">10</span><span className="stat__l">books compared</span></div>
+          </section>
 
-      <footer className="foot">
-        <p>
-          <b>No model. No pick.</b> Value Finder shows the best available number across
-          books, where a half-point sits on a sweet spot (a 3 or 7, worth the most), and a
-          fair-price check — the de-vigged price vs. how a favorite of that spread has
-          actually done over 27 seasons. Prices move; this updates automatically as new
-          odds are captured.
-        </p>
-      </footer>
+          <section className="grid">
+            {board.map((g) => <GameCard key={g.eventId} g={g} />)}
+          </section>
+
+          <footer className="foot">
+            <p>
+              <b>No model. No pick.</b> Value Finder shows the best available number across
+              books, where a half-point sits on a sweet spot (a 3 or 7, worth the most), and a
+              fair-price check — the de-vigged price vs. how a favorite of that spread has
+              actually done over 27 seasons. Prices move; this updates automatically as new
+              odds are captured.
+            </p>
+          </footer>
+        </>
+      )}
     </main>
   );
 }
