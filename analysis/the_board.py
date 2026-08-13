@@ -84,9 +84,16 @@ def fetch_week(env, week, season=2026):
 
 # ------------------------------------------------------------- board
 def best_price(rows):
-    """Highest American price is always best for the bettor. Returns (price, book)."""
-    b = max(rows, key=lambda r: r["price_american"])
-    return b["price_american"], b["book"]
+    """Highest American price is best for the bettor. Returns (price, books) where
+    books is every book offering that price -- so ties are visible, not hidden."""
+    top = max(r["price_american"] for r in rows)
+    books = sorted({r["book"] for r in rows if r["price_american"] == top})
+    return top, books
+
+
+def book_label(books):
+    """Terminal label: name one book, note the tie count. e.g. 'betus +3'."""
+    return books[0] + (f" +{len(books) - 1}" if len(books) > 1 else "")
 
 
 def moneyline(rows):
@@ -97,9 +104,9 @@ def moneyline(rows):
     out = {}
     for side, rs in sides.items():
         prices = [r["price_american"] for r in rs]
-        bp, book = best_price(rs)
+        bp, books = best_price(rs)
         edge = (median(implied(p) for p in prices) - implied(bp)) * 100
-        out[side] = (bp, book, edge, len(rs))
+        out[side] = (bp, books, edge, len(rs))
     return out
 
 
@@ -111,8 +118,8 @@ def line_side(rows, want="max_point"):
         return None
     tgt = max(pts) if want == "max_point" else min(pts)
     at = [r for r in rows if r["outcome_point"] == tgt]
-    price, book = best_price(at)
-    return tgt, price, book
+    price, books = best_price(at)
+    return tgt, price, books
 
 
 def spread(rows, home, away):
@@ -179,8 +186,8 @@ def render(board, week):
         # moneyline
         ml = g["ml"]
         parts = []
-        for side, (price, book, edge, n) in ml.items():
-            parts.append(f"{side} {fmt_odds(price):>5} {book}")
+        for side, (price, books, edge, n) in ml.items():
+            parts.append(f"{side} {fmt_odds(price):>5} {book_label(books)}")
             edges.append(edge)
         best_edge = max((e for _, (_, _, e, _) in ml.items()), default=0)
         print(f"  ML   {'   '.join(parts)}   | best shop edge +{best_edge:.1f}%")
@@ -193,15 +200,15 @@ def render(board, week):
             if s["key"]:
                 num, cost = s["key"]
                 flag = f"   *** KEY NUMBER {int(num)} — half point ~{cost:.0f}% ***"
-            print(f"  SPR  {g['home']} {hp:+g} ({fmt_odds(hpr)}) {hb}   "
-                  f"{g['away']} {ap:+g} ({fmt_odds(apr)}) {ab}{flag}")
+            print(f"  SPR  {g['home']} {hp:+g} ({fmt_odds(hpr)}) {book_label(hb)}   "
+                  f"{g['away']} {ap:+g} ({fmt_odds(apr)}) {book_label(ab)}{flag}")
         # total
         t = g["total"]
         if t["Over"] and t["Under"]:
             op, opr, ob = t["Over"]
             up, upr, ub = t["Under"]
-            print(f"  TOT  O {op:g} ({fmt_odds(opr)}) {ob}   "
-                  f"U {up:g} ({fmt_odds(upr)}) {ub}")
+            print(f"  TOT  O {op:g} ({fmt_odds(opr)}) {book_label(ob)}   "
+                  f"U {up:g} ({fmt_odds(upr)}) {book_label(ub)}")
     print("\n" + "=" * 78)
     if edges:
         avg = sum(edges) / len(edges)

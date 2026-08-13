@@ -42,11 +42,16 @@ def esc(s):
     return html.escape(str(s))
 
 
-def line_html(team, price, book, best=False):
+def line_html(team, price, books, best=False):
     cls = "line best" if best else "line"
+    if len(books) == 1:
+        book_html = f'<span class="book">{esc(books[0])}</span>'
+    else:
+        book_html = (f'<span class="book tie" title="{esc(", ".join(books))}">'
+                     f'×{len(books)} books</span>')
     return (f'<div class="{cls}"><span class="team">{esc(team)}</span>'
             f'<span class="odds">{esc(fmt_odds(price))}</span>'
-            f'<span class="book">{esc(book)}</span></div>')
+            f'{book_html}</div>')
 
 
 def market_html(label, left, right, extra=""):
@@ -62,8 +67,8 @@ def game_card(g):
     best_side = max(ml_items, key=lambda kv: kv[1][2])[0] if ml_items else None
     ml_lines = ""
     ml_edge = 0.0
-    for side, (price, book, edge, _n) in ml_items:
-        ml_lines += line_html(side, price, book, best=(side == best_side))
+    for side, (price, books, edge, _n) in ml_items:
+        ml_lines += line_html(side, price, books, best=(side == best_side))
         ml_edge = max(ml_edge, edge)
     ml_note = f'<span class="edge">shop&nbsp;+{ml_edge:.1f}%</span>'
 
@@ -218,6 +223,7 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .line .odds{font-family:var(--font-mono);font-size:13px;font-weight:600}
 .line.best .odds{color:var(--accent)}
 .line .book{font-size:10.5px;color:var(--muted);font-family:var(--font-mono)}
+.line .book.tie{cursor:help;border-bottom:1px dotted var(--muted)}
 .mkt__note{text-align:right;min-width:0}
 .edge{font-family:var(--font-mono);font-size:12px;color:var(--accent);
   font-weight:600;white-space:nowrap}
