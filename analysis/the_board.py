@@ -8,6 +8,8 @@ For each game it reports, per market:
   - the BEST available number across all books, and which book has it
   - the shopping edge — how much the best price beats the field, in win-prob points
   - key-number flags on spreads (a half point at 3 is worth ~9%, at 7 ~6.2%)
+  - market coherence — the de-vigged fair favorite prob vs the empirical rate for
+    that spread over 27 seasons; flags a genuinely divergent price (usually none)
 
     python analysis/the_board.py            # week 1
     python analysis/the_board.py --week 2
@@ -18,6 +20,7 @@ import argparse
 import json
 import os
 import sys
+import urllib.parse
 import urllib.request
 from collections import defaultdict
 from statistics import median
@@ -26,6 +29,10 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Empirical push cost at each key number (from spread_fundamentals.py / games.csv).
 KEY_NUMBERS = {3: 9.0, 7: 6.2}
+
+GAMES_LOCAL = os.path.join(REPO_ROOT, "data", "games.csv")
+GAMES_URL = "https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv"
+_HIST = None  # cached (fav_mag, fav_margin) pairs for the empirical win curve
 
 
 def load_env():
@@ -61,25 +68,31 @@ def fmt_odds(price):
 
 # ------------------------------------------------------------- fetch
 def fetch_week(env, week, season=2026):
+    """Return one COMPLETE snapshot of the week's odds. SCHEDULED/MANUAL sweeps
+    capture every game; PRE_KICKOFF is partial. We pin the board to the most recent
+    complete sweep and fetch only that snapshot_at, so the result is both current and
+    whole — and stays under PostgREST's 1000-row cap no matter how many snapshots
+    have accumulated. (Fetching all rows and de-duping client-side silently drops
+    games once the table passes 1000 rows.)"""
     ensure_ssl()
     base = env["SUPABASE_URL"].rstrip("/") + "/rest/v1/odds_snapshots"
-    key = env["SUPABASE_SERVICE_KEY"]
-    q = (f"?season=eq.{season}&week=eq.{week}"
-         "&select=snapshot_at,event_id,commence_time,home_team,away_team,"
-         "book,market,outcome_name,outcome_point,price_american"
-         "&order=event_id&limit=5000")
-    req = urllib.request.Request(base + q, headers={
-        "apikey": key, "Authorization": f"Bearer {key}"})
-    with urllib.request.urlopen(req, timeout=45) as r:
-        rows = json.loads(r.read())
-    # keep only the latest snapshot per (event,market,book,outcome,point)
-    latest = {}
-    for r in rows:
-        k = (r["event_id"], r["market"], r["book"], r["outcome_name"],
-             r["outcome_point"])
-        if k not in latest or r["snapshot_at"] > latest[k]["snapshot_at"]:
-            latest[k] = r
-    return list(latest.values())
+    hdr = {"apikey": env["SUPABASE_SERVICE_KEY"],
+           "Authorization": f"Bearer {env['SUPABASE_SERVICE_KEY']}"}
+
+    def get(q):
+        with urllib.request.urlopen(urllib.request.Request(base + q, headers=hdr),
+                                    timeout=45) as r:
+            return json.loads(r.read())
+
+    latest = get(f"?season=eq.{season}&week=eq.{week}"
+                 "&capture_reason=in.(SCHEDULED,MANUAL)"
+                 "&select=snapshot_at&order=snapshot_at.desc&limit=1")
+    if not latest:
+        return []
+    snap = urllib.parse.quote(latest[0]["snapshot_at"], safe="")
+    return get(f"?season=eq.{season}&week=eq.{week}&snapshot_at=eq.{snap}"
+               "&select=snapshot_at,event_id,commence_time,home_team,away_team,"
+               "book,market,outcome_name,outcome_point,price_american&limit=5000")
 
 
 # ------------------------------------------------------------- board
@@ -152,6 +165,97 @@ def total(rows):
     }
 
 
+# --------------------------------------------------------- market coherence
+def _hist():
+    """Cached list of (fav_mag, fav_margin) from games.csv, for the empirical win
+    curve. Local file if present, else fetched. Returns None if unavailable so the
+    board still works (coherence just omitted)."""
+    global _HIST
+    if _HIST is not None:
+        return _HIST or None
+    import csv
+    import io
+    text = None
+    try:
+        if os.path.exists(GAMES_LOCAL):
+            text = open(GAMES_LOCAL, encoding="utf-8").read()
+        else:
+            req = urllib.request.Request(GAMES_URL, headers={"User-Agent": "statseer/1.0"})
+            with urllib.request.urlopen(req, timeout=45) as r:
+                text = r.read().decode("utf-8")
+    except Exception:
+        _HIST = []
+        return None
+    pairs = []
+    for row in csv.DictReader(io.StringIO(text)):
+        if row.get("game_type") != "REG" or not row.get("spread_line") \
+                or not row.get("home_score") or not row.get("away_score"):
+            continue
+        try:
+            sp = float(row["spread_line"])          # + = home favored
+            margin = int(row["home_score"]) - int(row["away_score"])
+            fav_margin = margin if sp >= 0 else -margin
+            pairs.append((abs(sp), fav_margin))
+        except ValueError:
+            continue
+    _HIST = pairs
+    return pairs or None
+
+
+def emp_winprob(mag, bw=1.0):
+    """Empirical P(favorite wins outright | spread ~ mag), widening if the local
+    window is thin. Returns (p, n) or None."""
+    pairs = _hist()
+    if not pairs:
+        return None
+    s = [fm for m, fm in pairs if mag - bw <= m <= mag + bw]
+    if len(s) < 120:
+        s = [fm for m, fm in pairs if mag - 2.5 <= m <= mag + 2.5]
+    if not s:
+        return None
+    wins = sum(1 for fm in s if fm > 0)
+    ties = sum(1 for fm in s if fm == 0)
+    denom = len(s) - ties
+    return (wins / denom, len(s)) if denom else None
+
+
+def coherence(h2h_rows, consensus_spread, home, away):
+    """De-vig the live moneyline and compare the market's fair favorite win prob to
+    the empirical rate for that spread. Returns a dict, or None if not computable.
+    Most games come back 'coherent' — that is the honest, trust-building result."""
+    if consensus_spread is None or not h2h_rows:
+        return None
+    fav = home if consensus_spread < 0 else away
+    mag = abs(consensus_spread)
+    by_book = defaultdict(dict)
+    for r in h2h_rows:
+        by_book[r["book"]][r["outcome_name"]] = r["price_american"]
+    holds, fav_fair = [], []
+    for sides in by_book.values():
+        if fav not in sides or len(sides) != 2:
+            continue
+        p_fav = implied(sides[fav])
+        p_dog = implied(next(v for k, v in sides.items() if k != fav))
+        s = p_fav + p_dog
+        if s > 0:
+            holds.append(s - 1.0)
+            fav_fair.append(p_fav / s)
+    emp = emp_winprob(mag)
+    if not fav_fair or emp is None:
+        return None
+    mkt = median(fav_fair)
+    gap = mkt - emp[0]
+    # The absolute gap carries era-drift: modern favorites at a given spread win at
+    # a slightly different rate than the 27-year average, so a moderate gap is NOT a
+    # mispricing (two 3.5-favorites both showing +3.4 is the curve, not the market).
+    # The market is the sharper forecast (docs: market MAE 9.89 < line-blind 10.15).
+    # Only a large gap is worth a human look — as "investigate a possibly stale/soft
+    # line", never as a pick. Everything else is coherent: the honest, expected result.
+    flag = "investigate" if abs(gap) > 0.055 else "coherent"
+    return dict(fav=fav, hold=median(holds), mkt_fair=mkt,
+                emp=emp[0], gap=gap, flag=flag, n=emp[1])
+
+
 def build(rows):
     games = defaultdict(list)
     for r in rows:
@@ -162,12 +266,15 @@ def build(rows):
         by_market = defaultdict(list)
         for r in rs:
             by_market[r["market"]].append(r)
+        spr = spread(by_market.get("spreads", []), home, away)
         board.append({
             "matchup": f"{away} @ {home}", "home": home, "away": away,
             "commence": rs[0]["commence_time"], "snapshot": rs[0]["snapshot_at"],
             "ml": moneyline(by_market.get("h2h", [])),
-            "spread": spread(by_market.get("spreads", []), home, away),
+            "spread": spr,
             "total": total(by_market.get("totals", [])),
+            "coherence": coherence(by_market.get("h2h", []), spr["consensus"],
+                                   home, away),
         })
     board.sort(key=lambda g: g["commence"])
     return board
@@ -209,6 +316,13 @@ def render(board, week):
             up, upr, ub = t["Under"]
             print(f"  TOT  O {op:g} ({fmt_odds(opr)}) {book_label(ob)}   "
                   f"U {up:g} ({fmt_odds(upr)}) {book_label(ub)}")
+        # coherence
+        c = g.get("coherence")
+        if c:
+            tag = "INVESTIGATE" if c["flag"] == "investigate" else "coherent"
+            print(f"  COH  market {tag} — {c['fav']} priced {100*c['mkt_fair']:.0f}% "
+                  f"vs 27-yr {100*c['emp']:.0f}% ({100*c['gap']:+.1f}) · "
+                  f"hold {100*c['hold']:.1f}%")
     print("\n" + "=" * 78)
     if edges:
         avg = sum(edges) / len(edges)

@@ -96,6 +96,17 @@ def game_card(g):
         right = line_html(f"U {up:g}", upr, ub)
         tot_html = market_html("Total", left, right, "")
 
+    c = g.get("coherence")
+    coh_html = ""
+    if c:
+        invest = c["flag"] == "investigate"
+        coh_html = (
+            f'<div class="coh{" invest" if invest else ""}">'
+            f'<span class="coh__k">Market</span>'
+            f'<span class="coh__v">{"Investigate" if invest else "Coherent"}</span>'
+            f'<span class="coh__d">{esc(c["fav"])} priced {100*c["mkt_fair"]:.0f}% '
+            f'vs 27-yr {100*c["emp"]:.0f}% · hold {100*c["hold"]:.1f}%</span></div>')
+
     card_cls = "game key" if is_key else "game"
     badge = ('<span class="badge">KEY NUMBER</span>' if is_key else "")
     return (f'<article class="{card_cls}">'
@@ -104,18 +115,20 @@ def game_card(g):
             f'<time class="kick">{esc(fmt_kick(g["commence"]))}</time>{badge}</header>'
             f'<div class="markets">'
             f'{market_html("Moneyline", ml_lines, "", ml_note)}'
-            f'{spr_html}{tot_html}</div></article>')
+            f'{spr_html}{tot_html}</div>{coh_html}</article>')
 
 
 def page(board, week, season):
     snap = board[0]["snapshot"] if board else ""
     edges = []
     key_games = 0
+    cohs = [g["coherence"] for g in board if g.get("coherence")]
     for g in board:
         edges += [e for _, (_, _, e, _) in g["ml"].items()]
         if g["spread"].get("key"):
             key_games += 1
     avg_edge = sum(edges) / len(edges) if edges else 0
+    coherent_n = sum(1 for c in cohs if c["flag"] == "coherent")
 
     cards = "\n".join(game_card(g) for g in board)
     stat = (lambda v, l: f'<div class="stat"><span class="stat__v">{v}</span>'
@@ -135,8 +148,8 @@ def page(board, week, season):
   <section class="stats" aria-label="summary">
     {stat(f'+{avg_edge:.2f}%', 'avg shopping edge / side')}
     {stat(key_games, 'games on a key number')}
+    {stat(f'{coherent_n}/{len(cohs)}' if cohs else '—', 'fairly priced (coherence)')}
     {stat(10, 'books compared')}
-    {stat(len(board), 'games')}
   </section>
 
   <section class="grid">
@@ -144,9 +157,13 @@ def page(board, week, season):
   </section>
 
   <footer class="foot">
-    <p><b>No model. No pick.</b> Value Finder shows only the best available number
-    across books and where a half-point sits on a key number — arithmetic, not
-    prediction. Prices move; this is a single snapshot, timestamped above.</p>
+    <p><b>No model. No pick.</b> Value Finder shows the best available number across
+    books, where a half-point sits on a key number, and a coherence check — the
+    de-vigged price vs. how a favorite of that spread has actually done over 27
+    seasons. "Coherent" is the honest, expected result: the market is a sharp
+    forecast and there is rarely free money. A moderate price-vs-history gap is era
+    drift, not an edge; only a large gap is flagged to <em>investigate</em> a
+    possibly stale line — never as a pick. Prices move; this is a snapshot, timestamped above.</p>
   </footer>
 </main>"""
 
@@ -229,6 +246,13 @@ body{margin:0;background:var(--bg);color:var(--ink);
   font-weight:600;white-space:nowrap}
 .keytag{font-size:10.5px;color:var(--key);font-weight:600;white-space:nowrap;
   font-family:var(--font-mono)}
+.coh{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:10px;
+  padding-top:10px;border-top:1px solid var(--surface-2)}
+.coh__k{color:var(--muted);text-transform:uppercase;letter-spacing:.06em;
+  font-size:10px;font-weight:600}
+.coh__v{font-weight:700;font-size:12px;color:var(--accent)}
+.coh.invest .coh__v{color:var(--key)}
+.coh__d{color:var(--muted);font-family:var(--font-mono);font-size:11px}
 .foot{margin-top:30px;padding-top:18px;border-top:1px solid var(--line)}
 .foot p{max-width:70ch;color:var(--muted);font-size:13px;margin:0}
 .foot b{color:var(--ink)}
