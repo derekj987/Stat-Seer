@@ -175,6 +175,7 @@ CSS = """
   --ink:#161b22; --muted:#5c6672; --line:#dfe4ea;
   --accent:#0f6f68; --accent-soft:#e2f0ee;
   --key:#b04521; --key-soft:#f7e7df;
+  --spot:#b3995d; --spot-soft:#f4edda; --spot-ink:#7a6531;
   --font-sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --font-mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
 }
@@ -183,12 +184,14 @@ CSS = """
   --ink:#e8ecf1; --muted:#8b95a3; --line:#252c36;
   --accent:#43b3aa; --accent-soft:#12312e;
   --key:#e2865a; --key-soft:#2c1c14;
+  --spot:#b3995d; --spot-soft:#2b2617; --spot-ink:#cbb377;
 }}
 :root[data-theme="dark"]{
   --bg:#0e1116; --surface:#161b22; --surface-2:#1b212a;
   --ink:#e8ecf1; --muted:#8b95a3; --line:#252c36;
   --accent:#43b3aa; --accent-soft:#12312e;
   --key:#e2865a; --key-soft:#2c1c14;
+  --spot:#b3995d; --spot-soft:#2b2617; --spot-ink:#cbb377;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);
@@ -215,16 +218,16 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
 .game{background:var(--surface);border:1px solid var(--line);border-radius:12px;
   padding:16px 18px;position:relative;overflow:hidden}
-.game.key{border-color:color-mix(in srgb,var(--key) 45%,var(--line))}
+.game.key{border-color:color-mix(in srgb,var(--spot) 55%,var(--line))}
 .game.key::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;
-  background:var(--key)}
+  background:var(--spot)}
 .game__head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
   padding-bottom:12px;margin-bottom:8px;border-bottom:1px solid var(--line)}
 .matchup{font-weight:700;font-size:17px;letter-spacing:.01em}
 .matchup .at{color:var(--muted);font-weight:400;margin:0 7px}
 .kick{color:var(--muted);font-size:12px;font-family:var(--font-mono)}
-.badge{margin-left:auto;background:var(--key-soft);color:var(--key);
-  font-size:10px;font-weight:700;letter-spacing:.08em;padding:3px 8px;
+.badge{margin-left:auto;background:var(--spot);color:#1c1705;
+  font-size:10px;font-weight:800;letter-spacing:.08em;padding:3px 9px;
   border-radius:20px;text-transform:uppercase;white-space:nowrap}
 .markets{display:flex;flex-direction:column;gap:2px}
 .mkt{display:grid;grid-template-columns:64px 1fr auto;align-items:center;
@@ -245,7 +248,7 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .mkt__note{text-align:right;min-width:0}
 .edge{font-family:var(--font-mono);font-size:12px;color:var(--accent);
   font-weight:600;white-space:nowrap}
-.keytag{font-size:10.5px;color:var(--key);font-weight:600;white-space:nowrap;
+.keytag{font-size:10.5px;color:var(--spot-ink);font-weight:600;white-space:nowrap;
   font-family:var(--font-mono)}
 .coh{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:10px;
   padding-top:10px;border-top:1px solid var(--surface-2)}
