@@ -319,7 +319,7 @@ def render(board, week):
         # coherence
         c = g.get("coherence")
         if c:
-            tag = "INVESTIGATE" if c["flag"] == "investigate" else "coherent"
+            tag = "INVESTIGATE" if c["flag"] == "investigate" else "fair"
             print(f"  COH  market {tag} — {c['fav']} priced {100*c['mkt_fair']:.0f}% "
                   f"vs 27-yr {100*c['emp']:.0f}% ({100*c['gap']:+.1f}) · "
                   f"hold {100*c['hold']:.1f}%")

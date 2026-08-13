@@ -103,7 +103,7 @@ def game_card(g):
         coh_html = (
             f'<div class="coh{" invest" if invest else ""}">'
             f'<span class="coh__k">Market</span>'
-            f'<span class="coh__v">{"Investigate" if invest else "Coherent"}</span>'
+            f'<span class="coh__v">{"Investigate" if invest else "Fair"}</span>'
             f'<span class="coh__d">{esc(c["fav"])} priced {100*c["mkt_fair"]:.0f}% '
             f'vs 27-yr {100*c["emp"]:.0f}% · hold {100*c["hold"]:.1f}%</span></div>')
 
@@ -148,7 +148,7 @@ def page(board, week, season):
   <section class="stats" aria-label="summary">
     {stat(f'+{avg_edge:.2f}%', 'avg shopping edge / side')}
     {stat(key_games, 'games on a key number')}
-    {stat(f'{coherent_n}/{len(cohs)}' if cohs else '—', 'fairly priced (coherence)')}
+    {stat(f'{coherent_n}/{len(cohs)}' if cohs else '—', 'priced fair vs history')}
     {stat(10, 'books compared')}
   </section>
 
@@ -158,12 +158,12 @@ def page(board, week, season):
 
   <footer class="foot">
     <p><b>No model. No pick.</b> Value Finder shows the best available number across
-    books, where a half-point sits on a key number, and a coherence check — the
+    books, where a half-point sits on a key number, and a fair-price check — the
     de-vigged price vs. how a favorite of that spread has actually done over 27
-    seasons. "Coherent" is the honest, expected result: the market is a sharp
-    forecast and there is rarely free money. A moderate price-vs-history gap is era
-    drift, not an edge; only a large gap is flagged to <em>investigate</em> a
-    possibly stale line — never as a pick. Prices move; this is a snapshot, timestamped above.</p>
+    seasons. "Fair" is the honest, expected result: the market is a sharp forecast
+    and there is rarely free money. A moderate price-vs-history gap is era drift, not
+    an edge; only a large gap is flagged to <em>investigate</em> a possibly stale
+    line — never as a pick. Prices move; this is a snapshot, timestamped above.</p>
   </footer>
 </main>"""
 
