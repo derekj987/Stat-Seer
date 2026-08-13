@@ -26,7 +26,7 @@ This is now the main organizing principle. The separation exists because each
 section is true in a different way, and collapsing them into one composite
 confidence score destroys all three.
 
-## 1. The Board — line-aware
+## 1. Value Finder — line-aware
 
 **Question it answers: where is the price wrong?**
 
@@ -64,7 +64,7 @@ a genuine test of skill. That is the trust engine.
 - Large disagreements flagged as *investigate the model*, not *bet it*
 
 **Risk to avoid:** presenting it as purer advice. If users read "unbiased" and
-follow it over The Board, they do measurably worse.
+follow it over Value Finder, they do measurably worse.
 
 ## 3. Context — neither
 
@@ -97,10 +97,10 @@ machine the competition runs.
 | 5 | Per-coach credibility scoring | Model | Novel asset. Compounds every season. |
 | 6 | Contract data → opportunity model | Model | Reframed: contracts predict *opportunity*, not effort. |
 | 7 | Snap/touch share model | Model | **Build 1 complete.** +5.9% over persistence; +8.2% on change weeks. |
-| 8 | Live odds feeds | Board | Blocking dependency. |
-| 9 | Confidence tiers | Board + Model | Must be edge **and** uncertainty. Honest output is mostly "no bet." |
-| 10 | Best-number-across-books | Board | Highest trust-per-effort. |
-| 11 | Alternate-line fair pricing | Board | Engine built. |
+| 8 | Live odds feeds | Value Finder | Blocking dependency. |
+| 9 | Confidence tiers | Value Finder + Model | Must be edge **and** uncertainty. Honest output is mostly "no bet." |
+| 10 | Best-number-across-books | Value Finder | Highest trust-per-effort. |
+| 11 | Alternate-line fair pricing | Value Finder | Engine built. |
 | 12 | Player prop module | Model | Deferred by decision. **Where the tiers will actually fire.** |
 | 18 | Referee crew statistics | Context | Tested — display only. Penalty rates persistent (r=+0.267), outcomes are noise. |
 | 19 | **Trend analysis** | Context | Tested — see below. Framework is correct about football, produces no edge. |
@@ -175,7 +175,7 @@ the 5-game window (+0.254 vs +0.236).
 
 **But the ATS column is ~zero for every row.** The framework is accurate football
 analysis that produces no betting edge, because the closing line already contains
-it. This is the sharpest single illustration of the Board/Model/Context split, and
+it. This is the sharpest single illustration of the Value Finder/Model/Context split, and
 the reason trend analysis belongs in Context.
 
 ---

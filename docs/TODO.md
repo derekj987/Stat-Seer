@@ -183,7 +183,7 @@ version is **three to six months**. Anyone who tells you otherwise hasn't done i
   listing this week's games with their lines, pulled from your database. No
   styling, no login, no mobile. Just prove the pipeline works end to end.
 
-- [ ] **4b. The Board section.** Line shopping, key-number flags, alternate-line
+- [ ] **4b. The Value Finder section.** Line shopping, key-number flags, alternate-line
   fair prices. Start here because it's arithmetic — no model risk, and it's the
   most useful part of the whole app.
 

@@ -102,7 +102,7 @@ deliberately — each documents a specific failure worth not repeating.
 3. **Stage A availability model** — the player pipeline is currently conditioned
    on a player being active.
 4. **Touch-share layer** — converts snap share into prop numbers.
-5. **The Board** — needs no model at all, and it's where the value is.
+5. **Value Finder** — needs no model at all, and it's where the value is.
 
 ---
 

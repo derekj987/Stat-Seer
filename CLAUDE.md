@@ -39,7 +39,7 @@ and collapsing them into one composite confidence score destroys all three.
 
 | Section | Question | Contains |
 |---|---|---|
-| **The Board** | Where is the price wrong? | Line shopping, key numbers, alternate-line fair value, market coherence. Mostly arithmetic. **This is where the money is.** |
+| **Value Finder** | Where is the price wrong? | Line shopping, key numbers, alternate-line fair value, market coherence. Mostly arithmetic. **This is where the money is.** |
 | **The Model** | What does the data say on its own? | Line-blind predictions, published and locked pre-kickoff, calibration tracked. **This is the trust engine.** |
 | **Context** | What should I understand? | Weather, referees, injuries, trends, implied totals. All true, none an edge. **Explicitly not a pick driver.** |
 
@@ -95,7 +95,7 @@ machine the competition runs.
 3. **Build the Stage A availability model.** The whole player pipeline is currently
    conditioned on a player being active.
 4. **Build the touch-share layer**, converting snap share into prop numbers.
-5. **Build The Board**, which needs no model at all.
+5. **Build Value Finder**, which needs no model at all.
 
 ---
 
