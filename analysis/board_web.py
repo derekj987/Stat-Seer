@@ -121,12 +121,12 @@ def page(board, week, season):
     stat = (lambda v, l: f'<div class="stat"><span class="stat__v">{v}</span>'
             f'<span class="stat__l">{l}</span></div>')
 
-    return f"""<title>The Board · Week {week} {season}</title>
+    return f"""<title>Value Finder · Week {week} {season}</title>
 <style>{CSS}</style>
 <main class="wrap">
   <header class="masthead">
     <div class="brand">
-      <span class="brand__mark">THE&nbsp;BOARD</span>
+      <span class="brand__mark">VALUE&nbsp;FINDER</span>
       <span class="brand__sub">Line shopping &amp; key numbers · Week {week}, {season}</span>
     </div>
     <div class="asof">lines as of<br><b>{esc(fmt_snapshot(snap)) if snap else 'n/a'}</b></div>
@@ -144,7 +144,7 @@ def page(board, week, season):
   </section>
 
   <footer class="foot">
-    <p><b>No model. No pick.</b> The Board shows only the best available number
+    <p><b>No model. No pick.</b> Value Finder shows only the best available number
     across books and where a half-point sits on a key number — arithmetic, not
     prediction. Prices move; this is a single snapshot, timestamped above.</p>
   </footer>

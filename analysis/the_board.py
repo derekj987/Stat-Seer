@@ -178,7 +178,7 @@ def render(board, week):
         print(f"No odds in Supabase for week {week}.")
         return
     snap = board[0]["snapshot"]
-    print(f"\nTHE BOARD — Week {week}   (lines as of {snap})")
+    print(f"\nVALUE FINDER — Week {week}   (lines as of {snap})")
     print("=" * 78)
     edges = []
     for g in board:
@@ -213,7 +213,7 @@ def render(board, week):
     if edges:
         avg = sum(edges) / len(edges)
         print(f"Avg moneyline shopping edge across the board: +{avg:.2f}% win prob "
-              f"per side — free, no model. That is The Board.")
+              f"per side — free, no model. That is the Value Finder.")
 
 
 def main(argv=None):
