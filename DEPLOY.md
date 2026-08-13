@@ -60,11 +60,39 @@ a starting point, not sacred.
 
 ---
 
+## Web frontend (Value Finder) — `web/`, deploy on Vercel
+
+Next.js 16 app. A server component reads the latest complete odds snapshot from
+Supabase (service key, server-side only — never shipped to the browser) and renders
+Value Finder. ISR revalidates every 2 minutes, so it stays current as the capture
+Action writes new snapshots. **Free on Vercel Hobby** (cron is the only thing that
+needs Pro, and that lives in GitHub Actions).
+
+### Deploy
+
+1. Vercel → **Add New… → Project** → import the `Stat-Seer` repo.
+2. **Set the Root Directory to `web`** (Vercel auto-detects Next.js from there).
+3. Add two **Environment Variables** (same values as `.env`):
+   - `SUPABASE_URL` = `https://<ref>.supabase.co`
+   - `SUPABASE_SERVICE_KEY` = the `sb_secret_...` service key
+   *(Server-only — no `NEXT_PUBLIC_` prefix, so they never reach the client.)*
+4. **Deploy.** Every push to `main` auto-builds and redeploys.
+
+### Local dev
+
+```
+cd web
+npm install          # needs a network where the npm registry is reachable
+npm run dev          # http://localhost:3000
+```
+`web/.env.local` holds the Supabase vars locally (gitignored). Regenerate the baked
+win-curve (`web/lib/winCurve.ts`) from `analysis/the_board.emp_winprob` if the
+historical fit ever changes.
+
 ## Not yet deployed
 
 - **Practice / injury capture** — `ingest/injury_collector.py` is ready but waits on
   the paid SportsDataIO feed. When live, it gets its own workflow (same pattern,
   `SPORTSDATA_API_KEY` secret, Wed/Thu/Fri schedule).
-- **Frontend (Value Finder, etc.)** — the Next.js app on Vercel, reading Supabase.
-  The `api/cron/*.py` Vercel handlers remain in the repo for if/when you move
-  capture onto a Vercel Pro plan alongside the app.
+- The `api/cron/*.py` Vercel handlers remain in the repo as an alternative to the
+  Actions capture if you ever move onto Vercel Pro.
