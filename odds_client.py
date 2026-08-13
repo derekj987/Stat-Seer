@@ -64,20 +64,26 @@ TEAM_ABBR = {
 
 # --------------------------------------------------------------------------- env
 def load_env(path=ENV_PATH):
-    """Minimal .env reader -> dict. Ignores comments and inline `#` after values."""
+    """Config from a local .env, with real environment variables taking precedence.
+    The .env path is for local dev; CI/deploys (GitHub Actions, Vercel) set real env
+    vars and have no .env file, so os.environ must win."""
     env = {}
-    if not os.path.exists(path):
-        return env
-    with open(path, "r", encoding="utf-8") as fh:
-        for line in fh:
-            line = line.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-            name, _, value = line.partition("=")
-            value = value.split("#", 1)[0].strip()  # drop inline comment
-            if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
-                value = value[1:-1]
-            env[name.strip()] = value
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                name, _, value = line.partition("=")
+                value = value.split("#", 1)[0].strip()  # drop inline comment
+                if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+                    value = value[1:-1]
+                env[name.strip()] = value
+    # Real env vars override .env (and supply config when no .env exists).
+    for key, value in os.environ.items():
+        if key in env or key.startswith(("ODDS_", "SUPABASE_", "SPORTSDATA_",
+                                         "CRON_", "ANTHROPIC_")):
+            env[key] = value
     return env
 
 
@@ -304,6 +310,8 @@ def main(argv=None):
     ap.add_argument("--reason", default="MANUAL",
                     choices=["SCHEDULED", "PRE_KICKOFF", "BACKFILL", "MANUAL"])
     ap.add_argument("--write", action="store_true", help="write to Supabase (else dry-run)")
+    ap.add_argument("--commence-within", type=int, default=None, metavar="MIN",
+                    help="only keep games kicking off within MIN minutes (pre-kickoff sweep)")
     args = ap.parse_args(argv)
 
     env = load_env()
@@ -330,6 +338,9 @@ def main(argv=None):
     week_map = load_week_map()
     snapshot_at = snapshot_time_from_events(events)
     rows, unresolved = parse_snapshot(events, snapshot_at, args.reason, week_map)
+    if args.commence_within is not None:
+        rows = filter_commence_window(rows, args.commence_within)
+        print(f"  filtered to {len(rows)} rows within {args.commence_within} min of kickoff")
 
     print("PARSED")
     summarize(rows, unresolved, snapshot_at)

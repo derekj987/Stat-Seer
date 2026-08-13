@@ -1,0 +1,41 @@
+name: Capture odds
+
+# Free scheduled odds capture. Runs odds_client.py against the live Odds API and
+# writes to Supabase. No Vercel/Pro needed -- GitHub Actions is the scheduler.
+# All times UTC. Cadence is a starting point; tune the crons below as needed.
+
+on:
+  schedule:
+    # Sweep every 3 hours (all upcoming games), Aug-Jan. Establishes lines and,
+    # via the closing_lines view, backs up the pre-kickoff capture.
+    - cron: "0 */3 * 8-12,1 *"
+    # Pre-kickoff sharpener: every 15 min during afternoon/evening game windows
+    # on Sun/Mon/Thu, filtered to games within 30 min of kickoff.
+    - cron: "*/15 17-23 * 8-12,1 0,1,4"
+  workflow_dispatch: {}   # manual "Run workflow" button for testing
+
+concurrency:
+  group: capture-odds
+  cancel-in-progress: false   # never interrupt an in-flight write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi
+      - name: Capture odds -> Supabase
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          if [ "${{ github.event.schedule }}" = "*/15 17-23 * 8-12,1 0,1,4" ]; then
+            python odds_client.py --live --write --reason PRE_KICKOFF --commence-within 30
+          else
+            python odds_client.py --live --write --reason SCHEDULED
+          fi
