@@ -1,0 +1,32 @@
+name: Capture props
+
+# Player-props capture. Pricier than game lines (per-event calls), so this runs on
+# a modest cadence and only queries the nearest ~32 games (--max-events), where props
+# are actually posted. Empty markets cost 0 credits, so off-week runs are cheap.
+# All times UTC.
+
+on:
+  schedule:
+    - cron: "0 */6 * 8-12,1 *"   # every 6 hours, Aug-Jan
+  workflow_dispatch: {}
+
+concurrency:
+  group: capture-props
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi
+      - name: Capture props -> Supabase
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python props_client.py --live --write --reason SCHEDULED --max-events 32
