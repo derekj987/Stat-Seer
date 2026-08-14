@@ -106,12 +106,13 @@ function GameCard({
 
         {s.home && s.away && (
           <div className="mkt">
-            <span className="mkt__label">Spread{s.key && <span className="badge sm">SWEET SPOT</span>}</span>
+            <span className="mkt__label">Spread</span>
             <div className="lines">
               {chip(mk("Spread", `${g.home} ${fmtPt(s.home.point)}`, s.home.price, s.home.books))}
               {chip(mk("Spread", `${g.away} ${fmtPt(s.away.point)}`, s.away.price, s.away.books))}
             </div>
             <div className="mkt__note">
+              {s.key && <span className="badge sm">SWEET SPOT</span>}
               {s.key && <span className="keytag">on {s.key.num} · ½pt ≈ {s.key.cost.toFixed(0)}%</span>}
             </div>
           </div>
@@ -119,12 +120,13 @@ function GameCard({
 
         {t.over && t.under && (
           <div className="mkt">
-            <span className="mkt__label">Total{t.key && <span className="badge sm">SWEET SPOT</span>}</span>
+            <span className="mkt__label">Total</span>
             <div className="lines">
               {chip(mk("Total", `O ${t.over.point}`, t.over.price, t.over.books))}
               {chip(mk("Total", `U ${t.under.point}`, t.under.price, t.under.books))}
             </div>
             <div className="mkt__note">
+              {t.key && <span className="badge sm">SWEET SPOT</span>}
               {t.key && <span className="keytag">on {t.key.num} · ½pt ≈ {t.key.cost.toFixed(0)}%</span>}
             </div>
           </div>

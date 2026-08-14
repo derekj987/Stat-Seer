@@ -74,7 +74,7 @@ body{background:var(--bg);color:var(--ink);
   font-size:10px;font-weight:800;letter-spacing:.08em;padding:3px 9px;
   border-radius:20px;text-transform:uppercase;white-space:nowrap}
 /* small inline sweet-spot badge (next to a market label, not the card header) */
-.badge.sm{margin-left:6px;font-size:8.5px;padding:2px 6px;letter-spacing:.06em;vertical-align:middle}
+.badge.sm{margin:0;font-size:8.5px;padding:2px 7px;letter-spacing:.06em}
 /* compact gold key-number marker for dense tables */
 .ssmark{color:var(--spot-ink);margin-left:5px;font-size:10px;cursor:default}
 .markets{display:flex;flex-direction:column;gap:2px}
@@ -93,7 +93,8 @@ body{background:var(--bg);color:var(--ink);
 .line.best .odds{color:var(--accent)}
 .line .book{font-size:10.5px;color:var(--muted);font-family:var(--font-mono)}
 .line .book.tie{cursor:help;border-bottom:1px dotted var(--muted)}
-.mkt__note{text-align:right;min-width:0}
+.mkt__note{display:flex;flex-direction:column;align-items:flex-end;gap:3px;
+  text-align:right;min-width:0}
 .edge{font-family:var(--font-mono);font-size:12px;color:var(--accent);
   font-weight:600;white-space:nowrap}
 .keytag{font-size:10.5px;color:var(--spot-ink);font-weight:600;white-space:nowrap;
@@ -125,7 +126,7 @@ body{background:var(--bg);color:var(--ink);
 @media (max-width:640px){
   .stats{grid-template-columns:repeat(2,1fr)}
   .mkt{grid-template-columns:56px 1fr;grid-template-rows:auto auto}
-  .mkt__note{grid-column:2;text-align:left}
+  .mkt__note{grid-column:2;text-align:left;align-items:flex-start}
   .masthead{gap:12px}
 }
 
