@@ -70,12 +70,12 @@ def calibration_table(df):
 
 def backtest(seasons):
     g = pd.read_csv(GAMES_LOCAL, low_memory=False)
-    curve = gm.win_curve(g)
     rows = []
     for season in seasons:
         prior = gm.ratings(g, season - 1)
         if not prior:
             continue
+        curve = gm.model_win_curve(g, before_season=season)  # self-calibrated on prior seasons
         s = g[(g.season == season) & (g.game_type == "REG") & g.home_score.notna()]
         for _, r in s.iterrows():
             h, a = r.home_team, r.away_team
@@ -122,8 +122,11 @@ def live(write, fetch):
     # subject is the HOME team; model_prob is P(home wins). We grade WIN/LOSS on the
     # home team so it lines up with the public_calibration view (which calibrates
     # model_prob against the home outcome).
+    # Only grade the current model version — superseded versions (e.g. the pre-
+    # calibration v1) stay in the ledger as an audit trail but out of the record.
     preds = _get(env, "prediction_ledger",
-                 "?section=eq.MODEL&select=id,event_id,season,week,subject,model_prob&limit=5000")
+                 f"?section=eq.MODEL&model_version=eq.{gm.MODEL_VERSION}"
+                 "&select=id,event_id,season,week,subject,model_prob&limit=5000")
     graded = {r["prediction_id"] for r in
               _get(env, "prediction_results", "?select=prediction_id&limit=10000")}
 

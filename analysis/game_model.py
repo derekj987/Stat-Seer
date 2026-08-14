@@ -20,7 +20,7 @@ import argparse
 import numpy as np
 import pandas as pd
 
-MODEL_VERSION = "game-v1-powerdiff"
+MODEL_VERSION = "game-v2-powercal"
 HFA = 2.0        # home-field advantage, points
 REGRESS = 0.70   # shrink last-season rating gap toward the mean
 
@@ -44,12 +44,35 @@ def ratings(g, season):
 
 
 def win_curve(g):
-    """Historical (|margin|, fav_margin) pairs for the empirical margin->winprob map."""
+    """Historical (|market spread|, fav_margin) pairs. NOTE: calibrated for MARKET
+    spreads, which are sharper than model margins — using it on model margins made
+    the model overconfident (see grade_predictions.py --backtest). Kept for reference;
+    predict_week now uses model_win_curve instead."""
     s = g[(g.game_type == "REG") & g.home_score.notna() & g.spread_line.notna()].copy()
     s["margin"] = s.home_score - s.away_score
     s["fav_margin"] = np.where(s.spread_line >= 0, s.margin, -s.margin)
     s["fav_mag"] = s.spread_line.abs()
     return s[["fav_mag", "fav_margin"]].to_numpy()
+
+
+def model_win_curve(g, before_season):
+    """Self-calibrating curve: (predicted fav-margin magnitude, actual fav margin)
+    from the MODEL's OWN out-of-sample predictions over seasons < before_season.
+    Because it learns win rates from the model's noisier margins, a given predicted
+    margin implies the certainty it actually earns — fixing the overconfidence."""
+    frames = []
+    for season in sorted(s for s in g.season.unique() if s < before_season):
+        prior = ratings(g, season - 1)
+        if not prior:
+            continue
+        s = g[(g.season == season) & (g.game_type == "REG") & g.home_score.notna()].copy()
+        neutral = s["location"].astype(str).eq("Neutral") if "location" in s else False
+        hfa = np.where(neutral, 0.0, HFA)
+        margin = REGRESS * (s.home_team.map(prior).fillna(0.0) - s.away_team.map(prior).fillna(0.0)) + hfa
+        s["fav_mag"] = margin.abs()
+        s["fav_margin"] = np.where(margin >= 0, s.home_score - s.away_score, s.away_score - s.home_score)
+        frames.append(s[["fav_mag", "fav_margin"]])
+    return pd.concat(frames).to_numpy() if frames else np.empty((0, 2))
 
 
 def winprob(mag, curve, bw=1.0):
@@ -69,7 +92,7 @@ def winprob(mag, curve, bw=1.0):
 
 def predict_week(g, season, week):
     prior = ratings(g, season - 1)
-    curve = win_curve(g)
+    curve = model_win_curve(g, before_season=season)   # self-calibrated on prior seasons
     games = g[(g.season == season) & (g.week == week)]
     out = []
     for _, r in games.iterrows():

@@ -190,27 +190,33 @@ and misleading. The margin model (point differential) has real signal and stands
 the totals half does not. Contrast the margin model: MAE 10.15 vs market 9.89 — a
 genuine if losing prediction; the totals model barely moves off a constant.
 
-### Model win-probability calibration — OVERCONFIDENT (`grade_predictions.py --backtest`)
+### Model win-probability calibration — v1 overconfident, fixed in v2 (`grade_predictions.py --backtest`)
 
-Walk-forward 2021–2025, n=1,355. Calibrating the model's favored-team win prob
-against actual results:
+Walk-forward 2021–2025, n=1,355, calibrating the model's favored-team win prob
+against actual results.
+
+**v1 (`game-v1-powerdiff`) — overconfident:** overall predicted **65.1%** vs.
+actual **58.3%**; Brier **0.245**. Every band overshot (76.5%→59.2%, 83.3%→69.6%).
+Mechanism: `winprob` mapped the model's predicted margin through the empirical
+*market-spread* → win curve, but model margins are noisier than market spreads, so
+the same number implied more certainty than it earns.
+
+**v2 (`game-v2-powercal`) — calibrated:** rebuilt the curve from the model's OWN
+out-of-sample margins (`model_win_curve`, self-calibrating on prior seasons).
 
 | Predicted | Actual | n |
 |---|---|---|
-| 58.3% | 58.8% | 243 |
-| 66.9% | 59.5% | 257 |
-| 76.5% | 59.2% | 125 |
-| 83.3% | 69.6% | 171 |
+| 52.9% | 51.4% | 442 |
+| 57.2% | 56.9% | 297 |
+| 62.2% | 62.1% | 372 |
+| 67.1% | 63.2% | 152 |
+| 72.3% | 72.9% | 70 |
 
-Overall **predicted 65.1% vs. actual 58.3%** — the line-blind model is
-systematically **overconfident**. Brier score **0.245** (a coin flip at 50% is
-0.25). **Mechanism:** `winprob` maps the model's predicted margin through the
-empirical *market-spread* → win curve, but model margins are noisier than market
-spreads, so the same number should imply *less* certainty than a real spread does.
-**Fix (v2):** rebuild the margin→winprob curve from the model's OWN out-of-sample
-margins (self-calibrating), or shrink probabilities toward 0.5. Until then, the
-published win %s overstate confidence — and the grading engine will show exactly
-this on the live calibration curve, which is the point.
+Overall predicted **59.2%** vs. actual **58.3%** (0.9pt), Brier **0.239**. Say 62%,
+the favorite wins 62.1%. The recalibration touched only the margin→probability map,
+**not which side the model favors** — every off-consensus call is preserved; the
+model just stopped overstating its confidence. Brier stays near 0.24 because
+line-blind game outcomes are genuinely uncertain — v2 is now honest about that.
 
 ### Total-points key numbers (6,967 games, `total_key_numbers.py`)
 

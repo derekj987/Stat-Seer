@@ -4,7 +4,7 @@
 
 import { fetchWeek, implied, median, type OddsRow } from "./board";
 
-export const MODEL_VERSION = "game-v1-powerdiff";
+export const MODEL_VERSION = "game-v2-powercal";
 
 export interface ModelPrediction {
   eventId: string;
@@ -64,7 +64,7 @@ async function pg(table: string, query: string): Promise<Record<string, unknown>
 
 export async function fetchModelWeek(week: number, season = 2026): Promise<ModelPrediction[]> {
   const preds = await pg("prediction_ledger",
-    `?section=eq.MODEL&season=eq.${season}&week=eq.${week}` +
+    `?section=eq.MODEL&season=eq.${season}&week=eq.${week}&model_version=eq.${MODEL_VERSION}` +
     `&select=event_id,subject,model_prob,commence_time,published_at,reasoning&order=commence_time`);
   if (!preds.length) return [];
 
