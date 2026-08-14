@@ -1,59 +1,73 @@
-import { fetchWeek, weekRange, buildBoard } from "@/lib/board";
-import BoardView from "./BoardView";
+// Landing / home. Static — tells the StatSeer story and routes into the three
+// sections. Game Lines lives at /lines; Value Finder's front door is /best.
 
-export const revalidate = 120; // ISR: refresh Supabase reads every 2 min
+export const dynamic = "force-static";
 
-const SEASON = 2026;
+const SECTIONS = [
+  {
+    href: "/best", kicker: "Value Finder", q: "Where's the price wrong?",
+    body: "The best number across books, key-number sweet spots, and this week's value plays. Mostly arithmetic — and where the money actually is.",
+    cta: "This week's value plays",
+  },
+  {
+    href: "/model", kicker: "The Model", q: "What does the data say on its own?",
+    body: "Line-blind predictions, locked before kickoff and graded in public. The trust engine — check our record, don't take our word.",
+    cta: "See the model",
+  },
+  {
+    href: "/context", kicker: "Context", q: "What should you understand?",
+    body: "Weather, travel, injuries, and the market's own read on each game. All true and useful — and never a pick driver.",
+    cta: "Read the context",
+  },
+];
 
-function Shell({ children, sub }: { children: React.ReactNode; sub: string }) {
+export default function Home() {
   return (
-    <main className="wrap">
-      <header className="masthead">
-        <div className="brand">
-          <span className="brand__mark">VALUE&nbsp;FINDER</span>
-          <span className="brand__sub">{sub}</span>
+    <main className="home">
+      <section className="hero">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo-hero.png" alt="StatSeer" className="hero__logo" width={640} height={640} />
+        <div className="hero__pitch">
+          <h1 className="hero__h1">NFL betting analysis you can actually check.</h1>
+          <p className="hero__lead">
+            StatSeer is built on one idea: <b>verifiable trust</b>. Published probabilities. A public track
+            record — <b>including the bad stretches</b>. Calibration anyone can audit. Not confident-sounding
+            picks.
+          </p>
+          <div className="hero__cta">
+            <a href="/best" className="btn btn--primary">This week&apos;s value plays →</a>
+            <a href="/model" className="btn">See the model →</a>
+          </div>
         </div>
-      </header>
-      {children}
+      </section>
+
+      <section className="hcards">
+        {SECTIONS.map((s) => (
+          <a key={s.href} href={s.href} className="hcard">
+            <span className="hcard__k">{s.kicker}</span>
+            <h2 className="hcard__q">{s.q}</h2>
+            <p className="hcard__b">{s.body}</p>
+            <span className="hcard__cta">{s.cta} →</span>
+          </a>
+        ))}
+      </section>
+
+      <section className="creed">
+        <h2 className="creed__h">No locks. No hype. No tout.</h2>
+        <p className="creed__p">
+          Everyone else sells confidence. We show you where the value actually is, predict honestly, and
+          publish a track record you can audit. A good bet is <b>+EV over time</b> — not a guarantee on Sunday.
+          The three sections stay separate on purpose: combining zero-edge signals into one confident score is
+          exactly the machine we refuse to build.
+        </p>
+      </section>
+
+      <footer className="homefoot">
+        <p>
+          StatSeer is statistical analysis, not financial or betting advice. For adults of legal age only. If
+          gambling stops being fun, help is available — call <b>1-800-GAMBLER</b>.
+        </p>
+      </footer>
     </main>
-  );
-}
-
-export default async function Page({ searchParams }: PageProps<"/">) {
-  const sp = await searchParams;
-
-  let range: { min: number; max: number } | null = null;
-  try {
-    range = await weekRange(SEASON);
-  } catch (e) {
-    return (
-      <Shell sub="Line shopping & sweet spots">
-        <p className="foot">Couldn&apos;t load odds: {e instanceof Error ? e.message : String(e)}</p>
-      </Shell>
-    );
-  }
-  if (!range) {
-    return (
-      <Shell sub="Line shopping & sweet spots">
-        <p className="foot">No odds captured yet. Once the capture job has run, games will appear here.</p>
-      </Shell>
-    );
-  }
-
-  const requested = typeof sp.week === "string" ? parseInt(sp.week, 10) : NaN;
-  const week = Number.isFinite(requested)
-    ? Math.min(range.max, Math.max(range.min, requested))
-    : range.min;
-
-  const board = buildBoard(await fetchWeek(week, SEASON));
-  return (
-    <BoardView
-      board={board}
-      min={range.min}
-      max={range.max}
-      week={week}
-      season={SEASON}
-      snapshot={board[0]?.snapshot ?? ""}
-    />
   );
 }

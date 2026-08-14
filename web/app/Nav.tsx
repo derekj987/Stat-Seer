@@ -10,10 +10,12 @@
 export function Brand({ sub }: { sub: string }) {
   return (
     <div className="brand">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/logo-mark.png" alt="StatSeer" className="brand__logo" width={46} height={46} />
+      <a href="/" className="brand__home" aria-label="StatSeer home">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo-mark.png" alt="StatSeer" className="brand__logo" width={46} height={46} />
+      </a>
       <div className="brand__text">
-        <span className="brand__mark">STATSEER</span>
+        <a href="/" className="brand__marklink"><span className="brand__mark">STATSEER</span></a>
         <span className="brand__sub">{sub}</span>
       </div>
     </div>
@@ -39,7 +41,7 @@ export function ValueSubnav({ active }: { active: "best" | "lines" | "props" }) 
     <nav className="subnav" aria-label="Value Finder view">
       <a href="/best" className={active === "best" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "best" ? "page" : undefined}>Best Bets</a>
-      <a href="/" className={active === "lines" ? "subnav__t active" : "subnav__t"}
+      <a href="/lines" className={active === "lines" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "lines" ? "page" : undefined}>Game Lines</a>
       <a href="/props" className={active === "props" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "props" ? "page" : undefined}>Player Props</a>

@@ -63,7 +63,7 @@ function WeekNav({ min, max, current }: { min: number; max: number; current: num
       <span className="weeknav__label">Week</span>
       <div className="weeknav__list">
         {weeks.map((w) => (
-          <a key={w} href={`/?week=${w}`}
+          <a key={w} href={`/lines?week=${w}`}
             className={w === current ? "weeknav__w active" : "weeknav__w"}
             aria-current={w === current ? "page" : undefined}>{w}</a>
         ))}
