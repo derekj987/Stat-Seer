@@ -55,6 +55,7 @@ function PredictionCard({ p }: { p: ModelPrediction }) {
               <span className="pred__pick"><b>{p.marketFavored}</b> favored</span>
               <span className="pred__prob">{mktPct}% to win</span>
             </div>
+            <div className="probbar mkt" aria-hidden="true"><span style={{ width: `${mktPct}%` }} /></div>
             <div className="pred__take">
               {p.disagree
                 ? <>Our model likes <b>{p.favored}</b> — the market likes <b>{p.marketFavored}</b>.</>
