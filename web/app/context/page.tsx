@@ -40,8 +40,6 @@ interface Env {
   total: number | null;
   totalKey: { num: number; cost: number } | null;
   modelTotal: number | null;   // our line-blind projected total (weak; not an edge)
-  homeImplied: number | null;
-  awayImplied: number | null;
   neutral: boolean;
   venue: string | null;
   modelSpread: string | null;   // our model's projected spread, e.g. "DET -7.2"
@@ -74,7 +72,6 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
   const envs: Env[] = board.map((g) => {
     const total = g.total.consensus;
     const spread = g.spread.consensus; // home perspective; negative = home favored
-    const hasBoth = total !== null && spread !== null;
     const mp = modelById.get(g.eventId);
     return {
       eventId: g.eventId,
@@ -87,8 +84,6 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
       total,
       totalKey: g.total.key,
       modelTotal: MODEL_TOTALS[`${week}-${g.away}-${g.home}`] ?? null,
-      homeImplied: hasBoth ? total! / 2 - spread! / 2 : null,
-      awayImplied: hasBoth ? total! / 2 + spread! / 2 : null,
       neutral: mp?.neutral ?? false,
       venue: mp?.venue ?? null,
       modelSpread: mp ? `${mp.favored} -${Math.abs(mp.predMargin).toFixed(1)}` : null,
@@ -126,20 +121,17 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
 
       {/* --- Scoring environment: implied team totals --- */}
       <section className="ctxsec">
-        <h2 className="ctxsec__h">Lines &amp; scoring environment</h2>
+        <h2 className="ctxsec__h">Lines &amp; the model&apos;s read</h2>
         <p className="ctxsec__d">
-          The market&apos;s <b>spread</b> and <b>total</b> for each game, plus the <b>implied team totals</b>
-          they work out to — roughly how many points each team is expected to score if the line is right
-          (total ÷ 2, adjusted by the spread).
+          The market&apos;s <b>spread</b> and <b>total</b> for each game, with our <b>line-blind model&apos;s</b>
+          own read of each sitting right beside it.
         </p>
         <div className="readbox">
           <span className="readbox__h">How to read a row</span>
           <p>
-            Take <b>NO @ DET</b>: the market has set <b>DET −7</b> with a <b>49</b> total. That is not us
-            saying &quot;bet Detroit&quot; or &quot;this game hits 49&quot; — it&apos;s what the books are
-            offering. Split that line into team totals and it implies <b>DET ≈ 28, NO ≈ 21</b> — so the market
-            expects a comfortable Detroit win in a middle-scoring game. That&apos;s the game&apos;s expected
-            <em> shape</em>, useful for seeing which side and which players are set up to score. Nothing more.
+            Take <b>NO @ DET</b>: the market has set <b>DET −7</b> with a <b>49</b> total; our model, which never
+            sees the line, independently reads it <b>DET −8.0</b> with a <b>46.3</b> total. This is our read
+            <em> next to</em> the market&apos;s — for understanding where we agree and differ, not a bet.
           </p>
           <p className="readbox__note">
             The <b className="modh">model</b> columns are <b>our own line-blind projected spread and total</b> —
@@ -177,7 +169,6 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
                 <span>game</span><span>spread</span>
                 <span className="improw__modh">model</span><span>total</span>
                 <span className="improw__modh">model</span>
-                <span>{"impl. "}away</span><span>{"impl. "}home</span>
               </div>
               {scored.map((e) => (
                 <div className="improw" role="row" key={e.eventId}>
@@ -198,8 +189,6 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
                     {e.totalKey && <span className="ssmark" title={`Sweet spot — key total ${e.totalKey.num} (½pt ≈ ${e.totalKey.cost.toFixed(0)}%)`}>◆</span>}
                   </span>
                   <span className="improw__mod">{e.modelTotal !== null ? e.modelTotal.toFixed(1) : "—"}</span>
-                  <span className="improw__t">{e.awayImplied!.toFixed(1)}</span>
-                  <span className="improw__t">{e.homeImplied!.toFixed(1)}</span>
                 </div>
               ))}
             </div>
