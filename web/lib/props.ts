@@ -108,7 +108,7 @@ async function pgAll(query: string): Promise<PropRow[]> {
 
 export async function weekProps(week: number, season = 2026): Promise<PropGame[]> {
   const rows = await pgAll(
-    `?season=eq.${season}&week=eq.${week}` +
+    `?season=eq.${season}&week=eq.${week}&event_id=neq.test` + // exclude the dev test row
       `&select=snapshot_at,event_id,commence_time,home_team,away_team,book,market,` +
       `player_name,side,line,price_american&order=snapshot_at.desc`
   );
