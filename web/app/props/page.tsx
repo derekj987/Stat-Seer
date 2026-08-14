@@ -16,6 +16,7 @@ function Tabs() {
     <nav className="tabs" aria-label="View">
       <a href="/" className="tab">Game lines</a>
       <a href="/props" className="tab active" aria-current="page">Player props</a>
+      <a href="/model" className="tab">The Model</a>
     </nav>
   );
 }

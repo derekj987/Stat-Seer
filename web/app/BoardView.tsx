@@ -229,6 +229,7 @@ export default function BoardView({
         <nav className="tabs" aria-label="View">
           <a href="/" className="tab active" aria-current="page">Game lines</a>
           <a href="/props" className="tab">Player props</a>
+          <a href="/model" className="tab">The Model</a>
         </nav>
 
         <WeekNav min={min} max={max} current={week} />
