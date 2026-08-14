@@ -402,7 +402,47 @@ signal," but the rookie-blindness is structural, not just sample size.
 
 ---
 
-## 9. Errors caught during this work
+## 9. Props projection — volume × efficiency vs. baselines (`props_projection.py`)
+
+Stages 1–4 of the props model, built on the project's core principle: project
+volume (persists), multiply by a *regressed* league efficiency baseline (player
+efficiency is noise), never model yards directly. Walk-forward, test 2021–2025,
+graded on 16,936 skill player-weeks with ≥4 games of current-season history.
+
+Model = projected volume × position efficiency. Baselines use recent *yards*
+directly. MAE against actual box-score yards:
+
+| Prop (n) | persistence (last wk) | season-avg | model | model-EWMA |
+|---|---|---|---|---|
+| Rushing yds — RB/FB, proj carries ≥8 (2,399) | 34.51 | 27.52 | 27.54 | 27.31 |
+| Receiving yds — WR/TE, proj tgt ≥3 (7,018) | 32.63 | 25.60 | 25.49 | 25.70 |
+| Receptions — WR/TE (7,018) | 2.19 | 1.73 | 1.73 | 1.74 |
+
+**Two findings:**
+
+1. **The volume × efficiency projection ties a season-average of yards** (27.5 vs
+   27.5 rushing; 25.5 vs 25.6 receiving) and **beats last-week persistence by
+   ~25%.** The decomposition doesn't add point-accuracy edge because, for
+   established players, their own averaged efficiency ≈ the league baseline and
+   their averaged volume is already in the season-average.
+
+2. **Recency-weighting (EWMA volume) helps rushing on change weeks (+1.1%, n=503)
+   but hurts receiving (−2.4%, n=1,843).** Carry-role changes stick; target spikes
+   mean-revert, so chasing recent targets adds error. Matches the snap-share
+   result — the volume signal that persists is *carries/role*, not target bursts.
+
+**Consequence:** a better point projection is not where the props edge is — a
+projection that ties the season-average will not beat a market that also knows the
+season-average. The edge, if it exists, has to come from (a) **calibrated
+over/under _probabilities_** (the distribution, not the point — that's what prices
+a prop), (b) the validated **snap-share change signal** as the volume input
+(§1: +8.2% on change weeks), and (c) beating the **closing prop line** (needs the
+line history now being captured). Point MAE is a table-stakes sanity check, not the
+bar.
+
+---
+
+## 10. Errors caught during this work
 
 Recorded because these are the failure modes that produce confident, wrong betting
 products — and every one happened while explicitly trying to avoid them.
