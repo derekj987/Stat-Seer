@@ -1,0 +1,44 @@
+import { createClient } from "@/lib/supabase/server";
+
+export const dynamic = "force-dynamic";
+
+const SECTIONS = [
+  { slug: "the-app", name: "The App", desc: "Picks, odds, the model, betting — the main room." },
+  { slug: "nfl", name: "NFL Talk", desc: "General football: games, teams, news." },
+  { slug: "fantasy", name: "Fantasy Football", desc: "Lineups, waivers, start/sit." },
+  { slug: "parking-lot", name: "Parking Lot", desc: "Anything goes." },
+];
+
+export default async function Forum() {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+  const username = (data.user?.user_metadata?.username as string) ?? null;
+
+  return (
+    <main className="wrap">
+      <header className="masthead">
+        <div className="brand">
+          <a href="/" className="brand__home"><span className="brand__mark">STATSEER</span></a>
+        </div>
+      </header>
+
+      <section className="forumhead">
+        <h1 className="forumhead__h">Community</h1>
+        {username
+          ? <p className="forumhead__p">Welcome, <b>{username}</b>. Pick a room to jump in.</p>
+          : <p className="forumhead__p">Read freely. <a href="/signup">Create an account</a> or <a href="/login">log in</a> to post.</p>}
+      </section>
+
+      <section className="forumsections">
+        {SECTIONS.map((s) => (
+          <a key={s.slug} href={`/forum/${s.slug}`} className="forumsec">
+            <span className="forumsec__name">{s.name}</span>
+            <span className="forumsec__desc">{s.desc}</span>
+          </a>
+        ))}
+      </section>
+
+      <p className="foot">Threads &amp; replies are being built — sections go live next.</p>
+    </main>
+  );
+}

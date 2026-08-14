@@ -289,6 +289,55 @@ body{background:var(--bg);color:var(--ink);
   .hcards{grid-template-columns:1fr}
 }
 
+/* --- auth bar (global top strip) --- */
+.authbar{border-bottom:1px solid var(--line);background:var(--surface)}
+.authbar__inner{max-width:1080px;margin:0 auto;padding:8px 20px;display:flex;
+  align-items:center;justify-content:space-between;gap:12px;min-height:40px}
+.authbar__forum{font-size:13px;font-weight:700;color:var(--ink);text-decoration:none}
+.authbar__forum:hover{color:var(--accent)}
+.authbar__me{display:flex;align-items:center;gap:12px}
+.authbar__user{font-size:13px;font-weight:600;color:var(--accent);text-decoration:none}
+.authbar__link{font-size:13px;color:var(--muted);text-decoration:none}
+.authbar__link:hover{color:var(--ink)}
+.authbar__btn{font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:8px;
+  border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-decoration:none}
+.authbar__btn:hover{border-color:var(--accent);color:var(--accent)}
+.authbar__btn--primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.authbar__btn--primary:hover{filter:brightness(1.06);color:#fff}
+
+/* --- auth pages (login / signup) --- */
+.authwrap{min-height:70vh;display:flex;align-items:center;justify-content:center;padding:40px 20px}
+.authcard{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--line);
+  border-radius:16px;padding:28px 26px;text-align:center}
+.authcard__brand{display:inline-block;font-weight:800;letter-spacing:.14em;font-size:20px;
+  color:var(--ink);text-decoration:none;margin-bottom:6px}
+.authcard__h{font-size:20px;margin:6px 0 18px}
+.authform{display:flex;flex-direction:column;gap:12px;text-align:left}
+.authfield{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:600;
+  color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.authfield input{padding:10px 12px;border-radius:9px;border:1px solid var(--line);
+  background:var(--bg);color:var(--ink);font-size:14px;font-weight:400;text-transform:none;letter-spacing:0}
+.authfield input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+.authcheck{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:var(--ink);line-height:1.4}
+.authcheck input{margin-top:2px}
+.authbtn{width:100%;margin-top:4px;cursor:pointer}
+.authcard__err{color:var(--key);font-size:12.5px;margin:0;font-weight:600}
+.authcard__ok{font-size:14px;line-height:1.6;color:var(--ink)}
+.authcard__ok a,.authcard__alt a{color:var(--accent);font-weight:600;text-decoration:none}
+.authcard__alt{margin:16px 0 0;font-size:13px;color:var(--muted)}
+
+/* --- forum shell --- */
+.forumhead{margin:16px 0 18px}
+.forumhead__h{font-size:26px;margin:0 0 4px}
+.forumhead__p{margin:0;color:var(--muted);font-size:14px}
+.forumhead__p a{color:var(--accent);font-weight:600;text-decoration:none}
+.forumsections{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.forumsec{display:flex;flex-direction:column;gap:5px;padding:18px;border-radius:12px;
+  background:var(--surface);border:1px solid var(--line);text-decoration:none;transition:border-color .15s,transform .15s}
+.forumsec:hover{border-color:var(--accent);transform:translateY(-2px)}
+.forumsec__name{font-size:16px;font-weight:700;color:var(--ink)}
+.forumsec__desc{font-size:13px;color:var(--muted);line-height:1.45}
+
 /* --- global responsible-gambling footer --- */
 .sitefoot{max-width:1080px;margin:26px auto 0;padding:16px 20px 30px;
   border-top:1px solid var(--line);color:var(--muted);font-size:11.5px;

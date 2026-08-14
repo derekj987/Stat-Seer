@@ -1,0 +1,80 @@
+"use client";
+
+import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+
+export default function SignUp() {
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [over21, setOver21] = useState(false);
+  const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
+  const [msg, setMsg] = useState("");
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setMsg("");
+    if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+      setStatus("error"); setMsg("Username must be 3–20 letters, numbers, or underscores."); return;
+    }
+    if (password.length < 8) {
+      setStatus("error"); setMsg("Password must be at least 8 characters."); return;
+    }
+    if (!over21) {
+      setStatus("error"); setMsg("You must confirm you are 21 or older."); return;
+    }
+    setStatus("loading");
+    const supabase = createClient();
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { username },
+        emailRedirectTo: `${location.origin}/auth/callback`,
+      },
+    });
+    if (error) { setStatus("error"); setMsg(error.message); return; }
+    setStatus("sent");
+  }
+
+  return (
+    <main className="authwrap">
+      <div className="authcard">
+        <a href="/" className="authcard__brand">STATSEER</a>
+        <h1 className="authcard__h">Create your account</h1>
+
+        {status === "sent" ? (
+          <p className="authcard__ok">
+            Check your email — we sent a confirmation link to <b>{email}</b>. Click it to activate your
+            account, then <a href="/login">log in</a>.
+          </p>
+        ) : (
+          <form onSubmit={submit} className="authform">
+            <label className="authfield">Username
+              <input value={username} onChange={(e) => setUsername(e.target.value)}
+                autoComplete="username" placeholder="how you'll show up in the forum" required />
+            </label>
+            <label className="authfield">Email
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email" required />
+            </label>
+            <label className="authfield">Password
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password" minLength={8} required />
+            </label>
+            <label className="authcheck">
+              <input type="checkbox" checked={over21} onChange={(e) => setOver21(e.target.checked)} />
+              <span>I am 21 or older and agree to the terms.</span>
+            </label>
+            {msg && <p className="authcard__err">{msg}</p>}
+            <button type="submit" className="btn btn--primary authbtn" disabled={status === "loading"}>
+              {status === "loading" ? "Creating…" : "Create account"}
+            </button>
+          </form>
+        )}
+
+        <p className="authcard__alt">Already a member? <a href="/login">Log in</a></p>
+      </div>
+    </main>
+  );
+}

@@ -345,3 +345,40 @@ create trigger no_update_props before update or delete on prop_snapshots
     for each row execute function block_mutation();
 grant select, insert on prop_snapshots to service_role;
 grant usage, select on all sequences in schema public to service_role;
+
+-- =====================================================================
+-- MEMBERS. A public profile per auth user (username shown in the forum).
+-- auth.users lives in the auth schema; we mirror the public bit here with
+-- RLS. A trigger creates the profile from the signup metadata (username).
+-- =====================================================================
+create table if not exists profiles (
+    id         uuid primary key references auth.users(id) on delete cascade,
+    username   text unique not null,
+    created_at timestamptz not null default now()
+);
+alter table profiles enable row level security;
+
+drop policy if exists "profiles readable by all" on profiles;
+create policy "profiles readable by all" on profiles for select using (true);
+
+drop policy if exists "user updates own profile" on profiles;
+create policy "user updates own profile" on profiles
+    for update using (auth.uid() = id) with check (auth.uid() = id);
+
+-- On signup, create the profile row (username from raw_user_meta_data).
+create or replace function public.handle_new_user() returns trigger as $$
+begin
+    insert into public.profiles (id, username)
+    values (
+        new.id,
+        coalesce(nullif(new.raw_user_meta_data->>'username', ''),
+                 'member_' || substr(new.id::text, 1, 8))
+    )
+    on conflict (id) do nothing;
+    return new;
+end;
+$$ language plpgsql security definer;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created after insert on auth.users
+    for each row execute function public.handle_new_user();
