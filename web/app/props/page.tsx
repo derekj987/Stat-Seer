@@ -14,8 +14,8 @@ const et = (iso: string) => kickFmt.format(new Date(iso)) + " ET";
 function Tabs() {
   return (
     <nav className="tabs" aria-label="View">
-      <a href="/" className="tab">Game lines</a>
-      <a href="/props" className="tab active" aria-current="page">Player props</a>
+      <a href="/" className="tab">Value Finder</a>
+      <a href="/props" className="tab active" aria-current="page">Player Props</a>
       <a href="/model" className="tab">The Model</a>
     </nav>
   );
@@ -75,8 +75,8 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
     <main className="wrap">
       <header className="masthead">
         <div className="brand">
-          <span className="brand__mark">VALUE&nbsp;FINDER</span>
-          <span className="brand__sub">Player props · {cat.label} · Week {week}, {SEASON}</span>
+          <span className="brand__mark">STATSEER</span>
+          <span className="brand__sub">Player Props · {cat.label} · Week {week}, {SEASON}</span>
         </div>
         {snap && <div className="asof">props as of<br /><b>{et(snap)}</b></div>}
       </header>

@@ -220,15 +220,15 @@ export default function BoardView({
       <main className="wrap">
         <header className="masthead">
           <div className="brand">
-            <span className="brand__mark">VALUE&nbsp;FINDER</span>
-            <span className="brand__sub">Line shopping &amp; sweet spots · Week {week}, {season}</span>
+            <span className="brand__mark">STATSEER</span>
+            <span className="brand__sub">Value Finder · line shopping &amp; sweet spots · Week {week}, {season}</span>
           </div>
           {snapshot && <div className="asof">lines as of<br /><b>{et(snapshot, snapFmt)}</b></div>}
         </header>
 
         <nav className="tabs" aria-label="View">
-          <a href="/" className="tab active" aria-current="page">Game lines</a>
-          <a href="/props" className="tab">Player props</a>
+          <a href="/" className="tab active" aria-current="page">Value Finder</a>
+          <a href="/props" className="tab">Player Props</a>
           <a href="/model" className="tab">The Model</a>
         </nav>
 

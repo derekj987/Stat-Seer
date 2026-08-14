@@ -13,8 +13,8 @@ const et = (iso: string) => kickFmt.format(new Date(iso)) + " ET";
 function Tabs() {
   return (
     <nav className="tabs" aria-label="View">
-      <a href="/" className="tab">Game lines</a>
-      <a href="/props" className="tab">Player props</a>
+      <a href="/" className="tab">Value Finder</a>
+      <a href="/props" className="tab">Player Props</a>
       <a href="/model" className="tab active" aria-current="page">The Model</a>
     </nav>
   );
@@ -81,8 +81,8 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
     <main className="wrap">
       <header className="masthead">
         <div className="brand">
-          <span className="brand__mark">THE&nbsp;MODEL</span>
-          <span className="brand__sub">Line-blind predictions · Week {week}, {SEASON} · {MODEL_VERSION}</span>
+          <span className="brand__mark">STATSEER</span>
+          <span className="brand__sub">The Model · line-blind predictions · Week {week}, {SEASON} · {MODEL_VERSION}</span>
         </div>
         {published && <div className="asof">published<br /><b>{et(published)}</b></div>}
       </header>
