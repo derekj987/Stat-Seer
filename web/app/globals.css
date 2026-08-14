@@ -5,6 +5,7 @@
   --key:#b04521; --key-soft:#f7e7df;
   --spot:#b3995d; --spot-soft:#f4edda; --spot-ink:#7a6531;
   --save:#2f6fed; --save-soft:#e9f1fe;
+  --offc:#6d54c4; --offc-soft:#ede9fb; --offc-ink:#4a37a0;
   --font-sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --font-mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
 }
@@ -15,6 +16,7 @@
   --key:#e2865a; --key-soft:#2c1c14;
   --spot:#b3995d; --spot-soft:#2b2617; --spot-ink:#cbb377;
   --save:#6ea8fe; --save-soft:#152338;
+  --offc:#a693f0; --offc-soft:#201a36; --offc-ink:#b9a9f5;
 }}
 :root[data-theme="dark"]{
   --bg:#0e1116; --surface:#161b22; --surface-2:#1b212a;
@@ -23,6 +25,7 @@
   --key:#e2865a; --key-soft:#2c1c14;
   --spot:#b3995d; --spot-soft:#2b2617; --spot-ink:#cbb377;
   --save:#6ea8fe; --save-soft:#152338;
+  --offc:#a693f0; --offc-soft:#201a36; --offc-ink:#b9a9f5;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -234,6 +237,18 @@ body{background:var(--bg);color:var(--ink);
 .probbar{margin-top:8px;height:6px;border-radius:4px;background:var(--surface-2);overflow:hidden}
 .probbar span{display:block;height:100%;background:var(--accent);border-radius:4px}
 .pred__note{margin-top:8px;font-size:11.5px;color:var(--muted);font-family:var(--font-mono)}
+/* market comparison row + off-consensus flag */
+.pred__row--mkt{margin-top:9px;padding-top:9px;border-top:1px dashed var(--line)}
+.pred__row--mkt .pred__pick{color:var(--muted)}
+.pred__row--mkt .pred__prob{color:var(--muted)}
+.pred__take{margin-top:9px;font-size:12.5px;color:var(--ink)}
+.pred__take b{font-weight:700}
+.badge.offc{background:var(--offc);color:#fff}
+.game.offc{border-color:color-mix(in srgb,var(--offc) 55%,var(--line))}
+.game.offc .pred__take b{color:var(--offc-ink)}
+.chip.offc{display:inline-block;padding:1px 7px;margin:0 2px;border-radius:10px;
+  background:var(--offc-soft);color:var(--offc-ink);font-size:11px;font-weight:700;
+  letter-spacing:.02em;vertical-align:baseline}
 .calib{margin-top:26px;padding-top:18px;border-top:1px solid var(--line)}
 .calib__h{font-size:16px;margin:0 0 10px}
 .calib__table{display:flex;flex-direction:column;gap:2px;max-width:440px}

@@ -62,7 +62,7 @@ export function implied(price: number): number {
 export function fmtOdds(price: number): string {
   return price > 0 ? `+${price}` : String(price);
 }
-function median(xs: number[]): number {
+export function median(xs: number[]): number {
   const s = [...xs].sort((a, b) => a - b);
   const m = Math.floor(s.length / 2);
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;

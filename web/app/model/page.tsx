@@ -40,11 +40,13 @@ function WeekNav({ min, max, current }: { min: number; max: number; current: num
 function PredictionCard({ p }: { p: ModelPrediction }) {
   const favProb = p.favored === p.home ? p.homeWinProb : 1 - p.homeWinProb;
   const pct = Math.round(favProb * 100);
+  const mktPct = p.marketFavProb === null ? null : Math.round(p.marketFavProb * 100);
   return (
-    <article className="game">
+    <article className={p.disagree ? "game offc" : "game"}>
       <header className="game__head">
         <span className="matchup">{p.away}<span className="at">@</span>{p.home}</span>
         <time className="kick">{et(p.commence)}</time>
+        {p.disagree && <span className="badge offc">OFF CONSENSUS</span>}
         {p.neutral && <span className="badge neutral">NEUTRAL</span>}
       </header>
       <div className="pred">
@@ -54,6 +56,22 @@ function PredictionCard({ p }: { p: ModelPrediction }) {
           <span className="pred__prob">{pct}% to win</span>
         </div>
         <div className="probbar" aria-hidden="true"><span style={{ width: `${pct}%` }} /></div>
+
+        {p.marketFavored && mktPct !== null && (
+          <>
+            <div className="pred__row pred__row--mkt">
+              <span className="pred__label">Market</span>
+              <span className="pred__pick"><b>{p.marketFavored}</b> favored</span>
+              <span className="pred__prob">{mktPct}% to win</span>
+            </div>
+            <div className="pred__take">
+              {p.disagree
+                ? <>Our model likes <b>{p.favored}</b> — the market likes <b>{p.marketFavored}</b>.</>
+                : <>Model and market agree: <b>{p.favored}</b> is the side.</>}
+            </div>
+          </>
+        )}
+
         {p.neutral && <div className="pred__note">Neutral site — {p.venue}. No home-field edge applied.</div>}
       </div>
     </article>
@@ -92,11 +110,12 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
 
       <section className="explainer">
         <p>
-          <b>This is the trust engine, not a pick source.</b> The Model never sees the betting line —
-          it predicts from team strength alone. The market is <em>sharper</em> (it beats this model on
-          average), so these are not bets. Every prediction is <b>published and locked before kickoff</b>,
-          and calibration below tracks how well the probabilities hold up — so you can verify we&apos;re
-          honest, not lucky.
+          Our prediction model never sees the betting line — it reads each game from team strength alone,
+          then we show you <b>where it agrees with the market and where it doesn&apos;t.</b> An
+          <span className="chip offc">Off Consensus</span> game is one where the model likes a different
+          side than Vegas. Every prediction is <b>published and locked before kickoff</b>, and the
+          calibration below grades every one in public — so the track record is yours to check, not ours
+          to claim.
         </p>
       </section>
 
