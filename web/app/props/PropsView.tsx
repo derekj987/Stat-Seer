@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import type { PropGame, Quote } from "@/lib/props";
+import { SlipCallout } from "../Nav";
 
 const fmtOdds = (p: number) => (p > 0 ? `+${p}` : String(p));
 function sideLabel(side: string, line: number | null): string {
@@ -198,10 +199,8 @@ export default function PropsView({ games }: { games: PropGame[] }) {
 
   return (
     <>
-      <p className="hint">
-        {games.length} games · {players} players · best price on each, shopped across books. Tap a prop to add
-        it to a parlay — we&apos;ll find the best single book for it.
-      </p>
+      <SlipCallout kind="props" />
+      <p className="hint">{games.length} games · {players} players · best price on each, shopped across books.</p>
       <section className="propstack">
         {games.map((g, i) => (
           <PropGameCard key={g.eventId} g={g} open={i === 0} has={has} toggle={toggle} />

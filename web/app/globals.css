@@ -287,6 +287,15 @@ body{background:var(--bg);color:var(--ink);
   .hcards{grid-template-columns:1fr}
 }
 
+/* --- Build-your-betslip callout (Game Lines / Player Props) --- */
+.slipcta{display:flex;gap:13px;align-items:flex-start;margin:14px 0 10px;padding:13px 16px;
+  border-radius:12px;background:var(--accent-soft);
+  border:1px solid color-mix(in srgb,var(--accent) 30%,transparent)}
+.slipcta__icon{font-size:22px;line-height:1.15;flex:0 0 auto}
+.slipcta__text{display:flex;flex-direction:column;gap:3px;font-size:13px;line-height:1.55;
+  color:var(--ink);max-width:78ch}
+.slipcta__h{font-size:13.5px;color:var(--accent);letter-spacing:.01em}
+
 /* --- Best Bets --- */
 .playgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
 .play{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}

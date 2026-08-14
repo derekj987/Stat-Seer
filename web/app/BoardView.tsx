@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import type { Game } from "@/lib/board";
-import { TopNav, ValueSubnav, Brand } from "./Nav";
+import { TopNav, ValueSubnav, Brand, SlipCallout } from "./Nav";
 
 // ---- formatting (client-side; Intl has full ICU) ----
 const kickFmt = new Intl.DateTimeFormat("en-US", {
@@ -241,7 +241,7 @@ export default function BoardView({
               <div className="stat"><span className="stat__v">10</span><span className="stat__l">books compared</span></div>
             </section>
 
-            <p className="hint">Tap any price to save it to your slip — we&apos;ll tell you the best book to place it at.</p>
+            <SlipCallout kind="lines" />
 
             <section className="grid">
               {board.map((g) => <GameCard key={g.eventId} g={g} has={has} onToggle={toggle} />)}

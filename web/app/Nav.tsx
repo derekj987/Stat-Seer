@@ -6,6 +6,23 @@
 //   The Model    — line-blind predictions
 //   Context      — what to understand (informs, doesn't vote)
 
+/** Prominent "build your betslip" explainer for the shopping pages. */
+export function SlipCallout({ kind }: { kind: "lines" | "props" }) {
+  return (
+    <div className="slipcta">
+      <span className="slipcta__icon" aria-hidden="true">🎟️</span>
+      <div className="slipcta__text">
+        <b className="slipcta__h">Build your own betslip</b>
+        <span>
+          {kind === "lines"
+            ? "Tap any moneyline, spread, or total to add it to your slip. StatSeer then tells you the single best sportsbook to place each bet — so you never leave value on the table."
+            : "Tap any prop to add it to your slip or parlay. StatSeer finds the best sportsbook for each pick — and for a parlay, the one book with the best combined price."}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 /** Masthead brand: logo mark + STATSEER wordmark + a section subtitle. */
 export function Brand({ sub }: { sub: string }) {
   return (
