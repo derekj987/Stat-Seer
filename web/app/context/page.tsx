@@ -1,5 +1,5 @@
 import { weekRange, fetchWeek, buildBoard } from "@/lib/board";
-import { fetchModelWeek } from "@/lib/model";
+import { fetchModelWeek, type ModelPrediction } from "@/lib/model";
 import { TopNav, Brand } from "../Nav";
 
 export const revalidate = 300;
@@ -42,6 +42,8 @@ interface Env {
   awayImplied: number | null;
   neutral: boolean;
   venue: string | null;
+  modelSpread: string | null;   // our model's projected spread, e.g. "DET -7.2"
+  modelDisagree: boolean;       // model favors a different side than the market
 }
 
 function favLabel(home: string, away: string, spread: number | null): string {
@@ -61,19 +63,17 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
 
   const board = buildBoard(await fetchWeek(week, SEASON));
 
-  // Neutral-site / venue from the locked model ledger (schedule truth we already store).
-  const neutralById = new Map<string, { neutral: boolean; venue: string | null }>();
+  // Locked model predictions: neutral/venue (schedule truth) + projected spread.
+  const modelById = new Map<string, ModelPrediction>();
   try {
-    for (const p of await fetchModelWeek(week, SEASON)) {
-      neutralById.set(p.eventId, { neutral: p.neutral, venue: p.venue });
-    }
+    for (const p of await fetchModelWeek(week, SEASON)) modelById.set(p.eventId, p);
   } catch { /* predictions may not be published for this week yet */ }
 
   const envs: Env[] = board.map((g) => {
     const total = g.total.consensus;
     const spread = g.spread.consensus; // home perspective; negative = home favored
     const hasBoth = total !== null && spread !== null;
-    const n = neutralById.get(g.eventId);
+    const mp = modelById.get(g.eventId);
     return {
       eventId: g.eventId,
       home: g.home,
@@ -86,8 +86,10 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
       totalKey: g.total.key,
       homeImplied: hasBoth ? total! / 2 - spread! / 2 : null,
       awayImplied: hasBoth ? total! / 2 + spread! / 2 : null,
-      neutral: n?.neutral ?? false,
-      venue: n?.venue ?? null,
+      neutral: mp?.neutral ?? false,
+      venue: mp?.venue ?? null,
+      modelSpread: mp ? `${mp.favored} -${Math.abs(mp.predMargin).toFixed(1)}` : null,
+      modelDisagree: mp?.disagree ?? false,
     };
   });
 
@@ -137,8 +139,11 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
             <em> shape</em>, useful for seeing which side and which players are set up to score. Nothing more.
           </p>
           <p className="readbox__note">
-            <span className="ssmark">◆</span> marks a <b>sweet spot</b> — a spread or total sitting on a key
-            number. It&apos;s a heads-up; go to <a href="/best">Best Bets</a> to act on it.
+            The <b className="modh">model</b> column is <b>our own line-blind projected spread</b> — shown next
+            to the market&apos;s for comparison, not as the market&apos;s number. <span className="offcmark">⚑</span> means
+            our model is <b>off consensus</b> (favors a different side than the market); see <a href="/model">The Model</a>.
+            &nbsp;<span className="ssmark">◆</span> marks a <b>sweet spot</b> — a spread or total on a key number;
+            act on it in <a href="/best">Best Bets</a>.
           </p>
         </div>
 
@@ -165,7 +170,8 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
 
             <div className="imptable" role="table" aria-label="Lines and implied team totals">
               <div className="improw improw--head" role="row">
-                <span>game</span><span>spread</span><span>total</span>
+                <span>game</span><span>spread</span>
+                <span className="improw__modh">model</span><span>total</span>
                 <span>{"impl. "}away</span><span>{"impl. "}home</span>
               </div>
               {scored.map((e) => (
@@ -177,6 +183,10 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
                   <span className="improw__sp">
                     {e.favLabel}
                     {e.spreadKey && <span className="ssmark" title={`Sweet spot — key number ${e.spreadKey.num} (½pt ≈ ${e.spreadKey.cost.toFixed(0)}%)`}>◆</span>}
+                  </span>
+                  <span className="improw__mod">
+                    {e.modelSpread ?? "—"}
+                    {e.modelDisagree && <span className="offcmark" title="Off consensus — our model favors a different side than the market">⚑</span>}
                   </span>
                   <span className="improw__tot">
                     {e.total!.toFixed(1)}
