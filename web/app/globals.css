@@ -158,6 +158,17 @@ body{background:var(--bg);color:var(--ink);
   color:var(--muted);border-radius:8px;padding:6px 12px;cursor:pointer;
   font:inherit;font-size:12px}
 .slipbar__clear:hover{border-color:var(--key);color:var(--key)}
+.stakebox{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 10px;
+  padding:10px 12px;background:var(--surface-2);border-radius:9px}
+.stakebox__label{font-size:12px;font-weight:600;color:var(--muted);
+  display:inline-flex;align-items:center;gap:8px}
+.stakebox__field{display:inline-flex;align-items:center;gap:2px;background:var(--surface);
+  border:1px solid var(--line);border-radius:7px;padding:4px 8px;color:var(--muted)}
+.stakebox__input{width:72px;border:0;background:none;color:var(--ink);font:inherit;
+  font-family:var(--font-mono);font-size:14px;font-weight:600;outline:none}
+.stakebox__payout{font-size:13px;color:var(--ink)}
+.stakebox__payout b{color:var(--accent);font-family:var(--font-mono)}
+.stakebox__profit{color:var(--muted);font-size:12px}
 
 /* --- tabs (game lines / props) --- */
 .tabs{display:flex;gap:8px;margin:20px 0 6px}

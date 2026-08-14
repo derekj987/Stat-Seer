@@ -97,9 +97,19 @@ function ParlayBar({ legs, onRemove, onClear }: {
   legs: Leg[]; onRemove: (id: string) => void; onClear: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [stake, setStake] = useState(10);
+  useEffect(() => {
+    const s = Number(localStorage.getItem("statseer.stake"));
+    if (s > 0) setStake(s);
+  }, []);
+  useEffect(() => {
+    try { localStorage.setItem("statseer.stake", String(stake)); } catch { /* ignore */ }
+  }, [stake]);
+
   if (!legs.length) return null;
   const par = bestParlay(legs);
-  const stake = 10;
+  const payout = par ? stake * par.dec : 0;
+  const profit = par ? stake * (par.dec - 1) : 0;
 
   return (
     <div className="slipbar">
@@ -109,7 +119,7 @@ function ParlayBar({ legs, onRemove, onClear }: {
           <span>leg{legs.length === 1 ? "" : "s"}</span>
           <span className="slipbar__rec">
             {par
-              ? <>parlay <b>{fmtOdds(par.american)}</b> at {par.book}</>
+              ? <>parlay <b>{fmtOdds(par.american)}</b> at {par.book} · ${stake.toFixed(0)}→<b>${payout.toFixed(2)}</b></>
               : <>no single book prices all legs</>}
           </span>
           <span className="slipbar__chev">{open ? "▾" : "▴"}</span>
@@ -127,12 +137,26 @@ function ParlayBar({ legs, onRemove, onClear }: {
               ))}
             </ul>
             {par ? (
-              <p className="slipbar__note">
-                Best combined price: <b>{fmtOdds(par.american)}</b> at <b>{par.book}</b> — ${stake} pays
-                ${(stake * par.dec).toFixed(2)}. A parlay must be placed at one book, so this is the book with the
-                best price on all {legs.length} legs. <b>Line-shopping only, not a pick</b> — parlays compound the
-                vig, so even the best-priced one is usually −EV unless the legs are correlated.
-              </p>
+              <>
+                <div className="stakebox">
+                  <label className="stakebox__label">Stake
+                    <span className="stakebox__field">
+                      <span aria-hidden="true">$</span>
+                      <input type="number" min={0} step={1} value={stake}
+                        onChange={(e) => setStake(Math.max(0, Number(e.target.value) || 0))}
+                        className="stakebox__input" inputMode="decimal" aria-label="Stake amount" />
+                    </span>
+                  </label>
+                  <span className="stakebox__payout">
+                    pays <b>${payout.toFixed(2)}</b> at {par.book} <span className="stakebox__profit">(profit ${profit.toFixed(2)})</span>
+                  </span>
+                </div>
+                <p className="slipbar__note">
+                  Best combined price <b>{fmtOdds(par.american)}</b> on all {legs.length} legs — a parlay must sit at
+                  one book. <b>Line-shopping only, not a pick</b>: parlays compound the vig, so even the best-priced
+                  one is usually −EV unless the legs are correlated.
+                </p>
+              </>
             ) : (
               <p className="slipbar__note">
                 No single book prices all {legs.length} of your legs, so this parlay can&apos;t be placed as one.
