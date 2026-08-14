@@ -35,8 +35,12 @@ body{background:var(--bg);color:var(--ink);
 .wrap{max-width:1120px;margin:0 auto;padding:clamp(20px,4vw,44px)}
 .masthead{display:flex;justify-content:space-between;align-items:flex-end;
   gap:24px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:18px}
+.brand{display:flex;align-items:center;gap:13px;min-width:0}
+.brand__logo{flex:0 0 auto;width:46px;height:46px;border-radius:12px;
+  border:1px solid var(--line);box-shadow:0 1px 4px rgba(0,0,0,.25);object-fit:cover}
+.brand__text{display:flex;flex-direction:column;min-width:0}
 .brand__mark{display:block;font-weight:800;letter-spacing:.14em;
-  font-size:clamp(26px,5vw,40px);margin:0}
+  font-size:clamp(24px,5vw,38px);margin:0}
 .brand__sub{display:block;color:var(--muted);font-size:14px;margin-top:4px;
   letter-spacing:.01em}
 .asof{text-align:right;color:var(--muted);font-size:12px;

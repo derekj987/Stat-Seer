@@ -1,6 +1,6 @@
 import { weekRange } from "@/lib/board";
 import { weekProps, CATEGORIES, categoryByKey } from "@/lib/props";
-import { TopNav, ValueSubnav } from "../Nav";
+import { TopNav, ValueSubnav, Brand } from "../Nav";
 import PropsView from "./PropsView";
 
 export const revalidate = 120;
@@ -65,10 +65,7 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
   return (
     <main className="wrap">
       <header className="masthead">
-        <div className="brand">
-          <span className="brand__mark">STATSEER</span>
-          <span className="brand__sub">Value Finder · Player Props · {cat.label} · Week {week}, {SEASON}</span>
-        </div>
+        <Brand sub={`Value Finder · Player Props · ${cat.label} · Week ${week}, ${SEASON}`} />
         {snap && <div className="asof">props as of<br /><b>{et(snap)}</b></div>}
       </header>
 

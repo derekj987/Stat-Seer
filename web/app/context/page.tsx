@@ -1,6 +1,6 @@
 import { weekRange, fetchWeek, buildBoard } from "@/lib/board";
 import { fetchModelWeek } from "@/lib/model";
-import { TopNav } from "../Nav";
+import { TopNav, Brand } from "../Nav";
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -99,10 +99,7 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
   return (
     <main className="wrap">
       <header className="masthead">
-        <div className="brand">
-          <span className="brand__mark">STATSEER</span>
-          <span className="brand__sub">Context · what to understand · Week {week}, {SEASON}</span>
-        </div>
+        <Brand sub={`Context · what to understand · Week ${week}, ${SEASON}`} />
       </header>
 
       <TopNav active="context" />

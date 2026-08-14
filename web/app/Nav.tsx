@@ -6,6 +6,20 @@
 //   The Model    — line-blind predictions
 //   Context      — what to understand (informs, doesn't vote)
 
+/** Masthead brand: logo mark + STATSEER wordmark + a section subtitle. */
+export function Brand({ sub }: { sub: string }) {
+  return (
+    <div className="brand">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/logo-mark.png" alt="StatSeer" className="brand__logo" width={46} height={46} />
+      <div className="brand__text">
+        <span className="brand__mark">STATSEER</span>
+        <span className="brand__sub">{sub}</span>
+      </div>
+    </div>
+  );
+}
+
 export function TopNav({ active }: { active: "value" | "model" | "context" }) {
   return (
     <nav className="tabs" aria-label="Section">

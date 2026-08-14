@@ -1,6 +1,6 @@
 import { weekRange } from "@/lib/board";
 import { fetchModelWeek, fetchCalibration, MODEL_VERSION, type ModelPrediction } from "@/lib/model";
-import { TopNav } from "../Nav";
+import { TopNav, Brand } from "../Nav";
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -89,10 +89,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
   return (
     <main className="wrap">
       <header className="masthead">
-        <div className="brand">
-          <span className="brand__mark">STATSEER</span>
-          <span className="brand__sub">The Model · line-blind predictions · Week {week}, {SEASON} · {MODEL_VERSION}</span>
-        </div>
+        <Brand sub={`The Model · line-blind predictions · Week ${week}, ${SEASON} · ${MODEL_VERSION}`} />
         {published && <div className="asof">published<br /><b>{et(published)}</b></div>}
       </header>
 
