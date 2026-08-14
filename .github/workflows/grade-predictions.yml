@@ -1,0 +1,31 @@
+name: Grade predictions
+
+# Grades locked Model predictions once their games are final and appends WIN/LOSS
+# to prediction_results, which feeds the public_calibration view (the trust artefact).
+# Uses free nflverse results — NO Odds API credits. Runs daily during the season;
+# each run only grades games that newly went final, and skips anything already graded.
+
+on:
+  schedule:
+    - cron: "0 15 * 9-12,1 *"   # 15:00 UTC (~10am ET) daily, Sep-Jan
+  workflow_dispatch: {}
+
+concurrency:
+  group: grade-predictions
+  cancel-in-progress: false
+
+jobs:
+  grade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet pandas numpy certifi
+      - name: Grade -> prediction_results
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python grade_predictions.py --live --write
