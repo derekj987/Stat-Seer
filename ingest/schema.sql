@@ -306,3 +306,42 @@ join prediction_results r on r.prediction_id = l.id
 where r.outcome in ('WIN','LOSS')
 group by l.season, l.section, prob_bucket
 order by l.season, l.section, prob_bucket;
+
+-- =====================================================================
+-- PLAYER PROPS. Player-centric, so a separate table from odds_snapshots.
+-- player_name is always stored (as the book posts it); gsis_id is resolved
+-- later and may stay null. Append-only, like the other capture tables.
+-- =====================================================================
+create table if not exists prop_snapshots (
+    id             bigserial primary key,
+    snapshot_at    timestamptz not null,
+    capture_reason text        not null
+        check (capture_reason in ('SCHEDULED','PRE_KICKOFF','BACKFILL','MANUAL')),
+    season         smallint    not null,
+    week           smallint    not null,
+    event_id       text        not null,
+    commence_time  timestamptz not null,
+    home_team      text        not null,
+    away_team      text        not null,
+    book           text        not null,
+    market         text        not null,   -- e.g. player_pass_yds, player_anytime_td
+    player_name    text        not null,   -- as posted by the book (outcome.description)
+    gsis_id        text        references players(gsis_id),  -- resolved later; nullable
+    side           text        not null,   -- Over / Under / Yes / No
+    line           numeric(7,2),           -- prop line; null for yes/no markets
+    price_american integer,
+    collected_at   timestamptz not null default now()
+);
+create index if not exists prop_event_idx  on prop_snapshots (event_id, market, book);
+create index if not exists prop_time_idx   on prop_snapshots (snapshot_at);
+create index if not exists prop_week_idx    on prop_snapshots (season, week);
+create index if not exists prop_player_idx on prop_snapshots (player_name);
+create unique index if not exists prop_snapshots_dedupe on prop_snapshots
+    (snapshot_at, event_id, book, market, player_name, side, line) nulls not distinct;
+
+revoke update, delete on prop_snapshots from public, anon, authenticated;
+drop trigger if exists no_update_props on prop_snapshots;
+create trigger no_update_props before update or delete on prop_snapshots
+    for each row execute function block_mutation();
+grant select, insert on prop_snapshots to service_role;
+grant usage, select on all sequences in schema public to service_role;
