@@ -58,10 +58,13 @@ interface PropRow {
 
 export interface Quote {
   player: string;
+  market: string;
   side: string;
   line: number | null;
   price: number; // best across books
   books: string[]; // books at that price
+  byBook: Record<string, number>; // every book's price — needed for single-book parlays
+  eventId: string;
 }
 export interface MarketBlock {
   market: string;
@@ -119,22 +122,26 @@ export async function weekProps(week: number, season = 2026): Promise<PropGame[]
     if (!prev || r.snapshot_at > prev.snapshot_at) latest.set(k, r);
   }
 
-  // Best price per (event,market,player,side,line) across books.
-  type Agg = { r: PropRow; price: number; books: Set<string> };
-  const best = new Map<string, Agg>();
+  // Collect every book's price per (event,market,player,side,line).
+  const agg = new Map<string, { r: PropRow; byBook: Record<string, number> }>();
   for (const r of latest.values()) {
     const k = `${r.event_id}|${r.market}|${r.player_name}|${r.side}|${r.line}`;
-    const a = best.get(k);
-    if (!a) best.set(k, { r, price: r.price_american, books: new Set([r.book]) });
-    else if (r.price_american > a.price) best.set(k, { r, price: r.price_american, books: new Set([r.book]) });
-    else if (r.price_american === a.price) a.books.add(r.book);
+    let a = agg.get(k);
+    if (!a) {
+      a = { r, byBook: {} };
+      agg.set(k, a);
+    }
+    a.byBook[r.book] = r.price_american;
   }
 
-  // Group into games -> markets -> quotes.
+  // Group into games -> markets -> quotes (best price derived from byBook).
   const games = new Map<string, PropGame>();
   const marketMap = new Map<string, Map<string, Quote[]>>(); // eventId -> market -> quotes
-  for (const a of best.values()) {
+  for (const a of agg.values()) {
     const r = a.r;
+    const entries = Object.entries(a.byBook);
+    const best = Math.max(...entries.map(([, p]) => p));
+    const books = entries.filter(([, p]) => p === best).map(([b]) => b).sort();
     if (!games.has(r.event_id)) {
       games.set(r.event_id, {
         eventId: r.event_id, matchup: `${r.away_team} @ ${r.home_team}`,
@@ -146,8 +153,8 @@ export async function weekProps(week: number, season = 2026): Promise<PropGame[]
     const mm = marketMap.get(r.event_id)!;
     if (!mm.has(r.market)) mm.set(r.market, []);
     mm.get(r.market)!.push({
-      player: r.player_name, side: r.side, line: r.line,
-      price: a.price, books: [...a.books].sort(),
+      player: r.player_name, market: r.market, side: r.side, line: r.line,
+      price: best, books, byBook: a.byBook, eventId: r.event_id,
     });
   }
 

@@ -1,5 +1,6 @@
 import { weekRange } from "@/lib/board";
-import { weekProps, CATEGORIES, categoryByKey, type PropGame } from "@/lib/props";
+import { weekProps, CATEGORIES, categoryByKey } from "@/lib/props";
+import PropsView from "./PropsView";
 
 export const revalidate = 120;
 const SEASON = 2026;
@@ -9,7 +10,6 @@ const kickFmt = new Intl.DateTimeFormat("en-US", {
   weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
 });
 const et = (iso: string) => kickFmt.format(new Date(iso)) + " ET";
-const fmtOdds = (p: number) => (p > 0 ? `+${p}` : String(p));
 
 function Tabs() {
   return (
@@ -49,42 +49,6 @@ function WeekNav({ min, max, current, cat }: { min: number; max: number; current
   );
 }
 
-function sideLabel(side: string, line: number | null): string {
-  if (side === "Yes") return "";
-  if (side === "No") return "No";
-  return line !== null ? `${side[0]} ${line}` : side;
-}
-
-function PropGameCard({ g, open }: { g: PropGame; open?: boolean }) {
-  const nPlayers = new Set(g.markets.flatMap((m) => m.quotes.map((q) => q.player))).size;
-  return (
-    <details className="propgame" open={open}>
-      <summary className="propgame__head">
-        <span className="matchup">{g.away}<span className="at">@</span>{g.home}</span>
-        <time className="kick">{et(g.commence)}</time>
-        <span className="propgame__meta">{nPlayers} players<span className="propgame__chev">▸</span></span>
-      </summary>
-      <div className="propgame__body">
-        {g.markets.map((m) => (
-          <div className="propmkt" key={m.market}>
-            <div className="propmkt__label">{m.label}</div>
-            <ul className="propq__list">
-              {m.quotes.map((q, i) => (
-                <li className="propq" key={`${q.player}:${q.side}:${q.line}:${i}`}>
-                  <span className="propq__player">{q.player}</span>
-                  <span className="propq__side">{sideLabel(q.side, q.line)}</span>
-                  <span className="propq__price">{fmtOdds(q.price)}</span>
-                  <span className="propq__book">{q.books.join(" / ")}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-    </details>
-  );
-}
-
 export default async function Page({ searchParams }: PageProps<"/props">) {
   const sp = await searchParams;
   const cat = categoryByKey(typeof sp.cat === "string" ? sp.cat : "td");
@@ -104,11 +68,7 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
   const games = (await weekProps(week, SEASON))
     .map((g) => ({ ...g, markets: g.markets.filter((m) => catSet.has(m.market)) }))
     .filter((g) => g.markets.length > 0);
-
   const snap = games[0]?.snapshot ?? "";
-  const players = games.reduce(
-    (n, g) => n + new Set(g.markets.flatMap((m) => m.quotes.map((q) => q.player))).size, 0
-  );
 
   return (
     <main className="wrap">
@@ -130,17 +90,7 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
           props closer to kickoff — this fills in on its own during game week.
         </p>
       ) : (
-        <>
-          <p className="hint">{games.length} games · {players} players · best available price on each, shopped across books. Tap a game to expand.</p>
-          <section className="propstack">
-            {games.map((g, i) => <PropGameCard key={g.eventId} g={g} open={i === 0} />)}
-          </section>
-          <footer className="foot">
-            <p><b>No model. No pick.</b> Just the best available price on each player prop across books —
-            where props edge most plausibly lives, since books price hundreds of them semi-independently.
-            Projections (is the line beatable?) come later. Prices move; updates as new odds are captured.</p>
-          </footer>
-        </>
+        <PropsView games={games} />
       )}
     </main>
   );
