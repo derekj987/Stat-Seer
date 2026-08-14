@@ -10,6 +10,7 @@
 import { fetchWeek, implied, median, fmtOdds, type OddsRow } from "./board";
 
 const KEY_NUMBERS: Record<number, number> = { 3: 9.0, 7: 6.2 };
+const TOTAL_KEY_NUMBERS: Record<number, number> = { 37: 3.7, 41: 3.8, 43: 3.5, 44: 3.8, 51: 3.8 };
 
 export interface Play {
   eventId: string;
@@ -26,11 +27,11 @@ export interface KeyPlay {
   eventId: string;
   game: string;
   commence: string;
-  num: number;        // the key number the line sits on (3 or 7)
+  market: "Spread" | "Total";
+  num: number;        // the key number the line sits on (spread 3/7, total 37/41/43/44/51)
   cost: number;       // half-point value in %
-  spreadLabel: string;
-  fav: { label: string; price: number; books: string[] };
-  dog: { label: string; price: number; books: string[] };
+  sideA: { label: string; price: number; books: string[] };
+  sideB: { label: string; price: number; books: string[] };
 }
 
 function modal(nums: number[]): number {
@@ -101,7 +102,7 @@ export function buildBets(rows: OddsRow[]): { plays: Play[]; keys: KeyPlay[] } {
         label: `${side === "Over" ? "Over" : "Under"} ${e.point}`, price: e.price, books: e.books, edge: e.edge });
     }
 
-    // Key number (from the home team's modal spread)
+    // Spread key number (from the home team's modal spread)
     const homeSpread = sidesOf("spreads")[home] ?? [];
     const hpts = homeSpread.map((r) => r.outcome_point).filter((p): p is number => p !== null);
     if (hpts.length) {
@@ -110,16 +111,31 @@ export function buildBets(rows: OddsRow[]): { plays: Play[]; keys: KeyPlay[] } {
       if (KEY_NUMBERS[mag]) {
         const favTeam = cons < 0 ? home : away;
         const dogTeam = cons < 0 ? away : home;
-        const favRows = sidesOf("spreads")[favTeam] ?? [];
-        const dogRows = sidesOf("spreads")[dogTeam] ?? [];
-        const fe = sideEdge(favRows);
-        const de = sideEdge(dogRows);
+        const fe = sideEdge(sidesOf("spreads")[favTeam] ?? []);
+        const de = sideEdge(sidesOf("spreads")[dogTeam] ?? []);
         if (fe && de && fe.point !== null && de.point !== null) {
           keys.push({
-            eventId, game, commence, num: mag, cost: KEY_NUMBERS[mag],
-            spreadLabel: `${favTeam} ${fmtPoint(fe.point)}`,
-            fav: { label: `${favTeam} ${fmtPoint(fe.point)}`, price: fe.price, books: fe.books },
-            dog: { label: `${dogTeam} ${fmtPoint(de.point)}`, price: de.price, books: de.books },
+            eventId, game, commence, market: "Spread", num: mag, cost: KEY_NUMBERS[mag],
+            sideA: { label: `${favTeam} ${fmtPoint(fe.point)}`, price: fe.price, books: fe.books },
+            sideB: { label: `${dogTeam} ${fmtPoint(de.point)}`, price: de.price, books: de.books },
+          });
+        }
+      }
+    }
+
+    // Total key number (from the modal total line)
+    const totRows = byMarket["totals"] ?? [];
+    const tpts = totRows.map((r) => r.outcome_point).filter((p): p is number => p !== null);
+    if (tpts.length) {
+      const consT = modal(tpts);
+      if (TOTAL_KEY_NUMBERS[consT]) {
+        const oe = sideEdge(sidesOf("totals")["Over"] ?? []);
+        const ue = sideEdge(sidesOf("totals")["Under"] ?? []);
+        if (oe && ue && oe.point !== null && ue.point !== null) {
+          keys.push({
+            eventId, game, commence, market: "Total", num: consT, cost: TOTAL_KEY_NUMBERS[consT],
+            sideA: { label: `Over ${oe.point}`, price: oe.price, books: oe.books },
+            sideB: { label: `Under ${ue.point}`, price: ue.price, books: ue.books },
           });
         }
       }

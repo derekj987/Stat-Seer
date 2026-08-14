@@ -171,6 +171,26 @@ The normal model is low at nearly every spread. **Use the empirical curve.**
 Buying **+3 → +4 = +6.0 points** of win probability (n=2,272).
 Buying **+4.5 → +5.5 = +1.8 points** (n=738). Same point, 3.3x the value.
 
+### Total-points key numbers (6,967 games, `total_key_numbers.py`)
+
+Do totals have key numbers like spreads? Yes, but **much weaker** — half-point
+value = P(total lands exactly on N):
+
+| Total | ½-pt value |
+|---|---|
+| 41 | 3.79% |
+| 44 | 3.79% |
+| 51 | 3.76% |
+| 37 | 3.69% |
+| 43 | 3.52% |
+
+Everything else is <3.3%. The top total key (~3.8%) is under **half** the value of
+a spread on 3 (9.0%), and no single total dominates the way 3 does for margins
+(top 6 totals = 21.8% combined, vs. margin on 3 alone = 15.0%). **App flags total
+sweet spots only on {37, 41, 43, 44, 51}, always with the honest value shown** so a
+4% total key isn't confused with a 9% spread key. Note 49 is *not* a key total
+(~2.2%).
+
 ---
 
 ## 4. Base rates — nothing beats the vig

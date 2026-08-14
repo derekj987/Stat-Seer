@@ -36,31 +36,34 @@ function WeekNav({ min, max, current }: { min: number; max: number; current: num
 }
 
 function KeyCard({ k }: { k: KeyPlay }) {
+  const isSpread = k.market === "Spread";
   return (
     <article className="play play--key">
       <header className="play__head">
         <span className="play__game">{k.game}</span>
         <span className="badge">SWEET SPOT</span>
+        <span className="play__mkt">{k.market}</span>
       </header>
       <div className="play__body">
         <div className="play__val"><b>{k.cost.toFixed(0)}%</b><span>½-pt value on {k.num}</span></div>
         <div className="play__sides">
-          <div className="play__side">
-            <span className="play__lbl">{k.fav.label}</span>
-            <span className="play__price">{fmtOdds(k.fav.price)}</span>
-            <BookTag books={k.fav.books} />
-          </div>
-          <div className="play__side">
-            <span className="play__lbl">{k.dog.label}</span>
-            <span className="play__price">{fmtOdds(k.dog.price)}</span>
-            <BookTag books={k.dog.books} />
-          </div>
+          {[k.sideA, k.sideB].map((s) => (
+            <div className="play__side" key={s.label}>
+              <span className="play__lbl">{s.label}</span>
+              <span className="play__price">{fmtOdds(s.price)}</span>
+              <BookTag books={s.books} />
+            </div>
+          ))}
         </div>
       </div>
       <p className="play__why">
-        This line sits on <b>{k.num}</b> — the margin lands here more than any other, so getting the
-        right side of it (or buying the half-point) is worth ~{k.cost.toFixed(0)}% of win probability,
-        bigger than any model edge on a game line.
+        {isSpread ? (
+          <>The margin lands on <b>{k.num}</b> more than any other number, so getting the right side of it
+          (or buying the half-point) is worth ~{k.cost.toFixed(0)}% — bigger than any model edge on a game line.</>
+        ) : (
+          <>The total lands on <b>{k.num}</b> more than most numbers (~{k.cost.toFixed(0)}% of games), so the
+          half-point here carries real push value — softer than a spread key, but still worth shopping.</>
+        )}
       </p>
     </article>
   );

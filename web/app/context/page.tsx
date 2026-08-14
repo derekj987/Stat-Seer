@@ -35,7 +35,9 @@ interface Env {
   commence: string;
   spread: number | null;   // home perspective; negative = home favored
   favLabel: string;        // e.g. "PIT -3"  (favorite + line)
+  spreadKey: { num: number; cost: number } | null;
   total: number | null;
+  totalKey: { num: number; cost: number } | null;
   homeImplied: number | null;
   awayImplied: number | null;
   neutral: boolean;
@@ -79,7 +81,9 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
       commence: g.commence,
       spread,
       favLabel: favLabel(g.home, g.away, spread),
+      spreadKey: g.spread.key,
       total,
+      totalKey: g.total.key,
       homeImplied: hasBoth ? total! / 2 - spread! / 2 : null,
       awayImplied: hasBoth ? total! / 2 + spread! / 2 : null,
       neutral: n?.neutral ?? false,
@@ -106,10 +110,15 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
 
       <section className="explainer">
         <p>
-          <b>Context informs — it does not vote.</b> Everything here is true, sourced, and worth
-          understanding. <b>None of it is a pick.</b> Stacking these signals into one score would look
-          rigorous and produce zero edge — that&apos;s the machine we deliberately don&apos;t build. Read it
-          to understand a game, not to bet it.
+          <b>This page helps you understand a game — it is not our prediction and not a pick.</b> Every number
+          here is the <b>market&apos;s</b>, not ours: the same lines the sportsbooks post, just broken down so
+          you can see what they imply about how a game is expected to play out. We are <b>not</b> telling you to
+          bet a side or that a game will hit a number.
+        </p>
+        <p className="explainer__p2">
+          The other two sections do the deciding: <a href="/best">Value Finder</a> tells you <b>where the price
+          is wrong</b> (what to actually bet), and <a href="/model">The Model</a> is <b>our own independent
+          prediction</b>. Context is just the backdrop — read it to understand the game, then act over there.
         </p>
       </section>
 
@@ -117,10 +126,24 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
       <section className="ctxsec">
         <h2 className="ctxsec__h">Lines &amp; scoring environment</h2>
         <p className="ctxsec__d">
-          Each game&apos;s <b>spread</b> and <b>total</b>, plus the <b>implied team totals</b> they produce —
-          what the market expects each team to score (total ÷ 2, adjusted by the spread). Pure arithmetic,
-          the single best market-derived input — and still just context.
+          The market&apos;s <b>spread</b> and <b>total</b> for each game, plus the <b>implied team totals</b>
+          they work out to — roughly how many points each team is expected to score if the line is right
+          (total ÷ 2, adjusted by the spread).
         </p>
+        <div className="readbox">
+          <span className="readbox__h">How to read a row</span>
+          <p>
+            Take <b>NO @ DET</b>: the market has set <b>DET −7</b> with a <b>49</b> total. That is not us
+            saying &quot;bet Detroit&quot; or &quot;this game hits 49&quot; — it&apos;s what the books are
+            offering. Split that line into team totals and it implies <b>DET ≈ 28, NO ≈ 21</b> — so the market
+            expects a comfortable Detroit win in a middle-scoring game. That&apos;s the game&apos;s expected
+            <em> shape</em>, useful for seeing which side and which players are set up to score. Nothing more.
+          </p>
+          <p className="readbox__note">
+            <span className="ssmark">◆</span> marks a <b>sweet spot</b> — a spread or total sitting on a key
+            number. It&apos;s a heads-up; go to <a href="/best">Best Bets</a> to act on it.
+          </p>
+        </div>
 
         {scored.length === 0 ? (
           <p className="foot">No lines captured for Week {week} yet.</p>
@@ -154,8 +177,14 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
                     {e.away}<span className="at">@</span>{e.home}
                     {e.neutral && <span className="badge neutral">NEUTRAL</span>}
                   </span>
-                  <span className="improw__sp">{e.favLabel}</span>
-                  <span className="improw__tot">{e.total!.toFixed(1)}</span>
+                  <span className="improw__sp">
+                    {e.favLabel}
+                    {e.spreadKey && <span className="ssmark" title={`Sweet spot — key number ${e.spreadKey.num} (½pt ≈ ${e.spreadKey.cost.toFixed(0)}%)`}>◆</span>}
+                  </span>
+                  <span className="improw__tot">
+                    {e.total!.toFixed(1)}
+                    {e.totalKey && <span className="ssmark" title={`Sweet spot — key total ${e.totalKey.num} (½pt ≈ ${e.totalKey.cost.toFixed(0)}%)`}>◆</span>}
+                  </span>
                   <span className="improw__t">{e.awayImplied!.toFixed(1)}</span>
                   <span className="improw__t">{e.homeImplied!.toFixed(1)}</span>
                 </div>

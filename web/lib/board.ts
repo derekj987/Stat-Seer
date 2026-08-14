@@ -4,6 +4,9 @@
 import { empWinProb } from "./winCurve";
 
 const KEY_NUMBERS: Record<number, number> = { 3: 9.0, 7: 6.2 };
+// Total-points key numbers, measured 1999-2025 (analysis/total_key_numbers.py).
+// Value = P(total lands exactly on N). Weaker than spread keys (~4% vs 9%).
+const TOTAL_KEY_NUMBERS: Record<number, number> = { 37: 3.7, 41: 3.8, 43: 3.5, 44: 3.8, 51: 3.8 };
 
 export interface OddsRow {
   snapshot_at: string;
@@ -51,7 +54,12 @@ export interface Game {
     away: Line | null;
     key: { num: number; cost: number } | null;
   };
-  total: { consensus: number | null; over: Line | null; under: Line | null };
+  total: {
+    consensus: number | null;
+    over: Line | null;
+    under: Line | null;
+    key: { num: number; cost: number } | null;
+  };
   coherence: Coherence | null;
 }
 
@@ -115,10 +123,15 @@ function total(rows: OddsRow[]): Game["total"] {
   const sides: Record<string, OddsRow[]> = {};
   for (const r of rows) (sides[r.outcome_name] ??= []).push(r);
   const pts = rows.map((r) => r.outcome_point).filter((p): p is number => p !== null);
+  const consensus = pts.length ? median(pts) : null;
+  const key = consensus !== null && TOTAL_KEY_NUMBERS[consensus]
+    ? { num: consensus, cost: TOTAL_KEY_NUMBERS[consensus] }
+    : null;
   return {
-    consensus: pts.length ? median(pts) : null,
+    consensus,
     over: lineSide(sides["Over"] ?? [], "min"),
     under: lineSide(sides["Under"] ?? [], "max"),
+    key,
   };
 }
 
