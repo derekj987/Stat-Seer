@@ -2,7 +2,7 @@
 // Server-side only (Supabase service key).
 
 export const PROP_LABELS: Record<string, string> = {
-  player_anytime_td: "Anytime TD",
+  player_anytime_td: "ATTD",
   player_pass_yds: "Passing Yards",
   player_pass_tds: "Passing TDs",
   player_rush_yds: "Rushing Yards",
