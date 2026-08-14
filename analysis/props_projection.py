@@ -85,7 +85,9 @@ def mae(a, b):
     return float(np.mean(np.abs(np.asarray(a) - np.asarray(b))))
 
 
-def main():
+def build_projections():
+    """Full walk-forward panel with volume projections, efficiency baselines, model
+    projections, and naive baselines. Reused by the distribution layer."""
     df = load()
 
     # --- volume: season-to-date prior means + games so far ---
@@ -145,6 +147,11 @@ def main():
     df["p_rush"] = persist("rushing_yards")
     df["p_recyd"] = persist("receiving_yards")
     df["p_recpt"] = persist("receptions")
+    return df
+
+
+def main():
+    df = build_projections()
 
     test = df[df.season.isin(TEST) & (df.nprior >= MIN_PRIOR)].copy()
     CHG = 0.35   # >=35% swing in last-2 vs season-to-date volume = a "change" week

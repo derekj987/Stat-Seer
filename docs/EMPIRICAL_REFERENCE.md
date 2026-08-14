@@ -440,6 +440,33 @@ a prop), (b) the validated **snap-share change signal** as the volume input
 line history now being captured). Point MAE is a table-stakes sanity check, not the
 bar.
 
+### Distribution layer — P(over/under a line) (`props_distribution.py`)
+
+Turns a projection into a probability. Model the ratio r = actual / projection
+(far more stable than raw yards), bucket by projected volume (tertiles), keep an
+empirical ratio-CDF per bucket, fit on **strictly prior seasons**, apply
+walk-forward. Then P(over L) = 1 − F_b(L / projection). Empirical, not Gaussian.
+
+Out-of-sample calibration (test 2021–2025):
+
+| Prop | 50% cov | 80% cov | 90% cov | ECE |
+|---|---|---|---|---|
+| Rushing yards (n=1,427 pw) | 50.5% | 81.2% | 91.5% | 0.7 pts |
+| Receiving yards (n=5,602 pw) | 49.8% | 83.0% | 92.5% | 0.4 pts |
+| Receptions (n=5,602 pw) | 50.1% | 83.4% | 93.2% | 0.4 pts |
+
+**The probabilities mean what they say** — a predicted 65% over hits ~65%, across
+every decile, with expected calibration error <1 point. The 80/90% intervals run
+slightly *wide* (conservative), the safe direction — we never overstate confidence.
+This is the machinery that honestly prices a prop.
+
+**Still not an edge by itself.** A calibrated 55%-over is +EV only if the book
+prices it below 55%. Reliability here was checked against projection-relative
+synthetic lines, which proves the *distribution* is calibrated — not that we beat a
+book. The pick = our calibrated P vs. the book's implied P, which needs the prop-
+line history now accruing (`prop_snapshots`). Also validated only on rostered
+players above a volume floor with ≥4 games; low-volume/early-season is out of scope.
+
 ---
 
 ## 10. Errors caught during this work
