@@ -3,8 +3,8 @@ export default function Loading() {
     <main className="wrap">
       <header className="masthead">
         <div className="brand">
-          <span className="brand__mark">VALUE&nbsp;FINDER</span>
-          <span className="brand__sub">Loading the board…</span>
+          <span className="brand__mark">STATSEER</span>
+          <span className="brand__sub">Loading…</span>
         </div>
       </header>
       <section className="grid" aria-hidden="true">
