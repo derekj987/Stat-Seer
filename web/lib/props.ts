@@ -3,14 +3,44 @@
 
 export const PROP_LABELS: Record<string, string> = {
   player_anytime_td: "ATTD",
+  player_1st_td: "First TD",
+  player_last_td: "Last TD",
   player_pass_yds: "Passing Yards",
   player_pass_tds: "Passing TDs",
+  player_pass_completions: "Completions",
+  player_pass_attempts: "Pass Attempts",
+  player_pass_interceptions: "Interceptions",
+  player_pass_longest_completion: "Longest Completion",
   player_rush_yds: "Rushing Yards",
+  player_rush_attempts: "Rush Attempts",
+  player_rush_longest: "Longest Rush",
   player_reception_yds: "Receiving Yards",
   player_receptions: "Receptions",
+  player_reception_longest: "Longest Reception",
   player_rush_reception_yds: "Rush + Rec Yards",
+  player_pass_rush_reception_yds: "Pass+Rush+Rec Yards",
+  player_pass_rush_reception_tds: "Pass+Rush+Rec TDs",
+  player_kicking_points: "Kicking Points",
+  player_field_goals: "Field Goals",
+  player_pats: "Extra Points",
+  player_tackles_assists: "Tackles + Assists",
+  player_sacks: "Sacks",
+  player_solo_tackles: "Solo Tackles",
+  player_defensive_interceptions: "Interceptions (Def)",
 };
 const marketLabel = (k: string) => PROP_LABELS[k] ?? k.replace(/^player_/, "").replace(/_/g, " ");
+
+export interface Category { key: string; label: string; markets: string[] }
+export const CATEGORIES: Category[] = [
+  { key: "td", label: "Touchdowns", markets: ["player_anytime_td", "player_1st_td", "player_last_td"] },
+  { key: "passing", label: "Passing", markets: ["player_pass_yds", "player_pass_tds", "player_pass_completions", "player_pass_attempts", "player_pass_interceptions", "player_pass_longest_completion"] },
+  { key: "rushing", label: "Rushing", markets: ["player_rush_yds", "player_rush_attempts", "player_rush_longest"] },
+  { key: "receiving", label: "Receiving", markets: ["player_reception_yds", "player_receptions", "player_reception_longest"] },
+  { key: "combo", label: "Combo", markets: ["player_rush_reception_yds", "player_pass_rush_reception_yds", "player_pass_rush_reception_tds"] },
+  { key: "kicking", label: "Kicking", markets: ["player_kicking_points", "player_field_goals", "player_pats"] },
+  { key: "defense", label: "Defense", markets: ["player_tackles_assists", "player_sacks", "player_solo_tackles", "player_defensive_interceptions"] },
+];
+export const categoryByKey = (k: string): Category => CATEGORIES.find((c) => c.key === k) ?? CATEGORIES[0];
 
 interface PropRow {
   snapshot_at: string;

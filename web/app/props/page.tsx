@@ -1,5 +1,5 @@
 import { weekRange } from "@/lib/board";
-import { weekProps, type PropGame } from "@/lib/props";
+import { weekProps, CATEGORIES, categoryByKey, type PropGame } from "@/lib/props";
 
 export const revalidate = 120;
 const SEASON = 2026;
@@ -20,7 +20,19 @@ function Tabs() {
   );
 }
 
-function WeekNav({ min, max, current }: { min: number; max: number; current: number }) {
+function CatNav({ current, week }: { current: string; week: number }) {
+  return (
+    <nav className="catnav" aria-label="Prop category">
+      {CATEGORIES.map((c) => (
+        <a key={c.key} href={`/props?cat=${c.key}&week=${week}`}
+          className={c.key === current ? "catnav__c active" : "catnav__c"}
+          aria-current={c.key === current ? "page" : undefined}>{c.label}</a>
+      ))}
+    </nav>
+  );
+}
+
+function WeekNav({ min, max, current, cat }: { min: number; max: number; current: number; cat: string }) {
   const weeks: number[] = [];
   for (let w = min; w <= max; w++) weeks.push(w);
   return (
@@ -28,7 +40,7 @@ function WeekNav({ min, max, current }: { min: number; max: number; current: num
       <span className="weeknav__label">Week</span>
       <div className="weeknav__list">
         {weeks.map((w) => (
-          <a key={w} href={`/props?week=${w}`}
+          <a key={w} href={`/props?cat=${cat}&week=${w}`}
             className={w === current ? "weeknav__w active" : "weeknav__w"}
             aria-current={w === current ? "page" : undefined}>{w}</a>
         ))}
@@ -37,8 +49,6 @@ function WeekNav({ min, max, current }: { min: number; max: number; current: num
   );
 }
 
-// Anytime-TD is a Yes/No bet ("to score"), so "Yes" is implied by the market and
-// dropped. Over/Under markets show the meaningful side + line, e.g. "O 249.5".
 function sideLabel(side: string, line: number | null): string {
   if (side === "Yes") return "";
   if (side === "No") return "No";
@@ -77,6 +87,8 @@ function PropGameCard({ g, open }: { g: PropGame; open?: boolean }) {
 
 export default async function Page({ searchParams }: PageProps<"/props">) {
   const sp = await searchParams;
+  const cat = categoryByKey(typeof sp.cat === "string" ? sp.cat : "td");
+
   let range: { min: number; max: number } | null = null;
   try {
     range = await weekRange(SEASON);
@@ -88,27 +100,34 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
   const requested = typeof sp.week === "string" ? parseInt(sp.week, 10) : NaN;
   const week = Number.isFinite(requested) ? Math.min(max, Math.max(min, requested)) : min;
 
-  const games = await weekProps(week, SEASON);
+  const catSet = new Set(cat.markets);
+  const games = (await weekProps(week, SEASON))
+    .map((g) => ({ ...g, markets: g.markets.filter((m) => catSet.has(m.market)) }))
+    .filter((g) => g.markets.length > 0);
+
   const snap = games[0]?.snapshot ?? "";
-  const players = games.reduce((n, g) => n + new Set(g.markets.flatMap((m) => m.quotes.map((q) => q.player))).size, 0);
+  const players = games.reduce(
+    (n, g) => n + new Set(g.markets.flatMap((m) => m.quotes.map((q) => q.player))).size, 0
+  );
 
   return (
     <main className="wrap">
       <header className="masthead">
         <div className="brand">
           <span className="brand__mark">VALUE&nbsp;FINDER</span>
-          <span className="brand__sub">Player props · best price across books · Week {week}, {SEASON}</span>
+          <span className="brand__sub">Player props · {cat.label} · Week {week}, {SEASON}</span>
         </div>
         {snap && <div className="asof">props as of<br /><b>{et(snap)}</b></div>}
       </header>
 
       <Tabs />
-      <WeekNav min={min} max={max} current={week} />
+      <CatNav current={cat.key} week={week} />
+      <WeekNav min={min} max={max} current={week} cat={cat.key} />
 
       {games.length === 0 ? (
         <p className="foot">
-          No player props posted for Week {week} yet. Books post most props closer to kickoff —
-          this fills in on its own during game week. (Anytime touchdown is usually first up.)
+          No <b>{cat.label.toLowerCase()}</b> props posted for Week {week} yet. Books post most player
+          props closer to kickoff — this fills in on its own during game week.
         </p>
       ) : (
         <>

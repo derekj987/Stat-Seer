@@ -166,6 +166,13 @@ body{background:var(--bg);color:var(--ink);
 .tab:hover{border-color:var(--accent);color:var(--accent)}
 .tab.active{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.catnav{display:flex;gap:6px;overflow-x:auto;margin:10px 0 4px;padding-bottom:4px}
+.catnav__c{flex:0 0 auto;padding:6px 12px;border-radius:8px;text-decoration:none;
+  font-size:12.5px;font-weight:600;color:var(--muted);border:1px solid var(--line);
+  background:var(--surface);white-space:nowrap}
+.catnav__c:hover{border-color:var(--accent);color:var(--accent)}
+.catnav__c.active{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.catnav__c:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 /* --- player props --- */
 .propstack{display:flex;flex-direction:column;gap:10px;max-width:680px}

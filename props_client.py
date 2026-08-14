@@ -27,9 +27,16 @@ from datetime import datetime, timezone, timedelta
 import odds_client as oc
 
 BASE = "https://api.the-odds-api.com/v4/sports/americanfootball_nfl"
-DEFAULT_MARKETS = ("player_pass_yds,player_pass_tds,player_rush_yds,"
-                   "player_reception_yds,player_receptions,player_rush_reception_yds,"
-                   "player_anytime_td")
+DEFAULT_MARKETS = (
+    "player_pass_yds,player_pass_tds,player_pass_completions,player_pass_attempts,"
+    "player_pass_interceptions,player_pass_longest_completion,"
+    "player_rush_yds,player_rush_attempts,player_rush_longest,"
+    "player_reception_yds,player_receptions,player_reception_longest,"
+    "player_rush_reception_yds,player_pass_rush_reception_yds,player_pass_rush_reception_tds,"
+    "player_anytime_td,player_1st_td,player_last_td,"
+    "player_kicking_points,player_field_goals,player_pats,"
+    "player_tackles_assists,player_sacks,player_solo_tackles,player_defensive_interceptions"
+)
 FIXTURE = os.path.join("fixtures", "props_event_raw.json")
 
 
@@ -101,7 +108,10 @@ def write_props(rows, env, batch=500):
     url, key = env.get("SUPABASE_URL"), env.get("SUPABASE_SERVICE_KEY")
     if not (url and key):
         raise RuntimeError("SUPABASE_URL / SUPABASE_SERVICE_KEY missing")
-    endpoint = url.rstrip("/") + "/rest/v1/prop_snapshots"
+    # Name the dedupe index as the ON CONFLICT target — otherwise ignore-duplicates
+    # only catches the primary key and unique-index dupes 409.
+    endpoint = (url.rstrip("/") + "/rest/v1/prop_snapshots"
+                "?on_conflict=snapshot_at,event_id,book,market,player_name,side,line")
     headers = {"apikey": key, "Authorization": f"Bearer {key}",
                "Content-Type": "application/json",
                "Prefer": "return=minimal,resolution=ignore-duplicates"}

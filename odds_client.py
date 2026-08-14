@@ -253,7 +253,10 @@ def fetch_live(api_key, markets, regions, odds_format="american"):
 def write_supabase(rows, url, service_key, batch=500):
     """POST rows to PostgREST. Idempotent ONLY once odds_snapshots has a matching
     unique index (see the note printed by main()). Returns rows accepted."""
-    endpoint = url.rstrip("/") + "/rest/v1/odds_snapshots"
+    # Name the dedupe index as the ON CONFLICT target so ignore-duplicates actually
+    # ignores unique-index dupes (a bare ON CONFLICT only covers the primary key).
+    endpoint = (url.rstrip("/") + "/rest/v1/odds_snapshots"
+                "?on_conflict=snapshot_at,event_id,book,market,outcome_name,outcome_point")
     headers = {
         "apikey": service_key,
         "Authorization": f"Bearer {service_key}",
