@@ -227,7 +227,7 @@ body{background:var(--bg);color:var(--ink);
 .envcard.hi .envcard__v{color:var(--accent)}
 .envcard.lo .envcard__v{color:var(--key)}
 .imptable{display:flex;flex-direction:column;gap:2px;overflow-x:auto}
-.improw{display:grid;grid-template-columns:minmax(110px,1fr) 78px 88px 52px 58px 58px;gap:10px;
+.improw{display:grid;grid-template-columns:minmax(96px,1fr) 74px 86px 50px 60px 54px 54px;gap:10px;
   align-items:center;padding:8px 12px;background:var(--surface);border:1px solid var(--line);
   border-radius:8px;font-size:13px}
 .improw--head{background:none;border:0;color:var(--muted);font-size:11px;

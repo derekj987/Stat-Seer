@@ -1,5 +1,6 @@
 import { weekRange, fetchWeek, buildBoard } from "@/lib/board";
 import { fetchModelWeek, type ModelPrediction } from "@/lib/model";
+import { MODEL_TOTALS } from "@/lib/modelTotals";
 import { TopNav, Brand } from "../Nav";
 
 export const revalidate = 300;
@@ -38,6 +39,7 @@ interface Env {
   spreadKey: { num: number; cost: number } | null;
   total: number | null;
   totalKey: { num: number; cost: number } | null;
+  modelTotal: number | null;   // our line-blind projected total (weak; not an edge)
   homeImplied: number | null;
   awayImplied: number | null;
   neutral: boolean;
@@ -84,6 +86,7 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
       spreadKey: g.spread.key,
       total,
       totalKey: g.total.key,
+      modelTotal: MODEL_TOTALS[`${week}-${g.away}-${g.home}`] ?? null,
       homeImplied: hasBoth ? total! / 2 - spread! / 2 : null,
       awayImplied: hasBoth ? total! / 2 + spread! / 2 : null,
       neutral: mp?.neutral ?? false,
@@ -139,11 +142,12 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
             <em> shape</em>, useful for seeing which side and which players are set up to score. Nothing more.
           </p>
           <p className="readbox__note">
-            The <b className="modh">model</b> column is <b>our own line-blind projected spread</b> — shown next
-            to the market&apos;s for comparison, not as the market&apos;s number. <span className="offcmark">⚑</span> means
-            our model is <b>off consensus</b> (favors a different side than the market); see <a href="/model">The Model</a>.
-            &nbsp;<span className="ssmark">◆</span> marks a <b>sweet spot</b> — a spread or total on a key number;
-            act on it in <a href="/best">Best Bets</a>.
+            The <b className="modh">model</b> columns are <b>our own line-blind projected spread and total</b> —
+            shown next to the market&apos;s for comparison, not as the market&apos;s numbers. (Our total is
+            calibrated but <b>not sharper than the market</b> — an honest read, not an edge.)
+            &nbsp;<span className="offcmark">⚑</span> means our model is <b>off consensus</b> on the spread; see
+            <a href="/model"> The Model</a>. <span className="ssmark">◆</span> marks a <b>sweet spot</b> — a
+            spread or total on a key number; act on it in <a href="/best">Best Bets</a>.
           </p>
         </div>
 
@@ -172,6 +176,7 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
               <div className="improw improw--head" role="row">
                 <span>game</span><span>spread</span>
                 <span className="improw__modh">model</span><span>total</span>
+                <span className="improw__modh">model</span>
                 <span>{"impl. "}away</span><span>{"impl. "}home</span>
               </div>
               {scored.map((e) => (
@@ -192,6 +197,7 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
                     {e.total!.toFixed(1)}
                     {e.totalKey && <span className="ssmark" title={`Sweet spot — key total ${e.totalKey.num} (½pt ≈ ${e.totalKey.cost.toFixed(0)}%)`}>◆</span>}
                   </span>
+                  <span className="improw__mod">{e.modelTotal !== null ? e.modelTotal.toFixed(1) : "—"}</span>
                   <span className="improw__t">{e.awayImplied!.toFixed(1)}</span>
                   <span className="improw__t">{e.homeImplied!.toFixed(1)}</span>
                 </div>
