@@ -3,6 +3,13 @@ name: Capture props
 # Player-props capture. Pricier than game lines (per-event calls), so this runs on
 # a modest cadence and only queries the nearest ~32 games (--max-events), where props
 # are actually posted. Empty markets cost 0 credits, so off-week runs are cheap.
+#
+# Cost = markets-with-data x regions per event. We capture a FOCUSED market set, not
+# all 25: the three the projection model prices (rush yds, reception yds, receptions),
+# plus pass yds (next to be modelled) and the two TD markets the app already shows.
+# Focused (~6 mkts x 16 games = ~96 credits/run) vs. all-25 (~400) keeps a full
+# season well under the 100K/mo tier. The 00/06/12/18 UTC cadence includes 12:00 UTC
+# = ~7-8am ET Sunday, so we grab yardage lines the morning they post.
 # All times UTC.
 
 on:
@@ -29,4 +36,6 @@ jobs:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: python props_client.py --live --write --reason SCHEDULED --max-events 32
+        run: >
+          python props_client.py --live --write --reason SCHEDULED --max-events 32
+          --markets "player_rush_yds,player_reception_yds,player_receptions,player_pass_yds,player_anytime_td,player_1st_td"
