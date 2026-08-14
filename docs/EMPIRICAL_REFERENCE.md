@@ -171,6 +171,25 @@ The normal model is low at nearly every spread. **Use the empirical curve.**
 Buying **+3 → +4 = +6.0 points** of win probability (n=2,272).
 Buying **+4.5 → +5.5 = +1.8 points** (n=738). Same point, 3.3x the value.
 
+### Line-blind totals model — fails the bar (`totals_model.py`)
+
+Tested a totals prediction (regress the two teams' prior-season game-total tendency
+toward the league total). Walk-forward 2015–2025, n=2,847, best k=0.50:
+
+| | MAE (total points) |
+|---|---|
+| Naive (league-average total) | 10.97 |
+| Model total | **10.90** |
+| Market total (`total_line`) | 10.39 |
+
+Model beats a flat league-average guess by **0.07 pts** (essentially zero) and runs
+**0.5 behind the market**. Calibrated (bias −0.07) but near-signal-less — prior-
+season scoring tendency doesn't predict this year's game totals. **Not shipped:**
+model team totals would print ~league average for every game, worse than the market
+and misleading. The margin model (point differential) has real signal and stands;
+the totals half does not. Contrast the margin model: MAE 10.15 vs market 9.89 — a
+genuine if losing prediction; the totals model barely moves off a constant.
+
 ### Total-points key numbers (6,967 games, `total_key_numbers.py`)
 
 Do totals have key numbers like spreads? Yes, but **much weaker** — half-point
