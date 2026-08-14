@@ -37,29 +37,41 @@ function WeekNav({ min, max, current }: { min: number; max: number; current: num
   );
 }
 
-function PropGameCard({ g }: { g: PropGame }) {
+// Anytime-TD is a Yes/No bet ("to score"), so "Yes" is implied by the market and
+// dropped. Over/Under markets show the meaningful side + line, e.g. "O 249.5".
+function sideLabel(side: string, line: number | null): string {
+  if (side === "Yes") return "";
+  if (side === "No") return "No";
+  return line !== null ? `${side[0]} ${line}` : side;
+}
+
+function PropGameCard({ g, open }: { g: PropGame; open?: boolean }) {
+  const nPlayers = new Set(g.markets.flatMap((m) => m.quotes.map((q) => q.player))).size;
   return (
-    <article className="game">
-      <header className="game__head">
+    <details className="propgame" open={open}>
+      <summary className="propgame__head">
         <span className="matchup">{g.away}<span className="at">@</span>{g.home}</span>
         <time className="kick">{et(g.commence)}</time>
-      </header>
-      {g.markets.map((m) => (
-        <div className="propmkt" key={m.market}>
-          <div className="propmkt__label">{m.label}</div>
-          <ul className="propq__list">
-            {m.quotes.map((q, i) => (
-              <li className="propq" key={`${q.player}:${q.side}:${q.line}:${i}`}>
-                <span className="propq__player">{q.player}</span>
-                <span className="propq__side">{q.side}{q.line !== null ? ` ${q.line}` : ""}</span>
-                <span className="propq__price">{fmtOdds(q.price)}</span>
-                <span className="propq__book">{q.books.join(" / ")}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
-    </article>
+        <span className="propgame__meta">{nPlayers} players<span className="propgame__chev">▸</span></span>
+      </summary>
+      <div className="propgame__body">
+        {g.markets.map((m) => (
+          <div className="propmkt" key={m.market}>
+            <div className="propmkt__label">{m.label}</div>
+            <ul className="propq__list">
+              {m.quotes.map((q, i) => (
+                <li className="propq" key={`${q.player}:${q.side}:${q.line}:${i}`}>
+                  <span className="propq__player">{q.player}</span>
+                  <span className="propq__side">{sideLabel(q.side, q.line)}</span>
+                  <span className="propq__price">{fmtOdds(q.price)}</span>
+                  <span className="propq__book">{q.books.join(" / ")}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </details>
   );
 }
 
@@ -100,9 +112,9 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
         </p>
       ) : (
         <>
-          <p className="hint">{games.length} games · {players} players · best available price on each, shopped across books.</p>
-          <section className="grid">
-            {games.map((g) => <PropGameCard key={g.eventId} g={g} />)}
+          <p className="hint">{games.length} games · {players} players · best available price on each, shopped across books. Tap a game to expand.</p>
+          <section className="propstack">
+            {games.map((g, i) => <PropGameCard key={g.eventId} g={g} open={i === 0} />)}
           </section>
           <footer className="foot">
             <p><b>No model. No pick.</b> Just the best available price on each player prop across books —
