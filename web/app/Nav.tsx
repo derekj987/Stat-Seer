@@ -9,7 +9,7 @@
 export function TopNav({ active }: { active: "value" | "model" | "context" }) {
   return (
     <nav className="tabs" aria-label="Section">
-      <a href="/" className={active === "value" ? "tab active" : "tab"}
+      <a href="/best" className={active === "value" ? "tab active" : "tab"}
         aria-current={active === "value" ? "page" : undefined}>Value Finder</a>
       <a href="/model" className={active === "model" ? "tab active" : "tab"}
         aria-current={active === "model" ? "page" : undefined}>The Model</a>
@@ -20,9 +20,11 @@ export function TopNav({ active }: { active: "value" | "model" | "context" }) {
 }
 
 /** Secondary toggle shown only inside Value Finder. */
-export function ValueSubnav({ active }: { active: "lines" | "props" }) {
+export function ValueSubnav({ active }: { active: "best" | "lines" | "props" }) {
   return (
     <nav className="subnav" aria-label="Value Finder view">
+      <a href="/best" className={active === "best" ? "subnav__t active" : "subnav__t"}
+        aria-current={active === "best" ? "page" : undefined}>Best Bets</a>
       <a href="/" className={active === "lines" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "lines" ? "page" : undefined}>Game Lines</a>
       <a href="/props" className={active === "props" ? "subnav__t active" : "subnav__t"}

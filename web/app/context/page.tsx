@@ -33,11 +33,19 @@ interface Env {
   home: string;
   away: string;
   commence: string;
+  spread: number | null;   // home perspective; negative = home favored
+  favLabel: string;        // e.g. "PIT -3"  (favorite + line)
   total: number | null;
   homeImplied: number | null;
   awayImplied: number | null;
   neutral: boolean;
   venue: string | null;
+}
+
+function favLabel(home: string, away: string, spread: number | null): string {
+  if (spread === null) return "—";
+  if (spread === 0) return "PK";
+  return spread < 0 ? `${home} ${spread.toFixed(1)}` : `${away} -${spread.toFixed(1)}`;
 }
 
 export default async function Page({ searchParams }: PageProps<"/context">) {
@@ -69,6 +77,8 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
       home: g.home,
       away: g.away,
       commence: g.commence,
+      spread,
+      favLabel: favLabel(g.home, g.away, spread),
       total,
       homeImplied: hasBoth ? total! / 2 - spread! / 2 : null,
       awayImplied: hasBoth ? total! / 2 + spread! / 2 : null,
@@ -105,11 +115,11 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
 
       {/* --- Scoring environment: implied team totals --- */}
       <section className="ctxsec">
-        <h2 className="ctxsec__h">Scoring environment</h2>
+        <h2 className="ctxsec__h">Lines &amp; scoring environment</h2>
         <p className="ctxsec__d">
-          <b>Implied team totals</b> — what the market expects each team to score, from the lines alone
-          (total ÷ 2, adjusted by the spread). Pure arithmetic, the single best market-derived input — and
-          still just context.
+          Each game&apos;s <b>spread</b> and <b>total</b>, plus the <b>implied team totals</b> they produce —
+          what the market expects each team to score (total ÷ 2, adjusted by the spread). Pure arithmetic,
+          the single best market-derived input — and still just context.
         </p>
 
         {scored.length === 0 ? (
@@ -133,9 +143,10 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
               )}
             </div>
 
-            <div className="imptable" role="table" aria-label="Implied team totals">
+            <div className="imptable" role="table" aria-label="Lines and implied team totals">
               <div className="improw improw--head" role="row">
-                <span>game</span><span>away</span><span>home</span><span>total</span>
+                <span>game</span><span>spread</span><span>total</span>
+                <span>{"impl. "}away</span><span>{"impl. "}home</span>
               </div>
               {scored.map((e) => (
                 <div className="improw" role="row" key={e.eventId}>
@@ -143,9 +154,10 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
                     {e.away}<span className="at">@</span>{e.home}
                     {e.neutral && <span className="badge neutral">NEUTRAL</span>}
                   </span>
+                  <span className="improw__sp">{e.favLabel}</span>
+                  <span className="improw__tot">{e.total!.toFixed(1)}</span>
                   <span className="improw__t">{e.awayImplied!.toFixed(1)}</span>
                   <span className="improw__t">{e.homeImplied!.toFixed(1)}</span>
-                  <span className="improw__tot">{e.total!.toFixed(1)}</span>
                 </div>
               ))}
             </div>
