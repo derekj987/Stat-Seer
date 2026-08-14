@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import type { Game } from "@/lib/board";
+import { TopNav, ValueSubnav } from "./Nav";
 
 // ---- formatting (client-side; Intl has full ICU) ----
 const kickFmt = new Intl.DateTimeFormat("en-US", {
@@ -221,16 +222,13 @@ export default function BoardView({
         <header className="masthead">
           <div className="brand">
             <span className="brand__mark">STATSEER</span>
-            <span className="brand__sub">Value Finder · line shopping &amp; sweet spots · Week {week}, {season}</span>
+            <span className="brand__sub">Value Finder · Game Lines · line shopping &amp; sweet spots · Week {week}, {season}</span>
           </div>
           {snapshot && <div className="asof">lines as of<br /><b>{et(snapshot, snapFmt)}</b></div>}
         </header>
 
-        <nav className="tabs" aria-label="View">
-          <a href="/" className="tab active" aria-current="page">Value Finder</a>
-          <a href="/props" className="tab">Player Props</a>
-          <a href="/model" className="tab">The Model</a>
-        </nav>
+        <TopNav active="value" />
+        <ValueSubnav active="lines" />
 
         <WeekNav min={min} max={max} current={week} />
 

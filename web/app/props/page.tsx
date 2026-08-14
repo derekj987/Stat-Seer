@@ -1,5 +1,6 @@
 import { weekRange } from "@/lib/board";
 import { weekProps, CATEGORIES, categoryByKey } from "@/lib/props";
+import { TopNav, ValueSubnav } from "../Nav";
 import PropsView from "./PropsView";
 
 export const revalidate = 120;
@@ -10,16 +11,6 @@ const kickFmt = new Intl.DateTimeFormat("en-US", {
   weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
 });
 const et = (iso: string) => kickFmt.format(new Date(iso)) + " ET";
-
-function Tabs() {
-  return (
-    <nav className="tabs" aria-label="View">
-      <a href="/" className="tab">Value Finder</a>
-      <a href="/props" className="tab active" aria-current="page">Player Props</a>
-      <a href="/model" className="tab">The Model</a>
-    </nav>
-  );
-}
 
 function CatNav({ current, week }: { current: string; week: number }) {
   return (
@@ -76,12 +67,13 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
       <header className="masthead">
         <div className="brand">
           <span className="brand__mark">STATSEER</span>
-          <span className="brand__sub">Player Props · {cat.label} · Week {week}, {SEASON}</span>
+          <span className="brand__sub">Value Finder · Player Props · {cat.label} · Week {week}, {SEASON}</span>
         </div>
         {snap && <div className="asof">props as of<br /><b>{et(snap)}</b></div>}
       </header>
 
-      <Tabs />
+      <TopNav active="value" />
+      <ValueSubnav active="props" />
       <CatNav current={cat.key} week={week} />
       <WeekNav min={min} max={max} current={week} cat={cat.key} />
 

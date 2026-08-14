@@ -101,7 +101,7 @@ machine the competition runs.
 | 9 | Confidence tiers | Value Finder + Model | Must be edge **and** uncertainty. Honest output is mostly "no bet." |
 | 10 | Best-number-across-books | Value Finder | Highest trust-per-effort. |
 | 11 | Alternate-line fair pricing | Value Finder | Engine built. |
-| 12 | Player prop module | Model | Deferred by decision. **Where the tiers will actually fire.** |
+| 12 | Player prop module | Value Finder (shopping) + Model (projections) | Two layers: the **price-shopping view** (best line across books + parlay math) lives under **Value Finder** — it's the same "where's the price wrong" job — and is **built/live**. The **projection tiers** (snap/touch-share → fair prop number) are **Model** and still deferred. **Where the tiers will actually fire.** |
 | 18 | Referee crew statistics | Context | Tested — display only. Penalty rates persistent (r=+0.267), outcomes are noise. |
 | 19 | **Trend analysis** | Context | Tested — see below. Framework is correct about football, produces no edge. |
 | 25 | **Offseason roster improvement (FA/draft)** (Derek, Aug 14) | Context | Tested → see below and Empirical §8. Returning production = no signal (0.02 pts OOS); QB upgrade/downgrade *direction* = null; QB *change* only marks **uncertainty** (unproven new starter), not direction, and is unmeasurable for ~40% of changes. **Not a model input** — becomes a "New Week-1 starter (unproven)" **Context flag**. |

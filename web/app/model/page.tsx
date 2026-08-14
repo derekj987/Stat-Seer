@@ -1,5 +1,6 @@
 import { weekRange } from "@/lib/board";
 import { fetchModelWeek, fetchCalibration, MODEL_VERSION, type ModelPrediction } from "@/lib/model";
+import { TopNav } from "../Nav";
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -9,16 +10,6 @@ const kickFmt = new Intl.DateTimeFormat("en-US", {
   weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
 });
 const et = (iso: string) => kickFmt.format(new Date(iso)) + " ET";
-
-function Tabs() {
-  return (
-    <nav className="tabs" aria-label="View">
-      <a href="/" className="tab">Value Finder</a>
-      <a href="/props" className="tab">Player Props</a>
-      <a href="/model" className="tab active" aria-current="page">The Model</a>
-    </nav>
-  );
-}
 
 function WeekNav({ min, max, current }: { min: number; max: number; current: number }) {
   const weeks: number[] = [];
@@ -105,7 +96,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         {published && <div className="asof">published<br /><b>{et(published)}</b></div>}
       </header>
 
-      <Tabs />
+      <TopNav active="model" />
       <WeekNav min={min} max={max} current={week} />
 
       <section className="explainer">
