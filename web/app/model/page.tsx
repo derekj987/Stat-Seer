@@ -30,7 +30,11 @@ function WeekNav({ min, max, current }: { min: number; max: number; current: num
 
 function PredictionCard({ p }: { p: ModelPrediction }) {
   const favProb = p.favored === p.home ? p.homeWinProb : 1 - p.homeWinProb;
-  const pct = Math.round(favProb * 100);
+  const rawPct = Math.round(favProb * 100);
+  // Near-even games: a ~0 margin can map just under 50% — show it honestly as a toss-up
+  // instead of the contradictory "X by 0.1 · 49%".
+  const pickem = Math.abs(p.predMargin) < 0.5 || rawPct <= 50;
+  const pct = pickem ? 50 : rawPct;
   const mktPct = p.marketFavProb === null ? null : Math.round(p.marketFavProb * 100);
   return (
     <article className={p.disagree ? "game offc" : "game"}>
@@ -43,8 +47,10 @@ function PredictionCard({ p }: { p: ModelPrediction }) {
       <div className="pred">
         <div className="pred__row">
           <span className="pred__label">Model</span>
-          <span className="pred__pick"><b>{p.favored}</b> by {Math.abs(p.predMargin).toFixed(1)}</span>
-          <span className="pred__prob">{pct}% to win</span>
+          {pickem
+            ? <span className="pred__pick"><b>Pick&apos;em</b> — too close to call</span>
+            : <span className="pred__pick"><b>{p.favored}</b> by {Math.abs(p.predMargin).toFixed(1)}</span>}
+          <span className="pred__prob">{pickem ? "~50%" : `${pct}% to win`}</span>
         </div>
         <div className="probbar" aria-hidden="true"><span style={{ width: `${pct}%` }} /></div>
 

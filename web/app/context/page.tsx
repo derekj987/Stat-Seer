@@ -167,8 +167,8 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
             <div className="imptable" role="table" aria-label="Lines and implied team totals">
               <div className="improw improw--head" role="row">
                 <span>game</span><span>spread</span>
-                <span className="improw__modh">model</span><span>total</span>
-                <span className="improw__modh">model</span>
+                <span className="improw__modh">model spread</span><span>total</span>
+                <span className="improw__modh">model total</span>
               </div>
               {scored.map((e) => (
                 <div className="improw" role="row" key={e.eventId}>

@@ -62,12 +62,6 @@ export default function Home() {
         </p>
       </section>
 
-      <footer className="homefoot">
-        <p>
-          StatSeer is statistical analysis, not financial or betting advice. For adults of legal age only. If
-          gambling stops being fun, help is available — call <b>1-800-GAMBLER</b>.
-        </p>
-      </footer>
     </main>
   );
 }
