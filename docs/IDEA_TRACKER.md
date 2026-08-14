@@ -1,7 +1,7 @@
 # Product Idea Tracker
 
 Running log of every idea, its status, and the reasoning.
-Last updated: Aug 13, 2026.
+Last updated: Aug 14, 2026.
 
 ---
 
@@ -72,7 +72,7 @@ follow it over Value Finder, they do measurably worse.
 
 Accurate football analysis that helps people think, explicitly labeled as **not a
 pick driver**. Trend analysis, weather, referee crews, injury burden, implied
-totals, line movement.
+totals, line movement, **new-starter / QB-change flag** (see #25).
 
 Every number here is true, sourced, and useful. None of it is an edge. Showing it
 *without* claiming predictive power is what builds credibility rather than
@@ -104,6 +104,7 @@ machine the competition runs.
 | 12 | Player prop module | Model | Deferred by decision. **Where the tiers will actually fire.** |
 | 18 | Referee crew statistics | Context | Tested — display only. Penalty rates persistent (r=+0.267), outcomes are noise. |
 | 19 | **Trend analysis** | Context | Tested — see below. Framework is correct about football, produces no edge. |
+| 25 | **Offseason roster improvement (FA/draft)** (Derek, Aug 14) | Context | Tested → see below and Empirical §8. Returning production = no signal (0.02 pts OOS); QB upgrade/downgrade *direction* = null; QB *change* only marks **uncertainty** (unproven new starter), not direction, and is unmeasurable for ~40% of changes. **Not a model input** — becomes a "New Week-1 starter (unproven)" **Context flag**. |
 
 # Ideas: modified
 
@@ -215,6 +216,35 @@ the remaining deviation is noise, not insight.
 **Calibration note:** turnover margin persistence is r = **+0.214**, not zero. It
 is partly skill, so stripping all of it over-corrects — which is why model C is
 worst. Regress it partially.
+
+---
+
+# Offseason roster change — tested (idea #25)
+
+Derek's hypothesis (Aug 14): can we predict whether a team **improved** its roster
+through free agency and the draft, and use it as a preseason 8th factor that decays
+once games start? Tested against team point differential, OOS, 2017–2025. Full
+numbers in Empirical §8.
+
+| Version tested | OOS effect vs. last-year-only | Verdict |
+|---|---|---|
+| Returning production (snap-weighted retention) | −0.02 MAE | No signal; confounded with last year's record |
+| QB change — binary (new starter y/n) | −0.09 MAE | Small — but it's an **uncertainty** flag (rookie takeovers), not direction |
+| QB change — **direction** (incoming QB's prior EPA/att) | +0.01 MAE (worse) | **Null.** Can't forecast which way a QB swap tips |
+
+**Two structural reasons it fails as a model factor:**
+1. **42% of QB changes hand the job to a rookie / never-started QB** — the biggest,
+   highest-variance moves, whose direction is *unmeasurable in advance* from NFL
+   history. The one thing we most want to price is the one thing we can't.
+2. Prior-year QB EPA is itself noisy and mean-reverts, and **the market prices every
+   proven-QB swap** — a new starting QB is the single biggest mover of a Vegas win
+   total. No free direction signal is lying around.
+
+The honest read: for prediction, *roster change ≈ QB change*, and QB change signals
+**uncertainty, not direction**. That belongs in Context, not the rating.
+**Disposition:** a "New Week-1 starter (unproven)" Context flag — informs the reader
+the ground is shifting without pretending we know the outcome. Consistent with the
+panels-inform-they-don't-vote rule. Clean negative result, treated as output.
 
 ---
 

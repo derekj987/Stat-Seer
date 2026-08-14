@@ -3,7 +3,7 @@
 Every number measured during design work, with sample sizes. These are the
 reusable asset — decisions change, measurements don't.
 
-Sources: nflverse snap counts, injury reports, weekly player stats (2016–2024);
+Sources: nflverse snap counts, injury reports, weekly player stats (2016–2025);
 nfldata game results with closing spreads (1999–2025).
 
 ---
@@ -324,7 +324,65 @@ Sanity rule: base line must price near 50% or the comparison window is biased.
 
 ---
 
-## 8. Errors caught during this work
+## 8. Offseason roster change — QB continuity (tested → Context, not a model factor)
+
+Question: does an offseason roster-improvement signal sharpen the line-blind
+**preseason** rating beyond last-year point differential alone? Target = a team's
+mean point differential per game (the model's rating). OOS = leave-one-season-out
+over the 2017–2025 transitions. Scripts: `analysis/roster_backtest.py`,
+`analysis/qb_direction.py`.
+
+### 8a. Returning production — snap-weighted retention (n=286)
+
+RP = share of a team's year-(Y-1) offense+defense snaps taken by players still on
+the team in year Y. Mean 0.68, SD 0.10, range 0.43–0.97.
+
+| Model (OOS) | MAE | RMSE | vs. baseline |
+|---|---|---|---|
+| Prev point diff only | 4.643 | 5.591 | — |
+| + returning production | 4.624 | 5.567 | −0.019 |
+| + RP + prev×RP (interaction) | 4.636 | 5.594 | −0.007 |
+
+partial corr(RP, result \| prev) = **+0.11**. **No usable signal** — 0.02 pts,
+mostly confounded with last year's record (good teams both win and retain).
+
+### 8b. QB change — binary (n=286)
+
+Same primary starter as last year (62% of teams keep theirs).
+partial corr = **+0.15**; OOS MAE 4.643 → **4.550 (−0.093)**. Looks helpful — but
+8c shows what's actually inside it.
+
+### 8c. QB change — direction / upgrade vs. downgrade (n=235 measurable)
+
+Incoming QB's prior EPA/att minus outgoing QB's (0 if unchanged). Of 113 QB
+changes, **48 (42%) go to a rookie / never-started QB — direction unmeasurable in
+advance.** Of the 65 measurable changes: 34 upgrades, 31 downgrades (a coin flip).
+
+| Model (OOS, 235 rows) | MAE | vs. baseline |
+|---|---|---|
+| Prev point diff only | 4.572 | — |
+| + QB changed (binary) | 4.589 | +0.017 (worse) |
+| + QB **direction** | 4.586 | +0.013 (worse) |
+| + both | 4.600 | +0.027 (worse) |
+
+partial corr(direction, result \| prev) = **+0.05** overall, **+0.02** among changed
+teams only.
+
+**Direction is a null.** And note the binary flag *helped* in 8b (−0.093) but
+*hurts* here (+0.017) — because 8c excludes the rookie-takeover cases. So the 8b
+signal was the *rookie-takeover* cases: the flag marks **uncertainty (unproven new
+starter), not direction.** We can see the ground shift under a team; we can't
+forecast which way, and it's unmeasurable for ~40% of changes. The market prices
+every proven-QB swap.
+
+**Disposition:** not a model input (fails the OOS bar — makes it worse). Becomes a
+**Context flag** — "New Week-1 starter (unproven)" — that informs, does not move the
+number. Caveat: n=65 measurable changes is underpowered, so this is "no *detected*
+signal," but the rookie-blindness is structural, not just sample size.
+
+---
+
+## 9. Errors caught during this work
 
 Recorded because these are the failure modes that produce confident, wrong betting
 products — and every one happened while explicitly trying to avoid them.
