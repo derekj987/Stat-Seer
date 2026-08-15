@@ -1,7 +1,8 @@
 import { weekRange, fetchWeek, buildBoard } from "@/lib/board";
 import { fetchModelWeek, type ModelPrediction } from "@/lib/model";
 import { MODEL_TOTALS } from "@/lib/modelTotals";
-import { TopNav, Brand } from "../Nav";
+import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
+import { TopNav, Brand, FlowSteps } from "../Nav";
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -43,6 +44,7 @@ interface Env {
   neutral: boolean;
   venue: string | null;
   modelSpread: string | null;   // our model's projected spread, e.g. "DET -7.2"
+  modelFav: string | null;      // team the model favors
   modelDisagree: boolean;       // model favors a different side than the market
 }
 
@@ -87,36 +89,60 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
       neutral: mp?.neutral ?? false,
       venue: mp?.venue ?? null,
       modelSpread: mp ? `${mp.favored} -${Math.abs(mp.predMargin).toFixed(1)}` : null,
+      modelFav: mp ? mp.favored : null,
       modelDisagree: mp?.disagree ?? false,
     };
   });
 
   const scored = envs.filter((e) => e.total !== null).sort((a, b) => (b.total! - a.total!));
   const neutrals = envs.filter((e) => e.neutral);
+  const upsets = envs.filter((e) => e.modelDisagree && e.modelFav); // model likes the market's dog
   const hi = scored[0];
   const lo = scored[scored.length - 1];
 
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={`Context · what to understand · Week ${week}, ${SEASON}`} />
+        <Brand sub={`Context · Upset Watch · Week ${week}, ${SEASON}`} />
       </header>
 
       <TopNav active="context" />
+      <FlowSteps active="context" />
       <WeekNav min={min} max={max} current={week} />
 
       <section className="explainer">
         <p>
-          <b>This page helps you understand a game — it is not our prediction and not a pick.</b> Every number
-          here is the <b>market&apos;s</b>, not ours: the same lines the sportsbooks post, just broken down so
-          you can see what they imply about how a game is expected to play out. We are <b>not</b> telling you to
-          bet a side or that a game will hit a number.
+          <b>Step 2: pressure-test your pick.</b> Upset Watch shows what could make a game go
+          <em> sideways</em> — where our model disagrees with the market, plus the situational factors around
+          each game. It arms <b>your</b> judgment; it does not fake an &quot;adjusted number.&quot;
         </p>
         <p className="explainer__p2">
-          The other two sections do the deciding: <a href="/best">Value Finder</a> tells you <b>where the price
-          is wrong</b> (what to actually bet), and <a href="/model">The Model</a> is <b>our own independent
-          prediction</b>. Context is just the backdrop — read it to understand the game, then act over there.
+          We tested weather, referees, and roster moves against real results — they add <b>uncertainty, not a
+          knowable edge</b> (the market already prices them). So we flag <b>risk</b>, never a &quot;lock.&quot;
+          Then head to <a href="/best">Value Finder</a> to place what survives.
         </p>
+      </section>
+
+      {/* --- Upset Watch: where our model likes the underdog --- */}
+      <section className="ctxsec">
+        <h2 className="ctxsec__h">Upset watch</h2>
+        <p className="ctxsec__d">
+          Games where our <b>line-blind model likes the underdog</b> the market favors. These aren&apos;t locks —
+          the market is usually right — but they&apos;re where a surprise is most in play by our independent read.
+        </p>
+        {upsets.length === 0 ? (
+          <p className="foot">No upset flags this week — our model agrees with the market&apos;s favorite in every game.</p>
+        ) : (
+          <div className="upsets">
+            {upsets.map((e) => (
+              <div className="upset" key={e.eventId}>
+                <span className="upset__game">{e.away} @ {e.home}{e.neutral && <span className="badge neutral">NEUTRAL</span>}</span>
+                <span className="upset__pick">model likes <b>{e.modelFav}</b> <span className="upset__mspread">({e.modelSpread})</span></span>
+                <span className="upset__mkt">market: {e.favLabel}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* --- Scoring environment: implied team totals --- */}
@@ -219,6 +245,34 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
             </ul>
           </>
         )}
+      </section>
+
+      {/* --- Referee crews --- */}
+      <section className="ctxsec">
+        <h2 className="ctxsec__h">Referee crews</h2>
+        <p className="ctxsec__d">
+          Every active crew chief&apos;s tendencies, 2021–25. <b>Penalties are a mild, real crew tendency</b> — a
+          flag-happy crew stays flag-happy. <b>Scoring is not</b>: how many points land under a crew is
+          essentially random and doesn&apos;t carry to the next game, so the points columns are trivia, not a
+          signal (that&apos;s why they&apos;re greyed). League avg: {REF_LEAGUE.pen} penalties, {REF_LEAGUE.total} pts/game.
+        </p>
+        <div className="reftable">
+          <div className="refrow refrow--head">
+            <span>crew</span><span>pen/g</span><span>pen yds</span><span>pts/g</span><span>over%</span>
+          </div>
+          {REF_STATS.map((r) => (
+            <div className="refrow" key={r.name}>
+              <span className="refrow__name">{r.name} <span className="refrow__n">{r.games}g</span></span>
+              <span className={r.pen >= REF_LEAGUE.pen ? "refrow__v hot" : "refrow__v cool"}>{r.pen}</span>
+              <span className="refrow__v">{r.penY}</span>
+              <span className="refrow__v muted">{r.total}</span>
+              <span className="refrow__v muted">{r.over}%</span>
+            </div>
+          ))}
+        </div>
+        <p className="ctxsec__note">
+          Per-game crew assignments post during game week — we&apos;ll map each week&apos;s games to their crew then.
+        </p>
       </section>
 
       {/* --- Honest roadmap: data-dependent panels not yet live --- */}

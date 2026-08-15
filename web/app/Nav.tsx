@@ -6,6 +6,28 @@
 //   The Model    — line-blind predictions
 //   Context      — what to understand (informs, doesn't vote)
 
+/** The guided journey: read the model → pressure-test it → find the price. */
+export function FlowSteps({ active }: { active: "model" | "context" | "value" }) {
+  const steps = [
+    { key: "model", n: "1", label: "The Model", sub: "our read", href: "/model" },
+    { key: "context", n: "2", label: "Upset Watch", sub: "pressure-test it", href: "/context" },
+    { key: "value", n: "3", label: "Value Finder", sub: "place it", href: "/best" },
+  ] as const;
+  return (
+    <nav className="flow" aria-label="How to use StatSeer">
+      {steps.map((s, i) => (
+        <span key={s.key} className="flow__item">
+          <a href={s.href} className={s.key === active ? "flow__step active" : "flow__step"}>
+            <span className="flow__n">{s.n}</span>
+            <span className="flow__l">{s.label}<span className="flow__sub">{s.sub}</span></span>
+          </a>
+          {i < 2 && <span className="flow__arrow" aria-hidden="true">→</span>}
+        </span>
+      ))}
+    </nav>
+  );
+}
+
 /** Prominent "build your betslip" explainer for the shopping pages. */
 export function SlipCallout({ kind }: { kind: "lines" | "props" }) {
   return (
