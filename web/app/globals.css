@@ -345,6 +345,53 @@ body{background:var(--bg);color:var(--ink);
 .forumsec__name{font-size:16px;font-weight:700;color:var(--ink)}
 .forumsec__desc{font-size:13px;color:var(--muted);line-height:1.45}
 
+/* --- forum: threads & replies --- */
+.crumbs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0 14px;
+  font-size:12.5px;color:var(--muted)}
+.crumbs a{color:var(--accent);text-decoration:none;font-weight:600}
+.crumbs span{color:var(--line)}
+.secthead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;
+  flex-wrap:wrap;margin-bottom:16px}
+.secthead__h{font-size:24px;margin:0 0 2px}
+.secthead__d{margin:0;color:var(--muted);font-size:13.5px}
+.fthreads{display:flex;flex-direction:column;gap:4px}
+.fthread{display:flex;flex-direction:column;gap:5px;padding:13px 16px;border-radius:10px;
+  background:var(--surface);border:1px solid var(--line);text-decoration:none}
+.fthread:hover{border-color:var(--accent)}
+.fthread__title{font-size:15px;font-weight:700;color:var(--ink)}
+.fthread__meta{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.fthread__sep{color:var(--line)}
+/* author badge */
+.fauthor{font-weight:700;color:var(--accent)}
+.fauthor--gone{color:var(--muted);font-weight:400;font-style:italic}
+.fauthor.founder{color:var(--gold)}
+.fauthor__title{margin-left:6px;font-size:9px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.07em;padding:1px 7px;border-radius:10px;background:var(--gold);color:#241a00;
+  box-shadow:0 0 6px color-mix(in srgb,var(--gold) 45%,transparent)}
+/* posts */
+.fpost{padding:16px;border-radius:12px;background:var(--surface);border:1px solid var(--line);margin-bottom:10px}
+.fpost--op{border-color:color-mix(in srgb,var(--accent) 30%,var(--line))}
+.fpost__head{display:flex;align-items:baseline;gap:10px;margin-bottom:8px;font-size:13px}
+.fpost__time{margin-left:auto;font-family:var(--font-mono);font-size:11.5px;color:var(--muted)}
+.fpost__title{font-size:22px;margin:2px 0 10px;line-height:1.25}
+.fpost__body{font-size:14px;line-height:1.65;color:var(--ink);white-space:pre-wrap;word-wrap:break-word}
+.freplies__h{font-size:14px;color:var(--muted);margin:20px 0 10px;font-weight:600}
+.freplies{display:flex;flex-direction:column}
+/* composer / reply form */
+.composer{display:flex;flex-direction:column;gap:12px;background:var(--surface);
+  border:1px solid var(--line);border-radius:14px;padding:18px}
+.composer__h{font-size:18px;margin:0}
+.composer__title{padding:11px 13px;border-radius:9px;border:1px solid var(--line);
+  background:var(--bg);color:var(--ink);font-size:16px;font-weight:600}
+.composer__body{padding:11px 13px;border-radius:9px;border:1px solid var(--line);
+  background:var(--bg);color:var(--ink);font-size:14px;line-height:1.55;resize:vertical;font-family:inherit}
+.composer__title:focus,.composer__body:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+.composer__actions{display:flex;gap:10px;justify-content:flex-end}
+.replyform{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+.replyprompt{margin-top:16px;padding:14px;border-radius:10px;background:var(--surface-2);
+  border:1px solid var(--line);text-align:center;font-size:13.5px;color:var(--muted)}
+.replyprompt a{color:var(--accent);font-weight:600;text-decoration:none}
+
 /* --- global responsible-gambling footer --- */
 .sitefoot{max-width:1080px;margin:26px auto 0;padding:16px 20px 30px;
   border-top:1px solid var(--line);color:var(--muted);font-size:11.5px;

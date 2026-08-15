@@ -388,3 +388,71 @@ $$ language plpgsql security definer;
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created after insert on auth.users
     for each row execute function public.handle_new_user();
+
+-- =====================================================================
+-- FORUM. Sections are app-defined slugs (the-app | nfl | fantasy |
+-- parking-lot). Public read; members post their own; author or an
+-- admin/founder can delete. author_id -> profiles(id) so we can embed
+-- the author's username/role/title in one query.
+-- =====================================================================
+create table if not exists threads (
+    id            uuid primary key default gen_random_uuid(),
+    section       text not null,
+    title         text not null check (char_length(title) between 1 and 200),
+    body          text not null check (char_length(body) between 1 and 20000),
+    author_id     uuid not null references profiles(id) on delete cascade,
+    created_at    timestamptz not null default now(),
+    last_reply_at timestamptz not null default now()
+);
+create index if not exists threads_section_idx on threads (section, last_reply_at desc);
+
+create table if not exists replies (
+    id         uuid primary key default gen_random_uuid(),
+    thread_id  uuid not null references threads(id) on delete cascade,
+    body       text not null check (char_length(body) between 1 and 20000),
+    author_id  uuid not null references profiles(id) on delete cascade,
+    created_at timestamptz not null default now()
+);
+create index if not exists replies_thread_idx on replies (thread_id, created_at);
+
+alter table threads enable row level security;
+alter table replies enable row level security;
+
+drop policy if exists "threads readable by all" on threads;
+create policy "threads readable by all" on threads for select using (true);
+drop policy if exists "replies readable by all" on replies;
+create policy "replies readable by all" on replies for select using (true);
+
+drop policy if exists "members create threads" on threads;
+create policy "members create threads" on threads for insert to authenticated
+    with check (auth.uid() = author_id);
+drop policy if exists "members create replies" on replies;
+create policy "members create replies" on replies for insert to authenticated
+    with check (auth.uid() = author_id);
+
+-- Author deletes own; founder/admin deletes any (moderation).
+drop policy if exists "delete own or moderate thread" on threads;
+create policy "delete own or moderate thread" on threads for delete using (
+    auth.uid() = author_id
+    or exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('founder','admin'))
+);
+drop policy if exists "delete own or moderate reply" on replies;
+create policy "delete own or moderate reply" on replies for delete using (
+    auth.uid() = author_id
+    or exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('founder','admin'))
+);
+
+grant select on threads, replies to anon, authenticated;
+grant insert, delete on threads, replies to authenticated;
+
+-- Bump the thread's activity time when a reply lands (for recent-activity sort).
+create or replace function public.bump_thread() returns trigger as $$
+begin
+    update public.threads set last_reply_at = now() where id = new.thread_id;
+    return new;
+end;
+$$ language plpgsql security definer;
+
+drop trigger if exists on_reply_created on replies;
+create trigger on_reply_created after insert on replies
+    for each row execute function public.bump_thread();

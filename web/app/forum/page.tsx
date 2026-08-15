@@ -1,13 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
+import { SECTIONS } from "@/lib/forum";
 
 export const dynamic = "force-dynamic";
-
-const SECTIONS = [
-  { slug: "the-app", name: "The App", desc: "Picks, odds, the model, betting — the main room." },
-  { slug: "nfl", name: "NFL Talk", desc: "General football: games, teams, news." },
-  { slug: "fantasy", name: "Fantasy Football", desc: "Lineups, waivers, start/sit." },
-  { slug: "parking-lot", name: "Parking Lot", desc: "Anything goes." },
-];
 
 export default async function Forum() {
   const supabase = await createClient();
@@ -38,7 +32,6 @@ export default async function Forum() {
         ))}
       </section>
 
-      <p className="foot">Threads &amp; replies are being built — sections go live next.</p>
     </main>
   );
 }
