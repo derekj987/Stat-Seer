@@ -363,10 +363,19 @@ body{background:var(--bg);color:var(--ink);
 .authcard__alt{margin:16px 0 0;font-size:13px;color:var(--muted)}
 
 /* --- forum shell --- */
-.forumhead{margin:16px 0 18px}
-.forumhead__h{font-size:26px;margin:0 0 4px}
-.forumhead__p{margin:0;color:var(--muted);font-size:14px}
-.forumhead__p a{color:var(--accent);font-weight:600;text-decoration:none}
+/* Community banner (the tavern) — image with a title/welcome overlaid. */
+.forumbanner{position:relative;border-radius:16px;overflow:hidden;margin:16px 0 22px;
+  border:1px solid var(--line)}
+.forumbanner__img{display:block;width:100%;height:clamp(150px,25vw,250px);
+  object-fit:cover;object-position:center 42%}
+.forumbanner__overlay{position:absolute;inset:0;display:flex;flex-direction:column;
+  justify-content:flex-end;padding:20px 24px;
+  background:linear-gradient(to top,rgba(6,20,13,.88),rgba(6,20,13,.2) 55%,transparent)}
+.forumbanner__h{color:#f4f8f2;font-size:clamp(26px,4vw,38px);font-weight:800;margin:0;
+  letter-spacing:.01em;text-shadow:0 2px 14px rgba(0,0,0,.6)}
+.forumbanner__p{color:#dce7db;font-size:14px;margin:6px 0 0;text-shadow:0 1px 8px rgba(0,0,0,.75)}
+.forumbanner__p a{color:#f4c430;font-weight:700;text-decoration:none}
+.forumbanner__p b{color:#fff}
 .forumsections{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
 .forumsec{display:flex;flex-direction:column;gap:5px;padding:18px;border-radius:12px;
   background:var(--surface);border:1px solid var(--line);text-decoration:none;transition:border-color .15s,transform .15s}
@@ -646,12 +655,20 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
   font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;padding-bottom:2px}
 
 /* --- member profile pages (/u/[username]) --- */
+.pcover{margin-top:8px;border-radius:16px 16px 0 0;overflow:hidden;
+  border:1px solid var(--line);border-bottom:none;background:var(--surface-2)}
+.pcover__img{display:block;width:100%;height:clamp(130px,22vw,210px);
+  object-fit:cover;object-position:center 34%}
 .phead{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;
   padding:20px 0 24px;border-bottom:1px solid var(--line);margin-bottom:24px}
-.phead__avatarwrap{display:flex;flex-direction:column;align-items:center;gap:8px;flex:0 0 auto}
+/* when a cover sits above, pull the avatar up to straddle it */
+.phead--cover{padding-top:0}
+.phead--cover .phead__avatarwrap{margin-top:-80px}
+.phead__avatarwrap{display:flex;flex-direction:column;align-items:center;gap:8px;flex:0 0 auto;z-index:1}
 .pavatar{width:112px;height:112px;border-radius:18px;overflow:hidden;
   border:1px solid var(--line);background:var(--surface-2);
-  display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,.22)}
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 0 4px var(--bg),0 2px 12px rgba(0,0,0,.32)}
 .pavatar__img{width:100%;height:100%;object-fit:cover}
 .pavatar__ini{font-size:48px;font-weight:800;color:var(--accent);font-family:var(--font-mono)}
 .phead__id{flex:1;min-width:min(100%,260px)}

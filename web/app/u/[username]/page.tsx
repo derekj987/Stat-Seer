@@ -38,7 +38,13 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
         <span>{profile.username}</span>
       </nav>
 
-      <header className="phead">
+      {/* Default cover for the profile section (per-user covers can override this later). */}
+      <div className="pcover">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/profile-cover.jpg" alt="" className="pcover__img" />
+      </div>
+
+      <header className="phead phead--cover">
         <div className="phead__avatarwrap">
           <div className="pavatar">
             {profile.avatarUrl
