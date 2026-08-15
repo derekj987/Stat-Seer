@@ -1,0 +1,30 @@
+name: Capture referee assignments
+
+# Populates ref_assignments (per-game crew chief) from the free nflverse `referee`
+# field. Assignments appear game-week; a daily in-season run picks them up. No Odds
+# API credits. Context reads the table to show each game's crew as a factor.
+
+on:
+  schedule:
+    - cron: "0 14 * 9-12,1 *"   # 14:00 UTC (~9-10am ET) daily, Sep-Jan
+  workflow_dispatch: {}
+
+concurrency:
+  group: capture-ref-assignments
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet pandas certifi
+      - name: Capture crews -> Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python publish_ref_assignments.py --write

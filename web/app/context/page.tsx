@@ -2,6 +2,7 @@ import { weekRange, fetchWeek, buildBoard } from "@/lib/board";
 import { fetchModelWeek, type ModelPrediction } from "@/lib/model";
 import { MODEL_TOTALS } from "@/lib/modelTotals";
 import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
+import { weekRefs } from "@/lib/refAssignments";
 import { TopNav, Brand, FlowSteps } from "../Nav";
 
 export const revalidate = 300;
@@ -92,6 +93,9 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
   try {
     for (const p of await fetchModelWeek(week, SEASON)) modelById.set(p.eventId, p);
   } catch { /* predictions may not be published for this week yet */ }
+
+  // Per-game referee crew (empty until assignments post game-week).
+  const refs = await weekRefs(week, SEASON);
 
   const envs: Env[] = board.map((g) => {
     const total = g.total.consensus;
@@ -202,6 +206,7 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
               </div>
               {scored.map((e) => {
                 const bl = bottomLine(e);
+                const crew = refs.get(e.home);
                 return (
                 <div className="impgame" key={e.eventId}>
                 <div className="improw" role="row">
@@ -228,6 +233,11 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
                   {bl
                     ? <span>Our model favors <b>{bl.spread}</b>{bl.total && <> and <b>{bl.total}</b></>}.</span>
                     : <span className="impbottom__none">No model read for this game yet.</span>}
+                  {crew && (
+                    <span className="impbottom__crew">
+                      Crew: <b>{crew.referee}</b> ({crew.tendency}, {crew.pen} pen/g)
+                    </span>
+                  )}
                 </div>
                 </div>
                 );

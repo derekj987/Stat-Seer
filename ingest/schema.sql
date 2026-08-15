@@ -486,3 +486,20 @@ create policy "mods resolve reports" on reports for update using (
 grant insert on reports to authenticated;
 grant select on reports to authenticated, service_role;
 grant update (resolved) on reports to authenticated;  -- only the resolved flag
+
+-- =====================================================================
+-- REFEREE ASSIGNMENTS. Per-game crew chief, captured game-week from the
+-- nflverse `referee` field. Server-only (Context reads it with the service
+-- key to show each game's crew as a factor). Upserted, keyed per game.
+-- =====================================================================
+create table if not exists ref_assignments (
+    season      smallint    not null,
+    week        smallint    not null,
+    home_team   text        not null,
+    away_team   text        not null,
+    referee     text        not null,
+    captured_at timestamptz not null default now(),
+    primary key (season, week, home_team)
+);
+alter table ref_assignments enable row level security;  -- no public policies; service_role only
+grant select, insert, update on ref_assignments to service_role;
