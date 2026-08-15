@@ -444,6 +444,8 @@ create policy "delete own or moderate reply" on replies for delete using (
 
 grant select on threads, replies to anon, authenticated;
 grant insert, delete on threads, replies to authenticated;
+-- Server pages read the forum with the service key:
+grant select, insert, delete on threads, replies to service_role;
 
 -- Bump the thread's activity time when a reply lands (for recent-activity sort).
 create or replace function public.bump_thread() returns trigger as $$
