@@ -587,6 +587,16 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .probbar span{display:block;height:100%;background:var(--accent);border-radius:4px}
 .probbar.mkt{margin-top:6px}
 .probbar.mkt span{background:var(--mkt)}
+/* model-vs-market gap: diverging bar (center = market, left = lower, right = higher) */
+.gap{margin-top:11px}
+.gap__track{position:relative;height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden}
+.gap__zero{position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--muted);
+  transform:translateX(-1px);z-index:1}
+.gap__seg{position:absolute;top:0;bottom:0}
+.gap__seg.low{background:var(--mkt)}
+.gap__seg.high{background:var(--accent)}
+.gap__label{display:block;margin-top:6px;font-size:12px;color:var(--muted)}
+.gap__label b{color:var(--ink)}
 .pred__note{margin-top:8px;font-size:11.5px;color:var(--muted);font-family:var(--font-mono)}
 /* market comparison row + off-consensus flag */
 .pred__row--mkt{margin-top:9px;padding-top:9px;border-top:1px dashed var(--line)}
