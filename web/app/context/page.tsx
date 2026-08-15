@@ -120,8 +120,6 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
   const scored = envs.filter((e) => e.total !== null).sort((a, b) => (b.total! - a.total!));
   const neutrals = envs.filter((e) => e.neutral);
   const upsets = envs.filter((e) => e.modelDisagree && e.modelFav); // model likes the market's dog
-  const hi = scored[0];
-  const lo = scored[scored.length - 1];
 
   return (
     <main className="wrap">
@@ -175,8 +173,8 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
           The market&apos;s <b>spread</b> and <b>total</b> for each game, with our <b>line-blind model&apos;s</b>
           own read of each sitting right beside it.
         </p>
-        <div className="readbox">
-          <span className="readbox__h">How to read a row</span>
+        <details className="readbox">
+          <summary className="readbox__h">How to read a row</summary>
           <p>
             Take <b>NO @ DET</b>: the market has set <b>DET −7</b> with a <b>49</b> total; our model, which never
             sees the line, independently reads it <b>DET −8.0</b> with a <b>46.3</b> total. This is our read
@@ -190,29 +188,12 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
             <a href="/model"> The Model</a>. <span className="ssmark">◆</span> marks a <b>sweet spot</b> — a
             spread or total on a key number; act on it in <a href="/best">Best Bets</a>.
           </p>
-        </div>
+        </details>
 
         {scored.length === 0 ? (
           <p className="foot">No lines captured for Week {week} yet.</p>
         ) : (
           <>
-            <div className="envcards">
-              {hi && (
-                <div className="envcard hi">
-                  <span className="envcard__k">Highest total</span>
-                  <span className="envcard__g">{hi.away} @ {hi.home}</span>
-                  <span className="envcard__v">{hi.total!.toFixed(1)}</span>
-                </div>
-              )}
-              {lo && lo !== hi && (
-                <div className="envcard lo">
-                  <span className="envcard__k">Lowest total</span>
-                  <span className="envcard__g">{lo.away} @ {lo.home}</span>
-                  <span className="envcard__v">{lo.total!.toFixed(1)}</span>
-                </div>
-              )}
-            </div>
-
             <div className="imptable" role="table" aria-label="Lines and implied team totals">
               <div className="improw improw--head" role="row">
                 <span>game</span><span>spread</span>

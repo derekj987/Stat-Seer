@@ -556,10 +556,15 @@ body{background:var(--bg);color:var(--ink);
 .explainer a{color:var(--accent);font-weight:600;text-decoration:none}
 .explainer a:hover{text-decoration:underline}
 /* "how to read" callout on Context */
-.readbox{margin:0 0 14px;padding:12px 14px;border-radius:10px;background:var(--accent-soft);
+.readbox{margin:0 0 14px;border-radius:10px;background:var(--accent-soft);
   border:1px solid color-mix(in srgb,var(--accent) 25%,transparent)}
+.readbox>summary{cursor:pointer;list-style:none;padding:11px 14px;display:flex;align-items:center;gap:7px}
+.readbox>summary::-webkit-details-marker{display:none}
+.readbox>summary::before{content:"▸";color:var(--accent);font-size:11px}
+.readbox[open]>summary::before{content:"▾"}
 .readbox__h{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;font-weight:800;color:var(--accent)}
-.readbox p{margin:6px 0 0;font-size:12.5px;line-height:1.6;color:var(--ink)}
+.readbox p{margin:0 14px 0;font-size:12.5px;line-height:1.6;color:var(--ink)}
+.readbox p:last-child{padding-bottom:12px}
 .readbox b{font-weight:700}
 .readbox__note{color:var(--muted)!important}
 .readbox a{color:var(--accent);font-weight:600;text-decoration:none}
