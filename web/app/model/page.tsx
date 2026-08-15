@@ -36,12 +36,6 @@ function PredictionCard({ p }: { p: ModelPrediction }) {
   const pickem = Math.abs(p.predMargin) < 0.5 || rawPct <= 50;
   const pct = pickem ? 50 : rawPct;
   const mktPct = p.marketFavProb === null ? null : Math.round(p.marketFavProb * 100);
-  // model vs market gap, on the MARKET's favorite (positive = model more confident)
-  const mktFav = p.marketFavored;
-  const modelPctMktFav = mktFav === p.home ? p.homeWinProb : mktFav === p.away ? 1 - p.homeWinProb : null;
-  const delta = (modelPctMktFav !== null && p.marketFavProb !== null)
-    ? Math.round((modelPctMktFav - p.marketFavProb) * 100) : null;
-  const gapW = delta === null ? 0 : (Math.min(Math.abs(delta), 30) / 30) * 50;
   return (
     <article className={p.disagree ? "game offc" : "game"}>
       <header className="game__head">
@@ -68,24 +62,6 @@ function PredictionCard({ p }: { p: ModelPrediction }) {
               <span className="pred__prob">{mktPct}% to win</span>
             </div>
             <div className="probbar mkt" aria-hidden="true"><span style={{ width: `${mktPct}%` }} /></div>
-
-            {delta !== null && (
-              <div className="gap">
-                <div className="gap__track" aria-hidden="true">
-                  <span className="gap__zero" />
-                  {delta !== 0 && (
-                    <span className={delta < 0 ? "gap__seg low" : "gap__seg high"}
-                      style={delta < 0 ? { right: "50%", width: `${gapW}%` } : { left: "50%", width: `${gapW}%` }} />
-                  )}
-                </div>
-                <span className="gap__label">
-                  {delta === 0
-                    ? <>Our model is <b>even with</b> the market on {mktFav}.</>
-                    : <>Our model is <b>{Math.abs(delta)}% {delta < 0 ? "lower" : "higher"}</b> than the market on {mktFav}.</>}
-                </span>
-              </div>
-            )}
-
             <div className="pred__take">
               {p.disagree
                 ? <>Our model likes <b>{p.favored}</b> — the market likes <b>{p.marketFavored}</b>.</>
