@@ -666,8 +666,7 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 /* the arena, pinned across the bottom while the profile scrolls; releases at the end so the footer shows */
 .pbottombanner{position:sticky;bottom:0;margin-top:26px;overflow:hidden;
   border:1px solid var(--line);border-radius:14px 14px 0 0;box-shadow:0 -6px 22px rgba(0,0,0,.28)}
-.pbottombanner__img{display:block;width:100%;height:clamp(120px,17vw,168px);
-  object-fit:cover;object-position:center 30%}
+.pbottombanner__img{display:block;width:100%;height:auto}
 .pavatar__img{width:100%;height:100%;object-fit:cover}
 .pavatar__ini{font-size:48px;font-weight:800;color:var(--accent);font-family:var(--font-mono)}
 .phead__id{flex:1;min-width:min(100%,260px)}
