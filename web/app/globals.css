@@ -1,5 +1,5 @@
 :root {
-  --bg:#e9efe9; --surface:#ffffff; --surface-2:#eef3ec;
+  --bg:#e3ece0; --surface:#ffffff; --surface-2:#eef3ec;
   --ink:#12261b; --muted:#576a5e; --line:#d7e2d7;
   --accent:#17794a; --accent-soft:#e2f1e9;
   --key:#b04521; --key-soft:#f7e7df;
@@ -39,8 +39,13 @@ body{background:var(--bg);color:var(--ink);
   font-family:var(--font-sans);line-height:1.5;
   -webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
 .wrap{max-width:1120px;margin:0 auto;padding:clamp(20px,4vw,44px)}
-.masthead{display:flex;justify-content:space-between;align-items:flex-end;
-  gap:24px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:18px}
+.masthead{position:relative;display:flex;justify-content:space-between;align-items:flex-end;
+  gap:24px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding:8px 0 18px;
+  background:repeating-linear-gradient(90deg,transparent 0 63px,
+    color-mix(in srgb,var(--ink) 8%,transparent) 63px 64px)}
+/* flag-yellow first-down marker sitting on the sideline */
+.masthead::after{content:"";position:absolute;left:0;bottom:-2px;width:72px;height:2px;
+  background:var(--spot)}
 .brand{display:flex;align-items:center;gap:13px;min-width:0}
 .brand__home{flex:0 0 auto;display:inline-flex;line-height:0}
 .brand__marklink{text-decoration:none;color:inherit}
