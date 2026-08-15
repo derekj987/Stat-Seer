@@ -244,6 +244,14 @@ body{background:var(--bg);color:var(--ink);
 .improw__modh,.modh{color:var(--offc-ink)}
 .improw__t{font-family:var(--font-mono);text-align:right;color:var(--muted)}
 .improw__tot{font-family:var(--font-mono);font-weight:700;text-align:right;color:var(--accent)}
+.impgame{background:var(--surface);border:1px solid var(--line);border-radius:9px}
+.impgame .improw{border:0;background:transparent;border-radius:0;padding-bottom:6px}
+.impbottom{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;padding:7px 14px 10px;
+  font-size:12.5px;color:var(--muted);border-top:1px dashed var(--line)}
+.impbottom__k{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--accent);flex:0 0 auto;align-self:center}
+.impbottom b{color:var(--ink);font-weight:700}
+.impbottom__none{font-style:italic}
 .offcmark{color:var(--offc-ink);margin-left:5px;font-size:11px;cursor:default}
 .travellist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 .travellist li{display:flex;gap:12px;align-items:baseline;padding:9px 12px;

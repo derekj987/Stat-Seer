@@ -45,7 +45,29 @@ interface Env {
   venue: string | null;
   modelSpread: string | null;   // our model's projected spread, e.g. "DET -7.2"
   modelFav: string | null;      // team the model favors
+  modelMarginHome: number | null; // model predicted margin, home perspective
   modelDisagree: boolean;       // model favors a different side than the market
+}
+
+/** Plain-English read: which side of the MARKET spread the model favors (cover, not
+ * just winner), and its over/under lean. */
+function bottomLine(e: Env): { spread: string; total: string | null } | null {
+  if (e.spread === null || e.modelMarginHome === null) return null;
+  const mag = Math.abs(e.spread);
+  const marketFavHome = e.spread < 0;
+  const dog = marketFavHome ? e.away : e.home;
+  const modelMarginForFav = marketFavHome ? e.modelMarginHome : -e.modelMarginHome;
+  const spread = mag < 0.5
+    ? "neither side (it's a pick'em)"
+    : modelMarginForFav >= mag
+      ? `the ${e.favLabel} side`
+      : `the underdog ${dog} +${mag.toFixed(1)}`;
+  let total: string | null = null;
+  if (e.modelTotal !== null && e.total !== null) {
+    const d = e.modelTotal - e.total;
+    total = Math.abs(d) < 1 ? null : d < 0 ? "the under" : "the over";
+  }
+  return { spread, total };
 }
 
 function favLabel(home: string, away: string, spread: number | null): string {
@@ -90,6 +112,7 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
       venue: mp?.venue ?? null,
       modelSpread: mp ? `${mp.favored} -${Math.abs(mp.predMargin).toFixed(1)}` : null,
       modelFav: mp ? mp.favored : null,
+      modelMarginHome: mp ? mp.predMargin : null,
       modelDisagree: mp?.disagree ?? false,
     };
   });
@@ -196,8 +219,11 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
                 <span className="improw__modh">model spread</span><span>total</span>
                 <span className="improw__modh">model total</span>
               </div>
-              {scored.map((e) => (
-                <div className="improw" role="row" key={e.eventId}>
+              {scored.map((e) => {
+                const bl = bottomLine(e);
+                return (
+                <div className="impgame" key={e.eventId}>
+                <div className="improw" role="row">
                   <span className="improw__g">
                     {e.away}<span className="at">@</span>{e.home}
                     {e.neutral && <span className="badge neutral">NEUTRAL</span>}
@@ -216,7 +242,15 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
                   </span>
                   <span className="improw__mod">{e.modelTotal !== null ? e.modelTotal.toFixed(1) : "—"}</span>
                 </div>
-              ))}
+                <div className="impbottom">
+                  <span className="impbottom__k">Bottom line</span>
+                  {bl
+                    ? <span>Our model favors <b>{bl.spread}</b>{bl.total && <> and <b>{bl.total}</b></>}.</span>
+                    : <span className="impbottom__none">No model read for this game yet.</span>}
+                </div>
+                </div>
+                );
+              })}
             </div>
           </>
         )}
