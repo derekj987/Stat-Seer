@@ -373,6 +373,12 @@ body{background:var(--bg);color:var(--ink);
 .fpost--op{border-color:color-mix(in srgb,var(--accent) 30%,var(--line))}
 .fpost__head{display:flex;align-items:baseline;gap:10px;margin-bottom:8px;font-size:13px}
 .fpost__time{margin-left:auto;font-family:var(--font-mono);font-size:11.5px;color:var(--muted)}
+.postact{display:inline-flex;gap:6px;align-items:center;margin-left:10px}
+.postact__btn{font-size:11px;font-weight:600;padding:3px 9px;border-radius:7px;
+  border:1px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer}
+.postact__btn:hover{color:var(--ink);border-color:var(--accent)}
+.postact__btn--del:hover{color:#fff;background:var(--key);border-color:var(--key)}
+.postact__done{font-size:11px;color:var(--muted)}
 .fpost__title{font-size:22px;margin:2px 0 10px;line-height:1.25}
 .fpost__body{font-size:14px;line-height:1.65;color:var(--ink);white-space:pre-wrap;word-wrap:break-word}
 .freplies__h{font-size:14px;color:var(--muted);margin:20px 0 10px;font-weight:600}

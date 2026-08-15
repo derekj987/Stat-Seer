@@ -459,3 +459,25 @@ $$ language plpgsql security definer;
 drop trigger if exists on_reply_created on replies;
 create trigger on_reply_created after insert on replies
     for each row execute function public.bump_thread();
+
+-- Member reports (moderation queue). Members file; only founder/admin can read.
+create table if not exists reports (
+    id          uuid primary key default gen_random_uuid(),
+    target_type text not null check (target_type in ('thread','reply')),
+    target_id   uuid not null,
+    reporter_id uuid not null references profiles(id) on delete cascade,
+    reason      text,
+    resolved    boolean not null default false,
+    created_at  timestamptz not null default now()
+);
+alter table reports enable row level security;
+
+drop policy if exists "member files report" on reports;
+create policy "member files report" on reports for insert to authenticated
+    with check (auth.uid() = reporter_id);
+drop policy if exists "mods read reports" on reports;
+create policy "mods read reports" on reports for select using (
+    exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('founder','admin')));
+
+grant insert on reports to authenticated;
+grant select on reports to authenticated, service_role;

@@ -17,9 +17,12 @@ export interface ThreadRow {
   author: Author | null; replyCount: number;
 }
 export interface ThreadFull {
-  id: string; section: string; title: string; body: string; createdAt: string; author: Author | null;
+  id: string; section: string; title: string; body: string; createdAt: string;
+  authorId: string; author: Author | null;
 }
-export interface ReplyRow { id: string; body: string; createdAt: string; author: Author | null }
+export interface ReplyRow {
+  id: string; body: string; createdAt: string; authorId: string; author: Author | null;
+}
 
 async function pg(path: string): Promise<Record<string, unknown>[]> {
   const url = process.env.SUPABASE_URL;
@@ -56,7 +59,7 @@ export async function listThreads(section: string): Promise<ThreadRow[]> {
 
 export async function getThread(id: string): Promise<ThreadFull | null> {
   const rows = await pg(
-    `threads?id=eq.${id}&select=id,section,title,body,created_at,author:profiles(username,role,title)&limit=1`,
+    `threads?id=eq.${id}&select=id,section,title,body,created_at,author_id,author:profiles(username,role,title)&limit=1`,
   );
   const r = rows[0];
   if (!r) return null;
@@ -66,18 +69,20 @@ export async function getThread(id: string): Promise<ThreadFull | null> {
     title: r.title as string,
     body: r.body as string,
     createdAt: r.created_at as string,
+    authorId: r.author_id as string,
     author: author(r.author),
   };
 }
 
 export async function getReplies(threadId: string): Promise<ReplyRow[]> {
   const rows = await pg(
-    `replies?thread_id=eq.${threadId}&select=id,body,created_at,author:profiles(username,role,title)&order=created_at.asc&limit=1000`,
+    `replies?thread_id=eq.${threadId}&select=id,body,created_at,author_id,author:profiles(username,role,title)&order=created_at.asc&limit=1000`,
   );
   return rows.map((r) => ({
     id: r.id as string,
     body: r.body as string,
     createdAt: r.created_at as string,
+    authorId: r.author_id as string,
     author: author(r.author),
   }));
 }
