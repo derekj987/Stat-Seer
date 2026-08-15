@@ -362,6 +362,7 @@ alter table profiles enable row level security;
 
 drop policy if exists "profiles readable by all" on profiles;
 create policy "profiles readable by all" on profiles for select using (true);
+grant select on profiles to anon, authenticated, service_role;
 -- No user-update policy on purpose: role/title are NOT self-editable (a member must
 -- not be able to make themselves the founder). Managed by the trigger / an admin.
 
