@@ -74,6 +74,56 @@ export async function getThread(id: string): Promise<ThreadFull | null> {
   };
 }
 
+export interface ReportItem {
+  id: string;
+  type: "thread" | "reply";
+  reason: string | null;
+  createdAt: string;
+  reporter: Author | null;
+  label: string;   // thread title or reply snippet
+  link: string;    // where to jump to the post
+  gone: boolean;   // target already deleted
+}
+
+const snippet = (s: string) => (s.length > 90 ? s.slice(0, 90) + "…" : s);
+
+export async function listReports(): Promise<ReportItem[]> {
+  const reports = await pg(
+    "reports?resolved=eq.false&select=id,target_type,target_id,reason,created_at," +
+    "reporter:profiles(username,role,title)&order=created_at.desc&limit=300",
+  );
+  const ids = (t: string) => reports.filter((r) => r.target_type === t).map((r) => r.target_id as string);
+  const threadIds = ids("thread"); const replyIds = ids("reply");
+
+  const threads = threadIds.length
+    ? await pg(`threads?id=in.(${threadIds.join(",")})&select=id,section,title`) : [];
+  const tmap = new Map(threads.map((t) => [t.id as string, t]));
+  const replies = replyIds.length
+    ? await pg(`replies?id=in.(${replyIds.join(",")})&select=id,thread_id,body,threads(section)`) : [];
+  const rmap = new Map(replies.map((r) => [r.id as string, r]));
+
+  return reports.map((rep) => {
+    const base = {
+      id: rep.id as string,
+      reason: (rep.reason as string) ?? null,
+      createdAt: rep.created_at as string,
+      reporter: author(rep.reporter),
+    };
+    if (rep.target_type === "thread") {
+      const t = tmap.get(rep.target_id as string) as { section: string; title: string } | undefined;
+      return { ...base, type: "thread" as const,
+        label: t ? t.title : "(deleted thread)",
+        link: t ? `/forum/${t.section}/${rep.target_id}` : "#", gone: !t };
+    }
+    const r = rmap.get(rep.target_id as string) as
+      { thread_id: string; body: string; threads?: { section: string } } | undefined;
+    const section = r?.threads?.section;
+    return { ...base, type: "reply" as const,
+      label: r ? snippet(r.body) : "(deleted reply)",
+      link: r && section ? `/forum/${section}/${r.thread_id}` : "#", gone: !r };
+  });
+}
+
 export async function getReplies(threadId: string): Promise<ReplyRow[]> {
   const rows = await pg(
     `replies?thread_id=eq.${threadId}&select=id,body,created_at,author_id,author:profiles(username,role,title)&order=created_at.asc&limit=1000`,

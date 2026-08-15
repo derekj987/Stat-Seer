@@ -46,6 +46,8 @@ export default function AuthBar() {
           <span className="authbar__me" />
         ) : me ? (
           <span className="authbar__me">
+            {(me.role === "founder" || me.role === "admin") &&
+              <a href="/forum/reports" className="authbar__link">Reports</a>}
             <a href="/forum" className={me.role === "founder" ? "authbar__user founder" : "authbar__user"}>
               {me.username}
               {me.title && <span className="authbar__title">{me.title}</span>}

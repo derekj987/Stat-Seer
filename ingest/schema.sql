@@ -478,6 +478,11 @@ create policy "member files report" on reports for insert to authenticated
 drop policy if exists "mods read reports" on reports;
 create policy "mods read reports" on reports for select using (
     exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('founder','admin')));
+drop policy if exists "mods resolve reports" on reports;
+create policy "mods resolve reports" on reports for update using (
+    exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('founder','admin')))
+    with check (true);
 
 grant insert on reports to authenticated;
 grant select on reports to authenticated, service_role;
+grant update (resolved) on reports to authenticated;  -- only the resolved flag

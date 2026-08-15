@@ -398,6 +398,22 @@ body{background:var(--bg);color:var(--ink);
   border:1px solid var(--line);text-align:center;font-size:13.5px;color:var(--muted)}
 .replyprompt a{color:var(--accent);font-weight:600;text-decoration:none}
 
+/* --- reports inbox --- */
+.repcount{display:inline-block;min-width:20px;padding:0 7px;margin-left:8px;border-radius:11px;
+  background:var(--key);color:#fff;font-size:12px;font-weight:800;text-align:center;vertical-align:middle}
+.reports{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.report{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;
+  padding:13px 16px;border-radius:10px;background:var(--surface);border:1px solid var(--line)}
+.report__main{display:flex;flex-direction:column;gap:4px;min-width:0}
+.report__type{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--muted);align-self:flex-start;padding:2px 7px;border-radius:8px;background:var(--surface-2)}
+.report__label{font-size:14px;font-weight:600;color:var(--accent);text-decoration:none;
+  word-break:break-word}
+.report__label--gone{color:var(--muted);font-style:italic}
+.report__reason{margin:2px 0;font-size:13px;color:var(--ink);font-style:italic}
+.report__meta{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.report__actions{display:flex;gap:8px;flex:0 0 auto}
+
 /* --- global responsible-gambling footer --- */
 .sitefoot{max-width:1080px;margin:26px auto 0;padding:16px 20px 30px;
   border-top:1px solid var(--line);color:var(--muted);font-size:11.5px;
