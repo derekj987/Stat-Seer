@@ -1,0 +1,38 @@
+name: Capture practice reports
+
+# Free daily practice-participation capture from the open nflverse injuries feed
+# (no vendor, no API key — SportsData.io was ruled out on cost). Each run writes
+# THAT DAY's practice_status into practice_reports, tagged with the practice day.
+# Polled Wed-Sat, the daily snapshots accumulate the DNP -> LIMITED -> FULL
+# trajectory that CANNOT be backfilled. Idempotent (unique on season,week,team,
+# name,day), so running twice a day is strictly safer than once.
+#
+# Two polls a day catch nflverse's refresh whenever it lands: 23:00 UTC (~6-7pm ET,
+# same-day afternoon report) and 13:00 UTC (~8-9am ET, overnight refresh). Both UTC
+# hours share the calendar day with ET, so the day tag is correct.
+# All times UTC.
+
+on:
+  schedule:
+    - cron: "0 13,23 * 9-12,1 3,4,5,6"   # Wed/Thu/Fri/Sat, Sep-Jan
+  workflow_dispatch: {}                   # manual "Run workflow" for testing
+
+concurrency:
+  group: capture-practice
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi
+      - name: Capture practice reports -> Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python ingest/injuries_nflverse.py --current --write
