@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-type Me = { username: string } | null;
+type Me = { username: string; role: string; title: string | null } | null;
 
 export default function AuthBar() {
   const [me, setMe] = useState<Me | undefined>(undefined); // undefined = still loading
@@ -18,7 +18,15 @@ export default function AuthBar() {
       const { data } = await supabase.auth.getUser();
       if (!active) return;
       const u = data.user;
-      setMe(u ? { username: (u.user_metadata?.username as string) ?? u.email ?? "member" } : null);
+      if (!u) { setMe(null); return; }
+      const { data: profile } = await supabase
+        .from("profiles").select("username,role,title").eq("id", u.id).single();
+      if (!active) return;
+      setMe({
+        username: profile?.username ?? (u.user_metadata?.username as string) ?? u.email ?? "member",
+        role: profile?.role ?? "member",
+        title: profile?.title ?? null,
+      });
     };
     load();
     const { data: sub } = supabase.auth.onAuthStateChange(() => load());
@@ -38,7 +46,10 @@ export default function AuthBar() {
           <span className="authbar__me" />
         ) : me ? (
           <span className="authbar__me">
-            <a href="/forum" className="authbar__user">{me.username}</a>
+            <a href="/forum" className={me.role === "founder" ? "authbar__user founder" : "authbar__user"}>
+              {me.username}
+              {me.title && <span className="authbar__title">{me.title}</span>}
+            </a>
             <button onClick={logout} className="authbar__btn">Log out</button>
           </span>
         ) : (

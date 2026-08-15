@@ -354,25 +354,31 @@ grant usage, select on all sequences in schema public to service_role;
 create table if not exists profiles (
     id         uuid primary key references auth.users(id) on delete cascade,
     username   text unique not null,
+    role       text not null default 'member',  -- member | founder | admin | mod
+    title      text,                             -- custom badge, e.g. "The Creator"
     created_at timestamptz not null default now()
 );
 alter table profiles enable row level security;
 
 drop policy if exists "profiles readable by all" on profiles;
 create policy "profiles readable by all" on profiles for select using (true);
+-- No user-update policy on purpose: role/title are NOT self-editable (a member must
+-- not be able to make themselves the founder). Managed by the trigger / an admin.
 
-drop policy if exists "user updates own profile" on profiles;
-create policy "user updates own profile" on profiles
-    for update using (auth.uid() = id) with check (auth.uid() = id);
-
--- On signup, create the profile row (username from raw_user_meta_data).
+-- On signup, create the profile. The VERY FIRST account becomes the founder,
+-- "The Creator", shown in gold. Everyone after is a member.
 create or replace function public.handle_new_user() returns trigger as $$
+declare
+    is_first boolean;
 begin
-    insert into public.profiles (id, username)
+    select count(*) = 0 into is_first from public.profiles;
+    insert into public.profiles (id, username, role, title)
     values (
         new.id,
         coalesce(nullif(new.raw_user_meta_data->>'username', ''),
-                 'member_' || substr(new.id::text, 1, 8))
+                 'member_' || substr(new.id::text, 1, 8)),
+        case when is_first then 'founder'     else 'member' end,
+        case when is_first then 'The Creator' else null      end
     )
     on conflict (id) do nothing;
     return new;

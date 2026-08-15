@@ -7,6 +7,7 @@
   --save:#2f6fed; --save-soft:#e9f1fe;
   --offc:#6d54c4; --offc-soft:#ede9fb; --offc-ink:#4a37a0;
   --mkt:#8a2846;
+  --gold:#b8860b; --gold-soft:#faf0d0;
   --font-sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --font-mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
 }
@@ -19,6 +20,7 @@
   --save:#6ea8fe; --save-soft:#152338;
   --offc:#a693f0; --offc-soft:#201a36; --offc-ink:#b9a9f5;
   --mkt:#c56d84;
+  --gold:#e6c260; --gold-soft:#2b2412;
 }}
 :root[data-theme="dark"]{
   --bg:#0e1116; --surface:#161b22; --surface-2:#1b212a;
@@ -29,6 +31,7 @@
   --save:#6ea8fe; --save-soft:#152338;
   --offc:#a693f0; --offc-soft:#201a36; --offc-ink:#b9a9f5;
   --mkt:#c56d84;
+  --gold:#e6c260; --gold-soft:#2b2412;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -297,6 +300,10 @@ body{background:var(--bg);color:var(--ink);
 .authbar__forum:hover{color:var(--accent)}
 .authbar__me{display:flex;align-items:center;gap:12px}
 .authbar__user{font-size:13px;font-weight:600;color:var(--accent);text-decoration:none}
+.authbar__user.founder{color:var(--gold);font-weight:800;letter-spacing:.01em}
+.authbar__title{margin-left:7px;font-size:9.5px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.07em;padding:2px 8px;border-radius:11px;background:var(--gold);color:#241a00;
+  vertical-align:middle;box-shadow:0 0 7px color-mix(in srgb,var(--gold) 45%,transparent)}
 .authbar__link{font-size:13px;color:var(--muted);text-decoration:none}
 .authbar__link:hover{color:var(--ink)}
 .authbar__btn{font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:8px;
