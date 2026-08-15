@@ -437,8 +437,13 @@ body{background:var(--bg);color:var(--ink);
 
 /* --- referee crews --- */
 .reftable{display:flex;flex-direction:column;gap:2px;overflow-x:auto}
-.refrow{display:grid;grid-template-columns:minmax(150px,1fr) 54px 64px 52px 54px;gap:10px;align-items:center;
+.refrow{display:grid;grid-template-columns:minmax(128px,1fr) 50px 58px 48px 50px 56px;gap:9px;align-items:center;
   padding:7px 12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;font-size:13px}
+details.ctxdrop>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:8px;margin-bottom:8px}
+details.ctxdrop>summary::-webkit-details-marker{display:none}
+details.ctxdrop>summary::before{content:"▸";color:var(--muted);font-size:12px}
+details.ctxdrop[open]>summary::before{content:"▾"}
+details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .refrow--head{background:none;border:0;color:var(--muted);font-size:10.5px;text-transform:uppercase;
   letter-spacing:.05em;font-weight:600;padding:2px 12px}
 .refrow--head span:not(:first-child){text-align:right}

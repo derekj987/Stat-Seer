@@ -10,6 +10,7 @@ does NOT predict future games. So we show both, but the UI labels scoring as
     python analysis/gen_ref_stats.py
 """
 import json
+import numpy as np
 import pandas as pd
 
 RECENT = 2021  # crews active from this season on
@@ -30,6 +31,12 @@ def main():
           & (g.season >= RECENT)].copy()
     g["total"] = g.home_score + g.away_score
     g["over"] = (g.total > g.total_line).astype(float)
+    # favorite ATS: did the favored side cover? (nflverse spread_line >= 0 => home fav)
+    margin = g.home_score - g.away_score
+    fav_margin = np.where(g.spread_line >= 0, margin, -margin)
+    fav_mag = g.spread_line.abs()
+    g["favcover"] = np.where(g.spread_line.isna() | (fav_margin == fav_mag), np.nan,
+                             (fav_margin > fav_mag).astype(float))
 
     # penalties per game = home + away team penalties (from tstats)
     pen = load_penalties()
@@ -41,6 +48,7 @@ def main():
     gm["peny"] = gm.hpy.fillna(0) + gm.apy.fillna(0)
 
     lg = {"total": round(gm.total.mean(), 1), "over": round(gm.over.mean() * 100),
+          "atsFav": round(gm.favcover.mean() * 100),
           "pen": round(gm.pen.mean(), 1), "peny": round(gm.peny.mean())}
 
     rows = []
@@ -51,6 +59,7 @@ def main():
             "name": ref, "games": int(len(s)),
             "total": round(float(s.total.mean()), 1),
             "over": round(float(s.over.mean()) * 100),
+            "atsFav": round(float(s.favcover.mean()) * 100),
             "pen": round(float(s.pen.mean()), 1),
             "penY": round(float(s.peny.mean())),
         })
@@ -61,7 +70,7 @@ def main():
         f"// Active NFL crew chiefs {RECENT}-2025. Penalty rate is a mild PERSISTENT tendency;",
         "// scoring is historical, NOT predictive (crews don't reliably move totals).",
         f"export const REF_LEAGUE = {json.dumps(lg)};",
-        "export interface RefStat { name: string; games: number; total: number; over: number; pen: number; penY: number }",
+        "export interface RefStat { name: string; games: number; total: number; over: number; atsFav: number; pen: number; penY: number }",
         "export const REF_STATS: RefStat[] = [",
     ]
     for r in rows:

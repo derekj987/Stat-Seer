@@ -263,17 +263,18 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
       </section>
 
       {/* --- Referee crews --- */}
-      <section className="ctxsec">
-        <h2 className="ctxsec__h">Referee crews</h2>
+      <details className="ctxsec ctxdrop">
+        <summary className="ctxsec__h">Referee crews</summary>
         <p className="ctxsec__d">
           Every active crew chief&apos;s tendencies, 2021–25. <b>Penalties are a mild, real crew tendency</b> — a
-          flag-happy crew stays flag-happy. <b>Scoring is not</b>: how many points land under a crew is
-          essentially random and doesn&apos;t carry to the next game, so the points columns are trivia, not a
-          signal (that&apos;s why they&apos;re greyed). League avg: {REF_LEAGUE.pen} penalties, {REF_LEAGUE.total} pts/game.
+          flag-happy crew stays flag-happy. <b>Scoring and spread results are not</b>: how a crew&apos;s games land
+          against the total or the spread is essentially random and doesn&apos;t carry over — so those columns are
+          greyed as trivia, not a signal. League avg: {REF_LEAGUE.pen} penalties, {REF_LEAGUE.total} pts, fav
+          covers {REF_LEAGUE.atsFav}%.
         </p>
         <div className="reftable">
           <div className="refrow refrow--head">
-            <span>crew</span><span>pen/g</span><span>pen yds</span><span>pts/g</span><span>over%</span>
+            <span>crew</span><span>pen/g</span><span>pen yds</span><span>pts/g</span><span>over%</span><span>fav ats%</span>
           </div>
           {REF_STATS.map((r) => (
             <div className="refrow" key={r.name}>
@@ -282,13 +283,14 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
               <span className="refrow__v">{r.penY}</span>
               <span className="refrow__v muted">{r.total}</span>
               <span className="refrow__v muted">{r.over}%</span>
+              <span className="refrow__v muted">{r.atsFav}%</span>
             </div>
           ))}
         </div>
         <p className="ctxsec__note">
           Per-game crew assignments post during game week — we&apos;ll map each week&apos;s games to their crew then.
         </p>
-      </section>
+      </details>
 
       {/* --- Honest roadmap: data-dependent panels not yet live --- */}
       <section className="ctxsec">
