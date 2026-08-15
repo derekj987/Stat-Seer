@@ -24,7 +24,7 @@ export interface ReplyRow {
   id: string; body: string; createdAt: string; authorId: string; author: Author | null;
 }
 
-async function pg(path: string): Promise<Record<string, unknown>[]> {
+export async function pg(path: string): Promise<Record<string, unknown>[]> {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
   if (!url || !key) throw new Error("SUPABASE_URL / SUPABASE_SERVICE_KEY not set");
@@ -36,7 +36,7 @@ async function pg(path: string): Promise<Record<string, unknown>[]> {
   return (await res.json()) as Record<string, unknown>[];
 }
 
-function author(raw: unknown): Author | null {
+export function author(raw: unknown): Author | null {
   const a = raw as { username?: string; role?: string; title?: string | null } | null;
   return a && a.username ? { username: a.username, role: a.role ?? "member", title: a.title ?? null } : null;
 }

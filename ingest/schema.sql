@@ -488,6 +488,52 @@ grant select on reports to authenticated, service_role;
 grant update (resolved) on reports to authenticated;  -- only the resolved flag
 
 -- =====================================================================
+-- PROFILE PAGES. Each member gets /u/<username>: an avatar, a short bio
+-- (owner-editable), and a Facebook-style wall others can post to. role and
+-- title stay locked — the column-level UPDATE grant below is the real lock:
+-- authenticated may write ONLY bio/avatar_url, never role/title.
+-- =====================================================================
+alter table profiles add column if not exists bio text
+    check (bio is null or char_length(bio) <= 500);
+alter table profiles add column if not exists avatar_url text;
+
+-- Owner may update their OWN row (RLS); the column grant limits WHICH columns.
+drop policy if exists "owner updates own profile" on profiles;
+create policy "owner updates own profile" on profiles for update to authenticated
+    using (auth.uid() = id) with check (auth.uid() = id);
+grant update (bio, avatar_url) on profiles to authenticated;  -- NOT role/title
+
+-- The wall: anyone may post to anyone's wall; the author OR the wall owner
+-- (or a mod) can delete. profile_id = whose wall; author_id = who wrote it.
+create table if not exists wall_posts (
+    id         uuid primary key default gen_random_uuid(),
+    profile_id uuid not null references profiles(id) on delete cascade,
+    author_id  uuid not null references profiles(id) on delete cascade,
+    body       text not null check (char_length(body) between 1 and 5000),
+    created_at timestamptz not null default now()
+);
+create index if not exists wall_profile_idx on wall_posts (profile_id, created_at desc);
+
+alter table wall_posts enable row level security;
+
+drop policy if exists "wall readable by all" on wall_posts;
+create policy "wall readable by all" on wall_posts for select using (true);
+
+drop policy if exists "members post to walls" on wall_posts;
+create policy "members post to walls" on wall_posts for insert to authenticated
+    with check (auth.uid() = author_id);
+
+drop policy if exists "delete own wall post, or as wall owner or mod" on wall_posts;
+create policy "delete own wall post, or as wall owner or mod" on wall_posts for delete using (
+    auth.uid() = author_id
+    or auth.uid() = profile_id
+    or exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('founder','admin')));
+
+grant select on wall_posts to anon, authenticated;
+grant insert, delete on wall_posts to authenticated;
+grant select, insert, delete on wall_posts to service_role;
+
+-- =====================================================================
 -- REFEREE ASSIGNMENTS. Per-game crew chief, captured game-week from the
 -- nflverse `referee` field. Server-only (Context reads it with the service
 -- key to show each game's crew as a factor). Upserted, keyed per game.
