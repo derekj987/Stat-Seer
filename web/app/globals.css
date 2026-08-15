@@ -1,5 +1,5 @@
 :root {
-  --bg:#e3ece0; --surface:#ffffff; --surface-2:#eef3ec;
+  --bg:#dbe6d6; --surface:#f4f9f2; --surface-2:#e7efe4;
   --ink:#12261b; --muted:#576a5e; --line:#d7e2d7;
   --accent:#17794a; --accent-soft:#e2f1e9;
   --key:#b04521; --key-soft:#f7e7df;
@@ -69,7 +69,9 @@ body{background:var(--bg);color:var(--ink);
   letter-spacing:.07em}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
 .game{background:var(--surface);border:1px solid var(--line);border-radius:12px;
-  padding:16px 18px;position:relative;overflow:hidden}
+  padding:16px 18px;position:relative;overflow:hidden;
+  background-image:repeating-linear-gradient(90deg,transparent 0 45px,
+    color-mix(in srgb,var(--ink) 4%,transparent) 45px 46px)}
 .game.key{border-color:color-mix(in srgb,var(--spot) 55%,var(--line))}
 .game.key::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;
   background:var(--spot)}

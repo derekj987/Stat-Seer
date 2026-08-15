@@ -1,0 +1,49 @@
+<!-- Structurally realistic NFL injury-report table for parser testing.
+     Mirrors the standard columns: Player | Pos | Injury | Wed | Thu | Fri | Game Status.
+     NOTE: this is a SYNTHETIC shape, not a capture of a real source. It exercises
+     parse_injury_table's column mapping and value normalisation. It must be replaced
+     with a real captured page once official injury reports go live (~early Sept). -->
+<html>
+<head><title>Week 1 Injury Report - Kansas City Chiefs</title></head>
+<body>
+<h2>Practice Report</h2>
+<table class="injury-report">
+  <thead>
+    <tr>
+      <th>Player</th><th>Pos</th><th>Injury</th>
+      <th>Wed</th><th>Thu</th><th>Fri</th><th>Game Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Patrick Mahomes</td><td>QB</td><td>Ankle</td>
+      <td>Limited Participation in Practice</td>
+      <td>Limited Participation in Practice</td>
+      <td>Full Participation in Practice</td>
+      <td>Questionable</td>
+    </tr>
+    <tr>
+      <td>Travis Kelce</td><td>TE</td><td>Knee</td>
+      <td>Did Not Participate In Practice</td>
+      <td>Did Not Participate In Practice</td>
+      <td>Limited Participation in Practice</td>
+      <td>Questionable</td>
+    </tr>
+    <tr>
+      <td>Isiah Pacheco</td><td>RB</td><td>Rib</td>
+      <td>Did Not Participate In Practice</td>
+      <td>Did Not Participate In Practice</td>
+      <td>Did Not Participate In Practice</td>
+      <td>Out</td>
+    </tr>
+    <tr>
+      <td>Chris Jones</td><td>DT</td><td>Not injury related - resting player</td>
+      <td>Did Not Participate In Practice</td>
+      <td>Full Participation in Practice</td>
+      <td>Full Participation in Practice</td>
+      <td>--</td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>
