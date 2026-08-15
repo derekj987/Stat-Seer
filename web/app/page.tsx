@@ -26,7 +26,7 @@ export default function Home() {
     <main className="home">
       <section className="hero">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo-hero.png" alt="StatSeer" className="hero__logo" width={640} height={640} />
+        <img src="/logo-hero.png" alt="StatSeer — See the edge. Trust the data." className="hero__logo" width={543} height={724} />
         <div className="hero__pitch">
           <h1 className="hero__h1">NFL betting analysis you can actually check.</h1>
           <p className="hero__lead">
