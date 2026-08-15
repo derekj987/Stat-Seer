@@ -276,6 +276,11 @@ body{background:var(--bg);color:var(--ink);
   background:var(--surface);border:1px solid var(--line);transition:border-color .15s,transform .15s}
 .hcard:hover{border-color:var(--accent);transform:translateY(-2px)}
 .hcard__k{font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+.how{margin-bottom:34px}
+.how__h{font-size:20px;margin:0 0 14px;text-align:center}
+.hcard__top{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.hcard__n{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;
+  border-radius:50%;background:var(--accent);color:#fff;font-size:14px;font-weight:800;flex:0 0 auto}
 .hcard__q{font-size:18px;margin:8px 0 8px;color:var(--ink)}
 .hcard__b{font-size:13.5px;line-height:1.6;color:var(--muted);margin:0 0 16px;flex:1}
 .hcard__cta{font-size:13px;font-weight:700;color:var(--ink)}
