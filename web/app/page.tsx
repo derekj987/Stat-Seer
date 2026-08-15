@@ -24,11 +24,15 @@ const STEPS = [
 export default function Home() {
   return (
     <main className="home">
-      <section className="hero">
+      <aside className="home__banner">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo-hero.png" alt="StatSeer — See the edge. Trust the data." className="hero__logo" width={543} height={724} />
+        <img src="/logo-hero.png" alt="StatSeer — See the edge. Trust the data." className="home__bannerimg" width={543} height={724} />
+      </aside>
+
+      <div className="home__content">
+      <section className="hero">
         <div className="hero__pitch">
-          <h1 className="hero__h1">NFL betting analysis you can actually check.</h1>
+          <h1 className="hero__h1">Betting analysis you can actually check.</h1>
           <p className="hero__lead">
             StatSeer is built on one idea: <b>verifiable trust</b>. Published probabilities. A public track
             record — <b>including the bad stretches</b>. Calibration anyone can audit. Not confident-sounding
@@ -67,6 +71,7 @@ export default function Home() {
           exactly the machine we refuse to build.
         </p>
       </section>
+      </div>
     </main>
   );
 }
