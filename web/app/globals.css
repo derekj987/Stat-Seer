@@ -391,7 +391,8 @@ body{background:var(--bg);color:var(--ink);
 .fthread__meta{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .fthread__sep{color:var(--line)}
 /* author badge */
-.fauthor{font-weight:700;color:var(--accent)}
+.fauthor{font-weight:700;color:var(--accent);text-decoration:none}
+a.fauthor:hover{text-decoration:underline}
 .fauthor--gone{color:var(--muted);font-weight:400;font-style:italic}
 .fauthor.founder{color:var(--gold)}
 .fauthor__title{margin-left:6px;font-size:9px;font-weight:800;text-transform:uppercase;
@@ -678,6 +679,5 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .wall__list{display:flex;flex-direction:column;gap:12px;margin-top:20px}
 .wpost{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
 .wpost__head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.wpost__authorlink{text-decoration:none}
 .wpost__time{color:var(--muted);font-size:11.5px;font-family:var(--font-mono);margin-left:auto}
 .wpost__body{font-size:14px;line-height:1.6;white-space:pre-wrap}

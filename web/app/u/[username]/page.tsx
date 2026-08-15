@@ -76,9 +76,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             {wall.map((p) => (
               <article key={p.id} className="wpost">
                 <div className="wpost__head">
-                  {p.author
-                    ? <a href={`/u/${p.author.username}`} className="wpost__authorlink"><AuthorTag author={p.author} /></a>
-                    : <AuthorTag author={null} />}
+                  <AuthorTag author={p.author} />
                   <time className="wpost__time">{when(p.createdAt)}</time>
                   <WallActions postId={p.id} authorId={p.authorId} profileId={profile.id} me={me} />
                 </div>

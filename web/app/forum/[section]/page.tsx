@@ -40,7 +40,7 @@ export default async function SectionPage({ params }: PageProps<"/forum/[section
             <a key={t.id} href={`/forum/${section}/${t.id}`} className="fthread">
               <span className="fthread__title">{t.title}</span>
               <span className="fthread__meta">
-                <AuthorTag author={t.author} />
+                <AuthorTag author={t.author} plain />
                 <span className="fthread__sep">·</span>
                 {t.replyCount} {t.replyCount === 1 ? "reply" : "replies"}
                 <span className="fthread__sep">·</span>
