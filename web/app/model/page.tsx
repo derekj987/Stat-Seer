@@ -45,29 +45,40 @@ function PredictionCard({ p }: { p: ModelPrediction }) {
         {p.neutral && <span className="badge neutral">NEUTRAL</span>}
       </header>
       <div className="pred">
-        <div className="pred__row">
-          <span className="pred__label">Model</span>
-          {pickem
-            ? <span className="pred__pick"><b>Pick&apos;em</b> — too close to call</span>
-            : <span className="pred__pick"><b>{p.favored}</b> by {Math.abs(p.predMargin).toFixed(1)}</span>}
-          <span className="pred__prob">{pickem ? "~50%" : `${pct}% to win`}</span>
+        <div className="cmp">
+          <div className="cmp__side">
+            <div className="cmp__head">
+              <span className="cmp__lab">Our model</span>
+              {pickem
+                ? <span className="cmp__pick"><b>Pick&apos;em</b> — too close to call</span>
+                : <span className="cmp__pick"><b>{p.favored}</b> by {Math.abs(p.predMargin).toFixed(1)}</span>}
+            </div>
+            <div className="cmp__bar">
+              <div className="cmp__track"><span className="cmp__fill cmp__fill--model" style={{ width: `${pct}%` }} /></div>
+              <span className="cmp__pct cmp__pct--model">{pickem ? "~50" : pct}%</span>
+            </div>
+          </div>
+
+          {p.marketFavored && mktPct !== null && (
+            <div className="cmp__side">
+              <div className="cmp__head">
+                <span className="cmp__lab">The market</span>
+                <span className="cmp__pick"><b>{p.marketFavored}</b> favored</span>
+              </div>
+              <div className="cmp__bar">
+                <div className="cmp__track"><span className="cmp__fill cmp__fill--mkt" style={{ width: `${mktPct}%` }} /></div>
+                <span className="cmp__pct cmp__pct--mkt">{mktPct}%</span>
+              </div>
+            </div>
+          )}
         </div>
-        <div className="probbar" aria-hidden="true"><span style={{ width: `${pct}%` }} /></div>
 
         {p.marketFavored && mktPct !== null && (
-          <>
-            <div className="pred__row pred__row--mkt">
-              <span className="pred__label">Market</span>
-              <span className="pred__pick"><b>{p.marketFavored}</b> favored</span>
-              <span className="pred__prob">{mktPct}% to win</span>
-            </div>
-            <div className="probbar mkt" aria-hidden="true"><span style={{ width: `${mktPct}%` }} /></div>
-            <div className="pred__take">
-              {p.disagree
-                ? <>Our model likes <b>{p.favored}</b> — the market likes <b>{p.marketFavored}</b>.</>
-                : <>Model and market agree: <b>{p.favored}</b> is the side.</>}
-            </div>
-          </>
+          <div className="pred__take">
+            {p.disagree
+              ? <>Our model likes <b>{p.favored}</b> — the market likes <b>{p.marketFavored}</b>.</>
+              : <>Model and market agree: <b>{p.favored}</b> is the side.</>}
+          </div>
         )}
 
         {p.neutral && <div className="pred__note">Neutral site — {p.venue}. No home-field edge applied.</div>}
