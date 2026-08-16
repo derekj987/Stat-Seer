@@ -838,13 +838,3 @@ details.statsdrop>summary::-webkit-details-marker{display:none}
 details.statsdrop>summary::before{content:"▸";color:var(--muted);font-size:11px}
 details.statsdrop[open]>summary::before{content:"▾"}
 details.statsdrop .stats{margin:12px 0 0}
-
-/* ---------------- rotating brand motto strip (under the nav) ---------------- */
-.mottobar{display:flex;justify-content:center;align-items:center;padding:6px 16px;
-  background:var(--surface-2);border-top:1px solid var(--line);min-height:30px}
-.mottobar__text{font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;
-  color:var(--gold);font-size:15.5px;letter-spacing:.03em;text-align:center;line-height:1.2}
-@media (prefers-reduced-motion:no-preference){
-  .mottobar__text{animation:mottofade .5s ease}
-}
-@keyframes mottofade{from{opacity:0}to{opacity:1}}
