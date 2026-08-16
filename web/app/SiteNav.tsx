@@ -12,6 +12,7 @@ import { createClient } from "@/lib/supabase/client";
 type Me = { username: string; role: string; title: string | null } | null;
 
 const LINKS = [
+  { href: "/", label: "Home", on: (p: string) => p === "/" },
   { href: "/model", label: "The Model", on: (p: string) => p.startsWith("/model") },
   { href: "/context", label: "Context (Upset Watch)", on: (p: string) => p.startsWith("/context") },
   { href: "/lines", label: "Value Finder", on: (p: string) => ["/lines", "/props", "/best"].some((x) => p.startsWith(x)) },

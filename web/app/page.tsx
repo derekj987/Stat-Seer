@@ -1,5 +1,6 @@
 // Landing / home. Static — tells the StatSeer story and teaches the 1-2-3 flow.
 // Game Lines lives at /lines; Value Finder's front door is /best.
+import AccountPromo from "./AccountPromo";
 
 export const dynamic = "force-static";
 
@@ -30,6 +31,7 @@ export default function Home() {
       </aside>
 
       <div className="home__content">
+      <AccountPromo />
       <section className="hero">
         <div className="hero__pitch">
           <h1 className="hero__h1">Betting analysis you can actually check.</h1>
