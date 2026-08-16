@@ -215,6 +215,7 @@ def mentions(text, team_idx):
 # "top of week", so we keep its order. Rate limits are tight -- pace + retry 429.
 ATOM = "{http://www.w3.org/2005/Atom}"
 _last_req = [0.0]
+_rate_limited = [False]   # set by the last fetch_snippets if it 403/429'd
 
 
 def _http_get(url, tries=4):
@@ -232,7 +233,7 @@ def _http_get(url, tries=4):
             if e.code == 429 and attempt < tries - 1:
                 ra = e.headers.get("Retry-After")
                 back = (float(ra) if (ra and ra.replace(".", "", 1).isdigit())
-                        else min(45.0, 10.0 * (2 ** attempt)))  # 10, 20, 40s
+                        else min(15.0, 5.0 * (2 ** attempt)))  # 5, 10, 15s (capped)
                 time.sleep(back)
                 continue
             raise
@@ -254,10 +255,13 @@ def fetch_snippets(sub):
     """Top-of-week posts from the subreddit's RSS feed as [{text, permalink, score}].
     score is a synthetic descending rank (RSS has none) so feed/top order is kept."""
     oc.ensure_ssl_certs()
+    _rate_limited[0] = False
     url = f"https://www.reddit.com/r/{sub}/top/.rss?t=week"
     try:
         raw = _http_get(url)
     except urllib.error.HTTPError as e:
+        if e.code in (403, 429):
+            _rate_limited[0] = True
         hint = " (Reddit may be blocking this IP)" if e.code in (403, 429) else ""
         print(f"  r/{sub} -> HTTP {e.code}{hint}", file=sys.stderr)
         return []
@@ -374,6 +378,9 @@ def main(argv=None):
     ap.add_argument("--no-extract", action="store_true",
                     help="ingest + filter only; print snippet counts, no Claude call")
     ap.add_argument("--write", action="store_true", help="write to Supabase (else dry run)")
+    ap.add_argument("--max-minutes", type=float, default=16.0,
+                    help="stop starting new teams after this long (keeps the job under "
+                         "GitHub's 20m kill; partial data persists, rest fills next run)")
     args = ap.parse_args(argv)
 
     env = oc.load_env()
@@ -386,23 +393,39 @@ def main(argv=None):
             return 2
         season, week = args.season, args.week
 
-    which = ([t.strip().upper() for t in args.teams.split(",")] if args.teams
-             else list(TEAMS))
-    which = [t for t in which if t in TEAMS]
+    if args.teams:
+        which = [t.strip().upper() for t in args.teams.split(",") if t.strip().upper() in TEAMS]
+    else:
+        # Rotate the start each run so a throttled (partial) run doesn't always
+        # starve the same late-alphabet teams -- coverage fills over the week.
+        allteams = list(TEAMS)
+        off = (week + datetime.now(timezone.utc).weekday()) % len(allteams)
+        which = allteams[off:] + allteams[:off]
     roster = load_roster(season)
 
     print(f"Tailgate scan -- season {season}, week {week}, {len(which)} team(s)"
           f"{' [WRITE]' if args.write else ' [dry run]'} -- Reddit RSS")
-    total_rows, empty_teams = 0, 0
+    start = time.monotonic()
+    total_rows, empty_teams, rl_streak, done = 0, 0, 0, 0
     for abbrev in which:
+        if time.monotonic() - start > args.max_minutes * 60:
+            print(f"\nTime budget ({args.max_minutes:g}m) hit -- stopping cleanly with "
+                  f"{len(which) - done} team(s) left for the next run.", file=sys.stderr)
+            break
+        done += 1
         sub, nickname = TEAMS[abbrev]
         raw = fetch_snippets(sub)
+        # Circuit breaker: once Reddit throttles this IP, every request 429s and
+        # eats backoff -- bail rather than crawl into the 20m kill.
+        rl_streak = rl_streak + 1 if _rate_limited[0] else 0
+        if rl_streak >= 5:
+            print("\nReddit throttled 5 teams in a row -- stopping; the rest resume "
+                  "next run (rotated order covers them).", file=sys.stderr)
+            break
         if not raw:
             empty_teams += 1
-        if roster and abbrev in roster:
-            kept = [s for s in raw if mentions(s["text"], roster[abbrev])]
-        else:
-            kept = raw
+        kept = ([s for s in raw if mentions(s["text"], roster[abbrev])]
+                if roster and abbrev in roster else raw)
         print(f"  {abbrev:<4} r/{sub:<18} {len(raw):>3} snippets -> {len(kept):>3} on-topic")
         if args.no_extract or not kept:
             continue
@@ -415,12 +438,11 @@ def main(argv=None):
         if args.write:
             sb_write(env, season, week, nickname, rows)
 
-    if empty_teams == len(which):
-        print("\nWARNING: every team returned 0 snippets. Reddit is likely rate-"
-              "limiting or blocking this IP (403/429 above). Datacenter/CI ranges "
-              "are often blocked -- try from another network or raise MIN_INTERVAL.",
-              file=sys.stderr)
-    print(f"\n{total_rows} buzz row(s) {'written' if args.write else 'found (dry run)'}.")
+    if empty_teams and empty_teams == done:
+        print("\nWARNING: every team attempted returned 0 snippets -- Reddit is rate-"
+              "limiting/blocking this IP (403/429 above).", file=sys.stderr)
+    print(f"\n{total_rows} buzz row(s) {'written' if args.write else 'found (dry run)'} "
+          f"across {done} team(s).")
     return 0
 
 

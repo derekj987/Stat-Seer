@@ -32,7 +32,7 @@ concurrency:
 jobs:
   capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25   # the script self-stops at --max-minutes (16) well before this
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
