@@ -452,15 +452,17 @@ a.fauthor:hover{text-decoration:underline}
 /* --- guided flow stepper --- */
 .flow{display:flex;align-items:stretch;gap:5px;flex-wrap:nowrap;margin:12px 0 4px}
 .flow__item{display:flex;align-items:center;gap:5px;flex:1 1 0;min-width:0}
-.flow__step{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;flex:1;min-width:0;
+.flow__step{display:flex;align-items:center;gap:6px;padding:7px 8px;border-radius:10px;flex:1;min-width:0;
   text-decoration:none;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
 .flow__step.active{border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
 .flow__step:hover{border-color:var(--accent)}
-.flow__n{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;
-  background:var(--surface-2);font-size:11px;font-weight:800;color:var(--muted);flex:0 0 auto}
+.flow__n{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;
+  background:var(--surface-2);font-size:10px;font-weight:800;color:var(--muted);flex:0 0 auto}
 .flow__step.active .flow__n{background:var(--accent);color:#fff}
-.flow__l{display:flex;flex-direction:column;line-height:1.15;font-size:12.5px;font-weight:700;min-width:0}
-.flow__sub{font-size:10px;font-weight:500;color:var(--muted)}
+.flow__l{display:flex;flex-direction:column;line-height:1.15;min-width:0;
+  font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flow__sub{font-size:9px;font-weight:500;color:var(--muted);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .flow__arrow{color:var(--muted);font-size:12px;flex:0 0 auto}
 
 /* --- upset watch --- */
