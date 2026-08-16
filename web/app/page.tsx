@@ -18,7 +18,7 @@ const STEPS = [
   {
     n: "3", href: "/best", kicker: "The Value Finder", q: "We find the value.",
     body: "Your slip becomes a Value Finder: the single best sportsbook for each pick, plus the key-number sweet spots. Exactly where to place it.",
-    cta: "See best bets",
+    cta: "See sweet spots",
   },
 ];
 

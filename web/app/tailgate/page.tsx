@@ -86,7 +86,7 @@ export default async function Page() {
         <p>
           <b>Sentiment, not a signal.</b> Fan boards are passionate and sometimes right — but they&apos;re a
           crowd, not a model. Everything here is opinion aggregated for color and ideas. For the numbers, see
-          <a href="/model"> The Model</a>; for where the price is wrong, <a href="/best">Best Bets</a>.
+          <a href="/model"> The Model</a>; for where the price is wrong, <a href="/best">Sweet Spots</a>.
         </p>
       </footer>
     </main>

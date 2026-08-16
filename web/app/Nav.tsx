@@ -83,7 +83,7 @@ export function ContextSubnav({ active }: { active: "upset" | "fan" | "best" }) 
       <a href="/tailgate" className={active === "fan" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "fan" ? "page" : undefined}>Fan Analysis</a>
       <a href="/best" className={active === "best" ? "subnav__t active" : "subnav__t"}
-        aria-current={active === "best" ? "page" : undefined}>Best Bets</a>
+        aria-current={active === "best" ? "page" : undefined}>Sweet Spots</a>
     </nav>
   );
 }

@@ -144,7 +144,7 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
         <p className="explainer__p2">
           We tested weather, referees, and roster moves against real results — they add <b>uncertainty, not a
           knowable edge</b> (the market already prices them). So we flag <b>risk</b>, never a &quot;lock.&quot;
-          Then head to <a href="/best">Best Bets</a> to place what survives.
+          Then head to <a href="/best">Sweet Spots</a> to place what survives.
         </p>
       </section>
 
@@ -190,7 +190,7 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
             calibrated but <b>not sharper than the market</b> — an honest read, not an edge.)
             &nbsp;<span className="offcmark">⚑</span> means our model is <b>off consensus</b> on the spread; see
             <a href="/model"> The Model</a>. <span className="ssmark">◆</span> marks a <b>sweet spot</b> — a
-            spread or total on a key number; act on it in <a href="/best">Best Bets</a>.
+            spread or total on a key number; act on it in <a href="/best">Sweet Spots</a>.
           </p>
         </details>
 

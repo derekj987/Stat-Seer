@@ -115,7 +115,7 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={`The Context · Best Bets · Week ${week}, ${SEASON}`} />
+        <Brand sub={`The Context · Sweet Spots · Week ${week}, ${SEASON}`} />
       </header>
 
       <FlowSteps active="context" />
@@ -139,7 +139,7 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
         <>
           {keys.length > 0 && (
             <section className="ctxsec">
-              <h2 className="ctxsec__h">Sweet Spots — key numbers</h2>
+              <h2 className="ctxsec__h">Key numbers</h2>
               <p className="ctxsec__d">
                 Games sitting on <b>3</b> or <b>7</b>, where the margin lands most often. The single largest
                 edge in the whole app, and it&apos;s pure arithmetic.
