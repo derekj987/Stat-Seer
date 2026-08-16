@@ -325,7 +325,7 @@ body{background:var(--bg);color:var(--ink);
 @media (max-width:860px){
   .home{grid-template-columns:1fr;gap:26px}
   /* on narrow screens the banner stops being sticky and sits on top, sized down */
-  .home__banner{position:static;width:100%;max-width:380px;margin:0 auto}
+  .home__banner{position:static;width:100%;max-width:240px;margin:0 auto}
 }
 @media (max-width:720px){
   .hcards{grid-template-columns:1fr}
