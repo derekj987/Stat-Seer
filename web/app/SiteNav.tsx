@@ -120,6 +120,7 @@ export default function SiteNav() {
           <a href="/forum" className="snav__dtop">Community</a>
 
           <div className="snav__ddiv" />
+          <div className="snav__dtop snav__dlabel">User Options</div>
           {me === undefined ? null : me ? (
             <>
               <a href={`/u/${me.username}`} className="snav__dusr">My profile</a>

@@ -37,8 +37,8 @@ export default function Home() {
           <h1 className="hero__h1">Betting analysis you can actually check.</h1>
           <p className="hero__lead">
             StatSeer is built on one idea: <b>verifiable trust</b>. Published probabilities. A public track
-            record — <b>including the bad stretches</b>. Calibration anyone can audit. Not confident-sounding
-            picks. We walk you through it in <b>three honest steps</b>.
+            record — <b>including the bad stretches</b>. Calibration anyone can audit. We walk you through it
+            in <b>three honest steps</b>.
           </p>
           <div className="hero__cta">
             <a href="/model" className="btn btn--primary">Start with the model →</a>
@@ -104,9 +104,9 @@ export default function Home() {
             </div>
             <div className="slipdemo__parlay">
               <span>Parlay · all 6</span>
-              <span className="slipdemo__odds">best combined at <b>Caesars</b> +2100</span>
+              <span className="slipdemo__odds">best at <b>DraftKings</b> +6070</span>
             </div>
-            <div className="slipdemo__save">≈ 11% more than betting all six at one book</div>
+            <div className="slipdemo__save">$10 → $617 — the best combined price across books</div>
           </div>
         </div>
       </section>
