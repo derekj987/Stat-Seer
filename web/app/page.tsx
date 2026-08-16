@@ -43,6 +43,7 @@ export default function Home() {
           <div className="hero__cta">
             <a href="/model" className="btn btn--primary">Start with the model →</a>
             <a href="/best" className="btn">Jump to value plays →</a>
+            <a href="/tailgate" className="btn">See what fans are saying →</a>
           </div>
         </div>
       </section>
