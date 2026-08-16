@@ -183,11 +183,15 @@ body{background:var(--bg);color:var(--ink);
 .slipbar__x:hover{color:var(--key)}
 .slipbar__note{color:var(--muted);font-size:11.5px;line-height:1.5;margin:0 0 10px}
 .slipbar__note b{color:var(--accent)}
-.slipbar__actions{display:flex;justify-content:flex-end}
+.slipbar__actions{display:flex;justify-content:flex-end;gap:8px}
 .slipbar__clear{border:1px solid var(--line);background:var(--surface-2);
   color:var(--muted);border-radius:8px;padding:6px 12px;cursor:pointer;
   font:inherit;font-size:12px}
 .slipbar__clear:hover{border-color:var(--key);color:var(--key)}
+.slipbar__copy{border:1px solid var(--accent);background:var(--accent);
+  color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;
+  font:inherit;font-size:12px;font-weight:700}
+.slipbar__copy:hover{filter:brightness(1.06)}
 .stakebox{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 10px;
   padding:10px 12px;background:var(--surface-2);border-radius:9px}
 .stakebox__label{font-size:12px;font-weight:600;color:var(--muted);

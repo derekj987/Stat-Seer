@@ -98,6 +98,7 @@ function ParlayBar({ legs, onRemove, onClear }: {
   legs: Leg[]; onRemove: (id: string) => void; onClear: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [stake, setStake] = useState(10);
   useEffect(() => {
     const s = Number(localStorage.getItem("statseer.stake"));
@@ -111,6 +112,21 @@ function ParlayBar({ legs, onRemove, onClear }: {
   const par = bestParlay(legs);
   const payout = par ? stake * par.dec : 0;
   const profit = par ? stake * (par.dec - 1) : 0;
+
+  async function copySlip() {
+    const lines = legs.map((l) => `• ${l.game} — ${l.player} ${l.bet}  ${fmtOdds(l.best)}`);
+    const parLine = par
+      ? `Best parlay: ${fmtOdds(par.american)} at ${par.book} · $${stake.toFixed(0)} → $${payout.toFixed(2)}`
+      : `No single book prices all ${legs.length} legs.`;
+    const text =
+      `My StatSeer prop parlay — ${legs.length} leg${legs.length === 1 ? "" : "s"}\n` +
+      `${lines.join("\n")}\n\n${parLine}\nBuild your own at statseer.vercel.app`;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { /* ignore */ }
+  }
 
   return (
     <div className="slipbar">
@@ -165,6 +181,7 @@ function ParlayBar({ legs, onRemove, onClear }: {
               </p>
             )}
             <div className="slipbar__actions">
+              <button className="slipbar__copy" onClick={copySlip}>{copied ? "Copied ✓" : "Copy slip"}</button>
               <button className="slipbar__clear" onClick={onClear}>Clear</button>
             </div>
           </div>

@@ -139,10 +139,26 @@ function SlipBar({
   picks, onRemove, onClear,
 }: { picks: Pick[]; onRemove: (id: string) => void; onClear: () => void }) {
   const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   if (!picks.length) return null;
   const tally: Record<string, number> = {};
   for (const p of picks) for (const b of p.books) tally[b] = (tally[b] ?? 0) + 1;
   const [topBook, topCount] = Object.entries(tally).sort((a, b) => b[1] - a[1])[0] ?? ["—", 0];
+
+  async function copySlip() {
+    const lines = picks.map((p) =>
+      `• ${p.game} — ${p.market} ${p.label}  ${fmtOdds(p.price)}  (best: ${p.books.join(" / ")})`);
+    const text =
+      `My StatSeer slip — ${picks.length} pick${picks.length === 1 ? "" : "s"}\n` +
+      `${lines.join("\n")}\n\n` +
+      `Best single book: ${topBook} (best price on ${topCount}/${picks.length} legs).\n` +
+      `Build your own at statseer.vercel.app`;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { /* clipboard blocked — ignore */ }
+  }
 
   return (
     <div className="slipbar">
@@ -172,6 +188,7 @@ function SlipBar({
               at one book, so pick the one covering the most legs. Line-shopping only — not a pick.
             </p>
             <div className="slipbar__actions">
+              <button className="slipbar__copy" onClick={copySlip}>{copied ? "Copied ✓" : "Copy slip"}</button>
               <button className="slipbar__clear" onClick={onClear}>Clear slip</button>
             </div>
           </div>
