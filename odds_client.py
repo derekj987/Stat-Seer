@@ -82,7 +82,7 @@ def load_env(path=ENV_PATH):
     # Real env vars override .env (and supply config when no .env exists).
     for key, value in os.environ.items():
         if key in env or key.startswith(("ODDS_", "SUPABASE_", "SPORTSDATA_",
-                                         "CRON_", "ANTHROPIC_")):
+                                         "CRON_", "ANTHROPIC_", "REDDIT_")):
             env[key] = value
     return env
 
