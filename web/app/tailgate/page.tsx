@@ -16,7 +16,7 @@ function BuzzCard({ b }: { b: Buzz }) {
       <header className="tgcard__head">
         <div className="tgcard__id">
           <span className="tgcard__player">{b.player}</span>
-          <span className="tgcard__team">{b.team}{b.matchup && <> · {b.matchup}</>}</span>
+          {b.matchup && <span className="tgcard__team">{b.matchup}</span>}
         </div>
         <span className={`tgheat tgheat--h${b.heat}`} title={`Fan hype: ${HEAT_LABEL[b.heat]}`}>
           <span aria-hidden="true">{flames(b.heat)}</span>
@@ -38,6 +38,24 @@ function BuzzCard({ b }: { b: Buzz }) {
       </div>
     </article>
   );
+}
+
+// Group the flat feed by team, buzziest team first (max heat, then count, then name).
+// Input is already heat-desc, so each team's cards stay heat-desc.
+function groupByTeam(buzz: Buzz[]): [string, Buzz[]][] {
+  const map = new Map<string, Buzz[]>();
+  for (const b of buzz) {
+    const list = map.get(b.team);
+    if (list) list.push(b);
+    else map.set(b.team, [b]);
+  }
+  return [...map.entries()].sort((a, z) => {
+    const ah = Math.max(...a[1].map((x) => x.heat));
+    const zh = Math.max(...z[1].map((x) => x.heat));
+    if (zh !== ah) return zh - ah;
+    if (z[1].length !== a[1].length) return z[1].length - a[1].length;
+    return a[0].localeCompare(z[0]);
+  });
 }
 
 export default async function Page() {
@@ -78,7 +96,14 @@ export default async function Page() {
         <p className="foot">No fan buzz gathered for Week {week} yet — check back closer to kickoff.</p>
       ) : (
         <section className="tgfeed">
-          {feed.buzz.map((b) => <BuzzCard key={b.id} b={b} />)}
+          {groupByTeam(feed.buzz).map(([team, buzz]) => (
+            <div className="tgteam" key={team}>
+              <h2 className="tgteam__h">{team}<span className="tgteam__n">{buzz.length}</span></h2>
+              <div className="tgteam__cards">
+                {buzz.map((b) => <BuzzCard key={b.id} b={b} />)}
+              </div>
+            </div>
+          ))}
         </section>
       )}
 

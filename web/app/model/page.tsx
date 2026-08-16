@@ -152,6 +152,17 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         </section>
       )}
 
+      <section className="soonpanel">
+        <span className="soonpanel__tag">Arriving Week 1</span>
+        <h2 className="soonpanel__h">Player projections</h2>
+        <p className="soonpanel__p">
+          The layer that projects <b>player prop numbers</b> — rushing and receiving yards, receptions,
+          touches — from our snap-share model, the one measured edge we&apos;ve found. It needs live
+          in-season usage to project honestly, so it turns on with <b>Week&nbsp;1</b>. Until then, see which
+          players fans are buzzing about in <a href="/tailgate">Fan Analysis</a>.
+        </p>
+      </section>
+
       <section className="calib">
         <h2 className="calib__h">Calibration</h2>
         {calibration.length === 0 ? (
