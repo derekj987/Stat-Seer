@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { MedievalSharp } from "next/font/google";
 import "./globals.css";
 import SiteNav from "./SiteNav";
+import MottoBar from "./MottoBar";
 
 // Medieval display face for the STATSEER wordmark, exposed as a CSS var so any
 // masthead can use it (matches the tavern / seer tone).
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={medieval.variable}>
       <body>
         <SiteNav />
+        <MottoBar />
         {children}
         <footer className="sitefoot">
           <p>
