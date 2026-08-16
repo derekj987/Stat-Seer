@@ -763,13 +763,11 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
   .snav__dsub{display:block;padding:8px 10px 8px 28px;border-radius:8px;text-decoration:none;
     font-size:13.5px;font-weight:600;color:var(--ink)}
   .snav__dsub:hover{color:var(--accent);background:var(--surface-2)}
-  /* 'User Options' header behaves as a label, not a button */
-  .snav__dlabel{cursor:default}
-  /* account actions: green, indented under the User Options header */
-  .snav__dusr{display:block;width:100%;padding:9px 10px 9px 28px;border-radius:8px;text-decoration:none;
-    font-size:14px;font-weight:700;color:var(--accent);
+  /* account actions: match the other indented sub-links (ink, not green) */
+  .snav__dusr{display:block;width:100%;padding:8px 10px 8px 28px;border-radius:8px;text-decoration:none;
+    font-size:13.5px;font-weight:600;color:var(--ink);
     background:none;border:0;text-align:left;cursor:pointer;font:inherit}
-  .snav__dusr:hover{background:var(--accent-soft)}
+  .snav__dusr:hover{color:var(--accent);background:var(--surface-2)}
   .snav__ddiv{height:1px;background:var(--line);margin:8px 0}
 }
 

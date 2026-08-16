@@ -120,20 +120,22 @@ export default function SiteNav() {
           <a href="/forum" className="snav__dtop">Community</a>
 
           <div className="snav__ddiv" />
-          <div className="snav__dtop snav__dlabel">User Options</div>
-          {me === undefined ? null : me ? (
-            <>
-              <a href={`/u/${me.username}`} className="snav__dusr">My profile</a>
-              <a href="/settings" className="snav__dusr">Account settings</a>
-              {MOD.includes(me.role) && <a href="/forum/reports" className="snav__dusr">Reports</a>}
-              <button type="button" className="snav__dusr" onClick={logout}>Log out</button>
-            </>
-          ) : (
-            <>
-              <a href="/login" className="snav__dusr">Log in</a>
-              <a href="/signup" className="snav__dusr">Sign up</a>
-            </>
-          )}
+          <details className="snav__pgroup" open>
+            <summary className="snav__dtop snav__psum">User Options</summary>
+            {me === undefined ? null : me ? (
+              <>
+                <a href={`/u/${me.username}`} className="snav__dusr">My profile</a>
+                <a href="/settings" className="snav__dusr">Account settings</a>
+                {MOD.includes(me.role) && <a href="/forum/reports" className="snav__dusr">Reports</a>}
+                <button type="button" className="snav__dusr" onClick={logout}>Log out</button>
+              </>
+            ) : (
+              <>
+                <a href="/login" className="snav__dusr">Log in</a>
+                <a href="/signup" className="snav__dusr">Sign up</a>
+              </>
+            )}
+          </details>
         </div>
       )}
     </header>
