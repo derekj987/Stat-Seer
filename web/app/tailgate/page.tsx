@@ -1,6 +1,6 @@
 import { weekRange } from "@/lib/board";
 import { weekTailgate, HEAT_LABEL, type Buzz } from "@/lib/tailgate";
-import { Brand } from "../Nav";
+import { Brand, FlowSteps, ValueSubnav } from "../Nav";
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -48,15 +48,18 @@ export default async function Page() {
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={`Tailgate · What the fans are saying · Week ${week}, ${SEASON}`} />
+        <Brand sub={`Value Finder · Fan Analysis · what fans are saying · Week ${week}, ${SEASON}`} />
       </header>
+
+      <FlowSteps active="value" />
+      <ValueSubnav active="fans" />
 
       {/* The wall: this is fan sentiment, NOT a StatSeer pick or model output. */}
       <div className="tgwall" role="note">
         <span className="tgwall__tag">Fan chatter — not a pick</span>
         <p>
-          This is the <b>Tailgate</b>: a digest of what fans are buzzing about on their teams&apos; message
-          boards — sleepers who might go <b>over</b> their number this week. It&apos;s <b>ammo for your own
+          This is <b>Fan Analysis</b>: a digest of what fans are buzzing about on their teams&apos; boards and
+          blogs — sleepers who might go <b>over</b> their number this week. It&apos;s <b>ammo for your own
           research</b>, not our model, not a StatSeer pick, and it is <b>never graded</b>. We&apos;re not
           crunching numbers here — we&apos;re handing you the word around the league. Do your own homework.
         </p>

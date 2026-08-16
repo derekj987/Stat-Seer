@@ -16,8 +16,7 @@ const LINKS = [
   { href: "/", label: "Home", on: (p: string) => p === "/" },
   { href: "/model", label: "The Model", on: (p: string) => p.startsWith("/model") },
   { href: "/context", label: "The Context", on: (p: string) => p.startsWith("/context") },
-  { href: "/lines", label: "Value Finder", on: (p: string) => ["/lines", "/props", "/best"].some((x) => p.startsWith(x)) },
-  { href: "/tailgate", label: "Tailgate", on: (p: string) => p.startsWith("/tailgate") },
+  { href: "/lines", label: "Value Finder", on: (p: string) => ["/lines", "/props", "/best", "/tailgate"].some((x) => p.startsWith(x)) },
   { href: "/forum", label: "Community", on: (p: string) => p.startsWith("/forum") },
 ];
 const MOD = ["founder", "admin"];
@@ -121,7 +120,6 @@ export default function SiteNav() {
             <a href="/lines" className="snav__dsub">Value Finder</a>
           </details>
 
-          <a href="/tailgate" className="snav__dtop">Tailgate</a>
           <a href="/forum" className="snav__dtop">Community</a>
 
           <div className="snav__ddiv" />
