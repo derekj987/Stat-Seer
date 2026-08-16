@@ -375,6 +375,10 @@ def main(argv=None):
     g.add_argument("--season", type=int, help="explicit season (needs --week)")
     ap.add_argument("--week", type=int)
     ap.add_argument("--teams", help="comma-separated abbrevs, e.g. BUF,BAL (default: all 32)")
+    ap.add_argument("--shard", metavar="i/n",
+                    help="process only shard i of n -- a fixed 1/n slice of the 32 teams. "
+                         "Run all n shards (in parallel, separate IPs) to cover the league "
+                         "without tripping Reddit's per-IP throttle.")
     ap.add_argument("--no-extract", action="store_true",
                     help="ingest + filter only; print snippet counts, no Claude call")
     ap.add_argument("--write", action="store_true", help="write to Supabase (else dry run)")
@@ -395,6 +399,11 @@ def main(argv=None):
 
     if args.teams:
         which = [t.strip().upper() for t in args.teams.split(",") if t.strip().upper() in TEAMS]
+    elif args.shard:
+        i, n = (int(x) for x in args.shard.split("/"))
+        allteams = list(TEAMS)
+        size = -(-len(allteams) // n)      # ceil division
+        which = allteams[(i - 1) * size:i * size]
     else:
         # Rotate the start each run so a throttled (partial) run doesn't always
         # starve the same late-alphabet teams -- coverage fills over the week.

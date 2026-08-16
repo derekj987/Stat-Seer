@@ -3,24 +3,21 @@ name: Capture tailgate
 # Fan-sentiment scan: Reddit team boards -> Claude (Sonnet) -> Supabase tailgate_buzz.
 # NOT a pick and NOT model output -- never graded, never feeds The Model. See
 # docs/TAILGATE_PIPELINE.md. Reddit is read via its public RSS feed (no app/creds).
-# Claude is ~$2/run. NOTE: Reddit rate-limits/blocks some datacenter IPs -- if a run
-# reports every team empty (403/429), the GitHub-Actions IP is blocked; see the doc.
 #
-# Use the "test" mode of Run workflow first: it hits Reddit for 2 teams only, needs
-# NO secrets and NO table, and just tells you whether Actions can reach the feed.
+# Reddit throttles a single IP after ~12 teams, so we SHARD the 32 teams into 4
+# groups of 8 and run them as parallel matrix jobs -- each shard is a separate
+# runner with its own IP, staying under the per-IP throttle. Full league, daily.
 #
-# 3x/week spanning the practice-report arc: Wed chatter -> Fri designations ->
-# Sunday-morning late buzz. All times UTC.
+# Use the "test" dispatch mode first (shard 1 only, no secrets/table) to confirm
+# Actions can reach Reddit.
 
 on:
   schedule:
-    - cron: "0 14 * * 3"   # Wed 14:00 UTC (~9-10am ET) — after Wed practice chatter
-    - cron: "0 15 * * 5"   # Fri 15:00 UTC — post-final-practice / injury designations
-    - cron: "0 14 * * 0"   # Sun 14:00 UTC (~9-10am ET) — late buzz before the 1pm ET games
+    - cron: "0 14 * 8-12,1 *"   # daily 14:00 UTC (~9-10am ET), Aug-Jan
   workflow_dispatch:
     inputs:
       mode:
-        description: "test = 2-team reachability check (no secrets/table); full = scan all 32 + write"
+        description: "test = reachability check (shard 1 only, no secrets/table); full = all shards + write"
         type: choice
         options: [test, full]
         default: test
@@ -32,22 +29,30 @@ concurrency:
 jobs:
   capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 25   # the script self-stops at --max-minutes (16) well before this
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: pip install --quiet certifi anthropic
-      - name: Scan team boards -> Supabase
+      - name: "Scan shard ${{ matrix.shard }}/4 -> Supabase"
         env:
           ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
           SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        # Scheduled runs (no inputs) fall through to the full scan+write.
+        # Scheduled runs (no mode input) fall through to the full write of each shard.
         run: |
           if [ "${{ github.event.inputs.mode }}" = "test" ]; then
-            python tailgate_reddit.py --current --no-extract --teams BUF,BAL,KC,PHI
+            if [ "${{ matrix.shard }}" = "1" ]; then
+              python tailgate_reddit.py --current --no-extract --shard 1/4
+            else
+              echo "test mode: shard ${{ matrix.shard }} skipped"
+            fi
           else
-            python tailgate_reddit.py --current --write
+            python tailgate_reddit.py --current --write --shard ${{ matrix.shard }}/4
           fi
