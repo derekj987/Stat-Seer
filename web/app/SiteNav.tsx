@@ -77,6 +77,8 @@ export default function SiteNav() {
           ))}
         </nav>
 
+        <MottoBar />
+
         <div className="snav__right">
           {me === undefined ? (
             <span className="snav__slot" />
@@ -106,8 +108,6 @@ export default function SiteNav() {
           </button>
         </div>
       </div>
-
-      <MottoBar />
 
       {open && (
         <div className="snav__drawer">
