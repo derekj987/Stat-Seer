@@ -10,7 +10,7 @@
 export function FlowSteps({ active }: { active: "model" | "context" | "value" }) {
   const steps = [
     { key: "model", n: "1", label: "The Model", sub: "our read", href: "/model" },
-    { key: "context", n: "2", label: "Context (Upset Watch)", sub: "pressure-test it", href: "/context" },
+    { key: "context", n: "2", label: "The Context", sub: "pressure-test it", href: "/context" },
     { key: "value", n: "3", label: "Value Finder", sub: "place it", href: "/lines" },
   ] as const;
   return (
