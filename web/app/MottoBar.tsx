@@ -1,7 +1,7 @@
 "use client";
 
-// Rotating brand motto strip. Shown only on mobile (CSS hides it ≥821px), where
-// the top bar is otherwise sparse — it fills the slim bar under the logo/hamburger.
+// Rotating brand motto, centered inside the top bar between the logo and the
+// hamburger (all widths).
 import { useEffect, useState } from "react";
 
 const MOTTOS = [

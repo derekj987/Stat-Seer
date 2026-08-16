@@ -771,14 +771,13 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .snav__dusr:hover{color:var(--accent);background:var(--surface-2)}
 .snav__ddiv{height:1px;background:var(--line);margin:8px 0}
 
-/* rotating motto — MOBILE ONLY, centered inside the top bar next to the hamburger */
+/* rotating motto — centered inside the top bar next to the hamburger (all widths) */
 .mottobar{flex:1 1 auto;min-width:0;display:flex;justify-content:center;align-items:center;padding:0 8px}
 .mottobar__text{font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;
   color:var(--gold);font-size:14px;letter-spacing:.02em;text-align:center;line-height:1.2;
   max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (prefers-reduced-motion:no-preference){.mottobar__text{animation:mottofade .5s ease}}
 @keyframes mottofade{from{opacity:0}to{opacity:1}}
-@media (min-width:821px){.mottobar{display:none}}
 
 /* ---------------- account settings ---------------- */
 .settings{max-width:640px}
