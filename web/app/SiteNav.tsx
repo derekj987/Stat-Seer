@@ -73,6 +73,8 @@ export default function SiteNav() {
           <img src="/logo-mark.png?v=3" alt="" className="snav__logo" width={34} height={34} />
         </a>
 
+        {me === null && <a href="/signup" className="snav__signup">Create an Account</a>}
+
         <nav className="snav__links" aria-label="Primary">
           {LINKS.map((l) => (
             <a key={l.href} href={l.href} className={l.on(pathname) ? "snav__link active" : "snav__link"}>{l.label}</a>
@@ -99,8 +101,7 @@ export default function SiteNav() {
             </div>
           ) : (
             <div className="snav__auth">
-              <a href="/login" className="snav__link">Log in</a>
-              <a href="/signup" className="snav__cta">Sign up</a>
+              <a href="/login" className="snav__cta">Log in</a>
             </div>
           )}
 
