@@ -6,6 +6,19 @@ import AddToSlip from "../AddToSlip";
 export const revalidate = 300;
 const SEASON = 2026;
 
+// Team primary colors, brightened where needed so they stay legible on both the
+// light and dark (deep-green) themes. Keyed by nickname (Buzz.team).
+const TEAM_COLOR: Record<string, string> = {
+  Cardinals: "#e04f6e", Falcons: "#e24857", Ravens: "#9b7be8", Bills: "#4a8fe0",
+  Panthers: "#35b4e8", Bears: "#e8792e", Bengals: "#fb6a2e", Browns: "#e8843c",
+  Cowboys: "#7aa5e8", Broncos: "#fb7a3c", Lions: "#4aa8e0", Packers: "#5cb06a",
+  Texans: "#e24857", Colts: "#5a9ae0", Jaguars: "#2fb6be", Chiefs: "#e8455a",
+  Chargers: "#35a8e0", Rams: "#6a9ae8", Raiders: "#b3bac0", Dolphins: "#2ec6ce",
+  Vikings: "#8a6fe0", Patriots: "#6a9ae8", Saints: "#cbab52", Giants: "#5a8fe8",
+  Jets: "#4fa872", Eagles: "#2fae90", Steelers: "#e8c342", Seahawks: "#69be28",
+  "49ers": "#cb5a6e", Buccaneers: "#d84a3c", Titans: "#4aace0", Commanders: "#cf7a5c",
+};
+
 function flames(heat: Buzz["heat"]): string {
   return "🔥".repeat(heat);
 }
@@ -97,12 +110,16 @@ export default async function Page() {
       ) : (
         <section className="tgfeed">
           {groupByTeam(feed.buzz).map(([team, buzz]) => (
-            <div className="tgteam" key={team}>
-              <h2 className="tgteam__h">{team}<span className="tgteam__n">{buzz.length}</span></h2>
+            <details className="tgteam" key={team}>
+              <summary className="tgteam__h">
+                <span className="tgteam__name" style={{ color: TEAM_COLOR[team] ?? "var(--gold)" }}>{team}</span>
+                <span className="tgteam__n">{buzz.length}</span>
+                <span className="tgteam__chev" aria-hidden="true">▸</span>
+              </summary>
               <div className="tgteam__cards">
                 {buzz.map((b) => <BuzzCard key={b.id} b={b} />)}
               </div>
-            </div>
+            </details>
           ))}
         </section>
       )}
