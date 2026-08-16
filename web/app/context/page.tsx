@@ -3,7 +3,7 @@ import { fetchModelWeek, type ModelPrediction } from "@/lib/model";
 import { MODEL_TOTALS } from "@/lib/modelTotals";
 import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
 import { weekRefs } from "@/lib/refAssignments";
-import { Brand, FlowSteps } from "../Nav";
+import { Brand, FlowSteps, ContextSubnav } from "../Nav";
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -128,10 +128,11 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={`Context · Upset Watch · Week ${week}, ${SEASON}`} />
+        <Brand sub={`The Context · Upset Watch · Week ${week}, ${SEASON}`} />
       </header>
 
       <FlowSteps active="context" />
+      <ContextSubnav active="upset" />
       <WeekNav min={min} max={max} current={week} />
 
       <section className="explainer">

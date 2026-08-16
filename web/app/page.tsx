@@ -6,7 +6,7 @@ export const dynamic = "force-static";
 
 const STEPS = [
   {
-    n: "1", href: "/lines", kicker: "Review the analysis", q: "Find picks you jive with.",
+    n: "1", href: "/model", kicker: "Review the analysis", q: "Find picks you jive with.",
     body: "Read our line-blind ML model, the upset & context watch, and AI-distilled fan buzz. Agree with a read? That's a pick.",
     cta: "See the analysis",
   },

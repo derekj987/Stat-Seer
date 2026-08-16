@@ -6,12 +6,12 @@
 //   The Model    — line-blind predictions
 //   Context      — what to understand (informs, doesn't vote)
 
-/** The guided journey: read the model → pressure-test it → find the price. */
-export function FlowSteps({ active }: { active: "model" | "context" | "value" }) {
+/** The guided journey: analyze → read the context → shop the market. */
+export function FlowSteps({ active }: { active: "analyze" | "context" | "shop" }) {
   const steps = [
-    { key: "model", n: "1", label: "The Model", sub: "our read", href: "/model" },
-    { key: "context", n: "2", label: "The Context", sub: "spot the upsets", href: "/context" },
-    { key: "value", n: "3", label: "Analysis", sub: "find your picks", href: "/lines" },
+    { key: "analyze", n: "1", label: "Analyze", sub: "our read", href: "/model" },
+    { key: "context", n: "2", label: "The Context", sub: "read the room", href: "/context" },
+    { key: "shop", n: "3", label: "The Shop", sub: "shop the lines", href: "/lines" },
   ] as const;
   return (
     <nav className="flow" aria-label="How to use StatSeer">
@@ -74,18 +74,28 @@ export function TopNav({ active }: { active: "value" | "model" | "context" }) {
   );
 }
 
-/** Secondary toggle shown only inside Value Finder. */
-export function ValueSubnav({ active }: { active: "best" | "lines" | "props" | "fans" }) {
+/** Sub-tabs inside The Context. */
+export function ContextSubnav({ active }: { active: "upset" | "fan" | "best" }) {
   return (
-    <nav className="subnav" aria-label="Analysis view">
+    <nav className="subnav" aria-label="Context view">
+      <a href="/context" className={active === "upset" ? "subnav__t active" : "subnav__t"}
+        aria-current={active === "upset" ? "page" : undefined}>Upset Watch</a>
+      <a href="/tailgate" className={active === "fan" ? "subnav__t active" : "subnav__t"}
+        aria-current={active === "fan" ? "page" : undefined}>Fan Analysis</a>
+      <a href="/best" className={active === "best" ? "subnav__t active" : "subnav__t"}
+        aria-current={active === "best" ? "page" : undefined}>Best Bets</a>
+    </nav>
+  );
+}
+
+/** Sub-tabs inside The Shop. */
+export function ShopSubnav({ active }: { active: "lines" | "props" }) {
+  return (
+    <nav className="subnav" aria-label="Shop view">
       <a href="/lines" className={active === "lines" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "lines" ? "page" : undefined}>Game Lines</a>
       <a href="/props" className={active === "props" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "props" ? "page" : undefined}>Player Props</a>
-      <a href="/tailgate" className={active === "fans" ? "subnav__t active" : "subnav__t"}
-        aria-current={active === "fans" ? "page" : undefined}>Fan Analysis</a>
-      <a href="/best" className={active === "best" ? "subnav__t active" : "subnav__t"}
-        aria-current={active === "best" ? "page" : undefined}>Best Bets</a>
     </nav>
   );
 }

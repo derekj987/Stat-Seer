@@ -1,6 +1,6 @@
 import { weekRange } from "@/lib/board";
 import { weekTailgate, HEAT_LABEL, type Buzz } from "@/lib/tailgate";
-import { Brand, FlowSteps, ValueSubnav } from "../Nav";
+import { Brand, FlowSteps, ContextSubnav } from "../Nav";
 import AddToSlip from "../AddToSlip";
 
 export const revalidate = 300;
@@ -50,11 +50,11 @@ export default async function Page() {
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={`Analysis · Fan Analysis · what fans are saying · Week ${week}, ${SEASON}`} />
+        <Brand sub={`The Context · Fan Analysis · what fans are saying · Week ${week}, ${SEASON}`} />
       </header>
 
-      <FlowSteps active="value" />
-      <ValueSubnav active="fans" />
+      <FlowSteps active="context" />
+      <ContextSubnav active="fan" />
 
       {/* The wall: this is fan sentiment, NOT a StatSeer pick or model output. */}
       <div className="tgwall" role="note">
