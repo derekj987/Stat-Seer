@@ -1,5 +1,56 @@
 # Build plan — ordered to-do list
 
+> **CURRENT next steps live in the section directly below (updated Aug 15, 2026).**
+> Everything under "PHASE 0" onward is the original Aug‑10 planning doc, kept for
+> reference — most of it is now done: the app is LIVE at statseer.vercel.app,
+> data collection is deployed, and the business model is decided (subscription).
+
+---
+
+# NEXT STEPS — as of Aug 15, 2026
+
+The web app is live and the whole UI is themed (Turf) and navigable (hamburger nav
+on desktop + mobile, three analytics sections, membership + forum + profiles).
+What's left, split by who's blocked on what.
+
+## Derek — setup you own (quick, unblocks features)
+
+- [ ] **Run the `reports` table SQL in Supabase.** Delete-moderation already works,
+  but the Report button + founder inbox at `/forum/reports` need this table.
+- [ ] **Business-model paperwork.** Subscription is the chosen model, so before
+  confidence tiers can ship: **set up Stripe** and write a **Terms of Service /
+  responsible-gambling page**. This gates what the app is legally allowed to say.
+
+## Season-opener driven (hard deadline — data that can't be backfilled)
+
+- [ ] **Decide the practice-data feed:** nflverse daily poll vs. a scraper. The
+  Wed/Thu/Fri practice sequence only exists if captured on the day; the capture
+  job is written but the source is undecided.
+- [ ] **Verify grading + calibration after Week 1** — confirm the daily grading
+  Action is writing results and the calibration numbers look sane on real games.
+
+## Build — product (in priority order)
+
+- [ ] **Touch-share layer** — convert the snap-share model (the one real edge,
+  +8.2%) into projected prop numbers. This is what makes Player Props answer
+  *"is this line beatable?"* instead of only line-shopping.
+- [ ] **Stage A availability model** — the player pipeline currently assumes a
+  player is active; this predicts that.
+- [ ] **Sept 11: prop yardage → projection-vs-line** — the queued reminder; wire
+  projections against posted yardage lines.
+- [ ] **Value Finder depth** — alternate-lines fair value (direction B) + **one
+  unified slip across Game Lines and Player Props** with best-single-book /
+  savings math.
+
+## Polish / later
+
+- [ ] Per-user profile **cover upload** (`cover_url` col + CoverUpload component).
+- [ ] **Google sign-in**, and profile-wall notifications.
+
+---
+
+# ORIGINAL PLANNING DOC (Aug 10, 2026)
+
 Written for someone who hasn't shipped an app before. Ordered by **dependency and
 urgency**, not by importance.
 
