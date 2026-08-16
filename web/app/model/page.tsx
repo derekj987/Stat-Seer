@@ -1,6 +1,6 @@
 import { weekRange } from "@/lib/board";
 import { fetchModelWeek, fetchCalibration, MODEL_VERSION, type ModelPrediction } from "@/lib/model";
-import { TopNav, Brand, FlowSteps } from "../Nav";
+import { Brand, FlowSteps } from "../Nav";
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -111,7 +111,6 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         {published && <div className="asof">published<br /><b>{et(published)}</b></div>}
       </header>
 
-      <TopNav active="model" />
       <FlowSteps active="model" />
       <WeekNav min={min} max={max} current={week} />
 

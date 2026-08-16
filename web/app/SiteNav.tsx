@@ -1,0 +1,142 @@
+"use client";
+
+// Global navigation bar — the single top menu across the whole app. Replaces the
+// old AuthBar + the per-page section tabs. Circle logo (home), section links, a
+// Community link, and a user menu (profile / settings / reports / log out). On
+// mobile it collapses to a hamburger drawer that also lists the Value Finder
+// subsections.
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+
+type Me = { username: string; role: string; title: string | null } | null;
+
+const LINKS = [
+  { href: "/model", label: "The Model", on: (p: string) => p.startsWith("/model") },
+  { href: "/context", label: "Context (Upset Watch)", on: (p: string) => p.startsWith("/context") },
+  { href: "/lines", label: "Value Finder", on: (p: string) => ["/lines", "/props", "/best"].some((x) => p.startsWith(x)) },
+  { href: "/forum", label: "Community", on: (p: string) => p.startsWith("/forum") },
+];
+const VALUE_SUBS = [
+  { href: "/lines", label: "Game Lines" },
+  { href: "/props", label: "Player Props" },
+  { href: "/best", label: "Best Bets" },
+];
+const MOD = ["founder", "admin"];
+
+export default function SiteNav() {
+  const pathname = usePathname() || "/";
+  const [me, setMe] = useState<Me | undefined>(undefined);
+  const [open, setOpen] = useState(false);       // mobile drawer
+  const [userOpen, setUserOpen] = useState(false); // desktop user dropdown
+
+  useEffect(() => {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      setMe(null);
+      return;
+    }
+    const supabase = createClient();
+    let active = true;
+    const load = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!active) return;
+      const u = data.user;
+      if (!u) { setMe(null); return; }
+      const { data: profile } = await supabase
+        .from("profiles").select("username,role,title").eq("id", u.id).single();
+      if (!active) return;
+      setMe({
+        username: profile?.username ?? (u.user_metadata?.username as string) ?? u.email ?? "member",
+        role: profile?.role ?? "member",
+        title: profile?.title ?? null,
+      });
+    };
+    load();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => load());
+    return () => { active = false; sub.subscription.unsubscribe(); };
+  }, []);
+
+  // Close menus whenever the route changes.
+  useEffect(() => { setOpen(false); setUserOpen(false); }, [pathname]);
+
+  async function logout() {
+    await createClient().auth.signOut();
+    location.href = "/";
+  }
+
+  return (
+    <header className="snav">
+      <div className="snav__bar">
+        <a href="/" className="snav__home" aria-label="StatSeer home">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-mark.png" alt="" className="snav__logo" width={34} height={34} />
+        </a>
+
+        <nav className="snav__links" aria-label="Primary">
+          {LINKS.map((l) => (
+            <a key={l.href} href={l.href} className={l.on(pathname) ? "snav__link active" : "snav__link"}>{l.label}</a>
+          ))}
+        </nav>
+
+        <div className="snav__right">
+          {me === undefined ? (
+            <span className="snav__slot" />
+          ) : me ? (
+            <div className="snav__usr">
+              <button className="snav__usrbtn" onClick={() => setUserOpen((v) => !v)} aria-expanded={userOpen}>
+                <span className={me.role === "founder" ? "snav__name founder" : "snav__name"}>{me.username}</span>
+                <span className="snav__caret" aria-hidden="true">▾</span>
+              </button>
+              {userOpen && (
+                <div className="snav__menu">
+                  <a href={`/u/${me.username}`} className="snav__mi">My profile</a>
+                  <a href="/settings" className="snav__mi">Account settings</a>
+                  {MOD.includes(me.role) && <a href="/forum/reports" className="snav__mi">Reports</a>}
+                  <button type="button" className="snav__mi snav__mi--btn" onClick={logout}>Log out</button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="snav__auth">
+              <a href="/login" className="snav__link">Log in</a>
+              <a href="/signup" className="snav__cta">Sign up</a>
+            </div>
+          )}
+
+          <button className="snav__burger" aria-label="Menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+            <span /><span /><span />
+          </button>
+        </div>
+      </div>
+
+      {open && (
+        <div className="snav__drawer">
+          {LINKS.map((l) => (
+            <div key={l.href} className="snav__dgroup">
+              <a href={l.href} className={l.on(pathname) ? "snav__dlink active" : "snav__dlink"}>{l.label}</a>
+              {l.href === "/lines" && (
+                <div className="snav__dsubs">
+                  {VALUE_SUBS.map((s) => <a key={s.href} href={s.href} className="snav__dsub">{s.label}</a>)}
+                </div>
+              )}
+            </div>
+          ))}
+          <div className="snav__ddiv" />
+          {me === undefined ? null : me ? (
+            <>
+              <a href={`/u/${me.username}`} className="snav__dlink">My profile</a>
+              <a href="/settings" className="snav__dlink">Account settings</a>
+              {MOD.includes(me.role) && <a href="/forum/reports" className="snav__dlink">Reports</a>}
+              <button type="button" className="snav__dlink snav__mi--btn" onClick={logout}>Log out</button>
+            </>
+          ) : (
+            <>
+              <a href="/login" className="snav__dlink">Log in</a>
+              <a href="/signup" className="snav__dlink">Sign up</a>
+            </>
+          )}
+        </div>
+      )}
+    </header>
+  );
+}

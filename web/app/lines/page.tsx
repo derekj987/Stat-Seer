@@ -1,5 +1,5 @@
 import { fetchWeek, weekRange, buildBoard } from "@/lib/board";
-import { Brand, TopNav, ValueSubnav } from "../Nav";
+import { Brand, ValueSubnav } from "../Nav";
 import BoardView from "../BoardView";
 
 export const revalidate = 120; // ISR: refresh Supabase reads every 2 min
@@ -12,7 +12,6 @@ function Shell({ children, sub }: { children: React.ReactNode; sub: string }) {
       <header className="masthead">
         <Brand sub={sub} />
       </header>
-      <TopNav active="value" />
       <ValueSubnav active="lines" />
       {children}
     </main>

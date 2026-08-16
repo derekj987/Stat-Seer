@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import type { Game } from "@/lib/board";
-import { TopNav, ValueSubnav, Brand, SlipCallout } from "./Nav";
+import { ValueSubnav, Brand, SlipCallout } from "./Nav";
 
 // ---- formatting (client-side; Intl has full ICU) ----
 const kickFmt = new Intl.DateTimeFormat("en-US", {
@@ -215,7 +215,6 @@ export default function BoardView({
           {snapshot && <div className="asof">lines as of<br /><b>{et(snapshot, snapFmt)}</b></div>}
         </header>
 
-        <TopNav active="value" />
         <ValueSubnav active="lines" />
 
         <WeekNav min={min} max={max} current={week} />

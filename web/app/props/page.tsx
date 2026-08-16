@@ -1,6 +1,6 @@
 import { weekRange } from "@/lib/board";
 import { weekProps, CATEGORIES, categoryByKey } from "@/lib/props";
-import { TopNav, ValueSubnav, Brand } from "../Nav";
+import { ValueSubnav, Brand } from "../Nav";
 import PropsView from "./PropsView";
 
 export const revalidate = 120;
@@ -69,7 +69,6 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
         {snap && <div className="asof">props as of<br /><b>{et(snap)}</b></div>}
       </header>
 
-      <TopNav active="value" />
       <ValueSubnav active="props" />
       <CatNav current={cat.key} week={week} />
       <WeekNav min={min} max={max} current={week} cat={cat.key} />

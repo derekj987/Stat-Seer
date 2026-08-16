@@ -1,6 +1,6 @@
 import { weekRange } from "@/lib/board";
 import { fetchBets, fmtOdds, type Play, type KeyPlay } from "@/lib/bestbets";
-import { TopNav, ValueSubnav, Brand, FlowSteps } from "../Nav";
+import { ValueSubnav, Brand, FlowSteps } from "../Nav";
 
 export const revalidate = 120;
 const SEASON = 2026;
@@ -101,7 +101,6 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
         <Brand sub={`Value Finder · Best Bets · Week ${week}, ${SEASON}`} />
       </header>
 
-      <TopNav active="value" />
       <FlowSteps active="value" />
       <ValueSubnav active="best" />
       <WeekNav min={min} max={max} current={week} />

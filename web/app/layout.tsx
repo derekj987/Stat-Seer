@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import AuthBar from "./AuthBar";
+import SiteNav from "./SiteNav";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://statseer.vercel.app"),
@@ -25,7 +25,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en">
       <body>
-        <AuthBar />
+        <SiteNav />
         {children}
         <footer className="sitefoot">
           <p>
