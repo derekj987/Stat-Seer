@@ -174,7 +174,7 @@ export async function fetchBestProps(week: number, season = 2026, topN = 8): Pro
     for (const m of g.markets) {
       for (const q of m.quotes) {
         const prices = Object.values(q.byBook);
-        if (prices.length < 3) continue;   // need a real field to shop against
+        if (prices.length < 2) continue;   // need at least two books to shop between
         const edge = (median(prices.map(implied)) - implied(q.price)) * 100;
         if (edge <= 0.5) continue;
         plays.push({
