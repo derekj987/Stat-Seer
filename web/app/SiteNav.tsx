@@ -113,7 +113,7 @@ export default function SiteNav() {
         <div className="snav__drawer">
           <a href="/" className="snav__dtop">Home</a>
 
-          <details className="snav__pgroup" open>
+          <details className="snav__pgroup">
             <summary className="snav__dtop snav__psum">The Process</summary>
             <a href="/model" className="snav__dsub">The Model</a>
             <a href="/context" className="snav__dsub">The Context</a>
@@ -123,7 +123,7 @@ export default function SiteNav() {
           <a href="/forum" className="snav__dtop">Community</a>
 
           <div className="snav__ddiv" />
-          <details className="snav__pgroup" open>
+          <details className="snav__pgroup">
             <summary className="snav__dtop snav__psum">User Options</summary>
             {me === undefined ? null : me ? (
               <>
