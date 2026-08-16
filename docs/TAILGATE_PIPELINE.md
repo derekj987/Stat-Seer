@@ -1,7 +1,19 @@
 # Tailgate — automated fan-sentiment pipeline (Phase 2 spec)
 
-**Status:** spec, not built. Phase 1 (curated seed feed + `/tailgate` page) is live.
-**Owner setup needed:** a Reddit script app (client id/secret) and an Anthropic API key.
+**Status:** BUILT (Aug 16 2026), not yet running — waiting on Derek's one-time setup.
+Phase 1 (curated seed feed + `/tailgate` page) is live; the page now reads the live
+feed and falls back to the seed until the first scan writes rows.
+
+**To turn it on, Derek:**
+1. Run the `tailgate_buzz` block in `ingest/schema.sql` in the Supabase SQL editor.
+2. Create a Reddit **script** app (reddit.com/prefs/apps) → add `REDDIT_CLIENT_ID` /
+   `REDDIT_CLIENT_SECRET` to GitHub repo secrets.
+3. Add `ANTHROPIC_API_KEY` to GitHub repo secrets (`SUPABASE_*` already there).
+4. Trigger `capture-tailgate` manually once (Actions → Run workflow) and check the log
+   + the `/tailgate` page. Then the Wed/Fri/Sun cron takes over.
+
+Files: `tailgate_reddit.py`, `.github/workflows/capture-tailgate.yml`,
+`ingest/schema.sql` (table), `web/lib/tailgate.ts` (read).
 
 ---
 
@@ -212,21 +224,40 @@ the CSS, and the nav are untouched** — the whole point of shipping the shape f
 
 ---
 
-## Build order
+## Build order — all done (Aug 16 2026)
 
-1. **`tailgate_buzz` table** — add to `ingest/schema.sql`, Derek runs it in Supabase.
-2. **`tailgate_reddit.py` ingest stage** — Reddit pull + roster pre-filter, `--dry`
-   prints per-team snippet counts. Validate against one or two teams first (like the
-   presser collector's "3–4 teams before scaling" rule).
-3. **Extraction stage** — add the Haiku call + structured schema; `--dry` prints the
-   `Buzz` rows it *would* write. Eyeball them for hallucination before wiring writes.
-4. **`--write`** — upsert into Supabase; run once by hand, check the rows.
-5. **Web swap** — `weekTailgate()` reads Supabase; `sample: false`.
-6. **Workflow** — add `capture-tailgate.yml`, confirm a manual `workflow_dispatch` run
-   lands rows, then let the cron take over.
+1. ✅ **`tailgate_buzz` table** — in `ingest/schema.sql` (Derek runs it in Supabase).
+2. ✅ **Ingest stage** — Reddit app-only OAuth pull + nflverse roster mention filter.
+   Validate first with `python tailgate_reddit.py --current --no-extract --teams BUF,BAL`
+   (prints per-team snippet counts, no Claude call, no keys beyond Reddit needed).
+3. ✅ **Extraction stage** — Sonnet structured `Buzz` extraction, thinking-off.
+   `python tailgate_reddit.py --current --teams BUF,BAL` prints the rows it *would*
+   write — eyeball for hallucination before adding `--write`.
+4. ✅ **`--write`** — per-team delete-then-insert into Supabase.
+5. ✅ **Web swap** — `weekTailgate()` reads Supabase, seed fallback when empty.
+6. ✅ **Workflow** — `capture-tailgate.yml`, Wed/Fri/Sun + manual dispatch.
 
 Ships behind a real season anyway — there's no live board chatter until games start,
 so the seed feed stays visible until the first scan has something to say.
+
+### Staged validation (recommended first run, once keys are in)
+
+```bash
+# 1. Reddit + roster only, two teams — confirms boards resolve and the filter works.
+python tailgate_reddit.py --current --no-extract --teams BUF,BAL
+# 2. Add extraction (dry) — prints Buzz rows, no DB write. Check the takes read right.
+python tailgate_reddit.py --current --teams BUF,BAL
+# 3. Write two teams, check the /tailgate page, then let the cron scan all 32.
+python tailgate_reddit.py --current --teams BUF,BAL --write
+```
+
+### Known v1 simplifications (follow-ups)
+
+- **`matchup` is omitted** (the `Buzz.matchup` field is optional) — the card shows just
+  the team nickname for now. Wire the week's schedule in to populate it later.
+- **Subreddit names** are best-guess canonical (`TEAMS` map in `tailgate_reddit.py`);
+  the `--no-extract` run surfaces any that 404 so they can be corrected.
+- **Roster filter** degrades to no-filter if the nflverse rosters release is missing.
 
 ## Decisions (settled Aug 16 2026)
 
