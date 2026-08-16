@@ -1,6 +1,7 @@
 import { weekRange } from "@/lib/board";
 import { fetchModelWeek, fetchCalibration, MODEL_VERSION, type ModelPrediction } from "@/lib/model";
 import { Brand, FlowSteps } from "../Nav";
+import AddToSlip from "../AddToSlip";
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -82,6 +83,18 @@ function PredictionCard({ p }: { p: ModelPrediction }) {
         )}
 
         {p.neutral && <div className="pred__note">Neutral site — {p.venue}. No home-field edge applied.</div>}
+
+        {!pickem && (
+          <div className="pred__slip">
+            <AddToSlip
+              item={{
+                id: `model-${p.eventId}`, kind: "model",
+                title: `${p.favored} by ${Math.abs(p.predMargin).toFixed(1)}`,
+                detail: `${p.away} @ ${p.home} · model read`,
+              }}
+            />
+          </div>
+        )}
       </div>
     </article>
   );

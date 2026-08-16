@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback } from "react";
 import type { Game } from "@/lib/board";
 import { ValueSubnav, Brand, SlipCallout, FlowSteps } from "./Nav";
+import { useSlip } from "@/lib/slip";
 
 // ---- formatting (client-side; Intl has full ICU) ----
 const kickFmt = new Intl.DateTimeFormat("en-US", {
@@ -25,8 +26,6 @@ export interface Pick {
   price: number;
   books: string[];
 }
-
-const KEY = "statseer.slip.v1";
 
 function BookTag({ books }: { books: string[] }) {
   return books.length === 1 ? (
@@ -135,89 +134,15 @@ function GameCard({
   );
 }
 
-function SlipBar({
-  picks, onRemove, onClear,
-}: { picks: Pick[]; onRemove: (id: string) => void; onClear: () => void }) {
-  const [open, setOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
-  if (!picks.length) return null;
-  const tally: Record<string, number> = {};
-  for (const p of picks) for (const b of p.books) tally[b] = (tally[b] ?? 0) + 1;
-  const [topBook, topCount] = Object.entries(tally).sort((a, b) => b[1] - a[1])[0] ?? ["—", 0];
-
-  async function copySlip() {
-    const lines = picks.map((p) =>
-      `• ${p.game} — ${p.market} ${p.label}  ${fmtOdds(p.price)}  (best: ${p.books.join(" / ")})`);
-    const text =
-      `My StatSeer slip — ${picks.length} pick${picks.length === 1 ? "" : "s"}\n` +
-      `${lines.join("\n")}\n\n` +
-      `Best single book: ${topBook} (best price on ${topCount}/${picks.length} legs).\n` +
-      `Build your own at statseer.vercel.app`;
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch { /* clipboard blocked — ignore */ }
-  }
-
-  return (
-    <div className="slipbar">
-      <div className="slipbar__inner">
-        <button className="slipbar__summary" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-          <span className="slipbar__count">{picks.length}</span>
-          <span>slip</span>
-          <span className="slipbar__rec">best book: <b>{topBook}</b> · best price on {topCount}/{picks.length}</span>
-          <span className="slipbar__chev">{open ? "▾" : "▴"}</span>
-        </button>
-        {open && (
-          <div className="slipbar__panel">
-            <ul className="slipbar__list">
-              {picks.map((p) => (
-                <li key={p.id}>
-                  <span className="slipbar__g">{p.game}</span>
-                  <span className="slipbar__p">{p.market} {p.label}</span>
-                  <span className="odds">{fmtOdds(p.price)}</span>
-                  <span className="book">{p.books.join(" / ")}</span>
-                  <button className="slipbar__x" onClick={() => onRemove(p.id)} title="Remove">×</button>
-                </li>
-              ))}
-            </ul>
-            <p className="slipbar__note">
-              <b>{topBook}</b> has the best price on {topCount} of your {picks.length} picks — place there for
-              one-slip convenience. Separate straight bets can each go to their own best book; a parlay must sit
-              at one book, so pick the one covering the most legs. Line-shopping only — not a pick.
-            </p>
-            <div className="slipbar__actions">
-              <button className="slipbar__copy" onClick={copySlip}>{copied ? "Copied ✓" : "Copy slip"}</button>
-              <button className="slipbar__clear" onClick={onClear}>Clear slip</button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 export default function BoardView({
   board, min, max, week, season, snapshot,
 }: { board: Game[]; min: number; max: number; week: number; season: number; snapshot: string }) {
-  const [picks, setPicks] = useState<Pick[]>([]);
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (raw) setPicks(JSON.parse(raw));
-    } catch { /* ignore */ }
-  }, []);
-  useEffect(() => {
-    try { localStorage.setItem(KEY, JSON.stringify(picks)); } catch { /* ignore */ }
-  }, [picks]);
-
-  const has = useCallback((id: string) => picks.some((p) => p.id === id), [picks]);
-  const toggle = useCallback((p: Pick) =>
-    setPicks((prev) => (prev.some((x) => x.id === p.id) ? prev.filter((x) => x.id !== p.id) : [...prev, p])), []);
-  const remove = useCallback((id: string) => setPicks((prev) => prev.filter((x) => x.id !== id)), []);
-  const clear = useCallback(() => setPicks([]), []);
+  const { has, toggle: slipToggle } = useSlip();
+  const toggle = useCallback((p: Pick) => slipToggle({
+    id: p.id, kind: "line",
+    title: `${p.market} ${p.label}`, detail: p.game,
+    price: p.price, books: p.books,
+  }), [slipToggle]);
 
   const edges = board.flatMap((g) => Object.values(g.ml).map((s) => s.edge));
   const avgEdge = edges.length ? edges.reduce((a, b) => a + b, 0) / edges.length : 0;
@@ -278,7 +203,6 @@ export default function BoardView({
           </>
         )}
       </main>
-      <SlipBar picks={picks} onRemove={remove} onClear={clear} />
     </>
   );
 }

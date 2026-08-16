@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback } from "react";
 import type { PropGame, Quote } from "@/lib/props";
 import { SlipCallout } from "../Nav";
+import { useSlip } from "@/lib/slip";
 
 const fmtOdds = (p: number) => (p > 0 ? `+${p}` : String(p));
 function sideLabel(side: string, line: number | null): string {
@@ -10,8 +11,6 @@ function sideLabel(side: string, line: number | null): string {
   if (side === "No") return "No";
   return line !== null ? `${side[0]} ${line}` : side;
 }
-const decimal = (a: number) => (a > 0 ? a / 100 + 1 : 100 / -a + 1);
-const toAmerican = (d: number) => (d >= 2 ? Math.round((d - 1) * 100) : Math.round(-100 / (d - 1)));
 
 interface Leg {
   id: string;
@@ -19,22 +18,7 @@ interface Leg {
   player: string;
   bet: string; // e.g. "ATTD" / "O 249.5"
   best: number;
-  byBook: Record<string, number>;
-}
-const KEY = "statseer.parlay.v1";
-
-/** Best single book for the parlay: a parlay must sit at one book, so we take the
- * product of that book's prices — only books that price every leg qualify. */
-function bestParlay(legs: Leg[]): { book: string; dec: number; american: number } | null {
-  if (!legs.length) return null;
-  const books = [...new Set(legs.flatMap((l) => Object.keys(l.byBook)))];
-  let best: { book: string; dec: number } | null = null;
-  for (const b of books) {
-    if (!legs.every((l) => b in l.byBook)) continue;
-    const dec = legs.reduce((d, l) => d * decimal(l.byBook[b]), 1);
-    if (!best || dec > best.dec) best = { book: b, dec };
-  }
-  return best ? { ...best, american: toAmerican(best.dec) } : null;
+  books: string[];
 }
 
 function PropChip({ q, market, marketLabel, game, saved, onToggle }: {
@@ -43,7 +27,7 @@ function PropChip({ q, market, marketLabel, game, saved, onToggle }: {
   const bet = marketLabel === "ATTD" ? "ATTD" : sideLabel(q.side, q.line) || q.side;
   const leg: Leg = {
     id: `${q.eventId}:${market}:${q.player}:${q.side}:${q.line}`,
-    game, player: q.player, bet, best: q.price, byBook: q.byBook,
+    game, player: q.player, bet, best: q.price, books: q.books,
   };
   return (
     <button
@@ -51,7 +35,7 @@ function PropChip({ q, market, marketLabel, game, saved, onToggle }: {
       onClick={() => onToggle(leg)}
       className={`propq savable${saved ? " saved" : ""}`}
       aria-pressed={saved}
-      title={saved ? "Remove from parlay" : "Add to parlay"}
+      title={saved ? "Remove from slip" : "Add to slip"}
     >
       <span className="propq__player">{q.player}</span>
       <span className="propq__side">{sideLabel(q.side, q.line)}</span>
@@ -94,121 +78,13 @@ function PropGameCard({ g, open, has, toggle }: {
   );
 }
 
-function ParlayBar({ legs, onRemove, onClear }: {
-  legs: Leg[]; onRemove: (id: string) => void; onClear: () => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [stake, setStake] = useState(10);
-  useEffect(() => {
-    const s = Number(localStorage.getItem("statseer.stake"));
-    if (s > 0) setStake(s);
-  }, []);
-  useEffect(() => {
-    try { localStorage.setItem("statseer.stake", String(stake)); } catch { /* ignore */ }
-  }, [stake]);
-
-  if (!legs.length) return null;
-  const par = bestParlay(legs);
-  const payout = par ? stake * par.dec : 0;
-  const profit = par ? stake * (par.dec - 1) : 0;
-
-  async function copySlip() {
-    const lines = legs.map((l) => `• ${l.game} — ${l.player} ${l.bet}  ${fmtOdds(l.best)}`);
-    const parLine = par
-      ? `Best parlay: ${fmtOdds(par.american)} at ${par.book} · $${stake.toFixed(0)} → $${payout.toFixed(2)}`
-      : `No single book prices all ${legs.length} legs.`;
-    const text =
-      `My StatSeer prop parlay — ${legs.length} leg${legs.length === 1 ? "" : "s"}\n` +
-      `${lines.join("\n")}\n\n${parLine}\nBuild your own at statseer.vercel.app`;
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch { /* ignore */ }
-  }
-
-  return (
-    <div className="slipbar">
-      <div className="slipbar__inner">
-        <button className="slipbar__summary" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-          <span className="slipbar__count">{legs.length}</span>
-          <span>leg{legs.length === 1 ? "" : "s"}</span>
-          <span className="slipbar__rec">
-            {par
-              ? <>parlay <b>{fmtOdds(par.american)}</b> at {par.book} · ${stake.toFixed(0)}→<b>${payout.toFixed(2)}</b></>
-              : <>no single book prices all legs</>}
-          </span>
-          <span className="slipbar__chev">{open ? "▾" : "▴"}</span>
-        </button>
-        {open && (
-          <div className="slipbar__panel">
-            <ul className="slipbar__list">
-              {legs.map((l) => (
-                <li key={l.id}>
-                  <span className="slipbar__g">{l.game}</span>
-                  <span className="slipbar__p">{l.player} · {l.bet}</span>
-                  <span className="odds">{fmtOdds(l.best)}</span>
-                  <button className="slipbar__x" onClick={() => onRemove(l.id)} title="Remove">×</button>
-                </li>
-              ))}
-            </ul>
-            {par ? (
-              <>
-                <div className="stakebox">
-                  <label className="stakebox__label">Stake
-                    <span className="stakebox__field">
-                      <span aria-hidden="true">$</span>
-                      <input type="number" min={0} step={1} value={stake}
-                        onChange={(e) => setStake(Math.max(0, Number(e.target.value) || 0))}
-                        className="stakebox__input" inputMode="decimal" aria-label="Stake amount" />
-                    </span>
-                  </label>
-                  <span className="stakebox__payout">
-                    pays <b>${payout.toFixed(2)}</b> at {par.book} <span className="stakebox__profit">(profit ${profit.toFixed(2)})</span>
-                  </span>
-                </div>
-                <p className="slipbar__note">
-                  Best combined price <b>{fmtOdds(par.american)}</b> on all {legs.length} legs — a parlay must sit at
-                  one book. <b>Line-shopping only, not a pick</b>: parlays compound the vig, so even the best-priced
-                  one is usually −EV unless the legs are correlated.
-                </p>
-              </>
-            ) : (
-              <p className="slipbar__note">
-                No single book prices all {legs.length} of your legs, so this parlay can&apos;t be placed as one.
-                Drop a leg, or wait for more books to post these markets.
-              </p>
-            )}
-            <div className="slipbar__actions">
-              <button className="slipbar__copy" onClick={copySlip}>{copied ? "Copied ✓" : "Copy slip"}</button>
-              <button className="slipbar__clear" onClick={onClear}>Clear</button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 export default function PropsView({ games }: { games: PropGame[] }) {
-  const [legs, setLegs] = useState<Leg[]>([]);
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (raw) setLegs(JSON.parse(raw));
-    } catch { /* ignore */ }
-  }, []);
-  useEffect(() => {
-    try { localStorage.setItem(KEY, JSON.stringify(legs)); } catch { /* ignore */ }
-  }, [legs]);
-
-  const has = useCallback((id: string) => legs.some((l) => l.id === id), [legs]);
-  const toggle = useCallback((l: Leg) =>
-    setLegs((prev) => (prev.some((x) => x.id === l.id) ? prev.filter((x) => x.id !== l.id) : [...prev, l])), []);
-  const remove = useCallback((id: string) => setLegs((prev) => prev.filter((x) => x.id !== id)), []);
-  const clear = useCallback(() => setLegs([]), []);
+  const { has, toggle: slipToggle } = useSlip();
+  const toggle = useCallback((l: Leg) => slipToggle({
+    id: l.id, kind: "prop",
+    title: `${l.player} ${l.bet}`, detail: l.game,
+    price: l.best, books: l.books,
+  }), [slipToggle]);
 
   const players = games.reduce(
     (n, g) => n + new Set(g.markets.flatMap((m) => m.quotes.map((q) => q.player))).size, 0
@@ -237,7 +113,6 @@ export default function PropsView({ games }: { games: PropGame[] }) {
         edge most plausibly lives, since books price hundreds of them semi-independently. Projections (is the line
         beatable?) come later. Prices move; updates as new odds are captured.</p>
       </footer>
-      <ParlayBar legs={legs} onRemove={remove} onClear={clear} />
     </>
   );
 }

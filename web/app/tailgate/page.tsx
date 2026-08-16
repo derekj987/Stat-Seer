@@ -1,6 +1,7 @@
 import { weekRange } from "@/lib/board";
 import { weekTailgate, HEAT_LABEL, type Buzz } from "@/lib/tailgate";
 import { Brand, FlowSteps, ValueSubnav } from "../Nav";
+import AddToSlip from "../AddToSlip";
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -33,6 +34,7 @@ function BuzzCard({ b }: { b: Buzz }) {
             {s.url ? <a href={s.url} target="_blank" rel="noopener noreferrer">{s.board}</a> : s.board}
           </span>
         ))}
+        <AddToSlip item={{ id: `fan-${b.id}`, kind: "fan", title: b.player, detail: `${b.team} — ${b.angle}` }} />
       </div>
     </article>
   );

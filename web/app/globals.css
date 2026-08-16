@@ -886,3 +886,16 @@ details.statsdrop .stats{margin:12px 0 0}
   .tgheat__l{display:none}
   .tgcard__player{font-size:16px}
 }
+
+/* ---------------- unified "add to slip" control + grouped slip panel ---------------- */
+.addslip{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;
+  border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);
+  font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.addslip:hover{filter:brightness(1.05)}
+.addslip.saved{background:var(--accent);color:#fff;border-color:var(--accent)}
+.addslip__i{font-size:14px;line-height:1}
+.tgcard__src .addslip{margin-left:auto}
+.pred__slip{margin-top:12px;display:flex;justify-content:flex-end}
+.slipgrp{margin-bottom:10px}
+.slipgrp__h{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--muted);margin:6px 0 4px}

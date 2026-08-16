@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { MedievalSharp } from "next/font/google";
 import "./globals.css";
 import SiteNav from "./SiteNav";
+import SlipBar from "./SlipBar";
 
 // Medieval display face for the STATSEER wordmark, exposed as a CSS var so any
 // masthead can use it (matches the tavern / seer tone).
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body>
         <SiteNav />
         {children}
+        <SlipBar />
         <footer className="sitefoot">
           <p>
             StatSeer is statistical analysis, <b>not betting or financial advice</b>. For adults of legal
