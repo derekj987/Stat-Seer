@@ -126,7 +126,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={`Analyze · The Model · line-blind predictions · Week ${week}, ${SEASON} · ${MODEL_VERSION}`} />
+        <Brand sub={`The Model · line-blind predictions · Week ${week}, ${SEASON} · ${MODEL_VERSION}`} />
         {published && <div className="asof">published<br /><b>{et(published)}</b></div>}
       </header>
 

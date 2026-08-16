@@ -9,7 +9,7 @@
 /** The guided journey: analyze → read the context → shop the market. */
 export function FlowSteps({ active }: { active: "analyze" | "context" | "shop" }) {
   const steps = [
-    { key: "analyze", n: "1", label: "Analyze", sub: "our read", href: "/model" },
+    { key: "analyze", n: "1", label: "The Model", sub: "make your analysis", href: "/model" },
     { key: "context", n: "2", label: "The Context", sub: "read the room", href: "/context" },
     { key: "shop", n: "3", label: "The Shop", sub: "shop the lines", href: "/lines" },
   ] as const;
