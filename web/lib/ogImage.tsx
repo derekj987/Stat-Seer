@@ -38,7 +38,7 @@ export function BrandOg({ seerSrc }: { seerSrc: string }) {
           <span style={{ color: CHALK, marginLeft: "14px" }}>Trust the data.</span>
         </div>
         <div style={{ display: "flex", fontSize: 27, color: MINT, marginTop: "22px" }}>NFL betting analysis you can actually check.</div>
-        <div style={{ display: "flex", fontSize: 24, color: GRASS, marginTop: "38px", letterSpacing: 2 }}>Value Finder · The Model · Context</div>
+        <div style={{ display: "flex", fontSize: 24, color: GRASS, marginTop: "38px", letterSpacing: 2 }}>The Model · Context · Analysis</div>
       </div>
     </div>
   );

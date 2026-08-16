@@ -115,7 +115,7 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={`Value Finder · Best Bets · Week ${week}, ${SEASON}`} />
+        <Brand sub={`Analysis · Best Bets · Week ${week}, ${SEASON}`} />
       </header>
 
       <FlowSteps active="value" />

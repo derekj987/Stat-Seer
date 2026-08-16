@@ -16,7 +16,7 @@ const STEPS = [
     cta: "Check the upset watch",
   },
   {
-    n: "3", href: "/best", kicker: "Value Finder", q: "Place it.",
+    n: "3", href: "/best", kicker: "Analysis", q: "Place it.",
     body: "Made your picks? Here's the best number across books, the key-number sweet spots, and exactly where to bet each one. This is where the money is.",
     cta: "Find the value",
   },

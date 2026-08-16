@@ -153,7 +153,7 @@ export default function BoardView({
     <>
       <main className="wrap">
         <header className="masthead">
-          <Brand sub={`Value Finder · Game Lines · line shopping & sweet spots · Week ${week}, ${season}`} />
+          <Brand sub={`Analysis · Game Lines · line shopping & sweet spots · Week ${week}, ${season}`} />
           {snapshot && <div className="asof">lines as of<br /><b>{et(snapshot, snapFmt)}</b></div>}
         </header>
 
@@ -195,7 +195,7 @@ export default function BoardView({
 
             <footer className="foot">
               <p>
-                <b>No model. No pick.</b> Value Finder shows the <b>best available number across books</b> and where a
+                <b>No model. No pick.</b> This shows the <b>best available number across books</b> and where a
                 half-point sits on a <b>sweet spot</b> (a 3 or 7, worth the most) — the two places line shopping
                 actually pays. Prices move; this updates automatically as new odds are captured.
               </p>

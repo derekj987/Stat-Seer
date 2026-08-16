@@ -143,7 +143,7 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
         <p className="explainer__p2">
           We tested weather, referees, and roster moves against real results — they add <b>uncertainty, not a
           knowable edge</b> (the market already prices them). So we flag <b>risk</b>, never a &quot;lock.&quot;
-          Then head to <a href="/best">Value Finder</a> to place what survives.
+          Then head to <a href="/best">Best Bets</a> to place what survives.
         </p>
       </section>
 

@@ -11,7 +11,7 @@ export function FlowSteps({ active }: { active: "model" | "context" | "value" })
   const steps = [
     { key: "model", n: "1", label: "The Model", sub: "our read", href: "/model" },
     { key: "context", n: "2", label: "The Context", sub: "spot the upsets", href: "/context" },
-    { key: "value", n: "3", label: "Value Finder", sub: "place it", href: "/lines" },
+    { key: "value", n: "3", label: "Analysis", sub: "find your picks", href: "/lines" },
   ] as const;
   return (
     <nav className="flow" aria-label="How to use StatSeer">
@@ -69,7 +69,7 @@ export function TopNav({ active }: { active: "value" | "model" | "context" }) {
       <a href="/context" className={active === "context" ? "tab active" : "tab"}
         aria-current={active === "context" ? "page" : undefined}>Context (Upset Watch)</a>
       <a href="/lines" className={active === "value" ? "tab active" : "tab"}
-        aria-current={active === "value" ? "page" : undefined}>Value Finder</a>
+        aria-current={active === "value" ? "page" : undefined}>Analysis</a>
     </nav>
   );
 }
@@ -77,7 +77,7 @@ export function TopNav({ active }: { active: "value" | "model" | "context" }) {
 /** Secondary toggle shown only inside Value Finder. */
 export function ValueSubnav({ active }: { active: "best" | "lines" | "props" | "fans" }) {
   return (
-    <nav className="subnav" aria-label="Value Finder view">
+    <nav className="subnav" aria-label="Analysis view">
       <a href="/lines" className={active === "lines" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "lines" ? "page" : undefined}>Game Lines</a>
       <a href="/props" className={active === "props" ? "subnav__t active" : "subnav__t"}

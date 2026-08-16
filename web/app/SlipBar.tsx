@@ -48,7 +48,7 @@ export default function SlipBar() {
       <div className="slipbar__inner">
         <button className="slipbar__summary" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
           <span className="slipbar__count">{items.length}</span>
-          <span>slip</span>
+          <span>Value Finder</span>
           {top && priced.length > 0 && (
             <span className="slipbar__rec">best book: <b>{top[0]}</b> · {top[1]}/{priced.length}</span>
           )}
@@ -73,7 +73,7 @@ export default function SlipBar() {
               </div>
             ))}
             <p className="slipbar__note">
-              Your running slip across every section.{" "}
+              Your <b>Value Finder</b> — every pick you collect across the app, priced.{" "}
               {top && priced.length > 0 && <>For the priced bets, <b>{top[0]}</b> covers the most legs. </>}
               Model reads and fan buzz are here for reference — <b>not a pick, not graded</b>. Line-shopping only.
             </p>
