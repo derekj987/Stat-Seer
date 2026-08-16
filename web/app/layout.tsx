@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import AuthBar from "./AuthBar";
 
@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://statseer.vercel.app"),
   title: "StatSeer — See the edge. Trust the data.",
   description: "NFL betting analysis you can actually check: line shopping, sweet spots, honest calibrated predictions, and game context — from live odds.",
+  applicationName: "StatSeer",
+  appleWebApp: { capable: true, title: "StatSeer", statusBarStyle: "default" },
   openGraph: {
     title: "StatSeer — See the edge. Trust the data.",
     description: "NFL betting analysis you can actually check — published probabilities, a public track record, and where the price is wrong.",
@@ -13,6 +15,10 @@ export const metadata: Metadata = {
     type: "website",
   },
   twitter: { card: "summary_large_image" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0c2b1c",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
