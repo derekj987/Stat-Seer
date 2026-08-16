@@ -47,8 +47,11 @@ def run_capture():
         return 502, {"ok": False, "upstream_status": status, "credit": credit}
 
     week_map = oc.load_week_map()
+    season_starts = oc.load_season_starts()
+    reg_events, pre_events = oc.split_events(events, season_starts)
     snapshot_at = oc.snapshot_time_from_events(events)
-    rows, unresolved = oc.parse_snapshot(events, snapshot_at, CAPTURE_REASON, week_map)
+    rows, unresolved = oc.parse_snapshot(reg_events, snapshot_at, CAPTURE_REASON, week_map)
+    pre_rows, _pre_unresolved = oc.parse_preseason(pre_events, snapshot_at, CAPTURE_REASON)
     if COMMENCE_WITHIN_MIN is not None:
         rows = oc.filter_commence_window(rows, COMMENCE_WITHIN_MIN)
 
@@ -57,6 +60,7 @@ def run_capture():
         return 500, {"ok": False, "error": "Supabase creds missing", "parsed": len(rows)}
 
     written = oc.write_supabase(rows, url, key)
+    pre_written = oc.write_preseason(pre_rows, url, key) if pre_rows else 0
     return 200, {
         "ok": True,
         "capture_reason": CAPTURE_REASON,
@@ -66,6 +70,8 @@ def run_capture():
         "parsed": len(rows),
         "written": written,
         "unresolved": len(unresolved),
+        "preseason_parsed": len(pre_rows),
+        "preseason_written": pre_written,
     }
 
 

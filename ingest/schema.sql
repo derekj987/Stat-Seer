@@ -207,6 +207,36 @@ from odds_snapshots
 where snapshot_at < commence_time
 order by event_id, book, market, outcome_name, outcome_point, snapshot_at desc;
 
+-- =====================================================================
+-- PRESEASON ODDS — a DELIBERATELY ISOLATED lane. Exhibition lines for the
+-- Shop only: shown for line-shopping, NEVER graded, and NEVER joined into
+-- the model or calibration. Kept in its own table (not a season_type flag
+-- on odds_snapshots) precisely so it CANNOT leak into the trust engine.
+-- No `week` column: nflverse's schedule has no preseason rows, so preseason
+-- games have no meaningful week -- they're listed by kickoff time.
+-- =====================================================================
+create table if not exists preseason_odds (
+    id            bigserial primary key,
+    snapshot_at   timestamptz not null,
+    capture_reason text       not null
+        check (capture_reason in ('SCHEDULED','PRE_KICKOFF','BACKFILL','MANUAL')),
+    season        smallint    not null,
+    event_id      text        not null,
+    commence_time timestamptz not null,
+    home_team     text        not null,
+    away_team     text        not null,
+    book          text        not null,
+    market        text        not null,
+    outcome_name  text        not null,
+    outcome_point numeric(6,2),
+    price_american integer,
+    collected_at  timestamptz not null default now()
+);
+create index if not exists preseason_event_idx on preseason_odds (event_id, market, book);
+create index if not exists preseason_time_idx  on preseason_odds (snapshot_at);
+create unique index if not exists preseason_odds_dedupe on preseason_odds
+    (snapshot_at, event_id, book, market, outcome_name, outcome_point) nulls not distinct;
+
 -- ---------------------------------------------------------------------
 -- CALIBRATION LEDGER. The most important table in the application.
 -- ---------------------------------------------------------------------

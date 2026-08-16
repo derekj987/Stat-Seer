@@ -16,7 +16,7 @@ const LINKS = [
   { href: "/", label: "Home", on: (p: string) => p === "/" },
   { href: "/model", label: "The Model", on: (p: string) => p.startsWith("/model") },
   { href: "/context", label: "The Context", on: (p: string) => ["/context", "/tailgate", "/best"].some((x) => p.startsWith(x)) },
-  { href: "/lines", label: "The Shop", on: (p: string) => ["/lines", "/props"].some((x) => p.startsWith(x)) },
+  { href: "/lines", label: "The Shop", on: (p: string) => ["/lines", "/props", "/preseason"].some((x) => p.startsWith(x)) },
   { href: "/forum", label: "Community", on: (p: string) => p.startsWith("/forum") },
 ];
 const MOD = ["founder", "admin"];

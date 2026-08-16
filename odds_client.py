@@ -139,6 +139,58 @@ def load_week_map(source=None):
     return week_map
 
 
+def load_season_starts(source=None):
+    """Return {season:int -> 'YYYY-MM-DD'} = the earliest REGULAR-season Week-1
+    kickoff date per season. This is the preseason boundary: any game kicking off
+    BEFORE its season's start is preseason (nflverse's schedule has no preseason
+    rows, so those games never resolve a week and would otherwise be dropped)."""
+    import csv
+    import io
+
+    text = None
+    path = source or GAMES_LOCAL
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as fh:
+            text = fh.read()
+    else:
+        ensure_ssl_certs()
+        req = urllib.request.Request(GAMES_URL, headers={"User-Agent": "nfl-advice-app/1.0"})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            text = r.read().decode("utf-8")
+
+    starts = {}
+    for row in csv.DictReader(io.StringIO(text)):
+        if row.get("game_type") != "REG" or row.get("week") != "1":
+            continue
+        day = row.get("gameday")
+        if not day or not row.get("season"):
+            continue
+        try:
+            season = int(row["season"])
+        except ValueError:
+            continue
+        if season not in starts or day < starts[season]:
+            starts[season] = day
+    return starts
+
+
+def is_preseason(commence_iso, season_starts):
+    """True if this kickoff falls before its season's regular-season Week 1."""
+    if not commence_iso or len(commence_iso) < 7:
+        return False
+    start = season_starts.get(derive_season(commence_iso))
+    return bool(start) and commence_iso[:10] < start
+
+
+def split_events(events, season_starts):
+    """Partition Odds API events into (regular_season, preseason) by kickoff date."""
+    reg, pre = [], []
+    for ev in events:
+        target = pre if is_preseason(ev.get("commence_time", ""), season_starts) else reg
+        target.append(ev)
+    return reg, pre
+
+
 # --------------------------------------------------------------------- parsing
 def _abbr(team_name):
     return TEAM_ABBR.get(team_name)
@@ -182,6 +234,45 @@ def parse_snapshot(events, snapshot_at, capture_reason, week_map):
                         "capture_reason": capture_reason,
                         "season": season,
                         "week": week,
+                        "event_id": eid,
+                        "commence_time": commence,
+                        "home_team": home,
+                        "away_team": away,
+                        "book": bkey,
+                        "market": mkey,
+                        "outcome_name": outcome_name,
+                        "outcome_point": None if point is None else float(point),
+                        "price_american": None if oc.get("price") is None else int(oc["price"]),
+                    })
+    return rows, unresolved
+
+
+def parse_preseason(events, snapshot_at, capture_reason):
+    """Pure transform for the isolated preseason lane: Odds API events -> rows for
+    the `preseason_odds` table. Same shape as parse_snapshot but with NO week (see
+    the schema comment) and no schedule join. Events passed here are already known
+    to be preseason (see split_events). Returns (rows, unresolved)."""
+    rows, unresolved = [], []
+    for ev in events:
+        eid = ev.get("id")
+        commence = ev.get("commence_time")
+        home_full, away_full = ev.get("home_team"), ev.get("away_team")
+        home, away = _abbr(home_full), _abbr(away_full)
+        if home is None or away is None:
+            unresolved.append((eid, f"{away_full} @ {home_full}", "unmapped team name"))
+            continue
+        season = derive_season(commence)
+        for book in ev.get("bookmakers", []):
+            bkey = book.get("key")
+            for market in book.get("markets", []):
+                mkey = market.get("key")
+                for oc in market.get("outcomes", []):
+                    outcome_name = TEAM_ABBR.get(oc.get("name"), oc.get("name"))
+                    point = oc.get("point")
+                    rows.append({
+                        "snapshot_at": snapshot_at,
+                        "capture_reason": capture_reason,
+                        "season": season,
                         "event_id": eid,
                         "commence_time": commence,
                         "home_team": home,
@@ -279,6 +370,33 @@ def write_supabase(rows, url, service_key, batch=500):
     return written
 
 
+def write_preseason(rows, url, service_key, batch=500):
+    """POST preseason rows to the isolated preseason_odds table. Same idempotent
+    upsert pattern as write_supabase, different table + conflict target."""
+    endpoint = (url.rstrip("/") + "/rest/v1/preseason_odds"
+                "?on_conflict=snapshot_at,event_id,book,market,outcome_name,outcome_point")
+    headers = {
+        "apikey": service_key,
+        "Authorization": f"Bearer {service_key}",
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal,resolution=ignore-duplicates",
+    }
+    written = 0
+    for i in range(0, len(rows), batch):
+        chunk = rows[i:i + batch]
+        data = json.dumps(chunk).encode("utf-8")
+        req = urllib.request.Request(endpoint, data=data, headers=headers, method="POST")
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                if r.getcode() in (200, 201, 204):
+                    written += len(chunk)
+        except urllib.error.HTTPError as e:
+            detail = e.read().decode("utf-8", errors="replace")[:500]
+            print(f"  ! preseason batch {i//batch} failed: HTTP {e.code} {detail}", file=sys.stderr)
+            raise
+    return written
+
+
 # ----------------------------------------------------------------------- report
 def summarize(rows, unresolved, snapshot_at):
     books = sorted({r["book"] for r in rows})
@@ -337,16 +455,23 @@ def main(argv=None):
         with open(args.fixture, "r", encoding="utf-8") as fh:
             events = json.load(fh)
 
-    # 2. Parse.
+    # 2. Parse. Split preseason (exhibition, isolated lane) from regular season.
     week_map = load_week_map()
+    season_starts = load_season_starts()
+    reg_events, pre_events = split_events(events, season_starts)
     snapshot_at = snapshot_time_from_events(events)
-    rows, unresolved = parse_snapshot(events, snapshot_at, args.reason, week_map)
+    rows, unresolved = parse_snapshot(reg_events, snapshot_at, args.reason, week_map)
+    pre_rows, pre_unresolved = parse_preseason(pre_events, snapshot_at, args.reason)
     if args.commence_within is not None:
         rows = filter_commence_window(rows, args.commence_within)
         print(f"  filtered to {len(rows)} rows within {args.commence_within} min of kickoff")
 
-    print("PARSED")
+    print("PARSED (regular season)")
     summarize(rows, unresolved, snapshot_at)
+    if pre_events:
+        pre_events_placed = sorted({r["event_id"] for r in pre_rows})
+        print(f"PARSED (preseason lane) : {len(pre_rows)} rows, "
+              f"{len(pre_events_placed)} games")
 
     # 3. Write, or explain the dry run.
     if not args.write:
@@ -357,11 +482,13 @@ def main(argv=None):
     if not url or not key:
         print("ERROR: SUPABASE_URL / SUPABASE_SERVICE_KEY missing in .env", file=sys.stderr)
         return 1
-    print(f"\nWRITING {len(rows)} rows to {url} ...")
+    print(f"\nWRITING {len(rows)} regular rows to {url} ...")
     written = write_supabase(rows, url, key)
     print(f"  accepted: {written}")
-    print("  NOTE: dedupe is only enforced once odds_snapshots has a unique index "
-          "(see README follow-up).")
+    if pre_rows:
+        print(f"WRITING {len(pre_rows)} preseason rows to preseason_odds ...")
+        pre_written = write_preseason(pre_rows, url, key)
+        print(f"  accepted: {pre_written}")
     return 0
 
 

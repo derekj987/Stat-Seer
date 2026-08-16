@@ -197,17 +197,18 @@ export function buildBoard(rows: OddsRow[]): Game[] {
 }
 
 // ---- Supabase fetch (server-side) ----
-async function pg(path: string): Promise<unknown[]> {
+async function pgFrom(table: string, path: string): Promise<unknown[]> {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
   if (!url || !key) throw new Error("SUPABASE_URL / SUPABASE_SERVICE_KEY not set");
-  const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/odds_snapshots${path}`, {
+  const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/${table}${path}`, {
     headers: { apikey: key, Authorization: `Bearer ${key}` },
     next: { revalidate: 120 }, // refresh at most every 2 min
   });
   if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
   return (await res.json()) as unknown[];
 }
+const pg = (path: string) => pgFrom("odds_snapshots", path);
 
 /** The min/max NFL week that currently has any odds captured, for the week nav. */
 export async function weekRange(season = 2026): Promise<{ min: number; max: number } | null> {
@@ -215,6 +216,23 @@ export async function weekRange(season = 2026): Promise<{ min: number; max: numb
   const hi = (await pg(`?season=eq.${season}&select=week&order=week.desc&limit=1`)) as { week: number }[];
   if (!lo.length || !hi.length) return null;
   return { min: lo[0].week, max: hi[0].week };
+}
+
+/** The latest full preseason snapshot (isolated `preseason_odds` table — exhibition
+ * lines, never graded). No week: preseason games are listed by kickoff. Reuses the
+ * same OddsRow shape + buildBoard, which groups by event_id and ignores week. */
+export async function fetchPreseason(season = 2026): Promise<OddsRow[]> {
+  const latest = (await pgFrom("preseason_odds",
+    `?season=eq.${season}&capture_reason=in.(SCHEDULED,MANUAL)` +
+      `&select=snapshot_at&order=snapshot_at.desc&limit=1`
+  )) as { snapshot_at: string }[];
+  if (!latest.length) return [];
+  const snap = encodeURIComponent(latest[0].snapshot_at);
+  return (await pgFrom("preseason_odds",
+    `?season=eq.${season}&snapshot_at=eq.${snap}` +
+      `&select=snapshot_at,event_id,commence_time,home_team,away_team,book,market,` +
+      `outcome_name,outcome_point,price_american&limit=5000`
+  )) as OddsRow[];
 }
 
 /** One complete snapshot of the week's odds (pinned to the latest full sweep,
