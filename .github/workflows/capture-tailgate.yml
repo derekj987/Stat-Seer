@@ -2,7 +2,12 @@ name: Capture tailgate
 
 # Fan-sentiment scan: Reddit team boards -> Claude (Sonnet) -> Supabase tailgate_buzz.
 # NOT a pick and NOT model output -- never graded, never feeds The Model. See
-# docs/TAILGATE_PIPELINE.md. Reddit is free (app-only OAuth); Claude is ~$2/run.
+# docs/TAILGATE_PIPELINE.md. Reddit is read via its public RSS feed (no app/creds).
+# Claude is ~$2/run. NOTE: Reddit rate-limits/blocks some datacenter IPs -- if a run
+# reports every team empty (403/429), the GitHub-Actions IP is blocked; see the doc.
+#
+# Use the "test" mode of Run workflow first: it hits Reddit for 2 teams only, needs
+# NO secrets and NO table, and just tells you whether Actions can reach the feed.
 #
 # 3x/week spanning the practice-report arc: Wed chatter -> Fri designations ->
 # Sunday-morning late buzz. All times UTC.
@@ -12,7 +17,13 @@ on:
     - cron: "0 14 * * 3"   # Wed 14:00 UTC (~9-10am ET) — after Wed practice chatter
     - cron: "0 15 * * 5"   # Fri 15:00 UTC — post-final-practice / injury designations
     - cron: "0 14 * * 0"   # Sun 14:00 UTC (~9-10am ET) — late buzz before the 1pm ET games
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "test = 2-team reachability check (no secrets/table); full = scan all 32 + write"
+        type: choice
+        options: [test, full]
+        default: test
 
 concurrency:
   group: capture-tailgate
@@ -30,9 +41,13 @@ jobs:
       - run: pip install --quiet certifi anthropic
       - name: Scan team boards -> Supabase
         env:
-          REDDIT_CLIENT_ID:     ${{ secrets.REDDIT_CLIENT_ID }}
-          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
           ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
           SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: python tailgate_reddit.py --current --write
+        # Scheduled runs (no inputs) fall through to the full scan+write.
+        run: |
+          if [ "${{ github.event.inputs.mode }}" = "test" ]; then
+            python tailgate_reddit.py --current --no-extract --teams BUF,BAL,KC,PHI
+          else
+            python tailgate_reddit.py --current --write
+          fi

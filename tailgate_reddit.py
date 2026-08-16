@@ -17,7 +17,11 @@ player, cutting a team's raw ~40k tokens to ~10-15k before Claude sees them. If 
 nflverse roster is unavailable it degrades gracefully to no filter (Claude still
 extracts, just on more text).
 
-Reddit is free (app-only OAuth, 100 req/min). Claude is ~$2/run at Sonnet.
+Reddit is read via its public ATOM/RSS feed -- no app, no credentials. The JSON
+Data API is now 403 even from residential IPs and new app creation is gated, but
+the RSS feed (/r/<sub>/top/.rss) is an openly published syndication format and is
+still served. RSS gives post TITLES and self-post text (no comments or scores),
+which is thinner than the API but enough to surface buzz. Claude is ~$2/run at Sonnet.
 
   python tailgate_reddit.py --current                       # dry run, all teams
   python tailgate_reddit.py --current --teams BUF,BAL        # dry run, two teams
@@ -25,25 +29,27 @@ Reddit is free (app-only OAuth, 100 req/min). Claude is ~$2/run at Sonnet.
   python tailgate_reddit.py --current --write                # extract + write to Supabase
   python tailgate_reddit.py --season 2026 --week 3 --write   # explicit week
 
-Secrets (env or .env): REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, ANTHROPIC_API_KEY,
-SUPABASE_URL, SUPABASE_SERVICE_KEY.
+Secrets (env or .env): ANTHROPIC_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_KEY.
+(No Reddit credentials -- public JSON is unauthenticated.)
 """
 import argparse
-import base64
 import csv
+import html
 import io
 import json
 import re
 import sys
+import time
 import unicodedata
 import urllib.error
 import urllib.parse
 import urllib.request
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 
 import odds_client as oc  # reuse load_env() + ensure_ssl_certs()
 
-UA = "web:statseer-tailgate:0.2 (by /u/statseer)"
+UA = "statseer-tailgate/0.2"   # plain UA; Reddit RSS 200s this, 429s browser UAs
 MODEL = "claude-sonnet-5"
 SKILL_POS = {"QB", "RB", "WR", "TE", "FB"}
 ROSTER_URL = ("https://github.com/nflverse/nflverse-data/releases/download/"
@@ -75,7 +81,7 @@ TEAMS = {
 
 MAX_INPUT_CHARS = 14000   # per-team cap on text handed to Claude
 SNIPPET_CAP = 500         # per-snippet char cap
-COMMENT_POSTS = 8         # fetch comments for the top N posts by score
+MIN_INTERVAL = 5.0        # seconds between Reddit requests (RSS rate-limits hard)
 
 SYSTEM = (
     "You read NFL fan message-board chatter for ONE team and surface players fans "
@@ -196,65 +202,78 @@ def mentions(text, team_idx):
 
 
 # ------------------------------------------------------------------------ reddit
-def reddit_token(env):
-    cid, sec = env.get("REDDIT_CLIENT_ID"), env.get("REDDIT_CLIENT_SECRET")
-    if not (cid and sec):
-        raise RuntimeError("REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET missing")
-    oc.ensure_ssl_certs()
-    auth = base64.b64encode(f"{cid}:{sec}".encode()).decode()
-    body = urllib.parse.urlencode({"grant_type": "client_credentials"}).encode()
-    req = urllib.request.Request(
-        "https://www.reddit.com/api/v1/access_token", data=body, method="POST",
-        headers={"Authorization": f"Basic {auth}", "User-Agent": UA,
-                 "Content-Type": "application/x-www-form-urlencoded"})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return json.loads(r.read())["access_token"]
+# No app / credentials: read Reddit's public ATOM/RSS feed (/r/<sub>/top/.rss).
+# Reddit locked the JSON Data API (403 even from residential IPs) and gated new
+# app creation, but the RSS feed -- an openly published syndication format -- is
+# still served (200) to a polite, plainly-identified client. RSS gives post
+# TITLES and any self-post text, but NOT comments or scores; the feed is already
+# "top of week", so we keep its order. Rate limits are tight -- pace + retry 429.
+ATOM = "{http://www.w3.org/2005/Atom}"
+_last_req = [0.0]
 
 
-def reddit_get(path, token, params=None):
-    url = "https://oauth.reddit.com" + path
-    if params:
-        url += "?" + urllib.parse.urlencode(params)
-    req = urllib.request.Request(url, headers={"Authorization": f"bearer {token}",
-                                               "User-Agent": UA})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return json.loads(r.read())
-
-
-def fetch_snippets(sub, token):
-    """Posts (top-of-week + hot) and top comments for the hottest posts, as
-    [{text, permalink, score}]. Deduped by post id."""
-    posts, seen = [], set()
-    for listing, params in (("top", {"t": "week", "limit": 25}), ("hot", {"limit": 25})):
+def _http_get(url, tries=4):
+    for attempt in range(tries):
+        wait = MIN_INTERVAL - (time.monotonic() - _last_req[0])
+        if wait > 0:
+            time.sleep(wait)
+        req = urllib.request.Request(url, headers={"User-Agent": UA})
         try:
-            data = reddit_get(f"/r/{sub}/{listing}", token, params)
+            with urllib.request.urlopen(req, timeout=30) as r:
+                _last_req[0] = time.monotonic()
+                return r.read().decode("utf-8", "replace")
         except urllib.error.HTTPError as e:
-            print(f"  r/{sub} {listing} -> HTTP {e.code}", file=sys.stderr)
-            continue
-        for child in data.get("data", {}).get("children", []):
-            d = child.get("data", {})
-            pid = d.get("id")
-            if not pid or pid in seen:
+            _last_req[0] = time.monotonic()
+            if e.code == 429 and attempt < tries - 1:
+                ra = e.headers.get("Retry-After")
+                back = (float(ra) if (ra and ra.replace(".", "", 1).isdigit())
+                        else min(45.0, 10.0 * (2 ** attempt)))  # 10, 20, 40s
+                time.sleep(back)
                 continue
-            seen.add(pid)
-            text = (d.get("title", "") + "\n" + (d.get("selftext", "") or ""))[:SNIPPET_CAP]
-            posts.append({"id": pid, "text": text.strip(),
-                          "permalink": "https://reddit.com" + d.get("permalink", ""),
-                          "score": int(d.get("score", 0))})
-    snippets = list(posts)
-    for p in sorted(posts, key=lambda x: -x["score"])[:COMMENT_POSTS]:
-        try:
-            thread = reddit_get(f"/comments/{p['id']}", token, {"sort": "top", "limit": 10})
-        except urllib.error.HTTPError:
+            raise
+
+
+def _clean_content(raw):
+    """Reddit RSS <content> is double-escaped HTML ending in a 'submitted by ...
+    [link] [comments]' footer. Return just the self-post text (empty for link posts)."""
+    if not raw:
+        return ""
+    t = html.unescape(html.unescape(raw))
+    t = re.sub(r"<[^>]+>", " ", t)
+    t = re.sub(r"submitted by\s*/u/\S+.*", " ", t, flags=re.I | re.S)  # drop footer
+    t = re.sub(r"\[link\]|\[comments\]", " ", t)
+    return re.sub(r"\s+", " ", t).strip()
+
+
+def fetch_snippets(sub):
+    """Top-of-week posts from the subreddit's RSS feed as [{text, permalink, score}].
+    score is a synthetic descending rank (RSS has none) so feed/top order is kept."""
+    oc.ensure_ssl_certs()
+    url = f"https://www.reddit.com/r/{sub}/top/.rss?t=week"
+    try:
+        raw = _http_get(url)
+    except urllib.error.HTTPError as e:
+        hint = " (Reddit may be blocking this IP)" if e.code in (403, 429) else ""
+        print(f"  r/{sub} -> HTTP {e.code}{hint}", file=sys.stderr)
+        return []
+    try:
+        feed = ET.fromstring(raw)
+    except ET.ParseError as e:
+        print(f"  r/{sub} -> RSS parse error: {e}", file=sys.stderr)
+        return []
+    entries = feed.findall(f"{ATOM}entry")
+    snippets = []
+    for i, entry in enumerate(entries):
+        title = (entry.findtext(f"{ATOM}title") or "").strip()
+        if not title:
             continue
-        if len(thread) < 2:
-            continue
-        for c in thread[1].get("data", {}).get("children", []):
-            body = (c.get("data", {}).get("body") or "").strip()
-            if len(body) < 20:
-                continue
-            snippets.append({"text": body[:SNIPPET_CAP], "permalink": p["permalink"],
-                             "score": int(c.get("data", {}).get("score", 0))})
+        link_el = entry.find(f"{ATOM}link")
+        permalink = (link_el.get("href") if link_el is not None
+                     else f"https://reddit.com/r/{sub}")
+        body = _clean_content(entry.findtext(f"{ATOM}content") or "")
+        text = (title + (" -- " + body if body else ""))[:SNIPPET_CAP]
+        snippets.append({"text": text, "permalink": permalink,
+                         "score": len(entries) - i})  # keep top-of-week order
     return snippets
 
 
@@ -366,14 +385,15 @@ def main(argv=None):
              else list(TEAMS))
     which = [t for t in which if t in TEAMS]
     roster = load_roster(season)
-    token = reddit_token(env)
 
     print(f"Tailgate scan -- season {season}, week {week}, {len(which)} team(s)"
-          f"{' [WRITE]' if args.write else ' [dry run]'}")
-    total_rows = 0
+          f"{' [WRITE]' if args.write else ' [dry run]'} -- Reddit RSS")
+    total_rows, empty_teams = 0, 0
     for abbrev in which:
         sub, nickname = TEAMS[abbrev]
-        raw = fetch_snippets(sub, token)
+        raw = fetch_snippets(sub)
+        if not raw:
+            empty_teams += 1
         if roster and abbrev in roster:
             kept = [s for s in raw if mentions(s["text"], roster[abbrev])]
         else:
@@ -390,6 +410,11 @@ def main(argv=None):
         if args.write:
             sb_write(env, season, week, nickname, rows)
 
+    if empty_teams == len(which):
+        print("\nWARNING: every team returned 0 snippets. Reddit is likely rate-"
+              "limiting or blocking this IP (403/429 above). Datacenter/CI ranges "
+              "are often blocked -- try from another network or raise MIN_INTERVAL.",
+              file=sys.stderr)
     print(f"\n{total_rows} buzz row(s) {'written' if args.write else 'found (dry run)'}.")
     return 0
 
