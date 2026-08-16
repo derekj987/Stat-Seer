@@ -51,7 +51,7 @@ export function Brand({ sub }: { sub: string }) {
     <div className="brand">
       <a href="/" className="brand__home" aria-label="StatSeer home">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo-mark.png" alt="StatSeer" className="brand__logo" width={46} height={46} />
+        <img src="/logo-mark.png?v=3" alt="StatSeer" className="brand__logo" width={46} height={46} />
       </a>
       <div className="brand__text">
         <a href="/" className="brand__marklink"><span className="brand__mark">STATSEER</span></a>
