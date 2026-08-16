@@ -549,3 +549,33 @@ create table if not exists ref_assignments (
 );
 alter table ref_assignments enable row level security;  -- no public policies; service_role only
 grant select, insert, update on ref_assignments to service_role;
+
+-- =====================================================================
+-- TAILGATE. Fan-sentiment feed: players fans are buzzing to go OVER a
+-- number this week, scanned from team message boards (Reddit first) and
+-- distilled by Claude. This is NOT a pick and NOT model output -- it is
+-- never graded and never feeds The Model. Walled off in its own table,
+-- read by the public /tailgate page. Rows mirror the web `Buzz` type.
+-- Refreshed a few times a week; a run replaces that week's rows per team.
+-- =====================================================================
+create table if not exists tailgate_buzz (
+    season      smallint    not null,
+    week        smallint    not null,
+    id          text        not null,   -- w{week}-{team}-{player-slug}
+    player      text        not null,
+    team        text        not null,   -- nickname, e.g. "Bills"
+    matchup     text,                   -- optional, e.g. "BUF vs NYJ"
+    angle       text        not null,   -- the OVER fans tie them to
+    heat        smallint    not null check (heat between 1 and 3),
+    take        text        not null,   -- what the boards are saying + why
+    sources     jsonb       not null default '[]',  -- [{board, url}]
+    captured_at timestamptz not null default now(),
+    primary key (season, week, id)
+);
+alter table tailgate_buzz enable row level security;
+
+drop policy if exists "tailgate readable by all" on tailgate_buzz;
+create policy "tailgate readable by all" on tailgate_buzz for select using (true);
+
+grant select on tailgate_buzz to anon, authenticated;
+grant select, insert, update, delete on tailgate_buzz to service_role;

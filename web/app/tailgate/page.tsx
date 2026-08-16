@@ -43,7 +43,7 @@ export default async function Page() {
   try { range = await weekRange(SEASON); } catch { range = null; }
   const week = range?.min ?? 1;
 
-  const feed = weekTailgate(week, SEASON);
+  const feed = await weekTailgate(week, SEASON);
 
   return (
     <main className="wrap">

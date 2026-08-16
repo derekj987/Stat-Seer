@@ -115,8 +115,40 @@ const SEED: Buzz[] = [
   },
 ];
 
-/** The week's fan feed. Seeded/curated for now; the live scan will replace SEED. */
-export function weekTailgate(week: number, season: number): TailgateWeek {
+// Server-side read of the automated feed (Supabase `tailgate_buzz`, written by
+// tailgate_reddit.py). Falls back to the seed when no rows exist yet or the read
+// fails — so preseason and any hiccup just show the sample feed, never an error.
+interface BuzzRow {
+  id: string; player: string; team: string; matchup: string | null;
+  angle: string; heat: Heat; take: string; sources: BuzzSource[] | null;
+}
+
+async function fetchBuzz(week: number, season: number): Promise<Buzz[]> {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY;
+  if (!url || !key) return [];
+  const q = `?season=eq.${season}&week=eq.${week}` +
+    `&select=id,player,team,matchup,angle,heat,take,sources&order=heat.desc`;
+  const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/tailgate_buzz${q}`, {
+    headers: { apikey: key, Authorization: `Bearer ${key}` },
+    next: { revalidate: 300 },
+  });
+  if (!res.ok) throw new Error(`Supabase ${res.status}`);
+  const rows = (await res.json()) as BuzzRow[];
+  return rows.map((r) => ({
+    id: r.id, player: r.player, team: r.team,
+    matchup: r.matchup ?? undefined,
+    angle: r.angle, heat: r.heat, take: r.take,
+    sources: r.sources ?? [],
+  }));
+}
+
+/** The week's fan feed — the live scan if it has anything, else the seed. */
+export async function weekTailgate(week: number, season: number): Promise<TailgateWeek> {
+  try {
+    const buzz = await fetchBuzz(week, season);
+    if (buzz.length) return { week, season, sample: false, buzz };
+  } catch { /* fall through to the seed */ }
   return { week, season, sample: true, buzz: SEED };
 }
 
