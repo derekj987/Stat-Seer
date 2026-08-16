@@ -78,7 +78,6 @@ function GameCard({
   const ml = Object.entries(g.ml);
   const bestSide = ml.length ? ml.reduce((a, b) => (b[1].edge > a[1].edge ? b : a))[0] : null;
   const bestEdge = ml.reduce((m, [, s]) => Math.max(m, s.edge), 0);
-  const c = g.coherence;
   const s = g.spread;
   const t = g.total;
   const mk = (market: string, label: string, price: number, books: string[]): Pick => ({
@@ -132,16 +131,6 @@ function GameCard({
           </div>
         )}
       </div>
-
-      {c && (
-        <div className={c.flag === "investigate" ? "coh invest" : "coh"}>
-          <span className="coh__k">Market</span>
-          <span className="coh__v">{c.flag === "investigate" ? "Investigate" : "Fair"}</span>
-          <span className="coh__d">
-            {c.fav} priced {Math.round(c.mktFair * 100)}% vs 27-yr {Math.round(c.emp * 100)}% · hold {(c.hold * 100).toFixed(1)}%
-          </span>
-        </div>
-      )}
     </article>
   );
 }
@@ -216,8 +205,7 @@ export default function BoardView({
   const edges = board.flatMap((g) => Object.values(g.ml).map((s) => s.edge));
   const avgEdge = edges.length ? edges.reduce((a, b) => a + b, 0) / edges.length : 0;
   const keyGames = board.filter((g) => g.spread.key).length;
-  const cohs = board.map((g) => g.coherence).filter((c): c is NonNullable<typeof c> => !!c);
-  const fairN = cohs.filter((c) => c.flag === "fair").length;
+  const maxEdge = edges.length ? Math.max(...edges) : 0;
 
   return (
     <>
@@ -239,7 +227,7 @@ export default function BoardView({
             <section className="stats" aria-label="summary">
               <div className="stat"><span className="stat__v">+{avgEdge.toFixed(2)}%</span><span className="stat__l">avg shopping edge / side</span></div>
               <div className="stat"><span className="stat__v">{keyGames}</span><span className="stat__l">sweet-spot games</span></div>
-              <div className="stat"><span className="stat__v">{cohs.length ? `${fairN}/${cohs.length}` : "—"}</span><span className="stat__l">priced fair vs history</span></div>
+              <div className="stat"><span className="stat__v">+{maxEdge.toFixed(2)}%</span><span className="stat__l">best shopping edge</span></div>
               <div className="stat"><span className="stat__v">10</span><span className="stat__l">books compared</span></div>
             </section>
 
@@ -251,10 +239,9 @@ export default function BoardView({
 
             <footer className="foot">
               <p>
-                <b>No model. No pick.</b> Value Finder shows the best available number across books, where a
-                half-point sits on a sweet spot (a 3 or 7, worth the most), and a fair-price check — the de-vigged
-                price vs. how a favorite of that spread has actually done over 27 seasons. Prices move; this updates
-                automatically as new odds are captured.
+                <b>No model. No pick.</b> Value Finder shows the <b>best available number across books</b> and where a
+                half-point sits on a <b>sweet spot</b> (a 3 or 7, worth the most) — the two places line shopping
+                actually pays. Prices move; this updates automatically as new odds are captured.
               </p>
             </footer>
           </>

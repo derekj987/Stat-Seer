@@ -10,8 +10,8 @@
 export function FlowSteps({ active }: { active: "model" | "context" | "value" }) {
   const steps = [
     { key: "model", n: "1", label: "The Model", sub: "our read", href: "/model" },
-    { key: "context", n: "2", label: "Upset Watch", sub: "pressure-test it", href: "/context" },
-    { key: "value", n: "3", label: "Value Finder", sub: "place it", href: "/best" },
+    { key: "context", n: "2", label: "Context (Upset Watch)", sub: "pressure-test it", href: "/context" },
+    { key: "value", n: "3", label: "Value Finder", sub: "place it", href: "/lines" },
   ] as const;
   return (
     <nav className="flow" aria-label="How to use StatSeer">
@@ -64,12 +64,12 @@ export function Brand({ sub }: { sub: string }) {
 export function TopNav({ active }: { active: "value" | "model" | "context" }) {
   return (
     <nav className="tabs" aria-label="Section">
-      <a href="/best" className={active === "value" ? "tab active" : "tab"}
-        aria-current={active === "value" ? "page" : undefined}>Value Finder</a>
       <a href="/model" className={active === "model" ? "tab active" : "tab"}
         aria-current={active === "model" ? "page" : undefined}>The Model</a>
       <a href="/context" className={active === "context" ? "tab active" : "tab"}
-        aria-current={active === "context" ? "page" : undefined}>Context</a>
+        aria-current={active === "context" ? "page" : undefined}>Context (Upset Watch)</a>
+      <a href="/lines" className={active === "value" ? "tab active" : "tab"}
+        aria-current={active === "value" ? "page" : undefined}>Value Finder</a>
     </nav>
   );
 }
@@ -78,12 +78,12 @@ export function TopNav({ active }: { active: "value" | "model" | "context" }) {
 export function ValueSubnav({ active }: { active: "best" | "lines" | "props" }) {
   return (
     <nav className="subnav" aria-label="Value Finder view">
-      <a href="/best" className={active === "best" ? "subnav__t active" : "subnav__t"}
-        aria-current={active === "best" ? "page" : undefined}>Best Bets</a>
       <a href="/lines" className={active === "lines" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "lines" ? "page" : undefined}>Game Lines</a>
       <a href="/props" className={active === "props" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "props" ? "page" : undefined}>Player Props</a>
+      <a href="/best" className={active === "best" ? "subnav__t active" : "subnav__t"}
+        aria-current={active === "best" ? "page" : undefined}>Best Bets</a>
     </nav>
   );
 }
