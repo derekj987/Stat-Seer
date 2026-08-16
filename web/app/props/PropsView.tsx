@@ -228,8 +228,8 @@ export default function PropsView({ games }: { games: PropGame[] }) {
       <SlipCallout kind="props" />
       <p className="hint">{games.length} games · {players} players · best price on each, shopped across books.</p>
       <section className="propstack">
-        {games.map((g, i) => (
-          <PropGameCard key={g.eventId} g={g} open={i === 0} has={has} toggle={toggle} />
+        {games.map((g) => (
+          <PropGameCard key={g.eventId} g={g} has={has} toggle={toggle} />
         ))}
       </section>
       <footer className="foot">
