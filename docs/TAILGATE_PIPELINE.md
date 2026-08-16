@@ -4,13 +4,30 @@
 Phase 1 (curated seed feed + `/tailgate` page) is live; the page now reads the live
 feed and falls back to the seed until the first scan writes rows.
 
+**Reddit access note (important):** Reddit locked the JSON Data API — it returns
+**403 even from residential IPs**, and creating a new Data-API app is gated behind a
+moderation-use-case request we don't have. So there is **no Reddit app and no Reddit
+keys**. Instead we read Reddit's **public RSS feed** (`/r/<sub>/top/.rss`), an openly
+published syndication format still served (200) to a polite client. Trade-off: RSS
+gives post **titles + self-post text only — no comments, no scores** (thinner signal,
+but titles of top-of-week posts carry a lot of the buzz). Verified locally: BUF/BAL/
+KC/PHI each pulled 25 posts → 5/8/14/6 on-topic after the roster filter.
+
+**Open question — CI reachability:** RSS works from a residential IP but rate-limits
+hard (we pace 5s + back off on 429). Whether **GitHub Actions' datacenter IP** can
+reach it is untested — Reddit blocks many datacenter ranges. The workflow has a
+**`test` dispatch mode** to check this cheaply (below). If Actions is blocked, the
+fallback is running the scan from a residential IP (Derek's machine on a schedule).
+
 **To turn it on, Derek:**
 1. Run the `tailgate_buzz` block in `ingest/schema.sql` in the Supabase SQL editor.
-2. Create a Reddit **script** app (reddit.com/prefs/apps) → add `REDDIT_CLIENT_ID` /
-   `REDDIT_CLIENT_SECRET` to GitHub repo secrets.
-3. Add `ANTHROPIC_API_KEY` to GitHub repo secrets (`SUPABASE_*` already there).
-4. Trigger `capture-tailgate` manually once (Actions → Run workflow) and check the log
-   + the `/tailgate` page. Then the Wed/Fri/Sun cron takes over.
+2. Add `ANTHROPIC_API_KEY` to GitHub repo secrets (`SUPABASE_*` already there). **No
+   Reddit keys needed.**
+3. **Check CI reachability first:** Actions → *Capture tailgate* → Run workflow →
+   mode **`test`**. Needs no secrets/table — it scans 4 teams and prints snippet
+   counts. If they come back non-zero, Actions can reach Reddit and you're clear.
+4. Then Run workflow → mode **`full`** (or let the Wed/Fri/Sun cron fire) to scan all
+   32 and write. Check the `/tailgate` page.
 
 Files: `tailgate_reddit.py`, `.github/workflows/capture-tailgate.yml`,
 `ingest/schema.sql` (table), `web/lib/tailgate.ts` (read).
@@ -52,25 +69,25 @@ inherits three hard rules:
 
 ### 1. Reddit ingest — `tailgate_reddit.py` (root, next to `props_client.py`)
 
-**Auth.** A Reddit "script" app (free) → client id + secret. OAuth client-credentials
-flow gives a bearer token good for 100 req/min. That's ~2 orders of magnitude more
-than we need. No user login; read-only.
+**Access — public RSS, no app, no keys.** The JSON Data API is 403 (even
+residential) and new apps are gated, so we read the **RSS feed**
+`https://www.reddit.com/r/<sub>/top/.rss?t=week` — parsed as Atom with stdlib
+`xml.etree`. Plain descriptive User-Agent, paced 5s with exponential 429 backoff.
 
-**What it pulls, per team:**
-- The 32 team subreddits (static `TEAM_SUBREDDITS` map, e.g. `BUF → r/buffalobills`).
-- `top?t=week` + `hot` listings (≈25 posts each), deduped by post id.
-- For each post, the top ~10 comments (`?sort=top`), truncated to a char cap.
+**What it pulls, per team:** the ≈25 top-of-week posts from the `TEAMS` map
+(`BUF → r/buffalobills`, …) — each entry's **title** plus any **self-post text**.
+RSS carries **no comments and no scores**, so we keep the feed's own top-of-week
+order (synthetic descending rank) and lose the comment-level chatter the JSON path
+would have had. Titles still carry most of the buzz.
 
-**Pre-filter before Claude (this is the cost lever).** Raw board text is mostly
-noise (game threads, memes, refs). Before spending a single token:
-- Run each post/comment through the existing roster to keep only text that
-  **mentions a rostered player on that team** (reuse `ingest/player_resolver.py`
-  + a weekly roster pull — the same names infrastructure the props/injury paths use).
-- Keep a window of context around each hit (the sentence/comment), not the whole thread.
-- This typically cuts a team's ~40k raw tokens down to ~10–15k of on-topic text.
+**Pre-filter before Claude (the cost lever).** Keep only snippets that **mention a
+rostered skill player** (QB/RB/WR/TE) on that team, via a per-team name index built
+from the nflverse `rosters` release (`norm()` + full-name / last-name match).
+Degrades to no-filter if the release is unavailable. Verified: BUF/BAL/KC/PHI →
+5/8/14/6 kept of 25.
 
-**Output:** an intermediate `{ team, matchup, snippets: [{text, permalink, score}] }`
-per team. `matchup` comes from the week's schedule (already in the odds DB).
+**Output:** `[{text, permalink, score}]` per team (`score` = rank). `matchup` is
+omitted in v1 (the `Buzz.matchup` field is optional).
 
 > Empty-week safety (mirrors `practice_scraper.py`'s lesson): a team returning zero
 > snippets looks identical to "the scraper broke." Log per-team snippet counts every
@@ -177,15 +194,17 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - run: pip install --quiet certifi praw anthropic
+      - run: pip install --quiet certifi anthropic     # stdlib does the Reddit RSS + XML
       - env:
-          REDDIT_CLIENT_ID:     ${{ secrets.REDDIT_CLIENT_ID }}
-          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
           ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
           SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: python tailgate_reddit.py --current --write
+        run: python tailgate_reddit.py --current --write   # no Reddit keys
 ```
+
+(The real workflow also has a `workflow_dispatch` **`test`** mode that runs
+`--no-extract --teams BUF,BAL,KC,PHI` — no secrets/table — to check whether Actions
+can reach Reddit before committing to a full run.)
 
 Three runs a week to start — **Wed / Fri / Sun** — spanning the practice-report arc
 (Wed chatter → Fri designations → Sunday-morning late buzz). Easy to add a fourth
@@ -203,9 +222,9 @@ the CSS, and the nav are untouched** — the whole point of shipping the shape f
 
 ## Cost & rate limits (recap)
 
-- **Reddit:** $0. Free tier is 100 req/min; a full 32-team scan is a few hundred
-  requests total, spread over minutes. (Commercial-ToS is a later "read the terms"
-  item, not a build blocker.)
+- **Reddit:** $0, no account. Public RSS feed, ~32 requests/run paced 5s apart
+  (~3 min). Rate limits are tight (429 if you burst) and datacenter IPs may be
+  blocked — see the CI-reachability note up top.
 - **Claude (Sonnet):** ~$2/run for an all-32 scan (≈12k pre-filtered input + ~1k
   output per team, thinking-off). At **3 runs/week ≈ ~$20–25/month** (a little less
   now — Sonnet 5 intro pricing runs through Aug 31 2026). Sharper reads than Haiku
@@ -216,9 +235,10 @@ the CSS, and the nav are untouched** — the whole point of shipping the shape f
 
 | Secret | Where from |
 |---|---|
-| `REDDIT_CLIENT_ID` / `REDDIT_CLIENT_SECRET` | reddit.com/prefs/apps → create a **script** app (free) |
 | `ANTHROPIC_API_KEY` | console.anthropic.com → API keys (pay-as-you-go) |
 | `SUPABASE_URL` / `SUPABASE_SERVICE_KEY` | already set for the other capture jobs |
+
+(No Reddit secrets — the RSS feed is unauthenticated.)
 
 (As always: I never handle the key values — you paste them into GitHub secrets.)
 
@@ -227,7 +247,7 @@ the CSS, and the nav are untouched** — the whole point of shipping the shape f
 ## Build order — all done (Aug 16 2026)
 
 1. ✅ **`tailgate_buzz` table** — in `ingest/schema.sql` (Derek runs it in Supabase).
-2. ✅ **Ingest stage** — Reddit app-only OAuth pull + nflverse roster mention filter.
+2. ✅ **Ingest stage** — Reddit public-RSS pull + nflverse roster mention filter.
    Validate first with `python tailgate_reddit.py --current --no-extract --teams BUF,BAL`
    (prints per-team snippet counts, no Claude call, no keys beyond Reddit needed).
 3. ✅ **Extraction stage** — Sonnet structured `Buzz` extraction, thinking-off.
