@@ -122,7 +122,8 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
       <ValueSubnav active="best" />
       <WeekNav min={min} max={max} current={week} />
 
-      <section className="explainer">
+      <details className="readbox">
+        <summary className="readbox__h">What am I seeing here?</summary>
         <p>
           <b>Where the value is this week.</b> These are <b>price edges we can prove</b> — the best available
           number across books, and the games where a half-point matters most. Same bet, better price. They are
@@ -130,7 +131,7 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
           earns them with a public, calibrated record. A good play means <em>+EV over time</em>, not a lock on
           Sunday.
         </p>
-      </section>
+      </details>
 
       {plays.length === 0 ? (
         <p className="foot">No odds captured for Week {week} yet.</p>

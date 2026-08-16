@@ -108,26 +108,29 @@ export default function SiteNav() {
 
       {open && (
         <div className="snav__drawer">
-          <a href="/" className={pathname === "/" ? "snav__dlink active" : "snav__dlink"}>Home</a>
+          <a href="/" className="snav__dtop">Home</a>
 
-          <div className="snav__dhead">The Process</div>
-          <a href="/model" className={pathname.startsWith("/model") ? "snav__dlink active" : "snav__dlink"}>The Model</a>
-          <a href="/context" className={pathname.startsWith("/context") ? "snav__dlink active" : "snav__dlink"}>Context (Upset Watch)</a>
-          <a href="/lines" className={["/lines", "/props", "/best"].some((x) => pathname.startsWith(x)) ? "snav__dlink active" : "snav__dlink"}>Value Finder</a>
+          <details className="snav__pgroup" open>
+            <summary className="snav__dtop snav__psum">The Process</summary>
+            <a href="/model" className="snav__dsub">The Model</a>
+            <a href="/context" className="snav__dsub">Context (Upset Watch)</a>
+            <a href="/lines" className="snav__dsub">Value Finder</a>
+          </details>
 
-          <a href="/forum" className={pathname.startsWith("/forum") ? "snav__dlink active" : "snav__dlink"}>Community</a>
+          <a href="/forum" className="snav__dtop">Community</a>
+
           <div className="snav__ddiv" />
           {me === undefined ? null : me ? (
             <>
-              <a href={`/u/${me.username}`} className="snav__dlink">My profile</a>
-              <a href="/settings" className="snav__dlink">Account settings</a>
-              {MOD.includes(me.role) && <a href="/forum/reports" className="snav__dlink">Reports</a>}
-              <button type="button" className="snav__dlink snav__mi--btn" onClick={logout}>Log out</button>
+              <a href={`/u/${me.username}`} className="snav__dusr">My profile</a>
+              <a href="/settings" className="snav__dusr">Account settings</a>
+              {MOD.includes(me.role) && <a href="/forum/reports" className="snav__dusr">Reports</a>}
+              <button type="button" className="snav__dusr" onClick={logout}>Log out</button>
             </>
           ) : (
             <>
-              <a href="/login" className="snav__dlink">Log in</a>
-              <a href="/signup" className="snav__dlink">Sign up</a>
+              <a href="/login" className="snav__dusr">Log in</a>
+              <a href="/signup" className="snav__dusr">Sign up</a>
             </>
           )}
         </div>

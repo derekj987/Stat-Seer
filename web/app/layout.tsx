@@ -1,6 +1,11 @@
 import type { Metadata, Viewport } from "next";
+import { MedievalSharp } from "next/font/google";
 import "./globals.css";
 import SiteNav from "./SiteNav";
+
+// Medieval display face for the STATSEER wordmark, exposed as a CSS var so any
+// masthead can use it (matches the tavern / seer tone).
+const medieval = MedievalSharp({ subsets: ["latin"], weight: "400", display: "swap", variable: "--font-medieval" });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://statseer.vercel.app"),
@@ -23,7 +28,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en">
+    <html lang="en" className={medieval.variable}>
       <body>
         <SiteNav />
         {children}

@@ -55,11 +55,10 @@ body{background:var(--bg);color:var(--ink);
 .brand__logo{flex:0 0 auto;width:46px;height:46px;border-radius:50%;
   border:1px solid var(--line);box-shadow:0 1px 4px rgba(0,0,0,.25);object-fit:cover}
 .brand__text{display:flex;flex-direction:column;min-width:0}
-.brand__mark{display:block;font-weight:800;letter-spacing:.14em;
-  font-size:clamp(24px,5vw,38px);margin:0}
-/* Community page wordmark: medieval, gold — matches the tavern tone */
-.brand__mark.forumbrand{color:var(--gold);font-weight:400;letter-spacing:.03em;
-  text-shadow:0 1px 2px rgba(0,0,0,.25)}
+/* Medieval, gold STATSEER wordmark across all mastheads — matches the seer tone */
+.brand__mark{display:block;font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;
+  color:var(--gold);font-weight:400;letter-spacing:.03em;
+  font-size:clamp(24px,5vw,38px);margin:0;text-shadow:0 1px 2px rgba(0,0,0,.25)}
 .brand__sub{display:block;color:var(--muted);font-size:14px;margin-top:4px;
   letter-spacing:.01em}
 .asof{text-align:right;color:var(--muted);font-size:12px;
@@ -451,18 +450,18 @@ a.fauthor:hover{text-decoration:underline}
 .replyprompt a{color:var(--accent);font-weight:600;text-decoration:none}
 
 /* --- guided flow stepper --- */
-.flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:12px 0 4px}
-.flow__item{display:inline-flex;align-items:center;gap:6px}
-.flow__step{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:10px;
+.flow{display:flex;align-items:stretch;gap:5px;flex-wrap:nowrap;margin:12px 0 4px}
+.flow__item{display:flex;align-items:center;gap:5px;flex:1 1 0;min-width:0}
+.flow__step{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;flex:1;min-width:0;
   text-decoration:none;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
 .flow__step.active{border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
 .flow__step:hover{border-color:var(--accent)}
 .flow__n{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;
   background:var(--surface-2);font-size:11px;font-weight:800;color:var(--muted);flex:0 0 auto}
 .flow__step.active .flow__n{background:var(--accent);color:#fff}
-.flow__l{display:flex;flex-direction:column;line-height:1.1;font-size:13px;font-weight:700}
+.flow__l{display:flex;flex-direction:column;line-height:1.15;font-size:12.5px;font-weight:700;min-width:0}
 .flow__sub{font-size:10px;font-weight:500;color:var(--muted)}
-.flow__arrow{color:var(--muted);font-size:14px}
+.flow__arrow{color:var(--muted);font-size:12px;flex:0 0 auto}
 
 /* --- upset watch --- */
 .upsets{display:flex;flex-direction:column;gap:6px}
@@ -751,12 +750,24 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
   .snav__burger{display:flex}
   .snav__drawer{display:flex;flex-direction:column;padding:8px 14px 16px;gap:2px;
     border-top:1px solid var(--line);background:var(--surface)}
-  .snav__dgroup{display:flex;flex-direction:column}
-  .snav__dlink{padding:11px 10px;border-radius:8px;text-decoration:none;font-size:15px;
-    font-weight:600;color:var(--ink);text-align:left;background:none;border:0;cursor:pointer;font:inherit}
-  .snav__dlink.active{color:var(--accent);background:var(--accent-soft)}
-  .snav__dhead{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;
-    color:var(--muted);padding:10px 10px 3px}
+  /* top-level drawer items (Home, The Process, Community): medieval gold */
+  .snav__dtop{display:block;width:100%;padding:11px 10px;text-decoration:none;
+    font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;
+    font-size:20px;font-weight:400;letter-spacing:.02em;color:var(--gold);
+    background:none;border:0;text-align:left;cursor:pointer}
+  .snav__psum{list-style:none;display:flex;align-items:center}
+  .snav__psum::-webkit-details-marker{display:none}
+  .snav__psum::after{content:"▸";margin-left:auto;font-size:13px;color:var(--gold)}
+  .snav__pgroup[open] .snav__psum::after{content:"▾"}
+  /* the three under The Process: smaller, indented right */
+  .snav__dsub{display:block;padding:8px 10px 8px 28px;border-radius:8px;text-decoration:none;
+    font-size:13.5px;font-weight:600;color:var(--ink)}
+  .snav__dsub:hover{color:var(--accent);background:var(--surface-2)}
+  /* account actions: green */
+  .snav__dusr{display:block;width:100%;padding:10px 10px;border-radius:8px;text-decoration:none;
+    font-size:14.5px;font-weight:700;color:var(--accent);
+    background:none;border:0;text-align:left;cursor:pointer;font:inherit}
+  .snav__dusr:hover{background:var(--accent-soft)}
   .snav__ddiv{height:1px;background:var(--line);margin:8px 0}
 }
 
