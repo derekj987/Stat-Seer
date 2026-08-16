@@ -817,3 +817,12 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .acctpromo__cta{display:flex;align-items:center;gap:14px;flex-shrink:0}
 .acctpromo__login{font-size:13px;font-weight:600;color:var(--accent);text-decoration:none;white-space:nowrap}
 .acctpromo__login:hover{text-decoration:underline}
+
+/* ---------------- Game Lines: collapsible Snapshot Statistics ---------------- */
+details.statsdrop{margin:22px 0 26px}
+details.statsdrop>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;text-transform:uppercase;letter-spacing:.07em;font-weight:800;color:var(--muted)}
+details.statsdrop>summary::-webkit-details-marker{display:none}
+details.statsdrop>summary::before{content:"▸";color:var(--muted);font-size:11px}
+details.statsdrop[open]>summary::before{content:"▾"}
+details.statsdrop .stats{margin:12px 0 0}

@@ -236,16 +236,30 @@ export default function BoardView({
 
         <WeekNav min={min} max={max} current={week} />
 
+        <details className="readbox">
+          <summary className="readbox__h">What am I seeing here?</summary>
+          <p>
+            Every game&apos;s betting lines — <b>moneyline, spread, and total</b> — with the <b>best available
+            number across all books</b> highlighted. Tap any line to add it to your slip; StatSeer tells you the
+            best sportsbook for each pick. A gold <b>Sweet Spot</b> badge means the spread or total sits on a key
+            number (a <b>3</b> or <b>7</b>), where the half-point is worth the most. No model, no pick — this is
+            line shopping: the same bet at a better price.
+          </p>
+        </details>
+
         {board.length === 0 ? (
           <p className="foot">No odds captured for Week {week} yet.</p>
         ) : (
           <>
-            <section className="stats" aria-label="summary">
-              <div className="stat"><span className="stat__v">+{avgEdge.toFixed(2)}%</span><span className="stat__l">avg shopping edge / side</span></div>
-              <div className="stat"><span className="stat__v">{keyGames}</span><span className="stat__l">sweet-spot games</span></div>
-              <div className="stat"><span className="stat__v">+{maxEdge.toFixed(2)}%</span><span className="stat__l">best shopping edge</span></div>
-              <div className="stat"><span className="stat__v">10</span><span className="stat__l">books compared</span></div>
-            </section>
+            <details className="statsdrop">
+              <summary className="statsdrop__h">Snapshot Statistics</summary>
+              <section className="stats" aria-label="summary">
+                <div className="stat"><span className="stat__v">+{avgEdge.toFixed(2)}%</span><span className="stat__l">avg shopping edge / side</span></div>
+                <div className="stat"><span className="stat__v">{keyGames}</span><span className="stat__l">sweet-spot games</span></div>
+                <div className="stat"><span className="stat__v">+{maxEdge.toFixed(2)}%</span><span className="stat__l">best shopping edge</span></div>
+                <div className="stat"><span className="stat__v">10</span><span className="stat__l">books compared</span></div>
+              </section>
+            </details>
 
             <SlipCallout kind="lines" />
 
