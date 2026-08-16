@@ -8,13 +8,14 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import MottoBar from "./MottoBar";
 
 type Me = { username: string; role: string; title: string | null } | null;
 
 const LINKS = [
   { href: "/", label: "Home", on: (p: string) => p === "/" },
   { href: "/model", label: "The Model", on: (p: string) => p.startsWith("/model") },
-  { href: "/context", label: "Context (Upset Watch)", on: (p: string) => p.startsWith("/context") },
+  { href: "/context", label: "The Context", on: (p: string) => p.startsWith("/context") },
   { href: "/lines", label: "Value Finder", on: (p: string) => ["/lines", "/props", "/best"].some((x) => p.startsWith(x)) },
   { href: "/forum", label: "Community", on: (p: string) => p.startsWith("/forum") },
 ];
@@ -106,6 +107,8 @@ export default function SiteNav() {
         </div>
       </div>
 
+      <MottoBar />
+
       {open && (
         <div className="snav__drawer">
           <a href="/" className="snav__dtop">Home</a>
@@ -113,7 +116,7 @@ export default function SiteNav() {
           <details className="snav__pgroup" open>
             <summary className="snav__dtop snav__psum">The Process</summary>
             <a href="/model" className="snav__dsub">The Model</a>
-            <a href="/context" className="snav__dsub">Context (Upset Watch)</a>
+            <a href="/context" className="snav__dsub">The Context</a>
             <a href="/lines" className="snav__dsub">Value Finder</a>
           </details>
 
