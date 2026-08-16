@@ -80,33 +80,33 @@ export default function Home() {
             <div className="slipdemo__h">Your slip</div>
             <div className="slipdemo__leg">
               <span className="slipdemo__pick">BUF −2.5</span>
-              <span className="slipdemo__book">best at <b>DraftKings</b> −110</span>
+              <span className="slipdemo__book">best at <b>DraftKings</b> −135</span>
             </div>
             <div className="slipdemo__leg">
               <span className="slipdemo__pick">SEA/SF Over 47.5</span>
-              <span className="slipdemo__book">best at <b>DraftKings</b> −108</span>
-            </div>
-            <div className="slipdemo__leg">
-              <span className="slipdemo__pick">Mahomes 275+ pass yds</span>
-              <span className="slipdemo__book">best at <b>DraftKings</b> +115</span>
+              <span className="slipdemo__book">best at <b>DraftKings</b> −130</span>
             </div>
             <div className="slipdemo__leg">
               <span className="slipdemo__pick">Bijan 70+ rush yds</span>
-              <span className="slipdemo__book">best at <b>DraftKings</b> −105</span>
-            </div>
-            <div className="slipdemo__leg">
-              <span className="slipdemo__pick">Jefferson anytime TD</span>
-              <span className="slipdemo__book">best at <b>FanDuel</b> +140</span>
+              <span className="slipdemo__book">best at <b>DraftKings</b> −145</span>
             </div>
             <div className="slipdemo__leg">
               <span className="slipdemo__pick">Ravens ML</span>
-              <span className="slipdemo__book">best at <b>BetMGM</b> −150</span>
+              <span className="slipdemo__book">best at <b>DraftKings</b> −165</span>
+            </div>
+            <div className="slipdemo__leg">
+              <span className="slipdemo__pick">Jefferson anytime TD</span>
+              <span className="slipdemo__book">best at <b>FanDuel</b> −120</span>
+            </div>
+            <div className="slipdemo__leg">
+              <span className="slipdemo__pick">Mahomes 250+ pass yds</span>
+              <span className="slipdemo__book">best at <b>BetMGM</b> −140</span>
             </div>
             <div className="slipdemo__parlay">
               <span>Parlay · all 6</span>
-              <span className="slipdemo__odds">best at <b>DraftKings</b> +6070</span>
+              <span className="slipdemo__odds">best at <b>DraftKings</b> +2527</span>
             </div>
-            <div className="slipdemo__save">$10 → $617 — the best combined price across books</div>
+            <div className="slipdemo__save">$10 → $263 — the best combined price across books</div>
           </div>
         </div>
       </section>
