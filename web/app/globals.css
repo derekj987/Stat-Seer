@@ -905,3 +905,15 @@ details.statsdrop .stats{margin:12px 0 0}
 .slipgrp{margin-bottom:10px}
 .slipgrp__h{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
   color:var(--muted);margin:6px 0 4px}
+
+/* --- The Model: collapsible prediction cards --- */
+details.predcard{padding:0}
+.predcard__head{cursor:pointer;list-style:none;padding:13px 18px;margin-bottom:0;border-bottom:0}
+.predcard__head::-webkit-details-marker{display:none}
+.predcard[open] .predcard__head{border-bottom:1px solid var(--line)}
+.predcard__sum{margin-left:auto;font-size:13px;color:var(--muted);font-weight:500;white-space:nowrap}
+.predcard__sum b{color:var(--ink);font-weight:700}
+.predcard__chev{color:var(--muted);font-size:12px;flex:0 0 auto;transition:transform .15s}
+.predcard[open] .predcard__chev{transform:rotate(90deg)}
+.predcard .pred{padding:13px 18px 16px}
+.predcard .pred .kick{display:block;margin-bottom:12px}
