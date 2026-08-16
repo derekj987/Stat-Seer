@@ -1,5 +1,8 @@
+import { MedievalSharp } from "next/font/google";
 import { createClient } from "@/lib/supabase/server";
 import { SECTIONS } from "@/lib/forum";
+
+const medieval = MedievalSharp({ subsets: ["latin"], weight: "400", display: "swap" });
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +15,7 @@ export default async function Forum() {
     <main className="wrap">
       <header className="masthead">
         <div className="brand">
-          <a href="/" className="brand__home"><span className="brand__mark">STATSEER</span></a>
+          <a href="/" className="brand__marklink"><span className={`brand__mark forumbrand ${medieval.className}`}>STATSEER</span></a>
         </div>
       </header>
 

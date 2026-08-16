@@ -84,17 +84,29 @@ export default function Home() {
             </div>
             <div className="slipdemo__leg">
               <span className="slipdemo__pick">SEA/SF Over 47.5</span>
-              <span className="slipdemo__book">best at <b>FanDuel</b> −105</span>
+              <span className="slipdemo__book">best at <b>DraftKings</b> −108</span>
             </div>
             <div className="slipdemo__leg">
               <span className="slipdemo__pick">Mahomes 275+ pass yds</span>
-              <span className="slipdemo__book">best at <b>BetMGM</b> +120</span>
+              <span className="slipdemo__book">best at <b>DraftKings</b> +115</span>
+            </div>
+            <div className="slipdemo__leg">
+              <span className="slipdemo__pick">Bijan 70+ rush yds</span>
+              <span className="slipdemo__book">best at <b>DraftKings</b> −105</span>
+            </div>
+            <div className="slipdemo__leg">
+              <span className="slipdemo__pick">Jefferson anytime TD</span>
+              <span className="slipdemo__book">best at <b>FanDuel</b> +140</span>
+            </div>
+            <div className="slipdemo__leg">
+              <span className="slipdemo__pick">Ravens ML</span>
+              <span className="slipdemo__book">best at <b>BetMGM</b> −150</span>
             </div>
             <div className="slipdemo__parlay">
-              <span>Parlay · all 3</span>
-              <span className="slipdemo__odds">best combined at <b>Caesars</b> +560</span>
+              <span>Parlay · all 6</span>
+              <span className="slipdemo__odds">best combined at <b>Caesars</b> +2100</span>
             </div>
-            <div className="slipdemo__save">≈ 9% more than betting all three at one book</div>
+            <div className="slipdemo__save">≈ 11% more than betting all six at one book</div>
           </div>
         </div>
       </section>
