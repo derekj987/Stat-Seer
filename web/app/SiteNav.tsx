@@ -18,11 +18,6 @@ const LINKS = [
   { href: "/lines", label: "Value Finder", on: (p: string) => ["/lines", "/props", "/best"].some((x) => p.startsWith(x)) },
   { href: "/forum", label: "Community", on: (p: string) => p.startsWith("/forum") },
 ];
-const VALUE_SUBS = [
-  { href: "/lines", label: "Game Lines" },
-  { href: "/props", label: "Player Props" },
-  { href: "/best", label: "Best Bets" },
-];
 const MOD = ["founder", "admin"];
 
 export default function SiteNav() {
@@ -113,16 +108,14 @@ export default function SiteNav() {
 
       {open && (
         <div className="snav__drawer">
-          {LINKS.map((l) => (
-            <div key={l.href} className="snav__dgroup">
-              <a href={l.href} className={l.on(pathname) ? "snav__dlink active" : "snav__dlink"}>{l.label}</a>
-              {l.href === "/lines" && (
-                <div className="snav__dsubs">
-                  {VALUE_SUBS.map((s) => <a key={s.href} href={s.href} className="snav__dsub">{s.label}</a>)}
-                </div>
-              )}
-            </div>
-          ))}
+          <a href="/" className={pathname === "/" ? "snav__dlink active" : "snav__dlink"}>Home</a>
+
+          <div className="snav__dhead">The Process</div>
+          <a href="/model" className={pathname.startsWith("/model") ? "snav__dlink active" : "snav__dlink"}>The Model</a>
+          <a href="/context" className={pathname.startsWith("/context") ? "snav__dlink active" : "snav__dlink"}>Context (Upset Watch)</a>
+          <a href="/lines" className={["/lines", "/props", "/best"].some((x) => pathname.startsWith(x)) ? "snav__dlink active" : "snav__dlink"}>Value Finder</a>
+
+          <a href="/forum" className={pathname.startsWith("/forum") ? "snav__dlink active" : "snav__dlink"}>Community</a>
           <div className="snav__ddiv" />
           {me === undefined ? null : me ? (
             <>

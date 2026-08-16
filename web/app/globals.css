@@ -755,9 +755,8 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
   .snav__dlink{padding:11px 10px;border-radius:8px;text-decoration:none;font-size:15px;
     font-weight:600;color:var(--ink);text-align:left;background:none;border:0;cursor:pointer;font:inherit}
   .snav__dlink.active{color:var(--accent);background:var(--accent-soft)}
-  .snav__dsubs{display:flex;flex-direction:column;padding-left:14px}
-  .snav__dsub{padding:8px 10px;border-radius:8px;text-decoration:none;font-size:13.5px;
-    font-weight:600;color:color-mix(in srgb,var(--amber) 78%,var(--muted))}
+  .snav__dhead{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;
+    color:var(--muted);padding:10px 10px 3px}
   .snav__ddiv{height:1px;background:var(--line);margin:8px 0}
 }
 

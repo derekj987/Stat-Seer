@@ -22,7 +22,7 @@ export default async function Forum() {
       <div className="forumlayout">
         <aside className="forumside">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/forum-side.jpg" alt="" className="forumside__img" />
+          <img src="/forum-side.jpg?v=2" alt="" className="forumside__img" />
         </aside>
 
         <div className="forummain">
