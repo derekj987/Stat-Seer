@@ -23,7 +23,7 @@ function BuzzCard({ b }: { b: Buzz }) {
         </span>
       </header>
 
-      <div className="tgcard__angle">Fans like the <b>{b.angle}</b></div>
+      <div className="tgcard__angle">The buzz: <b>{b.angle}</b></div>
       <p className="tgcard__take">{b.take}</p>
 
       <div className="tgcard__src">

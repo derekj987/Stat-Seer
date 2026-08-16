@@ -91,8 +91,11 @@ SYSTEM = (
     "their own research.\n\n"
     "Rules:\n"
     "- Only report players and takes ACTUALLY present in the snippets. Never invent "
-    "a player, a stat line, or an over/under number. If fans didn't name a specific "
-    "number, describe the angle qualitatively (\"fans expect a big rushing day\").\n"
+    "a player, a stat line, or an over/under number.\n"
+    "- angle is a SHORT prop-style tag (max 6 words), never a sentence and never "
+    "starting with 'Fans' or 'Buzz'. Use \"OVER <n> <stat>\" when fans cite a number "
+    "(e.g. \"OVER 62.5 rec yds\"); otherwise a terse phrase like \"anytime TD\", "
+    "\"big rushing day\", or \"first TD\". Put the narrative in take, not angle.\n"
     "- heat: 3 = loud/repeated across multiple snippets; 2 = a few fans, a real "
     "thread; 1 = a one-off simmering mention. Be conservative -- most weeks have few 3s.\n"
     "- take is 1-2 plain sentences capturing the sentiment, not a specific poster.\n"
@@ -108,7 +111,9 @@ BUZZ_SCHEMA = {
             "type": "object",
             "properties": {
                 "player": {"type": "string"},
-                "angle": {"type": "string"},
+                "angle": {"type": "string", "description":
+                          "short prop-style tag, max 6 words, e.g. 'OVER 62.5 rec "
+                          "yds' or 'anytime TD' -- no sentences, no leading 'Fans'"},
                 "heat": {"type": "integer", "enum": [1, 2, 3]},
                 "take": {"type": "string"},
                 "quotes": {"type": "array", "items": {"type": "string"}},
