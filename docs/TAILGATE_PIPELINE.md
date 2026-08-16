@@ -67,8 +67,11 @@ per team. `matchup` comes from the week's schedule (already in the odds DB).
 ### 2. Claude extraction — same script, `--extract` stage
 
 One `messages.create` call **per team** (not one giant call — keeps each prompt
-small, cacheable, and independently retryable). Model: **`claude-haiku-4-5`** — a
-read-and-extract job is exactly its lane, and it's the cheap tier.
+small, cacheable, and independently retryable). Model: **`claude-sonnet-5`** —
+chosen over Haiku because the judgment parts of this (the `heat` call, the "why"
+behind a take, telling real buzz from noise) reward a sharper read, and the cost
+delta is small at this volume. Run it **thinking-off** (`thinking: {type: "disabled"}`)
+— this is a bounded extraction, not a reasoning task, so that keeps it cheap and fast.
 
 **Structured output** (guarantees valid `Buzz` rows — no parsing/retry loop):
 
@@ -86,7 +89,8 @@ BUZZ_SCHEMA = {
   },
   "required": ["buzz"], "additionalProperties": False
 }
-# client.messages.create(model="claude-haiku-4-5", output_config={"format": {"type": "json_schema", "schema": BUZZ_SCHEMA}}, ...)
+# client.messages.create(model="claude-sonnet-5", thinking={"type": "disabled"},
+#     output_config={"format": {"type": "json_schema", "schema": BUZZ_SCHEMA}}, ...)
 ```
 
 **Prompt (system):**
@@ -151,7 +155,8 @@ Same shape as `capture-props.yml`:
 on:
   schedule:
     - cron: "0 14 * * 3"   # Wed 14:00 UTC (~9-10am ET) — after Wed practice chatter
-    - cron: "0 15 * * 6"   # Sat 15:00 UTC — game-week refresh before Sunday
+    - cron: "0 15 * * 5"   # Fri 15:00 UTC — post-final-practice / injury designations
+    - cron: "0 14 * * 0"   # Sun 14:00 UTC (~9-10am ET) — late buzz before the 1pm ET games
   workflow_dispatch: {}
 jobs:
   capture:
@@ -170,7 +175,10 @@ jobs:
         run: python tailgate_reddit.py --current --write
 ```
 
-Twice-weekly is plenty; `workflow_dispatch` lets you run it by hand while testing.
+Three runs a week to start — **Wed / Fri / Sun** — spanning the practice-report arc
+(Wed chatter → Fri designations → Sunday-morning late buzz). Easy to add a fourth
+cron later if a slot proves valuable. `workflow_dispatch` lets you run it by hand
+while testing.
 
 ### 5. Web wiring — one function changes
 
@@ -186,8 +194,10 @@ the CSS, and the nav are untouched** — the whole point of shipping the shape f
 - **Reddit:** $0. Free tier is 100 req/min; a full 32-team scan is a few hundred
   requests total, spread over minutes. (Commercial-ToS is a later "read the terms"
   item, not a build blocker.)
-- **Claude:** ~$4/month at Haiku for a weekly all-32 scan (~$1/run, twice a week ≈
-  **$8/month**). Sonnet upgrade path is ~3× if sentiment reads feel thin.
+- **Claude (Sonnet):** ~$2/run for an all-32 scan (≈12k pre-filtered input + ~1k
+  output per team, thinking-off). At **3 runs/week ≈ ~$20–25/month** (a little less
+  now — Sonnet 5 intro pricing runs through Aug 31 2026). Sharper reads than Haiku
+  for a rounding-error difference at this volume.
 - Both scale trivially; nothing here threatens a budget.
 
 ## Secrets Derek adds (GitHub → repo secrets)
@@ -218,12 +228,16 @@ the CSS, and the nav are untouched** — the whole point of shipping the shape f
 Ships behind a real season anyway — there's no live board chatter until games start,
 so the seed feed stays visible until the first scan has something to say.
 
-## Open questions
+## Decisions (settled Aug 16 2026)
 
-- **Which boards beyond Reddit?** Reddit first (all 32, one API). Marquee off-Reddit
-  team forums come later as bespoke scrapers, per the source decision.
-- **Cadence during game week** — is Wed + Sat enough, or do we want a Sunday-morning
-  pull for late-breaking buzz? Cheap to add a third cron if so.
+- **Model:** Sonnet (`claude-sonnet-5`), thinking-off — sharper sentiment reads;
+  cost delta is negligible at this volume.
+- **Cadence:** 3×/week (Wed / Fri / Sun) to start; add more slots if a run proves valuable.
+- **Sources:** Reddit first (all 32, one API). Marquee off-Reddit team forums come
+  later as bespoke per-site scrapers.
+
+## Still open / future
+
 - **Verifiable-trust angle (future):** because these are timestamped, locked-pre-game
   claims, we *could* later grade how often fan-buzzed overs actually hit — turning
   Tailgate from pure color into another public track record. On-brand, not now.
