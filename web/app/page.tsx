@@ -62,6 +62,41 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="slipfeat">
+        <div className="slipfeat__text">
+          <span className="slipfeat__eyebrow">Only on StatSeer</span>
+          <h2 className="slipfeat__h">Build your slip. We tell you where to place it.</h2>
+          <p className="slipfeat__p">
+            Tap the bets you like on any page to build a slip. StatSeer finds the <b>single best
+            sportsbook for each pick</b> — and the <b>one book with the best price for the whole parlay</b> —
+            so you never leave money on the table by betting everything in one app.
+          </p>
+          <a href="/lines" className="btn btn--primary">Build a slip →</a>
+        </div>
+        <div className="slipfeat__demo">
+          <div className="slipdemo" aria-hidden="true">
+            <div className="slipdemo__h">Your slip</div>
+            <div className="slipdemo__leg">
+              <span className="slipdemo__pick">BUF −2.5</span>
+              <span className="slipdemo__book">best at <b>DraftKings</b> −110</span>
+            </div>
+            <div className="slipdemo__leg">
+              <span className="slipdemo__pick">SEA/SF Over 47.5</span>
+              <span className="slipdemo__book">best at <b>FanDuel</b> −105</span>
+            </div>
+            <div className="slipdemo__leg">
+              <span className="slipdemo__pick">Mahomes 275+ pass yds</span>
+              <span className="slipdemo__book">best at <b>BetMGM</b> +120</span>
+            </div>
+            <div className="slipdemo__parlay">
+              <span>Parlay · all 3</span>
+              <span className="slipdemo__odds">best combined at <b>Caesars</b> +560</span>
+            </div>
+            <div className="slipdemo__save">≈ 9% more than betting all three at one book</div>
+          </div>
+        </div>
+      </section>
+
       <section className="creed">
         <h2 className="creed__h">No locks. No hype. No tout.</h2>
         <p className="creed__p">

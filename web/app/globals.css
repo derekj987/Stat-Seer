@@ -768,3 +768,30 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .setdel__row{display:flex;gap:10px;flex-wrap:wrap}
 .btn--danger{background:var(--key);color:#fff;border:0}
 .btn--danger:hover{filter:brightness(1.06)}
+
+/* ---------------- landing: build-your-slip feature ---------------- */
+.slipfeat{display:flex;gap:28px;flex-wrap:wrap;align-items:center;
+  background:var(--surface);border:1px solid var(--line);border-radius:16px;
+  padding:26px;margin:8px 0 34px}
+.slipfeat__text{flex:1 1 300px;min-width:0}
+.slipfeat__eyebrow{display:inline-block;font-size:10.5px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.09em;color:var(--amber);background:var(--amber-soft);padding:4px 10px;
+  border-radius:20px;margin-bottom:12px}
+.slipfeat__h{font-size:clamp(20px,3vw,26px);line-height:1.15;margin:0 0 12px;letter-spacing:-.01em}
+.slipfeat__p{font-size:14.5px;line-height:1.6;color:var(--muted);margin:0 0 18px;max-width:52ch}
+.slipfeat__p b{color:var(--ink)}
+.slipfeat__demo{flex:1 1 280px;display:flex;justify-content:center}
+.slipdemo{width:100%;max-width:340px;background:var(--surface-2);border:1px solid var(--line);
+  border-radius:14px;padding:14px 16px;box-shadow:0 4px 18px rgba(0,0,0,.12)}
+.slipdemo__h{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--muted);margin-bottom:6px}
+.slipdemo__leg{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  padding:9px 0;border-top:1px solid var(--line)}
+.slipdemo__pick{font-size:13.5px;font-weight:700;color:var(--ink)}
+.slipdemo__book{font-size:12px;color:var(--muted);text-align:right;white-space:nowrap}
+.slipdemo__book b{color:var(--accent)}
+.slipdemo__parlay{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  margin-top:8px;padding-top:11px;border-top:2px solid var(--ink);font-size:13px;font-weight:700}
+.slipdemo__odds{color:var(--accent);text-align:right}
+.slipdemo__save{margin-top:10px;font-size:11.5px;font-weight:700;color:var(--amber);
+  background:var(--amber-soft);border-radius:8px;padding:7px 10px;text-align:center}
