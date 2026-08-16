@@ -123,20 +123,28 @@ SNIPPET_CAP = 500         # per-snippet char cap
 MIN_INTERVAL = 5.0        # seconds between Reddit requests (RSS rate-limits hard)
 
 SYSTEM = (
-    "You read NFL fan message-board chatter for ONE team and surface players fans "
-    "are buzzing about to go OVER a number this week (rushing/receiving yards, "
-    "receptions, an anytime TD, etc.). You are NOT predicting anything and NOT "
-    "giving picks -- you summarize what fans are saying, as ammo for someone doing "
-    "their own research.\n\n"
+    "You read NFL fan message-board chatter for ONE team and surface players whose "
+    "'fan stock' is MOVING this week -- in either direction. UP (bullish): fans "
+    "expect a big game, more volume, a sleeper going OVER a number, an anytime TD. "
+    "DOWN (bearish): fans are souring on a player, worried about a shrinking role, "
+    "a matchup they distrust, or production trending down (a likely UNDER). You are "
+    "NOT predicting anything and NOT giving picks -- you summarize what fans are "
+    "saying, as ammo for someone doing their own research.\n\n"
     "Rules:\n"
     "- Only report players and takes ACTUALLY present in the snippets. Never invent "
     "a player, a stat line, or an over/under number.\n"
+    "- direction: 'up' when fans are bullish/excited, 'down' when they are "
+    "bearish/worried/frustrated. Report BOTH -- a player fans are down on is just as "
+    "useful as a sleeper. Do not force one direction; read the actual tone.\n"
     "- angle is a SHORT prop-style tag (max 6 words), never a sentence and never "
-    "starting with 'Fans' or 'Buzz'. Use \"OVER <n> <stat>\" when fans cite a number "
-    "(e.g. \"OVER 62.5 rec yds\"); otherwise a terse phrase like \"anytime TD\", "
-    "\"big rushing day\", or \"first TD\". Put the narrative in take, not angle.\n"
-    "- heat: 3 = loud/repeated across multiple snippets; 2 = a few fans, a real "
-    "thread; 1 = a one-off simmering mention. Be conservative -- most weeks have few 3s.\n"
+    "starting with 'Fans' or 'Buzz'. For up, prefer \"OVER <n> <stat>\" when fans "
+    "cite a number (e.g. \"OVER 62.5 rec yds\") else a terse phrase like \"anytime "
+    "TD\" or \"big rushing day\". For down, use \"UNDER <n> <stat>\" with a cited "
+    "number, else a terse phrase like \"fading role\" or \"tough matchup\". Put the "
+    "narrative in take, not angle.\n"
+    "- heat: magnitude of the move, SAME scale for up and down. 3 = loud/repeated "
+    "across multiple snippets; 2 = a few fans, a real thread; 1 = a one-off mention. "
+    "Be conservative -- most weeks have few 3s.\n"
     "- take is 1-2 plain sentences capturing the sentiment, not a specific poster.\n"
     "- Include 1-3 short verbatim quotes (each under 15 words) copied from the "
     "snippets that back the buzz, so we can link to the thread.\n"
@@ -150,14 +158,18 @@ BUZZ_SCHEMA = {
             "type": "object",
             "properties": {
                 "player": {"type": "string"},
+                "direction": {"type": "string", "enum": ["up", "down"], "description":
+                              "'up' = fans bullish/excited; 'down' = fans "
+                              "bearish/souring/production trending down"},
                 "angle": {"type": "string", "description":
                           "short prop-style tag, max 6 words, e.g. 'OVER 62.5 rec "
-                          "yds' or 'anytime TD' -- no sentences, no leading 'Fans'"},
+                          "yds' (up) or 'UNDER 58.5 rec yds' / 'fading role' (down) "
+                          "-- no sentences, no leading 'Fans'"},
                 "heat": {"type": "integer", "enum": [1, 2, 3]},
                 "take": {"type": "string"},
                 "quotes": {"type": "array", "items": {"type": "string"}},
             },
-            "required": ["player", "angle", "heat", "take"],
+            "required": ["player", "direction", "angle", "heat", "take"],
             "additionalProperties": False,
         }},
     },
@@ -394,6 +406,7 @@ def build_rows(abbrev, nickname, buzz, snippets, season, week):
             "id": f"w{week}-{abbrev}-{slug(player)}",
             "player": player, "team": nickname,
             "angle": (b.get("angle") or "").strip(),
+            "direction": "down" if str(b.get("direction", "up")).lower() == "down" else "up",
             "heat": int(b.get("heat", 1)),
             "take": (b.get("take") or "").strip(),
             "sources": srcs[:3],
@@ -500,8 +513,8 @@ def main(argv=None):
         rows = build_rows(abbrev, nickname, buzz, kept, season, week)
         total_rows += len(rows)
         for r in rows:
-            heat = {1: "simmering", 2: "heating up", 3: "on fire"}[r["heat"]]
-            print(f"       + {r['player']} ({heat}) -- {r['angle']}")
+            tick = f"[{'UP' if r['direction'] == 'up' else 'DN'} x{r['heat']}]"
+            print(f"       {tick:<8} {r['player']} -- {r['angle']}")
         if args.write:
             sb_write(env, season, week, nickname, rows)
 

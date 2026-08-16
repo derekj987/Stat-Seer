@@ -8,8 +8,11 @@
 // this same shape. Keeping the type stable now means the page never changes when
 // the live pipeline lands.
 
-/** Fan hype level. Deliberately subjective — this is vibe, not a probability. */
-export type Heat = 1 | 2 | 3; // 1 simmering · 2 heating up · 3 on fire
+/** Move magnitude, like a stock's swing — how loud/strong the sentiment is. */
+export type Heat = 1 | 2 | 3; // 1 slight · 2 notable · 3 strong
+
+/** Which way the fan sentiment is pointing — bullish (up) or bearish (down). */
+export type Direction = "up" | "down";
 
 export interface BuzzSource {
   board: string;      // e.g. "r/BuffaloBills" or "Bills Mafia forum"
@@ -21,8 +24,9 @@ export interface Buzz {
   player: string;
   team: string;       // fan team, e.g. "Bills"
   matchup?: string;   // e.g. "BUF vs NYJ"
-  angle: string;      // the over fans are buzzing, e.g. "OVER 62.5 receiving yards"
-  heat: Heat;
+  angle: string;      // the prop fans are pointing at, e.g. "OVER 62.5 receiving yards"
+  direction: Direction; // up = fans bullish; down = fans souring / production trending down
+  heat: Heat;         // magnitude of the move (in either direction)
   take: string;       // what the boards are actually saying, and why
   sources: BuzzSource[];
 }
@@ -46,6 +50,7 @@ const SEED: Buzz[] = [
     team: "Bills",
     matchup: "BUF vs NYJ",
     angle: "OVER 74.5 rushing yards",
+    direction: "up",
     heat: 3,
     take:
       "Bills boards are loud on Cook this week — the read is a heavy early-down script " +
@@ -62,6 +67,7 @@ const SEED: Buzz[] = [
     team: "Ravens",
     matchup: "BAL vs CLE",
     angle: "OVER 5.5 receptions",
+    direction: "up",
     heat: 2,
     take:
       "Ravens fans keep pointing at Flowers as the short-area outlet if the game scripts pass-heavy. " +
@@ -76,6 +82,7 @@ const SEED: Buzz[] = [
     team: "Broncos",
     matchup: "DEN vs TEN",
     angle: "OVER 38.5 receiving yards",
+    direction: "up",
     heat: 2,
     take:
       "A genuine sleeper buzz — Broncos boards think Mims has carved out a bigger role and like his " +
@@ -91,6 +98,7 @@ const SEED: Buzz[] = [
     team: "Falcons",
     matchup: "ATL vs CAR",
     angle: "OVER 44.5 receiving yards",
+    direction: "up",
     heat: 1,
     take:
       "Quieter chatter, but a few Falcons threads flag Mooney as the deep-shot beneficiary if " +
@@ -105,12 +113,43 @@ const SEED: Buzz[] = [
     team: "Cowboys",
     matchup: "DAL vs NYG",
     angle: "ANYTIME TD",
+    direction: "up",
     heat: 1,
     take:
       "Red-zone whispers on the Cowboys boards — fans have noticed the TE getting goal-line looks " +
       "in camp reports and think an early-season score is coming. Low-volume take, high upside if right.",
     sources: [
       { board: "r/cowboys" },
+    ],
+  },
+  {
+    id: "w1-pickens",
+    player: "George Pickens",
+    team: "Steelers",
+    matchup: "PIT vs ATL",
+    angle: "UNDER 58.5 receiving yards",
+    direction: "down",
+    heat: 2,
+    take:
+      "Steelers boards are cooling on Pickens — recurring frustration about the target share drying up " +
+      "and the offense running through other reads. 'Don't trust the volume right now' is the mood, not a blowup.",
+    sources: [
+      { board: "r/steelers" },
+    ],
+  },
+  {
+    id: "w1-gibbs",
+    player: "Jahmyr Gibbs",
+    team: "Lions",
+    matchup: "DET vs GB",
+    angle: "UNDER 68.5 rushing yards",
+    direction: "down",
+    heat: 1,
+    take:
+      "Quiet worry on the Lions boards about a committee week and a tough front — a few threads flag the " +
+      "rushing line as high if the game scripts pass-heavy. Soft signal, fans just less sure than usual.",
+    sources: [
+      { board: "r/detroitlions" },
     ],
   },
 ];
@@ -120,7 +159,7 @@ const SEED: Buzz[] = [
 // fails — so preseason and any hiccup just show the sample feed, never an error.
 interface BuzzRow {
   id: string; player: string; team: string; matchup: string | null;
-  angle: string; heat: Heat; take: string; sources: BuzzSource[] | null;
+  angle: string; direction: string | null; heat: Heat; take: string; sources: BuzzSource[] | null;
 }
 
 async function fetchBuzz(week: number, season: number): Promise<Buzz[]> {
@@ -128,7 +167,7 @@ async function fetchBuzz(week: number, season: number): Promise<Buzz[]> {
   const key = process.env.SUPABASE_SERVICE_KEY;
   if (!url || !key) return [];
   const q = `?season=eq.${season}&week=eq.${week}` +
-    `&select=id,player,team,matchup,angle,heat,take,sources&order=heat.desc`;
+    `&select=id,player,team,matchup,angle,direction,heat,take,sources&order=heat.desc`;
   const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/tailgate_buzz${q}`, {
     headers: { apikey: key, Authorization: `Bearer ${key}` },
     next: { revalidate: 300 },
@@ -138,7 +177,10 @@ async function fetchBuzz(week: number, season: number): Promise<Buzz[]> {
   return rows.map((r) => ({
     id: r.id, player: r.player, team: r.team,
     matchup: r.matchup ?? undefined,
-    angle: r.angle, heat: r.heat, take: r.take,
+    angle: r.angle,
+    // Legacy rows written before the up/down split default to bullish.
+    direction: r.direction === "down" ? "down" : "up",
+    heat: r.heat, take: r.take,
     sources: r.sources ?? [],
   }));
 }
@@ -152,8 +194,18 @@ export async function weekTailgate(week: number, season: number): Promise<Tailga
   return { week, season, sample: true, buzz: SEED };
 }
 
-export const HEAT_LABEL: Record<Heat, string> = {
-  1: "Simmering",
-  2: "Heating up",
-  3: "On fire",
+// Stock-ticker labels — a bullish/bearish word scaled by how strong the move is.
+const STOCK_LABEL: Record<Direction, Record<Heat, string>> = {
+  up:   { 1: "Ticking up", 2: "Rising", 3: "Surging" },
+  down: { 1: "Slipping", 2: "Sliding", 3: "Tanking" },
 };
+
+/** Human label for a fan-stock move, e.g. up+3 → "Surging", down+2 → "Sliding". */
+export function stockLabel(direction: Direction, heat: Heat): string {
+  return STOCK_LABEL[direction][heat];
+}
+
+/** Stacked stock arrows for a move — ▲ per unit up, ▼ per unit down. */
+export function stockArrows(direction: Direction, heat: Heat): string {
+  return (direction === "up" ? "▲" : "▼").repeat(heat);
+}

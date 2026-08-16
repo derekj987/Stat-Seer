@@ -865,21 +865,26 @@ details.statsdrop .stats{margin:12px 0 0}
 .tgfeed{display:flex;flex-direction:column;gap:14px;margin-bottom:26px}
 .tgcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;
   padding:16px 18px;border-left:4px solid var(--line)}
-.tgcard--h1{border-left-color:var(--muted)}
-.tgcard--h2{border-left-color:var(--amber)}
-.tgcard--h3{border-left-color:var(--key)}
+/* Left accent = direction: green when fans are buying, red when they're selling. */
+.tgcard--up{border-left-color:var(--accent)}
+.tgcard--down{border-left-color:var(--key)}
 .tgcard__head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .tgcard__id{display:flex;flex-direction:column;gap:1px;min-width:0}
 .tgcard__player{font-size:17px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
 .tgcard__team{font-size:12px;color:var(--muted);font-weight:600}
-.tgheat{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;padding:4px 10px;border-radius:20px;
+/* Stock ticker badge — squared-off chip, green ▲ / red ▼, tabular for alignment. */
+.tgstock{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;padding:4px 10px;border-radius:8px;
   font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
-  background:var(--surface-2);color:var(--muted)}
-.tgheat--h2{background:var(--amber-soft);color:var(--amber)}
-.tgheat--h3{background:var(--key-soft);color:var(--key)}
-.tgheat__l{white-space:nowrap}
+  font-variant-numeric:tabular-nums;background:var(--surface-2);color:var(--muted)}
+.tgstock--up{background:var(--accent-soft);color:var(--accent)}
+.tgstock--down{background:var(--key-soft);color:var(--key)}
+.tgstock__arw{font-size:12px;letter-spacing:-2px;line-height:1}
+.tgstock__l{white-space:nowrap}
 .tgcard__angle{margin:11px 0 8px;font-size:13.5px;color:var(--ink)}
 .tgcard__angle b{color:var(--accent);font-weight:800}
+.tgcard--down .tgcard__angle b{color:var(--key)}
+.tgwall__up{color:var(--accent);white-space:nowrap}
+.tgwall__down{color:var(--key);white-space:nowrap}
 .tgcard__take{margin:0 0 12px;font-size:14px;line-height:1.6;color:var(--ink)}
 .tgcard__src{display:flex;align-items:center;flex-wrap:wrap;gap:8px;
   padding-top:11px;border-top:1px solid var(--line)}
@@ -889,7 +894,7 @@ details.statsdrop .stats{margin:12px 0 0}
 .tgsrc a{color:var(--accent);text-decoration:none;font-weight:600}
 .tgsrc a:hover{text-decoration:underline}
 @media (max-width:520px){
-  .tgheat__l{display:none}
+  .tgstock__l{display:none}
   .tgcard__player{font-size:16px}
 }
 

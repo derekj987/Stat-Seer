@@ -565,13 +565,17 @@ create table if not exists tailgate_buzz (
     player      text        not null,
     team        text        not null,   -- nickname, e.g. "Bills"
     matchup     text,                   -- optional, e.g. "BUF vs NYJ"
-    angle       text        not null,   -- the OVER fans tie them to
-    heat        smallint    not null check (heat between 1 and 3),
+    angle       text        not null,   -- the prop fans tie them to (OVER when up, UNDER when down)
+    direction   text        not null default 'up' check (direction in ('up','down')),  -- fan stock: buying/selling
+    heat        smallint    not null check (heat between 1 and 3),   -- magnitude of the move, either way
     take        text        not null,   -- what the boards are saying + why
     sources     jsonb       not null default '[]',  -- [{board, url}]
     captured_at timestamptz not null default now(),
     primary key (season, week, id)
 );
+-- Migration for an existing deployment (safe to re-run):
+--   alter table tailgate_buzz add column if not exists direction text not null default 'up'
+--     check (direction in ('up','down'));
 alter table tailgate_buzz enable row level security;
 
 drop policy if exists "tailgate readable by all" on tailgate_buzz;

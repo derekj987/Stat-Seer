@@ -1,5 +1,5 @@
 import { weekRange } from "@/lib/board";
-import { weekTailgate, HEAT_LABEL, type Buzz } from "@/lib/tailgate";
+import { weekTailgate, stockLabel, stockArrows, type Buzz } from "@/lib/tailgate";
 import { Brand, FlowSteps, ContextSubnav } from "../Nav";
 import AddToSlip from "../AddToSlip";
 
@@ -19,25 +19,25 @@ const TEAM_COLOR: Record<string, string> = {
   "49ers": "#cb5a6e", Buccaneers: "#d84a3c", Titans: "#4aace0", Commanders: "#cf7a5c",
 };
 
-function flames(heat: Buzz["heat"]): string {
-  return "🔥".repeat(heat);
-}
-
 function BuzzCard({ b }: { b: Buzz }) {
+  const label = stockLabel(b.direction, b.heat);
   return (
-    <article className={`tgcard tgcard--h${b.heat}`}>
+    <article className={`tgcard tgcard--${b.direction} tgcard--h${b.heat}`}>
       <header className="tgcard__head">
         <div className="tgcard__id">
           <span className="tgcard__player">{b.player}</span>
           {b.matchup && <span className="tgcard__team">{b.matchup}</span>}
         </div>
-        <span className={`tgheat tgheat--h${b.heat}`} title={`Fan hype: ${HEAT_LABEL[b.heat]}`}>
-          <span aria-hidden="true">{flames(b.heat)}</span>
-          <span className="tgheat__l">{HEAT_LABEL[b.heat]}</span>
+        <span className={`tgstock tgstock--${b.direction}`}
+          title={`Fan stock: ${label} (${b.direction === "up" ? "bullish" : "bearish"})`}>
+          <span className="tgstock__arw" aria-hidden="true">{stockArrows(b.direction, b.heat)}</span>
+          <span className="tgstock__l">{label}</span>
         </span>
       </header>
 
-      <div className="tgcard__angle">The buzz: <b>{b.angle}</b></div>
+      <div className="tgcard__angle">
+        {b.direction === "up" ? "Fans are on:" : "Fans are off:"} <b>{b.angle}</b>
+      </div>
       <p className="tgcard__take">{b.take}</p>
 
       <div className="tgcard__src">
@@ -89,12 +89,13 @@ export default async function Page() {
 
       {/* The wall: this is fan sentiment, NOT a StatSeer pick or model output. */}
       <div className="tgwall" role="note">
-        <span className="tgwall__tag">Fan chatter — not a pick</span>
+        <span className="tgwall__tag">Fan Stock</span>
         <p>
-          This is <b>Fan Analysis</b>: a digest of what fans are buzzing about on their teams&apos; boards and
-          blogs — sleepers who might go <b>over</b> their number this week. It&apos;s <b>ammo for your own
-          research</b>, not our model, not a StatSeer pick, and it is <b>never graded</b>. We&apos;re not
-          crunching numbers here — we&apos;re handing you the word around the league. Do your own homework.
+          This is <b>Fan Stock</b>: a read on which players fans are <b className="tgwall__up">buying&nbsp;▲</b> and
+          which they&apos;re <b className="tgwall__down">selling&nbsp;▼</b> on their teams&apos; boards and blogs —
+          sleepers heating up, and names the crowd is souring on. It&apos;s <b>ammo for your own research</b>, not
+          our model, not a StatSeer pick, and it is <b>never graded</b>. We&apos;re not crunching numbers here —
+          we&apos;re handing you the word around the league. Do your own homework.
         </p>
       </div>
 
