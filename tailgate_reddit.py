@@ -1,11 +1,11 @@
 """
 tailgate_reddit.py -- Phase 2 of the Tailgate feature (see docs/TAILGATE_PIPELINE.md).
 
-Scans the 32 team subreddits for players fans are buzzing to go OVER a number this
-week, distills each team's chatter with Claude (Sonnet, thinking-off), and writes
-`Buzz` rows into Supabase `tailgate_buzz` -- the exact shape the /tailgate page
-already renders. This is FAN SENTIMENT, not a pick and not model output; it is never
-graded and never feeds The Model.
+Scans each team's fan community -- its subreddit (Reddit RSS) AND its SB Nation team
+blog (RSS) -- for players fans are buzzing to go OVER a number this week, distills
+each team's chatter with Claude (Sonnet, thinking-off), and writes `Buzz` rows into
+Supabase `tailgate_buzz` -- the exact shape the /tailgate page already renders. This
+is FAN SENTIMENT, not a pick and not model output; never graded, never feeds The Model.
 
 Pipeline per team:
   Reddit (top?t=week + hot + top comments)  ->  roster mention pre-filter
@@ -77,6 +77,45 @@ TEAMS = {
     "PIT": ("steelers", "Steelers"),    "SEA": ("Seahawks", "Seahawks"),
     "SF":  ("49ers", "49ers"),          "TB":  ("buccaneers", "Buccaneers"),
     "TEN": ("Tennesseetitans", "Titans"), "WAS": ("Commanders", "Commanders"),
+}
+
+# Second source: each team's SB Nation blog (all 32 publish an Atom feed at
+# https://www.<domain>/rss/index.xml -- verified live). Fan-run team communities;
+# more editorial than raw board chatter, but the same player-buzz territory and
+# rock-solid RSS. team -> (display name, domain).
+BLOGS = {
+    "ARI": ("Revenge of the Birds", "revengeofthebirds.com"),
+    "ATL": ("The Falcoholic", "thefalcoholic.com"),
+    "BAL": ("Baltimore Beatdown", "baltimorebeatdown.com"),
+    "BUF": ("Buffalo Rumblings", "buffalorumblings.com"),
+    "CAR": ("Cat Scratch Reader", "catscratchreader.com"),
+    "CHI": ("Windy City Gridiron", "windycitygridiron.com"),
+    "CIN": ("Cincy Jungle", "cincyjungle.com"),
+    "CLE": ("Dawgs By Nature", "dawgsbynature.com"),
+    "DAL": ("Blogging The Boys", "bloggingtheboys.com"),
+    "DEN": ("Mile High Report", "milehighreport.com"),
+    "DET": ("Pride Of Detroit", "prideofdetroit.com"),
+    "GB": ("Acme Packing Company", "acmepackingcompany.com"),
+    "HOU": ("Battle Red Blog", "battleredblog.com"),
+    "IND": ("Stampede Blue", "stampedeblue.com"),
+    "JAX": ("Big Cat Country", "bigcatcountry.com"),
+    "KC": ("Arrowhead Pride", "arrowheadpride.com"),
+    "LAC": ("Bolts From The Blue", "boltsfromtheblue.com"),
+    "LAR": ("Turf Show Times", "turfshowtimes.com"),
+    "LV": ("Silver And Black Pride", "silverandblackpride.com"),
+    "MIA": ("The Phinsider", "thephinsider.com"),
+    "MIN": ("Daily Norseman", "dailynorseman.com"),
+    "NE": ("Pats Pulpit", "patspulpit.com"),
+    "NO": ("Canal Street Chronicles", "canalstreetchronicles.com"),
+    "NYG": ("Big Blue View", "bigblueview.com"),
+    "NYJ": ("Gang Green Nation", "ganggreennation.com"),
+    "PHI": ("Bleeding Green Nation", "bleedinggreennation.com"),
+    "PIT": ("Behind The Steel Curtain", "behindthesteelcurtain.com"),
+    "SEA": ("Field Gulls", "fieldgulls.com"),
+    "SF": ("Niners Nation", "ninersnation.com"),
+    "TB": ("Bucs Nation", "bucsnation.com"),
+    "TEN": ("Music City Miracles", "musiccitymiracles.com"),
+    "WAS": ("Hogs Haven", "hogshaven.com"),
 }
 
 MAX_INPUT_CHARS = 14000   # per-team cap on text handed to Claude
@@ -251,55 +290,71 @@ def _clean_content(raw):
     return re.sub(r"\s+", " ", t).strip()
 
 
-def fetch_snippets(sub):
-    """Top-of-week posts from the subreddit's RSS feed as [{text, permalink, score}].
-    score is a synthetic descending rank (RSS has none) so feed/top order is kept."""
-    oc.ensure_ssl_certs()
-    _rate_limited[0] = False
-    url = f"https://www.reddit.com/r/{sub}/top/.rss?t=week"
+def fetch_feed(board, url):
+    """Parse one Atom feed -> [{text, permalink, score, board}]. A 403/429 (Reddit)
+    trips the rate-limit flag; any other feed error just logs and skips (one bad
+    blog feed must not kill the team)."""
     try:
         raw = _http_get(url)
     except urllib.error.HTTPError as e:
         if e.code in (403, 429):
             _rate_limited[0] = True
-        hint = " (Reddit may be blocking this IP)" if e.code in (403, 429) else ""
-        print(f"  r/{sub} -> HTTP {e.code}{hint}", file=sys.stderr)
+        hint = " (rate-limited/blocked)" if e.code in (403, 429) else ""
+        print(f"  {board} -> HTTP {e.code}{hint}", file=sys.stderr)
+        return []
+    except Exception as e:  # noqa: BLE001 -- network/decoding hiccup on one feed
+        print(f"  {board} -> error: {e}", file=sys.stderr)
         return []
     try:
         feed = ET.fromstring(raw)
     except ET.ParseError as e:
-        print(f"  r/{sub} -> RSS parse error: {e}", file=sys.stderr)
+        print(f"  {board} -> parse error: {e}", file=sys.stderr)
         return []
     entries = feed.findall(f"{ATOM}entry")
-    snippets = []
+    out = []
     for i, entry in enumerate(entries):
         title = (entry.findtext(f"{ATOM}title") or "").strip()
         if not title:
             continue
         link_el = entry.find(f"{ATOM}link")
-        permalink = (link_el.get("href") if link_el is not None
-                     else f"https://reddit.com/r/{sub}")
+        permalink = link_el.get("href") if link_el is not None else url
         body = _clean_content(entry.findtext(f"{ATOM}content") or "")
         text = (title + (" -- " + body if body else ""))[:SNIPPET_CAP]
-        snippets.append({"text": text, "permalink": permalink,
-                         "score": len(entries) - i})  # keep top-of-week order
+        out.append({"text": text, "permalink": permalink,
+                    "score": len(entries) - i, "board": board})  # keep feed order
+    return out
+
+
+def fetch_snippets(abbrev):
+    """All of a team's community feeds -- its subreddit (Reddit RSS) plus its SB
+    Nation team blog (RSS) -- aggregated into [{text, permalink, score, board}]."""
+    oc.ensure_ssl_certs()
+    _rate_limited[0] = False
+    sub, _ = TEAMS[abbrev]
+    feeds = [(f"r/{sub}", f"https://www.reddit.com/r/{sub}/top/.rss?t=week")]
+    if abbrev in BLOGS:
+        name, dom = BLOGS[abbrev]
+        feeds.append((name, f"https://www.{dom}/rss/index.xml"))
+    snippets = []
+    for board, url in feeds:
+        snippets += fetch_feed(board, url)
     return snippets
 
 
 # --------------------------------------------------------------------- extract
-def extract(nickname, sub, snippets, env):
+def extract(nickname, snippets, env):
     """Claude call -> list of buzz dicts (player, angle, heat, take, quotes)."""
     import anthropic  # lazy: only needed when extracting
 
     lines, total = [], 0
     for i, s in enumerate(sorted(snippets, key=lambda x: -x["score"]), 1):
-        block = f"[{i}] (score {s['score']}) {s['text']}"
+        block = f"[{i}] ({s.get('board', 'fans')}) {s['text']}"
         if total + len(block) > MAX_INPUT_CHARS:
             break
         lines.append(block)
         total += len(block)
-    user = (f"Team: {nickname}\nSnippets from r/{sub} this week:\n\n"
-            + "\n\n".join(lines))
+    user = (f"Team: {nickname}\nFan-community snippets (subreddit + team blog) this "
+            f"week:\n\n" + "\n\n".join(lines))
 
     client = anthropic.Anthropic(api_key=env["ANTHROPIC_API_KEY"])
     resp = client.messages.create(
@@ -314,7 +369,9 @@ def extract(nickname, sub, snippets, env):
     return json.loads(text).get("buzz", [])
 
 
-def build_rows(abbrev, nickname, sub, buzz, snippets, season, week):
+def build_rows(abbrev, nickname, buzz, snippets, season, week):
+    # boards this team's snippets came from, for a generic fallback attribution
+    boards = list(dict.fromkeys(s.get("board") for s in snippets if s.get("board")))
     rows = []
     for b in buzz:
         player = (b.get("player") or "").strip()
@@ -328,10 +385,10 @@ def build_rows(abbrev, nickname, sub, buzz, snippets, season, week):
             for s in snippets:
                 if qn in norm(s["text"]) and s["permalink"] not in seen:
                     seen.add(s["permalink"])
-                    srcs.append({"board": f"r/{sub}", "url": s["permalink"]})
+                    srcs.append({"board": s.get("board", "fan boards"), "url": s["permalink"]})
                     break
         if not srcs:
-            srcs = [{"board": f"r/{sub}"}]
+            srcs = [{"board": boards[0] if boards else "fan boards"}]
         rows.append({
             "season": season, "week": week,
             "id": f"w{week}-{abbrev}-{slug(player)}",
@@ -413,7 +470,7 @@ def main(argv=None):
     roster = load_roster(season)
 
     print(f"Tailgate scan -- season {season}, week {week}, {len(which)} team(s)"
-          f"{' [WRITE]' if args.write else ' [dry run]'} -- Reddit RSS")
+          f"{' [WRITE]' if args.write else ' [dry run]'} -- Reddit + team blogs")
     start = time.monotonic()
     total_rows, empty_teams, rl_streak, done = 0, 0, 0, 0
     for abbrev in which:
@@ -422,24 +479,25 @@ def main(argv=None):
                   f"{len(which) - done} team(s) left for the next run.", file=sys.stderr)
             break
         done += 1
-        sub, nickname = TEAMS[abbrev]
-        raw = fetch_snippets(sub)
+        nickname = TEAMS[abbrev][1]
+        raw = fetch_snippets(abbrev)
         # Circuit breaker: once Reddit throttles this IP, every request 429s and
-        # eats backoff -- bail rather than crawl into the 20m kill.
-        rl_streak = rl_streak + 1 if _rate_limited[0] else 0
+        # eats backoff -- bail rather than crawl into the 20m kill. Only counts
+        # when the team came back empty (a working blog feed keeps the team alive).
+        rl_streak = rl_streak + 1 if (_rate_limited[0] and not raw) else 0
         if rl_streak >= 5:
             print("\nReddit throttled 5 teams in a row -- stopping; the rest resume "
-                  "next run (rotated order covers them).", file=sys.stderr)
+                  "next run (rotated/sharded order covers them).", file=sys.stderr)
             break
         if not raw:
             empty_teams += 1
         kept = ([s for s in raw if mentions(s["text"], roster[abbrev])]
                 if roster and abbrev in roster else raw)
-        print(f"  {abbrev:<4} r/{sub:<18} {len(raw):>3} snippets -> {len(kept):>3} on-topic")
+        print(f"  {abbrev:<4} {len(raw):>3} snippets -> {len(kept):>3} on-topic")
         if args.no_extract or not kept:
             continue
-        buzz = extract(nickname, sub, kept, env)
-        rows = build_rows(abbrev, nickname, sub, buzz, kept, season, week)
+        buzz = extract(nickname, kept, env)
+        rows = build_rows(abbrev, nickname, buzz, kept, season, week)
         total_rows += len(rows)
         for r in rows:
             heat = {1: "simmering", 2: "heating up", 3: "on fire"}[r["heat"]]
