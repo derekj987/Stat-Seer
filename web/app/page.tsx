@@ -1,24 +1,24 @@
-// Landing / home. Static — tells the StatSeer story and teaches the 1-2-3 flow.
-// Game Lines lives at /lines; Value Finder's front door is /best.
+// Landing / home. Static — the restructured flow: review the AI/ML analysis, build
+// your slip, and the Value Finder tells you where to place it.
 import AccountPromo from "./AccountPromo";
 
 export const dynamic = "force-static";
 
 const STEPS = [
   {
-    n: "1", href: "/model", kicker: "The Model", q: "Start here — what does the data say?",
-    body: "Our line-blind read on every game: calibrated win probabilities, locked before kickoff, graded in public. Find the games you agree with.",
-    cta: "See the model",
+    n: "1", href: "/lines", kicker: "Review the analysis", q: "Find picks you jive with.",
+    body: "Read our line-blind ML model, the upset & context watch, and AI-distilled fan buzz. Agree with a read? That's a pick.",
+    cta: "See the analysis",
   },
   {
-    n: "2", href: "/context", kicker: "Upset Watch", q: "Pressure-test it.",
-    body: "Where our model likes the underdog, plus the situational factors — weather, referee crews, roster moves. We flag upset risk; we never fake an adjusted number.",
-    cta: "Check the upset watch",
+    n: "2", href: "/lines", kicker: "Build your slip", q: "Collect as you read.",
+    body: "See something you like on any page — a model read, a fan sleeper, a line, a prop? Add it to your slip. It follows you everywhere.",
+    cta: "Start a slip",
   },
   {
-    n: "3", href: "/best", kicker: "Analysis", q: "Place it.",
-    body: "Made your picks? Here's the best number across books, the key-number sweet spots, and exactly where to bet each one. This is where the money is.",
-    cta: "Find the value",
+    n: "3", href: "/best", kicker: "The Value Finder", q: "We find the value.",
+    body: "Your slip becomes a Value Finder: the single best sportsbook for each pick, plus the key-number sweet spots. Exactly where to place it.",
+    cta: "See best bets",
   },
 ];
 
@@ -32,17 +32,18 @@ export default function Home() {
 
       <div className="home__content">
       <AccountPromo />
+
       <section className="hero">
         <div className="hero__pitch">
-          <h1 className="hero__h1">Betting analysis you can actually check.</h1>
+          <span className="hero__eyebrow">AI + ML model analysis</span>
+          <h1 className="hero__h1">Review the analysis. Build your slip. <em>We find the value.</em></h1>
           <p className="hero__lead">
-            StatSeer is built on one idea: <b>verifiable trust</b>. Published probabilities. A public track
-            record — <b>including the bad stretches</b>. Calibration anyone can audit. We walk you through it
-            in <b>three honest steps</b>.
+            StatSeer runs every game through <b>calibrated ML models</b> and distills the fan boards with
+            <b> AI</b> — then publishes the probabilities and a public track record you can audit. You bring the
+            reads you believe in; the <b>Value Finder</b> handles the shopping.
           </p>
           <div className="hero__cta">
             <a href="/model" className="btn btn--primary">Start with the model →</a>
-            <a href="/best" className="btn">Jump to value plays →</a>
             <a href="/tailgate" className="btn">See what fans are saying →</a>
           </div>
         </div>
@@ -52,7 +53,7 @@ export default function Home() {
         <h2 className="how__h">How it works — three steps</h2>
         <div className="hcards">
           {STEPS.map((s) => (
-            <a key={s.href} href={s.href} className="hcard">
+            <a key={s.kicker} href={s.href} className="hcard">
               <span className="hcard__top">
                 <span className="hcard__n">{s.n}</span>
                 <span className="hcard__k">{s.kicker}</span>
@@ -67,47 +68,35 @@ export default function Home() {
 
       <section className="slipfeat">
         <div className="slipfeat__text">
-          <span className="slipfeat__eyebrow">Only on StatSeer</span>
-          <h2 className="slipfeat__h">Build your slip. We tell you where to place it.</h2>
+          <span className="slipfeat__eyebrow">The payoff</span>
+          <h2 className="slipfeat__h">Your slip becomes a Value Finder.</h2>
           <p className="slipfeat__p">
-            Tap the bets you like on any page to build a slip. StatSeer finds the <b>single best
-            sportsbook for each pick</b> — and the <b>one book with the best price for the whole parlay</b> —
+            Everything you collect — a model read, a fan sleeper, a line, a prop — lands in <b>one slip</b>.
+            StatSeer finds the <b>single best sportsbook for each pick</b> and the <b>key-number sweet spots</b>,
             so you never leave money on the table by betting everything in one app.
           </p>
-          <a href="/lines" className="btn btn--primary">Build a slip →</a>
+          <a href="/lines" className="btn btn--primary">Start a slip →</a>
         </div>
         <div className="slipfeat__demo">
           <div className="slipdemo" aria-hidden="true">
-            <div className="slipdemo__h">Your slip</div>
+            <div className="slipdemo__h">Value Finder · your picks</div>
             <div className="slipdemo__leg">
-              <span className="slipdemo__pick">BUF −2.5</span>
+              <span className="slipdemo__pick"><span className="slipdemo__grp">MODEL</span>DET −7</span>
               <span className="slipdemo__book">best at <b>DraftKings</b> −135</span>
             </div>
             <div className="slipdemo__leg">
-              <span className="slipdemo__pick">SEA/SF Over 47.5</span>
-              <span className="slipdemo__book">best at <b>DraftKings</b> −130</span>
+              <span className="slipdemo__pick"><span className="slipdemo__grp">FAN</span>Tank Dell O 62.5</span>
+              <span className="slipdemo__book">best at <b>FanDuel</b> −112</span>
             </div>
             <div className="slipdemo__leg">
-              <span className="slipdemo__pick">Bijan 70+ rush yds</span>
-              <span className="slipdemo__book">best at <b>DraftKings</b> −145</span>
+              <span className="slipdemo__pick"><span className="slipdemo__grp">LINES</span>SEA/SF Over 47.5</span>
+              <span className="slipdemo__book">best at <b>BetMGM</b> −130</span>
             </div>
             <div className="slipdemo__leg">
-              <span className="slipdemo__pick">Ravens ML</span>
-              <span className="slipdemo__book">best at <b>DraftKings</b> −165</span>
+              <span className="slipdemo__pick"><span className="slipdemo__grp">PROP</span>Mahomes 250+ pass yds</span>
+              <span className="slipdemo__book">best at <b>DraftKings</b> −140</span>
             </div>
-            <div className="slipdemo__leg">
-              <span className="slipdemo__pick">Jefferson anytime TD</span>
-              <span className="slipdemo__book">best at <b>FanDuel</b> −120</span>
-            </div>
-            <div className="slipdemo__leg">
-              <span className="slipdemo__pick">Mahomes 250+ pass yds</span>
-              <span className="slipdemo__book">best at <b>BetMGM</b> −140</span>
-            </div>
-            <div className="slipdemo__parlay">
-              <span>Parlay · all 6</span>
-              <span className="slipdemo__odds">best at <b>DraftKings</b> +2527</span>
-            </div>
-            <div className="slipdemo__save">$10 → $263 — the best combined price across books</div>
+            <div className="slipdemo__save">DraftKings covers the most in one app — or split each to its best book</div>
           </div>
         </div>
       </section>
@@ -115,10 +104,9 @@ export default function Home() {
       <section className="creed">
         <h2 className="creed__h">No locks. No hype. No tout.</h2>
         <p className="creed__p">
-          Everyone else sells confidence. We show you where the value actually is, predict honestly, and
-          publish a track record you can audit. A good bet is <b>+EV over time</b> — not a guarantee on Sunday.
-          The three steps stay separate on purpose: combining zero-edge signals into one confident score is
-          exactly the machine we refuse to build.
+          The AI and ML do the analysis; <b>you</b> decide what to bet. We show you where the value actually is,
+          predict honestly, and publish a track record you can audit — <b>never a black box, never a guaranteed
+          lock</b>. A good bet is +EV over time, not a promise on Sunday.
         </p>
       </section>
       </div>
