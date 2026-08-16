@@ -38,20 +38,14 @@ function PredictionCard({ p }: { p: ModelPrediction }) {
   const pct = pickem ? 50 : rawPct;
   const mktPct = p.marketFavProb === null ? null : Math.round(p.marketFavProb * 100);
   return (
-    <details className={p.disagree ? "game offc predcard" : "game predcard"}>
-      <summary className="game__head predcard__head">
+    <article className={p.disagree ? "game offc" : "game"}>
+      <header className="game__head">
         <span className="matchup">{p.away}<span className="at">@</span>{p.home}</span>
+        <time className="kick">{et(p.commence)}</time>
         {p.disagree && <span className="badge offc">OFF CONSENSUS</span>}
         {p.neutral && <span className="badge neutral">NEUTRAL</span>}
-        <span className="predcard__sum">
-          {pickem
-            ? <b>Pick&apos;em</b>
-            : <><b>{p.favored}</b> by {Math.abs(p.predMargin).toFixed(1)} · {pct}%</>}
-        </span>
-        <span className="predcard__chev" aria-hidden="true">▸</span>
-      </summary>
+      </header>
       <div className="pred">
-        <time className="kick">{et(p.commence)}</time>
         <div className="cmp">
           <div className="cmp__side">
             <div className="cmp__head">
@@ -102,7 +96,7 @@ function PredictionCard({ p }: { p: ModelPrediction }) {
           </div>
         )}
       </div>
-    </details>
+    </article>
   );
 }
 
