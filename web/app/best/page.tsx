@@ -1,5 +1,5 @@
 import { weekRange } from "@/lib/board";
-import { fetchBets, fmtOdds, type Play, type KeyPlay } from "@/lib/bestbets";
+import { fetchBets, fetchBestProps, fmtOdds, type Play, type KeyPlay, type PropPlay } from "@/lib/bestbets";
 import { ValueSubnav, Brand, FlowSteps } from "../Nav";
 
 export const revalidate = 120;
@@ -83,6 +83,20 @@ function PriceRow({ p }: { p: Play }) {
   );
 }
 
+function PropRow({ p }: { p: PropPlay }) {
+  return (
+    <div className="pricerow" role="row">
+      <span className="pricerow__edge">+{p.edge.toFixed(1)}%</span>
+      <span className="pricerow__bet">
+        <b>{p.player} · {p.label}</b>
+        <span className="pricerow__mkt">{p.market} · {p.game}</span>
+      </span>
+      <span className="pricerow__price">{fmtOdds(p.price)}</span>
+      <BookTag books={p.books} />
+    </div>
+  );
+}
+
 export default async function Page({ searchParams }: PageProps<"/best">) {
   const sp = await searchParams;
   let range: { min: number; max: number } | null = null;
@@ -92,7 +106,10 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
   const requested = typeof sp.week === "string" ? parseInt(sp.week, 10) : NaN;
   const week = Number.isFinite(requested) ? Math.min(max, Math.max(min, requested)) : min;
 
-  const { plays, keys } = await fetchBets(week, SEASON);
+  const [{ plays, keys }, propPlays] = await Promise.all([
+    fetchBets(week, SEASON),
+    fetchBestProps(week, SEASON, TOP_N).catch(() => [] as PropPlay[]),
+  ]);
   const topPrices = plays.filter((p) => p.edge > 0.5).slice(0, TOP_N);
 
   return (
@@ -146,6 +163,22 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
               {topPrices.map((p) => <PriceRow key={`${p.eventId}:${p.market}:${p.label}`} p={p} />)}
             </div>
           </section>
+
+          {propPlays.length > 0 && (
+            <section className="ctxsec">
+              <h2 className="ctxsec__h">Best props this week</h2>
+              <p className="ctxsec__d">
+                Player props where <b>one book is priced well above the field</b> — the same prop at a better
+                number. Shopping edge is the de-vigged gap vs. the other books.
+              </p>
+              <div className="pricetable" role="table" aria-label="Best props">
+                <div className="pricerow pricerow--head" role="row">
+                  <span>edge</span><span>prop</span><span>price</span><span>book</span>
+                </div>
+                {propPlays.map((p) => <PropRow key={`${p.eventId}:${p.market}:${p.player}:${p.label}`} p={p} />)}
+              </div>
+            </section>
+          )}
         </>
       )}
 

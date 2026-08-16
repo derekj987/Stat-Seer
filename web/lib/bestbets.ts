@@ -8,6 +8,7 @@
 // from The Model / props once they beat the closing line with a public record.
 
 import { fetchWeek, implied, median, fmtOdds, type OddsRow } from "./board";
+import { weekProps } from "./props";
 
 const KEY_NUMBERS: Record<number, number> = { 3: 9.0, 7: 6.2 };
 const TOTAL_KEY_NUMBERS: Record<number, number> = { 37: 3.7, 41: 3.8, 43: 3.5, 44: 3.8, 51: 3.8 };
@@ -151,4 +152,40 @@ export { fmtOdds };
 
 export async function fetchBets(week: number, season = 2026): Promise<{ plays: Play[]; keys: KeyPlay[] }> {
   return buildBets(await fetchWeek(week, season));
+}
+
+// ---- Best props: the biggest prop shopping edges (best book vs. the field) ----
+export interface PropPlay {
+  eventId: string;
+  game: string;
+  commence: string;
+  player: string;
+  market: string;    // human label, e.g. "Passing Yards"
+  label: string;     // the exact side, e.g. "Over 274.5" or "Yes"
+  price: number;     // best available American price
+  books: string[];
+  edge: number;      // shopping edge in %
+}
+
+export async function fetchBestProps(week: number, season = 2026, topN = 8): Promise<PropPlay[]> {
+  const games = await weekProps(week, season);
+  const plays: PropPlay[] = [];
+  for (const g of games) {
+    for (const m of g.markets) {
+      for (const q of m.quotes) {
+        const prices = Object.values(q.byBook);
+        if (prices.length < 3) continue;   // need a real field to shop against
+        const edge = (median(prices.map(implied)) - implied(q.price)) * 100;
+        if (edge <= 0.5) continue;
+        plays.push({
+          eventId: q.eventId, game: g.matchup, commence: g.commence,
+          player: q.player, market: m.label,
+          label: q.line !== null ? `${q.side} ${q.line}` : q.side,
+          price: q.price, books: q.books, edge,
+        });
+      }
+    }
+  }
+  plays.sort((a, b) => b.edge - a.edge);
+  return plays.slice(0, topN);
 }
