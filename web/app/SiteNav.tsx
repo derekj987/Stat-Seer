@@ -8,6 +8,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import MottoBar from "./MottoBar";
 
 type Me = { username: string; role: string; title: string | null } | null;
 
@@ -105,6 +106,8 @@ export default function SiteNav() {
           </button>
         </div>
       </div>
+
+      <MottoBar />
 
       {open && (
         <div className="snav__drawer">
