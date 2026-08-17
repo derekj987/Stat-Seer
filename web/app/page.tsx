@@ -1,7 +1,7 @@
 // Home — "The Model Edition" broadsheet. The Card (model vs market, per game) leads,
 // open; the Upsets of the Week alert sits collapsed below it. All data is real and
 // honest: model columns read "—" until the week's predictions lock (see lib/home.ts).
-import { fetchHome, type CardRow, type UpsetRow } from "@/lib/home";
+import { fetchHome, type CardRow, type UpsetRow, type PlayerPick } from "@/lib/home";
 import AddToSlip from "./AddToSlip";
 
 export const revalidate = 120;
@@ -131,6 +131,28 @@ function Upsets({ rows }: { rows: UpsetRow[] }) {
   );
 }
 
+function PlayersWeLike({ players }: { players: PlayerPick[] }) {
+  if (players.length === 0) return null;
+  return (
+    <section className="hb-players">
+      <div className="hb-players__hd">
+        <span className="hb-players__title">Players We Like</span>
+        <a className="hb-players__more" href="/tailgate">Fan Analysis →</a>
+      </div>
+      <p className="hb-players__sub">Rising on the fan boards this week — a starting point, not a pick. Dig into each in Fan Analysis.</p>
+      <div className="hb-players__grid">
+        {players.map((p) => (
+          <a className="hb-plr" href="/tailgate" key={p.id}>
+            <span className="hb-plr__name">{p.player}</span>
+            <span className="hb-plr__team">{p.team}</span>
+            <span className="hb-plr__angle"><span className="hb-plr__up" aria-hidden="true">▲</span>{p.angle}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default async function Home() {
   const data = await fetchHome(SEASON);
   return (
@@ -151,12 +173,13 @@ export default async function Home() {
 
       <TheCard rows={data.card} />
       <Upsets rows={data.upsets} />
+      <PlayersWeLike players={data.players} />
 
       <section className="hb-creed">
-        <div className="hb-creed__h">No locks. No hype. <b>Numbers you can check.</b></div>
+        <div className="hb-creed__h">Bet smarter. <b>Win more often.</b></div>
         <p className="hb-creed__p">
-          Every prediction is a published probability, locked before kickoff and graded in public —
-          bad weeks and all. <a href="/model">See the full model →</a> · <a href="/lines">Shop the lines →</a>
+          StatSeer finds real edges and proves them in the open — published probabilities, an honest
+          track record, and the best price on every pick. <a href="/model">See the full model →</a> · <a href="/lines">Shop the lines →</a>
         </p>
       </section>
     </main>

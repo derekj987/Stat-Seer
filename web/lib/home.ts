@@ -10,6 +10,7 @@
 import { weekRange, fetchWeek, buildBoard, type Game } from "./board";
 import { fetchModelWeek, type ModelPrediction } from "./model";
 import { MODEL_TOTALS } from "./modelTotals";
+import { weekTailgate } from "./tailgate";
 
 export interface CardRow {
   eventId: string;
@@ -33,12 +34,20 @@ export interface UpsetRow {
   byPoints: number; // model's margin for the dog
 }
 
+export interface PlayerPick {
+  id: string;
+  player: string;
+  team: string;
+  angle: string; // the prop the boards are buzzing, e.g. "OVER 74.5 rush yds"
+}
+
 export interface HomeData {
   week: number;
   season: number;
   hasModel: boolean; // any locked predictions for the week yet
   card: CardRow[];
   upsets: UpsetRow[];
+  players: PlayerPick[]; // a few risers from Fan Stock — teaser into Fan Analysis
 }
 
 /** "FAV -mag" from a home-perspective consensus spread (negative = home favored). */
@@ -109,5 +118,16 @@ export async function fetchHome(season = 2026): Promise<HomeData> {
     // biggest model-vs-market gap first — the juiciest alerts lead.
     .sort((a, z) => (z.modelPct - z.marketPct) - (a.modelPct - a.marketPct));
 
-  return { week, season, hasModel: preds.length > 0, card, upsets };
+  // A few players fans are highest on (Fan Stock risers) — a teaser, not our pick.
+  let players: PlayerPick[] = [];
+  try {
+    const tg = await weekTailgate(week, season);
+    players = tg.buzz
+      .filter((b) => b.direction === "up")
+      .sort((a, z) => z.heat - a.heat)
+      .slice(0, 3)
+      .map((b) => ({ id: b.id, player: b.player, team: b.team, angle: b.angle }));
+  } catch { players = []; }
+
+  return { week, season, hasModel: preds.length > 0, card, upsets, players };
 }

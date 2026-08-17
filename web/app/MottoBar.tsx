@@ -9,6 +9,9 @@ const MOTTOS = [
   "Proof over promises.",
   "Read the game before it's played.",
   "The house has its edge. Now you have yours.",
+  "Every prediction, graded in public.",
+  "Calibration tracked live — win or lose.",
+  "We measure our closing-line value on every pick.",
 ];
 
 export default function MottoBar() {
