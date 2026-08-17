@@ -979,6 +979,11 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-mast__row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;padding:10px 0 6px}
 .hb-mast__side{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
 .hb-mast__side.hb-r{text-align:right}
+/* taglines flanking the nameplate, between the rules */
+.hb-mast__flank{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);line-height:1.45}
+.hb-mast__flank--r{text-align:right}
+/* week label, now above The Card instead of in the masthead */
+.hb-weeklabel{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:16px 0 0}
 .hb-mast__name{justify-self:center;text-decoration:none;color:var(--gold);
   font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;font-weight:400;
   font-size:clamp(30px,7vw,44px);line-height:1;letter-spacing:.02em}
@@ -1124,6 +1129,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .hb-tav__bar{flex-wrap:wrap}
   .hb-tav__title{font-size:16px}
   .hb-mast__name{font-size:30px}
+  .hb-mast__flank{display:none}
   /* shrink The Card so all 5 columns fit the phone without sideways scroll */
   .hb-form{min-width:0;table-layout:auto}
   .hb-form th:nth-child(n),.hb-form td:nth-child(n){width:auto}

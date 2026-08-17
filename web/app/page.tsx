@@ -197,18 +197,14 @@ export default async function Home() {
     <main className="hb">
       <header className="hb-mast">
         <div className="hb-mast__row">
-          <span className="hb-mast__side">NFL Week {data.week} · {data.season}</span>
+          <span className="hb-mast__flank">Line-blind predictions</span>
           <a href="/" className="hb-mast__name">StatSeer</a>
-          <span className="hb-mast__side hb-r">The Model Edition</span>
+          <span className="hb-mast__flank hb-mast__flank--r">Published, locked &amp; graded in public</span>
         </div>
         <div className="hb-mast__rule"></div>
-        <div className="hb-strap">
-          <span>Line-blind predictions</span><i>·</i>
-          <span>published &amp; locked pre-kickoff</span><i>·</i>
-          <span>graded in public</span>
-        </div>
       </header>
 
+      <div className="hb-weeklabel">NFL Week {data.week} · {data.season}</div>
       <TheCard rows={data.card} />
       <Upsets rows={data.upsets} />
       <PlayersWeLike players={data.players} />
