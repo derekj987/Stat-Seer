@@ -61,8 +61,7 @@ function TheCard({ rows }: { rows: CardRow[] }) {
             <div className="hb-legend">
               <span className="hb-dia">◆</span> Off-consensus — our model and the market disagree on the pick.
             </div>
-            <div className="hb-cardrow">
-              <div className="hb-formwrap">
+            <div className="hb-formwrap">
               <table className="hb-form">
                 <thead>
                   <tr>
@@ -97,11 +96,6 @@ function TheCard({ rows }: { rows: CardRow[] }) {
                   ))}
                 </tbody>
               </table>
-              </div>
-              <div className="hb-cardseer" aria-hidden="true">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo-hero.png" alt="" width={543} height={724} />
-              </div>
             </div>
           </>
         )}
@@ -228,6 +222,11 @@ export default async function Home() {
       </section>
 
       <HomePromo />
+
+      <div className="hb-pageseer" aria-hidden="true">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo-hero.png" alt="" width={543} height={724} />
+      </div>
     </main>
   );
 }
