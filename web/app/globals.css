@@ -1062,6 +1062,17 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-creed__p{font-size:12.5px;color:var(--muted);margin-top:4px;font-style:italic}
 .hb-creed__p a{color:var(--accent);text-decoration:none;font-weight:600;font-style:normal}
 
+/* membership band — the over-the-shoulder seer + join CTA, fills the bottom */
+.hb-promo{margin-top:24px;display:grid;grid-template-columns:1fr 230px;align-items:stretch;
+  border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface-2)}
+.hb-promo__text{padding:24px 26px;align-self:center}
+.hb-promo__art{overflow:hidden;min-height:210px;background:var(--bg)}
+.hb-promo__img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+.hb-promo__eyebrow{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.hb-promo__h{font-size:clamp(20px,3.2vw,26px);font-weight:800;margin:6px 0 8px;letter-spacing:-.01em;line-height:1.15}
+.hb-promo__p{font-size:13.5px;color:var(--muted);line-height:1.6;margin:0 0 16px;max-width:54ch}
+.hb-promo__cta{display:flex;gap:10px;flex-wrap:wrap}
+
 @media (max-width:640px){
   .hb-cols{grid-template-columns:1fr}
   .hb-up{border-left:none;border-top:1px solid var(--line)}
@@ -1069,4 +1080,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .hb-players__grid{grid-template-columns:1fr}
   .hb-bar__hint{display:none}
   .hb-mast__name{font-size:30px}
+  .hb-promo{grid-template-columns:1fr}
+  .hb-promo__art{grid-row:1;min-height:150px;max-height:180px}
+  .hb-promo__text{padding:20px}
 }

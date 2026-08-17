@@ -3,6 +3,7 @@
 // honest: model columns read "—" until the week's predictions lock (see lib/home.ts).
 import { fetchHome, type CardRow, type UpsetRow, type PlayerPick } from "@/lib/home";
 import AddToSlip from "./AddToSlip";
+import HomePromo from "./HomePromo";
 
 export const revalidate = 120;
 const SEASON = 2026;
@@ -134,22 +135,28 @@ function Upsets({ rows }: { rows: UpsetRow[] }) {
 function PlayersWeLike({ players }: { players: PlayerPick[] }) {
   if (players.length === 0) return null;
   return (
-    <section className="hb-players">
-      <div className="hb-players__hd">
-        <span className="hb-players__title">Players We Like</span>
-        <a className="hb-players__more" href="/tailgate">Fan Analysis →</a>
+    <details className="hb-panel">
+      <summary className="hb-bar">
+        <span className="hb-bar__title hb-bar__title--gold">Players We Like</span>
+        <span className="hb-bar__count hb-bar__count--gold">{players.length}</span>
+        <span className="hb-bar__hint">rising on the fan boards this week</span>
+        <span className="hb-bar__chev" aria-hidden="true">▾</span>
+      </summary>
+      <div className="hb-body">
+        <p className="hb-players__sub">
+          A starting point, not a pick — dig into each in <a href="/tailgate">Fan Analysis</a>.
+        </p>
+        <div className="hb-players__grid">
+          {players.map((p) => (
+            <a className="hb-plr" href="/tailgate" key={p.id}>
+              <span className="hb-plr__name">{p.player}</span>
+              <span className="hb-plr__team">{p.team}</span>
+              <span className="hb-plr__angle"><span className="hb-plr__up" aria-hidden="true">▲</span>{p.angle}</span>
+            </a>
+          ))}
+        </div>
       </div>
-      <p className="hb-players__sub">Rising on the fan boards this week — a starting point, not a pick. Dig into each in Fan Analysis.</p>
-      <div className="hb-players__grid">
-        {players.map((p) => (
-          <a className="hb-plr" href="/tailgate" key={p.id}>
-            <span className="hb-plr__name">{p.player}</span>
-            <span className="hb-plr__team">{p.team}</span>
-            <span className="hb-plr__angle"><span className="hb-plr__up" aria-hidden="true">▲</span>{p.angle}</span>
-          </a>
-        ))}
-      </div>
-    </section>
+    </details>
   );
 }
 
@@ -182,6 +189,8 @@ export default async function Home() {
           track record, and the best price on every pick. <a href="/model">See the full model →</a> · <a href="/lines">Shop the lines →</a>
         </p>
       </section>
+
+      <HomePromo />
     </main>
   );
 }
