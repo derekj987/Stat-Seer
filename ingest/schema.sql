@@ -237,6 +237,27 @@ create index if not exists preseason_time_idx  on preseason_odds (snapshot_at);
 create unique index if not exists preseason_odds_dedupe on preseason_odds
     (snapshot_at, event_id, book, market, outcome_name, outcome_point) nulls not distinct;
 
+-- Preseason box scores from ESPN (espn_preseason.py). ISOLATED like the odds
+-- lane: this feeds ONLY the throwaway preseason "test-run" model, and is NEVER
+-- joined into the real model, calibration, or player pipelines. nflverse carries
+-- no preseason data, so ESPN is the source; one row per (game, team).
+create table if not exists preseason_team_games (
+    season       smallint    not null,
+    week         smallint    not null,   -- ESPN preseason week (HOF game = 1)
+    event_id     text        not null,   -- ESPN event id
+    kickoff      timestamptz,
+    team         text        not null,   -- nflverse abbreviation
+    opponent     text        not null,
+    is_home      boolean     not null,
+    points_for   smallint,
+    points_against smallint,
+    won          boolean,
+    stats        jsonb       not null default '{}',  -- {category:{stat:value}} team box score
+    captured_at  timestamptz not null default now(),
+    primary key (season, event_id, team)
+);
+create index if not exists preseason_tg_week_idx on preseason_team_games (season, week);
+
 -- ---------------------------------------------------------------------
 -- CALIBRATION LEDGER. The most important table in the application.
 -- ---------------------------------------------------------------------
