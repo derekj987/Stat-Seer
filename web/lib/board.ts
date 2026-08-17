@@ -210,6 +210,17 @@ async function pgFrom(table: string, path: string): Promise<unknown[]> {
 }
 const pg = (path: string) => pgFrom("odds_snapshots", path);
 
+/** The current NFL week: the earliest week that still has an un-kicked-off game.
+ * Rotates automatically — once a week's games are all in the past it advances. */
+export async function currentWeek(season = 2026): Promise<number | null> {
+  const now = new Date().toISOString();
+  const rows = (await pg(
+    `?season=eq.${season}&commence_time=gt.${encodeURIComponent(now)}` +
+      `&select=week&order=week.asc&limit=1`
+  )) as { week: number }[];
+  return rows.length ? rows[0].week : null;
+}
+
 /** The min/max NFL week that currently has any odds captured, for the week nav. */
 export async function weekRange(season = 2026): Promise<{ min: number; max: number } | null> {
   const lo = (await pg(`?season=eq.${season}&select=week&order=week.asc&limit=1`)) as { week: number }[];

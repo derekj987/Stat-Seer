@@ -115,12 +115,20 @@ export default function SiteNav() {
         <div className="snav__drawer" role="dialog" aria-label="Menu">
           <button className="snav__dclose" onClick={() => setOpen(false)} aria-label="Close menu">✕</button>
           <a href="/" className="snav__dtop">Home</a>
+          <a href="/model" className="snav__dtop">The Model</a>
 
           <details className="snav__pgroup">
-            <summary className="snav__dtop snav__psum">The Process</summary>
-            <a href="/model" className="snav__dsub">The Model</a>
-            <a href="/context" className="snav__dsub">The Context</a>
-            <a href="/lines" className="snav__dsub">Shop Around</a>
+            <summary className="snav__dtop snav__psum">The Context</summary>
+            <a href="/context" className="snav__dsub">Upset Watch</a>
+            <a href="/tailgate" className="snav__dsub">Fan Analysis</a>
+            <a href="/best" className="snav__dsub">Sweet Spots</a>
+          </details>
+
+          <details className="snav__pgroup">
+            <summary className="snav__dtop snav__psum">Shop Around</summary>
+            <a href="/lines" className="snav__dsub">Game Lines</a>
+            <a href="/props" className="snav__dsub">Player Props</a>
+            <a href="/preseason" className="snav__dsub">Preseason</a>
           </details>
 
           <a href="/forum" className="snav__dtop">Community</a>

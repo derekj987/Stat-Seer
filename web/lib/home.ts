@@ -7,7 +7,7 @@
 //   - MODEL_TOTALS    → the model's own total (combined points), static per week
 // Nothing is fabricated: model columns are null until the week's predictions lock.
 
-import { weekRange, fetchWeek, buildBoard, type Game } from "./board";
+import { weekRange, currentWeek, fetchWeek, buildBoard, type Game } from "./board";
 import { fetchModelWeek, type ModelPrediction } from "./model";
 import { MODEL_TOTALS } from "./modelTotals";
 import { weekTailgate } from "./tailgate";
@@ -61,10 +61,13 @@ function fmtMarketSpread(g: Game): string | null {
 }
 
 export async function fetchHome(season = 2026): Promise<HomeData> {
+  // Show the CURRENT NFL week (rotates as the season moves), clamped to weeks we
+  // actually have odds for. Falls back to the earliest available week.
   let week = 1;
   try {
-    const range = await weekRange(season);
-    if (range) week = range.min;
+    const [cur, range] = await Promise.all([currentWeek(season), weekRange(season)]);
+    week = cur ?? range?.min ?? 1;
+    if (range) week = Math.min(range.max, Math.max(range.min, week));
   } catch { /* default week 1 */ }
 
   // Market board (present well before kickoff) + locked model predictions (may be empty).
