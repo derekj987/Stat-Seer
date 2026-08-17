@@ -23,11 +23,14 @@ export default function HomePromo() {
   return (
     <details className="hb-tav">
       <summary className="hb-tav__bar">
-        <span className="hb-tav__title">The whole board is inside</span>
+        <span className="hb-tav__title">Let&apos;s talk numbers — join our community!</span>
         <span className="hb-tav__hint">pull up a stool — see what members get</span>
-        <span className="hb-tav__ic hb-tav__ic--shut" aria-hidden="true">🍺</span>
-        <span className="hb-tav__ic hb-tav__ic--open" aria-hidden="true">🍻</span>
-        <span className="hb-tav__chev" aria-hidden="true">▾</span>
+        <span className="hb-tav__right">
+          <a href="/signup" className="hb-tav__join" onClick={(e) => e.stopPropagation()}>Become a member →</a>
+          <span className="hb-tav__ic hb-tav__ic--shut" aria-hidden="true">🍺</span>
+          <span className="hb-tav__ic hb-tav__ic--open" aria-hidden="true">🍻</span>
+          <span className="hb-tav__chev" aria-hidden="true">▾</span>
+        </span>
       </summary>
       <div className="hb-tav__body">
         <h2 className="hb-promo__h">There&apos;s a lot more where this came from.</h2>

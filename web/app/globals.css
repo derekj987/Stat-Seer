@@ -1085,7 +1085,12 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-tav__title{font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;
   font-size:20px;color:var(--gold);letter-spacing:.02em}
 .hb-tav__hint{font-size:11.5px;color:var(--muted);font-style:italic}
-.hb-tav__ic{margin-left:auto;font-size:21px;line-height:1;flex:0 0 auto}
+.hb-tav__right{margin-left:auto;flex:0 0 auto;display:flex;align-items:center;gap:11px}
+.hb-tav__join{flex:0 0 auto;font-size:12.5px;font-weight:700;color:var(--accent);
+  text-decoration:none;white-space:nowrap;background:var(--accent-soft);border:1px solid var(--accent);
+  padding:5px 11px;border-radius:8px}
+.hb-tav__join:hover{background:var(--accent);color:#053322}
+.hb-tav__ic{font-size:21px;line-height:1;flex:0 0 auto}
 .hb-tav__ic--open{display:none}
 .hb-tav[open] .hb-tav__ic--shut{display:none}
 .hb-tav[open] .hb-tav__ic--open{display:inline}
@@ -1110,6 +1115,9 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .hb-up:first-child{border-top:none}
   .hb-players__grid{grid-template-columns:1fr}
   .hb-bar__hint{display:none}
+  .hb-tav__hint{display:none}
+  .hb-tav__bar{flex-wrap:wrap}
+  .hb-tav__title{font-size:16px}
   .hb-mast__name{font-size:30px}
   /* shrink The Card so all 5 columns fit the phone without sideways scroll */
   .hb-form{min-width:0;table-layout:auto}
@@ -1120,8 +1128,12 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .hb-game{font-size:11.5px}
   .hb-at{margin:0 4px}
 }
-/* below this width the table wants the room; drop the in-card seer */
-@media (max-width:880px){ .hb-cardseer{display:none} }
+/* below this width the table wants the full row; the seer stacks under it */
+@media (max-width:880px){
+  .hb-cardrow{flex-direction:column}
+  .hb-cardseer{padding-left:0;padding-top:14px;border-top:1px solid var(--line);justify-content:center}
+  .hb-cardseer img{max-width:78%;max-height:360px}
+}
 
 /* ================= How our model works ================= */
 .how2{max-width:760px}

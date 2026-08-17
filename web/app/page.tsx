@@ -66,7 +66,7 @@ function TheCard({ rows }: { rows: CardRow[] }) {
               <table className="hb-form">
                 <thead>
                   <tr>
-                    <th className="hb-l">Game</th><th>Spread</th><th>Model</th><th>O/U</th><th>Model O/U</th>
+                    <th className="hb-l">Game</th><th>Market Spread</th><th>Model</th><th>Market O/U</th><th>Model O/U</th>
                   </tr>
                 </thead>
                 <tbody>
