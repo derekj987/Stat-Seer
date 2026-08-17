@@ -1010,11 +1010,12 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-slip{position:absolute;right:0;top:50%;transform:translateY(-50%);opacity:0;transition:opacity .1s}
 .hb-form tbody tr:hover .hb-slip{opacity:1}
 .hb-slip .addslip{padding:4px 10px;font-size:11px}
-/* split-flap "odds board" digits — always look alive, even when unchanged */
-.flap{display:inline-flex;white-space:pre;perspective:80px}
+/* split-flap "odds board" digits — only digits roll, slow + sparse */
+.flap{display:inline-flex;white-space:pre;perspective:90px}
+.flap__s{display:inline-block}
 .flap__d{display:inline-block;transform-origin:50% 50%;backface-visibility:hidden;
   animation-name:flaproll;animation-iteration-count:infinite;animation-timing-function:ease-in-out}
-@keyframes flaproll{0%,86%{transform:rotateX(0deg)}100%{transform:rotateX(360deg)}}
+@keyframes flaproll{0%,95%{transform:rotateX(0deg)}100%{transform:rotateX(360deg)}}
 @media (prefers-reduced-motion:reduce){.flap__d{animation:none}}
 
 /* Upsets — newspaper columns */
@@ -1077,7 +1078,13 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-tav__ic--open{display:none}
 .hb-tav[open] .hb-tav__ic--shut{display:none}
 .hb-tav[open] .hb-tav__ic--open{display:inline}
-.hb-tav__body{border-top:1px solid color-mix(in srgb,var(--gold) 30%,var(--line))}
+.hb-tav__chev{color:var(--muted);font-size:13px;flex:0 0 auto;transition:transform .2s}
+.hb-tav[open] .hb-tav__chev{transform:rotate(180deg)}
+.hb-tav__body{border-top:1px solid color-mix(in srgb,var(--gold) 30%,var(--line));padding:22px 24px}
+
+/* seer, back at the bottom to fill the page's tail */
+.hb-seer{margin-top:26px;display:flex;justify-content:center}
+.hb-seer__img{width:auto;height:auto;max-height:360px;max-width:66%;object-fit:contain;display:block}
 
 /* membership band — the over-the-shoulder seer + join CTA */
 .hb-promo{display:grid;grid-template-columns:1fr 230px;align-items:stretch}
@@ -1104,8 +1111,5 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .hb-form td+td,.hb-form th+th{padding-left:9px}
   .hb-game{font-size:11.5px}
   .hb-at{margin:0 4px}
-  .hb-promo{grid-template-columns:1fr}
-  .hb-promo__text{grid-row:1;padding:20px 20px 6px}
-  .hb-promo__art{grid-row:2;min-height:0;height:auto;background:none;padding:0 20px 18px}
-  .hb-promo__img{height:auto;width:auto;max-height:230px;max-width:60%;margin:0 auto;object-fit:contain}
+  .hb-seer__img{max-height:280px;max-width:82%}
 }

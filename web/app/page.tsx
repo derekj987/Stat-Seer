@@ -21,19 +21,22 @@ const numStr = (v: number | null) => (v === null ? "—" : String(v));
 function Flap({ text, seed = 0 }: { text: string; seed?: number }) {
   return (
     <span className="flap" aria-label={text}>
-      {Array.from(text).map((ch, i) => (
+      {Array.from(text).map((ch, i) => {
+        const roll = ch >= "0" && ch <= "9";
+        return (
         <span
           key={i}
-          className="flap__d"
+          className={roll ? "flap__d" : "flap__s"}
           aria-hidden="true"
-          style={{
-            animationDelay: `${((i * 0.29 + seed * 0.13) % 2.6).toFixed(2)}s`,
-            animationDuration: `${(3.6 + ((i + seed) % 5) * 0.5).toFixed(2)}s`,
-          }}
+          style={roll ? {
+            animationDelay: `${((i * 1.9 + seed * 2.7) % 9).toFixed(2)}s`,
+            animationDuration: `${(10 + ((i * 3 + seed) % 8)).toFixed(2)}s`,
+          } : undefined}
         >
           {ch === " " ? " " : ch}
         </span>
-      ))}
+        );
+      })}
     </span>
   );
 }
@@ -219,6 +222,11 @@ export default async function Home() {
       </section>
 
       <HomePromo />
+
+      <div className="hb-seer">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo-hero.png" alt="" className="hb-seer__img" width={543} height={724} />
+      </div>
     </main>
   );
 }
