@@ -197,7 +197,7 @@ export default async function Home() {
     <main className="hb">
       <header className="hb-mast">
         <div className="hb-mast__row">
-          <span className="hb-mast__side">Week {data.week} · {data.season}</span>
+          <span className="hb-mast__side">NFL Week {data.week} · {data.season}</span>
           <a href="/" className="hb-mast__name">StatSeer</a>
           <span className="hb-mast__side hb-r">The Model Edition</span>
         </div>
