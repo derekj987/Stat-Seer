@@ -223,7 +223,7 @@ export default async function Home() {
         <div className="hb-creed__h">Bet smarter. <b>Win more often.</b></div>
         <p className="hb-creed__p">
           StatSeer finds real edges and proves them in the open — published probabilities, an honest
-          track record, and the best price on every pick. <a href="/model">See the full model →</a> · <a href="/lines">Shop the lines →</a>
+          track record, and the best price on every pick. <a href="/model">See the full model →</a> · <a href="/how">How it works →</a>
         </p>
       </section>
 
