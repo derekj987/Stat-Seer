@@ -1059,9 +1059,22 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-creed__p{font-size:12.5px;color:var(--muted);margin-top:4px;font-style:italic}
 .hb-creed__p a{color:var(--accent);text-decoration:none;font-weight:600;font-style:normal}
 
-/* membership band — the over-the-shoulder seer + join CTA, fills the bottom */
-.hb-promo{margin-top:24px;display:grid;grid-template-columns:1fr 230px;align-items:stretch;
-  border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface-2)}
+/* membership dropdown — a tavern invitation with a beer-pitcher toggle */
+.hb-tav{margin-top:24px;border:1px solid color-mix(in srgb,var(--gold) 45%,var(--line));
+  border-radius:14px;overflow:hidden;background:var(--surface-2)}
+.hb-tav__bar{list-style:none;display:flex;align-items:center;gap:12px;padding:15px 18px;cursor:pointer}
+.hb-tav__bar::-webkit-details-marker{display:none}
+.hb-tav__title{font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;
+  font-size:20px;color:var(--gold);letter-spacing:.02em}
+.hb-tav__hint{font-size:11.5px;color:var(--muted);font-style:italic}
+.hb-tav__ic{margin-left:auto;font-size:21px;line-height:1;flex:0 0 auto}
+.hb-tav__ic--open{display:none}
+.hb-tav[open] .hb-tav__ic--shut{display:none}
+.hb-tav[open] .hb-tav__ic--open{display:inline}
+.hb-tav__body{border-top:1px solid color-mix(in srgb,var(--gold) 30%,var(--line))}
+
+/* membership band — the over-the-shoulder seer + join CTA */
+.hb-promo{display:grid;grid-template-columns:1fr 230px;align-items:stretch}
 .hb-promo__text{padding:24px 26px;align-self:center}
 .hb-promo__art{overflow:hidden;min-height:210px;background:var(--bg)}
 .hb-promo__img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
