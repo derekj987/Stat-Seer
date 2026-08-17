@@ -71,7 +71,12 @@ function TheCard({ rows }: { rows: CardRow[] }) {
               <table className="hb-form">
                 <thead>
                   <tr>
-                    <th className="hb-l">Game</th><th className="hb-x">Kickoff</th><th>Market Spread</th><th>Market O/U</th><th>Our Model Suggests</th>
+                    <th className="hb-l">Game</th><th className="hb-x">Kickoff</th><th>Market Spread</th><th>Market O/U</th>
+                    <th>
+                      <a className="hb-modeltip" href="/model">Our Model Suggests
+                        <span className="hb-modeltip__pop">See how the data works for our model inside.</span>
+                      </a>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>

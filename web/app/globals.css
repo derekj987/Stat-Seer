@@ -959,6 +959,18 @@ details.statsdrop .stats{margin:12px 0 0}
 .addslip.saved{background:var(--accent);color:#fff;border-color:var(--accent)}
 .addslip__i{font-size:14px;line-height:1}
 .tgcard__src .addslip{margin-left:auto}
+/* The + / heart save button stays hidden until you hover the pick it belongs to —
+   but ONLY where a real hover exists. Touch screens (hover:none) keep it visible so
+   it stays tappable, and a saved pick always shows so you can see what's on your slip. */
+@media (hover: hover){
+  .addslip{opacity:0;transition:opacity .12s}
+  :hover > .addslip,.addslip:hover,.addslip:focus-visible,.addslip.saved{opacity:1}
+  .line.savable .heart{opacity:0;transition:opacity .12s}
+  .line.savable:hover .heart,.line.savable.saved .heart,.line.savable:focus-visible .heart{opacity:1}
+  .pricerow.savable .pricerow__heart{opacity:0;transition:opacity .12s}
+  .pricerow.savable:hover .pricerow__heart,.pricerow.savable.saved .pricerow__heart,
+  .pricerow.savable:focus-visible .pricerow__heart{opacity:1}
+}
 .pred__slip{margin-top:12px;display:flex;justify-content:flex-end}
 .slipgrp{margin-bottom:10px}
 .slipgrp__h{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
@@ -1061,6 +1073,16 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-sug{display:inline-flex;align-items:center;gap:5px}
 .hb-sug__t{font-size:11.5px;font-weight:700;color:var(--offc-ink);white-space:nowrap}
 .hb-leannone{font-size:11px;color:var(--muted);font-style:italic}
+/* "Our Model Suggests" header: hover reveals a note + links into The Model */
+.hb-modeltip{position:relative;color:inherit;text-decoration:none;cursor:help;
+  border-bottom:1px dotted color-mix(in srgb,currentColor 55%,transparent)}
+.hb-modeltip__pop{position:absolute;top:calc(100% + 8px);right:0;z-index:6;width:210px;
+  padding:9px 11px;border-radius:9px;background:var(--surface);border:1px solid var(--line);
+  box-shadow:0 8px 24px rgba(0,0,0,.22);font-size:11.5px;font-weight:600;letter-spacing:0;
+  text-transform:none;color:var(--ink);line-height:1.4;text-align:left;opacity:0;pointer-events:none;
+  transform:translateY(-4px);transition:opacity .14s,transform .14s}
+.hb-modeltip__pop::after{content:" →";color:var(--accent);font-weight:800}
+.hb-modeltip:hover .hb-modeltip__pop,.hb-modeltip:focus-visible .hb-modeltip__pop{opacity:1;transform:translateY(0)}
 .addslip--compact{padding:2px 6px;gap:0;font-size:12px}
 .hb-sug .addslip{border-color:color-mix(in srgb,var(--offc) 40%,transparent);
   background:color-mix(in srgb,var(--offc) 9%,transparent);color:var(--offc-ink)}
