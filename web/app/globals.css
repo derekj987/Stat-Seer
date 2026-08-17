@@ -997,14 +997,15 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-dia{color:var(--gold)}
 .hb-dia--end{margin-left:8px;font-size:11px;vertical-align:1px}
 
-/* The Card — agate table */
-.hb-formwrap{overflow-x:auto}
-.hb-form{width:100%;min-width:520px;border-collapse:collapse;table-layout:fixed}
+/* The Card — agate table clustered left, seer filling the dead space at right */
+.hb-cardrow{display:flex;gap:18px;align-items:stretch}
+.hb-formwrap{flex:0 1 auto;min-width:0;overflow-x:auto}
+.hb-cardseer{flex:1 1 0;min-width:0;display:flex;align-items:flex-end;justify-content:center;padding-left:8px}
+.hb-cardseer img{max-width:270px;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 18%);
+  mask-image:linear-gradient(180deg,transparent,#000 18%)}
+.hb-form{border-collapse:collapse;table-layout:auto}
 .hb-form th,.hb-form td{text-align:left}
-.hb-form th:nth-child(1),.hb-form td:nth-child(1){width:26%}
-.hb-form th:nth-child(2),.hb-form td:nth-child(2){width:14%}
-.hb-form th:nth-child(3),.hb-form td:nth-child(3){width:16%}
-.hb-form th:nth-child(4),.hb-form td:nth-child(4){width:13%}
 .hb-form th{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
   font-weight:700;padding:0 0 6px;border-bottom:1px solid var(--line)}
 .hb-form td{font-size:13px;padding:9px 0;border-bottom:1px solid var(--line);white-space:nowrap}
@@ -1092,19 +1093,6 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-tav[open] .hb-tav__chev{transform:rotate(180deg)}
 .hb-tav__body{border-top:1px solid color-mix(in srgb,var(--gold) 30%,var(--line));padding:22px 24px}
 
-/* seer, back at the bottom to fill the page's tail */
-.hb-seer{margin-top:26px;display:flex;justify-content:center}
-.hb-seer__img{width:auto;height:auto;max-height:430px;max-width:74%;object-fit:contain;display:block}
-/* wide-screen side rail: fixed in the empty margin beside the centered content */
-.hb-seerail{display:none}
-@media (min-width:1281px){
-  .hb-seer{display:none}
-  .hb-seerail{display:block;position:fixed;right:0;bottom:0;z-index:1;pointer-events:none;
-    width:calc((100vw - 1040px) / 2);max-width:300px}
-  .hb-seerail img{width:100%;height:auto;max-height:76vh;object-fit:contain;display:block;
-    -webkit-mask-image:linear-gradient(180deg,transparent,#000 24%);
-    mask-image:linear-gradient(180deg,transparent,#000 24%)}
-}
 
 /* membership band — the over-the-shoulder seer + join CTA */
 .hb-promo{display:grid;grid-template-columns:1fr 230px;align-items:stretch}
@@ -1131,5 +1119,6 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .hb-form td+td,.hb-form th+th{padding-left:9px}
   .hb-game{font-size:11.5px}
   .hb-at{margin:0 4px}
-  .hb-seer__img{max-height:400px;max-width:96%}
 }
+/* below this width the table wants the room; drop the in-card seer */
+@media (max-width:880px){ .hb-cardseer{display:none} }
