@@ -96,7 +96,7 @@ function TheCard({ rows }: { rows: CardRow[] }) {
                       </td>
                       <td className="hb-x hb-kick2">{etShort(r.commence)}</td>
                       <td className="hb-num"><Flap text={r.marketSpread ?? "—"} seed={i} /></td>
-                      <td className="hb-num hb-model"><Flap text={r.modelSpread ?? "—"} seed={i + 2} /></td>
+                      <td className="hb-num hb-model hb-mspread"><Flap text={r.modelSpread ?? "—"} seed={i + 2} /></td>
                       <td className="hb-num hb-tot"><Flap text={numStr(r.marketTotal)} seed={i + 4} /></td>
                       <td className="hb-num hb-model"><Flap text={numStr(r.modelTotal)} seed={i + 6} /></td>
                       <td className="hb-x hb-lean">
@@ -232,7 +232,10 @@ export default async function Home() {
       <PlayersWeLike players={data.players} />
 
       <HomePromo />
+      </div>
 
+      {/* Full-width closer below the grid so the seer column ends exactly at this
+          rule (desktop) instead of running down alongside the creed + footer. */}
       <section className="hb-creed">
         <div className="hb-creed__h">Bet smarter. <b>Win more often.</b></div>
         <p className="hb-creed__p">
@@ -240,7 +243,6 @@ export default async function Home() {
           track record, and the best price on every pick. <a href="/model">See the full model →</a> · <a href="/how">How our model works →</a>
         </p>
       </section>
-      </div>
 
       <div className="hb-side" aria-hidden="true">
         {/* eslint-disable-next-line @next/next/no-img-element */}

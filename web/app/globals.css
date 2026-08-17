@@ -764,11 +764,11 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .snav__scrim{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:65;border:0;
   animation:snavfade .2s ease}
 @keyframes snavfade{from{opacity:0}to{opacity:1}}
-.snav__drawer{position:fixed;top:0;right:0;bottom:0;z-index:70;width:min(84vw,320px);
+.snav__drawer{position:fixed;top:0;left:0;bottom:0;z-index:70;width:min(84vw,320px);
   display:flex;flex-direction:column;gap:2px;padding:54px 16px 22px;overflow-y:auto;
-  background:var(--surface);border-left:1px solid var(--line);box-shadow:-6px 0 26px rgba(0,0,0,.30);
+  background:var(--surface);border-right:1px solid var(--line);box-shadow:6px 0 26px rgba(0,0,0,.30);
   animation:snavslide .22s ease}
-@keyframes snavslide{from{transform:translateX(100%)}to{transform:translateX(0)}}
+@keyframes snavslide{from{transform:translateX(-100%)}to{transform:translateX(0)}}
 .snav__dclose{position:absolute;top:12px;right:14px;background:none;border:0;font-size:20px;
   line-height:1;color:var(--muted);cursor:pointer;padding:4px}
 .snav__dclose:hover{color:var(--ink)}
@@ -1033,7 +1033,13 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-num{font-variant-numeric:tabular-nums}
 .hb-model{color:var(--accent);font-weight:700}
 .hb-tot{color:var(--muted)}
-.hb-off td{background:color-mix(in srgb,var(--spot) 11%,transparent)}
+/* Off-consensus (model disagrees with the market) — flag the disagreeing pick in
+   blue so it jumps out: blue row wash, blue ◆, blue model-spread pick + lean chip. */
+.hb-off td{background:color-mix(in srgb,var(--offc) 13%,transparent)}
+.hb-off .hb-mspread{color:var(--offc-ink)}
+.hb-off .hb-dia{color:var(--offc-ink)}
+.hb-off .hb-leanchip:not(.hb-leanchip--t){background:var(--offc-soft);color:var(--offc-ink);
+  border-color:color-mix(in srgb,var(--offc) 34%,transparent)}
 /* kickoff + model-lean columns (desktop; hidden on phones to keep the core 5 tight) */
 .hb-kick2{font-size:11px;color:var(--muted)}
 .hb-leanwrap{display:inline-flex;gap:6px;flex-wrap:wrap}
@@ -1163,8 +1169,11 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 @media (min-width:1100px){
   .hb-mast__eyes{display:none}
   .hb{max-width:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 22vw;align-items:start}
-  .hb-main{padding:clamp(12px,2vw,22px) 28px clamp(24px,3vw,40px) clamp(24px,5vw,72px)}
-  .hb-side{margin:0;align-self:stretch}
+  /* content left (row 1), seer right (row 1), creed spans full width in row 2 —
+     so the seer column ends exactly at the creed's rule, not down by the footer. */
+  .hb-main{grid-column:1;grid-row:1;padding:clamp(12px,2vw,22px) 28px clamp(24px,3vw,40px) clamp(24px,5vw,72px)}
+  .hb-side{grid-column:2;grid-row:1;margin:0;align-self:stretch}
+  .hb-creed{grid-column:1/-1;grid-row:2;margin-top:0;padding:13px clamp(24px,5vw,72px) 30px}
   .hb-seerimg{position:sticky;top:0;height:100vh;max-height:100%;width:100%;object-fit:cover;object-position:center 14%;
     -webkit-mask-image:linear-gradient(90deg,transparent,#000 15%);
     mask-image:linear-gradient(90deg,transparent,#000 15%)}
