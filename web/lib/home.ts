@@ -38,7 +38,8 @@ export interface PlayerPick {
   id: string;
   player: string;
   team: string;
-  angle: string; // the prop the boards are buzzing, e.g. "OVER 74.5 rush yds"
+  angle: string;      // the prop the boards are buzzing, e.g. "OVER 74.5 rush yds"
+  sources: string[];  // boards/blogs the player was mentioned on
 }
 
 export interface HomeData {
@@ -126,7 +127,10 @@ export async function fetchHome(season = 2026): Promise<HomeData> {
       .filter((b) => b.direction === "up")
       .sort((a, z) => z.heat - a.heat)
       .slice(0, 3)
-      .map((b) => ({ id: b.id, player: b.player, team: b.team, angle: b.angle }));
+      .map((b) => ({
+        id: b.id, player: b.player, team: b.team, angle: b.angle,
+        sources: b.sources.map((s) => s.board),
+      }));
   } catch { players = []; }
 
   return { week, season, hasModel: preds.length > 0, card, upsets, players };
