@@ -898,6 +898,26 @@ details.statsdrop .stats{margin:12px 0 0}
   .tgcard__player{font-size:16px}
 }
 
+/* ---------------- preseason sandbox model (test run, walled off) ---------------- */
+.presb{margin:26px 0 8px}
+.presb__wall{display:flex;flex-direction:column;gap:8px;background:var(--surface-2);
+  border:1px dashed var(--line);border-radius:14px;padding:15px 18px;margin:0 0 16px}
+.presb__tag{align-self:flex-start;font-size:10.5px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--muted);background:var(--surface);border:1px solid var(--line);
+  padding:4px 10px;border-radius:20px}
+.presb__wall p{margin:0;font-size:13px;line-height:1.6;color:var(--ink)}
+.presb__table{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.presb__row{display:grid;grid-template-columns:1fr 3rem 6rem 5rem;align-items:center;gap:8px;
+  padding:9px 14px;font-size:13.5px;color:var(--ink);border-top:1px solid var(--line)}
+.presb__row:first-child{border-top:0}
+.presb__row--head{background:var(--surface-2);color:var(--muted);font-size:11px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.05em}
+.presb__row span:nth-child(2),.presb__row span:nth-child(3),.presb__row span:nth-child(4){
+  text-align:right;font-variant-numeric:tabular-nums}
+.presb__team{font-weight:800}
+.presb__pos{color:var(--accent);font-weight:700}
+.presb__neg{color:var(--key);font-weight:700}
+
 /* ---------------- unified "add to slip" control + grouped slip panel ---------------- */
 .addslip{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;
   border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);

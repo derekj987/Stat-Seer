@@ -1,4 +1,5 @@
 import { fetchPreseason, buildBoard } from "@/lib/board";
+import { fetchPreseasonRatings } from "@/lib/preseason";
 import { Brand, ShopSubnav, FlowSteps } from "../Nav";
 import PreseasonView from "../PreseasonView";
 
@@ -31,9 +32,12 @@ export default async function Page() {
     );
   }
 
+  const ratings = await fetchPreseasonRatings(SEASON);
+
   return (
     <PreseasonView
       board={board}
+      ratings={ratings}
       season={SEASON}
       snapshot={board[0]?.snapshot ?? ""}
     />

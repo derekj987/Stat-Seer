@@ -6,6 +6,7 @@
 // board. No week nav — preseason games are listed by kickoff time.
 import { useCallback } from "react";
 import type { Game } from "@/lib/board";
+import type { PreRating } from "@/lib/preseason";
 import { ShopSubnav, Brand, FlowSteps } from "./Nav";
 import { useSlip } from "@/lib/slip";
 
@@ -109,9 +110,47 @@ function GameCard({
   );
 }
 
+function SandboxModel({ ratings }: { ratings: PreRating[] }) {
+  return (
+    <section className="presb" aria-label="Preseason test-run model">
+      <div className="presb__wall" role="note">
+        <span className="presb__tag">Test run · sandbox · not graded</span>
+        <p>
+          <b>Preseason model — a machinery test, not a pick.</b> This runs StatSeer&apos;s exact
+          rating method (mean point differential, heavily shrunk) on <b>preseason box scores only</b>.
+          Preseason is 2–3 games of mostly backups, so these numbers are <b>essentially noise</b> — we
+          show them to exercise the pipeline before Week&nbsp;1, <b>never</b> as a StatSeer prediction.
+          It is walled off from The Model and never enters calibration.
+        </p>
+      </div>
+      {ratings.length === 0 ? (
+        <p className="foot">
+          No preseason box scores captured yet. Ratings appear once the ESPN preseason feed has run.
+        </p>
+      ) : (
+        <div className="presb__table" role="table" aria-label="Preseason ratings">
+          <div className="presb__row presb__row--head" role="row">
+            <span>team</span><span>GP</span><span>avg pt diff</span><span>rating</span>
+          </div>
+          {ratings.map((r) => (
+            <div className="presb__row" role="row" key={r.team}>
+              <span className="presb__team">{r.team}</span>
+              <span>{r.gp}</span>
+              <span>{r.rawDiff >= 0 ? "+" : ""}{r.rawDiff.toFixed(1)}</span>
+              <span className={r.rating >= 0 ? "presb__pos" : "presb__neg"}>
+                {r.rating >= 0 ? "+" : ""}{r.rating.toFixed(1)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function PreseasonView({
-  board, season, snapshot,
-}: { board: Game[]; season: number; snapshot: string }) {
+  board, ratings, season, snapshot,
+}: { board: Game[]; ratings: PreRating[]; season: number; snapshot: string }) {
   const { has, toggle: slipToggle } = useSlip();
   const toggle = useCallback((p: Pick) => slipToggle({
     id: p.id, kind: "line",
@@ -150,6 +189,8 @@ export default function PreseasonView({
           {board.map((g) => <GameCard key={g.eventId} g={g} has={has} onToggle={toggle} />)}
         </section>
       )}
+
+      <SandboxModel ratings={ratings} />
 
       <footer className="foot">
         <p>
