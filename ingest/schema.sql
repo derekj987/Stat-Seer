@@ -258,6 +258,14 @@ create table if not exists preseason_team_games (
 );
 create index if not exists preseason_tg_week_idx on preseason_team_games (season, week);
 
+-- Grants for the preseason lanes. This project does NOT auto-grant new tables, so
+-- both the web (server reads with the service key) and the writers need these
+-- explicitly, or every read 403s. Server-only tables (like odds_snapshots) — no
+-- RLS, no anon grant; access is the service key.
+grant select, insert on preseason_odds to service_role;
+grant select, insert, update on preseason_team_games to service_role;
+grant usage, select on all sequences in schema public to service_role;
+
 -- ---------------------------------------------------------------------
 -- CALIBRATION LEDGER. The most important table in the application.
 -- ---------------------------------------------------------------------
