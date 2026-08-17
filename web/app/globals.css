@@ -980,11 +980,6 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-bar__hint{font-size:11.5px;color:var(--muted);font-style:italic}
 .hb-bar__chev{margin-left:auto;color:var(--muted);font-size:13px;transition:transform .2s;flex:0 0 auto}
 .hb-panel[open] .hb-bar__chev{transform:rotate(180deg)}
-.hb-dot{width:9px;height:9px;border-radius:50%;background:var(--key);flex:0 0 auto;
-  box-shadow:0 0 0 0 color-mix(in srgb,var(--key) 60%,transparent);animation:hb-pulse 1.8s infinite}
-@keyframes hb-pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--key) 55%,transparent)}
-  70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
-@media (prefers-reduced-motion:reduce){.hb-dot{animation:none}}
 .hb-body{border-top:1px solid var(--line);padding:14px 16px 8px}
 .hb-empty{font-size:13px;color:var(--muted);font-style:italic;padding:4px 0 12px;line-height:1.55}
 .hb-empty a{color:var(--accent);text-decoration:none;font-weight:600}

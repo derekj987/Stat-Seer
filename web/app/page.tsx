@@ -81,7 +81,6 @@ function Upsets({ rows }: { rows: UpsetRow[] }) {
   return (
     <details className="hb-panel hb-panel--alert">
       <summary className="hb-bar">
-        <span className="hb-dot" aria-hidden="true"></span>
         <span className="hb-bar__title hb-bar__title--gold">Upsets of the Week Alert</span>
         <span className="hb-bar__count hb-bar__count--gold">{rows.length}</span>
         <span className="hb-bar__hint">the market has them losing — our model says they win</span>
@@ -154,7 +153,7 @@ function PlayersWeLike({ players }: { players: PlayerPick[] }) {
               <span className="hb-plr__angle"><span className="hb-plr__up" aria-hidden="true">▲</span>{p.angle}</span>
               {p.sources.length > 0 && (
                 <span className="hb-plr__src">
-                  <span className="hb-plr__srck">Heard on</span> {p.sources.join(" · ")}
+                  <span className="hb-plr__srck">Trending on</span> {p.sources.join(" · ")}
                 </span>
               )}
             </a>
