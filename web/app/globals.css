@@ -1010,6 +1010,12 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-slip{position:absolute;right:0;top:50%;transform:translateY(-50%);opacity:0;transition:opacity .1s}
 .hb-form tbody tr:hover .hb-slip{opacity:1}
 .hb-slip .addslip{padding:4px 10px;font-size:11px}
+/* split-flap "odds board" digits — always look alive, even when unchanged */
+.flap{display:inline-flex;white-space:pre;perspective:80px}
+.flap__d{display:inline-block;transform-origin:50% 50%;backface-visibility:hidden;
+  animation-name:flaproll;animation-iteration-count:infinite;animation-timing-function:ease-in-out}
+@keyframes flaproll{0%,86%{transform:rotateX(0deg)}100%{transform:rotateX(360deg)}}
+@media (prefers-reduced-motion:reduce){.flap__d{animation:none}}
 
 /* Upsets — newspaper columns */
 .hb-cols{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
@@ -1090,6 +1096,14 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .hb-players__grid{grid-template-columns:1fr}
   .hb-bar__hint{display:none}
   .hb-mast__name{font-size:30px}
+  /* shrink The Card so all 5 columns fit the phone without sideways scroll */
+  .hb-form{min-width:0;table-layout:auto}
+  .hb-form th:nth-child(n),.hb-form td:nth-child(n){width:auto}
+  .hb-form th,.hb-form td{font-size:11px}
+  .hb-form td{padding-top:8px;padding-bottom:8px}
+  .hb-form td+td,.hb-form th+th{padding-left:9px}
+  .hb-game{font-size:11.5px}
+  .hb-at{margin:0 4px}
   .hb-promo{grid-template-columns:1fr}
   .hb-promo__text{grid-row:1;padding:20px 20px 6px}
   .hb-promo__art{grid-row:2;min-height:0;height:auto;background:none;padding:0 20px 18px}

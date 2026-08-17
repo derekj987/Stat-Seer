@@ -13,6 +13,30 @@ const kickFmt = new Intl.DateTimeFormat("en-US", {
   weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
 });
 const et = (iso: string) => kickFmt.format(new Date(iso)) + " ET";
+const numStr = (v: number | null) => (v === null ? "—" : String(v));
+
+// Split-flap "odds board" number: each character rolls on its own cadence so the
+// board always looks alive, even when the value hasn't changed. Purely cosmetic —
+// the real value is exposed to screen readers via aria-label.
+function Flap({ text, seed = 0 }: { text: string; seed?: number }) {
+  return (
+    <span className="flap" aria-label={text}>
+      {Array.from(text).map((ch, i) => (
+        <span
+          key={i}
+          className="flap__d"
+          aria-hidden="true"
+          style={{
+            animationDelay: `${((i * 0.29 + seed * 0.13) % 2.6).toFixed(2)}s`,
+            animationDuration: `${(3.6 + ((i + seed) % 5) * 0.5).toFixed(2)}s`,
+          }}
+        >
+          {ch === " " ? " " : ch}
+        </span>
+      ))}
+    </span>
+  );
+}
 
 function TheCard({ rows }: { rows: CardRow[] }) {
   return (
@@ -42,7 +66,7 @@ function TheCard({ rows }: { rows: CardRow[] }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map((r) => (
+                  {rows.map((r, i) => (
                     <tr key={r.eventId} className={r.off ? "hb-off" : undefined}>
                       <td className="hb-l">
                         <span className="hb-game" title={et(r.commence)}>
@@ -61,10 +85,10 @@ function TheCard({ rows }: { rows: CardRow[] }) {
                           </span>
                         )}
                       </td>
-                      <td className="hb-num">{r.marketSpread ?? "—"}</td>
-                      <td className="hb-num hb-model">{r.modelSpread ?? "—"}</td>
-                      <td className="hb-num hb-tot">{r.marketTotal ?? "—"}</td>
-                      <td className="hb-num hb-model">{r.modelTotal ?? "—"}</td>
+                      <td className="hb-num"><Flap text={r.marketSpread ?? "—"} seed={i} /></td>
+                      <td className="hb-num hb-model"><Flap text={r.modelSpread ?? "—"} seed={i + 2} /></td>
+                      <td className="hb-num hb-tot"><Flap text={numStr(r.marketTotal)} seed={i + 4} /></td>
+                      <td className="hb-num hb-model"><Flap text={numStr(r.modelTotal)} seed={i + 6} /></td>
                     </tr>
                   ))}
                 </tbody>
