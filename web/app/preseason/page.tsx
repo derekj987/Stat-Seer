@@ -1,6 +1,6 @@
 import { fetchPreseason, buildBoard } from "@/lib/board";
 import { fetchPreseasonRatings } from "@/lib/preseason";
-import { Brand, ShopSubnav, FlowSteps } from "../Nav";
+import { Brand, ShopSubnav, SeasonSubnav, FlowSteps } from "../Nav";
 import PreseasonView from "../PreseasonView";
 
 export const revalidate = 120; // ISR: refresh Supabase reads every 2 min
@@ -14,7 +14,8 @@ function Shell({ children }: { children: React.ReactNode }) {
         <Brand sub={`Shop Around · Preseason · exhibition lines · ${SEASON}`} />
       </header>
       <FlowSteps active="shop" />
-      <ShopSubnav active="pre" />
+      <ShopSubnav active="lines" />
+      <SeasonSubnav area="lines" active="pre" />
       {children}
     </main>
   );

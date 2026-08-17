@@ -37,7 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <footer className="sitefoot">
           <p>
             StatSeer is statistical analysis, <b>not betting or financial advice</b>. For adults of legal
-            age only (21+). Please gamble responsibly — if it stops being fun, help is available:
+            age only (18+). Please gamble responsibly — if it stops being fun, help is available:
             call <b>1-800-GAMBLER</b>.
           </p>
         </footer>

@@ -89,14 +89,26 @@ export function ContextSubnav({ active }: { active: "upset" | "fan" | "best" }) 
 }
 
 /** Sub-tabs inside Shop Around. */
-export function ShopSubnav({ active }: { active: "lines" | "props" | "pre" }) {
+export function ShopSubnav({ active }: { active: "lines" | "props" }) {
   return (
     <nav className="subnav" aria-label="Shop view">
       <a href="/lines" className={active === "lines" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "lines" ? "page" : undefined}>Game Lines</a>
       <a href="/props" className={active === "props" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "props" ? "page" : undefined}>Player Props</a>
-      <a href="/preseason" className={active === "pre" ? "subnav__t active" : "subnav__t"}
+    </nav>
+  );
+}
+
+/** Regular-season vs preseason toggle within a Shop area. */
+export function SeasonSubnav({ area, active }: { area: "lines" | "props"; active: "reg" | "pre" }) {
+  const reg = area === "lines" ? "/lines" : "/props";
+  const pre = area === "lines" ? "/preseason" : "/props?season=pre";
+  return (
+    <nav className="subnav subnav--season" aria-label="Season">
+      <a href={reg} className={active === "reg" ? "subnav__t active" : "subnav__t"}
+        aria-current={active === "reg" ? "page" : undefined}>Regular Season</a>
+      <a href={pre} className={active === "pre" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "pre" ? "page" : undefined}>Preseason</a>
     </nav>
   );

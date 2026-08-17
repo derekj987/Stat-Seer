@@ -1,6 +1,6 @@
 import { weekRange } from "@/lib/board";
 import { weekProps, CATEGORIES, categoryByKey } from "@/lib/props";
-import { ShopSubnav, Brand, FlowSteps } from "../Nav";
+import { ShopSubnav, SeasonSubnav, Brand, FlowSteps } from "../Nav";
 import PropsView from "./PropsView";
 
 export const revalidate = 120;
@@ -43,6 +43,7 @@ function WeekNav({ min, max, current, cat }: { min: number; max: number; current
 
 export default async function Page({ searchParams }: PageProps<"/props">) {
   const sp = await searchParams;
+  const isPre = sp.season === "pre";
   const cat = categoryByKey(typeof sp.cat === "string" ? sp.cat : "td");
 
   let range: { min: number; max: number } | null = null;
@@ -57,7 +58,7 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
   const week = Number.isFinite(requested) ? Math.min(max, Math.max(min, requested)) : min;
 
   const catSet = new Set(cat.markets);
-  const games = (await weekProps(week, SEASON))
+  const games = isPre ? [] : (await weekProps(week, SEASON))
     .map((g) => ({ ...g, markets: g.markets.filter((m) => catSet.has(m.market)) }))
     .filter((g) => g.markets.length > 0);
   const snap = games[0]?.snapshot ?? "";
@@ -65,22 +66,39 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={`Shop Around · Player Props · ${cat.label} · Week ${week}, ${SEASON}`} />
-        {snap && <div className="asof">props as of<br /><b>{et(snap)}</b></div>}
+        <Brand sub={isPre
+          ? `Shop Around · Player Props · Preseason · ${SEASON}`
+          : `Shop Around · Player Props · ${cat.label} · Week ${week}, ${SEASON}`} />
+        {!isPre && snap && <div className="asof">props as of<br /><b>{et(snap)}</b></div>}
       </header>
 
       <FlowSteps active="shop" />
       <ShopSubnav active="props" />
-      <CatNav current={cat.key} week={week} />
-      <WeekNav min={min} max={max} current={week} cat={cat.key} />
+      <SeasonSubnav area="props" active={isPre ? "pre" : "reg"} />
 
-      {games.length === 0 ? (
-        <p className="foot">
-          No <b>{cat.label.toLowerCase()}</b> props posted for Week {week} yet. Books post most player
-          props closer to kickoff — this fills in on its own during game week.
-        </p>
+      {isPre ? (
+        <div className="tgwall" role="note">
+          <span className="tgwall__tag">Preseason props — not offered</span>
+          <p>
+            Books rarely post <b>player props</b> for preseason games — snap counts are unpredictable and
+            starters barely play, so there&apos;s no reliable market to shop. If preseason props do appear,
+            they&apos;ll show here. For now, shop preseason <a href="/preseason">Game Lines</a>, or switch to
+            <a href="/props"> Regular Season</a> props.
+          </p>
+        </div>
       ) : (
-        <PropsView games={games} />
+        <>
+          <CatNav current={cat.key} week={week} />
+          <WeekNav min={min} max={max} current={week} cat={cat.key} />
+          {games.length === 0 ? (
+            <p className="foot">
+              No <b>{cat.label.toLowerCase()}</b> props posted for Week {week} yet. Books post most player
+              props closer to kickoff — this fills in on its own during game week.
+            </p>
+          ) : (
+            <PropsView games={games} />
+          )}
+        </>
       )}
     </main>
   );

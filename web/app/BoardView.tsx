@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import type { Game } from "@/lib/board";
-import { ShopSubnav, Brand, SlipCallout, FlowSteps } from "./Nav";
+import { ShopSubnav, SeasonSubnav, Brand, SlipCallout, FlowSteps } from "./Nav";
 import { useSlip } from "@/lib/slip";
 
 // ---- formatting (client-side; Intl has full ICU) ----
@@ -159,6 +159,7 @@ export default function BoardView({
 
         <FlowSteps active="shop" />
         <ShopSubnav active="lines" />
+        <SeasonSubnav area="lines" active="reg" />
 
         <WeekNav min={min} max={max} current={week} />
 

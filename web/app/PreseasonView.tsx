@@ -7,7 +7,7 @@
 import { useCallback } from "react";
 import type { Game } from "@/lib/board";
 import type { PreRating } from "@/lib/preseason";
-import { ShopSubnav, Brand, FlowSteps } from "./Nav";
+import { ShopSubnav, SeasonSubnav, Brand, FlowSteps } from "./Nav";
 import { useSlip } from "@/lib/slip";
 
 const kickFmt = new Intl.DateTimeFormat("en-US", {
@@ -112,39 +112,41 @@ function GameCard({
 
 function SandboxModel({ ratings }: { ratings: PreRating[] }) {
   return (
-    <section className="presb" aria-label="Preseason test-run model">
-      <div className="presb__wall" role="note">
-        <span className="presb__tag">Test run · sandbox · not graded</span>
-        <p>
-          <b>Preseason model — a machinery test, not a pick.</b> This runs StatSeer&apos;s exact
-          rating method (mean point differential, heavily shrunk) on <b>preseason box scores only</b>.
-          Preseason is 2–3 games of mostly backups, so these numbers are <b>essentially noise</b> — we
-          show them to exercise the pipeline before Week&nbsp;1, <b>never</b> as a StatSeer prediction.
-          It is walled off from The Model and never enters calibration.
+    <details className="presb">
+      <summary className="presb__sum">
+        <span className="presb__tag">Test run · sandbox</span>
+        <span className="presb__sumtxt">Preseason power ratings — a machinery test, not picks</span>
+        <span className="presb__chev" aria-hidden="true">▾</span>
+      </summary>
+      <div className="presb__body">
+        <p className="presb__note">
+          <b>What this is telling you:</b> StatSeer&apos;s rating method (mean point differential, heavily
+          shrunk) run on <b>preseason box scores only</b> — 2–3 games of mostly backups, so the numbers are
+          <b> essentially noise</b>. It exists to exercise the pipeline before Week&nbsp;1; it is <b>never</b>
+          a pick and never enters calibration. A higher <b>rating</b> just means a team looked better on the
+          preseason sample — take it with a big grain of salt.
         </p>
-      </div>
-      {ratings.length === 0 ? (
-        <p className="foot">
-          No preseason box scores captured yet. Ratings appear once the ESPN preseason feed has run.
-        </p>
-      ) : (
-        <div className="presb__table" role="table" aria-label="Preseason ratings">
-          <div className="presb__row presb__row--head" role="row">
-            <span>team</span><span>GP</span><span>avg pt diff</span><span>rating</span>
-          </div>
-          {ratings.map((r) => (
-            <div className="presb__row" role="row" key={r.team}>
-              <span className="presb__team">{r.team}</span>
-              <span>{r.gp}</span>
-              <span>{r.rawDiff >= 0 ? "+" : ""}{r.rawDiff.toFixed(1)}</span>
-              <span className={r.rating >= 0 ? "presb__pos" : "presb__neg"}>
-                {r.rating >= 0 ? "+" : ""}{r.rating.toFixed(1)}
-              </span>
+        {ratings.length === 0 ? (
+          <p className="foot">No preseason box scores captured yet — ratings appear once the ESPN feed has run.</p>
+        ) : (
+          <div className="presb__table" role="table" aria-label="Preseason ratings">
+            <div className="presb__row presb__row--head" role="row">
+              <span>team</span><span>GP</span><span>avg pt diff</span><span>rating</span>
             </div>
-          ))}
-        </div>
-      )}
-    </section>
+            {ratings.map((r) => (
+              <div className="presb__row" role="row" key={r.team}>
+                <span className="presb__team">{r.team}</span>
+                <span>{r.gp}</span>
+                <span>{r.rawDiff >= 0 ? "+" : ""}{r.rawDiff.toFixed(1)}</span>
+                <span className={r.rating >= 0 ? "presb__pos" : "presb__neg"}>
+                  {r.rating >= 0 ? "+" : ""}{r.rating.toFixed(1)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </details>
   );
 }
 
@@ -166,18 +168,19 @@ export default function PreseasonView({
       </header>
 
       <FlowSteps active="shop" />
-      <ShopSubnav active="pre" />
+      <ShopSubnav active="lines" />
+      <SeasonSubnav area="lines" active="pre" />
 
-      {/* Wall: preseason is line-shopping only. It never touches the model or grading. */}
-      <div className="tgwall" role="note">
-        <span className="tgwall__tag">Exhibition — never graded</span>
+      <details className="readbox">
+        <summary className="readbox__h">What am I seeing here?</summary>
         <p>
-          <b>Preseason lines, for shopping only.</b> These are exhibition games — starters play a
-          handful of snaps and the books know it, so the lines are soft and low-limit. StatSeer
-          shows them so you can shop the best price, but they are <b>never graded, never scored, and
-          never fed to The Model</b>. No calibration, no track record — pure line shopping.
+          Every <b>preseason</b> game&apos;s lines — moneyline, spread, and total — with the best number
+          across books highlighted. Tap any line to add it to your slip. These are <b>exhibition games</b>:
+          starters barely play, so the lines are soft and low-limit, and StatSeer <b>never grades or
+          models them</b> — it&apos;s pure line shopping. For graded predictions and the real board, switch
+          to <a href="/lines">Regular Season</a>.
         </p>
-      </div>
+      </details>
 
       {board.length === 0 ? (
         <p className="foot">

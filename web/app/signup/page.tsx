@@ -21,7 +21,7 @@ export default function SignUp() {
       setStatus("error"); setMsg("Password must be at least 8 characters."); return;
     }
     if (!over21) {
-      setStatus("error"); setMsg("You must confirm you are 21 or older."); return;
+      setStatus("error"); setMsg("You must confirm you are 18 or older."); return;
     }
     setStatus("loading");
     const supabase = createClient();
@@ -64,7 +64,7 @@ export default function SignUp() {
             </label>
             <label className="authcheck">
               <input type="checkbox" checked={over21} onChange={(e) => setOver21(e.target.checked)} />
-              <span>I am 21 or older and agree to the terms.</span>
+              <span>I am 18 or older and agree to the terms.</span>
             </label>
             {msg && <p className="authcard__err">{msg}</p>}
             <button type="submit" className="btn btn--primary authbtn" disabled={status === "loading"}>
