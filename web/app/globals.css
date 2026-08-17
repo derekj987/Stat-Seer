@@ -975,6 +975,9 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 
 /* ================= Home — "The Model Edition" broadsheet ================= */
 .hb{max-width:1000px;margin:0 auto;padding:clamp(12px,3vw,26px) clamp(16px,4vw,24px) 44px}
+.hb-main{min-width:0}
+.hb-side{margin-top:22px}
+.hb-seerimg{display:block;width:100%;height:auto}
 .hb-mast{border-top:2px solid var(--ink)}
 .hb-mast__row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;padding:10px 0 6px}
 .hb-mast__side{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
@@ -1142,16 +1145,16 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .hb-game{font-size:11.5px}
   .hb-at{margin:0 4px}
 }
-/* Seer. Default (mobile): a wide static image across the very bottom of the page.
-   Desktop (>=1100px): fixed, full-height, taking the whole right side. */
-.hb-pageseer{margin-top:22px;display:block}
-.hb-pageseer img{display:block;width:100%;height:auto}
+/* Seer. Mobile: a wide image across the very bottom (hb-side stacks under content).
+   Desktop (>=1100px): a 2-column grid, content left + a STICKY seer right that
+   stays in view while scrolling and settles at the content bottom (above the
+   footer) — reaching the bottom on a fully-expanded page. */
 @media (min-width:1100px){
   .hb-mast__eyes{display:none}
-  .hb{max-width:none;margin:0;padding-left:clamp(24px,5vw,72px);padding-right:calc(22vw + 24px)}
-  /* explicit height so she reliably fills top-to-tavern, stopping ~90px above the footer */
-  .hb-pageseer{position:fixed;top:0;right:0;height:calc(100dvh - 90px);width:22vw;margin:0;z-index:1;pointer-events:none}
-  .hb-pageseer img{width:100%;height:100%;object-fit:cover;object-position:center 16%;
+  .hb{max-width:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 22vw;align-items:start}
+  .hb-main{padding:clamp(12px,2vw,22px) 28px clamp(24px,3vw,40px) clamp(24px,5vw,72px)}
+  .hb-side{margin:0;align-self:stretch}
+  .hb-seerimg{position:sticky;top:0;height:100vh;max-height:100%;width:100%;object-fit:cover;object-position:center 14%;
     -webkit-mask-image:linear-gradient(90deg,transparent,#000 15%);
     mask-image:linear-gradient(90deg,transparent,#000 15%)}
 }

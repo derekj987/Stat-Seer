@@ -195,6 +195,7 @@ export default async function Home() {
   const data = await fetchHome(SEASON);
   return (
     <main className="hb">
+      <div className="hb-main">
       <header className="hb-mast">
         <div className="hb-mast__eyes">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -213,6 +214,8 @@ export default async function Home() {
       <Upsets rows={data.upsets} />
       <PlayersWeLike players={data.players} />
 
+      <HomePromo />
+
       <section className="hb-creed">
         <div className="hb-creed__h">Bet smarter. <b>Win more often.</b></div>
         <p className="hb-creed__p">
@@ -220,12 +223,11 @@ export default async function Home() {
           track record, and the best price on every pick. <a href="/model">See the full model →</a> · <a href="/how">How it works →</a>
         </p>
       </section>
+      </div>
 
-      <HomePromo />
-
-      <div className="hb-pageseer" aria-hidden="true">
+      <div className="hb-side" aria-hidden="true">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo-hero.png" alt="" width={543} height={724} />
+        <img src="/logo-hero.png" alt="" className="hb-seerimg" width={543} height={724} />
       </div>
     </main>
   );
