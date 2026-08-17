@@ -153,7 +153,7 @@ export default function BoardView({
     <>
       <main className="wrap">
         <header className="masthead">
-          <Brand sub={`The Shop · Game Lines · line shopping & sweet spots · Week ${week}, ${season}`} />
+          <Brand sub={`Shop Around · Game Lines · line shopping & sweet spots · Week ${week}, ${season}`} />
           {snapshot && <div className="asof">lines as of<br /><b>{et(snapshot, snapFmt)}</b></div>}
         </header>
 

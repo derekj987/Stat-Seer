@@ -161,7 +161,7 @@ export default function PreseasonView({
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={`The Shop · Preseason · exhibition lines · ${season}`} />
+        <Brand sub={`Shop Around · Preseason · exhibition lines · ${season}`} />
         {snapshot && <div className="asof">lines as of<br /><b>{et(snapshot, snapFmt)}</b></div>}
       </header>
 

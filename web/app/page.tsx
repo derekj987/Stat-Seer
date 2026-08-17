@@ -227,6 +227,12 @@ export default async function Home() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo-hero.png" alt="" className="hb-seer__img" width={543} height={724} />
       </div>
+
+      {/* wide screens only: she stands in the empty side margin, never over content */}
+      <div className="hb-seerail" aria-hidden="true">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo-hero.png" alt="" width={543} height={724} />
+      </div>
     </main>
   );
 }

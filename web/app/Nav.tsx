@@ -11,7 +11,7 @@ export function FlowSteps({ active }: { active: "analyze" | "context" | "shop" }
   const steps = [
     { key: "analyze", n: "1", label: "The Model", sub: "make your analysis", href: "/model" },
     { key: "context", n: "2", label: "The Context", sub: "read the room", href: "/context" },
-    { key: "shop", n: "3", label: "The Shop", sub: "shop the lines", href: "/lines" },
+    { key: "shop", n: "3", label: "Shop Around", sub: "shop the lines", href: "/lines" },
   ] as const;
   return (
     <nav className="flow" aria-label="How to use StatSeer">
@@ -88,7 +88,7 @@ export function ContextSubnav({ active }: { active: "upset" | "fan" | "best" }) 
   );
 }
 
-/** Sub-tabs inside The Shop. */
+/** Sub-tabs inside Shop Around. */
 export function ShopSubnav({ active }: { active: "lines" | "props" | "pre" }) {
   return (
     <nav className="subnav" aria-label="Shop view">

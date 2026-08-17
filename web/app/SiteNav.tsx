@@ -16,7 +16,7 @@ const LINKS = [
   { href: "/", label: "Home", on: (p: string) => p === "/" },
   { href: "/model", label: "The Model", on: (p: string) => p.startsWith("/model") },
   { href: "/context", label: "The Context", on: (p: string) => ["/context", "/tailgate", "/best"].some((x) => p.startsWith(x)) },
-  { href: "/lines", label: "The Shop", on: (p: string) => ["/lines", "/props", "/preseason"].some((x) => p.startsWith(x)) },
+  { href: "/lines", label: "Shop Around", on: (p: string) => ["/lines", "/props", "/preseason"].some((x) => p.startsWith(x)) },
   { href: "/forum", label: "Community", on: (p: string) => p.startsWith("/forum") },
 ];
 const MOD = ["founder", "admin"];
@@ -110,14 +110,17 @@ export default function SiteNav() {
       </div>
 
       {open && (
-        <div className="snav__drawer">
+        <>
+        <div className="snav__scrim" onClick={() => setOpen(false)} aria-hidden="true" />
+        <div className="snav__drawer" role="dialog" aria-label="Menu">
+          <button className="snav__dclose" onClick={() => setOpen(false)} aria-label="Close menu">✕</button>
           <a href="/" className="snav__dtop">Home</a>
 
           <details className="snav__pgroup">
             <summary className="snav__dtop snav__psum">The Process</summary>
             <a href="/model" className="snav__dsub">The Model</a>
             <a href="/context" className="snav__dsub">The Context</a>
-            <a href="/lines" className="snav__dsub">The Shop</a>
+            <a href="/lines" className="snav__dsub">Shop Around</a>
           </details>
 
           <a href="/forum" className="snav__dtop">Community</a>
@@ -140,6 +143,7 @@ export default function SiteNav() {
             )}
           </details>
         </div>
+        </>
       )}
     </header>
   );
