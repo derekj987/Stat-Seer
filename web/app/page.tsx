@@ -29,8 +29,8 @@ function Flap({ text, seed = 0 }: { text: string; seed?: number }) {
           className={roll ? "flap__d" : "flap__s"}
           aria-hidden="true"
           style={roll ? {
-            animationDelay: `${((i * 1.9 + seed * 2.7) % 9).toFixed(2)}s`,
-            animationDuration: `${(10 + ((i * 3 + seed) % 8)).toFixed(2)}s`,
+            animationDelay: `${((i * 3.1 + seed * 4.3) % 22).toFixed(2)}s`,
+            animationDuration: `${(24 + ((i * 3 + seed) % 16)).toFixed(2)}s`,
           } : undefined}
         >
           {ch === " " ? " " : ch}

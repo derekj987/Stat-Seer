@@ -1015,7 +1015,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .flap__s{display:inline-block}
 .flap__d{display:inline-block;transform-origin:50% 50%;backface-visibility:hidden;
   animation-name:flaproll;animation-iteration-count:infinite;animation-timing-function:ease-in-out}
-@keyframes flaproll{0%,95%{transform:rotateX(0deg)}100%{transform:rotateX(360deg)}}
+@keyframes flaproll{0%,97%{transform:rotateX(0deg)}100%{transform:rotateX(360deg)}}
 @media (prefers-reduced-motion:reduce){.flap__d{animation:none}}
 
 /* Upsets — newspaper columns */
@@ -1084,7 +1084,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 
 /* seer, back at the bottom to fill the page's tail */
 .hb-seer{margin-top:26px;display:flex;justify-content:center}
-.hb-seer__img{width:auto;height:auto;max-height:360px;max-width:66%;object-fit:contain;display:block}
+.hb-seer__img{width:auto;height:auto;max-height:430px;max-width:74%;object-fit:contain;display:block}
 
 /* membership band — the over-the-shoulder seer + join CTA */
 .hb-promo{display:grid;grid-template-columns:1fr 230px;align-items:stretch}
@@ -1111,5 +1111,5 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .hb-form td+td,.hb-form th+th{padding-left:9px}
   .hb-game{font-size:11.5px}
   .hb-at{margin:0 4px}
-  .hb-seer__img{max-height:280px;max-width:82%}
+  .hb-seer__img{max-height:340px;max-width:92%}
 }
