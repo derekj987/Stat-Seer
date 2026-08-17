@@ -6,7 +6,7 @@
   --spot:#f4c430; --spot-soft:#fbf3d3; --spot-ink:#6a5200;
   --amber:#b45309; --amber-soft:#f7e3ce;
   --save:#2f6fed; --save-soft:#e9f1fe;
-  --offc:#6d54c4; --offc-soft:#ede9fb; --offc-ink:#4a37a0;
+  --offc:#2f6fd0; --offc-soft:#e6eefb; --offc-ink:#1e5bc4;
   --mkt:#8a2846;
   --gold:#b8860b; --gold-soft:#faf0d0;
   --font-sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -20,7 +20,7 @@
   --spot:#f4c430; --spot-soft:#2b2408; --spot-ink:#ecc94b;
   --amber:#e6a552; --amber-soft:#2e2410;
   --save:#6ea8fe; --save-soft:#152338;
-  --offc:#a693f0; --offc-soft:#201a36; --offc-ink:#b9a9f5;
+  --offc:#6ea8f5; --offc-soft:#152439; --offc-ink:#8fbcf8;
   --mkt:#c56d84;
   --gold:#e6c260; --gold-soft:#2b2412;
 }}
@@ -32,7 +32,7 @@
   --spot:#f4c430; --spot-soft:#2b2408; --spot-ink:#ecc94b;
   --amber:#e6a552; --amber-soft:#2e2410;
   --save:#6ea8fe; --save-soft:#152338;
-  --offc:#a693f0; --offc-soft:#201a36; --offc-ink:#b9a9f5;
+  --offc:#6ea8f5; --offc-soft:#152439; --offc-ink:#8fbcf8;
   --mkt:#c56d84;
   --gold:#e6c260; --gold-soft:#2b2412;
 }
@@ -806,7 +806,7 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .snav__ddiv{height:1px;background:var(--line);margin:8px 0}
 
 /* rotating motto — centered inside the top bar next to the hamburger (all widths) */
-.mottobar{flex:1 1 auto;min-width:0;display:flex;justify-content:center;align-items:center;padding:0 8px}
+.mottobar{flex:1 1 auto;min-width:0;display:flex;justify-content:flex-start;align-items:center;padding:0 8px 0 26px}
 .mottobar__text{font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;
   color:var(--gold);font-size:14px;letter-spacing:.02em;text-align:center;line-height:1.2;
   max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1051,15 +1051,20 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-off td{background:color-mix(in srgb,var(--offc) 13%,transparent)}
 .hb-off .hb-mspread{color:var(--offc-ink)}
 .hb-off .hb-dia{color:var(--offc-ink)}
-.hb-off .hb-leanchip:not(.hb-leanchip--t){background:var(--offc-soft);color:var(--offc-ink);
-  border-color:color-mix(in srgb,var(--offc) 34%,transparent)}
-/* kickoff + model-lean columns (desktop; hidden on phones to keep the core 5 tight) */
+/* kickoff + "Our Model Suggests" columns (desktop; hidden on phones to keep the core 5 tight) */
 .hb-kick2{font-size:11px;color:var(--muted)}
-.hb-leanwrap{display:inline-flex;gap:6px;flex-wrap:wrap}
-.hb-leanchip{font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;white-space:nowrap;
-  background:var(--accent-soft);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent)}
-.hb-leanchip--t{background:var(--spot);color:#4a3c00;border-color:transparent}
+/* boxless blue suggestions — spread + O/U side by side, each with its own + slip.
+   The disagree-with-market rows get a thin blue border around the pair. */
+.hb-sugwrap{display:inline-flex;gap:14px;align-items:center;flex-wrap:wrap}
+.hb-sugwrap--off{border:1px solid color-mix(in srgb,var(--offc) 55%,transparent);
+  border-radius:8px;padding:3px 9px;background:color-mix(in srgb,var(--offc) 6%,transparent)}
+.hb-sug{display:inline-flex;align-items:center;gap:5px}
+.hb-sug__t{font-size:11.5px;font-weight:700;color:var(--offc-ink);white-space:nowrap}
 .hb-leannone{font-size:11px;color:var(--muted);font-style:italic}
+.addslip--compact{padding:2px 6px;gap:0;font-size:12px}
+.hb-sug .addslip{border-color:color-mix(in srgb,var(--offc) 40%,transparent);
+  background:color-mix(in srgb,var(--offc) 9%,transparent);color:var(--offc-ink)}
+.hb-sug .addslip.saved{background:var(--offc);border-color:var(--offc);color:#fff}
 .hb-slip{position:absolute;right:0;top:50%;transform:translateY(-50%);opacity:0;transition:opacity .1s}
 .hb-form tbody tr:hover .hb-slip{opacity:1}
 .hb-slip .addslip{padding:4px 10px;font-size:11px}

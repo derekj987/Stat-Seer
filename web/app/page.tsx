@@ -65,13 +65,13 @@ function TheCard({ rows }: { rows: CardRow[] }) {
           <>
             <div className="hb-legend">
               <span className="hb-dia">◆</span> Off-consensus — our model and the market disagree on the pick.
-              <span className="hb-x"> · <b>Model lean</b> is our read at the market number, graded in public — informative, never a guaranteed bet.</span>
+              <span className="hb-x"> · <b>Our Model Suggests</b> is our read at the market number, graded in public — informative, never a guaranteed bet. Tap <b>+</b> to add a pick to your slip.</span>
             </div>
             <div className="hb-formwrap">
               <table className="hb-form">
                 <thead>
                   <tr>
-                    <th className="hb-l">Game</th><th className="hb-x">Kickoff</th><th>Market Spread</th><th>Model</th><th>Market O/U</th><th>Model O/U</th><th className="hb-x">Model lean</th>
+                    <th className="hb-l">Game</th><th className="hb-x">Kickoff</th><th>Market Spread</th><th>Model</th><th>Market O/U</th><th>Model O/U</th><th className="hb-x">Our Model Suggests</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -82,28 +82,31 @@ function TheCard({ rows }: { rows: CardRow[] }) {
                           {r.away}<span className="hb-at">at</span>{r.home}
                         </span>
                         {r.off && <span className="hb-dia hb-dia--end" aria-label="off consensus">◆</span>}
-                        {r.modelSpread && (
-                          <span className="hb-slip">
-                            <AddToSlip
-                              item={{
-                                id: `model-${r.eventId}`, kind: "model",
-                                title: r.modelSpread, detail: `${r.away} @ ${r.home} · model read`,
-                              }}
-                              label="Slip"
-                            />
-                          </span>
-                        )}
                       </td>
                       <td className="hb-x hb-kick2">{etShort(r.commence)}</td>
                       <td className="hb-num"><Flap text={r.marketSpread ?? "—"} seed={i} /></td>
                       <td className="hb-num hb-model hb-mspread"><Flap text={r.modelSpread ?? "—"} seed={i + 2} /></td>
                       <td className="hb-num hb-tot"><Flap text={numStr(r.marketTotal)} seed={i + 4} /></td>
                       <td className="hb-num hb-model"><Flap text={numStr(r.modelTotal)} seed={i + 6} /></td>
-                      <td className="hb-x hb-lean">
+                      <td className="hb-x hb-suggest">
                         {r.spreadLean || r.totalLean ? (
-                          <span className="hb-leanwrap">
-                            {r.spreadLean && <span className="hb-leanchip">{r.spreadLean.side} {r.spreadLean.num}</span>}
-                            {r.totalLean && <span className="hb-leanchip hb-leanchip--t">{r.totalLean.dir} {r.totalLean.num}</span>}
+                          <span className={r.off ? "hb-sugwrap hb-sugwrap--off" : "hb-sugwrap"}>
+                            {r.spreadLean && (
+                              <span className="hb-sug">
+                                <span className="hb-sug__t">{r.spreadLean.side} {r.spreadLean.num}</span>
+                                <AddToSlip compact label="Slip"
+                                  item={{ id: `model-sp-${r.eventId}`, kind: "model",
+                                    title: `${r.spreadLean.side} ${r.spreadLean.num}`, detail: `${r.away} @ ${r.home} · model spread` }} />
+                              </span>
+                            )}
+                            {r.totalLean && (
+                              <span className="hb-sug">
+                                <span className="hb-sug__t">{r.totalLean.dir === "OVER" ? "Over" : "Under"} {r.totalLean.num}</span>
+                                <AddToSlip compact label="Slip"
+                                  item={{ id: `model-ou-${r.eventId}`, kind: "model",
+                                    title: `${r.totalLean.dir === "OVER" ? "Over" : "Under"} ${r.totalLean.num}`, detail: `${r.away} @ ${r.home} · model total` }} />
+                              </span>
+                            )}
                           </span>
                         ) : <span className="hb-leannone">even</span>}
                       </td>
