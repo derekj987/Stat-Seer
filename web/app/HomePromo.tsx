@@ -37,12 +37,12 @@ export default function HomePromo() {
           {member ? (
             <>
               <a href="/lines" className="btn btn--primary">Explore the full board →</a>
-              <a href="/forum" className="btn">Join the community →</a>
+              <a href="/forum" className="btn">Visit the Forums →</a>
             </>
           ) : (
             <>
-              <a href="/signup" className="btn btn--primary">Create your free account →</a>
-              <a href="/forum" className="btn">See the community →</a>
+              <a href="/signup" className="btn btn--primary">Become a member →</a>
+              <a href="/forum" className="btn">Visit the Forums →</a>
             </>
           )}
         </div>

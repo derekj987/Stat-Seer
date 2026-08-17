@@ -1078,9 +1078,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .hb-bar__hint{display:none}
   .hb-mast__name{font-size:30px}
   .hb-promo{grid-template-columns:1fr}
-  .hb-promo__text{grid-row:1;padding:20px 20px 4px}
-  .hb-promo__art{grid-row:2;min-height:0;height:96px;opacity:.85;
-    -webkit-mask-image:linear-gradient(180deg,transparent,#000 55%);
-    mask-image:linear-gradient(180deg,transparent,#000 55%)}
-  .hb-promo__img{object-position:center 22%}
+  .hb-promo__text{grid-row:1;padding:20px 20px 6px}
+  .hb-promo__art{grid-row:2;min-height:0;height:auto;background:none;padding:0 20px 18px}
+  .hb-promo__img{height:auto;width:auto;max-height:230px;max-width:60%;margin:0 auto;object-fit:contain}
 }
