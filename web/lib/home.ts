@@ -39,6 +39,7 @@ export interface PlayerPick {
   player: string;
   team: string;
   angle: string;      // the prop the boards are buzzing, e.g. "OVER 74.5 rush yds"
+  dir: "up" | "down"; // over/bullish (up) vs under/bearish (down) — sets the arrow
   sources: string[];  // boards/blogs the player was mentioned on
 }
 
@@ -122,17 +123,18 @@ export async function fetchHome(season = 2026): Promise<HomeData> {
     // biggest model-vs-market gap first — the juiciest alerts lead.
     .sort((a, z) => (z.modelPct - z.marketPct) - (a.modelPct - a.marketPct));
 
-  // A few players fans are highest on (Fan Stock risers) — a teaser, not our pick.
+  // A few players the boards have a real prop lean on — a teaser, not our pick.
+  // weekTailgate already drops non-bettable trivia; we keep both overs (up) and
+  // unders (down), loudest first, so "take the under" leans surface too.
   let players: PlayerPick[] = [];
   try {
     const tg = await weekTailgate(week, season);
     players = tg.buzz
-      .filter((b) => b.direction === "up")
       .sort((a, z) => z.heat - a.heat)
       .slice(0, 3)
       .map((b) => ({
         id: b.id, player: b.player, team: b.team, angle: b.angle,
-        sources: b.sources.map((s) => s.board),
+        dir: b.direction, sources: b.sources.map((s) => s.board),
       }));
   } catch { players = []; }
 

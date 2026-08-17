@@ -177,7 +177,9 @@ function PlayersWeLike({ players }: { players: PlayerPick[] }) {
             <a className="hb-plr" href="/tailgate" key={p.id}>
               <span className="hb-plr__name">{p.player}</span>
               <span className="hb-plr__team">{p.team}</span>
-              <span className="hb-plr__angle"><span className="hb-plr__up" aria-hidden="true">▲</span>{p.angle}</span>
+              <span className="hb-plr__angle">
+                <span className={p.dir === "down" ? "hb-plr__up hb-plr__down" : "hb-plr__up"} aria-hidden="true">{p.dir === "down" ? "▼" : "▲"}</span>{p.angle}
+              </span>
               {p.sources.length > 0 && (
                 <span className="hb-plr__src">
                   <span className="hb-plr__srck">Trending on</span> {p.sources.join(" · ")}

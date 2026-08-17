@@ -69,6 +69,10 @@ export default function SiteNav() {
           <img src="/logo-mark.png?v=3" alt="" className="snav__logo" width={34} height={34} />
         </a>
 
+        <button className="snav__burger" aria-label="Menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+          <span /><span /><span />
+        </button>
+
         {me === null && <a href="/signup" className="snav__signup">Create an Account</a>}
 
         <nav className="snav__links" aria-label="Primary">
@@ -102,10 +106,6 @@ export default function SiteNav() {
               <a href="/login" className="snav__cta">Log in</a>
             </div>
           )}
-
-          <button className="snav__burger" aria-label="Menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
-            <span /><span /><span />
-          </button>
         </div>
       </div>
 
