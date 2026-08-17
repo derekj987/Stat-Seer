@@ -1181,11 +1181,29 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-promo__p{font-size:13.5px;color:var(--muted);line-height:1.6;margin:0 0 16px;max-width:54ch}
 .hb-promo__cta{display:flex;gap:10px;flex-wrap:wrap}
 
+/* "Build your own bet slip" home feature — our where-to-place-it differentiator */
+.hb-slipf{margin-top:20px;border:1px solid color-mix(in srgb,var(--accent) 32%,var(--line));
+  border-radius:14px;background:var(--surface-2);padding:18px 20px}
+.hb-slipf__hd{display:flex;gap:14px;align-items:flex-start}
+.hb-slipf__ic{font-size:30px;line-height:1;flex:0 0 auto}
+.hb-slipf__h{font-size:18px;font-weight:800;letter-spacing:-.01em;margin:0 0 6px}
+.hb-slipf__p{font-size:13.5px;color:var(--muted);line-height:1.6;margin:0;max-width:62ch}
+.hb-slipf__p b{color:var(--ink)}
+.hb-slipf__steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+.hb-slipf__step{display:flex;flex-direction:column;gap:2px;padding:11px 13px;border-radius:10px;
+  background:var(--surface);border:1px solid var(--line)}
+.hb-slipf__n{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;
+  font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-bottom:4px}
+.hb-slipf__step b{font-size:13px}
+.hb-slipf__step span:last-child{font-size:11.5px;color:var(--muted);line-height:1.45}
+.hb-slipf__cta{display:flex;gap:10px;flex-wrap:wrap}
+
 @media (max-width:640px){
   .hb-cols{grid-template-columns:1fr}
   .hb-up{border-left:none;border-top:1px solid var(--line)}
   .hb-up:first-child{border-top:none}
   .hb-players__grid{grid-template-columns:1fr}
+  .hb-slipf__steps{grid-template-columns:1fr}
   .hb-bar__hint{display:none}
   .hb-tav__hint{display:none}
   .hb-tav__bar{flex-wrap:wrap}

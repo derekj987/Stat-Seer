@@ -238,6 +238,30 @@ export default async function Home() {
       <PlayersWeLike players={data.players} />
 
       <HomePromo />
+
+      <section className="hb-slipf">
+        <div className="hb-slipf__hd">
+          <span className="hb-slipf__ic" aria-hidden="true">🎟️</span>
+          <div>
+            <h2 className="hb-slipf__h">Build your own bet slip — we tell you where to place it</h2>
+            <p className="hb-slipf__p">
+              Tap any pick anywhere on StatSeer — a model suggestion, a moneyline, a spread, a prop — and it
+              lands on your slip. When you&apos;re ready, we show you the <b>single best sportsbook for every
+              leg</b>, and for a parlay, the <b>one book with the best combined price</b>. Same bets, better
+              numbers — you never leave value on the table.
+            </p>
+          </div>
+        </div>
+        <div className="hb-slipf__steps">
+          <div className="hb-slipf__step"><span className="hb-slipf__n">1</span><b>Add your picks</b><span>Tap to save anything you like as you read the board.</span></div>
+          <div className="hb-slipf__step"><span className="hb-slipf__n">2</span><b>We shop it</b><span>StatSeer compares every book and finds the best price.</span></div>
+          <div className="hb-slipf__step"><span className="hb-slipf__n">3</span><b>You place it</b><span>Bet at the book we name — the same wager at a better number.</span></div>
+        </div>
+        <div className="hb-slipf__cta">
+          <a href="/lines" className="btn btn--primary">Start a slip →</a>
+          <a href="/how" className="btn">How it works →</a>
+        </div>
+      </section>
       </div>
 
       {/* Full-width closer below the grid so the seer column ends exactly at this
