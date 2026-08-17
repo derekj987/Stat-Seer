@@ -105,6 +105,30 @@ export default function How() {
         </ul>
       </section>
 
+      <section className="how2__story">
+        <h2 className="how2__h2">My story</h2>
+        <div className="how2__story__body">
+          <p>
+            I got tired of paying for picks. Every subscription promised a sure thing and delivered
+            noise — confident-sounding bets that lost about as often as they won, dressed up to look
+            like an edge. Eventually I stopped listening to the touts and started listening to the data.
+          </p>
+          <p>
+            StatSeer started as something I built for myself, and then for the people I actually care
+            about — friends and family who just wanted to bet a little smarter. It was never about a
+            subscriber count or a big payday. It was about helping the people around me make better
+            decisions and lose less often.
+          </p>
+          <p>
+            I won&apos;t insult you with a promise I can&apos;t keep. Can we be right on 100% of picks?
+            Not a chance — gambling isn&apos;t a science, and it&apos;s volatile by nature; anyone who
+            tells you different is selling something. What we <b>can</b> do is cut through the noise,
+            show you where the numbers actually point, and stay honest about it every step of the way.
+            Not certainty — just a clearer, straighter read than you&apos;ll find anywhere else.
+          </p>
+        </div>
+      </section>
+
       <section className="how2__cta">
         <h2 className="how2__h2">No locks. No black box.</h2>
         <p>

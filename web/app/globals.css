@@ -1128,9 +1128,9 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-pageseer{margin-top:22px;display:block}
 .hb-pageseer img{display:block;width:100%;height:auto}
 @media (min-width:1100px){
-  .hb{max-width:none;margin:0;padding-left:clamp(24px,5vw,72px);padding-right:calc(33vw + 24px)}
-  /* top:0 + bottom:150px -> definite height that stops above the site footer */
-  .hb-pageseer{position:fixed;top:0;right:0;bottom:150px;width:33vw;margin:0;z-index:1;pointer-events:none}
+  .hb{max-width:none;margin:0;padding-left:clamp(24px,5vw,72px);padding-right:calc(22vw + 24px)}
+  /* explicit height so she reliably fills top-to-tavern, stopping ~90px above the footer */
+  .hb-pageseer{position:fixed;top:0;right:0;height:calc(100dvh - 90px);width:22vw;margin:0;z-index:1;pointer-events:none}
   .hb-pageseer img{width:100%;height:100%;object-fit:cover;object-position:center 16%;
     -webkit-mask-image:linear-gradient(90deg,transparent,#000 15%);
     mask-image:linear-gradient(90deg,transparent,#000 15%)}
@@ -1150,6 +1150,11 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .how2__list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px}
 .how2__list li{font-size:14.5px;line-height:1.65;color:var(--ink);padding-left:16px;border-left:2px solid var(--accent)}
 .how2__list b{color:var(--accent)}
+.how2__story{margin:26px 0;border-top:1px solid var(--line);padding-top:20px}
+.how2__story__body{border-left:3px solid var(--gold);padding-left:18px}
+.how2__story p{font-size:15px;line-height:1.75;color:var(--ink);margin:0 0 14px;max-width:62ch}
+.how2__story p:last-child{margin-bottom:0}
+.how2__story b{color:var(--accent)}
 .how2__cta{margin:28px 0 40px;border-top:3px double var(--ink);padding-top:16px}
 .how2__cta p{font-size:14.5px;line-height:1.7;color:var(--ink);max-width:66ch}
 .how2__ctarow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
