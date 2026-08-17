@@ -16,12 +16,13 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#100b07",
-          color: "#d9a441",
-          fontSize: 50,
+          background: "#221812",
+          color: "#f0c35a",
+          fontSize: 46,
           fontWeight: 700,
           fontFamily: "sans-serif",
-          borderRadius: 14,
+          borderRadius: "50%",
+          border: "3px solid #e0b24e",
         }}
       >
         S

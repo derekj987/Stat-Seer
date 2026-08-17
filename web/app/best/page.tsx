@@ -1,6 +1,7 @@
 import { weekRange } from "@/lib/board";
-import { fetchBets, fetchBestProps, fmtOdds, type Play, type KeyPlay, type PropPlay } from "@/lib/bestbets";
+import { fetchBets, fetchBestProps, fmtOdds, type KeyPlay, type PropPlay } from "@/lib/bestbets";
 import { ContextSubnav, Brand, FlowSteps } from "../Nav";
+import SavableRow from "./SavableRow";
 
 export const revalidate = 120;
 const SEASON = 2026;
@@ -69,34 +70,6 @@ function KeyCard({ k }: { k: KeyPlay }) {
   );
 }
 
-function PriceRow({ p }: { p: Play }) {
-  return (
-    <div className="pricerow" role="row">
-      <span className="pricerow__edge">+{p.edge.toFixed(1)}%</span>
-      <span className="pricerow__bet">
-        <b>{p.label}</b>
-        <span className="pricerow__mkt">{p.market} · {p.game}</span>
-      </span>
-      <span className="pricerow__price">{fmtOdds(p.price)}</span>
-      <BookTag books={p.books} />
-    </div>
-  );
-}
-
-function PropRow({ p }: { p: PropPlay }) {
-  return (
-    <div className="pricerow" role="row">
-      <span className="pricerow__edge">+{p.edge.toFixed(1)}%</span>
-      <span className="pricerow__bet">
-        <b>{p.player} · {p.label}</b>
-        <span className="pricerow__mkt">{p.market} · {p.game}</span>
-      </span>
-      <span className="pricerow__price">{fmtOdds(p.price)}</span>
-      <BookTag books={p.books} />
-    </div>
-  );
-}
-
 export default async function Page({ searchParams }: PageProps<"/best">) {
   const sp = await searchParams;
   let range: { min: number; max: number } | null = null;
@@ -139,16 +112,25 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
         <>
           {keys.length > 0 && (
             <section className="ctxsec">
-              <h2 className="ctxsec__h">Key numbers</h2>
+              <h2 className="ctxsec__h">Key numbers — what to do</h2>
               <p className="ctxsec__d">
-                Games sitting on <b>3</b> or <b>7</b>, where the margin lands most often. The single largest
-                edge in the whole app, and it&apos;s pure arithmetic.
+                NFL games are decided by <b>3</b> or <b>7</b> far more than any other margin. So when a spread
+                or total sits right on one of those numbers, do one of two things: <b>take the side that already
+                has the number working for it</b> (the favorite laying fewer than 3, or the dog getting 3+), or
+                <b> buy the half-point</b> to move onto it. That half-point swings more games than any model edge
+                on a line — the biggest, cheapest edge in the app. Each card shows the number and exactly what
+                the half-point is worth.
               </p>
               <div className="playgrid">
                 {keys.map((k) => <KeyCard key={k.eventId} k={k} />)}
               </div>
             </section>
           )}
+
+          <p className="ctxsec__lead">
+            <b>If you like these picks, place them on your slip.</b> Tap any row below to save it — StatSeer
+            lines up the single best sportsbook for each, and totals your ticket at the bottom of the screen.
+          </p>
 
           <section className="ctxsec">
             <h2 className="ctxsec__h">Best prices this week</h2>
@@ -159,9 +141,16 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
             </p>
             <div className="pricetable" role="table" aria-label="Best prices">
               <div className="pricerow pricerow--head" role="row">
-                <span>edge</span><span>bet</span><span>price</span><span>book</span>
+                <span>bet</span><span>price</span><span>book</span><span>edge</span><span aria-hidden="true"></span>
               </div>
-              {topPrices.map((p) => <PriceRow key={`${p.eventId}:${p.market}:${p.label}`} p={p} />)}
+              {topPrices.map((p) => (
+                <SavableRow
+                  key={`${p.eventId}:${p.market}:${p.label}`}
+                  item={{ id: `best-${p.eventId}:${p.market}:${p.label}`, kind: "line",
+                    title: `${p.market} ${p.label}`, detail: p.game, price: p.price, books: p.books }}
+                  bet={p.label} sub={`${p.market} · ${p.game}`} price={fmtOdds(p.price)} books={p.books} edge={p.edge}
+                />
+              ))}
             </div>
           </section>
 
@@ -174,9 +163,16 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
               </p>
               <div className="pricetable" role="table" aria-label="Best props">
                 <div className="pricerow pricerow--head" role="row">
-                  <span>edge</span><span>prop</span><span>price</span><span>book</span>
+                  <span>prop</span><span>price</span><span>book</span><span>edge</span><span aria-hidden="true"></span>
                 </div>
-                {propPlays.map((p) => <PropRow key={`${p.eventId}:${p.market}:${p.player}:${p.label}`} p={p} />)}
+                {propPlays.map((p) => (
+                  <SavableRow
+                    key={`${p.eventId}:${p.market}:${p.player}:${p.label}`}
+                    item={{ id: `bestprop-${p.eventId}:${p.market}:${p.player}:${p.label}`, kind: "prop",
+                      title: `${p.player} ${p.label}`, detail: `${p.market} · ${p.game}`, price: p.price, books: p.books }}
+                    bet={`${p.player} · ${p.label}`} sub={`${p.market} · ${p.game}`} price={fmtOdds(p.price)} books={p.books} edge={p.edge}
+                  />
+                ))}
               </div>
             </section>
           )}
