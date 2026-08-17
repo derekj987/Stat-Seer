@@ -88,6 +88,23 @@ export default function How() {
       </section>
 
       <section className="how2__block">
+        <h2 className="how2__h2">The model keeps learning</h2>
+        <p>
+          A machine-learning model is never &ldquo;finished.&rdquo; Every game that goes final is fresh
+          training data — more matchups, more of what actually happened versus what we predicted. The
+          model folds that back in and re-tunes. So the version grading <b>Week 1</b> is the least
+          experienced it will ever be; the one grading Week 12 has learned from everything since.
+        </p>
+        <p>
+          That matters for how you read the early weeks. A cold opening Sunday isn&apos;t the model
+          breaking — it&apos;s a small sample on a brand-new season, before the year&apos;s form has
+          shown up in the data. We publish the record from day one anyway, because hiding a rough start
+          would defeat the whole point. <b>Don&apos;t give up on it after one bad week.</b> The honest
+          expectation is that it sharpens as the sample grows — steadily better, week over week.
+        </p>
+      </section>
+
+      <section className="how2__block">
         <h2 className="how2__h2">How we grade ourselves (and how you can too)</h2>
         <ul className="how2__list">
           <li>
@@ -106,7 +123,7 @@ export default function How() {
       </section>
 
       <section className="how2__story">
-        <h2 className="how2__h2">My story</h2>
+        <h2 className="how2__h2">Our Testimony</h2>
         <div className="how2__story__body">
           <p>
             I got tired of paying for picks. Every subscription promised a sure thing and delivered

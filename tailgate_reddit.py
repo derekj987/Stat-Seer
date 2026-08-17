@@ -2,8 +2,9 @@
 tailgate_reddit.py -- Phase 2 of the Tailgate feature (see docs/TAILGATE_PIPELINE.md).
 
 Scans each team's fan community -- its subreddit (Reddit RSS) AND its SB Nation team
-blog (RSS) -- for players fans are buzzing to go OVER a number this week, distills
-each team's chatter with Claude (Sonnet, thinking-off), and writes `Buzz` rows into
+blog (RSS) -- for players whose fan stock is moving this week, maps each take onto a
+real sportsbook prop market (receptions, rush/pass attempts, yards, TDs, INTs, ...),
+distills the chatter with Claude (Sonnet, thinking-off), and writes `Buzz` rows into
 Supabase `tailgate_buzz` -- the exact shape the /tailgate page already renders. This
 is FAN SENTIMENT, not a pick and not model output; never graded, never feeds The Model.
 
@@ -124,31 +125,56 @@ MIN_INTERVAL = 5.0        # seconds between Reddit requests (RSS rate-limits har
 
 SYSTEM = (
     "You read NFL fan message-board chatter for ONE team and surface players whose "
-    "'fan stock' is MOVING this week -- in either direction. UP (bullish): fans "
-    "expect a big game, more volume, a sleeper going OVER a number, an anytime TD. "
-    "DOWN (bearish): fans are souring on a player, worried about a shrinking role, "
-    "a matchup they distrust, or production trending down (a likely UNDER). You are "
-    "NOT predicting anything and NOT giving picks -- you summarize what fans are "
-    "saying, as ammo for someone doing their own research.\n\n"
+    "'fan stock' is MOVING this week -- in either direction -- and translate each take "
+    "into a REAL sportsbook prop market. You are NOT predicting anything and NOT giving "
+    "picks; you summarize what fans are saying, mapped to a bettable angle, as ammo for "
+    "someone doing their own research.\n\n"
+    "THE KEY JOB: every angle must be a bet a book actually offers. Fans rarely say "
+    "'take the over on 4.5 receptions' -- they say things like 'he's going to eat this "
+    "week', 'workhorse role', 'they'll be throwing all game', 'red-zone back now', "
+    "'shadowed by their #1 corner'. Your job is to convert that sentiment into the "
+    "matching market and side. Cover the WHOLE prop board, not just TDs and yards:\n"
+    "  QB  -> passing yards | pass attempts | completions | passing TDs | interceptions "
+    "| (mobile QB) rushing yards\n"
+    "  RB  -> rush attempts (carries) | rushing yards | receptions | rush+rec yards | "
+    "anytime TD\n"
+    "  WR/TE -> receptions | receiving yards | longest reception | anytime TD | first TD\n"
+    "  Any -> anytime TD (ATTD)\n\n"
+    "Sentiment -> market mapping (examples):\n"
+    "  'huge volume / featured / bell-cow / workhorse' -> OVER rush attempts (RB) or "
+    "OVER receptions (WR/TE)\n"
+    "  'they'll be trailing / shootout / pass-heavy script' -> OVER pass attempts, OVER "
+    "passing yards\n"
+    "  'goal-line / red-zone role / gets the rock inside the 5' -> anytime TD\n"
+    "  'target hog / sees 8+ looks / safety blanket' -> OVER receptions\n"
+    "  'deep threat / boom game / matchup to exploit' -> OVER receiving yards\n"
+    "  'committee now / losing snaps / timeshare' -> UNDER rush attempts / UNDER receptions\n"
+    "  'shadowed by elite CB / tough front / grind-it-out' -> UNDER receiving yards / "
+    "UNDER passing yards\n"
+    "  'turnover-prone / pressure all day' -> OVER interceptions\n\n"
     "Rules:\n"
-    "- Only report players and takes ACTUALLY present in the snippets. Never invent "
-    "a player, a stat line, or an over/under number.\n"
-    "- direction: 'up' when fans are bullish/excited, 'down' when they are "
-    "bearish/worried/frustrated. Report BOTH -- a player fans are down on is just as "
-    "useful as a sleeper. Do not force one direction; read the actual tone.\n"
-    "- angle is a SHORT prop-style tag (max 6 words), never a sentence and never "
-    "starting with 'Fans' or 'Buzz'. For up, prefer \"OVER <n> <stat>\" when fans "
-    "cite a number (e.g. \"OVER 62.5 rec yds\") else a terse phrase like \"anytime "
-    "TD\" or \"big rushing day\". For down, use \"UNDER <n> <stat>\" with a cited "
-    "number, else a terse phrase like \"fading role\" or \"tough matchup\". Put the "
-    "narrative in take, not angle.\n"
-    "- heat: magnitude of the move, SAME scale for up and down. 3 = loud/repeated "
-    "across multiple snippets; 2 = a few fans, a real thread; 1 = a one-off mention. "
-    "Be conservative -- most weeks have few 3s.\n"
-    "- take is 1-2 plain sentences capturing the sentiment, not a specific poster.\n"
-    "- Include 1-3 short verbatim quotes (each under 15 words) copied from the "
-    "snippets that back the buzz, so we can link to the thread.\n"
-    "- If nothing rises above noise, return an empty buzz array. That is a valid answer."
+    "- Only report players and takes ACTUALLY present in the snippets. Never invent a "
+    "player or a stat line.\n"
+    "- direction: 'up' when the bet is an OVER / anytime-TD (fans bullish), 'down' when "
+    "the bet is an UNDER (fans bearish/souring). Report BOTH -- an UNDER is as useful as "
+    "an OVER. Read the actual tone; do not force one side.\n"
+    "- angle is a SHORT prop tag (max 6 words) naming the SIDE + MARKET, e.g. 'OVER "
+    "receptions', 'OVER 62.5 rec yds', 'OVER rush attempts', 'UNDER passing yards', "
+    "'anytime TD', 'first TD', 'OVER interceptions'. Include a NUMBER only if fans cite "
+    "one; otherwise give the market direction without a number (the book sets the line). "
+    "Never a sentence, never starting with 'Fans'. Put the narrative in take, not angle.\n"
+    "- Every angle MUST be one of the markets above. If a take doesn't map to a real "
+    "prop (pure narrative like 'breakout season', 'named the starter', 'looked good in "
+    "camp'), DROP it -- do not emit a row for it.\n"
+    "- heat: magnitude of the move, SAME scale for up and down. 3 = loud/repeated across "
+    "multiple snippets; 2 = a few fans, a real thread; 1 = a one-off mention. Be "
+    "conservative -- most weeks have few 3s.\n"
+    "- take is 1-2 plain sentences capturing the sentiment (and, briefly, why it points "
+    "to that market), not a specific poster.\n"
+    "- Include 1-3 short verbatim quotes (each under 15 words) copied from the snippets "
+    "that back the buzz, so we can link to the thread.\n"
+    "- If nothing rises above noise or nothing maps to a real market, return an empty "
+    "buzz array. That is a valid answer."
 )
 
 BUZZ_SCHEMA = {
@@ -162,9 +188,13 @@ BUZZ_SCHEMA = {
                               "'up' = fans bullish/excited; 'down' = fans "
                               "bearish/souring/production trending down"},
                 "angle": {"type": "string", "description":
-                          "short prop-style tag, max 6 words, e.g. 'OVER 62.5 rec "
-                          "yds' (up) or 'UNDER 58.5 rec yds' / 'fading role' (down) "
-                          "-- no sentences, no leading 'Fans'"},
+                          "SIDE + real prop MARKET, max 6 words. e.g. 'OVER "
+                          "receptions', 'OVER 62.5 rec yds', 'OVER rush attempts', "
+                          "'UNDER passing yards', 'anytime TD', 'first TD', 'OVER "
+                          "interceptions'. Number only if fans cite one. MUST be a "
+                          "market a book offers (pass/rush/rec yards & attempts, "
+                          "receptions, completions, TDs, INTs) -- never pure narrative "
+                          "like 'breakout season'; drop those. No sentences, no 'Fans'"},
                 "heat": {"type": "integer", "enum": [1, 2, 3]},
                 "take": {"type": "string"},
                 "quotes": {"type": "array", "items": {"type": "string"}},

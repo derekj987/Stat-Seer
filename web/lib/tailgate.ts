@@ -189,13 +189,19 @@ async function fetchBuzz(week: number, season: number): Promise<Buzz[]> {
 // anytime-TD (ATTD), or an over/under on a stat line. Narrative chatter with no
 // bet attached ("breakout season expected", "named the starting QB") is trivia:
 // it doesn't help the bottom line, so it never surfaces as a "player we like".
+// Real sportsbook markets we recognize — passing/rushing/receiving volume &
+// yardage, TDs, INTs, longest. A bettable angle names one of these AND a
+// direction (over/under, or an anytime/first-TD), with or without a cited line.
+const PROP_MARKET =
+  /\b(rec(eption)?s?|catches|targets|rush(ing)?|carries|attempts?|att|pass(ing)?|completions?|comp|yards?|yds?|touchdowns?|tds?|interceptions?|ints?|longest)\b/i;
+
 export function isBettableAngle(angle: string): boolean {
   const s = angle.trim();
-  if (/\banytime\s+td\b|\battd\b|\banytime\s+touchdown\b/i.test(s)) return true;
-  // OVER / UNDER on a number — a real prop line.
-  if (/\b(over|under)\b/i.test(s) && /\d/.test(s)) return true;
-  // bare "O 22.5" / "U 5.5" shorthand.
-  return /\b[ou]\s*\d/i.test(s);
+  // TD markets stand on their own — no number needed.
+  if (/\banytime\s+td\b|\battd\b|\banytime\s+touchdown\b|\bfirst\s+td\b/i.test(s)) return true;
+  // Otherwise: a direction (OVER/UNDER, or bare "O 5.5"/"U 22") on a named market.
+  const hasDir = /\b(over|under)\b/i.test(s) || /\b[ou]\s*\d/i.test(s);
+  return hasDir && PROP_MARKET.test(s);
 }
 
 /** The week's fan feed — the live scan if it has anything, else the seed. Only

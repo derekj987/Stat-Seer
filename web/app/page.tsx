@@ -13,6 +13,11 @@ const kickFmt = new Intl.DateTimeFormat("en-US", {
   weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
 });
 const et = (iso: string) => kickFmt.format(new Date(iso)) + " ET";
+// Compact kickoff for the table's own column (day + time), e.g. "Sun 1:00 PM".
+const kickShortFmt = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/New_York", weekday: "short", hour: "numeric", minute: "2-digit",
+});
+const etShort = (iso: string) => kickShortFmt.format(new Date(iso)).replace(",", "");
 const numStr = (v: number | null) => (v === null ? "—" : String(v));
 
 // Split-flap "odds board" number: each character rolls on its own cadence so the
@@ -60,12 +65,13 @@ function TheCard({ rows }: { rows: CardRow[] }) {
           <>
             <div className="hb-legend">
               <span className="hb-dia">◆</span> Off-consensus — our model and the market disagree on the pick.
+              <span className="hb-x"> · <b>Model lean</b> is our read at the market number, graded in public — informative, never a guaranteed bet.</span>
             </div>
             <div className="hb-formwrap">
               <table className="hb-form">
                 <thead>
                   <tr>
-                    <th className="hb-l">Game</th><th>Market Spread</th><th>Model</th><th>Market O/U</th><th>Model O/U</th>
+                    <th className="hb-l">Game</th><th className="hb-x">Kickoff</th><th>Market Spread</th><th>Model</th><th>Market O/U</th><th>Model O/U</th><th className="hb-x">Model lean</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -88,10 +94,19 @@ function TheCard({ rows }: { rows: CardRow[] }) {
                           </span>
                         )}
                       </td>
+                      <td className="hb-x hb-kick2">{etShort(r.commence)}</td>
                       <td className="hb-num"><Flap text={r.marketSpread ?? "—"} seed={i} /></td>
                       <td className="hb-num hb-model"><Flap text={r.modelSpread ?? "—"} seed={i + 2} /></td>
                       <td className="hb-num hb-tot"><Flap text={numStr(r.marketTotal)} seed={i + 4} /></td>
                       <td className="hb-num hb-model"><Flap text={numStr(r.modelTotal)} seed={i + 6} /></td>
+                      <td className="hb-x hb-lean">
+                        {r.spreadLean || r.totalLean ? (
+                          <span className="hb-leanwrap">
+                            {r.spreadLean && <span className="hb-leanchip">{r.spreadLean.side} {r.spreadLean.num}</span>}
+                            {r.totalLean && <span className="hb-leanchip hb-leanchip--t">{r.totalLean.dir} {r.totalLean.num}</span>}
+                          </span>
+                        ) : <span className="hb-leannone">even</span>}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -222,7 +237,7 @@ export default async function Home() {
         <div className="hb-creed__h">Bet smarter. <b>Win more often.</b></div>
         <p className="hb-creed__p">
           StatSeer finds real edges and proves them in the open — published probabilities, an honest
-          track record, and the best price on every pick. <a href="/model">See the full model →</a> · <a href="/how">How it works →</a>
+          track record, and the best price on every pick. <a href="/model">See the full model →</a> · <a href="/how">How our model works →</a>
         </p>
       </section>
       </div>

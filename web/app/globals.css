@@ -1020,7 +1020,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 
 /* The Card — agate table, columns clustered left */
 .hb-formwrap{overflow-x:auto}
-.hb-form{border-collapse:collapse;table-layout:auto}
+.hb-form{border-collapse:collapse;table-layout:auto;width:100%}
 .hb-form th,.hb-form td{text-align:left}
 .hb-form th{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
   font-weight:700;padding:0 0 6px;border-bottom:1px solid var(--line)}
@@ -1034,6 +1034,13 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-model{color:var(--accent);font-weight:700}
 .hb-tot{color:var(--muted)}
 .hb-off td{background:color-mix(in srgb,var(--spot) 11%,transparent)}
+/* kickoff + model-lean columns (desktop; hidden on phones to keep the core 5 tight) */
+.hb-kick2{font-size:11px;color:var(--muted)}
+.hb-leanwrap{display:inline-flex;gap:6px;flex-wrap:wrap}
+.hb-leanchip{font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;white-space:nowrap;
+  background:var(--accent-soft);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent)}
+.hb-leanchip--t{background:var(--spot);color:#4a3c00;border-color:transparent}
+.hb-leannone{font-size:11px;color:var(--muted);font-style:italic}
 .hb-slip{position:absolute;right:0;top:50%;transform:translateY(-50%);opacity:0;transition:opacity .1s}
 .hb-form tbody tr:hover .hb-slip{opacity:1}
 .hb-slip .addslip{padding:4px 10px;font-size:11px}
@@ -1139,7 +1146,8 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   /* keep the taglines flanking a centered StatSeer under the eyes strip, just smaller */
   .hb-mast__flank{display:block;font-size:8.5px;letter-spacing:.05em;line-height:1.35}
   .hb-mast__row{gap:8px}
-  /* shrink The Card so all 5 columns fit the phone without sideways scroll */
+  /* phone: drop the kickoff + model-lean extras, keep the core 5 columns tight */
+  .hb-x{display:none}
   .hb-form{min-width:0;table-layout:auto}
   .hb-form th:nth-child(n),.hb-form td:nth-child(n){width:auto}
   .hb-form th,.hb-form td{font-size:11px}

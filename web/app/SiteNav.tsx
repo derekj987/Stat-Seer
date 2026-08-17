@@ -132,7 +132,7 @@ export default function SiteNav() {
           </details>
 
           <a href="/forum" className="snav__dtop">Community</a>
-          <a href="/how" className="snav__dtop">How it works</a>
+          <a href="/how" className="snav__dtop">How our Model works</a>
 
           <div className="snav__ddiv" />
           <details className="snav__pgroup">

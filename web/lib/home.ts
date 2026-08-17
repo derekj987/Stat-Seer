@@ -22,6 +22,10 @@ export interface CardRow {
   marketTotal: number | null;
   modelTotal: number | null;
   off: boolean;                // model and market disagree on the side
+  // The model's actionable read vs the market number (null when they're within
+  // half a point — i.e. the model has no real lean). Derived, tracked in public.
+  spreadLean: { side: string; num: string } | null;   // e.g. { side:"NE", num:"+3.5" }
+  totalLean: { dir: "OVER" | "UNDER"; num: number } | null;
 }
 
 export interface UpsetRow {
@@ -86,6 +90,31 @@ export async function fetchHome(season = 2026): Promise<HomeData> {
     // ordering difference between the odds feed and the schedule still resolves.
     const modelTotal = MODEL_TOTALS[`${week}-${g.away}-${g.home}`]
       ?? MODEL_TOTALS[`${week}-${g.home}-${g.away}`] ?? null;
+
+    // Spread lean: compare the model's margin for the MARKET's favorite against the
+    // market number. Model laying more than the line → back the favorite; less (or
+    // the underdog) → take the dog getting points. Only when the gap clears ½ point.
+    const c = g.spread.consensus;
+    let spreadLean: CardRow["spreadLean"] = null;
+    if (p && c !== null && c !== 0) {
+      const marketFav = c < 0 ? g.home : g.away;
+      const marketDog = c < 0 ? g.away : g.home;
+      const favMag = Math.abs(c);
+      const modelForFav = p.favored === marketFav ? Math.abs(p.predMargin) : -Math.abs(p.predMargin);
+      const edge = modelForFav - favMag;
+      if (Math.abs(edge) >= 0.5) {
+        spreadLean = edge > 0
+          ? { side: marketFav, num: `-${favMag}` }
+          : { side: marketDog, num: `+${favMag}` };
+      }
+    }
+    // Total lean: model's combined-points read vs the market total, same ½-pt gate.
+    let totalLean: CardRow["totalLean"] = null;
+    if (modelTotal !== null && g.total.consensus !== null) {
+      const te = modelTotal - g.total.consensus;
+      if (Math.abs(te) >= 0.5) totalLean = { dir: te > 0 ? "OVER" : "UNDER", num: g.total.consensus };
+    }
+
     return {
       eventId: g.eventId,
       away: g.away,
@@ -96,6 +125,8 @@ export async function fetchHome(season = 2026): Promise<HomeData> {
       marketTotal: g.total.consensus,
       modelTotal,
       off: p?.disagree ?? false,
+      spreadLean,
+      totalLean,
     };
   });
 
