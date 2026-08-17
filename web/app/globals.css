@@ -1068,8 +1068,10 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 /* boxless blue suggestions — spread + O/U side by side, each with its own + slip.
    The disagree-with-market rows get a thin blue border around the pair. */
 .hb-sugwrap{display:inline-flex;gap:14px;align-items:center;flex-wrap:wrap}
+/* pull the box back by its own border+padding so the pick text still lines up with
+   the non-boxed rows above/below (the P in PIT over the I in IND). */
 .hb-sugwrap--off{border:1px solid color-mix(in srgb,var(--offc) 55%,transparent);
-  border-radius:8px;padding:3px 9px;background:color-mix(in srgb,var(--offc) 6%,transparent)}
+  border-radius:8px;padding:3px 9px;margin:0 0 0 -10px;background:color-mix(in srgb,var(--offc) 6%,transparent)}
 .hb-sug{display:inline-flex;align-items:center;gap:5px}
 .hb-sug__t{font-size:11.5px;font-weight:700;color:var(--offc-ink);white-space:nowrap}
 .hb-leannone{font-size:11px;color:var(--muted);font-style:italic}
@@ -1215,9 +1217,12 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   /* content left (row 1), seer right (row 1), creed spans full width in row 2 —
      so the seer column ends exactly at the creed's rule, not down by the footer. */
   .hb-main{grid-column:1;grid-row:1;padding:clamp(12px,2vw,22px) 28px clamp(24px,3vw,40px) clamp(24px,5vw,72px)}
-  .hb-side{grid-column:2;grid-row:1;margin:0;align-self:stretch}
+  .hb-side{grid-column:2;grid-row:1;margin:0;align-self:stretch;min-height:0}
   .hb-creed{grid-column:1/-1;grid-row:2;margin-top:0;padding:13px clamp(24px,5vw,72px) 30px}
-  .hb-seerimg{position:sticky;top:0;height:100vh;max-height:100%;width:100%;object-fit:cover;object-position:center 14%;
+  /* height:100% (of the content-sized column), capped at the viewport — so the seer
+     matches the content height (line sits right after the tavern) yet still sticks
+     and fills the viewport on a long, scrolled page. */
+  .hb-seerimg{position:sticky;top:0;height:100%;max-height:100vh;width:100%;object-fit:cover;object-position:center 14%;
     -webkit-mask-image:linear-gradient(90deg,transparent,#000 15%);
     mask-image:linear-gradient(90deg,transparent,#000 15%)}
 }
