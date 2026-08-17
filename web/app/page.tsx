@@ -1,115 +1,164 @@
-// Landing / home. Static — the restructured flow: review the AI/ML analysis, build
-// your slip, and the Value Finder tells you where to place it.
-import AccountPromo from "./AccountPromo";
+// Home — "The Model Edition" broadsheet. The Card (model vs market, per game) leads,
+// open; the Upsets of the Week alert sits collapsed below it. All data is real and
+// honest: model columns read "—" until the week's predictions lock (see lib/home.ts).
+import { fetchHome, type CardRow, type UpsetRow } from "@/lib/home";
+import AddToSlip from "./AddToSlip";
 
-export const dynamic = "force-static";
+export const revalidate = 120;
+const SEASON = 2026;
 
-const STEPS = [
-  {
-    n: "1", href: "/model", kicker: "Review the analysis", q: "Find picks you jive with.",
-    body: "Read our line-blind ML model, the upset & context watch, and AI-distilled fan buzz. Agree with a read? That's a pick.",
-    cta: "See the analysis",
-  },
-  {
-    n: "2", href: "/lines", kicker: "Build your slip", q: "Collect as you read.",
-    body: "See something you like on any page — a model read, a fan sleeper, a line, a prop? Add it to your slip. It follows you everywhere.",
-    cta: "Start a slip",
-  },
-  {
-    n: "3", href: "/best", kicker: "The Value Finder", q: "We find the value.",
-    body: "Your slip becomes a Value Finder: the single best sportsbook for each pick, plus the key-number sweet spots. Exactly where to place it.",
-    cta: "See sweet spots",
-  },
-];
+const kickFmt = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/New_York",
+  weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+});
+const et = (iso: string) => kickFmt.format(new Date(iso)) + " ET";
 
-export default function Home() {
+function TheCard({ rows }: { rows: CardRow[] }) {
   return (
-    <main className="home">
-      <aside className="home__banner">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo-hero.png" alt="StatSeer — See the edge. Trust the data." className="home__bannerimg" width={543} height={724} />
-      </aside>
-
-      <div className="home__content">
-      <AccountPromo />
-
-      <section className="hero">
-        <div className="hero__pitch">
-          <span className="hero__eyebrow">AI + ML model analysis</span>
-          <h1 className="hero__h1">Review the analysis. Build your slip. <em>We find the value.</em></h1>
-          <p className="hero__lead">
-            StatSeer runs every game through <b>calibrated ML models</b> and distills the fan boards with
-            <b> AI</b> — then publishes the probabilities and a public track record you can audit. You bring the
-            reads you believe in; the <b>Value Finder</b> handles the shopping.
+    <details className="hb-panel hb-panel--card" open>
+      <summary className="hb-bar">
+        <span className="hb-bar__title">The Card — model vs market</span>
+        <span className="hb-bar__count">{rows.length} games</span>
+        <span className="hb-bar__hint">our model&apos;s read beside the market&apos;s, every game</span>
+        <span className="hb-bar__chev" aria-hidden="true">▾</span>
+      </summary>
+      <div className="hb-body">
+        {rows.length === 0 ? (
+          <p className="hb-empty">
+            The board opens when this week&apos;s odds and model predictions post. Until then, see
+            the latest in <a href="/model">The Model</a>.
           </p>
-          <div className="hero__cta">
-            <a href="/model" className="btn btn--primary">Start with the model →</a>
-            <a href="/tailgate" className="btn">See what fans are saying →</a>
-          </div>
-        </div>
-      </section>
+        ) : (
+          <>
+            <div className="hb-legend">
+              <span className="hb-dia">◆</span> Off-consensus — our model and the market disagree on the pick.
+            </div>
+            <div className="hb-formwrap">
+              <table className="hb-form">
+                <thead>
+                  <tr>
+                    <th className="hb-l">Game</th><th>Spread</th><th>Model</th><th>O/U</th><th>Model O/U</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((r) => (
+                    <tr key={r.eventId} className={r.off ? "hb-off" : undefined}>
+                      <td className="hb-l">
+                        <span className="hb-game" title={et(r.commence)}>
+                          {r.away}<span className="hb-at">at</span>{r.home}
+                        </span>
+                        {r.off && <span className="hb-dia hb-dia--end" aria-label="off consensus">◆</span>}
+                        {r.modelSpread && (
+                          <span className="hb-slip">
+                            <AddToSlip
+                              item={{
+                                id: `model-${r.eventId}`, kind: "model",
+                                title: r.modelSpread, detail: `${r.away} @ ${r.home} · model read`,
+                              }}
+                              label="Slip"
+                            />
+                          </span>
+                        )}
+                      </td>
+                      <td className="hb-num">{r.marketSpread ?? "—"}</td>
+                      <td className="hb-num hb-model">{r.modelSpread ?? "—"}</td>
+                      <td className="hb-num hb-tot">{r.marketTotal ?? "—"}</td>
+                      <td className="hb-num hb-model">{r.modelTotal ?? "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </div>
+    </details>
+  );
+}
 
-      <section className="how">
-        <h2 className="how__h">How it works — three steps</h2>
-        <div className="hcards">
-          {STEPS.map((s) => (
-            <a key={s.kicker} href={s.href} className="hcard">
-              <span className="hcard__top">
-                <span className="hcard__n">{s.n}</span>
-                <span className="hcard__k">{s.kicker}</span>
-              </span>
-              <h3 className="hcard__q">{s.q}</h3>
-              <p className="hcard__b">{s.body}</p>
-              <span className="hcard__cta">{s.cta} →</span>
-            </a>
+function Upsets({ rows }: { rows: UpsetRow[] }) {
+  return (
+    <details className="hb-panel hb-panel--alert">
+      <summary className="hb-bar">
+        <span className="hb-dot" aria-hidden="true"></span>
+        <span className="hb-bar__title hb-bar__title--gold">Upsets of the Week Alert</span>
+        <span className="hb-bar__count hb-bar__count--gold">{rows.length}</span>
+        <span className="hb-bar__hint">the market has them losing — our model says they win</span>
+        <span className="hb-bar__chev" aria-hidden="true">▾</span>
+      </summary>
+      {rows.length === 0 ? (
+        <div className="hb-body">
+          <p className="hb-empty">
+            No upset alerts this week — our model and the market agree on every game&apos;s side.
+            They fire the moment a line and our read diverge, so check back as the week&apos;s odds move.
+          </p>
+        </div>
+      ) : (
+        <div className="hb-cols">
+          {rows.map((u) => (
+            <div className="hb-up" key={u.eventId}>
+              <div className="hb-up__hd">
+                <span className="hb-up__team">{u.dog}<small>{u.matchup}</small></span>
+                {u.spread && <span className="hb-up__spread">{u.spread}</span>}
+              </div>
+              <div className="hb-up__note">
+                The market has the {u.dog} losing. Our model has them <b>winning</b> by {u.byPoints.toFixed(1)}.
+              </div>
+              <div className="hb-cap">Chance to win the game</div>
+              <div className="hb-prob hb-prob--m">
+                <div className="hb-prob__t"><span>Our model says</span><span className="hb-prob__v">{u.modelPct}%</span></div>
+                <div className="hb-prob__tr"><span style={{ width: `${u.modelPct}%` }} /></div>
+              </div>
+              <div className="hb-prob hb-prob--k">
+                <div className="hb-prob__t"><span>The market says</span><span className="hb-prob__v">{u.marketPct}%</span></div>
+                <div className="hb-prob__tr"><span style={{ width: `${u.marketPct}%` }} /></div>
+              </div>
+              <div className="hb-up__ft">
+                <span className="hb-up__edge">Model likes them +{u.modelPct - u.marketPct}%</span>
+                <AddToSlip
+                  item={{
+                    id: `upset-${u.eventId}`, kind: "model",
+                    title: `${u.dog} upset`, detail: `${u.dog} ${u.matchup} · model backs the dog`,
+                  }}
+                  label="Slip"
+                />
+              </div>
+            </div>
           ))}
         </div>
-      </section>
+      )}
+    </details>
+  );
+}
 
-      <section className="slipfeat">
-        <div className="slipfeat__text">
-          <span className="slipfeat__eyebrow">The payoff</span>
-          <h2 className="slipfeat__h">Your slip becomes a Value Finder.</h2>
-          <p className="slipfeat__p">
-            Everything you collect — a model read, a fan sleeper, a line, a prop — lands in <b>one slip</b>.
-            StatSeer finds the <b>single best sportsbook for each pick</b> and the <b>key-number sweet spots</b>,
-            so you never leave money on the table by betting everything in one app.
-          </p>
-          <a href="/lines" className="btn btn--primary">Start a slip →</a>
+export default async function Home() {
+  const data = await fetchHome(SEASON);
+  return (
+    <main className="hb">
+      <header className="hb-mast">
+        <div className="hb-mast__row">
+          <span className="hb-mast__side">Week {data.week} · {data.season}</span>
+          <a href="/" className="hb-mast__name">StatSeer</a>
+          <span className="hb-mast__side hb-r">The Model Edition</span>
         </div>
-        <div className="slipfeat__demo">
-          <div className="slipdemo" aria-hidden="true">
-            <div className="slipdemo__h">Value Finder · your picks</div>
-            <div className="slipdemo__leg">
-              <span className="slipdemo__pick"><span className="slipdemo__grp">MODEL</span>DET −7</span>
-              <span className="slipdemo__book">best at <b>DraftKings</b> −135</span>
-            </div>
-            <div className="slipdemo__leg">
-              <span className="slipdemo__pick"><span className="slipdemo__grp">FAN</span>Tank Dell O 62.5</span>
-              <span className="slipdemo__book">best at <b>FanDuel</b> −112</span>
-            </div>
-            <div className="slipdemo__leg">
-              <span className="slipdemo__pick"><span className="slipdemo__grp">LINES</span>SEA/SF Over 47.5</span>
-              <span className="slipdemo__book">best at <b>BetMGM</b> −130</span>
-            </div>
-            <div className="slipdemo__leg">
-              <span className="slipdemo__pick"><span className="slipdemo__grp">PROP</span>Mahomes 250+ pass yds</span>
-              <span className="slipdemo__book">best at <b>DraftKings</b> −140</span>
-            </div>
-            <div className="slipdemo__save">DraftKings covers the most in one app — or split each to its best book</div>
-          </div>
+        <div className="hb-mast__rule"></div>
+        <div className="hb-strap">
+          <span>Line-blind predictions</span><i>·</i>
+          <span>published &amp; locked pre-kickoff</span><i>·</i>
+          <span>graded in public</span>
         </div>
-      </section>
+      </header>
 
-      <section className="creed">
-        <h2 className="creed__h">No locks. No hype. No tout.</h2>
-        <p className="creed__p">
-          The AI and ML do the analysis; <b>you</b> decide what to bet. We show you where the value actually is,
-          predict honestly, and publish a track record you can audit — <b>never a black box, never a guaranteed
-          lock</b>. A good bet is +EV over time, not a promise on Sunday.
+      <TheCard rows={data.card} />
+      <Upsets rows={data.upsets} />
+
+      <section className="hb-creed">
+        <div className="hb-creed__h">No locks. No hype. <b>Numbers you can check.</b></div>
+        <p className="hb-creed__p">
+          Every prediction is a published probability, locked before kickoff and graded in public —
+          bad weeks and all. <a href="/model">See the full model →</a> · <a href="/lines">Shop the lines →</a>
         </p>
       </section>
-      </div>
     </main>
   );
 }
