@@ -71,7 +71,7 @@ function TheCard({ rows }: { rows: CardRow[] }) {
               <table className="hb-form">
                 <thead>
                   <tr>
-                    <th className="hb-l">Game</th><th className="hb-x">Kickoff</th><th>Market Spread</th><th>Model</th><th>Market O/U</th><th>Model O/U</th><th className="hb-x">Our Model Suggests</th>
+                    <th className="hb-l">Game</th><th className="hb-x">Kickoff</th><th>Market Spread</th><th>Market O/U</th><th>Our Model Suggests</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -85,10 +85,8 @@ function TheCard({ rows }: { rows: CardRow[] }) {
                       </td>
                       <td className="hb-x hb-kick2">{etShort(r.commence)}</td>
                       <td className="hb-num"><Flap text={r.marketSpread ?? "—"} seed={i} /></td>
-                      <td className="hb-num hb-model hb-mspread"><Flap text={r.modelSpread ?? "—"} seed={i + 2} /></td>
                       <td className="hb-num hb-tot"><Flap text={numStr(r.marketTotal)} seed={i + 4} /></td>
-                      <td className="hb-num hb-model"><Flap text={numStr(r.modelTotal)} seed={i + 6} /></td>
-                      <td className="hb-x hb-suggest">
+                      <td className="hb-suggest">
                         {r.spreadLean || r.totalLean ? (
                           <span className={r.off ? "hb-sugwrap hb-sugwrap--off" : "hb-sugwrap"}>
                             {r.spreadLean && (

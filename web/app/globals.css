@@ -1170,7 +1170,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   /* keep the taglines flanking a centered StatSeer under the eyes strip, just smaller */
   .hb-mast__flank{display:block;font-size:8.5px;letter-spacing:.05em;line-height:1.35}
   .hb-mast__row{gap:8px}
-  /* phone: drop the kickoff + model-lean extras, keep the core 5 columns tight */
+  /* phone: drop the kickoff column; keep Game · Market Spread · Market O/U · Our Model Suggests */
   .hb-x{display:none}
   .hb-form{min-width:0;table-layout:auto}
   .hb-form th:nth-child(n),.hb-form td:nth-child(n){width:auto}
@@ -1179,6 +1179,9 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .hb-form td+td,.hb-form th+th{padding-left:9px}
   .hb-game{font-size:11.5px}
   .hb-at{margin:0 4px}
+  /* stack the two suggested picks so the column stays narrow on a phone */
+  .hb-sugwrap{flex-direction:column;align-items:flex-start;gap:5px}
+  .hb-sug__t{font-size:11px}
 }
 /* Seer. Mobile: a wide image across the very bottom (hb-side stacks under content).
    Desktop (>=1100px): a 2-column grid, content left + a STICKY seer right that
