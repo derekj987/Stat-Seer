@@ -45,7 +45,7 @@ function TheCard({ rows }: { rows: CardRow[] }) {
   return (
     <details className="hb-panel hb-panel--card" open>
       <summary className="hb-bar">
-        <span className="hb-bar__title">The Card — model vs market</span>
+        <span className="hb-bar__title hb-bar__title--gold">The Card — model vs market</span>
         <span className="hb-bar__count">{rows.length} games</span>
         <span className="hb-bar__hint">our model&apos;s read beside the market&apos;s, every game</span>
         <span className="hb-bar__chev" aria-hidden="true">▾</span>
