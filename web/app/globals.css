@@ -984,6 +984,9 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-mast__flank--r{text-align:right}
 /* week label, now above The Card instead of in the masthead */
 .hb-weeklabel{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:16px 0 0}
+/* seer-eyes strip across the top — mobile web app only (desktop has the full right seer) */
+.hb-mast__eyes{width:100%;height:92px;overflow:hidden;line-height:0;margin:6px 0 2px}
+.hb-mast__eyes img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
 .hb-mast__name{justify-self:center;text-decoration:none;color:var(--gold);
   font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;font-weight:400;
   font-size:clamp(30px,7vw,44px);line-height:1;letter-spacing:.02em}
@@ -1144,6 +1147,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-pageseer{margin-top:22px;display:block}
 .hb-pageseer img{display:block;width:100%;height:auto}
 @media (min-width:1100px){
+  .hb-mast__eyes{display:none}
   .hb{max-width:none;margin:0;padding-left:clamp(24px,5vw,72px);padding-right:calc(22vw + 24px)}
   /* explicit height so she reliably fills top-to-tavern, stopping ~90px above the footer */
   .hb-pageseer{position:fixed;top:0;right:0;height:calc(100dvh - 90px);width:22vw;margin:0;z-index:1;pointer-events:none}

@@ -196,6 +196,10 @@ export default async function Home() {
   return (
     <main className="hb">
       <header className="hb-mast">
+        <div className="hb-mast__eyes">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/seereyes.png" alt="" width={1983} height={793} />
+        </div>
         <div className="hb-mast__row">
           <span className="hb-mast__flank">Line-blind predictions</span>
           <a href="/" className="hb-mast__name">StatSeer</a>
