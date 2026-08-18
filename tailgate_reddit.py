@@ -119,6 +119,17 @@ BLOGS = {
     "WAS": ("Hogs Haven", "hogshaven.com"),
 }
 
+# National NFL player-news RSS. Fetched ONCE per run and pooled across all teams,
+# filtered per team by roster mention -- a wider net than Reddit + team blogs, and
+# free (public RSS, no scraping). Beat-writer/insider signal without the paid X API.
+NATIONAL_FEEDS = [
+    ("ProFootballTalk", "https://profootballtalk.nbcsports.com/feed/"),
+    ("ESPN NFL", "https://www.espn.com/espn/rss/nfl/news"),
+    ("CBS Sports NFL", "https://www.cbssports.com/rss/headlines/nfl/"),
+    ("Yahoo Sports NFL", "https://sports.yahoo.com/nfl/rss/"),
+    ("NFL.com", "https://www.nfl.com/feeds/rss/news"),
+]
+
 MAX_INPUT_CHARS = 14000   # per-team cap on text handed to Claude
 SNIPPET_CAP = 500         # per-snippet char cap
 MIN_INTERVAL = 5.0        # seconds between Reddit requests (RSS rate-limits hard)
@@ -383,6 +394,17 @@ def fetch_snippets(abbrev):
     return snippets
 
 
+def fetch_national():
+    """National NFL player-news feeds, fetched once and shared across every team.
+    Returns [{text, permalink, score, board}]; the per-team roster filter keeps only
+    the items that name that team's players."""
+    oc.ensure_ssl_certs()
+    snippets = []
+    for name, url in NATIONAL_FEEDS:
+        snippets += fetch_feed(name, url)
+    return snippets
+
+
 # --------------------------------------------------------------------- extract
 def extract(nickname, snippets, env):
     """Claude call -> list of buzz dicts (player, angle, heat, take, quotes)."""
@@ -513,7 +535,10 @@ def main(argv=None):
     roster = load_roster(season)
 
     print(f"Tailgate scan -- season {season}, week {week}, {len(which)} team(s)"
-          f"{' [WRITE]' if args.write else ' [dry run]'} -- Reddit + team blogs")
+          f"{' [WRITE]' if args.write else ' [dry run]'} -- Reddit + team blogs + national feeds")
+    # National player-news feeds: fetch once, reuse for every team (roster-filtered).
+    national = fetch_national()
+    print(f"  national feeds -> {len(national)} snippets pooled across all teams")
     start = time.monotonic()
     total_rows, empty_teams, rl_streak, done = 0, 0, 0, 0
     for abbrev in which:
@@ -534,9 +559,14 @@ def main(argv=None):
             break
         if not raw:
             empty_teams += 1
-        kept = ([s for s in raw if mentions(s["text"], roster[abbrev])]
-                if roster and abbrev in roster else raw)
-        print(f"  {abbrev:<4} {len(raw):>3} snippets -> {len(kept):>3} on-topic")
+        # Pool the team's own feeds with the national feeds, then keep only snippets
+        # that name this team's players (national items about other teams drop out).
+        # Without a roster we can't filter, so national is skipped (would be cross-team noise).
+        if roster and abbrev in roster:
+            kept = [s for s in (raw + national) if mentions(s["text"], roster[abbrev])]
+        else:
+            kept = raw
+        print(f"  {abbrev:<4} {len(raw):>3} team + {len(national):>3} natl -> {len(kept):>3} on-topic")
         if args.no_extract or not kept:
             continue
         buzz = extract(nickname, kept, env)
