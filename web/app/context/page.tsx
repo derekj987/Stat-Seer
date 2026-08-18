@@ -8,12 +8,6 @@ import { Brand, FlowSteps, ContextSubnav } from "../Nav";
 export const revalidate = 300;
 const SEASON = 2026;
 
-const kickFmt = new Intl.DateTimeFormat("en-US", {
-  timeZone: "America/New_York",
-  weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
-});
-const et = (iso: string) => kickFmt.format(new Date(iso)) + " ET";
-
 function WeekNav({ min, max, current }: { min: number; max: number; current: number }) {
   const weeks: number[] = [];
   for (let w = min; w <= max; w++) weeks.push(w);
@@ -130,7 +124,6 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
   });
 
   const scored = envs.filter((e) => e.total !== null).sort((a, b) => (b.total! - a.total!));
-  const neutrals = envs.filter((e) => e.neutral);
   const upsets = envs.filter((e) => e.modelDisagree && e.modelFav); // model likes the market's dog
 
   return (
@@ -143,18 +136,21 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
       <ContextSubnav active="upset" />
       <WeekNav min={min} max={max} current={week} />
 
-      <section className="explainer">
+      <details className="explainer explainer--drop">
+        <summary className="explainer__sum">
+          <b>Step 2: pressure-test your pick</b> — how Upset Watch works
+        </summary>
         <p>
-          <b>Step 2: pressure-test your pick.</b> Upset Watch shows what could make a game go
-          <em> sideways</em> — where our model disagrees with the market, plus the situational factors around
-          each game. It arms <b>your</b> judgment; it does not fake an &quot;adjusted number.&quot;
+          Upset Watch shows what could make a game go <em>sideways</em> — where our model disagrees with the
+          market. It arms <b>your</b> judgment; it does not fake an &quot;adjusted number.&quot;
         </p>
         <p className="explainer__p2">
-          We tested weather, referees, and roster moves against real results — they add <b>uncertainty, not a
-          knowable edge</b> (the market already prices them). So we flag <b>risk</b>, never a &quot;lock.&quot;
-          Then head to <a href="/best">Sweet Spots</a> to place what survives.
+          The situational factors around each game — site, weather, referee crew, incentives — now live in their
+          own <a href="/considerations">Special Considerations</a> tab. We tested them against real results: they
+          add <b>uncertainty, not a knowable edge</b> (the market already prices them), so we flag <b>risk</b>,
+          never a &quot;lock.&quot; Then head to <a href="/best">Sweet Spots</a> to place what survives.
         </p>
-      </section>
+      </details>
 
       {/* --- Upset Watch: where our model likes the underdog --- */}
       <section className="ctxsec">
@@ -255,31 +251,6 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
         )}
       </section>
 
-      {/* --- Travel & site --- */}
-      <section className="ctxsec">
-        <h2 className="ctxsec__h">Travel &amp; site</h2>
-        {neutrals.length === 0 ? (
-          <p className="ctxsec__d">All Week {week} games are at the home team&apos;s own venue — no neutral-site or international games.</p>
-        ) : (
-          <>
-            <p className="ctxsec__d">
-              Neutral-site games — the &quot;home&quot; team is nominal, so The Model applies <b>no home-field
-              edge</b>. Long travel and body-clock effects are real but too small and varied to model honestly,
-              so they live here as context, not as a number.
-            </p>
-            <ul className="travellist">
-              {neutrals.map((e) => (
-                <li key={e.eventId}>
-                  <span className="travellist__g">{e.away} @ {e.home}</span>
-                  <span className="travellist__v">{e.venue ?? "neutral site"}</span>
-                  <span className="travellist__t">{et(e.commence)}</span>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-      </section>
-
       {/* --- Referee crews --- */}
       <details className="ctxsec ctxdrop">
         <summary className="ctxsec__h">Referee crews</summary>
@@ -296,15 +267,16 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
             One crew tendency carries over year to year: <b>how many flags they throw</b>. Crews tagged
             <b className="hot"> Flag-heavy</b> throw noticeably more than league average ({REF_LEAGUE.pen}/g) and
             <b className="cool"> Lets them play</b> throw fewer — that&apos;s the real read (more flags = more
-            variance: drives extended, drives killed). A crew&apos;s history with the <b>total</b> or against the
-            <b> spread</b> is essentially random and does <b>not</b> predict the next game, so those columns stay
-            greyed — history, not a lean. When weekly assignments post, each game&apos;s flag tendency shows up in
-            its <b>Special Considerations</b> above.
+            variance: drives extended, drives killed). The rest — a crew&apos;s <b>average total</b>, how often
+            their games went <b>over</b>, and how often the <b>favorite</b> vs the <b>underdog</b> covered — is
+            <b> historical context</b>, not a reliable lean: it&apos;s mostly noise that doesn&apos;t carry to the
+            next game (league avg: {REF_LEAGUE.total} pts, {REF_LEAGUE.over}% over, favorite covers {REF_LEAGUE.atsFav}%).
+            Read it for interest, bet it at your own risk.
           </p>
         </div>
         <div className="reftable">
           <div className="refrow refrow--head">
-            <span>crew</span><span>read</span><span>pen/g</span><span>pts/g</span><span>over%</span><span>fav ats%</span>
+            <span>crew</span><span>read</span><span>pen/g</span><span>avg pts</span><span>over%</span><span>fav/dog ats</span>
           </div>
           {REF_STATS.map((r) => {
             const flag = crewFlag(r.pen);
@@ -317,9 +289,9 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
                   : <span className="muted">Average flags</span>}
               </span>
               <span className={r.pen >= REF_LEAGUE.pen ? "refrow__v hot" : "refrow__v cool"}>{r.pen}</span>
-              <span className="refrow__v muted">{r.total}</span>
-              <span className="refrow__v muted">{r.over}%</span>
-              <span className="refrow__v muted">{r.atsFav}%</span>
+              <span className={r.total >= REF_LEAGUE.total ? "refrow__v hot" : "refrow__v cool"}>{r.total}</span>
+              <span className="refrow__v">{r.over}%</span>
+              <span className="refrow__v" title="favorite covered / underdog covered, ATS">{r.atsFav}/{100 - r.atsFav}</span>
             </div>
             );
           })}

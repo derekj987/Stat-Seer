@@ -75,11 +75,13 @@ export function TopNav({ active }: { active: "value" | "model" | "context" }) {
 }
 
 /** Sub-tabs inside The Context. */
-export function ContextSubnav({ active }: { active: "upset" | "fan" | "best" }) {
+export function ContextSubnav({ active }: { active: "upset" | "fan" | "best" | "special" }) {
   return (
     <nav className="subnav" aria-label="Context view">
       <a href="/context" className={active === "upset" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "upset" ? "page" : undefined}>Upset Watch</a>
+      <a href="/considerations" className={active === "special" ? "subnav__t active" : "subnav__t"}
+        aria-current={active === "special" ? "page" : undefined}>Special Considerations</a>
       <a href="/tailgate" className={active === "fan" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "fan" ? "page" : undefined}>Fan Analysis</a>
       <a href="/best" className={active === "best" ? "subnav__t active" : "subnav__t"}
