@@ -21,6 +21,38 @@ export interface SlipItem {
 const KEY = "statseer.slip.v2";
 const EVT = "statseer:slip";
 
+// --- Share links: encode the slip into a compact URL-safe string and back. Lets a
+// member send their slip; the recipient opens it in StatSeer (installed or browser).
+type Packed = { k: SlipKind; t: string; d?: string; p?: number; b?: string[] };
+
+function slug(s: string): string {
+  return (s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 24);
+}
+
+export function encodeSlip(items: SlipItem[]): string {
+  const packed: Packed[] = items.map((i) => ({
+    k: i.kind, t: i.title,
+    ...(i.detail ? { d: i.detail } : {}),
+    ...(i.price !== undefined ? { p: i.price } : {}),
+    ...(i.books?.length ? { b: i.books } : {}),
+  }));
+  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(packed))));
+  return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+export function decodeSlip(s: string): SlipItem[] {
+  try {
+    const b64 = s.replace(/-/g, "+").replace(/_/g, "/");
+    const arr = JSON.parse(decodeURIComponent(escape(atob(b64)))) as Packed[];
+    return arr.map((e, i) => ({
+      id: `shared-${i}-${slug(e.t)}`, kind: e.k, title: e.t,
+      detail: e.d, price: e.p, books: e.b,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 function read(): SlipItem[] {
   try {
     const raw = localStorage.getItem(KEY);
@@ -68,5 +100,14 @@ export function useSlip() {
 
   const clear = useCallback(() => { write([]); setItems([]); }, []);
 
-  return { items, has, toggle, remove, clear };
+  // Merge in a set of picks (from a shared slip), skipping any already on the slip.
+  const addMany = useCallback((add: SlipItem[]) => {
+    const cur = read();
+    const ids = new Set(cur.map((i) => i.id));
+    const next = [...cur, ...add.filter((i) => !ids.has(i.id))];
+    write(next);
+    setItems(next);
+  }, []);
+
+  return { items, has, toggle, remove, clear, addMany };
 }

@@ -211,6 +211,9 @@ body{background:var(--bg);color:var(--ink);
   color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;
   font:inherit;font-size:12px;font-weight:700}
 .slipbar__copy:hover{filter:brightness(1.06)}
+.slipbar__share{border:1px solid var(--accent);background:var(--surface-2);color:var(--accent);
+  border-radius:8px;padding:7px 12px;font-size:12.5px;font-weight:700;cursor:pointer;margin-right:auto}
+.slipbar__share:hover{background:var(--accent-soft)}
 .stakebox{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 10px;
   padding:10px 12px;background:var(--surface-2);border-radius:9px}
 .stakebox__label{font-size:12px;font-weight:600;color:var(--muted);
@@ -585,6 +588,31 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .scg__soon{margin-top:12px;padding-top:11px;border-top:1px dashed var(--line);font-size:11.5px;
   color:var(--muted);line-height:1.5}
 .scg__soon b{color:var(--ink)}
+
+/* Shared-slip landing page (/slip?d=…) */
+.sharepage{max-width:620px}
+.sharehero{display:flex;gap:14px;align-items:center;margin:16px 0 18px}
+.sharehero__logo{width:52px;height:52px;border-radius:50%;border:2px solid var(--gold);object-fit:cover;
+  flex:0 0 auto;filter:brightness(1.15)}
+.sharehero__h{font-size:20px;font-weight:800;margin:0 0 4px;line-height:1.2}
+.sharehero__p{font-size:13px;color:var(--muted);margin:0;line-height:1.5}
+.shareslip{list-style:none;margin:0 0 18px;padding:0;display:flex;flex-direction:column;gap:8px}
+.shareslip__i{display:grid;grid-template-columns:1fr auto;
+  grid-template-areas:"kind meta" "title meta" "detail meta";gap:1px 10px;align-items:center;
+  padding:11px 14px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}
+.shareslip__kind{grid-area:kind;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.shareslip__t{grid-area:title;font-size:14px;font-weight:700;color:var(--ink)}
+.shareslip__d{grid-area:detail;font-size:11.5px;color:var(--muted)}
+.shareslip__meta{grid-area:meta;justify-self:end;display:flex;flex-direction:column;gap:2px;align-items:flex-end}
+.shareslip__meta .odds{font-family:var(--font-mono);font-weight:700}
+.shareslip__meta .book{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+.shareact{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.installcard{border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line));border-radius:12px;
+  background:var(--surface-2);padding:15px 16px}
+.installcard__h{display:block;font-weight:800;font-size:14px;margin-bottom:6px}
+.installcard p{margin:0 0 6px;font-size:12.5px;color:var(--muted);line-height:1.55}
+.installcard__how{color:var(--ink)}
+.installcard__how b{color:var(--accent)}
 .ctxsec__note{margin:8px 0 0;font-size:11.5px;color:var(--muted);font-style:italic}
 
 /* --- reports inbox --- */

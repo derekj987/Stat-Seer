@@ -4,7 +4,7 @@
 // across every section. Groups items by where they came from; for the priced
 // bets (lines/props) it points at the single book that covers the most.
 import { useState } from "react";
-import { useSlip, type SlipKind } from "@/lib/slip";
+import { useSlip, encodeSlip, type SlipKind } from "@/lib/slip";
 
 const fmtOdds = (p?: number) => (p === undefined ? "" : p > 0 ? `+${p}` : String(p));
 const KIND_LABEL: Record<SlipKind, string> = {
@@ -16,6 +16,7 @@ export default function SlipBar() {
   const { items, remove, clear } = useSlip();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [shared, setShared] = useState(false);
   if (!items.length) return null;
 
   const priced = items.filter((i) => i.books && i.books.length);
@@ -40,6 +41,20 @@ export default function SlipBar() {
       await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    } catch { /* clipboard blocked */ }
+  }
+
+  // Share a link that re-opens this slip in StatSeer (installed app or browser).
+  async function shareSlip() {
+    const url = `${location.origin}/slip?d=${encodeSlip(items)}`;
+    const title = `My StatSeer slip — ${items.length} pick${items.length === 1 ? "" : "s"}`;
+    if (typeof navigator.share === "function") {
+      try { await navigator.share({ title, text: title, url }); return; } catch { /* user cancelled */ }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setShared(true);
+      setTimeout(() => setShared(false), 2000);
     } catch { /* clipboard blocked */ }
   }
 
@@ -78,6 +93,7 @@ export default function SlipBar() {
               Model reads and fan buzz are here for reference — <b>not a pick, not graded</b>. Line-shopping only.
             </p>
             <div className="slipbar__actions">
+              <button className="slipbar__share" onClick={shareSlip}>{shared ? "Link copied ✓" : "Share slip"}</button>
               <button className="slipbar__copy" onClick={copySlip}>{copied ? "Copied ✓" : "Copy slip"}</button>
               <button className="slipbar__clear" onClick={clear}>Clear slip</button>
             </div>
