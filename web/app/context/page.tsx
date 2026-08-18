@@ -77,6 +77,14 @@ function favLabel(home: string, away: string, spread: number | null): string {
   return spread < 0 ? `${home} ${spread.toFixed(1)}` : `${away} -${spread.toFixed(1)}`;
 }
 
+/** The ONE crew tendency that persists year-to-year is the penalty rate. Score/ATS
+ * history is noise (tested), so the plain-English read is about flags only. */
+function crewFlag(pen: number): { label: string; tone: "hot" | "cool" } | null {
+  if (pen >= REF_LEAGUE.pen + 0.8) return { label: "Flag-heavy", tone: "hot" };
+  if (pen <= REF_LEAGUE.pen - 0.8) return { label: "Lets them play", tone: "cool" };
+  return null;
+}
+
 export default async function Page({ searchParams }: PageProps<"/context">) {
   const sp = await searchParams;
   let range: { min: number; max: number } | null = null;
@@ -282,23 +290,43 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
           greyed as trivia, not a signal. League avg: {REF_LEAGUE.pen} penalties, {REF_LEAGUE.total} pts, fav
           covers {REF_LEAGUE.atsFav}%.
         </p>
+        <div className="refbottom">
+          <span className="refbottom__k">Bottom line — what to actually use</span>
+          <p>
+            One crew tendency carries over year to year: <b>how many flags they throw</b>. Crews tagged
+            <b className="hot"> Flag-heavy</b> throw noticeably more than league average ({REF_LEAGUE.pen}/g) and
+            <b className="cool"> Lets them play</b> throw fewer — that&apos;s the real read (more flags = more
+            variance: drives extended, drives killed). A crew&apos;s history with the <b>total</b> or against the
+            <b> spread</b> is essentially random and does <b>not</b> predict the next game, so those columns stay
+            greyed — history, not a lean. When weekly assignments post, each game&apos;s flag tendency shows up in
+            its <b>Special Considerations</b> above.
+          </p>
+        </div>
         <div className="reftable">
           <div className="refrow refrow--head">
-            <span>crew</span><span>pen/g</span><span>pen yds</span><span>pts/g</span><span>over%</span><span>fav ats%</span>
+            <span>crew</span><span>read</span><span>pen/g</span><span>pts/g</span><span>over%</span><span>fav ats%</span>
           </div>
-          {REF_STATS.map((r) => (
+          {REF_STATS.map((r) => {
+            const flag = crewFlag(r.pen);
+            return (
             <div className="refrow" key={r.name}>
               <span className="refrow__name">{r.name} <span className="refrow__n">{r.games}g</span></span>
+              <span className="refrow__read">
+                {flag
+                  ? <b className={flag.tone}>{flag.label}</b>
+                  : <span className="muted">Average flags</span>}
+              </span>
               <span className={r.pen >= REF_LEAGUE.pen ? "refrow__v hot" : "refrow__v cool"}>{r.pen}</span>
-              <span className="refrow__v">{r.penY}</span>
               <span className="refrow__v muted">{r.total}</span>
               <span className="refrow__v muted">{r.over}%</span>
               <span className="refrow__v muted">{r.atsFav}%</span>
             </div>
-          ))}
+            );
+          })}
         </div>
         <p className="ctxsec__note">
-          Per-game crew assignments post during game week — we&apos;ll map each week&apos;s games to their crew then.
+          Per-game crew assignments post during game week — each week&apos;s games get mapped to their crew, and a
+          flag-heavy or lets-them-play crew becomes a line in that game&apos;s Special Considerations.
         </p>
       </details>
 

@@ -141,9 +141,16 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
       {preds.length === 0 ? (
         <p className="foot">No predictions published for Week {week} yet.</p>
       ) : (
-        <section className="grid">
-          {preds.map((p) => <PredictionCard key={p.eventId} p={p} />)}
-        </section>
+        <details className="gamesdrop" open>
+          <summary className="gamesdrop__h">
+            Week {week} predictions — model vs market
+            <span className="gamesdrop__n">{preds.length} games</span>
+            <span className="gamesdrop__chev" aria-hidden="true">▾</span>
+          </summary>
+          <section className="grid">
+            {preds.map((p) => <PredictionCard key={p.eventId} p={p} />)}
+          </section>
+        </details>
       )}
 
       <section className="soonpanel">

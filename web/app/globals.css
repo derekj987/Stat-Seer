@@ -186,6 +186,22 @@ body{background:var(--bg);color:var(--ink);
 .slipbar__x:hover{color:var(--key)}
 .slipbar__note{color:var(--muted);font-size:11.5px;line-height:1.5;margin:0 0 10px}
 .slipbar__note b{color:var(--accent)}
+/* Phone: the one-line item (title · detail · odds · book · x) is too cramped.
+   Stack it — pick title on top, the meta wrapping below, remove pinned top-right. */
+@media (max-width:640px){
+  .slipbar__summary{gap:8px;padding:11px 14px}
+  .slipbar__rec{font-size:11px}
+  .slipbar__panel{padding:12px 14px}
+  .slipbar__list{gap:10px}
+  .slipbar__list li{flex-wrap:wrap;align-items:center;column-gap:8px;row-gap:2px;
+    position:relative;padding-right:20px}
+  .slipbar__g{flex:1 1 100%;min-width:0;color:var(--ink);font-weight:700;font-size:13px;line-height:1.25}
+  .slipbar__p{color:var(--muted);font-weight:400;font-size:11px}
+  .slipbar__list .odds{margin-left:0;font-size:12px;font-weight:700;color:var(--ink)}
+  .slipbar__list .book{font-size:10.5px}
+  .slipbar__x{position:absolute;top:-2px;right:0;font-size:18px;padding:0 4px}
+  .slipbar__note{font-size:11px}
+}
 .slipbar__actions{display:flex;justify-content:flex-end;gap:8px}
 .slipbar__clear{border:1px solid var(--line);background:var(--surface-2);
   color:var(--muted);border-radius:8px;padding:6px 12px;cursor:pointer;
@@ -231,12 +247,28 @@ body{background:var(--bg);color:var(--ink);
 .subnav__t.active{background:var(--amber);color:#fff;
   box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .subnav__t:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
-/* second-level season toggle (Regular / Preseason) — quieter than the area tabs */
-.subnav--season{background:transparent;border:0;padding:0;gap:8px;margin:2px 0 10px}
-.subnav--season .subnav__t{border:1px solid var(--line);border-radius:20px;padding:4px 13px;
-  font-size:11.5px;color:var(--muted)}
-.subnav--season .subnav__t.active{background:var(--amber-soft);color:var(--amber);box-shadow:none;
-  border-color:color-mix(in srgb,var(--amber) 40%,transparent)}
+/* second-level season toggle (Regular / Preseason) — staggered in to the right under
+   the area tabs, in darkish-yellow pills to set them apart from the amber area tabs. */
+.subnav--season{background:transparent;border:0;padding:0;gap:8px;margin:2px 0 12px 32px}
+.subnav--season .subnav__t{border-radius:20px;padding:4px 14px;font-size:11.5px;
+  border:1px solid color-mix(in srgb,var(--gold) 42%,var(--line));
+  background:color-mix(in srgb,var(--gold) 24%,var(--surface-2));
+  color:color-mix(in srgb,var(--gold) 88%,var(--ink))}
+.subnav--season .subnav__t:hover{color:var(--gold)}
+.subnav--season .subnav__t.active{background:var(--gold);color:#3a2d00;box-shadow:0 1px 3px rgba(0,0,0,.2);
+  border-color:var(--gold)}
+
+/* The Model: collapse the game cards into a dropdown so the page isn't a wall of games */
+.gamesdrop{margin:14px 0}
+.gamesdrop__h{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;
+  padding:11px 15px;border:1px solid var(--line);border-radius:11px;background:var(--surface-2);
+  font-weight:800;font-size:14.5px}
+.gamesdrop__h::-webkit-details-marker{display:none}
+.gamesdrop__n{font-size:12px;color:var(--muted);font-weight:600;border:1px solid var(--line);
+  border-radius:20px;padding:2px 9px}
+.gamesdrop__chev{margin-left:auto;color:var(--muted);transition:transform .15s}
+.gamesdrop[open]>.gamesdrop__h{margin-bottom:14px;border-color:color-mix(in srgb,var(--accent) 32%,var(--line))}
+.gamesdrop[open]>.gamesdrop__h .gamesdrop__chev{transform:rotate(180deg)}
 
 /* --- Context section --- */
 .ctxsec{margin-top:22px}
@@ -489,7 +521,7 @@ a.fauthor:hover{text-decoration:underline}
 
 /* --- referee crews --- */
 .reftable{display:flex;flex-direction:column;gap:2px;overflow-x:auto}
-.refrow{display:grid;grid-template-columns:minmax(128px,1fr) 50px 58px 48px 50px 56px;gap:9px;align-items:center;
+.refrow{display:grid;grid-template-columns:minmax(118px,1fr) 92px 46px 46px 44px 52px;gap:9px;align-items:center;
   padding:7px 12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;font-size:13px}
 details.ctxdrop>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:8px;margin-bottom:8px}
 details.ctxdrop>summary::-webkit-details-marker{display:none}
@@ -505,6 +537,21 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .refrow__v.hot{color:var(--key);font-weight:700}
 .refrow__v.cool{color:var(--accent);font-weight:700}
 .refrow__v.muted{color:var(--muted)}
+/* the plain-English crew "read" column (penalty tendency) + its head, left-aligned */
+.refrow--head span:nth-child(2){text-align:left}
+.refrow__read{font-size:12px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.refrow__read .hot{color:var(--key);font-weight:700}
+.refrow__read .cool{color:var(--accent);font-weight:700}
+.refrow__read .muted{color:var(--muted)}
+/* section bottom-line callout */
+.refbottom{margin:2px 0 14px;padding:12px 15px;border-radius:11px;
+  background:var(--surface-2);border:1px solid color-mix(in srgb,var(--accent) 26%,var(--line))}
+.refbottom__k{display:inline-block;font-size:10.5px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.06em;color:var(--accent);margin-bottom:5px}
+.refbottom p{margin:0;font-size:12.5px;line-height:1.6;color:var(--muted)}
+.refbottom b{color:var(--ink)}
+.refbottom b.hot{color:var(--key)}
+.refbottom b.cool{color:var(--accent)}
 .ctxsec__note{margin:8px 0 0;font-size:11.5px;color:var(--muted);font-style:italic}
 
 /* --- reports inbox --- */
