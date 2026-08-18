@@ -45,8 +45,8 @@ export function SlipCallout({ kind }: { kind: "lines" | "props" }) {
   );
 }
 
-/** Masthead brand: logo mark + STATSEER wordmark + a section subtitle. */
-export function Brand({ sub }: { sub: string }) {
+/** Masthead brand: logo mark + STATSEER wordmark + a section subtitle (string or node). */
+export function Brand({ sub }: { sub: import("react").ReactNode }) {
   return (
     <div className="brand">
       <a href="/" className="brand__home" aria-label="StatSeer home">

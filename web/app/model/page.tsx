@@ -1,7 +1,32 @@
 import { weekRange } from "@/lib/board";
-import { fetchModelWeek, fetchCalibration, MODEL_VERSION, type ModelPrediction } from "@/lib/model";
+import { fetchModelWeek, fetchCalibration, type ModelPrediction } from "@/lib/model";
 import { Brand, FlowSteps } from "../Nav";
 import AddToSlip from "../AddToSlip";
+import ModelClock from "../ModelClock";
+
+// Sports on the roadmap. NFL is live; the rest turn on once each is built + validated.
+const SPORTS = [
+  { key: "nfl", label: "NFL", live: true },
+  { key: "mlb", label: "MLB", live: false },
+  { key: "nba", label: "NBA", live: false },
+  { key: "cfb", label: "College Football", live: false },
+  { key: "nhl", label: "NHL", live: false },
+];
+
+function SportTabs() {
+  return (
+    <div className="sporttabs" aria-label="Sport">
+      {SPORTS.map((s) => (
+        <span key={s.key}
+          className={s.live ? "sporttab sporttab--active" : "sporttab sporttab--soon"}
+          aria-current={s.live ? "page" : undefined}>
+          {s.label}
+          {!s.live && <em className="sporttab__soon">Soon</em>}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -113,18 +138,23 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
   const requested = typeof sp.week === "string" ? parseInt(sp.week, 10) : NaN;
   const week = Number.isFinite(requested) ? Math.min(max, Math.max(min, requested)) : min;
 
-  const preds = await fetchModelWeek(week, SEASON);
-  const calibration = await fetchCalibration(SEASON);
-  const published = preds[0]?.publishedAt;
+  let preds: ModelPrediction[] = [];
+  try { preds = await fetchModelWeek(week, SEASON); } catch { preds = []; }
+  let calibration: Awaited<ReturnType<typeof fetchCalibration>> = [];
+  try { calibration = await fetchCalibration(SEASON); } catch { calibration = []; }
 
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={`The Model · line-blind predictions · Week ${week}, ${SEASON} · ${MODEL_VERSION}`} />
-        {published && <div className="asof">published<br /><b>{et(published)}</b></div>}
+        <Brand sub={<ModelClock />} />
       </header>
 
       <FlowSteps active="analyze" />
+      <SportTabs />
+      <p className="sportnote">
+        <b>NFL first.</b> We perfect one sport before adding the next — MLB, NBA, College Football and NHL
+        will turn on here once each has its own line-blind model with a public track record.
+      </p>
       <WeekNav min={min} max={max} current={week} />
 
       <section className="explainer">
