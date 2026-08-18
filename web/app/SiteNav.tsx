@@ -116,22 +116,25 @@ export default function SiteNav() {
           <button className="snav__dclose" onClick={() => setOpen(false)} aria-label="Close menu">✕</button>
           <a href="/" className="snav__dtop">Home</a>
 
-          <div className="snav__dsection">Featured Resources</div>
-          <a href="/model" className="snav__dtop snav__dfeat">The Model</a>
+          <details className="snav__pgroup" open>
+            <summary className="snav__dtop snav__psum">Featured Resources</summary>
 
-          <details className="snav__pgroup snav__pgroup--feat">
-            <summary className="snav__dtop snav__psum snav__dfeat">Context</summary>
-            <a href="/context" className="snav__dsub">Upset Watch</a>
-            <a href="/considerations" className="snav__dsub">Special Considerations</a>
-            <a href="/tailgate" className="snav__dsub">Fan Analysis</a>
-          </details>
+            <a href="/model" className="snav__dfeat">The Model</a>
 
-          <details className="snav__pgroup snav__pgroup--feat">
-            <summary className="snav__dtop snav__psum snav__dfeat">Value Finder</summary>
-            <a href="/lines" className="snav__dsub">Game Lines</a>
-            <a href="/props" className="snav__dsub">Player Props</a>
-            <a href="/best" className="snav__dsub">Sweet Spots</a>
-            <a href="/preseason" className="snav__dsub">Preseason</a>
+            <details className="snav__pgroup snav__pgroup--feat">
+              <summary className="snav__dfeat snav__psum">Context</summary>
+              <a href="/context" className="snav__dsub">Upset Watch</a>
+              <a href="/considerations" className="snav__dsub">Special Considerations</a>
+              <a href="/tailgate" className="snav__dsub">Fan Analysis</a>
+            </details>
+
+            <details className="snav__pgroup snav__pgroup--feat">
+              <summary className="snav__dfeat snav__psum">Value Finder</summary>
+              <a href="/lines" className="snav__dsub">Game Lines</a>
+              <a href="/props" className="snav__dsub">Player Props</a>
+              <a href="/best" className="snav__dsub">Sweet Spots</a>
+              <a href="/preseason" className="snav__dsub">Preseason</a>
+            </details>
           </details>
 
           <div className="snav__ddiv" />

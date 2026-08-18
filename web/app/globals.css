@@ -916,12 +916,14 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .snav__psum::-webkit-details-marker{display:none}
 .snav__psum::after{content:"▸";margin-left:auto;font-size:13px;color:var(--gold)}
 .snav__pgroup[open] .snav__psum::after{content:"▾"}
-/* Featured Resources — The Model / Context / Value Finder, set apart from the gold
-   items in the app's green so they read as the primary sections. */
-.snav__dsection{padding:14px 10px 3px;font-size:10.5px;font-weight:800;text-transform:uppercase;
-  letter-spacing:.1em;color:var(--muted)}
-.snav__dfeat{color:var(--accent)}
-.snav__pgroup--feat .snav__psum::after{color:var(--accent)}
+/* Featured Resources → The Model / Context / Value Finder: smaller than the top-level
+   items, staggered in under the section, in the app's green. */
+.snav__dfeat{width:100%;padding:8px 10px 8px 26px;text-decoration:none;
+  font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;font-size:16px;font-weight:400;
+  letter-spacing:.02em;color:var(--accent);background:none;border:0;text-align:left;cursor:pointer}
+a.snav__dfeat{display:block}
+.snav__pgroup--feat>.snav__psum::after{color:var(--accent)}
+.snav__pgroup--feat .snav__dsub{padding-left:42px}
 /* the three under The Process: smaller, indented right */
 .snav__dsub{display:block;padding:8px 10px 8px 28px;border-radius:8px;text-decoration:none;
   font-size:13.5px;font-weight:600;color:var(--ink)}
