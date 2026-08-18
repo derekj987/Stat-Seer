@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import type { Game } from "@/lib/board";
-import { ShopSubnav, SeasonSubnav, Brand, SlipCallout, FlowSteps } from "./Nav";
+import { ShopSubnav, SeasonSubnav, Brand, SlipCallout, FlowSteps, ValueFinderNote } from "./Nav";
 import { useSlip } from "@/lib/slip";
 
 // ---- formatting (client-side; Intl has full ICU) ----
@@ -153,13 +153,14 @@ export default function BoardView({
     <>
       <main className="wrap">
         <header className="masthead">
-          <Brand sub={`Shop Around · Game Lines · line shopping & sweet spots · Week ${week}, ${season}`} />
+          <Brand sub={`Value Finder · Game Lines · best price across books · Week ${week}, ${season}`} />
           {snapshot && <div className="asof">lines as of<br /><b>{et(snapshot, snapFmt)}</b></div>}
         </header>
 
-        <FlowSteps active="shop" />
+        <FlowSteps active="value" />
         <ShopSubnav active="lines" />
         <SeasonSubnav area="lines" active="reg" />
+        <ValueFinderNote />
 
         <WeekNav min={min} max={max} current={week} />
 

@@ -27,14 +27,14 @@ export default async function Page({ searchParams }: PageProps<"/lines">) {
     range = await weekRange(SEASON);
   } catch (e) {
     return (
-      <Shell sub="Game Lines · line shopping & sweet spots">
+      <Shell sub="Value Finder · Game Lines">
         <p className="foot">Couldn&apos;t load odds: {e instanceof Error ? e.message : String(e)}</p>
       </Shell>
     );
   }
   if (!range) {
     return (
-      <Shell sub="Game Lines · line shopping & sweet spots">
+      <Shell sub="Value Finder · Game Lines">
         <p className="foot">No odds captured yet. Once the capture job has run, games will appear here.</p>
       </Shell>
     );

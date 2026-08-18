@@ -15,8 +15,8 @@ type Me = { username: string; role: string; title: string | null } | null;
 const LINKS = [
   { href: "/", label: "Home", on: (p: string) => p === "/" },
   { href: "/model", label: "The Model", on: (p: string) => p.startsWith("/model") },
-  { href: "/context", label: "The Context", on: (p: string) => ["/context", "/tailgate", "/best"].some((x) => p.startsWith(x)) },
-  { href: "/lines", label: "Shop Around", on: (p: string) => ["/lines", "/props", "/preseason"].some((x) => p.startsWith(x)) },
+  { href: "/context", label: "Context", on: (p: string) => ["/context", "/considerations", "/tailgate"].some((x) => p.startsWith(x)) },
+  { href: "/lines", label: "Value Finder", on: (p: string) => ["/lines", "/props", "/preseason", "/best"].some((x) => p.startsWith(x)) },
   { href: "/forum", label: "Community", on: (p: string) => p.startsWith("/forum") },
 ];
 const MOD = ["founder", "admin"];
@@ -118,16 +118,17 @@ export default function SiteNav() {
           <a href="/model" className="snav__dtop">The Model</a>
 
           <details className="snav__pgroup">
-            <summary className="snav__dtop snav__psum">The Context</summary>
+            <summary className="snav__dtop snav__psum">Context</summary>
             <a href="/context" className="snav__dsub">Upset Watch</a>
+            <a href="/considerations" className="snav__dsub">Special Considerations</a>
             <a href="/tailgate" className="snav__dsub">Fan Analysis</a>
-            <a href="/best" className="snav__dsub">Sweet Spots</a>
           </details>
 
           <details className="snav__pgroup">
-            <summary className="snav__dtop snav__psum">Shop Around</summary>
+            <summary className="snav__dtop snav__psum">Value Finder</summary>
             <a href="/lines" className="snav__dsub">Game Lines</a>
             <a href="/props" className="snav__dsub">Player Props</a>
+            <a href="/best" className="snav__dsub">Sweet Spots</a>
             <a href="/preseason" className="snav__dsub">Preseason</a>
           </details>
 

@@ -262,6 +262,31 @@ export default async function Home() {
           <a href="/how" className="btn">How it works →</a>
         </div>
       </section>
+
+      <section className="hb-nav3">
+        <h2 className="hb-nav3__h">There&apos;s a lot more inside</h2>
+        <p className="hb-nav3__sub">
+          The board above is a taste. StatSeer does two things — helps you make <b>smarter, data-driven picks</b>,
+          then finds you the <b>maximum return</b> on them. Here&apos;s where each lives:
+        </p>
+        <div className="hb-nav3__grid">
+          <a href="/model" className="hb-nav3__c">
+            <span className="hb-nav3__k">The Model</span>
+            <span className="hb-nav3__d">Line-blind predictions for every game, published and graded in public — plus the calibration to check us.</span>
+            <span className="hb-nav3__go">Open The Model →</span>
+          </a>
+          <a href="/context" className="hb-nav3__c">
+            <span className="hb-nav3__k">Context</span>
+            <span className="hb-nav3__d">Upset Watch, Special Considerations, and Fan Analysis — everything around a game a number can&apos;t capture.</span>
+            <span className="hb-nav3__go">Read the Context →</span>
+          </a>
+          <a href="/lines" className="hb-nav3__c">
+            <span className="hb-nav3__k">Value Finder</span>
+            <span className="hb-nav3__d">Once you&apos;ve chosen a bet, we find the single best sportsbook for it — game lines, props, and sweet spots.</span>
+            <span className="hb-nav3__go">Find the best price →</span>
+          </a>
+        </div>
+      </section>
       </div>
 
       {/* Full-width closer below the grid so the seer column ends exactly at this

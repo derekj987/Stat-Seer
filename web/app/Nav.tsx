@@ -6,12 +6,12 @@
 //   The Model    — line-blind predictions
 //   Context      — what to understand (informs, doesn't vote)
 
-/** The guided journey: analyze → read the context → shop the market. */
-export function FlowSteps({ active }: { active: "analyze" | "context" | "shop" }) {
+/** The guided journey: analyze → read the context → find the best price. */
+export function FlowSteps({ active }: { active: "analyze" | "context" | "value" }) {
   const steps = [
     { key: "analyze", n: "1", label: "The Model", sub: "make your analysis", href: "/model" },
-    { key: "context", n: "2", label: "The Context", sub: "read the room", href: "/context" },
-    { key: "shop", n: "3", label: "Shop Around", sub: "shop the lines", href: "/lines" },
+    { key: "context", n: "2", label: "Context", sub: "read the room", href: "/context" },
+    { key: "value", n: "3", label: "Value Finder", sub: "find the best price", href: "/lines" },
   ] as const;
   return (
     <nav className="flow" aria-label="How to use StatSeer">
@@ -74,8 +74,8 @@ export function TopNav({ active }: { active: "value" | "model" | "context" }) {
   );
 }
 
-/** Sub-tabs inside The Context. */
-export function ContextSubnav({ active }: { active: "upset" | "fan" | "best" | "special" }) {
+/** Sub-tabs inside Context. */
+export function ContextSubnav({ active }: { active: "upset" | "fan" | "special" }) {
   return (
     <nav className="subnav" aria-label="Context view">
       <a href="/context" className={active === "upset" ? "subnav__t active" : "subnav__t"}
@@ -84,21 +84,32 @@ export function ContextSubnav({ active }: { active: "upset" | "fan" | "best" | "
         aria-current={active === "special" ? "page" : undefined}>Special Considerations</a>
       <a href="/tailgate" className={active === "fan" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "fan" ? "page" : undefined}>Fan Analysis</a>
+    </nav>
+  );
+}
+
+/** Sub-tabs inside Value Finder (Game Lines · Player Props · Sweet Spots). */
+export function ShopSubnav({ active }: { active: "lines" | "props" | "best" }) {
+  return (
+    <nav className="subnav" aria-label="Value Finder view">
+      <a href="/lines" className={active === "lines" ? "subnav__t active" : "subnav__t"}
+        aria-current={active === "lines" ? "page" : undefined}>Game Lines</a>
+      <a href="/props" className={active === "props" ? "subnav__t active" : "subnav__t"}
+        aria-current={active === "props" ? "page" : undefined}>Player Props</a>
       <a href="/best" className={active === "best" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "best" ? "page" : undefined}>Sweet Spots</a>
     </nav>
   );
 }
 
-/** Sub-tabs inside Shop Around. */
-export function ShopSubnav({ active }: { active: "lines" | "props" }) {
+/** The Value Finder is line-shopping only — it points members to the picks pages. */
+export function ValueFinderNote() {
   return (
-    <nav className="subnav" aria-label="Shop view">
-      <a href="/lines" className={active === "lines" ? "subnav__t active" : "subnav__t"}
-        aria-current={active === "lines" ? "page" : undefined}>Game Lines</a>
-      <a href="/props" className={active === "props" ? "subnav__t active" : "subnav__t"}
-        aria-current={active === "props" ? "page" : undefined}>Player Props</a>
-    </nav>
+    <p className="vfnote">
+      <b>Value Finder is about price, not picks.</b> It finds the single best sportsbook for a bet you&apos;ve
+      already chosen. For our data-driven picks and predictions, head to <a href="/model">The Model</a> and{" "}
+      <a href="/context">Context</a>.
+    </p>
   );
 }
 

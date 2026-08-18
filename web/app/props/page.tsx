@@ -1,6 +1,6 @@
 import { weekRange } from "@/lib/board";
 import { weekProps, CATEGORIES, categoryByKey } from "@/lib/props";
-import { ShopSubnav, SeasonSubnav, Brand, FlowSteps } from "../Nav";
+import { ShopSubnav, SeasonSubnav, Brand, FlowSteps, ValueFinderNote } from "../Nav";
 import PropsView from "./PropsView";
 
 export const revalidate = 120;
@@ -67,14 +67,15 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
     <main className="wrap">
       <header className="masthead">
         <Brand sub={isPre
-          ? `Shop Around · Player Props · Preseason · ${SEASON}`
-          : `Shop Around · Player Props · ${cat.label} · Week ${week}, ${SEASON}`} />
+          ? `Value Finder · Player Props · Preseason · ${SEASON}`
+          : `Value Finder · Player Props · ${cat.label} · Week ${week}, ${SEASON}`} />
         {!isPre && snap && <div className="asof">props as of<br /><b>{et(snap)}</b></div>}
       </header>
 
-      <FlowSteps active="shop" />
+      <FlowSteps active="value" />
       <ShopSubnav active="props" />
       <SeasonSubnav area="props" active={isPre ? "pre" : "reg"} />
+      <ValueFinderNote />
 
       {isPre ? (
         <div className="tgwall" role="note">

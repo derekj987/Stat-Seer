@@ -11,9 +11,9 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={`Shop Around · Preseason · exhibition lines · ${SEASON}`} />
+        <Brand sub={`Value Finder · Preseason · exhibition lines · ${SEASON}`} />
       </header>
-      <FlowSteps active="shop" />
+      <FlowSteps active="value" />
       <ShopSubnav active="lines" />
       <SeasonSubnav area="lines" active="pre" />
       {children}
