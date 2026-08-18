@@ -129,7 +129,7 @@ function Upsets({ rows }: { rows: UpsetRow[] }) {
   return (
     <details className="hb-panel hb-panel--alert">
       <summary className="hb-bar">
-        <span className="hb-bar__title hb-bar__title--gold">Upsets of the Week Alert</span>
+        <span className="hb-bar__title hb-bar__title--gold">Potential Upsets of the Week</span>
         <span className="hb-bar__count hb-bar__count--gold">{rows.length}</span>
         <span className="hb-bar__hint">the market has them losing — our model says they win</span>
         <span className="hb-bar__chev" aria-hidden="true">▾</span>
@@ -277,6 +277,7 @@ export default async function Home() {
       <div className="hb-side" aria-hidden="true">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo-hero.png" alt="" className="hb-seerimg" width={543} height={724} />
+        <div className="hb-seertag"><b>See the edge.</b> Trust the data.</div>
       </div>
     </main>
   );

@@ -558,19 +558,23 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .play__why b{color:var(--ink)}
 /* bet · price · book · edge · (heart) — edge sits at the end beside the book.
    Capped width so short prop labels don't leave a big gap in the middle. */
+/* Shared column grid so every row lines up with the header and each other
+   (fixed tracks for price/book/edge; the bet label flexes). */
 .pricetable{display:flex;flex-direction:column;gap:4px;max-width:760px}
-.pricerow{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto 20px;gap:14px;align-items:center;
+.pricerow{display:grid;grid-template-columns:minmax(0,1fr) 3.4rem 6rem 3.4rem 16px;gap:12px;align-items:center;
   padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:9px}
 .pricerow--head{background:none;border:0;color:var(--muted);font-size:11px;padding:0 12px;
   text-transform:uppercase;letter-spacing:.06em;font-weight:600}
-.pricerow--head span:nth-child(2),.pricerow--head span:nth-child(3),.pricerow--head span:nth-child(4){text-align:right}
+.pricerow--head span:nth-child(2),.pricerow--head span:nth-child(4){text-align:right}
 .pricerow__edge{font-family:var(--font-mono);font-weight:700;color:var(--accent);font-size:15px;text-align:right}
 .pricerow__bet{display:flex;flex-direction:column;line-height:1.25;min-width:0;text-align:left}
 .pricerow__bet b{font-size:14px}
 .pricerow__mkt{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pricerow__price{font-family:var(--font-mono);font-weight:700}
 /* whole-row "add to slip" button */
-.pricerow.savable{cursor:pointer;font:inherit;width:100%;text-align:left;transition:border-color .12s,background .12s}
+.pricerow.savable{cursor:pointer;font:inherit;color:var(--ink);width:100%;text-align:left;transition:border-color .12s,background .12s}
+.pricerow__bet b{color:var(--ink)}
+.pricerow__price{color:var(--ink)}
 .pricerow.savable:hover{border-color:var(--accent)}
 .pricerow.savable.saved{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 35%,var(--line))}
 .pricerow__heart{justify-self:end;font-size:14px;color:var(--muted)}
@@ -579,6 +583,11 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .ctxsec__lead{max-width:760px;margin:18px 0 4px;padding:11px 14px;font-size:13.5px;line-height:1.55;
   background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 28%,transparent);border-radius:10px}
 .ctxsec__lead b{color:var(--accent)}
+@media (max-width:640px){
+  .pricerow{grid-template-columns:minmax(0,1fr) 2.7rem 4.4rem 2.7rem 14px;gap:8px;padding:9px 10px}
+  .pricerow__bet b{font-size:12.5px}
+  .pricerow__edge{font-size:13px}
+}
 
 /* --- player props --- */
 .propstack{display:flex;flex-direction:column;gap:10px;max-width:680px}
@@ -735,7 +744,7 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 /* ---------------- global site nav (SiteNav) ---------------- */
 .snav{position:sticky;top:0;z-index:60;background:var(--surface);
   border-bottom:1px solid var(--line);box-shadow:0 1px 6px rgba(0,0,0,.06)}
-.snav__bar{max-width:1160px;margin:0 auto;padding:8px 18px;display:flex;align-items:center;gap:14px}
+.snav__bar{max-width:none;margin:0;padding:8px 20px;display:flex;align-items:center;gap:14px}
 .snav__home{flex:0 0 auto;display:inline-flex;line-height:0}
 .snav__logo{width:34px;height:34px;border-radius:50%;border:2px solid var(--gold);object-fit:cover;
   filter:brightness(1.18) saturate(1.05);box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 30%,transparent)}
@@ -1003,6 +1012,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-main{min-width:0}
 .hb-side{margin-top:22px}
 .hb-seerimg{display:block;width:66%;height:auto;margin:0 auto}
+.hb-seertag{display:none}  /* desktop-only overlay; mobile shows the full poster */
 .hb-mast{border-top:2px solid var(--ink)}
 .hb-mast__row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;padding:10px 0 6px}
 .hb-mast__side{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
@@ -1235,7 +1245,10 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   /* content left (row 1), seer right (row 1), creed spans full width in row 2 —
      so the seer column ends exactly at the creed's rule, not down by the footer. */
   .hb-main{grid-column:1;grid-row:1;padding:clamp(12px,2vw,22px) 28px clamp(24px,3vw,40px) clamp(24px,5vw,72px)}
-  .hb-side{grid-column:2;grid-row:1;margin:0;align-self:stretch;min-height:0}
+  /* padding-bottom pulls the seer's end up so it finishes level with the bet-slip
+     section, not down on the creed's rule. */
+  .hb-side{grid-column:2;grid-row:1;margin:0;align-self:stretch;min-height:0;position:relative;
+    padding-bottom:clamp(24px,3vw,40px)}
   .hb-creed{grid-column:1/-1;grid-row:2;margin-top:0;padding:13px clamp(24px,5vw,72px) 30px}
   /* height:100% (of the content-sized column), capped at the viewport — so the seer
      matches the content height (line sits right after the tavern) yet still sticks
@@ -1243,6 +1256,13 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .hb-seerimg{position:sticky;top:0;height:100%;max-height:100vh;width:100%;object-fit:cover;object-position:center 14%;
     -webkit-mask-image:linear-gradient(90deg,transparent,#000 15%);
     mask-image:linear-gradient(90deg,transparent,#000 15%)}
+  /* the poster's baked "SEE THE EDGE…" gets side-cropped in this narrow rail, so
+     render the tagline as HTML pinned to the bottom, fully readable. */
+  .hb-seertag{display:block;position:sticky;bottom:0;z-index:2;padding:26px 10px 12px;
+    text-align:center;text-transform:uppercase;letter-spacing:.07em;font-weight:700;
+    font-size:clamp(10.5px,1vw,13px);color:var(--accent);
+    background:linear-gradient(to top,rgba(6,8,6,.95) 42%,rgba(6,8,6,.55) 74%,transparent)}
+  .hb-seertag b{color:#ece0c6}
 }
 
 /* ================= How our model works ================= */
