@@ -1,7 +1,10 @@
 import { weekRange, fetchWeek, buildBoard } from "@/lib/board";
 import { fetchModelWeek, type ModelPrediction } from "@/lib/model";
 import { weekRefs } from "@/lib/refAssignments";
+import { REF_STATS } from "@/lib/refStats";
 import { Brand, FlowSteps, ContextSubnav } from "../Nav";
+
+const refByName = new Map(REF_STATS.map((s) => [s.name, s]));
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -60,14 +63,21 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
       });
     }
 
-    // Referee crew — the one persistent tendency (penalties). Set only once assignments post.
+    // Referee crew — set only once assignments post game-week. Penalty rate is the
+    // one persistent tendency; the O/U + favorite/underdog history is context, not a lean.
     if (crew) {
+      const s = refByName.get(crew.referee);
       const read = crew.tendency === "flag-happy"
-        ? "a flag-heavy crew (more penalties than average — more drives extended and killed, more variance)"
+        ? "flag-heavy — more penalties than average, so more variance"
         : crew.tendency === "flag-light"
-          ? "a lets-them-play crew (fewer flags than average)"
-          : "an average-penalty crew";
-      items.push({ kind: "Referee", text: `${crew.referee} — ${read}, ~${crew.pen} penalties/game.` });
+          ? "lets them play — fewer flags than average"
+          : "average penalties";
+      let text = `${crew.referee} (${read}, ~${crew.pen}/g).`;
+      if (s) {
+        text += ` Their games average ${s.total} total points (${s.over}% over), and the favorite`
+          + ` covers ${s.atsFav}% ATS vs the underdog ${100 - s.atsFav}% — historical context, not a lean.`;
+      }
+      items.push({ kind: "Referee", text });
     }
 
     return { g, kickoff: g.commence, items };

@@ -174,9 +174,9 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
         )}
       </section>
 
-      {/* --- Scoring environment: implied team totals --- */}
-      <section className="ctxsec">
-        <h2 className="ctxsec__h">Lines &amp; the model&apos;s read</h2>
+      {/* --- Scoring environment: implied team totals (collapsible) --- */}
+      <details className="ctxsec ctxdrop" open>
+        <summary className="ctxsec__h">Lines &amp; the model&apos;s read</summary>
         <p className="ctxsec__d">
           The market&apos;s <b>spread</b> and <b>total</b> for each game, with our <b>line-blind model&apos;s</b>
           own read of each sitting right beside it.
@@ -249,7 +249,7 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
             </div>
           </>
         )}
-      </section>
+      </details>
 
       {/* --- Referee crews --- */}
       <details className="ctxsec ctxdrop">
