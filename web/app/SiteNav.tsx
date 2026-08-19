@@ -144,7 +144,6 @@ export default function SiteNav() {
                   <a href="/lines" className="snav__dsub">Game Lines</a>
                   <a href="/props" className="snav__dsub">Player Props</a>
                   <a href="/best" className="snav__dsub">Sweet Spots</a>
-                  <a href="/preseason" className="snav__dsub">Preseason</a>
                 </details>
               </div>
             </details>

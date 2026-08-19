@@ -225,9 +225,32 @@ export default async function Home() {
           <img src="/seereyes.png" alt="" width={1983} height={793} />
         </div>
         <div className="hb-mast__row">
-          <span className="hb-mast__flank">Line-blind reads</span>
           <a href="/" className="hb-mast__name">StatSeer</a>
-          <span className="hb-mast__flank hb-mast__flank--r">Published, locked &amp; graded in public</span>
+          <span className="hb-mast__tag">Arm yourself with data-driven decisions.</span>
+          <span className="hb-mast__crest" aria-hidden="true">
+            <svg viewBox="0 0 120 128" className="crest" role="img">
+              {/* crossed swords behind the shield — long blades cross above, hilts below */}
+              <g transform="rotate(40 60 76)">
+                <path className="crest__blade" d="M55.5,98 L55.5,24 L60,9 L64.5,24 L64.5,98 Z" />
+                <path className="crest__steel" d="M44,96 H76 V102 H44 Z" />
+                <path className="crest__steel" d="M57,102 H63 V117 H57 Z" />
+                <circle className="crest__steel" cx="60" cy="121" r="4.6" />
+              </g>
+              <g transform="rotate(-40 60 76)">
+                <path className="crest__blade" d="M55.5,98 L55.5,24 L60,9 L64.5,24 L64.5,98 Z" />
+                <path className="crest__steel" d="M44,96 H76 V102 H44 Z" />
+                <path className="crest__steel" d="M57,102 H63 V117 H57 Z" />
+                <circle className="crest__steel" cx="60" cy="121" r="4.6" />
+              </g>
+              {/* heater shield */}
+              <path className="crest__shield" d="M26,40 H94 V71 Q94,101 60,120 Q26,101 26,71 Z" />
+              <path className="crest__shieldln" fill="none" d="M32,45 H88 V70 Q88,96 60,112 Q32,96 32,70 Z" />
+              {/* dragon rampant, charged on the shield — head + open jaw (left), spread
+                  wing (upper right), standing on hind legs, barbed tail curling up */}
+              <path className="crest__dragon" d="M43,57 C39,53 40,50 44,52 C45,49 48,49 49,52 C52,53 54,56 56,60 C58,60 60,60 62,61 C66,53 76,49 86,52 C80,56 78,61 81,67 C76,64 72,66 69,70 C73,77 73,86 69,93 C74,92 79,88 81,82 L85,84 C83,91 77,96 70,96 C71,99 70,103 67,105 L64,103 L65,97 C61,95 59,90 59,85 C57,89 54,92 51,104 L47,103 L50,91 C52,86 53,82 54,77 C50,79 45,78 43,72 C47,71 50,70 51,66 C47,66 44,64 43,63 L37,61 L43,58 Z" />
+              <circle className="crest__eye" cx="47" cy="55.5" r="1.5" />
+            </svg>
+          </span>
         </div>
         <div className="hb-mast__rule"></div>
       </header>
