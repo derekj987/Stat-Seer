@@ -946,10 +946,19 @@ a.snav__dfeat{display:block}
 .snav__pgroup--feat>.snav__psum::after{color:var(--accent)}
 .snav__pgroup--feat .snav__dsub{padding-left:42px}
 /* Popular (sports) list in the drawer — NFL live, the rest 'Soon' */
-.snav__dsport{display:flex;align-items:center;justify-content:space-between}
+/* sports in the Popular section — each a top-level entry; NFL live (green link),
+   the rest 'Soon'. Model/Context/Value nest under the live sport in .snav__sportkids. */
+.snav__dsport{display:flex;align-items:center;justify-content:space-between;width:100%;
+  padding:9px 10px 9px 18px;text-decoration:none;letter-spacing:.02em;
+  font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;font-size:17px;font-weight:400;
+  color:var(--gold);background:none;border:0;text-align:left}
+.snav__dsport--active{color:var(--accent)}
 .snav__dsport--soon{color:var(--muted);cursor:default}
 .snav__dsport em{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;font-style:normal;
   color:#4a3c00;background:var(--spot);border-radius:20px;padding:1px 6px;margin-left:auto}
+.snav__sportkids{margin:2px 0 8px;padding-left:12px;
+  border-left:2px solid color-mix(in srgb,var(--accent) 28%,var(--line))}
+.snav__sportkids .snav__dfeat{padding-left:16px}
 /* the three under The Process: smaller, indented right */
 .snav__dsub{display:block;padding:8px 10px 8px 28px;border-radius:8px;text-decoration:none;
   font-size:13.5px;font-weight:600;color:var(--ink)}
@@ -1050,8 +1059,20 @@ details.statsdrop .stats{margin:12px 0 0}
 .tgfeed{display:flex;flex-direction:column;gap:14px;margin-bottom:26px}
 /* forward-facing seer banner at the bottom of Fan Analysis — fills the width, capped
    height so a portrait poster doesn't run 1500px tall on desktop */
-.tgseer{margin-top:26px;border-radius:14px;overflow:hidden;line-height:0;border:1px solid var(--line)}
-.tgseer__img{display:block;width:100%;height:auto;max-height:600px;object-fit:cover;object-position:center 38%}
+/* forward-facing seer at the bottom — modest, centered (not a giant banner) */
+.tgseer{margin:26px auto 6px;max-width:540px;border-radius:14px;overflow:hidden;line-height:0;
+  border:1px solid var(--line)}
+.tgseer__img{display:block;width:100%;height:auto}
+/* "NFL Week N" wrapper dropdown holding all the team dropdowns */
+.tgweek{margin:8px 0}
+.tgweek__h{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:11px 15px;
+  border:1px solid var(--line);border-radius:11px;background:var(--surface-2);font-weight:800;font-size:15px}
+.tgweek__h::-webkit-details-marker{display:none}
+.tgweek__n{font-size:12px;color:var(--muted);font-weight:600;border:1px solid var(--line);
+  border-radius:20px;padding:2px 9px}
+.tgweek__chev{margin-left:auto;color:var(--muted);transition:transform .15s}
+.tgweek[open]>.tgweek__h{margin-bottom:12px;border-color:color-mix(in srgb,var(--accent) 30%,var(--line))}
+.tgweek[open]>.tgweek__h .tgweek__chev{transform:rotate(180deg)}
 .tgcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;
   padding:16px 18px;border-left:4px solid var(--line)}
 /* Left accent = direction: green when fans are buying, red when they're selling. */

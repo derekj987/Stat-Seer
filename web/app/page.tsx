@@ -301,7 +301,7 @@ export default async function Home() {
 
       <div className="hb-side" aria-hidden="true">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo-hero.png?v=2" alt="" className="hb-seerimg" width={543} height={580} />
+        <img src="/logo-hero.png?v=3" alt="" className="hb-seerimg" width={543} height={724} />
       </div>
     </main>
   );

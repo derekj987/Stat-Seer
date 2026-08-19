@@ -119,32 +119,32 @@ export default function SiteNav() {
 
           <details className="snav__pgroup" open>
             <summary className="snav__dtop snav__psum">Popular</summary>
-            {SPORTS.map((s) => (
-              s.live
-                ? <a key={s.key} href="/" className="snav__dsub snav__dsport">{s.label}</a>
-                : <span key={s.key} className="snav__dsub snav__dsport snav__dsport--soon">{s.label}<em>Soon</em></span>
+
+            {/* NFL is live — a clickable link to its home, with its own Model / Context /
+                Value Finder nested under it. This is the template for every future sport. */}
+            <a href="/" className="snav__dsport snav__dsport--active">NFL</a>
+            <div className="snav__sportkids">
+              <a href="/model" className="snav__dfeat">The Model</a>
+
+              <details className="snav__pgroup snav__pgroup--feat">
+                <summary className="snav__dfeat snav__psum">Context</summary>
+                <a href="/context" className="snav__dsub">Upset Watch</a>
+                <a href="/considerations" className="snav__dsub">Special Considerations</a>
+                <a href="/tailgate" className="snav__dsub">Fan Analysis</a>
+              </details>
+
+              <details className="snav__pgroup snav__pgroup--feat">
+                <summary className="snav__dfeat snav__psum">Value Finder</summary>
+                <a href="/lines" className="snav__dsub">Game Lines</a>
+                <a href="/props" className="snav__dsub">Player Props</a>
+                <a href="/best" className="snav__dsub">Sweet Spots</a>
+                <a href="/preseason" className="snav__dsub">Preseason</a>
+              </details>
+            </div>
+
+            {SPORTS.filter((s) => !s.live).map((s) => (
+              <span key={s.key} className="snav__dsport snav__dsport--soon">{s.label}<em>Soon</em></span>
             ))}
-          </details>
-
-          <details className="snav__pgroup" open>
-            <summary className="snav__dtop snav__psum">Featured Resources</summary>
-
-            <a href="/model" className="snav__dfeat">The Model</a>
-
-            <details className="snav__pgroup snav__pgroup--feat">
-              <summary className="snav__dfeat snav__psum">Context</summary>
-              <a href="/context" className="snav__dsub">Upset Watch</a>
-              <a href="/considerations" className="snav__dsub">Special Considerations</a>
-              <a href="/tailgate" className="snav__dsub">Fan Analysis</a>
-            </details>
-
-            <details className="snav__pgroup snav__pgroup--feat">
-              <summary className="snav__dfeat snav__psum">Value Finder</summary>
-              <a href="/lines" className="snav__dsub">Game Lines</a>
-              <a href="/props" className="snav__dsub">Player Props</a>
-              <a href="/best" className="snav__dsub">Sweet Spots</a>
-              <a href="/preseason" className="snav__dsub">Preseason</a>
-            </details>
           </details>
 
           <div className="snav__ddiv" />

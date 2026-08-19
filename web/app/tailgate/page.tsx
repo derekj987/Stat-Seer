@@ -110,20 +110,27 @@ export default async function Page() {
       {feed.buzz.length === 0 ? (
         <p className="foot">No fan buzz gathered for Week {week} yet — check back closer to kickoff.</p>
       ) : (
-        <section className="tgfeed">
-          {groupByTeam(feed.buzz).map(([team, buzz]) => (
-            <details className="tgteam" key={team}>
-              <summary className="tgteam__h">
-                <span className="tgteam__name" style={{ color: TEAM_COLOR[team] ?? "var(--gold)" }}>{team}</span>
-                <span className="tgteam__n">{buzz.length}</span>
-                <span className="tgteam__chev" aria-hidden="true">▸</span>
-              </summary>
-              <div className="tgteam__cards">
-                {buzz.map((b) => <BuzzCard key={b.id} b={b} />)}
-              </div>
-            </details>
-          ))}
-        </section>
+        <details className="tgweek" open>
+          <summary className="tgweek__h">
+            NFL Week {week}
+            <span className="tgweek__n">{groupByTeam(feed.buzz).length} teams</span>
+            <span className="tgweek__chev" aria-hidden="true">▾</span>
+          </summary>
+          <section className="tgfeed">
+            {groupByTeam(feed.buzz).map(([team, buzz]) => (
+              <details className="tgteam" key={team}>
+                <summary className="tgteam__h">
+                  <span className="tgteam__name" style={{ color: TEAM_COLOR[team] ?? "var(--gold)" }}>{team}</span>
+                  <span className="tgteam__n">{buzz.length}</span>
+                  <span className="tgteam__chev" aria-hidden="true">▸</span>
+                </summary>
+                <div className="tgteam__cards">
+                  {buzz.map((b) => <BuzzCard key={b.id} b={b} />)}
+                </div>
+              </details>
+            ))}
+          </section>
+        </details>
       )}
 
       <footer className="foot">
@@ -136,7 +143,7 @@ export default async function Page() {
 
       <div className="tgseer" aria-hidden="true">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/newlogo.png" alt="" className="tgseer__img" width={1086} height={1448} />
+        <img src="/newimage.png" alt="" className="tgseer__img" width={1535} height={1024} />
       </div>
     </main>
   );
