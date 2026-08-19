@@ -11,7 +11,7 @@ const medieval = MedievalSharp({ subsets: ["latin"], weight: "400", display: "sw
 export const metadata: Metadata = {
   metadataBase: new URL("https://statseer.vercel.app"),
   title: "StatSeer — See the edge. Trust the data.",
-  description: "NFL betting analysis you can actually check: line shopping, sweet spots, honest calibrated predictions, and game context — from live odds.",
+  description: "NFL betting analysis you can actually check: line shopping, sweet spots, honest calibrated probabilities, and game context — from live odds.",
   applicationName: "StatSeer",
   appleWebApp: { capable: true, title: "StatSeer", statusBarStyle: "default" },
   openGraph: {

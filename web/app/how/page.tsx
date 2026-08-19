@@ -44,7 +44,7 @@ export default function How() {
         <p>
           Two rules keep us honest. First, our game model is <b>line-blind</b> — it never sees the betting
           line before it predicts, so it can genuinely agree or disagree with Vegas instead of just echoing
-          it. Second, every prediction is <b>published and frozen before kickoff</b>. We can&apos;t quietly
+          it. Second, every read is <b>published and frozen before kickoff</b>. We can&apos;t quietly
           rewrite a bad call after the fact; the track record is what it is.
         </p>
       </section>

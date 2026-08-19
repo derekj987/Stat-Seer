@@ -2,7 +2,7 @@ import { weekRange, fetchWeek, buildBoard } from "@/lib/board";
 import { fetchModelWeek, type ModelPrediction } from "@/lib/model";
 import { weekRefs } from "@/lib/refAssignments";
 import { REF_STATS } from "@/lib/refStats";
-import { Brand, FlowSteps, ContextSubnav } from "../Nav";
+import { Brand, FlowSteps, ContextSubnav, SportTabs } from "../Nav";
 
 const refByName = new Map(REF_STATS.map((s) => [s.name, s]));
 
@@ -92,6 +92,7 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
       </header>
 
       <FlowSteps active="context" />
+      <SportTabs />
       <ContextSubnav active="special" />
       <WeekNav min={min} max={max} current={week} />
 

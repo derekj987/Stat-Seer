@@ -58,7 +58,7 @@ function TheCard({ rows }: { rows: CardRow[] }) {
       <div className="hb-body">
         {rows.length === 0 ? (
           <p className="hb-empty">
-            The board opens when this week&apos;s odds and model predictions post. Until then, see
+            The board opens when this week&apos;s odds and model reads post. Until then, see
             the latest in <a href="/model">The Model</a>.
           </p>
         ) : (
@@ -225,7 +225,7 @@ export default async function Home() {
           <img src="/seereyes.png" alt="" width={1983} height={793} />
         </div>
         <div className="hb-mast__row">
-          <span className="hb-mast__flank">Line-blind predictions</span>
+          <span className="hb-mast__flank">Line-blind reads</span>
           <a href="/" className="hb-mast__name">StatSeer</a>
           <span className="hb-mast__flank hb-mast__flank--r">Published, locked &amp; graded in public</span>
         </div>
@@ -272,7 +272,7 @@ export default async function Home() {
         <div className="hb-nav3__grid">
           <a href="/model" className="hb-nav3__c">
             <span className="hb-nav3__k">The Model</span>
-            <span className="hb-nav3__d">Line-blind predictions for every game, published and graded in public — plus the calibration to check us.</span>
+            <span className="hb-nav3__d">Line-blind reads on every game, published and graded in public — plus the calibration to check us.</span>
             <span className="hb-nav3__go">Open The Model →</span>
           </a>
           <a href="/context" className="hb-nav3__c">

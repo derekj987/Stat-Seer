@@ -1,6 +1,6 @@
 import { weekRange } from "@/lib/board";
 import { weekTailgate, stockLabel, stockArrows, type Buzz } from "@/lib/tailgate";
-import { Brand, FlowSteps, ContextSubnav } from "../Nav";
+import { Brand, FlowSteps, ContextSubnav, SportTabs } from "../Nav";
 import AddToSlip from "../AddToSlip";
 
 export const revalidate = 300;
@@ -85,6 +85,7 @@ export default async function Page() {
       </header>
 
       <FlowSteps active="context" />
+      <SportTabs />
       <ContextSubnav active="fan" />
 
       {/* The wall: this is fan sentiment, NOT a StatSeer pick or model output. */}

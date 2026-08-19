@@ -1,32 +1,8 @@
 import { weekRange } from "@/lib/board";
 import { fetchModelWeek, fetchCalibration, type ModelPrediction } from "@/lib/model";
-import { Brand, FlowSteps } from "../Nav";
+import { Brand, FlowSteps, SportTabs } from "../Nav";
 import AddToSlip from "../AddToSlip";
 import ModelClock from "../ModelClock";
-
-// Sports on the roadmap. NFL is live; the rest turn on once each is built + validated.
-const SPORTS = [
-  { key: "nfl", label: "NFL", live: true },
-  { key: "mlb", label: "MLB", live: false },
-  { key: "nba", label: "NBA", live: false },
-  { key: "cfb", label: "College Football", live: false },
-  { key: "nhl", label: "NHL", live: false },
-];
-
-function SportTabs() {
-  return (
-    <div className="sporttabs" aria-label="Sport">
-      {SPORTS.map((s) => (
-        <span key={s.key}
-          className={s.live ? "sporttab sporttab--active" : "sporttab sporttab--soon"}
-          aria-current={s.live ? "page" : undefined}>
-          {s.label}
-          {!s.live && <em className="sporttab__soon">Soon</em>}
-        </span>
-      ))}
-    </div>
-  );
-}
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -146,7 +122,8 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={<ModelClock />} />
+        <Brand sub="" />
+        <div className="masthead__clock"><ModelClock /></div>
       </header>
 
       <FlowSteps active="analyze" />
@@ -159,21 +136,21 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
 
       <section className="explainer">
         <p>
-          Our prediction model never sees the betting line — it reads each game from team strength alone,
+          Our model never sees the betting line — it reads each game from team strength alone,
           then we show you <b>where it agrees with the market and where it doesn&apos;t.</b> An
           <span className="chip offc">Off Consensus</span> game is one where the model likes a different
-          side than Vegas. Every prediction is <b>published and locked before kickoff</b>, and the
+          side than Vegas. Every read is <b>published and locked before kickoff</b>, and the
           calibration below grades every one in public — so the track record is yours to check, not ours
           to claim.
         </p>
       </section>
 
       {preds.length === 0 ? (
-        <p className="foot">No predictions published for Week {week} yet.</p>
+        <p className="foot">No reads published for Week {week} yet.</p>
       ) : (
         <details className="gamesdrop" open>
           <summary className="gamesdrop__h">
-            Week {week} predictions — model vs market
+            Week {week} reads — model vs market
             <span className="gamesdrop__n">{preds.length} games</span>
             <span className="gamesdrop__chev" aria-hidden="true">▾</span>
           </summary>
@@ -198,14 +175,14 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         <h2 className="calib__h">Calibration</h2>
         {calibration.length === 0 ? (
           <p className="foot">
-            No graded predictions yet — calibration begins once Week&nbsp;1 games are played and graded.
-            The {preds.length || ""} predictions above are locked in the ledger; they can&apos;t be edited,
+            No graded reads yet — calibration begins once Week&nbsp;1 games are played and graded.
+            The {preds.length || ""} reads above are locked in the ledger; they can&apos;t be edited,
             so what you see now is exactly what will be scored.
           </p>
         ) : (
           <div className="calib__table" role="table">
             <div className="calib__row calib__row--head" role="row">
-              <span>predicted</span><span>actual</span><span>n</span><span>avg CLV</span>
+              <span>modeled</span><span>actual</span><span>n</span><span>avg CLV</span>
             </div>
             {calibration.map((c) => (
               <div className="calib__row" role="row" key={c.prob_bucket}>

@@ -1,6 +1,6 @@
 import { weekRange } from "@/lib/board";
 import { fetchBets, fetchBestProps, fmtOdds, type KeyPlay, type PropPlay } from "@/lib/bestbets";
-import { ShopSubnav, Brand, FlowSteps, ValueFinderNote } from "../Nav";
+import { ShopSubnav, Brand, FlowSteps, ValueFinderNote, SportTabs } from "../Nav";
 import SavableRow from "./SavableRow";
 
 export const revalidate = 120;
@@ -92,6 +92,7 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
       </header>
 
       <FlowSteps active="value" />
+      <SportTabs />
       <ShopSubnav active="best" />
       <ValueFinderNote />
       <WeekNav min={min} max={max} current={week} />
@@ -101,7 +102,7 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
         <p>
           <b>Where the value is this week.</b> These are <b>price edges we can prove</b> — the best available
           number across books, and the games where a half-point matters most. Same bet, better price. They are
-          <b> not</b> outcome predictions: &quot;we think team X wins&quot; picks only appear once the model
+          <b> not</b> outcome calls: &quot;we think team X wins&quot; picks only appear once the model
           earns them with a public, calibrated record. A good play means <em>+EV over time</em>, not a lock on
           Sunday.
         </p>

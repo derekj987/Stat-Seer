@@ -28,6 +28,33 @@ export function FlowSteps({ active }: { active: "analyze" | "context" | "value" 
   );
 }
 
+// Sports on the roadmap. NFL is live; the rest turn on here as each is built + validated.
+// The vision: every sport gets the same layout across Home / The Model / Context / Value Finder.
+const SPORTS = [
+  { key: "nfl", label: "NFL", live: true },
+  { key: "ncaaf", label: "NCAAF", live: false },
+  { key: "mlb", label: "MLB", live: false },
+  { key: "nba", label: "NBA", live: false },
+  { key: "wnba", label: "WNBA", live: false },
+  { key: "soccer", label: "Soccer", live: false },
+];
+
+/** Sport selector shown across The Model / Context / Value Finder. NFL active; rest "Soon". */
+export function SportTabs() {
+  return (
+    <div className="sporttabs" aria-label="Sport">
+      {SPORTS.map((s) => (
+        <span key={s.key}
+          className={s.live ? "sporttab sporttab--active" : "sporttab sporttab--soon"}
+          aria-current={s.live ? "page" : undefined}>
+          {s.label}
+          {!s.live && <em className="sporttab__soon">Soon</em>}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 /** Prominent "build your betslip" explainer for the shopping pages. */
 export function SlipCallout({ kind }: { kind: "lines" | "props" }) {
   return (
@@ -55,7 +82,7 @@ export function Brand({ sub }: { sub: import("react").ReactNode }) {
       </a>
       <div className="brand__text">
         <a href="/" className="brand__marklink"><span className="brand__mark">STATSEER</span></a>
-        <span className="brand__sub">{sub}</span>
+        {sub ? <span className="brand__sub">{sub}</span> : null}
       </div>
     </div>
   );
@@ -107,7 +134,7 @@ export function ValueFinderNote() {
   return (
     <p className="vfnote">
       <b>Value Finder is about price, not picks.</b> It finds the single best sportsbook for a bet you&apos;ve
-      already chosen. For our data-driven picks and predictions, head to <a href="/model">The Model</a> and{" "}
+      already chosen. For our data-driven picks and analysis, head to <a href="/model">The Model</a> and{" "}
       <a href="/context">Context</a>.
     </p>
   );

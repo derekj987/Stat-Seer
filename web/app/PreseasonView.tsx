@@ -7,7 +7,7 @@
 import { useCallback } from "react";
 import type { Game } from "@/lib/board";
 import type { PreRating } from "@/lib/preseason";
-import { ShopSubnav, SeasonSubnav, Brand, FlowSteps } from "./Nav";
+import { ShopSubnav, SeasonSubnav, Brand, FlowSteps, SportTabs } from "./Nav";
 import { useSlip } from "@/lib/slip";
 
 const kickFmt = new Intl.DateTimeFormat("en-US", {
@@ -168,6 +168,7 @@ export default function PreseasonView({
       </header>
 
       <FlowSteps active="value" />
+      <SportTabs />
       <ShopSubnav active="lines" />
       <SeasonSubnav area="lines" active="pre" />
 
@@ -177,7 +178,7 @@ export default function PreseasonView({
           Every <b>preseason</b> game&apos;s lines — moneyline, spread, and total — with the best number
           across books highlighted. Tap any line to add it to your slip. These are <b>exhibition games</b>:
           starters barely play, so the lines are soft and low-limit, and StatSeer <b>never grades or
-          models them</b> — it&apos;s pure line shopping. For graded predictions and the real board, switch
+          models them</b> — it&apos;s pure line shopping. For graded reads and the real board, switch
           to <a href="/lines">Regular Season</a>.
         </p>
       </details>
@@ -198,7 +199,7 @@ export default function PreseasonView({
       <footer className="foot">
         <p>
           <b>No model. No pick. No grade.</b> Preseason is a separate, walled-off lane — it exists so
-          you can price a preseason bet, nothing more. For graded predictions, see
+          you can price a preseason bet, nothing more. For graded reads, see
           <a href="/model"> The Model</a>; for the regular-season board, <a href="/lines">Game Lines</a>.
         </p>
       </footer>

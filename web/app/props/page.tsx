@@ -1,6 +1,6 @@
 import { weekRange } from "@/lib/board";
 import { weekProps, CATEGORIES, categoryByKey } from "@/lib/props";
-import { ShopSubnav, SeasonSubnav, Brand, FlowSteps, ValueFinderNote } from "../Nav";
+import { ShopSubnav, SeasonSubnav, Brand, FlowSteps, ValueFinderNote, SportTabs } from "../Nav";
 import PropsView from "./PropsView";
 
 export const revalidate = 120;
@@ -73,6 +73,7 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
       </header>
 
       <FlowSteps active="value" />
+      <SportTabs />
       <ShopSubnav active="props" />
       <SeasonSubnav area="props" active={isPre ? "pre" : "reg"} />
       <ValueFinderNote />
