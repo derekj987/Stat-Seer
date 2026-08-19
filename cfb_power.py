@@ -1,19 +1,19 @@
 """
-cfb_power.py — a margin-based College Football power rating fit from data/cfb.db, and
+cfb_power.py -- a margin-based College Football power rating fit from data/cfb.db, and
 an honest walk-forward test of whether it actually predicts games.
 
-Method (mirrors the NFL discipline — never win/loss, always point differential):
+Method (mirrors the NFL discipline -- never win/loss, always point differential):
   margin(home,away) = rating[home] - rating[away] + HFA*(not neutral)
-Ratings are solved by RIDGE-regularized least squares over FBS-vs-FBS games — the
+Ratings are solved by RIDGE-regularized least squares over FBS-vs-FBS games -- the
 penalty both identifies the ratings (they're otherwise free up to a constant) and
 shrinks thin-schedule teams toward the mean so early-season noise can't run away.
 Blowout margins are capped (a 45-point win is barely more information than a 28-point
-one) — the same reason we never model raw yardage.
+one) -- the same reason we never model raw yardage.
 
 Validation is WALK-FORWARD inside each season: to predict week w we fit only on
 weeks < w, so nothing sees its own result. We score three ways against the same test
-games — our rating, CFBD's own pregame Elo (best linear fit of Elo->margin, so it's a
-fair fight), and "home team wins" — and report straight-up accuracy plus margin error.
+games -- our rating, CFBD's own pregame Elo (best linear fit of Elo->margin, so it's a
+fair fight), and "home team wins" -- and report straight-up accuracy plus margin error.
 Beating Elo here is the bar to clear before the real test vs the closing line (next).
 
     python cfb_power.py                       # 2020-2024, cap 28, ridge sweep
@@ -108,7 +108,7 @@ def walk_forward(games, lam, cap, from_week, decay):
             elo_coef = fit_elo_scale(train)
             for g in test:
                 if g["home"] not in ratings or g["away"] not in ratings:
-                    continue  # a team with no prior games this season — skip, count coverage
+                    continue  # a team with no prior games this season -- skip, count coverage
                 home_adj = 0.0 if g["neutral"] else 1.0
                 pred = ratings[g["home"]] - ratings[g["away"]] + hfa * home_adj
                 epred = elo_coef[0] * g["elo_diff"] + elo_coef[1] * home_adj
@@ -146,7 +146,7 @@ def main(argv=None):
 
     games = load_games(args.db, args.start, args.end)
     if not games:
-        print("No games — run cfb_backfill.py first.", file=sys.stderr)
+        print("No games -- run cfb_backfill.py first.", file=sys.stderr)
         return 1
     print(f"{len(games)} FBS-vs-FBS games, {args.start}-{args.end}. "
           f"Walk-forward from week {args.from_week}, margin cap {args.cap or 'none'}.\n")
@@ -174,7 +174,7 @@ def main(argv=None):
           f"our SU {pct(res['ours_su'],n).strip()} vs Elo {pct(res['elo_su'],n).strip()} "
           f"vs home {pct(res['home_su'],n).strip()}.")
     print("Reading: matching/edging Elo means the rating has real signal; the honest "
-          "bar is still beating the closing spread (CFBD /lines) — that's the next step.")
+          "bar is still beating the closing spread (CFBD /lines) -- that's the next step.")
     return 0
 
 

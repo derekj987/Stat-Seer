@@ -1,10 +1,10 @@
 """
-cfb_backfill.py — pull five seasons of College Football games from the CFBD API and
+cfb_backfill.py -- pull five seasons of College Football games from the CFBD API and
 land them in a local SQLite store (cfb.db) that the CFB power-rating model reads.
 
-Why store, not recompute on the fly: the model iterates (fit → score vs the closing
-line → refit), and re-pulling thousands of games each pass burns API credits for no
-reason. One backfill, many model runs. Re-running is safe — games upsert by id, so a
+Why store, not recompute on the fly: the model iterates (fit -> score vs the closing
+line -> refit), and re-pulling thousands of games each pass burns API credits for no
+reason. One backfill, many model runs. Re-running is safe -- games upsert by id, so a
 finished season is stable and a current season refreshes its scores.
 
     python cfb_backfill.py                 # default: 2020-2024, regular + postseason
@@ -13,7 +13,7 @@ finished season is stable and a current season refreshes its scores.
 
 Captures every game the API returns (all divisions), tagging each side's
 classification so the model can scope to FBS (and FBS-vs-FCS guarantee games) itself.
-CFBD's own pre/postgame Elo is stored too — a ready-made benchmark for our rating.
+CFBD's own pre/postgame Elo is stored too -- a ready-made benchmark for our rating.
 
 Auth: CFBD_API_KEY in .env (same key cfbd_client.py uses).
 Stdlib only (sqlite3 + cfbd_client for the fetch).
@@ -111,13 +111,13 @@ def main(argv=None):
     ap.add_argument("--start", type=int, default=2020, help="first season (inclusive)")
     ap.add_argument("--end", type=int, default=2024, help="last season (inclusive)")
     ap.add_argument("--db", default="data/cfb.db",
-                    help="SQLite path (default: data/cfb.db — gitignored)")
+                    help="SQLite path (default: data/cfb.db -- gitignored)")
     args = ap.parse_args(argv)
 
     env = oc.load_env()
     api_key = env.get("CFBD_API_KEY")
     if not api_key:
-        print("ERROR: CFBD_API_KEY missing in .env — get one at "
+        print("ERROR: CFBD_API_KEY missing in .env -- get one at "
               "https://collegefootballdata.com/key", file=sys.stderr)
         return 1
 
@@ -130,7 +130,7 @@ def main(argv=None):
     for year in range(args.start, args.end + 1):
         status, games = cc.fetch_games(api_key, year, "both")
         if status != 200 or not isinstance(games, list):
-            print(f"  {year}: CFBD HTTP {status} — {str(games)[:200]}", file=sys.stderr)
+            print(f"  {year}: CFBD HTTP {status} -- {str(games)[:200]}", file=sys.stderr)
             conn.rollback()
             return 1
         upsert(conn, games)
@@ -149,7 +149,7 @@ def main(argv=None):
         "SELECT COUNT(*) FROM games WHERE home_class='fbs' AND away_class='fbs'").fetchone()[0]
     conn.close()
 
-    print(f"\nBackfill complete → {args.db}")
+    print(f"\nBackfill complete -> {args.db}")
     print(f"  {total_rows} games stored across {args.start}-{args.end} "
           f"({grand_total} fetched this run)")
     print(f"  {fbs_rows} involve an FBS team; {fbs_vs_fbs} are FBS-vs-FBS "

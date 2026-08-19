@@ -1,7 +1,7 @@
 """
-cfbd_client.py — pull College Football (CFB) data from the CollegeFootballData (CFBD)
+cfbd_client.py -- pull College Football (CFB) data from the CollegeFootballData (CFBD)
 API v2, the college equivalent of nflverse. First step of the CFB module: schedule +
-results (and, later, team/advanced stats) that feed a CFB power-rating model — our
+results (and, later, team/advanced stats) that feed a CFB power-rating model -- our
 pre-NFL-Week-1 measuring stick. Odds come from The Odds API (americanfootball_ncaaf),
 not here.
 
@@ -70,7 +70,7 @@ def main(argv=None):
     env = oc.load_env()
     api_key = env.get("CFBD_API_KEY")
     if not api_key:
-        print("ERROR: CFBD_API_KEY missing in .env — get one at "
+        print("ERROR: CFBD_API_KEY missing in .env -- get one at "
               "https://collegefootballdata.com/key", file=sys.stderr)
         return 1
 
@@ -82,7 +82,7 @@ def main(argv=None):
         print(f"unexpected payload (not a list): {str(games)[:400]}", file=sys.stderr)
         return 1
 
-    print(f"{len(games)} games — {args.year} {args.season_type}"
+    print(f"{len(games)} games -- {args.year} {args.season_type}"
           + (f" week {args.week}" if args.week else ""))
     played = [g for g in games if _g(g, "homePoints", "home_points") is not None]
     print(f"  {len(played)} with a final score\n")
@@ -94,7 +94,7 @@ def main(argv=None):
         ap_ = _g(g, "awayPoints", "away_points")
         wk = _g(g, "week")
         date = (_g(g, "startDate", "start_date") or "")[:16]
-        score = f"{ap_}-{hp}" if hp is not None else "—"
+        score = f"{ap_}-{hp}" if hp is not None else "--"
         print(f"  W{wk:<2} {away} @ {home:<24} {score:<8} {date}")
 
     if args.fields and games:
