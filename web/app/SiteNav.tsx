@@ -120,27 +120,34 @@ export default function SiteNav() {
           <details className="snav__pgroup" open>
             <summary className="snav__dtop snav__psum">Popular</summary>
 
-            {/* NFL is live — a clickable link to its home, with its own Model / Context /
-                Value Finder nested under it. This is the template for every future sport. */}
-            <a href="/" className="snav__dsport snav__dsport--active">NFL</a>
-            <div className="snav__sportkids">
-              <a href="/model" className="snav__dfeat">The Model</a>
+            {/* NFL is live — its own dropdown, holding The Model / Context / Value
+                Finder. The "NFL" text stays a clickable link to its home; the chevron
+                (or the rest of the row) toggles the group open. This is the template
+                for every future sport. */}
+            <details className="snav__pgroup snav__sportgroup" open>
+              <summary className="snav__sportsum">
+                <a href="/" className="snav__sportname" onClick={(e) => e.stopPropagation()}>NFL</a>
+                <span className="snav__sportchev" aria-hidden="true">▾</span>
+              </summary>
+              <div className="snav__sportkids">
+                <a href="/model" className="snav__dfeat">The Model</a>
 
-              <details className="snav__pgroup snav__pgroup--feat">
-                <summary className="snav__dfeat snav__psum">Context</summary>
-                <a href="/context" className="snav__dsub">Upset Watch</a>
-                <a href="/considerations" className="snav__dsub">Special Considerations</a>
-                <a href="/tailgate" className="snav__dsub">Fan Analysis</a>
-              </details>
+                <details className="snav__pgroup snav__pgroup--feat">
+                  <summary className="snav__dfeat snav__psum">Context</summary>
+                  <a href="/context" className="snav__dsub">Upset Watch</a>
+                  <a href="/considerations" className="snav__dsub">Special Considerations</a>
+                  <a href="/tailgate" className="snav__dsub">Fan Analysis</a>
+                </details>
 
-              <details className="snav__pgroup snav__pgroup--feat">
-                <summary className="snav__dfeat snav__psum">Value Finder</summary>
-                <a href="/lines" className="snav__dsub">Game Lines</a>
-                <a href="/props" className="snav__dsub">Player Props</a>
-                <a href="/best" className="snav__dsub">Sweet Spots</a>
-                <a href="/preseason" className="snav__dsub">Preseason</a>
-              </details>
-            </div>
+                <details className="snav__pgroup snav__pgroup--feat">
+                  <summary className="snav__dfeat snav__psum">Value Finder</summary>
+                  <a href="/lines" className="snav__dsub">Game Lines</a>
+                  <a href="/props" className="snav__dsub">Player Props</a>
+                  <a href="/best" className="snav__dsub">Sweet Spots</a>
+                  <a href="/preseason" className="snav__dsub">Preseason</a>
+                </details>
+              </div>
+            </details>
 
             {SPORTS.filter((s) => !s.live).map((s) => (
               <span key={s.key} className="snav__dsport snav__dsport--soon">{s.label}<em>Soon</em></span>

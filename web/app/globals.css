@@ -937,22 +937,31 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .snav__psum::-webkit-details-marker{display:none}
 .snav__psum::after{content:"▸";margin-left:auto;font-size:13px;color:var(--gold)}
 .snav__pgroup[open] .snav__psum::after{content:"▾"}
-/* Featured Resources → The Model / Context / Value Finder: smaller than the top-level
-   items, staggered in under the section, in the app's green. */
+/* The Model / Context / Value Finder under a sport: smaller than the top-level
+   items, staggered in under the section, in a warm gold that's easier on the eye
+   than the bright green. */
 .snav__dfeat{width:100%;padding:8px 10px 8px 26px;text-decoration:none;
   font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;font-size:16px;font-weight:400;
-  letter-spacing:.02em;color:var(--accent);background:none;border:0;text-align:left;cursor:pointer}
+  letter-spacing:.02em;color:var(--gold);background:none;border:0;text-align:left;cursor:pointer}
 a.snav__dfeat{display:block}
-.snav__pgroup--feat>.snav__psum::after{color:var(--accent)}
+.snav__pgroup--feat>.snav__psum::after{color:var(--gold)}
 .snav__pgroup--feat .snav__dsub{padding-left:42px}
-/* Popular (sports) list in the drawer — NFL live, the rest 'Soon' */
-/* sports in the Popular section — each a top-level entry; NFL live (green link),
-   the rest 'Soon'. Model/Context/Value nest under the live sport in .snav__sportkids. */
+/* Popular (sports) list in the drawer. Every sport is the same light sage green.
+   NFL is live and is its own dropdown (.snav__sportgroup) whose "NFL" text links to
+   its home; the rest are 'Soon'. Model/Context/Value nest under the live sport. */
+.snav__sportsum{list-style:none;display:flex;align-items:center;width:100%;
+  padding:9px 10px 9px 18px;cursor:pointer}
+.snav__sportsum::-webkit-details-marker{display:none}
+.snav__sportname{color:var(--muted);text-decoration:none;letter-spacing:.02em;
+  font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;font-size:17px;font-weight:400}
+.snav__sportname:hover{color:var(--accent)}
+.snav__sportchev{margin-left:auto;font-size:13px;color:var(--muted);transition:transform .15s ease}
+.snav__sportgroup[open]>.snav__sportsum .snav__sportchev{transform:rotate(180deg)}
 .snav__dsport{display:flex;align-items:center;justify-content:space-between;width:100%;
   padding:9px 10px 9px 18px;text-decoration:none;letter-spacing:.02em;
   font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;font-size:17px;font-weight:400;
-  color:var(--gold);background:none;border:0;text-align:left}
-.snav__dsport--active{color:var(--accent)}
+  color:var(--muted);background:none;border:0;text-align:left}
+.snav__dsport--active{color:var(--muted)}
 .snav__dsport--soon{color:var(--muted);cursor:default}
 .snav__dsport em{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;font-style:normal;
   color:#4a3c00;background:var(--spot);border-radius:20px;padding:1px 6px;margin-left:auto}
