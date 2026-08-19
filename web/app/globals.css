@@ -1215,8 +1215,8 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-mast__row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;padding:10px 0 6px}
 .hb-mast__tag{font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;
   font-size:clamp(13px,2.1vw,18px);font-style:italic;letter-spacing:.01em;color:var(--muted);line-height:1.25}
-.hb-mast__crest{justify-self:end;width:66px;height:62px;
-  background:url(/crest.png?v=1) center/contain no-repeat}
+.hb-mast__crest{justify-self:end;width:74px;height:74px;
+  background:url(/crest.png?v=2) center/contain no-repeat}
 .hb-mast__side{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
 .hb-mast__side.hb-r{text-align:right}
 /* week label, now above The Card instead of in the masthead */
@@ -1436,7 +1436,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .hb-tav__title{font-size:16px}
   .hb-mast__name{font-size:28px}
   .hb-mast__tag{font-size:12px}
-  .hb-mast__crest{width:50px;height:46px}
+  .hb-mast__crest{width:56px;height:56px}
   .hb-mast__row{gap:9px}
   /* phone: drop the kickoff column; keep Game · Market Spread · Market O/U · Our Model Suggests */
   .hb-x{display:none}

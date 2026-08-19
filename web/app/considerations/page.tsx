@@ -115,35 +115,42 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
       {games.length === 0 ? (
         <p className="foot">No games captured for Week {week} yet.</p>
       ) : (
-        <div className="scglist">
-          {games.map(({ g, kickoff, items }) => (
-            <details className="scg" key={g.eventId}>
-              <summary className="scg__h">
-                <span className="scg__game">{g.away}<span className="at">@</span>{g.home}</span>
-                <time className="scg__time">{et(kickoff)}</time>
-                {items.length > 0
-                  ? <span className="scg__count">{items.length}</span>
-                  : <span className="scg__count scg__count--none">—</span>}
-                <span className="scg__chev" aria-hidden="true">▾</span>
-              </summary>
-              <div className="scg__body">
-                {items.length > 0 ? (
-                  <ul className="scg__items">
-                    {items.map((it, i) => (
-                      <li key={i}><b className="scg__k">{it.kind}</b> {it.text}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="scg__none">Nothing flagged for this game yet.</p>
-                )}
-                <div className="scg__soon">
-                  <b>Arriving game week:</b> weather (wind &amp; rain — wind is our one measured edge), player
-                  incentives (contract bonuses in reach), referee assignment, and playoff stakes for late-season games.
+        <details className="tgweek" open>
+          <summary className="tgweek__h">
+            NFL Week {week}
+            <span className="tgweek__n">{games.length} games</span>
+            <span className="tgweek__chev" aria-hidden="true">▾</span>
+          </summary>
+          <div className="scglist">
+            {games.map(({ g, kickoff, items }) => (
+              <details className="scg" key={g.eventId}>
+                <summary className="scg__h">
+                  <span className="scg__game">{g.away}<span className="at">@</span>{g.home}</span>
+                  <time className="scg__time">{et(kickoff)}</time>
+                  {items.length > 0
+                    ? <span className="scg__count">{items.length}</span>
+                    : <span className="scg__count scg__count--none">—</span>}
+                  <span className="scg__chev" aria-hidden="true">▾</span>
+                </summary>
+                <div className="scg__body">
+                  {items.length > 0 ? (
+                    <ul className="scg__items">
+                      {items.map((it, i) => (
+                        <li key={i}><b className="scg__k">{it.kind}</b> {it.text}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="scg__none">Nothing flagged for this game yet.</p>
+                  )}
+                  <div className="scg__soon">
+                    <b>Arriving game week:</b> weather (wind &amp; rain — wind is our one measured edge), player
+                    incentives (contract bonuses in reach), referee assignment, and playoff stakes for late-season games.
+                  </div>
                 </div>
-              </div>
-            </details>
-          ))}
-        </div>
+              </details>
+            ))}
+          </div>
+        </details>
       )}
 
       {/* --- Referee crews (moved here from Upset Watch) --- */}

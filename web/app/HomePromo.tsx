@@ -41,7 +41,7 @@ export default function HomePromo() {
         <div className="hb-promo__cta">
           {member ? (
             <>
-              <a href="/lines" className="btn btn--primary">Explore the full board →</a>
+              <a href="/model" className="btn btn--primary">Explore The Model →</a>
               <a href="/forum" className="btn">Visit the Forums →</a>
             </>
           ) : (
