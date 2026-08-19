@@ -1,10 +1,17 @@
 import { weekRange, fetchWeek, buildBoard } from "@/lib/board";
 import { fetchModelWeek, type ModelPrediction } from "@/lib/model";
 import { weekRefs } from "@/lib/refAssignments";
-import { REF_STATS } from "@/lib/refStats";
+import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
 import { Brand, FlowSteps, ContextSubnav, SportTabs } from "../Nav";
 
 const refByName = new Map(REF_STATS.map((s) => [s.name, s]));
+
+/** The ONE crew tendency that persists year-to-year is the penalty rate. */
+function crewFlag(pen: number): { label: string; tone: "hot" | "cool" } | null {
+  if (pen >= REF_LEAGUE.pen + 0.8) return { label: "Flag-heavy", tone: "hot" };
+  if (pen <= REF_LEAGUE.pen - 0.8) return { label: "Lets them play", tone: "cool" };
+  return null;
+}
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -138,6 +145,48 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
           ))}
         </div>
       )}
+
+      {/* --- Referee crews (moved here from Upset Watch) --- */}
+      <details className="ctxsec ctxdrop">
+        <summary className="ctxsec__h">Referee crews</summary>
+        <div className="refbottom">
+          <span className="refbottom__k">Bottom line — what to actually use</span>
+          <p>
+            One crew tendency carries over year to year: <b>how many flags they throw</b>. Crews tagged
+            <b className="hot"> Flag-heavy</b> throw more than league average ({REF_LEAGUE.pen}/g) and
+            <b className="cool"> Lets them play</b> throw fewer — that&apos;s the real read (more flags = more
+            variance). The rest — average total, over/under lean, favorite vs underdog cover — is <b>historical
+            context, not a reliable lean</b>: mostly noise that doesn&apos;t carry to the next game. When a crew is
+            assigned game-week, its flag tendency shows up in that game&apos;s considerations above.
+          </p>
+        </div>
+        <div className="reftable">
+          <div className="refrow refrow--head">
+            <span>crew</span><span>games</span><span>read</span><span>pen/g</span><span>avg total</span><span>leans O/U</span><span>leans ATS</span>
+          </div>
+          {REF_STATS.map((r) => {
+            const flag = crewFlag(r.pen);
+            const ou = r.over >= 50 ? { d: "Over", p: r.over } : { d: "Under", p: 100 - r.over };
+            const ats = r.atsFav >= 50 ? { d: "Fav", p: r.atsFav } : { d: "Dog", p: 100 - r.atsFav };
+            return (
+              <div className="refrow" key={r.name}>
+                <span className="refrow__name">{r.name}</span>
+                <span className="refrow__v muted">{r.games}</span>
+                <span className="refrow__read">
+                  {flag ? <b className={flag.tone}>{flag.label}</b> : <span className="muted">Average flags</span>}
+                </span>
+                <span className={r.pen >= REF_LEAGUE.pen ? "refrow__v hot" : "refrow__v cool"}>{r.pen}</span>
+                <span className="refrow__v">{r.total}</span>
+                <span className="refrow__lean">{ou.d} {ou.p}%</span>
+                <span className="refrow__lean">{ats.d} {ats.p}%</span>
+              </div>
+            );
+          })}
+        </div>
+        <p className="ctxsec__note">
+          Historical crew tendencies, 2021–25. Assignments post during game week and map to each game above.
+        </p>
+      </details>
     </main>
   );
 }

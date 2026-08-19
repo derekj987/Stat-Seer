@@ -1,7 +1,6 @@
 import { weekRange, fetchWeek, buildBoard } from "@/lib/board";
 import { fetchModelWeek, type ModelPrediction } from "@/lib/model";
 import { MODEL_TOTALS } from "@/lib/modelTotals";
-import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
 import { weekRefs } from "@/lib/refAssignments";
 import { Brand, FlowSteps, ContextSubnav, SportTabs } from "../Nav";
 
@@ -69,14 +68,6 @@ function favLabel(home: string, away: string, spread: number | null): string {
   if (spread === null) return "—";
   if (spread === 0) return "PK";
   return spread < 0 ? `${home} ${spread.toFixed(1)}` : `${away} -${spread.toFixed(1)}`;
-}
-
-/** The ONE crew tendency that persists year-to-year is the penalty rate. Score/ATS
- * history is noise (tested), so the plain-English read is about flags only. */
-function crewFlag(pen: number): { label: string; tone: "hot" | "cool" } | null {
-  if (pen >= REF_LEAGUE.pen + 0.8) return { label: "Flag-heavy", tone: "hot" };
-  if (pen <= REF_LEAGUE.pen - 0.8) return { label: "Lets them play", tone: "cool" };
-  return null;
 }
 
 export default async function Page({ searchParams }: PageProps<"/context">) {
@@ -250,57 +241,6 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
             </div>
           </>
         )}
-      </details>
-
-      {/* --- Referee crews --- */}
-      <details className="ctxsec ctxdrop">
-        <summary className="ctxsec__h">Referee crews</summary>
-        <p className="ctxsec__d">
-          Every active crew chief&apos;s tendencies, 2021–25. <b>Penalties are a mild, real crew tendency</b> — a
-          flag-happy crew stays flag-happy. <b>Scoring and spread results are not</b>: how a crew&apos;s games land
-          against the total or the spread is essentially random and doesn&apos;t carry over — so those columns are
-          greyed as trivia, not a signal. League avg: {REF_LEAGUE.pen} penalties, {REF_LEAGUE.total} pts, fav
-          covers {REF_LEAGUE.atsFav}%.
-        </p>
-        <div className="refbottom">
-          <span className="refbottom__k">Bottom line — what to actually use</span>
-          <p>
-            One crew tendency carries over year to year: <b>how many flags they throw</b>. Crews tagged
-            <b className="hot"> Flag-heavy</b> throw noticeably more than league average ({REF_LEAGUE.pen}/g) and
-            <b className="cool"> Lets them play</b> throw fewer — that&apos;s the real read (more flags = more
-            variance: drives extended, drives killed). The rest — a crew&apos;s <b>average total</b>, how often
-            their games went <b>over</b>, and how often the <b>favorite</b> vs the <b>underdog</b> covered — is
-            <b> historical context</b>, not a reliable lean: it&apos;s mostly noise that doesn&apos;t carry to the
-            next game (league avg: {REF_LEAGUE.total} pts, {REF_LEAGUE.over}% over, favorite covers {REF_LEAGUE.atsFav}%).
-            Read it for interest, bet it at your own risk.
-          </p>
-        </div>
-        <div className="reftable">
-          <div className="refrow refrow--head">
-            <span>crew</span><span>read</span><span>pen/g</span><span>avg pts</span><span>over%</span><span>fav/dog ats</span>
-          </div>
-          {REF_STATS.map((r) => {
-            const flag = crewFlag(r.pen);
-            return (
-            <div className="refrow" key={r.name}>
-              <span className="refrow__name">{r.name} <span className="refrow__n">{r.games}g</span></span>
-              <span className="refrow__read">
-                {flag
-                  ? <b className={flag.tone}>{flag.label}</b>
-                  : <span className="muted">Average flags</span>}
-              </span>
-              <span className={r.pen >= REF_LEAGUE.pen ? "refrow__v hot" : "refrow__v cool"}>{r.pen}</span>
-              <span className={r.total >= REF_LEAGUE.total ? "refrow__v hot" : "refrow__v cool"}>{r.total}</span>
-              <span className="refrow__v">{r.over}%</span>
-              <span className="refrow__v" title="favorite covered / underdog covered, ATS">{r.atsFav}/{100 - r.atsFav}</span>
-            </div>
-            );
-          })}
-        </div>
-        <p className="ctxsec__note">
-          Per-game crew assignments post during game week — each week&apos;s games get mapped to their crew, and a
-          flag-heavy or lets-them-play crew becomes a line in that game&apos;s Special Considerations.
-        </p>
       </details>
 
       {/* --- Honest roadmap: data-dependent panels not yet live --- */}
