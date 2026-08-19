@@ -11,6 +11,8 @@ data/
 *.csv
 *.csv.gz
 *.parquet
+*.db
+*.sqlite
 !docs/**/*.csv
 
 # ---- Python
