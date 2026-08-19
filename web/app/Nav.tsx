@@ -30,27 +30,40 @@ export function FlowSteps({ active }: { active: "analyze" | "context" | "value" 
 
 // Sports on the roadmap. NFL is live; the rest turn on here as each is built + validated.
 // The vision: every sport gets the same layout across Home / The Model / Context / Value Finder.
+// Sports on the roadmap. NFL + NCAAF are live; the rest turn on here as each is
+// built + validated. `home` is where the sport's tab links. The vision: every sport
+// gets the same layout across Home / The Model / Context / Value Finder.
 export const SPORTS = [
-  { key: "nfl", label: "NFL", live: true },
-  { key: "ncaaf", label: "NCAAF", live: false },
-  { key: "mlb", label: "MLB", live: false },
-  { key: "nba", label: "NBA", live: false },
-  { key: "wnba", label: "WNBA", live: false },
-  { key: "soccer", label: "Soccer", live: false },
+  { key: "nfl", label: "NFL", live: true, home: "/" },
+  { key: "ncaaf", label: "NCAAF", live: true, home: "/ncaaf" },
+  { key: "mlb", label: "MLB", live: false, home: "" },
+  { key: "nba", label: "NBA", live: false, home: "" },
+  { key: "wnba", label: "WNBA", live: false, home: "" },
+  { key: "soccer", label: "Soccer", live: false, home: "" },
 ];
 
-/** Sport selector shown across The Model / Context / Value Finder. NFL active; rest "Soon". */
-export function SportTabs() {
+/** Sport selector shown across The Model / Context / Value Finder. Live sports link
+ *  to their section; `active` marks the current one; the rest read "Soon". */
+export function SportTabs({ active = "nfl" }: { active?: string }) {
   return (
     <div className="sporttabs" aria-label="Sport">
-      {SPORTS.map((s) => (
-        <span key={s.key}
-          className={s.live ? "sporttab sporttab--active" : "sporttab sporttab--soon"}
-          aria-current={s.live ? "page" : undefined}>
-          {s.label}
-          {!s.live && <em className="sporttab__soon">Soon</em>}
-        </span>
-      ))}
+      {SPORTS.map((s) => {
+        if (!s.live) {
+          return (
+            <span key={s.key} className="sporttab sporttab--soon">
+              {s.label}<em className="sporttab__soon">Soon</em>
+            </span>
+          );
+        }
+        const isActive = s.key === active;
+        return (
+          <a key={s.key} href={s.home}
+            className={isActive ? "sporttab sporttab--active" : "sporttab sporttab--link"}
+            aria-current={isActive ? "page" : undefined}>
+            {s.label}
+          </a>
+        );
+      })}
     </div>
   );
 }

@@ -292,7 +292,10 @@ body{background:var(--bg);color:var(--ink);
   font-size:13.5px;font-weight:700;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
 .sporttab--active{background:var(--accent-soft);color:var(--accent);
   border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+.sporttab--link{color:var(--ink);text-decoration:none}
+.sporttab--link:hover{border-color:color-mix(in srgb,var(--accent) 45%,transparent);color:var(--accent)}
 .sporttab--soon{color:var(--muted);opacity:.8;cursor:default}
+a.sporttab--active{text-decoration:none}
 .sporttab__soon{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-style:normal;
   color:#4a3c00;background:var(--spot);border-radius:20px;padding:1px 6px}
 .sportnote{font-size:12.5px;color:var(--muted);line-height:1.55;margin:4px 0 14px;max-width:72ch}
@@ -1522,4 +1525,54 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .ladder__row{grid-template-columns:44px 1fr}
   .ladder__bar{grid-column:2}
   .ladder__txt{grid-column:1 / -1}
+}
+
+/* ================= NCAAF — The Model ================= */
+.ncf-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+.ncf-card{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--surface);
+  display:flex;flex-direction:column;gap:4px}
+.ncf-card--good{border-color:color-mix(in srgb,var(--accent) 40%,var(--line));background:var(--accent-soft)}
+.ncf-card--flat{border-color:color-mix(in srgb,var(--mkt) 40%,var(--line));
+  background:color-mix(in srgb,var(--mkt) 8%,var(--surface))}
+.ncf-card__l{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.ncf-card__v{font-size:30px;font-weight:800;line-height:1;
+  font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;color:var(--ink)}
+.ncf-card--good .ncf-card__v{color:var(--accent)}
+.ncf-card--flat .ncf-card__v{color:var(--mkt)}
+.ncf-card__s{font-size:11.5px;color:var(--muted);line-height:1.45}
+
+.ncf-honest{border:1px solid color-mix(in srgb,var(--spot) 45%,var(--line));background:var(--spot-soft);
+  border-radius:12px;padding:14px 16px;margin:14px 0}
+.ncf-honest__tag{display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--spot-ink);margin-bottom:5px}
+.ncf-honest p{margin:0;font-size:13.5px;line-height:1.6}
+
+.ncf-sec{margin:22px 0 10px}
+.ncf-h{font-size:16px;margin:0 0 10px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.ncf-h__note{font-size:11.5px;font-weight:400;color:var(--muted)}
+.ncf-tbl{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.ncf-row{display:grid;grid-template-columns:40px 1fr 140px 72px;align-items:center;gap:8px;
+  padding:9px 14px;border-top:1px solid var(--line);font-size:14px}
+.ncf-row:first-child{border-top:0}
+.ncf-row--head{background:var(--surface-2);font-size:11px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--muted)}
+.ncf-row__rk{color:var(--muted);font-variant-numeric:tabular-nums}
+.ncf-row__tm{font-weight:700}
+.ncf-row__cf{font-size:12px;color:var(--muted)}
+.ncf-row__rt{text-align:right;font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent)}
+.ncf-note{font-size:12.5px;color:var(--muted);line-height:1.55;margin:10px 2px}
+
+.ncf-method{margin:16px 0;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.ncf-method__h{cursor:pointer;list-style:none;padding:12px 16px;font-weight:800;font-size:14px}
+.ncf-method__h::-webkit-details-marker{display:none}
+.ncf-method__h::after{content:"▾";float:right;color:var(--muted)}
+.ncf-method[open] .ncf-method__h::after{content:"▴"}
+.ncf-method__b{padding:0 16px 12px}
+.ncf-method__b ul{margin:0;padding-left:18px}
+.ncf-method__b li{margin:6px 0;font-size:13px;line-height:1.5}
+
+@media (max-width:720px){
+  .ncf-cards{grid-template-columns:1fr}
+  .ncf-row{grid-template-columns:30px 1fr 64px;gap:6px}
+  .ncf-row__cf{display:none}
 }
