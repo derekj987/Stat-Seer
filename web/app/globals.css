@@ -1084,8 +1084,10 @@ details.statsdrop .stats{margin:12px 0 0}
     padding:clamp(20px,2vw,40px) clamp(24px,5vw,72px) 96px clamp(24px,3vw,40px)}
   /* sticky so she stays pinned as the feed scrolls; the inner (right) edge feathers
      into the content via the mask. */
+  /* the seer sits on the right of a wide image, so focus the crop there to show
+     her (face + figure) rather than the dashboard wall at the center. */
   .tg-seerimg{position:sticky;top:0;height:100%;max-height:100vh;width:100%;
-    object-fit:cover;object-position:center 14%;
+    object-fit:cover;object-position:80% 28%;
     -webkit-mask-image:linear-gradient(90deg,#000 80%,transparent);
     mask-image:linear-gradient(90deg,#000 80%,transparent)}
 }
@@ -1224,9 +1226,13 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 /* seer-eyes strip across the top — mobile web app only (desktop has the full right seer) */
 .hb-mast__eyes{width:100%;height:92px;overflow:hidden;line-height:0;margin:6px 0 2px}
 .hb-mast__eyes img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
-.hb-mast__name{justify-self:start;text-decoration:none;color:var(--mkt);
+/* deep wine burgundy to match the crest (the token --mkt read too pink);
+   lightened just enough on the dark theme to stay legible on deep green. */
+.hb-mast__name{justify-self:start;text-decoration:none;color:#7d1a2a;
   font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;font-weight:400;
   font-size:clamp(30px,7vw,44px);line-height:1;letter-spacing:.02em}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hb-mast__name{color:#c06078}}
+:root[data-theme="dark"] .hb-mast__name{color:#c06078}
 .hb-mast__rule{border-top:1px solid var(--ink);border-bottom:3px double var(--ink)}
 .hb-strap{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:7px 0;
   font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
