@@ -133,6 +133,11 @@ export default async function Page() {
           <a href="/model"> The Model</a>; for where the price is wrong, <a href="/best">Sweet Spots</a>.
         </p>
       </footer>
+
+      <div className="tgseer" aria-hidden="true">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/newlogo.png" alt="" className="tgseer__img" width={1086} height={1448} />
+      </div>
     </main>
   );
 }

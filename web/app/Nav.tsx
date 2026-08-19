@@ -30,7 +30,7 @@ export function FlowSteps({ active }: { active: "analyze" | "context" | "value" 
 
 // Sports on the roadmap. NFL is live; the rest turn on here as each is built + validated.
 // The vision: every sport gets the same layout across Home / The Model / Context / Value Finder.
-const SPORTS = [
+export const SPORTS = [
   { key: "nfl", label: "NFL", live: true },
   { key: "ncaaf", label: "NCAAF", live: false },
   { key: "mlb", label: "MLB", live: false },

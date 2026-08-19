@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import MottoBar from "./MottoBar";
+import { SPORTS } from "./Nav";
 
 type Me = { username: string; role: string; title: string | null } | null;
 
@@ -115,6 +116,15 @@ export default function SiteNav() {
         <div className="snav__drawer" role="dialog" aria-label="Menu">
           <button className="snav__dclose" onClick={() => setOpen(false)} aria-label="Close menu">✕</button>
           <a href="/" className="snav__dtop">Home</a>
+
+          <details className="snav__pgroup" open>
+            <summary className="snav__dtop snav__psum">Popular</summary>
+            {SPORTS.map((s) => (
+              s.live
+                ? <a key={s.key} href="/" className="snav__dsub snav__dsport">{s.label}</a>
+                : <span key={s.key} className="snav__dsub snav__dsport snav__dsport--soon">{s.label}<em>Soon</em></span>
+            ))}
+          </details>
 
           <details className="snav__pgroup" open>
             <summary className="snav__dtop snav__psum">Featured Resources</summary>
