@@ -1415,7 +1415,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 }
 
 /* ================= How our model works ================= */
-.how2{max-width:760px}
+.how2{max-width:920px}
 .how2__hero{margin:20px 0 8px}
 .how2__h1{font-size:clamp(24px,4.5vw,34px);font-weight:800;line-height:1.15;letter-spacing:-.01em;
   margin:0 0 12px;text-wrap:balance}
