@@ -79,7 +79,8 @@ export default async function Page() {
   const feed = await weekTailgate(week, SEASON);
 
   return (
-    <main className="wrap">
+    <main className="tg">
+      <div className="tg-main">
       <header className="masthead">
         <Brand sub={`The Context · Fan Analysis · what fans are saying · Week ${week}, ${SEASON}`} />
       </header>
@@ -140,10 +141,13 @@ export default async function Page() {
           <a href="/model"> The Model</a>; for where the price is wrong, <a href="/best">Sweet Spots</a>.
         </p>
       </footer>
+      </div>
 
-      <div className="tgseer" aria-hidden="true">
+      {/* The seer runs static down the left rail on desktop (like the homepage seer
+          on the right); on mobile she drops below the feed in a framed card. */}
+      <div className="tg-side" aria-hidden="true">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/newimage.png" alt="" className="tgseer__img" width={1535} height={1024} />
+        <img src="/newimage.png" alt="" className="tg-seerimg" width={1535} height={1024} />
       </div>
     </main>
   );

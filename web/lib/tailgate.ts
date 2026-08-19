@@ -29,6 +29,8 @@ export interface Buzz {
   heat: Heat;         // magnitude of the move (in either direction)
   take: string;       // what the boards are actually saying, and why
   sources: BuzzSource[];
+  book?: string;      // sportsbook the prop is quoted at (illustrative in the seed;
+                      // the real book comes from the live prop board when it matches)
 }
 
 export interface TailgateWeek {
@@ -50,6 +52,7 @@ const SEED: Buzz[] = [
     team: "Bills",
     matchup: "BUF vs NYJ",
     angle: "OVER 74.5 rushing yards",
+    book: "DraftKings",
     direction: "up",
     heat: 3,
     take:
@@ -67,6 +70,7 @@ const SEED: Buzz[] = [
     team: "Ravens",
     matchup: "BAL vs CLE",
     angle: "OVER 5.5 receptions",
+    book: "FanDuel",
     direction: "up",
     heat: 2,
     take:
@@ -82,6 +86,7 @@ const SEED: Buzz[] = [
     team: "Broncos",
     matchup: "DEN vs TEN",
     angle: "OVER 38.5 receiving yards",
+    book: "BetMGM",
     direction: "up",
     heat: 2,
     take:
@@ -98,6 +103,7 @@ const SEED: Buzz[] = [
     team: "Falcons",
     matchup: "ATL vs CAR",
     angle: "OVER 44.5 receiving yards",
+    book: "Caesars",
     direction: "up",
     heat: 1,
     take:
@@ -113,6 +119,7 @@ const SEED: Buzz[] = [
     team: "Cowboys",
     matchup: "DAL vs NYG",
     angle: "ANYTIME TD",
+    book: "DraftKings",
     direction: "up",
     heat: 1,
     take:
@@ -128,6 +135,7 @@ const SEED: Buzz[] = [
     team: "Steelers",
     matchup: "PIT vs ATL",
     angle: "UNDER 58.5 receiving yards",
+    book: "FanDuel",
     direction: "down",
     heat: 2,
     take:
@@ -143,6 +151,7 @@ const SEED: Buzz[] = [
     team: "Lions",
     matchup: "DET vs GB",
     angle: "UNDER 68.5 rushing yards",
+    book: "BetMGM",
     direction: "down",
     heat: 1,
     take:
