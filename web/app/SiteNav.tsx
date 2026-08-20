@@ -73,15 +73,15 @@ export default function SiteNav() {
           <span /><span /><span />
         </button>
 
-        {/* Main StatSeer wordmark + tagline + crest — the brand block in the top bar,
-            right of the hamburger (moved up from the homepage masthead). Wordmark and
-            tagline are a lockup: inline on desktop, stacked (tagline beneath) on phones
-            so the tagline still shows next to StatSeer. */}
+        {/* Main StatSeer wordmark + tagline — the brand block in the top bar, right of
+            the hamburger (moved up from the homepage masthead). Wordmark and tagline are
+            a lockup: inline on desktop, stacked (tagline beneath) on phones so the tagline
+            still shows next to StatSeer. The crest lives over in snav__right, just left of
+            the Create-an-Account button. */}
         <span className="snav__brandlock">
           <a href="/" className="snav__brand">StatSeer</a>
           <span className="snav__tagline">Arm yourself with data-driven decisions.</span>
         </span>
-        <span className="snav__crest" role="img" aria-label="StatSeer crest" />
 
         <nav className="snav__links" aria-label="Primary">
           {LINKS.map((l) => (
@@ -90,6 +90,7 @@ export default function SiteNav() {
         </nav>
 
         <div className="snav__right">
+          <span className="snav__crest" role="img" aria-label="StatSeer crest" />
           {me === null && <a href="/signup" className="snav__signup">Create an Account</a>}
           {me === undefined ? (
             <span className="snav__slot" />

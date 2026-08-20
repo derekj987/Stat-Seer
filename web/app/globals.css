@@ -909,28 +909,32 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .snav__brandlock{flex:0 1 auto;min-width:0;display:flex;align-items:center}
 .snav__brand{flex:0 0 auto;padding-left:4px;text-decoration:none;white-space:nowrap;
   font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;font-weight:400;
-  font-size:23px;line-height:1;letter-spacing:.02em;color:#7d1a2a}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .snav__brand{color:#a8354c}}
-:root[data-theme="dark"] .snav__brand{color:#a8354c}
+  font-size:23px;line-height:1;letter-spacing:.02em;color:#6a0f1c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .snav__brand{color:#a92133}}
+:root[data-theme="dark"] .snav__brand{color:#a92133}
 .snav__tagline{flex:0 1 auto;min-width:0;padding-left:8px;white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis;font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;
   font-size:13px;font-style:italic;letter-spacing:.01em;color:var(--muted)}
-.snav__crest{flex:0 0 auto;width:38px;height:38px;margin-left:2px;
+/* Crest now lives in snav__right (far right, just left of the Create-an-Account button);
+   the flex gap spaces it, so no side margin needed. */
+.snav__crest{flex:0 0 auto;width:38px;height:38px;
   background:url(/crest.png?v=2) center/contain no-repeat}
 /* Phones: stack the tagline beneath the wordmark (it was hidden before) and shrink
-   the crest so the lockup fits beside the burger. */
+   the crest so the right cluster stays compact. */
 @media (max-width:640px){
   .snav__brandlock{flex-direction:column;align-items:flex-start;line-height:1.05}
   .snav__brand{font-size:20px}
   .snav__tagline{padding-left:5px;font-size:10px;max-width:60vw}
-  .snav__crest{width:26px;height:26px;margin-left:4px}
+  .snav__crest{width:22px;height:22px}
 }
 @media (max-width:400px){.snav__brand{font-size:18px} .snav__tagline{font-size:9.5px;max-width:56vw}
-  .snav__crest{width:23px;height:23px}}
+  .snav__crest{width:19px;height:19px}}
 .snav__signup{flex:0 0 auto;padding:6px 13px;border-radius:9px;background:var(--accent);
   color:#fff;text-decoration:none;font-size:13px;font-weight:700;white-space:nowrap}
 .snav__signup:hover{filter:brightness(1.06)}
 @media (max-width:820px){.snav__signup{font-size:12px;padding:6px 10px}}
+/* small Create-an-Account button on phones (after the 820 rule so it wins the cascade) */
+@media (max-width:480px){.snav__signup{font-size:11px;padding:5px 9px}}
 .snav__links{display:flex;align-items:center;gap:2px}
 .snav__link{padding:7px 12px;border-radius:8px;text-decoration:none;font-size:13.5px;
   font-weight:600;color:var(--muted);white-space:nowrap}
@@ -1276,11 +1280,11 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-mast__eyes img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
 /* deep wine burgundy to match the crest (the token --mkt read too pink);
    lightened just enough on the dark theme to stay legible on deep green. */
-.hb-mast__name{justify-self:start;text-decoration:none;color:#7d1a2a;
+.hb-mast__name{justify-self:start;text-decoration:none;color:#6a0f1c;
   font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;font-weight:400;
   font-size:clamp(30px,7vw,44px);line-height:1;letter-spacing:.02em}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hb-mast__name{color:#a8354c}}
-:root[data-theme="dark"] .hb-mast__name{color:#a8354c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hb-mast__name{color:#a92133}}
+:root[data-theme="dark"] .hb-mast__name{color:#a92133}
 .hb-mast__rule{border-bottom:1px solid var(--ink)}
 .hb-strap{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:7px 0;
   font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
