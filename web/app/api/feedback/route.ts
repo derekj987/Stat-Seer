@@ -30,7 +30,7 @@ export async function POST(req: Request) {
   const from = process.env.FEEDBACK_FROM || "StatSeer Feedback <feedback@statseer.info>";
 
   // No email service configured yet — the submission still lives in the /feedback inbox.
-  if (!key) return NextResponse.json({ ok: true, emailed: false });
+  if (!key) return NextResponse.json({ ok: true, emailed: false, reason: "no-key", from });
 
   try {
     const res = await fetch("https://api.resend.com/emails", {
@@ -48,8 +48,10 @@ export async function POST(req: Request) {
           `\nReview all feedback: https://statseer.vercel.app/feedback`,
       }),
     });
-    return NextResponse.json({ ok: true, emailed: res.ok });
-  } catch {
-    return NextResponse.json({ ok: true, emailed: false });
+    if (res.ok) return NextResponse.json({ ok: true, emailed: true });
+    const detail = await res.text().catch(() => "");
+    return NextResponse.json({ ok: true, emailed: false, reason: "resend-rejected", status: res.status, detail, from });
+  } catch (e) {
+    return NextResponse.json({ ok: true, emailed: false, reason: "fetch-threw", err: String(e) });
   }
 }
