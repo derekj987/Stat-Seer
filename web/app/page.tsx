@@ -233,6 +233,8 @@ export default async function Home() {
   return (
     <main className="hb">
       <div className="hb-main">
+      {/* eyes strip + sports bar pinned together below the site bar as the feed scrolls */}
+      <div className="hb-topstick">
       <header className="hb-mast">
         <div className="hb-mast__eyes">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -244,6 +246,7 @@ export default async function Home() {
       </header>
 
       <SportStrip />
+      </div>
 
       <div className="hb-weeklabel">NFL Week {data.week} · {data.season}</div>
       <TheCard rows={data.card} />

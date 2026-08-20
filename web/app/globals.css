@@ -982,7 +982,7 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .snav__dcrest{width:22px;height:22px;object-fit:contain;flex:0 0 auto}
 .snav__psum{list-style:none;display:flex;align-items:center}
 .snav__psum::-webkit-details-marker{display:none}
-.snav__psum::after{content:"▸";margin-left:auto;font-size:13px;color:var(--gold)}
+.snav__psum::after{content:"▸";margin-left:8px;font-size:16px;line-height:1;color:var(--gold)}
 .snav__pgroup[open] .snav__psum::after{content:"▾"}
 /* The Model / Context / Value Finder under a sport: smaller than the top-level
    items, staggered in under the section, in a warm gold that's easier on the eye
@@ -1002,7 +1002,7 @@ a.snav__dfeat{display:block}
 .snav__sportname{color:var(--muted);text-decoration:none;letter-spacing:.02em;
   font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;font-size:17px;font-weight:400}
 .snav__sportname:hover{color:var(--accent)}
-.snav__sportchev{margin-left:auto;font-size:13px;color:var(--muted);transition:transform .15s ease}
+.snav__sportchev{margin-left:8px;font-size:16px;line-height:1;color:var(--muted);transition:transform .15s ease}
 .snav__sportgroup[open]>.snav__sportsum .snav__sportchev{transform:rotate(180deg)}
 .snav__dsport{display:flex;align-items:center;justify-content:space-between;width:100%;
   padding:9px 10px 9px 18px;text-decoration:none;letter-spacing:.02em;
@@ -1249,6 +1249,11 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 /* ================= Home — "The Model Edition" broadsheet ================= */
 .hb{max-width:1000px;margin:0 auto;padding:clamp(12px,3vw,26px) clamp(16px,4vw,24px) 44px}
 .hb-main{min-width:0}
+/* The seer-eyes strip + sports bar stay pinned below the sticky site bar as the feed
+   scrolls (they're a single sticky unit so they hold together). --navh ~= the site bar
+   height so this parks just beneath it. */
+:root{--navh:51px}
+.hb-topstick{position:sticky;top:var(--navh);z-index:40;background:var(--bg)}
 .hb-side{margin-top:22px}
 .hb-seerimg{display:block;width:66%;height:auto;margin:0 auto}
 /* Phone: the seer-eyes strip + nameplate row stay pinned below the site bar as the
