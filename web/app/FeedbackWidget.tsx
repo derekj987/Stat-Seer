@@ -35,6 +35,12 @@ export default function FeedbackWidget() {
         path,
       });
       if (error) throw error;
+      // Best-effort email to the team inbox — never block the UX on it (the row is saved).
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg.trim(), email: email.trim() || null, path }),
+      }).catch(() => {});
       setStatus("done");
       setMsg(""); setEmail("");
     } catch {
