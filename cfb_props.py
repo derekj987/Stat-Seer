@@ -98,7 +98,18 @@ def main(argv=None):
     ap.add_argument("--markets", default=DEFAULT_MARKETS)
     ap.add_argument("--regions", default="us")
     ap.add_argument("--dry-run", action="store_true", help="fetch + report, but do not write")
+    ap.add_argument("--log", default=None,
+                    help="append the run summary here (default: <db dir>/cfb_props.log)")
     args = ap.parse_args(argv)
+
+    # Self-log so a scheduled run records what it did without relying on shell
+    # stdout redirection (Task Scheduler doesn't reliably capture it).
+    log_path = args.log or os.path.join(os.path.dirname(os.path.abspath(args.db)), "cfb_props.log")
+    log_lines = []
+
+    def emit(msg):
+        print(msg)
+        log_lines.append(msg)
 
     oc.ensure_ssl_certs()
     key = oc.load_env().get("ODDS_API_KEY")
@@ -120,8 +131,8 @@ def main(argv=None):
         if now <= ct <= horizon:
             upcoming.append(e)
     upcoming = upcoming[:args.max_events]
-    print(f"{len(events)} NCAAF events posted; {len(upcoming)} kick off within "
-          f"{args.within_days} days (polling those).")
+    emit(f"[{snapshot_at}] {len(events)} NCAAF events posted; {len(upcoming)} kick off "
+         f"within {args.within_days} days (polling those).")
 
     conn = None
     if not args.dry_run:
@@ -143,12 +154,19 @@ def main(argv=None):
         conn.commit()
         conn.close()
 
-    print(f"  {with_props}/{len(upcoming)} games had props; {total_rows} prop rows "
-          f"{'(dry-run, not written)' if args.dry_run else 'stored'}. "
-          f"credits remaining: {remaining}")
+    emit(f"  {with_props}/{len(upcoming)} games had props; {total_rows} prop rows "
+         f"{'(dry-run, not written)' if args.dry_run else 'stored'}. "
+         f"credits remaining: {remaining}")
     if with_props == 0:
-        print("  No props posted yet (normal >3-4 days out). Schedule this daily as the "
-              "openers approach -- prop history only exists if captured on the day.")
+        emit("  No props posted yet (normal >3-4 days out). Schedule this daily as the "
+             "openers approach -- prop history only exists if captured on the day.")
+
+    try:
+        os.makedirs(os.path.dirname(os.path.abspath(log_path)), exist_ok=True)
+        with open(log_path, "a", encoding="utf-8") as f:
+            f.write("\n".join(log_lines) + "\n")
+    except OSError:
+        pass
     return 0
 
 
