@@ -3,7 +3,6 @@
 // honest: model columns read "—" until the week's predictions lock (see lib/home.ts).
 import { fetchHome, type CardRow, type UpsetRow, type PlayerPick } from "@/lib/home";
 import AddToSlip from "./AddToSlip";
-import HomePromo from "./HomePromo";
 import SportStrip from "./SportStrip";
 
 export const revalidate = 120;
@@ -252,37 +251,6 @@ export default async function Home() {
       <TheCard rows={data.card} />
       <Upsets rows={data.upsets} />
       <PlayersWeLike players={data.players} />
-
-      <HomePromo />
-
-      <details className="hb-slipf">
-        <summary className="hb-slipf__bar">
-          <span className="hb-slipf__ic" aria-hidden="true">🎟️</span>
-          <span className="hb-slipf__h">Build your own bet slip — we tell you where to place it</span>
-          <span className="hb-tav__right">
-            <span className="hb-tav__ic hb-tav__ic--shut" aria-hidden="true">🍺</span>
-            <span className="hb-tav__ic hb-tav__ic--open" aria-hidden="true">🍻</span>
-            <span className="hb-tav__chev" aria-hidden="true">▾</span>
-          </span>
-        </summary>
-        <div className="hb-slipf__body">
-          <p className="hb-slipf__p">
-            Tap any pick anywhere on StatSeer — a model suggestion, a moneyline, a spread, a prop — and it
-            lands on your slip. When you&apos;re ready, we show you the <b>single best sportsbook for every
-            leg</b>, and for a parlay, the <b>one book with the best combined price</b>. Same bets, better
-            numbers — you never leave value on the table.
-          </p>
-          <div className="hb-slipf__steps">
-            <div className="hb-slipf__step"><span className="hb-slipf__n">1</span><b>Add your picks</b><span>Tap to save anything you like as you read the board.</span></div>
-            <div className="hb-slipf__step"><span className="hb-slipf__n">2</span><b>We shop it</b><span>StatSeer compares every book and finds the best price.</span></div>
-            <div className="hb-slipf__step"><span className="hb-slipf__n">3</span><b>You place it</b><span>Bet at the book we name — the same wager at a better number.</span></div>
-          </div>
-          <div className="hb-slipf__cta">
-            <a href="/lines" className="btn btn--primary">Start a slip →</a>
-            <a href="/how" className="btn">How it works →</a>
-          </div>
-        </div>
-      </details>
 
       <section className="hb-nav3">
         <h2 className="hb-nav3__h">There&apos;s a lot more inside</h2>

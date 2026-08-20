@@ -103,11 +103,16 @@ function lineSide(rows: OddsRow[], want: "max" | "min"): Line | null {
   return { point: tgt, price, books };
 }
 
+// Books trade in half-points, but a median across an even number of books can land on
+// a quarter (e.g. median of 49.0 and 49.5 = 49.25). Snap the consensus to the nearest
+// half so what we show is always a real, bettable number.
+const halfPt = (x: number) => Math.round(x * 2) / 2;
+
 function spread(rows: OddsRow[], home: string, away: string): Game["spread"] {
   const sides: Record<string, OddsRow[]> = {};
   for (const r of rows) (sides[r.outcome_name] ??= []).push(r);
   const homePts = (sides[home] ?? []).map((r) => r.outcome_point).filter((p): p is number => p !== null);
-  const consensus = homePts.length ? median(homePts) : null;
+  const consensus = homePts.length ? halfPt(median(homePts)) : null;
   const key = consensus !== null && KEY_NUMBERS[Math.abs(consensus)]
     ? { num: Math.abs(consensus), cost: KEY_NUMBERS[Math.abs(consensus)] }
     : null;
@@ -123,7 +128,7 @@ function total(rows: OddsRow[]): Game["total"] {
   const sides: Record<string, OddsRow[]> = {};
   for (const r of rows) (sides[r.outcome_name] ??= []).push(r);
   const pts = rows.map((r) => r.outcome_point).filter((p): p is number => p !== null);
-  const consensus = pts.length ? median(pts) : null;
+  const consensus = pts.length ? halfPt(median(pts)) : null;
   const key = consensus !== null && TOTAL_KEY_NUMBERS[consensus]
     ? { num: consensus, cost: TOTAL_KEY_NUMBERS[consensus] }
     : null;

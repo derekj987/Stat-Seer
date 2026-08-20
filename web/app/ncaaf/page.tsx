@@ -1,6 +1,5 @@
 import { NCAAF_MODEL, type NcaafCardGame, type NcaafUpset } from "./model-data";
 import SportStrip from "../SportStrip";
-import HomePromo from "../HomePromo";
 
 // College Football home — mirrors the NFL homepage broadsheet: The Card (model vs
 // market), Potential Upsets, Players We Like, promo, and the 3-section nav. The Card
@@ -191,8 +190,6 @@ export default function Home() {
       <TheCard games={c.games} />
       <Upsets rows={c.upsets} />
       <PlayersWeLike />
-
-      <HomePromo />
 
       <section className="hb-nav3">
         <h2 className="hb-nav3__h">There&apos;s a lot more inside</h2>
