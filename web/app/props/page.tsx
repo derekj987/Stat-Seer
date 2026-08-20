@@ -67,8 +67,8 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
     <main className="wrap">
       <header className="masthead">
         <Brand sub={isPre
-          ? `Value Finder · Player Props · Preseason · ${SEASON}`
-          : `Value Finder · Player Props · ${cat.label} · Week ${week}, ${SEASON}`} />
+          ? `Value Finder · Player Props · Preseason`
+          : `Value Finder · Player Props · ${cat.label}`} />
         {!isPre && snap && <div className="asof">props as of<br /><b>{et(snap)}</b></div>}
       </header>
 

@@ -88,7 +88,7 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={`Value Finder · Sweet Spots · Week ${week}, ${SEASON}`} />
+        <Brand sub={`Value Finder · Sweet Spots`} />
       </header>
 
       <FlowSteps active="value" />
