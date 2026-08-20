@@ -239,7 +239,8 @@ export default async function Home() {
           <img src="/seereyes.png" alt="" width={1983} height={793} />
         </div>
         <div className="hb-mast__row">
-          <a href="/" className="hb-mast__name">StatSeer</a>
+          {/* StatSeer wordmark moved up to the top bar; the masthead keeps the tagline
+              and crest. */}
           <span className="hb-mast__tag">Arm yourself with data-driven decisions.</span>
           {/* Crest art lives at web/public/crest.png. Rendered as a background so a
               missing file degrades to empty rather than a broken-image icon. */}

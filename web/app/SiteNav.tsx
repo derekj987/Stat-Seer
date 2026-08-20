@@ -8,7 +8,6 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import MottoBar from "./MottoBar";
 import { SPORTS } from "./Nav";
 
 type Me = { username: string; role: string; title: string | null } | null;
@@ -74,7 +73,9 @@ export default function SiteNav() {
           <span /><span /><span />
         </button>
 
-        {me === null && <a href="/signup" className="snav__signup">Create an Account</a>}
+        {/* Main StatSeer wordmark — lives in the top bar on every page, right of the
+            hamburger (replaced the old rotating motto). */}
+        <a href="/" className="snav__brand">StatSeer</a>
 
         <nav className="snav__links" aria-label="Primary">
           {LINKS.map((l) => (
@@ -82,9 +83,8 @@ export default function SiteNav() {
           ))}
         </nav>
 
-        <MottoBar />
-
         <div className="snav__right">
+          {me === null && <a href="/signup" className="snav__signup">Create an Account</a>}
           {me === undefined ? (
             <span className="snav__slot" />
           ) : me ? (
