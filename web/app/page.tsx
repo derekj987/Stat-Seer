@@ -4,6 +4,7 @@
 import { fetchHome, type CardRow, type UpsetRow, type PlayerPick } from "@/lib/home";
 import AddToSlip from "./AddToSlip";
 import HomePromo from "./HomePromo";
+import SportStrip from "./SportStrip";
 
 export const revalidate = 120;
 const SEASON = 2026;
@@ -246,6 +247,8 @@ export default async function Home() {
         </div>
         <div className="hb-mast__rule"></div>
       </header>
+
+      <SportStrip />
 
       <div className="hb-weeklabel">NFL Week {data.week} · {data.season}</div>
       <TheCard rows={data.card} />

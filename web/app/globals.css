@@ -300,10 +300,10 @@ a.sporttab--active{text-decoration:none}
   color:#4a3c00;background:var(--spot);border-radius:20px;padding:1px 6px}
 .sportnote{font-size:12.5px;color:var(--muted);line-height:1.55;margin:4px 0 14px;max-width:72ch}
 
-/* Global sports strip — thin bar under the site header, on every page. Scrolls
-   horizontally on a phone so it stays one thin line. */
-.sportstrip{border-bottom:1px solid var(--line);background:var(--surface-2)}
-.sportstrip__in{display:flex;gap:2px;overflow-x:auto;max-width:1120px;margin:0 auto;padding:0 8px;
+/* Sports strip — a thin tab row on the homepage, under the masthead rule and above
+   the week label. Scrolls horizontally on a phone so it stays one thin line. */
+.sportstrip{border-bottom:1px solid var(--line);margin:2px 0 0}
+.sportstrip__in{display:flex;gap:2px;overflow-x:auto;padding:0;
   scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .sportstrip__in::-webkit-scrollbar{display:none}
 .sportstrip__i{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;padding:9px 14px;

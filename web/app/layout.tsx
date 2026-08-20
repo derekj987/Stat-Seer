@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { MedievalSharp } from "next/font/google";
 import "./globals.css";
 import SiteNav from "./SiteNav";
-import SportStrip from "./SportStrip";
 import SlipBar from "./SlipBar";
 
 // Medieval display face for the STATSEER wordmark, exposed as a CSS var so any
@@ -33,7 +32,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={medieval.variable}>
       <body>
         <SiteNav />
-        <SportStrip />
         {children}
         <SlipBar />
         <footer className="sitefoot">
