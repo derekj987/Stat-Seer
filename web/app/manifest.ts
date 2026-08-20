@@ -14,12 +14,14 @@ export default function manifest(): MetadataRoute.Manifest {
     orientation: "portrait",
     background_color: "#0c2b1c",
     theme_color: "#0c2b1c",
-    // Full-bleed icon: golden seer circle + STATSEER wordmark on black. No maskable
-    // variant — Android center-crops maskable icons, which would cut the wordmark and
-    // the ring; as "any" it's shown whole (with rounded corners) so both survive.
+    // Full-bleed icon: the seer fills a golden ring on a dark ground, STATSEER at the
+    // bottom. It's maskable-safe (ring + text inside the ~84% safe zone), so the same
+    // art serves "any" AND "maskable" — Android uses the maskable and drops the white
+    // square, while the ring/text still survive the circle crop.
     icons: [
-      { src: "/icon-192.png?v=11", sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: "/icon-512.png?v=11", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: "/icon-192.png?v=12", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/icon-512.png?v=12", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: "/icon-maskable-512.png?v=12", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
   };
 }

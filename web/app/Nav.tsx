@@ -90,7 +90,8 @@ export function SlipCallout({ kind }: { kind: "lines" | "props" }) {
   );
 }
 
-/** Masthead brand: logo mark + STATSEER wordmark + a section subtitle (string or node). */
+/** Masthead brand: logo mark + a section subtitle. The "StatSeer" wordmark lives in
+ *  the global top bar now, so the masthead no longer repeats it. */
 export function Brand({ sub }: { sub: import("react").ReactNode }) {
   return (
     <div className="brand">
@@ -99,7 +100,6 @@ export function Brand({ sub }: { sub: import("react").ReactNode }) {
         <img src="/logo-mark.png?v=4" alt="StatSeer" className="brand__logo" width={46} height={46} />
       </a>
       <div className="brand__text">
-        <a href="/" className="brand__marklink"><span className="brand__mark">STATSEER</span></a>
         {sub ? <span className="brand__sub">{sub}</span> : null}
       </div>
     </div>
