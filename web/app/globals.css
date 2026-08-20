@@ -1422,10 +1422,16 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 
 /* "Build your own bet slip" home feature — our where-to-place-it differentiator */
 .hb-slipf{margin-top:20px;border:1px solid color-mix(in srgb,var(--accent) 32%,var(--line));
-  border-radius:14px;background:var(--surface-2);padding:18px 20px}
-.hb-slipf__hd{display:flex;gap:14px;align-items:flex-start}
-.hb-slipf__ic{font-size:30px;line-height:1;flex:0 0 auto}
-.hb-slipf__h{font-size:18px;font-weight:800;letter-spacing:-.01em;margin:0 0 6px}
+  border-radius:14px;background:var(--surface-2);overflow:hidden}
+.hb-slipf__bar{list-style:none;display:flex;align-items:center;gap:12px;padding:15px 18px;cursor:pointer}
+.hb-slipf__bar::-webkit-details-marker{display:none}
+.hb-slipf__body{border-top:1px solid color-mix(in srgb,var(--accent) 26%,var(--line));padding:18px 20px}
+.hb-slipf__ic{font-size:26px;line-height:1;flex:0 0 auto}
+.hb-slipf__h{font-size:17px;font-weight:800;letter-spacing:-.01em;margin:0}
+/* the betslip dropdown shares the tavern's cheering-mugs + chevron toggle */
+.hb-slipf[open] .hb-tav__ic--shut{display:none}
+.hb-slipf[open] .hb-tav__ic--open{display:inline}
+.hb-slipf[open] .hb-tav__chev{transform:rotate(180deg)}
 .hb-slipf__p{font-size:13.5px;color:var(--muted);line-height:1.6;margin:0;max-width:62ch}
 .hb-slipf__p b{color:var(--ink)}
 .hb-slipf__steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
