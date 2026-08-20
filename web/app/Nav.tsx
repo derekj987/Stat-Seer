@@ -7,11 +7,16 @@
 //   Context      — what to understand (informs, doesn't vote)
 
 /** The guided journey: analyze → read the context → find the best price. */
-export function FlowSteps({ active }: { active: "analyze" | "context" | "value" }) {
+export function FlowSteps({ active, base = "nfl" }: {
+  active: "analyze" | "context" | "value"; base?: "nfl" | "ncaaf";
+}) {
+  const hrefs = base === "ncaaf"
+    ? { analyze: "/ncaaf", context: "/ncaaf/context", value: "/ncaaf/value" }
+    : { analyze: "/model", context: "/context", value: "/lines" };
   const steps = [
-    { key: "analyze", n: "1", label: "The Model", sub: "make your analysis", href: "/model" },
-    { key: "context", n: "2", label: "Context", sub: "read the room", href: "/context" },
-    { key: "value", n: "3", label: "Value Finder", sub: "find the best price", href: "/lines" },
+    { key: "analyze", n: "1", label: "The Model", sub: "make your analysis", href: hrefs.analyze },
+    { key: "context", n: "2", label: "Context", sub: "read the room", href: hrefs.context },
+    { key: "value", n: "3", label: "Value Finder", sub: "find the best price", href: hrefs.value },
   ] as const;
   return (
     <nav className="flow" aria-label="How to use StatSeer">

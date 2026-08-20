@@ -1,5 +1,6 @@
 import { Brand, FlowSteps, SportTabs } from "../Nav";
 import { NCAAF_MODEL, type NcaafTeam } from "./model-data";
+import { StatCard } from "./StatCard";
 
 // College Football — The Model. A line-blind power rating, published with its real
 // out-of-sample track record: it predicts as well as a mature Elo, and we've verified
@@ -12,16 +13,6 @@ export const metadata = {
 
 const M = NCAAF_MODEL;
 
-function StatCard({ label, value, sub, tone }: { label: string; value: string; sub: string; tone?: "good" | "flat" }) {
-  return (
-    <div className={`ncf-card${tone ? ` ncf-card--${tone}` : ""}`}>
-      <span className="ncf-card__l">{label}</span>
-      <span className="ncf-card__v">{value}</span>
-      <span className="ncf-card__s">{sub}</span>
-    </div>
-  );
-}
-
 export default function Page() {
   const v = M.validation;
   const a = M.ats;
@@ -33,7 +24,7 @@ export default function Page() {
         <Brand sub={`The Model · College Football · line-blind power rating · ${M.season}`} />
       </header>
 
-      <FlowSteps active="analyze" />
+      <FlowSteps active="analyze" base="ncaaf" />
       <SportTabs active="ncaaf" />
 
       <section className="explainer">

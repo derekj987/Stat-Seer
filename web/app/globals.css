@@ -1567,6 +1567,20 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .ncf-row__rt{text-align:right;font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent)}
 .ncf-note{font-size:12.5px;color:var(--muted);line-height:1.55;margin:10px 2px}
 
+/* key-number ladder (Value Finder). Bar is decorative; the % text is the reliable
+   readout, and the fill color is hardcoded + forced-color-adjust so it never renders
+   blank under a forced-colors / high-contrast mode. */
+.ncf-key{border:1px solid var(--line);border-radius:12px;padding:4px 14px;background:var(--surface)}
+.ncf-keyrow{display:grid;grid-template-columns:52px 1fr 54px 78px;align-items:center;gap:10px;
+  padding:10px 0;border-top:1px solid var(--line)}
+.ncf-keyrow:first-child{border-top:0}
+.ncf-keyrow__m{font-weight:800;font-variant-numeric:tabular-nums}
+.ncf-keyrow__track{height:12px;border-radius:6px;background:var(--surface-2);
+  border:1px solid var(--line);overflow:hidden}
+.ncf-keyrow__fill{display:block;height:100%;border-radius:6px;background:#35b06a;forced-color-adjust:none}
+.ncf-keyrow__p{font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent);text-align:right}
+.ncf-keyrow__nfl{font-size:11.5px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+
 .ncf-method{margin:16px 0;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
 .ncf-method__h{cursor:pointer;list-style:none;padding:12px 16px;font-weight:800;font-size:14px}
 .ncf-method__h::-webkit-details-marker{display:none}
@@ -1580,4 +1594,8 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .ncf-cards{grid-template-columns:1fr}
   .ncf-row{grid-template-columns:30px 1fr 64px;gap:6px}
   .ncf-row__cf{display:none}
+}
+@media (max-width:560px){
+  .ncf-keyrow{grid-template-columns:46px 1fr 48px}
+  .ncf-keyrow__nfl{display:none}
 }
