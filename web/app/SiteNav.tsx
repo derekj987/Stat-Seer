@@ -151,6 +151,21 @@ export default function SiteNav() {
               </div>
             </details>
 
+            {/* NCAAF — live, same template as NFL. Its Model / Context / Value Finder
+                are single consolidated pages for now (the per-subpage CFB data isn't
+                flowing yet), so they're direct links rather than nested dropdowns. */}
+            <details className="snav__pgroup snav__sportgroup">
+              <summary className="snav__sportsum">
+                <a href="/ncaaf" className="snav__sportname" onClick={(e) => e.stopPropagation()}>NCAAF</a>
+                <span className="snav__sportchev" aria-hidden="true">▾</span>
+              </summary>
+              <div className="snav__sportkids">
+                <a href="/ncaaf" className="snav__dfeat">The Model</a>
+                <a href="/ncaaf/context" className="snav__dfeat">Context</a>
+                <a href="/ncaaf/value" className="snav__dfeat">Value Finder</a>
+              </div>
+            </details>
+
             {SPORTS.filter((s) => !s.live).map((s) => (
               <span key={s.key} className="snav__dsport snav__dsport--soon">{s.label}<em>Soon</em></span>
             ))}
