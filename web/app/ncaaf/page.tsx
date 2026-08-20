@@ -1,106 +1,116 @@
-import { Brand, FlowSteps } from "../Nav";
-import { NCAAF_MODEL, type NcaafTeam } from "./model-data";
-import { StatCard } from "./StatCard";
+import { NCAAF_MODEL, type NcaafCardGame } from "./model-data";
+import SportStrip from "../SportStrip";
+import HomePromo from "../HomePromo";
 
-// College Football — The Model. A line-blind power rating, published with its real
-// out-of-sample track record: it predicts as well as a mature Elo, and we've verified
-// it does NOT beat the closing spread. That honesty is the point — this is Context /
-// trust, not a pick driver ("panels inform, they do not vote").
+// College Football home — mirrors the NFL homepage broadsheet. The Card is our
+// LINE-BLIND read: the power rating's projected margin for the week's marquee games,
+// before any market. Not a pick (the rating doesn't beat the spread — see The Model).
 export const metadata = {
-  title: "StatSeer — College Football Model",
-  description: "A line-blind CFB power rating, graded in public. Verified honest: predicts well, doesn't beat the market.",
+  title: "StatSeer — College Football",
+  description: "College football read line-blind — our power-rating projection for the week's marquee games, plus the honest track record.",
 };
 
 const M = NCAAF_MODEL;
 
-export default function Page() {
-  const v = M.validation;
-  const a = M.ats;
-  const beatsMarket = a.atsPct > a.breakeven;
-
+function TheCard({ games }: { games: readonly NcaafCardGame[] }) {
   return (
-    <main className="wrap">
-      <header className="masthead">
-        <Brand sub={`The Model · College Football · line-blind power rating · ${M.season}`} />
+    <details className="hb-panel hb-panel--card" open>
+      <summary className="hb-bar">
+        <span className="hb-bar__title hb-bar__title--gold">The Card — our line-blind read</span>
+        <span className="hb-bar__count">{games.length} games</span>
+        <span className="hb-bar__hint">the power rating&apos;s projected margin, before the market</span>
+        <span className="hb-bar__chev" aria-hidden="true">▾</span>
+      </summary>
+      <div className="hb-body">
+        <div className="hb-legend">
+          <b>Line-blind.</b> Our projection from the power rating alone — no betting line involved. A read to
+          understand the week&apos;s biggest games, <b>not a pick</b> (the model doesn&apos;t beat the spread —
+          see <a href="/ncaaf/model">The Model</a>). Marquee matchups first.
+        </div>
+        <div className="hb-formwrap">
+          <table className="hb-form">
+            <thead>
+              <tr><th className="hb-l">Game</th><th className="ncf-projh">Our projection</th></tr>
+            </thead>
+            <tbody>
+              {games.map((g) => (
+                <tr key={`${g.away}-${g.home}`}>
+                  <td className="hb-l">
+                    <span className="hb-game">{g.away}<span className="hb-at">at</span>{g.home}</span>
+                    {g.neutral ? <span className="ncf-site"> · neutral</span> : null}
+                  </td>
+                  <td className="ncf-proj"><b>{g.fav}</b> by {g.margin}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+  );
+}
+
+export default function Home() {
+  return (
+    <main className="hb">
+      <div className="hb-main">
+      <header className="hb-mast">
+        <div className="hb-mast__eyes">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/seereyes.png" alt="" width={1983} height={793} />
+        </div>
+        <div className="hb-mast__row">
+          <span className="hb-mast__tag">College football — every game, read line-blind.</span>
+          <span className="hb-mast__crest" role="img" aria-label="StatSeer crest" />
+        </div>
+        <div className="hb-mast__rule"></div>
       </header>
 
-      <FlowSteps active="analyze" base="ncaaf" />
+      <SportStrip />
 
-      <section className="explainer">
-        <p>
-          <b>The Model, for college football.</b> A line-blind power rating — every team&apos;s strength from
-          point differential alone (never win-loss), with home field and prior-season carryover baked in.
-          It is <b>published and gradeable</b>, and it drives <b>no picks</b>. Here&apos;s exactly how good it
-          is, measured out of sample — the good and the inconvenient.
+      <div className="hb-weeklabel">NCAAF Week {M.card.week} · {M.card.season}</div>
+      <TheCard games={M.card.games} />
+
+      <HomePromo />
+
+      <section className="hb-nav3">
+        <h2 className="hb-nav3__h">There&apos;s a lot more inside</h2>
+        <p className="hb-nav3__sub">
+          The rating above reads the games; the rest of the section keeps us honest and finds you the
+          <b> best price</b>. Here&apos;s where each lives:
+        </p>
+        <div className="hb-nav3__grid">
+          <a href="/ncaaf/model" className="hb-nav3__c">
+            <span className="hb-nav3__k">The Model</span>
+            <span className="hb-nav3__d">The power rating in full — top-25, the methodology, and the honest track record (it predicts as well as Elo, and we show that it doesn&apos;t beat the spread).</span>
+            <span className="hb-nav3__go">Open The Model →</span>
+          </a>
+          <a href="/ncaaf/context" className="hb-nav3__c">
+            <span className="hb-nav3__k">Context</span>
+            <span className="hb-nav3__d">The measured backdrop — home field and conference strength — plus Upset Watch and Fan Analysis as the season&apos;s data flows.</span>
+            <span className="hb-nav3__go">Read the Context →</span>
+          </a>
+          <a href="/ncaaf/lines" className="hb-nav3__c">
+            <span className="hb-nav3__k">Value Finder</span>
+            <span className="hb-nav3__d">Where the price is wrong — key numbers and line shopping now, live boards and props as the odds capture fills in.</span>
+            <span className="hb-nav3__go">Find the best price →</span>
+          </a>
+        </div>
+      </section>
+      </div>
+
+      <section className="hb-creed">
+        <div className="hb-creed__h">Read the game. <b>Trust the numbers.</b></div>
+        <p className="hb-creed__p">
+          Our college model reads every game line-blind and proves itself in the open — including where it falls
+          short. <a href="/ncaaf/model">See the full model →</a> · <a href="/how">How our model works →</a>
         </p>
       </section>
 
-      {/* The honest scoreboard — this transparency is the product. */}
-      <div className="ncf-cards">
-        <StatCard tone="good" label="Predicts as well as Elo"
-          value={`${v.ourSU}%`}
-          sub={`straight-up, ${v.games.toLocaleString()} games out of sample — vs CFBD Elo ${v.eloSU}% and a ${v.homeSU}% home-team baseline`} />
-        <StatCard tone="good" label="Margin error (RMSE)"
-          value={`${v.ourRMSE}`}
-          sub={`points per game — right with CFBD Elo (${v.eloRMSE}). A competent, honest rating.`} />
-        <StatCard tone="flat" label="Against the closing spread"
-          value={`${a.atsPct}%`}
-          sub={`${a.bets.toLocaleString()} bets — below the ${a.breakeven}% a −110 bettor must clear. It does ${beatsMarket ? "" : "NOT "}beat the market.`} />
+      <div className="hb-side" aria-hidden="true">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo-hero.png?v=3" alt="" className="hb-seerimg" width={543} height={724} />
       </div>
-
-      <div className="ncf-honest" role="note">
-        <span className="ncf-honest__tag">Why we show you this</span>
-        <p>
-          Most sites would bury that last number. We lead with it. Our CFB model reads games as well as the
-          best public systems — but we <b>tested it against the closing line and it doesn&apos;t beat the
-          number</b>, the same result we found for NFL game lines. So we publish it as <b>context you can
-          trust</b>, graded in the open — <b>not</b> as a pick. A rating that can&apos;t beat the market is
-          still a great way to understand one. Panels inform; they don&apos;t vote.
-        </p>
-      </div>
-
-      <section className="ncf-sec">
-        <h2 className="ncf-h">Power ratings — top 25 <span className="ncf-h__note">end of {M.season}, in points vs an average FBS team</span></h2>
-        <div className="ncf-tbl">
-          <div className="ncf-row ncf-row--head">
-            <span>#</span><span>Team</span><span>Conf</span><span>Rating</span>
-          </div>
-          {M.top.map((t: NcaafTeam) => (
-            <div className="ncf-row" key={t.team}>
-              <span className="ncf-row__rk">{t.rank}</span>
-              <span className="ncf-row__tm">{t.team}</span>
-              <span className="ncf-row__cf">{t.conf}</span>
-              <span className="ncf-row__rt">{t.rating > 0 ? "+" : ""}{t.rating}</span>
-            </div>
-          ))}
-        </div>
-        <p className="ncf-note">
-          Read it as a spread: a team rated +{Math.abs(M.top[0].rating)} over one rated +0 is favored by about
-          that many points on a neutral field, plus <b>{M.hfa} points</b> of home advantage for the host.
-        </p>
-      </section>
-
-      <details className="ncf-method">
-        <summary className="ncf-method__h">How the rating is built</summary>
-        <div className="ncf-method__b">
-          <ul>
-            <li><b>Point differential, never win-loss.</b> A 3-point win and a 30-point win are different evidence; a win and a loss on the scoreboard hide it.</li>
-            <li><b>Ridge-regularized</b> so a team with a thin or lopsided early schedule is pulled toward the mean instead of ballooning on noise.</li>
-            <li><b>Prior-season carryover.</b> Each season starts from last year&apos;s regressed rating, then the new games take over — so week 3 isn&apos;t a coin flip.</li>
-            <li><b>Blowouts capped</b> at {28} points — running up the score is barely more information than a comfortable win.</li>
-            <li><b>Home field = {M.hfa} points</b>, estimated from the data, dropped entirely at neutral sites.</li>
-            <li><b>Fit on {M.seasons}</b>, {M.teamsRated} FBS teams, tested walk-forward (each week predicted only from earlier weeks).</li>
-          </ul>
-        </div>
-      </details>
-
-      <footer className="foot">
-        <p>
-          <b>Line-blind and graded in public.</b> These reads never see the betting line before they&apos;re set,
-          and we publish the track record — including where it falls short. For where the price is actually
-          wrong, that lives in <a href="/ncaaf/lines">Value Finder</a>; the NFL model is on <a href="/model">The Model</a>.
-        </p>
-      </footer>
     </main>
   );
 }

@@ -67,7 +67,7 @@ export default function Page() {
       <footer className="foot">
         <p>
           <b>Understand the game — don&apos;t get handed a pick.</b> For the line-blind read see
-          <a href="/ncaaf"> The Model</a>; for where the price is wrong, <a href="/ncaaf/lines">Value Finder</a>.
+          <a href="/ncaaf/model"> The Model</a>; for where the price is wrong, <a href="/ncaaf/lines">Value Finder</a>.
         </p>
       </footer>
     </main>

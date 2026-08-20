@@ -33,7 +33,7 @@ export default function Page() {
       <footer className="foot">
         <p>
           <b>Price, not picks.</b> Key numbers are live on <a href="/ncaaf/best">Sweet Spots</a>; the line-blind
-          read is <a href="/ncaaf">The Model</a>.
+          read is <a href="/ncaaf/model">The Model</a>.
         </p>
       </footer>
     </main>

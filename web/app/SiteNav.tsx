@@ -161,7 +161,7 @@ export default function SiteNav() {
                 <span className="snav__sportchev" aria-hidden="true">▾</span>
               </summary>
               <div className="snav__sportkids">
-                <a href="/ncaaf" className="snav__dfeat">The Model</a>
+                <a href="/ncaaf/model" className="snav__dfeat">The Model</a>
 
                 <details className="snav__pgroup snav__pgroup--feat">
                   <summary className="snav__dfeat snav__psum">Context</summary>

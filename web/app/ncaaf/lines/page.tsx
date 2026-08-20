@@ -47,13 +47,13 @@ export default function Page() {
         title="Live board — tap any line to shop it"
         blurb="The full game board — every FBS matchup, each book's spread, total, and moneyline, with one tap to add a pick to your slip and see the single best book for it — turns on as the odds capture fills in. The measured shopping value above is the durable part; it doesn't need the live board to be true."
         waitingOn="the NCAAF odds capture feeding the site (the historical lines are already in the model; the live board is the deploy step)."
-        links={[{ href: "/ncaaf/best", label: "Sweet Spots (key numbers)" }, { href: "/ncaaf", label: "The Model" }]}
+        links={[{ href: "/ncaaf/best", label: "Sweet Spots (key numbers)" }, { href: "/ncaaf/model", label: "The Model" }]}
       />
 
       <footer className="foot">
         <p>
           <b>Price, not picks.</b> For which margins to pay up for, see <a href="/ncaaf/best">Sweet Spots</a>; for
-          the line-blind read, <a href="/ncaaf">The Model</a>.
+          the line-blind read, <a href="/ncaaf/model">The Model</a>.
         </p>
       </footer>
     </main>

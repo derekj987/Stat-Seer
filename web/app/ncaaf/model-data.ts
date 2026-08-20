@@ -3,170 +3,171 @@
 export type NcaafTeam = { rank: number; team: string; conf: string; rating: number };
 export type NcaafConf = { conf: string; avgRating: number; teams: number };
 export type NcaafKeyNum = { margin: number; pct: number; nfl: number };
+export type NcaafCardGame = { away: string; home: string; neutral: number; fav: string; margin: number; date: string };
 export const NCAAF_MODEL = {
-  "season": 2024,
-  "seasons": "2020-2024",
-  "hfa": 3.0,
-  "teamsRated": 134,
+  "season": 2025,
+  "seasons": "2020-2025",
+  "hfa": 3.2,
+  "teamsRated": 136,
   "top": [
     {
       "rank": 1,
-      "team": "Ohio State",
+      "team": "Indiana",
       "conf": "Big Ten",
-      "rating": 19.8
+      "rating": 20.3
     },
     {
       "rank": 2,
-      "team": "Notre Dame",
-      "conf": "FBS Independents",
-      "rating": 16.7
+      "team": "Ohio State",
+      "conf": "Big Ten",
+      "rating": 20.2
     },
     {
       "rank": 3,
+      "team": "Notre Dame",
+      "conf": "FBS Independents",
+      "rating": 17.7
+    },
+    {
+      "rank": 4,
       "team": "Oregon",
       "conf": "Big Ten",
       "rating": 16.5
     },
     {
-      "rank": 4,
-      "team": "Texas",
-      "conf": "SEC",
-      "rating": 15.1
-    },
-    {
       "rank": 5,
-      "team": "Penn State",
-      "conf": "Big Ten",
-      "rating": 15.1
+      "team": "Texas Tech",
+      "conf": "Big 12",
+      "rating": 16.0
     },
     {
       "rank": 6,
-      "team": "Ole Miss",
-      "conf": "SEC",
-      "rating": 13.9
+      "team": "Miami",
+      "conf": "ACC",
+      "rating": 15.8
     },
     {
       "rank": 7,
-      "team": "Alabama",
+      "team": "Georgia",
       "conf": "SEC",
-      "rating": 12.9
+      "rating": 13.7
     },
     {
       "rank": 8,
-      "team": "Georgia",
-      "conf": "SEC",
-      "rating": 12.8
+      "team": "Utah",
+      "conf": "Big 12",
+      "rating": 13.4
     },
     {
       "rank": 9,
-      "team": "Miami",
-      "conf": "ACC",
-      "rating": 10.6
+      "team": "Ole Miss",
+      "conf": "SEC",
+      "rating": 12.7
     },
     {
       "rank": 10,
-      "team": "SMU",
-      "conf": "ACC",
-      "rating": 10.4
+      "team": "Texas A&M",
+      "conf": "SEC",
+      "rating": 11.4
     },
     {
       "rank": 11,
-      "team": "Indiana",
+      "team": "Iowa",
       "conf": "Big Ten",
-      "rating": 10.3
+      "rating": 10.6
     },
     {
       "rank": 12,
-      "team": "Louisville",
-      "conf": "ACC",
-      "rating": 9.3
+      "team": "Vanderbilt",
+      "conf": "SEC",
+      "rating": 10.3
     },
     {
       "rank": 13,
-      "team": "South Carolina",
-      "conf": "SEC",
-      "rating": 9.3
+      "team": "James Madison",
+      "conf": "Sun Belt",
+      "rating": 10.3
     },
     {
       "rank": 14,
-      "team": "Boise State",
-      "conf": "Mountain West",
-      "rating": 9.2
+      "team": "BYU",
+      "conf": "Big 12",
+      "rating": 10.3
     },
     {
       "rank": 15,
-      "team": "Tennessee",
-      "conf": "SEC",
-      "rating": 8.9
+      "team": "USC",
+      "conf": "Big Ten",
+      "rating": 10.2
     },
     {
       "rank": 16,
-      "team": "LSU",
-      "conf": "SEC",
-      "rating": 8.9
+      "team": "Penn State",
+      "conf": "Big Ten",
+      "rating": 10.1
     },
     {
       "rank": 17,
-      "team": "Clemson",
-      "conf": "ACC",
-      "rating": 8.5
+      "team": "Texas",
+      "conf": "SEC",
+      "rating": 10.1
     },
     {
       "rank": 18,
-      "team": "BYU",
-      "conf": "Big 12",
-      "rating": 8.2
+      "team": "Alabama",
+      "conf": "SEC",
+      "rating": 9.9
     },
     {
       "rank": 19,
-      "team": "Michigan",
-      "conf": "Big Ten",
-      "rating": 7.8
+      "team": "SMU",
+      "conf": "ACC",
+      "rating": 9.7
     },
     {
       "rank": 20,
-      "team": "Kansas State",
-      "conf": "Big 12",
-      "rating": 7.7
+      "team": "Washington",
+      "conf": "Big Ten",
+      "rating": 9.6
     },
     {
       "rank": 21,
-      "team": "USC",
-      "conf": "Big Ten",
-      "rating": 7.7
+      "team": "Oklahoma",
+      "conf": "SEC",
+      "rating": 8.1
     },
     {
       "rank": 22,
-      "team": "Iowa",
-      "conf": "Big Ten",
-      "rating": 7.3
+      "team": "South Florida",
+      "conf": "American Athletic",
+      "rating": 7.8
     },
     {
       "rank": 23,
-      "team": "Texas A&M",
-      "conf": "SEC",
-      "rating": 7.2
+      "team": "Louisville",
+      "conf": "ACC",
+      "rating": 7.3
     },
     {
       "rank": 24,
-      "team": "Arizona State",
-      "conf": "Big 12",
-      "rating": 6.9
+      "team": "North Texas",
+      "conf": "American Athletic",
+      "rating": 7.2
     },
     {
       "rank": 25,
-      "team": "Iowa State",
-      "conf": "Big 12",
-      "rating": 6.8
+      "team": "Tennessee",
+      "conf": "SEC",
+      "rating": 7.0
     }
   ],
   "validation": {
-    "games": 2306,
-    "ourSU": 70.8,
-    "eloSU": 70.3,
-    "homeSU": 56.3,
-    "ourRMSE": 16.57,
-    "eloRMSE": 16.23
+    "games": 2822,
+    "ourSU": 71.0,
+    "eloSU": 70.6,
+    "homeSU": 56.5,
+    "ourRMSE": 16.43,
+    "eloRMSE": 16.15
   },
   "ats": {
     "bets": 2306,
@@ -176,21 +177,21 @@ export const NCAAF_MODEL = {
     "breakeven": 52.38
   },
   "context": {
-    "hfa": 3.0,
+    "hfa": 3.2,
     "conferences": [
       {
         "conf": "SEC",
-        "avgRating": 6.5,
+        "avgRating": 6.3,
         "teams": 16
       },
       {
         "conf": "Big Ten",
-        "avgRating": 4.8,
+        "avgRating": 5.4,
         "teams": 18
       },
       {
         "conf": "Big 12",
-        "avgRating": 2.6,
+        "avgRating": 3.3,
         "teams": 16
       },
       {
@@ -199,43 +200,38 @@ export const NCAAF_MODEL = {
         "teams": 17
       },
       {
-        "conf": "FBS Independents",
-        "avgRating": 0.6,
-        "teams": 3
-      },
-      {
-        "conf": "Sun Belt",
+        "conf": "American Athletic",
         "avgRating": -2.6,
         "teams": 14
       },
       {
-        "conf": "American Athletic",
-        "avgRating": -3.9,
+        "conf": "Mountain West",
+        "avgRating": -3.2,
+        "teams": 12
+      },
+      {
+        "conf": "Sun Belt",
+        "avgRating": -3.7,
         "teams": 14
       },
       {
-        "conf": "Mountain West",
-        "avgRating": -4.1,
+        "conf": "Conference USA",
+        "avgRating": -6.2,
         "teams": 12
       },
       {
         "conf": "Mid-American",
-        "avgRating": -4.9,
-        "teams": 12
-      },
-      {
-        "conf": "Conference USA",
-        "avgRating": -6.1,
-        "teams": 10
+        "avgRating": -6.8,
+        "teams": 13
       }
     ]
   },
   "value": {
-    "games": 3670,
+    "games": 4478,
     "keyNumbers": [
       {
         "margin": 3,
-        "pct": 10.4,
+        "pct": 10.6,
         "nfl": 15.0
       },
       {
@@ -245,12 +241,12 @@ export const NCAAF_MODEL = {
       },
       {
         "margin": 10,
-        "pct": 4.7,
+        "pct": 4.6,
         "nfl": 5.8
       },
       {
         "margin": 14,
-        "pct": 4.5,
+        "pct": 4.4,
         "nfl": 4.9
       }
     ],
@@ -259,5 +255,139 @@ export const NCAAF_MODEL = {
       "avgRange": 0.78,
       "pctGap1": 30
     }
+  },
+  "card": {
+    "season": 2026,
+    "week": 1,
+    "games": [
+      {
+        "away": "Louisville",
+        "home": "Ole Miss",
+        "neutral": 1,
+        "fav": "Ole Miss",
+        "margin": 3.2,
+        "date": "2026-09-06"
+      },
+      {
+        "away": "North Texas",
+        "home": "Indiana",
+        "neutral": 0,
+        "fav": "Indiana",
+        "margin": 11.1,
+        "date": "2026-09-05"
+      },
+      {
+        "away": "Clemson",
+        "home": "LSU",
+        "neutral": 0,
+        "fav": "LSU",
+        "margin": 2.7,
+        "date": "2026-09-05"
+      },
+      {
+        "away": "Washington State",
+        "home": "Washington",
+        "neutral": 0,
+        "fav": "Washington",
+        "margin": 6.2,
+        "date": "2026-09-06"
+      },
+      {
+        "away": "Boise State",
+        "home": "Oregon",
+        "neutral": 0,
+        "fav": "Oregon",
+        "margin": 10.6,
+        "date": "2026-09-05"
+      },
+      {
+        "away": "East Carolina",
+        "home": "Alabama",
+        "neutral": 0,
+        "fav": "Alabama",
+        "margin": 6.8,
+        "date": "2026-09-05"
+      },
+      {
+        "away": "Tulane",
+        "home": "Duke",
+        "neutral": 0,
+        "fav": "Duke",
+        "margin": 3.0,
+        "date": "2026-09-05"
+      },
+      {
+        "away": "Memphis",
+        "home": "UNLV",
+        "neutral": 0,
+        "fav": "UNLV",
+        "margin": 2.9,
+        "date": "2026-08-30"
+      },
+      {
+        "away": "NC State",
+        "home": "Virginia",
+        "neutral": 0,
+        "fav": "Virginia",
+        "margin": 4.7,
+        "date": "2026-08-29"
+      },
+      {
+        "away": "Texas State",
+        "home": "Texas",
+        "neutral": 0,
+        "fav": "Texas",
+        "margin": 7.9,
+        "date": "2026-09-05"
+      },
+      {
+        "away": "SMU",
+        "home": "Florida State",
+        "neutral": 0,
+        "fav": "SMU",
+        "margin": 1.5,
+        "date": "2026-09-07"
+      },
+      {
+        "away": "Western Michigan",
+        "home": "Michigan",
+        "neutral": 0,
+        "fav": "Michigan",
+        "margin": 7.2,
+        "date": "2026-09-05"
+      },
+      {
+        "away": "Ohio",
+        "home": "Nebraska",
+        "neutral": 0,
+        "fav": "Nebraska",
+        "margin": 2.3,
+        "date": "2026-09-05"
+      },
+      {
+        "away": "Baylor",
+        "home": "Auburn",
+        "neutral": 1,
+        "fav": "Auburn",
+        "margin": 2.5,
+        "date": "2026-09-05"
+      },
+      {
+        "away": "Fresno State",
+        "home": "USC",
+        "neutral": 0,
+        "fav": "USC",
+        "margin": 9.7,
+        "date": "2026-09-05"
+      },
+      {
+        "away": "Wisconsin",
+        "home": "Notre Dame",
+        "neutral": 1,
+        "fav": "Notre Dame",
+        "margin": 11.1,
+        "date": "2026-09-06"
+      }
+    ]
   }
 } as const;

@@ -24,13 +24,13 @@ export default function Page() {
         waitingOn="the CFB fan scan (team boards → extraction) being pointed at college programs."
         links={[
           { href: "/tailgate", label: "See the NFL Fan Analysis" },
-          { href: "/ncaaf", label: "The Model" },
+          { href: "/ncaaf/model", label: "The Model" },
         ]}
       />
 
       <footer className="foot">
         <p>
-          <b>Sentiment, not a signal.</b> For the numbers, see <a href="/ncaaf">The Model</a>; for measured
+          <b>Sentiment, not a signal.</b> For the numbers, see <a href="/ncaaf/model">The Model</a>; for measured
           context, <a href="/ncaaf/considerations">Special Considerations</a>.
         </p>
       </footer>

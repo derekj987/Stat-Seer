@@ -11,7 +11,7 @@ export function FlowSteps({ active, base = "nfl" }: {
   active: "analyze" | "context" | "value"; base?: "nfl" | "ncaaf";
 }) {
   const hrefs = base === "ncaaf"
-    ? { analyze: "/ncaaf", context: "/ncaaf/context", value: "/ncaaf/lines" }
+    ? { analyze: "/ncaaf/model", context: "/ncaaf/context", value: "/ncaaf/lines" }
     : { analyze: "/model", context: "/context", value: "/lines" };
   const steps = [
     { key: "analyze", n: "1", label: "The Model", sub: "make your analysis", href: hrefs.analyze },

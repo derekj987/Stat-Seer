@@ -25,7 +25,7 @@ export default function Page() {
         waitingOn="live NCAAF odds feeding the site each week (the rating itself is already built and validated)."
         links={[
           { href: "/ncaaf/considerations", label: "Special Considerations (live now)" },
-          { href: "/ncaaf", label: "The Model" },
+          { href: "/ncaaf/model", label: "The Model" },
         ]}
       />
 

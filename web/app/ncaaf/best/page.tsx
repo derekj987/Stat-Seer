@@ -66,7 +66,7 @@ export default function Page() {
       <footer className="foot">
         <p>
           <b>Same bet, better number.</b> Line shopping is on <a href="/ncaaf/lines">Game Lines</a>; the line-blind
-          read is <a href="/ncaaf">The Model</a>.
+          read is <a href="/ncaaf/model">The Model</a>.
         </p>
       </footer>
     </main>
