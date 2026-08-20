@@ -1688,3 +1688,70 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .ncf-keyrow{grid-template-columns:46px 1fr 48px}
   .ncf-keyrow__nfl{display:none}
 }
+
+/* ================= Multi-sport landing hub (/) ================= */
+.lp{max-width:1040px;margin:0 auto;padding:clamp(10px,2.5vw,22px) clamp(16px,4vw,24px) 64px}
+/* Hero */
+.lp-hero{border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);margin-bottom:26px}
+.lp-hero__eyes{width:100%;height:clamp(78px,13vw,128px);overflow:hidden;line-height:0}
+.lp-hero__eyes img{width:100%;height:100%;object-fit:cover;object-position:center 28%;display:block}
+.lp-hero__body{padding:16px 2px 20px;text-align:center}
+.lp-hero__wm{margin:0;font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;
+  font-weight:400;font-size:clamp(42px,9vw,74px);line-height:.98;letter-spacing:.01em;color:#6a0f1c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lp-hero__wm{color:#c9455c}}
+:root[data-theme="dark"] .lp-hero__wm{color:#c9455c}
+.lp-hero__tag{margin:12px auto 0;max-width:56ch;font-size:clamp(14px,2.2vw,18px);line-height:1.55;color:var(--muted)}
+.lp-hero__tag b{color:var(--ink)}
+.lp-stats{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:20px}
+.lp-stat{flex:1 1 130px;max-width:180px;border:1px solid var(--line);border-radius:12px;
+  background:var(--surface);padding:12px 10px;display:flex;flex-direction:column;gap:2px;align-items:center}
+.lp-stat__n{font-size:clamp(22px,3.4vw,30px);font-weight:800;color:var(--accent);line-height:1;font-variant-numeric:tabular-nums}
+.lp-stat__l{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:center}
+
+/* Headliner Card */
+.lp-card{border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:14px;
+  overflow:hidden;background:var(--surface);box-shadow:0 6px 22px rgba(0,0,0,.06)}
+.lp-card__bar{padding:16px 18px 14px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--gold) 8%,transparent),transparent)}
+.lp-card__kicker{font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.lp-card__h{margin:4px 0 0;font-size:clamp(20px,3.4vw,26px);line-height:1.1;color:var(--ink)}
+.lp-gold{color:var(--gold)}
+.lp-card__sub{margin:7px 0 0;font-size:13px;line-height:1.55;color:var(--muted);max-width:70ch}
+.lp-card__sub b{color:var(--ink)}
+.lp-formwrap{overflow-x:auto}
+.lp-form{border-collapse:collapse;width:100%;table-layout:auto}
+.lp-form th,.lp-form td{text-align:left;white-space:nowrap}
+.lp-form th{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  font-weight:700;padding:10px 14px 8px;border-bottom:1px solid var(--line)}
+.lp-form td{font-size:13px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.lp-form tbody tr:last-child td{border-bottom:0}
+.lp-form .hb-off{background:color-mix(in srgb,var(--mkt) 6%,transparent)}
+.lp-sp{width:1%}
+.lp-chip{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.05em;padding:3px 9px;
+  border-radius:999px;text-decoration:none;text-transform:uppercase}
+.lp-chip--nfl{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}
+.lp-chip--ncaaf{background:color-mix(in srgb,var(--mkt) 15%,transparent);color:var(--mkt)}
+.lp-chip:hover{filter:brightness(1.08)}
+.lp-card__foot{display:flex;flex-wrap:wrap;gap:10px 18px;justify-content:space-between;align-items:center;
+  padding:12px 18px;font-size:11.5px;color:var(--muted);background:var(--surface-2)}
+.lp-card__legend .hb-dia{color:var(--mkt)}
+.lp-card__links a{color:var(--accent);text-decoration:none;font-weight:700;margin-left:10px}
+.lp-card__links a:hover{text-decoration:underline}
+
+/* Section headings on the landing */
+.lp-h2{font-size:clamp(18px,3vw,23px);margin:34px 0 4px;color:var(--ink);text-align:center}
+.lp-sections__sub{margin:0 auto 16px;text-align:center;font-size:13.5px;color:var(--muted);max-width:64ch}
+
+/* Sport tiles */
+.lp-sports__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:14px}
+.lp-sport{display:flex;flex-direction:column;gap:3px;padding:16px 16px 14px;border-radius:14px;
+  border:1px solid var(--line);background:var(--surface);text-decoration:none;position:relative}
+.lp-sport--live{transition:transform .12s ease,box-shadow .12s ease}
+.lp-sport--live:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.1);border-color:var(--accent)}
+.lp-sport--soon{opacity:.62}
+.lp-sport__name{font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;font-size:22px;color:var(--ink)}
+.lp-sport__meta{font-size:11.5px;color:var(--muted)}
+.lp-sport__go{margin-top:8px;font-size:12px;font-weight:800;color:var(--accent);letter-spacing:.02em}
+.lp-sport__soon{position:absolute;top:12px;right:12px;font-size:8.5px;font-weight:800;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 7px}
+.lp-sections{margin-top:6px}

@@ -139,7 +139,7 @@ export default function SiteNav() {
                 that several sports share the list. Template for every future sport. */}
             <details className="snav__pgroup snav__sportgroup">
               <summary className="snav__sportsum">
-                <a href="/" className="snav__sportname" onClick={(e) => e.stopPropagation()}>NFL</a>
+                <a href="/nfl" className="snav__sportname" onClick={(e) => e.stopPropagation()}>NFL</a>
                 <span className="snav__sportchev" aria-hidden="true">▾</span>
               </summary>
               <div className="snav__sportkids">

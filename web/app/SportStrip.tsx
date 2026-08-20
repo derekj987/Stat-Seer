@@ -13,7 +13,7 @@ const NFL_PREFIXES = [
 
 function activeSport(path: string): string | null {
   if (path === "/ncaaf" || path.startsWith("/ncaaf/")) return "ncaaf";
-  if (path === "/") return "nfl";
+  if (path === "/nfl") return "nfl";
   if (NFL_PREFIXES.some((p) => path === p || path.startsWith(p + "/"))) return "nfl";
   return null; // non-sport pages (forum, settings, auth, …) highlight nothing
 }
