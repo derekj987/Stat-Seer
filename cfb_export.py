@@ -174,18 +174,27 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds):
         hsp = od["home_spread"] if od else None                  # home line (neg = home fav)
         mtot = od["total"] if od else None
 
-        # Our read, shown beside the market: our projected favorite + margin, and an
-        # over/under lean on the total. We show our PROJECTION (not a "take the dog"
-        # betting pick) — the rating is compressed vs the market, so a betting lean
-        # would be a one-directional artifact, not an edge (the model doesn't beat it).
+        # Our read beside the market: our projected favorite + margin, an ATS pick (which
+        # side of the MARKET spread our projection covers), and an over/under lean.
         our_fav = home if margin >= 0 else away
         proj_spread = {"fav": our_fav, "num": round(-abs(float(margin)), 1)}
-        market_spread = total_lean = None
+        market_spread = total_lean = pick = None
         off_flag = False
         if hsp is not None:
             mfav = home if hsp <= 0 else away
             market_spread = {"fav": mfav, "num": -abs(hsp)}      # the favorite's line
             off_flag = bool(mfav != our_fav)                     # off-consensus side
+            # ATS lean: does our projected margin cover the market number? If our margin
+            # for the favorite falls short of the line, our read is the dog +points.
+            line = abs(float(hsp))
+            fav_is_home = hsp <= 0
+            fav_team = home if fav_is_home else away
+            dog_team = away if fav_is_home else home
+            fav_margin = float(margin) if fav_is_home else -float(margin)
+            if fav_margin >= line:
+                pick = {"side": fav_team, "num": round(-line, 1)}     # take the favorite -line
+            else:
+                pick = {"side": dog_team, "num": round(line, 1)}      # take the dog +line
         if mtot is not None and abs(ptot - mtot) >= 2.0:
             total_lean = {"dir": "OVER" if ptot > mtot else "UNDER", "num": mtot}
 
@@ -193,7 +202,7 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds):
             "away": away, "home": home, "neutral": 1 if neu else 0,
             "marketSpread": market_spread, "marketTotal": mtot,
             "projSpread": proj_spread, "projTotal": round(float(ptot), 1),
-            "totalLean": total_lean, "off": off_flag,
+            "pick": pick, "totalLean": total_lean, "off": off_flag,
             "featured": bool(home in top_set or away in top_set),
             "_interest": min(rh, ra),
         })
@@ -322,6 +331,7 @@ def main():
             "export type NcaafCardGame = { away: string; home: string; neutral: number;"
             " marketSpread: { fav: string; num: number } | null; marketTotal: number | null;"
             " projSpread: { fav: string; num: number }; projTotal: number;"
+            " pick: { side: string; num: number } | null;"
             " totalLean: { dir: string; num: number } | null; off: boolean; featured: boolean };\n"
             "export type NcaafUpset = { dog: string; matchup: string; spread: string;"
             " modelPct: number; marketPct: number; byPoints: number };\n"

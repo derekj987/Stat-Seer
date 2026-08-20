@@ -81,7 +81,8 @@ function NcaafCard({ games, week }: { games: readonly NcaafCardGame[]; week: num
             <thead><tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Our Model Suggests</th></tr></thead>
             <tbody>
               {show.map((g) => {
-                const ms = g.marketSpread; const ps = g.projSpread; const tl = g.totalLean;
+                const ms = g.marketSpread; const ps = g.projSpread; const tl = g.totalLean; const pk = g.pick;
+                const pickTxt = pk ? `${pk.side} ${pk.num > 0 ? "+" : ""}${pk.num}` : `${ps.fav} ${ps.num}`;
                 return (
                   <tr key={`${g.away}-${g.home}`} className={g.off ? "hb-off" : undefined}>
                     <td className="hb-l">
@@ -93,7 +94,7 @@ function NcaafCard({ games, week }: { games: readonly NcaafCardGame[]; week: num
                     <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
                     <td className="hb-suggest">
                       <span className="hb-sugwrap">
-                        <span className="hb-sug"><span className="hb-sug__t">{ps.fav} {ps.num}</span></span>
+                        <span className="hb-sug"><span className="hb-sug__t">{pickTxt}</span></span>
                         {tl && <span className="hb-sug"><span className="hb-sug__t">{tl.dir === "OVER" ? "Over" : "Under"} {tl.num}</span></span>}
                       </span>
                     </td>
@@ -182,8 +183,10 @@ function Betslip() {
           <div className="hb-slipf__step"><span className="hb-slipf__n">2</span><b>We shop it</b><span>StatSeer compares every book and finds the best price.</span></div>
           <div className="hb-slipf__step"><span className="hb-slipf__n">3</span><b>You place it</b><span>Bet at the book we name — the same wager at a better number.</span></div>
         </div>
+        <p className="hb-slipf__lead">Start on a game-lines board — tap a line to add it to your slip:</p>
         <div className="hb-slipf__cta">
-          <a href="/lines" className="btn btn--primary">Start a slip →</a>
+          <a href="/lines" className="btn btn--primary">NFL Game Lines →</a>
+          <a href="/ncaaf/lines" className="btn btn--primary">College Football Game Lines →</a>
           <a href="/how" className="btn">How it works →</a>
         </div>
       </div>

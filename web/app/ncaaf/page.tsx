@@ -15,7 +15,8 @@ function CardRows({ games }: { games: readonly NcaafCardGame[] }) {
   return (
     <>
       {games.map((g) => {
-        const ms = g.marketSpread; const ps = g.projSpread; const tl = g.totalLean;
+        const ms = g.marketSpread; const ps = g.projSpread; const tl = g.totalLean; const pk = g.pick;
+        const pickTxt = pk ? `${pk.side} ${pk.num > 0 ? "+" : ""}${pk.num}` : `${ps.fav} ${ps.num}`;
         return (
           <tr key={`${g.away}-${g.home}`} className={g.off ? "hb-off" : undefined}>
             <td className="hb-l">
@@ -27,7 +28,7 @@ function CardRows({ games }: { games: readonly NcaafCardGame[] }) {
             <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
             <td className="hb-suggest">
               <span className="hb-sugwrap">
-                <span className="hb-sug"><span className="hb-sug__t">{ps.fav} {ps.num}</span></span>
+                <span className="hb-sug"><span className="hb-sug__t">{pickTxt}</span></span>
                 {tl && (
                   <span className="hb-sug">
                     <span className="hb-sug__t">{tl.dir === "OVER" ? "Over" : "Under"} {tl.num}</span>
@@ -71,8 +72,8 @@ function TheCard({ games }: { games: readonly NcaafCardGame[] }) {
       <div className="hb-body">
         <div className="hb-legend">
           <span className="hb-dia">◆</span> Off-consensus — our model and the market disagree on who&apos;s favored.
-          <span className="hb-x"> · <b>Our Model Suggests</b> is our line-blind projection at the market number —
-            informative context, <b>not a pick</b> (our rating doesn&apos;t beat the spread; see{" "}
+          <span className="hb-x"> · <b>Our Model Suggests</b> is the side of the market spread our line-blind read
+            would take — informative, <b>not a guaranteed bet</b> (our rating doesn&apos;t beat the spread; see{" "}
             <a href="/ncaaf/model">The Model</a>).</span>
         </div>
         <div className="hb-formcap">Ranked matchups — every game with a top-25 team</div>
@@ -181,34 +182,31 @@ export default function Home() {
       </header>
 
       <div className="hb-weeklabel">NCAAF Week {c.week} · {c.season}</div>
-      <TheCard games={c.games} />
-      <Upsets rows={c.upsets} />
-      <PlayersWeLike />
 
-      <section className="hb-nav3">
-        <h2 className="hb-nav3__h">There&apos;s a lot more inside</h2>
-        <p className="hb-nav3__sub">
-          The board above is our read; the rest of the section keeps us honest and finds you the
-          <b> best price</b>. Here&apos;s where each lives:
-        </p>
+      {/* Section links up top so the three tools stay connected to the board below. */}
+      <section className="hb-nav3 hb-nav3--top">
         <div className="hb-nav3__grid">
           <a href="/ncaaf/model" className="hb-nav3__c">
             <span className="hb-nav3__k">The Model</span>
-            <span className="hb-nav3__d">The power rating in full — top-25, methodology, and the honest track record (predicts as well as Elo; verified it doesn&apos;t beat the spread).</span>
+            <span className="hb-nav3__d">The power rating in full — top-25, methodology, and the honest track record.</span>
             <span className="hb-nav3__go">Open The Model →</span>
           </a>
           <a href="/ncaaf/context" className="hb-nav3__c">
             <span className="hb-nav3__k">Context</span>
-            <span className="hb-nav3__d">The measured backdrop — home field and conference strength — plus Upset Watch and Fan Analysis as the season&apos;s data flows.</span>
+            <span className="hb-nav3__d">Upset Watch, home field and conference strength — the measured backdrop.</span>
             <span className="hb-nav3__go">Read the Context →</span>
           </a>
           <a href="/ncaaf/lines" className="hb-nav3__c">
             <span className="hb-nav3__k">Value Finder</span>
-            <span className="hb-nav3__d">Where the price is wrong — key numbers and line shopping now, live boards and props as the odds capture fills in.</span>
+            <span className="hb-nav3__d">Where the price is wrong — key numbers, line shopping, and the game-lines board.</span>
             <span className="hb-nav3__go">Find the best price →</span>
           </a>
         </div>
       </section>
+
+      <TheCard games={c.games} />
+      <Upsets rows={c.upsets} />
+      <PlayersWeLike />
       </div>
 
       <section className="hb-creed">

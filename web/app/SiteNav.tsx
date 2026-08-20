@@ -95,7 +95,10 @@ export default function SiteNav() {
           <a href="/forum" className="snav__forums">Visit the Forums</a>
           {/* Create-an-Account stays in the top bar (pre-launch CTA), to the right of Forums.
               The community "Become a member" link is the one that hides for signed-in members. */}
-          <a href="/signup" className="snav__signup">Create an Account</a>
+          <a href="/signup" className="snav__signup">
+            <span className="snav__signup__full">Create an Account</span>
+            <span className="snav__signup__short">Sign Up</span>
+          </a>
           {me === undefined ? (
             <span className="snav__slot" />
           ) : me ? (

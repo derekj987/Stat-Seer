@@ -933,17 +933,22 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
    crest entirely so the right cluster (just the Create-an-Account button) stays clear. */
 @media (max-width:640px){
   .snav__brandlock{flex-direction:column;align-items:flex-start;line-height:1.05}
-  .snav__brand{font-size:20px}
-  .snav__tagline{padding-left:5px;font-size:10px;max-width:60vw}
+  .snav__brand{font-size:19px}
+  .snav__tagline{padding-left:5px;font-size:9px;max-width:50vw}
   .snav__crest{display:none}
 }
-@media (max-width:400px){.snav__brand{font-size:18px} .snav__tagline{font-size:9.5px;max-width:56vw}}
+@media (max-width:400px){.snav__brand{font-size:17px} .snav__tagline{font-size:8.5px;max-width:46vw}}
 .snav__signup{flex:0 0 auto;padding:6px 13px;border-radius:9px;background:var(--accent);
   color:#fff;text-decoration:none;font-size:13px;font-weight:700;white-space:nowrap}
 .snav__signup:hover{filter:brightness(1.06)}
 @media (max-width:820px){.snav__signup{font-size:12px;padding:6px 10px}}
 /* small Create-an-Account button on phones (after the 820 rule so it wins the cascade) */
-@media (max-width:480px){.snav__signup{font-size:11px;padding:5px 9px}}
+.snav__signup__short{display:none}
+@media (max-width:480px){
+  .snav__signup{font-size:11px;padding:5px 10px}
+  .snav__signup__full{display:none}
+  .snav__signup__short{display:inline}
+}
 /* Visit-the-Forums button — same green as the CTA, outlined so two greens don't clash;
    sits between the crest and the signup button. Drawer's Community link covers phones. */
 .snav__forums{flex:0 0 auto;padding:6px 13px;border-radius:9px;border:1.5px solid var(--accent);
@@ -1514,6 +1519,15 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-nav3__d{font-size:12.5px;color:var(--muted);line-height:1.5;flex:1}
 .hb-nav3__go{font-size:12.5px;font-weight:700;color:var(--accent);margin-top:2px}
 @media (max-width:640px){.hb-nav3__grid{grid-template-columns:1fr}}
+/* Section links promoted to the TOP of a sport homepage — amber/gold so the three tools
+   stand out as the way into the section. */
+.hb-nav3--top{margin-top:14px;margin-bottom:6px}
+.hb-nav3--top .hb-nav3__c{background:var(--spot-soft);border-color:color-mix(in srgb,var(--spot) 45%,var(--line))}
+.hb-nav3--top .hb-nav3__c:hover{border-color:var(--spot)}
+.hb-nav3--top .hb-nav3__k{color:var(--spot-ink)}
+.hb-nav3--top .hb-nav3__go{color:var(--spot-ink)}
+/* small lead line above the bet-slip CTA buttons */
+.hb-slipf__lead{margin:0 0 10px;font-size:13px;color:var(--muted)}
 
 @media (max-width:640px){
   .hb-cols{grid-template-columns:1fr}
@@ -1701,13 +1715,15 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .lp{max-width:1040px;margin:0 auto;padding:clamp(10px,2.5vw,22px) clamp(16px,4vw,24px) 64px}
 /* Hero — the seer's eyes as a wide banner (stretched edge-to-edge of the page), with the
    gold wordmark sitting BENEATH it. */
-.lp-hero{margin-bottom:24px;text-align:center}
-.lp-hero__banner{position:relative;height:clamp(180px,34vw,380px);overflow:hidden;
+.lp-hero{margin-bottom:22px;text-align:center}
+/* A thin band cropped to the seer's EYES — object-position keeps the eyes centered so the
+   image's black letterbox never shows. Stretched edge-to-edge of the page. */
+.lp-hero__banner{position:relative;height:clamp(88px,14vw,158px);overflow:hidden;
   margin:calc(-1 * clamp(10px,2.5vw,22px)) calc(-1 * clamp(16px,4vw,24px)) 0;
   border-bottom:1px solid var(--line)}
-.lp-hero__img{width:100%;height:100%;object-fit:cover;object-position:center 56%;display:block}
-.lp-hero__wm{margin:20px 0 0;font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;
-  font-weight:400;font-size:clamp(46px,10vw,96px);line-height:1;letter-spacing:.02em;color:var(--gold)}
+.lp-hero__img{width:100%;height:100%;object-fit:cover;object-position:center 55%;display:block}
+.lp-hero__wm{margin:16px 0 0;font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;
+  font-weight:400;font-size:clamp(32px,6.5vw,58px);line-height:1;letter-spacing:.02em;color:var(--gold)}
 .lp-hero__tag{margin:12px auto 0;max-width:76ch;text-align:center;
   font-size:clamp(15px,2.3vw,20px);line-height:1.5;color:var(--muted)}
 .lp-hero__tag b{color:var(--ink)}
