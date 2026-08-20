@@ -164,8 +164,11 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds):
     conn.close()
     cards, upsets = [], []
     for away, home, neu, date in rows:
-        rh, ra = ratings.get(home, 0.0), ratings.get(away, 0.0)
-        margin = rh - ra + (0.0 if neu else hfa)                 # home perspective
+        rated = home in ratings and away in ratings          # both have FBS rating history
+        rh, ra = ratings.get(home, NEWCOMER_R), ratings.get(away, NEWCOMER_R)
+        raw = rh - ra + (0.0 if neu else hfa)
+        # de-compress onto a realistic margin scale (see CARD_SCALE), guard the tail
+        margin = max(-DISPLAY_CAP, min(DISPLAY_CAP, CARD_SCALE * raw))   # home perspective
         ptot = 2 * L + off.get(home, 0) + deff.get(away, 0) + off.get(away, 0) + deff.get(home, 0)
         od = match_odds(away, home, odds)
         hsp = od["home_spread"] if od else None                  # home line (neg = home fav)
@@ -196,8 +199,9 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds):
         })
 
         # Potential upset — only on competitive lines (a single-digit dog our model
-        # flips to win outright), never a naive blowout-dog flip.
-        if hsp is not None and off_flag and abs(hsp) <= 9.5:
+        # flips to win outright), never a naive blowout-dog flip, and never on a
+        # newcomer we couldn't rate.
+        if hsp is not None and off_flag and abs(hsp) <= 9.5 and rated:
             dog = away if hsp <= 0 else home
             dog_margin = float(margin if dog == home else -margin)
             if dog_margin > 0:
@@ -219,6 +223,16 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds):
 
 CARD_SEASON, CARD_WEEK = 2026, 1
 
+# Card-projection calibration. The rating is fit on CAPPED margins and (for a preseason
+# card) carried from last season, so the raw rating-diff badly UNDER-projects real
+# margins. Calibrated on history — realized early-season margin ~= CARD_SCALE * prior
+# final rating-diff — this de-compresses the projection onto a realistic scale and, as a
+# bonus, lowers preseason error (RMSE 18.1 vs 19.1 for the old 0.6x shrink). DISPLAY_CAP
+# guards the tail (no team is projected to win by > this). NEWCOMER_R is the floor for a
+# team with no FBS rating history (an FCS/independent call-up); such games are shown but
+# NEVER flagged as an upset — we have no data to back one.
+CARD_SCALE, NEWCOMER_R, DISPLAY_CAP = 1.209, -9.0, 50.0
+
 
 def main():
     games = cp.load_games(DB, 2020, 2025)
@@ -228,12 +242,13 @@ def main():
     last = max(g["season"] for g in games)
 
     final, hfa = season_final_ratings(games, last)
-    # The Card: line-blind projections for the UPCOMING week. Start from the regressed
-    # end-of-`last` carryover, then fold in any games already played this season, so a
-    # scheduled refresh stays correct as the season runs. Week auto-advances.
-    prior_next = {t: DECAY * r for t, r in final.items()}
+    # The Card: line-blind projections for the UPCOMING week. The preseason strength
+    # estimate is last season's UNDECAYED final rating (validated: lower early-season
+    # error than the old 0.6x shrink); CARD_SCALE then de-compresses it. As the season
+    # runs, games already played refit toward that full prior, so a scheduled refresh
+    # stays correct. Week auto-advances.
     completed = load_completed(DB, CARD_SEASON)
-    cur_ratings = cp.fit_ratings(completed, LAM, CAP, prior_next)[0] if completed else prior_next
+    cur_ratings = cp.fit_ratings(completed, LAM, CAP, final)[0] if completed else final
     card_week = detect_upcoming_week(DB, CARD_SEASON, CARD_WEEK)
     top_set = {t for t, _ in sorted(final.items(), key=lambda kv: kv[1], reverse=True)[:25]}
     scoring = team_scoring(DB, last, DECAY)
