@@ -11,7 +11,7 @@ export function FlowSteps({ active, base = "nfl" }: {
   active: "analyze" | "context" | "value"; base?: "nfl" | "ncaaf";
 }) {
   const hrefs = base === "ncaaf"
-    ? { analyze: "/ncaaf", context: "/ncaaf/context", value: "/ncaaf/value" }
+    ? { analyze: "/ncaaf", context: "/ncaaf/context", value: "/ncaaf/lines" }
     : { analyze: "/model", context: "/context", value: "/lines" };
   const steps = [
     { key: "analyze", n: "1", label: "The Model", sub: "make your analysis", href: hrefs.analyze },
@@ -120,28 +120,38 @@ export function TopNav({ active }: { active: "value" | "model" | "context" }) {
 }
 
 /** Sub-tabs inside Context. */
-export function ContextSubnav({ active }: { active: "upset" | "fan" | "special" }) {
+export function ContextSubnav({ active, base = "nfl" }: {
+  active: "upset" | "fan" | "special"; base?: "nfl" | "ncaaf";
+}) {
+  const h = base === "ncaaf"
+    ? { upset: "/ncaaf/context", special: "/ncaaf/considerations", fan: "/ncaaf/tailgate" }
+    : { upset: "/context", special: "/considerations", fan: "/tailgate" };
   return (
     <nav className="subnav" aria-label="Context view">
-      <a href="/context" className={active === "upset" ? "subnav__t active" : "subnav__t"}
+      <a href={h.upset} className={active === "upset" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "upset" ? "page" : undefined}>Upset Watch</a>
-      <a href="/considerations" className={active === "special" ? "subnav__t active" : "subnav__t"}
+      <a href={h.special} className={active === "special" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "special" ? "page" : undefined}>Special Considerations</a>
-      <a href="/tailgate" className={active === "fan" ? "subnav__t active" : "subnav__t"}
+      <a href={h.fan} className={active === "fan" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "fan" ? "page" : undefined}>Fan Analysis</a>
     </nav>
   );
 }
 
 /** Sub-tabs inside Value Finder (Game Lines · Player Props · Sweet Spots). */
-export function ShopSubnav({ active }: { active: "lines" | "props" | "best" }) {
+export function ShopSubnav({ active, base = "nfl" }: {
+  active: "lines" | "props" | "best"; base?: "nfl" | "ncaaf";
+}) {
+  const h = base === "ncaaf"
+    ? { lines: "/ncaaf/lines", props: "/ncaaf/props", best: "/ncaaf/best" }
+    : { lines: "/lines", props: "/props", best: "/best" };
   return (
     <nav className="subnav" aria-label="Value Finder view">
-      <a href="/lines" className={active === "lines" ? "subnav__t active" : "subnav__t"}
+      <a href={h.lines} className={active === "lines" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "lines" ? "page" : undefined}>Game Lines</a>
-      <a href="/props" className={active === "props" ? "subnav__t active" : "subnav__t"}
+      <a href={h.props} className={active === "props" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "props" ? "page" : undefined}>Player Props</a>
-      <a href="/best" className={active === "best" ? "subnav__t active" : "subnav__t"}
+      <a href={h.best} className={active === "best" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "best" ? "page" : undefined}>Sweet Spots</a>
     </nav>
   );

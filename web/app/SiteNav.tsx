@@ -151,9 +151,10 @@ export default function SiteNav() {
               </div>
             </details>
 
-            {/* NCAAF — live, same template as NFL. Its Model / Context / Value Finder
-                are single consolidated pages for now (the per-subpage CFB data isn't
-                flowing yet), so they're direct links rather than nested dropdowns. */}
+            {/* NCAAF — live, same template as NFL: Model + Context/Value Finder as
+                nested dropdowns holding their subpages. Some subpages are live now
+                (Special Considerations, Sweet Spots, Game Lines) and the rest arrive
+                with the season's odds/props/fan data. */}
             <details className="snav__pgroup snav__sportgroup">
               <summary className="snav__sportsum">
                 <a href="/ncaaf" className="snav__sportname" onClick={(e) => e.stopPropagation()}>NCAAF</a>
@@ -161,8 +162,20 @@ export default function SiteNav() {
               </summary>
               <div className="snav__sportkids">
                 <a href="/ncaaf" className="snav__dfeat">The Model</a>
-                <a href="/ncaaf/context" className="snav__dfeat">Context</a>
-                <a href="/ncaaf/value" className="snav__dfeat">Value Finder</a>
+
+                <details className="snav__pgroup snav__pgroup--feat">
+                  <summary className="snav__dfeat snav__psum">Context</summary>
+                  <a href="/ncaaf/context" className="snav__dsub">Upset Watch</a>
+                  <a href="/ncaaf/considerations" className="snav__dsub">Special Considerations</a>
+                  <a href="/ncaaf/tailgate" className="snav__dsub">Fan Analysis</a>
+                </details>
+
+                <details className="snav__pgroup snav__pgroup--feat">
+                  <summary className="snav__dfeat snav__psum">Value Finder</summary>
+                  <a href="/ncaaf/lines" className="snav__dsub">Game Lines</a>
+                  <a href="/ncaaf/props" className="snav__dsub">Player Props</a>
+                  <a href="/ncaaf/best" className="snav__dsub">Sweet Spots</a>
+                </details>
               </div>
             </details>
 

@@ -99,7 +99,7 @@ export default function Page() {
         <p>
           <b>Line-blind and graded in public.</b> These reads never see the betting line before they&apos;re set,
           and we publish the track record — including where it falls short. For where the price is actually
-          wrong, that lives in <a href="/lines">Value Finder</a>; the NFL model is on <a href="/model">The Model</a>.
+          wrong, that lives in <a href="/ncaaf/lines">Value Finder</a>; the NFL model is on <a href="/model">The Model</a>.
         </p>
       </footer>
     </main>
