@@ -49,6 +49,15 @@ body{background:var(--bg);color:var(--ink);
 /* flag-yellow first-down marker sitting on the sideline */
 .masthead::after{content:"";position:absolute;left:0;bottom:-2px;width:72px;height:2px;
   background:var(--spot)}
+/* sport wayfinding badge — a flex sibling that sits in the masthead's open band
+   (between the brand and the far edge) so it's clear which sport's section
+   (Model / Context / Value Finder) you're on. Hidden on phones. */
+.msport{flex:0 0 auto;margin:0 auto 2px;display:flex;align-items:center;gap:9px;
+  pointer-events:none;user-select:none;white-space:nowrap}
+.msport__ball{width:46px;height:26px;display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.18))}
+.msport__name{font-weight:800;font-size:21px;letter-spacing:.13em;color:var(--ink);
+  text-transform:uppercase;line-height:1}
+@media (max-width:760px){.msport{display:none}}
 .brand{display:flex;align-items:center;gap:13px;min-width:0}
 .brand__home{flex:0 0 auto;display:inline-flex;line-height:0}
 .brand__marklink{text-decoration:none;color:inherit}

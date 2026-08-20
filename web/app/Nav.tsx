@@ -1,5 +1,7 @@
-// Shared navigation. Pure presentational (no hooks / server-only code) so it can
-// be used from both server pages and the client BoardView island.
+// Shared navigation. Mostly presentational so it can be used from both server pages
+// and the client BoardView island. Brand embeds the route-aware MastheadSport badge.
+import MastheadSport from "./MastheadSport";
+
 //
 // Three top-level SECTIONS (the canonical architecture):
 //   Value Finder — where's the price wrong?  (Game Lines + Player Props live here)
@@ -93,16 +95,22 @@ export function SlipCallout({ kind }: { kind: "lines" | "props" }) {
 /** Masthead brand: logo mark + a section subtitle. The "StatSeer" wordmark lives in
  *  the global top bar now, so the masthead no longer repeats it. */
 export function Brand({ sub }: { sub: import("react").ReactNode }) {
+  // Returns two masthead-level siblings: the brand cluster (left) and the sport badge.
+  // As a flex sibling the badge sits in the masthead's open band without ever
+  // overlapping the subtitle. It renders nothing on non-sport pages.
   return (
-    <div className="brand">
-      <a href="/" className="brand__home" aria-label="StatSeer home">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo-mark.png?v=4" alt="StatSeer" className="brand__logo" width={46} height={46} />
-      </a>
-      <div className="brand__text">
-        {sub ? <span className="brand__sub">{sub}</span> : null}
+    <>
+      <div className="brand">
+        <a href="/" className="brand__home" aria-label="StatSeer home">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-mark.png?v=4" alt="StatSeer" className="brand__logo" width={46} height={46} />
+        </a>
+        <div className="brand__text">
+          {sub ? <span className="brand__sub">{sub}</span> : null}
+        </div>
       </div>
-    </div>
+      <MastheadSport />
+    </>
   );
 }
 
