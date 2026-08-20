@@ -93,9 +93,9 @@ export default function SiteNav() {
           <span className="snav__crest" role="img" aria-label="StatSeer crest" />
           {/* Forums button (green, always visible) sits between the crest and the signup CTA. */}
           <a href="/forum" className="snav__forums">Visit the Forums</a>
-          {/* Create-an-Account only when signed OUT — it disappears once a member logs in.
-              (Account actions live in the drawer's User Options.) */}
-          {me === null && <a href="/signup" className="snav__signup">Create an Account</a>}
+          {/* Create-an-Account stays in the top bar (pre-launch CTA), to the right of Forums.
+              The community "Become a member" link is the one that hides for signed-in members. */}
+          <a href="/signup" className="snav__signup">Create an Account</a>
           {me === undefined ? (
             <span className="snav__slot" />
           ) : me ? (

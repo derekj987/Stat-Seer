@@ -209,9 +209,8 @@ export default async function Landing() {
         <div className="lp-hero__banner">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/seereyes.png" alt="" className="lp-hero__img" width={1983} height={793} />
-          <div className="lp-hero__grad" aria-hidden="true" />
-          <h1 className="lp-hero__wm">StatSeer</h1>
         </div>
+        <h1 className="lp-hero__wm">StatSeer</h1>
         <p className="lp-hero__tag">
           One model reads every game <b>line-blind</b>, then shows you exactly where it disagrees with the
           market — and the <b>best price</b> on every pick.
