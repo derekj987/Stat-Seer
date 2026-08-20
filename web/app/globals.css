@@ -919,16 +919,15 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
    the flex gap spaces it, so no side margin needed. */
 .snav__crest{flex:0 0 auto;width:38px;height:38px;
   background:url(/crest.png?v=2) center/contain no-repeat}
-/* Phones: stack the tagline beneath the wordmark (it was hidden before) and shrink
-   the crest so the right cluster stays compact. */
+/* Phones: stack the tagline beneath the wordmark (it was hidden before) and drop the
+   crest entirely so the right cluster (just the Create-an-Account button) stays clear. */
 @media (max-width:640px){
   .snav__brandlock{flex-direction:column;align-items:flex-start;line-height:1.05}
   .snav__brand{font-size:20px}
   .snav__tagline{padding-left:5px;font-size:10px;max-width:60vw}
-  .snav__crest{width:22px;height:22px}
+  .snav__crest{display:none}
 }
-@media (max-width:400px){.snav__brand{font-size:18px} .snav__tagline{font-size:9.5px;max-width:56vw}
-  .snav__crest{width:19px;height:19px}}
+@media (max-width:400px){.snav__brand{font-size:18px} .snav__tagline{font-size:9.5px;max-width:56vw}}
 .snav__signup{flex:0 0 auto;padding:6px 13px;border-radius:9px;background:var(--accent);
   color:#fff;text-decoration:none;font-size:13px;font-weight:700;white-space:nowrap}
 .snav__signup:hover{filter:brightness(1.06)}
