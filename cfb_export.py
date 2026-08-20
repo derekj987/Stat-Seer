@@ -150,10 +150,11 @@ def team_scoring(db, season, decay):
 WINK = 11.0  # margin -> win-prob logistic scale (a 7-pt edge ~ 65%)
 
 
-def build_card(db, ratings, hfa, season, week, limit, scoring, odds):
+def build_card(db, ratings, hfa, season, week, top_set, scoring, odds):
     """Model-vs-Market card + upsets for `week`, mirroring the NFL board. Each game gets
-    the market spread + total and our model's spread/total lean; upsets are off-consensus
-    games where the model backs the market underdog to win."""
+    the market spread + total and our model's projection; `featured` flags games with a
+    top-25 team (the homepage leads with those, the rest go behind a 'see all' dropdown).
+    Upsets are off-consensus competitive games where the model backs the market dog."""
     L, off, deff = scoring
     conn = sqlite3.connect(db)
     rows = conn.execute(
@@ -190,6 +191,7 @@ def build_card(db, ratings, hfa, season, week, limit, scoring, odds):
             "marketSpread": market_spread, "marketTotal": mtot,
             "projSpread": proj_spread, "projTotal": round(float(ptot), 1),
             "totalLean": total_lean, "off": off_flag,
+            "featured": bool(home in top_set or away in top_set),
             "_interest": min(rh, ra),
         })
 
@@ -207,14 +209,15 @@ def build_card(db, ratings, hfa, season, week, limit, scoring, odds):
                     "modelPct": round(100 * p_dog), "marketPct": round(100 * p_dog_mkt),
                     "byPoints": round(dog_margin, 1),
                 })
-    cards.sort(key=lambda g: g["_interest"], reverse=True)
+    # featured (top-25 team) games first, then the rest — each block by interest.
+    cards.sort(key=lambda g: (g["featured"], g["_interest"]), reverse=True)
     for g in cards:
         del g["_interest"]
     upsets.sort(key=lambda u: u["modelPct"] - u["marketPct"], reverse=True)
-    return cards[:limit], upsets
+    return cards, upsets
 
 
-CARD_SEASON, CARD_WEEK, CARD_LIMIT = 2026, 1, 16
+CARD_SEASON, CARD_WEEK = 2026, 1
 
 
 def main():
@@ -232,9 +235,10 @@ def main():
     completed = load_completed(DB, CARD_SEASON)
     cur_ratings = cp.fit_ratings(completed, LAM, CAP, prior_next)[0] if completed else prior_next
     card_week = detect_upcoming_week(DB, CARD_SEASON, CARD_WEEK)
+    top_set = {t for t, _ in sorted(final.items(), key=lambda kv: kv[1], reverse=True)[:25]}
     scoring = team_scoring(DB, last, DECAY)
     odds = fetch_ncaaf_odds()
-    card_games, upsets = build_card(DB, cur_ratings, hfa, CARD_SEASON, card_week, CARD_LIMIT, scoring, odds)
+    card_games, upsets = build_card(DB, cur_ratings, hfa, CARD_SEASON, card_week, top_set, scoring, odds)
     confs = team_conferences(DB, last)
     ranked = sorted(final.items(), key=lambda kv: kv[1], reverse=True)
     top = [{"rank": i + 1, "team": t, "conf": confs.get(t, ""), "rating": round(r, 1)}
@@ -303,7 +307,7 @@ def main():
             "export type NcaafCardGame = { away: string; home: string; neutral: number;"
             " marketSpread: { fav: string; num: number } | null; marketTotal: number | null;"
             " projSpread: { fav: string; num: number }; projTotal: number;"
-            " totalLean: { dir: string; num: number } | null; off: boolean };\n"
+            " totalLean: { dir: string; num: number } | null; off: boolean; featured: boolean };\n"
             "export type NcaafUpset = { dog: string; matchup: string; spread: string;"
             " modelPct: number; marketPct: number; byPoints: number };\n"
             "export const NCAAF_MODEL = " + json.dumps(data, indent=2) + " as const;\n")

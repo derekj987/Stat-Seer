@@ -19,9 +19,9 @@ export default function manifest(): MetadataRoute.Manifest {
     // art serves "any" AND "maskable" — Android uses the maskable and drops the white
     // square, while the ring/text still survive the circle crop.
     icons: [
-      { src: "/icon-192.png?v=12", sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: "/icon-512.png?v=12", sizes: "512x512", type: "image/png", purpose: "any" },
-      { src: "/icon-maskable-512.png?v=12", sizes: "512x512", type: "image/png", purpose: "maskable" },
+      { src: "/icon-192.png?v=13", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/icon-512.png?v=13", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: "/icon-maskable-512.png?v=13", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
   };
 }

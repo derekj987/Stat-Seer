@@ -13,7 +13,55 @@ export const metadata = {
 
 const M = NCAAF_MODEL;
 
+function CardRows({ games }: { games: readonly NcaafCardGame[] }) {
+  return (
+    <>
+      {games.map((g) => {
+        const ms = g.marketSpread; const ps = g.projSpread; const tl = g.totalLean;
+        return (
+          <tr key={`${g.away}-${g.home}`} className={g.off ? "hb-off" : undefined}>
+            <td className="hb-l">
+              <span className="hb-game">{g.away}<span className="hb-at">at</span>{g.home}</span>
+              {g.neutral ? <span className="ncf-site"> · N</span> : null}
+              {g.off && <span className="hb-dia hb-dia--end" aria-label="off consensus">◆</span>}
+            </td>
+            <td className="hb-num">{ms ? `${ms.fav} ${ms.num}` : "—"}</td>
+            <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
+            <td className="hb-suggest">
+              <span className="hb-sugwrap">
+                <span className="hb-sug"><span className="hb-sug__t">{ps.fav} {ps.num}</span></span>
+                {tl && (
+                  <span className="hb-sug">
+                    <span className="hb-sug__t">{tl.dir === "OVER" ? "Over" : "Under"} {tl.num}</span>
+                  </span>
+                )}
+              </span>
+            </td>
+          </tr>
+        );
+      })}
+    </>
+  );
+}
+
+function CardHead() {
+  return (
+    <thead>
+      <tr>
+        <th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th>
+        <th>Our Model Suggests</th>
+      </tr>
+    </thead>
+  );
+}
+
 function TheCard({ games }: { games: readonly NcaafCardGame[] }) {
+  // Lead with games that involve a top-25 team; tuck the rest of the slate behind a
+  // "see all" dropdown so the homepage isn't a 50-row wall.
+  const featured = games.filter((g) => g.featured);
+  const rest = games.filter((g) => !g.featured);
+  const lead = featured.length ? featured : games;   // fall back if nothing is ranked
+  const extra = featured.length ? rest : [];
   return (
     <details className="hb-panel hb-panel--card" open>
       <summary className="hb-bar">
@@ -29,42 +77,27 @@ function TheCard({ games }: { games: readonly NcaafCardGame[] }) {
             informative context, <b>not a pick</b> (our rating doesn&apos;t beat the spread; see{" "}
             <a href="/ncaaf/model">The Model</a>).</span>
         </div>
+        <div className="hb-formcap">Ranked matchups — every game with a top-25 team</div>
         <div className="hb-formwrap">
           <table className="hb-form">
-            <thead>
-              <tr>
-                <th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th>
-                <th>Our Model Suggests</th>
-              </tr>
-            </thead>
-            <tbody>
-              {games.map((g) => {
-                const ms = g.marketSpread; const ps = g.projSpread; const tl = g.totalLean;
-                return (
-                  <tr key={`${g.away}-${g.home}`} className={g.off ? "hb-off" : undefined}>
-                    <td className="hb-l">
-                      <span className="hb-game">{g.away}<span className="hb-at">at</span>{g.home}</span>
-                      {g.neutral ? <span className="ncf-site"> · N</span> : null}
-                      {g.off && <span className="hb-dia hb-dia--end" aria-label="off consensus">◆</span>}
-                    </td>
-                    <td className="hb-num">{ms ? `${ms.fav} ${ms.num}` : "—"}</td>
-                    <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
-                    <td className="hb-suggest">
-                      <span className="hb-sugwrap">
-                        <span className="hb-sug"><span className="hb-sug__t">{ps.fav} {ps.num}</span></span>
-                        {tl && (
-                          <span className="hb-sug">
-                            <span className="hb-sug__t">{tl.dir === "OVER" ? "Over" : "Under"} {tl.num}</span>
-                          </span>
-                        )}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
+            <CardHead />
+            <tbody><CardRows games={lead} /></tbody>
           </table>
         </div>
+        {extra.length > 0 && (
+          <details className="hb-more">
+            <summary className="hb-more__sum">
+              <span className="hb-more__chev" aria-hidden="true">▸</span>
+              See all {extra.length} other games
+            </summary>
+            <div className="hb-formwrap">
+              <table className="hb-form">
+                <CardHead />
+                <tbody><CardRows games={extra} /></tbody>
+              </table>
+            </div>
+          </details>
+        )}
       </div>
     </details>
   );

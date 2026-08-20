@@ -1291,6 +1291,17 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 
 /* The Card — agate table, columns clustered left */
 .hb-formwrap{overflow-x:auto}
+.hb-formcap{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  font-weight:700;margin:0 0 8px}
+/* "See all N other games" — the rest of the slate, folded away by default */
+.hb-more{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.hb-more__sum{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:7px;
+  font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:var(--accent)}
+.hb-more__sum::-webkit-details-marker{display:none}
+.hb-more__chev{display:inline-block;font-size:10px;transition:transform .15s ease}
+.hb-more[open] .hb-more__chev{transform:rotate(90deg)}
+.hb-more__sum:hover{filter:brightness(1.12)}
+.hb-more .hb-formwrap{margin-top:12px}
 .hb-form{border-collapse:collapse;table-layout:auto;width:100%}
 .hb-form th,.hb-form td{text-align:left}
 .hb-form th{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);

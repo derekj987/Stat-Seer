@@ -127,9 +127,9 @@ export default function SiteNav() {
 
             {/* NFL is live — its own dropdown, holding The Model / Context / Value
                 Finder. The "NFL" text stays a clickable link to its home; the chevron
-                (or the rest of the row) toggles the group open. This is the template
-                for every future sport. */}
-            <details className="snav__pgroup snav__sportgroup" open>
+                (or the rest of the row) toggles the group open. Collapsed by default now
+                that several sports share the list. Template for every future sport. */}
+            <details className="snav__pgroup snav__sportgroup">
               <summary className="snav__sportsum">
                 <a href="/" className="snav__sportname" onClick={(e) => e.stopPropagation()}>NFL</a>
                 <span className="snav__sportchev" aria-hidden="true">▾</span>
