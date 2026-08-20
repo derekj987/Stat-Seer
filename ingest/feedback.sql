@@ -15,6 +15,11 @@ create table if not exists public.feedback (
 
 create index if not exists feedback_created_idx on public.feedback (created_at desc);
 
+-- Table-level privileges. A table made with raw SQL does NOT inherit these, so grant them
+-- explicitly (RLS below still governs which ROWS each role may touch).
+grant insert on public.feedback to anon, authenticated;  -- anyone may submit
+grant select on public.feedback to authenticated;        -- staff read (RLS restricts to founders)
+
 alter table public.feedback enable row level security;
 
 -- Anyone may submit a piece of feedback.
