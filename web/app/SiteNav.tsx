@@ -115,7 +115,10 @@ export default function SiteNav() {
         <div className="snav__scrim" onClick={() => setOpen(false)} aria-hidden="true" />
         <div className="snav__drawer" role="dialog" aria-label="Menu">
           <button className="snav__dclose" onClick={() => setOpen(false)} aria-label="Close menu">✕</button>
-          <a href="/" className="snav__dtop">Home</a>
+          <a href="/" className="snav__dtop snav__dhome">Home
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/crest.png?v=2" alt="" className="snav__dcrest" width={22} height={22} />
+          </a>
 
           <details className="snav__pgroup" open>
             <summary className="snav__dtop snav__psum">Popular</summary>
