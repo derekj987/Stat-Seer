@@ -67,7 +67,7 @@ export default function SiteNav() {
       <div className="snav__bar">
         <a href="/" className="snav__home" aria-label="StatSeer home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-mark.png?v=3" alt="" className="snav__logo" width={34} height={34} />
+          <img src="/logo-mark.png?v=4" alt="" className="snav__logo" width={34} height={34} />
         </a>
 
         <button className="snav__burger" aria-label="Menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}>

@@ -18,8 +18,8 @@ export default function manifest(): MetadataRoute.Manifest {
     // variant — Android center-crops maskable icons, which would cut the wordmark and
     // the ring; as "any" it's shown whole (with rounded corners) so both survive.
     icons: [
-      { src: "/icon-192.png?v=10", sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: "/icon-512.png?v=10", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: "/icon-192.png?v=11", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/icon-512.png?v=11", sizes: "512x512", type: "image/png", purpose: "any" },
     ],
   };
 }
