@@ -1590,6 +1590,20 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .ncf-method__b ul{margin:0;padding-left:18px}
 .ncf-method__b li{margin:6px 0;font-size:13px;line-height:1.5}
 
+/* "arriving with the season" panel for NCAAF subpages awaiting live data */
+.ncf-soon{border:1px dashed color-mix(in srgb,var(--accent) 40%,var(--line));border-radius:14px;
+  padding:20px 18px;background:var(--surface);margin:16px 0}
+.ncf-soon__tag{display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--accent);background:var(--accent-soft);border-radius:20px;padding:3px 10px}
+.ncf-soon__h{font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;font-weight:400;
+  font-size:22px;margin:12px 0 6px;color:var(--ink)}
+.ncf-soon__p{font-size:13.5px;line-height:1.6;color:var(--ink);margin:0 0 10px;max-width:70ch}
+.ncf-soon__wait{font-size:12.5px;color:var(--muted);line-height:1.55;margin:0 0 12px;max-width:70ch}
+.ncf-soon__links{display:flex;flex-wrap:wrap;gap:10px}
+.ncf-soon__link{font-size:13px;font-weight:700;text-decoration:none;color:var(--accent);
+  border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));border-radius:9px;padding:7px 12px}
+.ncf-soon__link:hover{background:var(--accent-soft)}
+
 @media (max-width:720px){
   .ncf-cards{grid-template-columns:1fr}
   .ncf-row{grid-template-columns:30px 1fr 64px;gap:6px}
