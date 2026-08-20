@@ -74,9 +74,13 @@ export default function SiteNav() {
         </button>
 
         {/* Main StatSeer wordmark + tagline + crest — the brand block in the top bar,
-            right of the hamburger (moved up from the homepage masthead). */}
-        <a href="/" className="snav__brand">StatSeer</a>
-        <span className="snav__tagline">Arm yourself with data-driven decisions.</span>
+            right of the hamburger (moved up from the homepage masthead). Wordmark and
+            tagline are a lockup: inline on desktop, stacked (tagline beneath) on phones
+            so the tagline still shows next to StatSeer. */}
+        <span className="snav__brandlock">
+          <a href="/" className="snav__brand">StatSeer</a>
+          <span className="snav__tagline">Arm yourself with data-driven decisions.</span>
+        </span>
         <span className="snav__crest" role="img" aria-label="StatSeer crest" />
 
         <nav className="snav__links" aria-label="Primary">

@@ -320,6 +320,8 @@ a.sportstrip__i:hover{color:var(--ink)}
 /* --- Context section --- */
 .ctxsec{margin-top:22px}
 .ctxsec__h{font-size:16px;margin:0 0 4px}
+.ctxsec__n{margin-left:8px;font-size:12px;color:var(--muted);font-weight:600;
+  border:1px solid var(--line);border-radius:999px;padding:1px 9px;vertical-align:2px}
 .ctxsec__d{margin:0 0 12px;font-size:13px;color:var(--muted);max-width:74ch;line-height:1.6}
 .ctxsec__d b{color:var(--ink)}
 .envcards{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
@@ -902,7 +904,9 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .snav__logo{width:34px;height:34px;border-radius:50%;border:2px solid var(--gold);object-fit:cover;
   filter:brightness(1.18) saturate(1.05);box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 30%,transparent)}
 /* brand block in the top bar, right of the hamburger: StatSeer wordmark (deep wine
-   burgundy, lightened on dark), the tagline, then the crest. */
+   burgundy, lightened on dark), the tagline, then the crest. Wordmark + tagline are
+   a lockup — inline on desktop, stacked on phones. */
+.snav__brandlock{flex:0 1 auto;min-width:0;display:flex;align-items:center}
 .snav__brand{flex:0 0 auto;padding-left:4px;text-decoration:none;white-space:nowrap;
   font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;font-weight:400;
   font-size:23px;line-height:1;letter-spacing:.02em;color:#7d1a2a}
@@ -913,8 +917,16 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
   font-size:13px;font-style:italic;letter-spacing:.01em;color:var(--muted)}
 .snav__crest{flex:0 0 auto;width:38px;height:38px;margin-left:2px;
   background:url(/crest.png?v=2) center/contain no-repeat}
-@media (max-width:640px){.snav__tagline{display:none}}
-@media (max-width:400px){.snav__brand{font-size:20px} .snav__crest{width:32px;height:32px}}
+/* Phones: stack the tagline beneath the wordmark (it was hidden before) and shrink
+   the crest so the lockup fits beside the burger. */
+@media (max-width:640px){
+  .snav__brandlock{flex-direction:column;align-items:flex-start;line-height:1.05}
+  .snav__brand{font-size:20px}
+  .snav__tagline{padding-left:5px;font-size:10px;max-width:60vw}
+  .snav__crest{width:26px;height:26px;margin-left:4px}
+}
+@media (max-width:400px){.snav__brand{font-size:18px} .snav__tagline{font-size:9.5px;max-width:56vw}
+  .snav__crest{width:23px;height:23px}}
 .snav__signup{flex:0 0 auto;padding:6px 13px;border-radius:9px;background:var(--accent);
   color:#fff;text-decoration:none;font-size:13px;font-weight:700;white-space:nowrap}
 .snav__signup:hover{filter:brightness(1.06)}
