@@ -15,9 +15,11 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: "#0c2b1c",
     theme_color: "#0c2b1c",
     icons: [
-      { src: "/icon-192.png?v=8", sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: "/icon-512.png?v=8", sizes: "512x512", type: "image/png", purpose: "any" },
-      { src: "/icon-maskable-512.png?v=8", sizes: "512x512", type: "image/png", purpose: "maskable" },
+      { src: "/icon-192.png?v=9", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/icon-512.png?v=9", sizes: "512x512", type: "image/png", purpose: "any" },
+      // Maskable: the logo is scaled into the safe zone so Android's circle/squircle
+      // crop keeps the golden ring (a full-bleed icon here loses the ring on Pixel).
+      { src: "/icon-maskable-512.png?v=9", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
   };
 }
