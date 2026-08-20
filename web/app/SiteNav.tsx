@@ -112,6 +112,7 @@ export default function SiteNav() {
                   <a href={`/u/${me.username}`} className="snav__mi">My profile</a>
                   <a href="/settings" className="snav__mi">Account settings</a>
                   {MOD.includes(me.role) && <a href="/forum/reports" className="snav__mi">Reports</a>}
+                  {MOD.includes(me.role) && <a href="/feedback" className="snav__mi">Feedback inbox</a>}
                   <button type="button" className="snav__mi snav__mi--btn" onClick={logout}>Log out</button>
                 </div>
               )}
@@ -210,6 +211,7 @@ export default function SiteNav() {
                 <a href={`/u/${me.username}`} className="snav__dusr">My profile</a>
                 <a href="/settings" className="snav__dusr">Account settings</a>
                 {MOD.includes(me.role) && <a href="/forum/reports" className="snav__dusr">Reports</a>}
+                {MOD.includes(me.role) && <a href="/feedback" className="snav__dusr">Feedback inbox</a>}
                 <button type="button" className="snav__dusr" onClick={logout}>Log out</button>
               </>
             ) : (
