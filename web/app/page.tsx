@@ -238,14 +238,8 @@ export default async function Home() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/seereyes.png" alt="" width={1983} height={793} />
         </div>
-        <div className="hb-mast__row">
-          {/* StatSeer wordmark moved up to the top bar; the masthead keeps the tagline
-              and crest. */}
-          <span className="hb-mast__tag">Arm yourself with data-driven decisions.</span>
-          {/* Crest art lives at web/public/crest.png. Rendered as a background so a
-              missing file degrades to empty rather than a broken-image icon. */}
-          <span className="hb-mast__crest" role="img" aria-label="StatSeer crest" />
-        </div>
+        {/* StatSeer wordmark, tagline, and crest all live in the top bar now; the
+            masthead keeps only the seer-eyes strip. */}
         <div className="hb-mast__rule"></div>
       </header>
 

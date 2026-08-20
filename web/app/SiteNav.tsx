@@ -73,9 +73,11 @@ export default function SiteNav() {
           <span /><span /><span />
         </button>
 
-        {/* Main StatSeer wordmark — lives in the top bar on every page, right of the
-            hamburger (replaced the old rotating motto). */}
+        {/* Main StatSeer wordmark + tagline + crest — the brand block in the top bar,
+            right of the hamburger (moved up from the homepage masthead). */}
         <a href="/" className="snav__brand">StatSeer</a>
+        <span className="snav__tagline">Arm yourself with data-driven decisions.</span>
+        <span className="snav__crest" role="img" aria-label="StatSeer crest" />
 
         <nav className="snav__links" aria-label="Primary">
           {LINKS.map((l) => (

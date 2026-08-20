@@ -10,11 +10,15 @@ Writes web/app/ncaaf/model-data.ts. Re-run whenever the backfill refreshes.
 Stdlib + numpy; reuses cfb_power / cfb_ats.
 """
 import json
+import math
 import sqlite3
+import statistics
 import sys
+import urllib.request
 
 import cfb_power as cp
 import cfb_ats as ca
+import odds_client as oc
 
 DB = "data/cfb.db"
 LAM, CAP, DECAY, FROM_WEEK = 5.0, 28, 0.6, 6
@@ -70,31 +74,144 @@ def detect_upcoming_week(db, season, fallback):
     return r[0] or fallback
 
 
-def project_week(db, ratings, hfa, season, week, limit):
-    """Line-blind projections for an upcoming week: margin = home - away + HFA (0 at
-    neutral sites). No market involved. Returns the `limit` biggest matchups (by the
-    two teams' combined rating) so the homepage Card leads with the marquee games."""
+def _norm(s):
+    """Normalize a team name for cross-source matching (Odds API full names vs CFBD)."""
+    return " ".join("".join(c if c.isalnum() else " " for c in (s or "").lower()).split())
+
+
+def fetch_ncaaf_odds():
+    """Current NCAAF consensus spreads + totals from The Odds API. Returns a list of
+    {away_n, home_n, home_spread, total}; home_spread is the HOME line (neg = home fav).
+    Empty on any failure (the Card then shows model-only, like the NFL board pre-lock)."""
+    key = oc.load_env().get("ODDS_API_KEY")
+    if not key:
+        return []
+    oc.ensure_ssl_certs()
+    url = ("https://api.the-odds-api.com/v4/sports/americanfootball_ncaaf/odds"
+           "?apiKey=%s&regions=us&markets=spreads,totals&oddsFormat=american" % key)
+    try:
+        with urllib.request.urlopen(url, timeout=60) as r:
+            data = json.loads(r.read())
+    except Exception as e:  # noqa: BLE001
+        print("  odds fetch failed: %s" % e, file=sys.stderr)
+        return []
+    out = []
+    for e in data:
+        hf, af = e.get("home_team"), e.get("away_team")
+        hsp, tot = [], []
+        for b in e.get("bookmakers", []):
+            for m in b.get("markets", []):
+                if m["key"] == "spreads":
+                    for o in m.get("outcomes", []):
+                        if o.get("name") == hf and o.get("point") is not None:
+                            hsp.append(o["point"])
+                elif m["key"] == "totals":
+                    pts = [o["point"] for o in m.get("outcomes", []) if o.get("point") is not None]
+                    if pts:
+                        tot.append(pts[0])
+        out.append({"away_n": _norm(af), "home_n": _norm(hf),
+                    "home_spread": round(statistics.median(hsp), 1) if hsp else None,
+                    "total": round(statistics.median(tot), 1) if tot else None})
+    return out
+
+
+def match_odds(away, home, odds):
+    a, h = _norm(away), _norm(home)
+    def m(x, y):
+        return y == x or y.startswith(x + " ") or x.startswith(y + " ")
+    cands = [o for o in odds if m(a, o["away_n"]) and m(h, o["home_n"])]
+    return min(cands, key=lambda o: len(o["away_n"]) + len(o["home_n"])) if cands else None
+
+
+def team_scoring(db, season, decay):
+    """A light totals model: each team's regressed offensive/defensive point deviation
+    from the league average, carried toward next season by `decay`. Projected total =
+    2*L + off[home] + def[away] + off[away] + def[home]."""
     conn = sqlite3.connect(db)
     rows = conn.execute(
-        """SELECT away_team, home_team, neutral_site, start_date
-             FROM games WHERE season=? AND week=?
-               AND home_class='fbs' AND away_class='fbs'""", (season, week)).fetchall()
+        """SELECT home_team, away_team, home_points, away_points FROM games
+             WHERE season=? AND home_class='fbs' AND away_class='fbs'
+               AND home_points IS NOT NULL""", (season,)).fetchall()
     conn.close()
-    out = []
+    scored, allowed = {}, {}
+    for h, a, hp, ap in rows:
+        scored.setdefault(h, []).append(hp); allowed.setdefault(h, []).append(ap)
+        scored.setdefault(a, []).append(ap); allowed.setdefault(a, []).append(hp)
+    allpts = [p for v in scored.values() for p in v]
+    L = sum(allpts) / len(allpts) if allpts else 27.0
+    off, deff = {}, {}
+    for t in scored:
+        n = len(scored[t]); shrink = n / (n + 4)
+        off[t] = decay * (sum(scored[t]) / n - L) * shrink
+        deff[t] = decay * (sum(allowed[t]) / n - L) * shrink
+    return L, off, deff
+
+
+WINK = 11.0  # margin -> win-prob logistic scale (a 7-pt edge ~ 65%)
+
+
+def build_card(db, ratings, hfa, season, week, limit, scoring, odds):
+    """Model-vs-Market card + upsets for `week`, mirroring the NFL board. Each game gets
+    the market spread + total and our model's spread/total lean; upsets are off-consensus
+    games where the model backs the market underdog to win."""
+    L, off, deff = scoring
+    conn = sqlite3.connect(db)
+    rows = conn.execute(
+        """SELECT away_team, home_team, neutral_site, start_date FROM games
+             WHERE season=? AND week=? AND home_class='fbs' AND away_class='fbs'""",
+        (season, week)).fetchall()
+    conn.close()
+    cards, upsets = [], []
     for away, home, neu, date in rows:
         rh, ra = ratings.get(home, 0.0), ratings.get(away, 0.0)
-        pred = rh - ra + (0.0 if neu else hfa)
-        out.append({
+        margin = rh - ra + (0.0 if neu else hfa)                 # home perspective
+        ptot = 2 * L + off.get(home, 0) + deff.get(away, 0) + off.get(away, 0) + deff.get(home, 0)
+        od = match_odds(away, home, odds)
+        hsp = od["home_spread"] if od else None                  # home line (neg = home fav)
+        mtot = od["total"] if od else None
+
+        # Our read, shown beside the market: our projected favorite + margin, and an
+        # over/under lean on the total. We show our PROJECTION (not a "take the dog"
+        # betting pick) — the rating is compressed vs the market, so a betting lean
+        # would be a one-directional artifact, not an edge (the model doesn't beat it).
+        our_fav = home if margin >= 0 else away
+        proj_spread = {"fav": our_fav, "num": round(-abs(float(margin)), 1)}
+        market_spread = total_lean = None
+        off_flag = False
+        if hsp is not None:
+            mfav = home if hsp <= 0 else away
+            market_spread = {"fav": mfav, "num": -abs(hsp)}      # the favorite's line
+            off_flag = bool(mfav != our_fav)                     # off-consensus side
+        if mtot is not None and abs(ptot - mtot) >= 2.0:
+            total_lean = {"dir": "OVER" if ptot > mtot else "UNDER", "num": mtot}
+
+        cards.append({
             "away": away, "home": home, "neutral": 1 if neu else 0,
-            "fav": home if pred >= 0 else away, "margin": round(abs(pred), 1),
-            # rank by the WEAKER side's rating so genuinely marquee (two strong teams)
-            # games lead, not top-team-vs-cupcake blowouts.
-            "date": (date or "")[:10], "_interest": min(rh, ra),
+            "marketSpread": market_spread, "marketTotal": mtot,
+            "projSpread": proj_spread, "projTotal": round(float(ptot), 1),
+            "totalLean": total_lean, "off": off_flag,
+            "_interest": min(rh, ra),
         })
-    out.sort(key=lambda g: g["_interest"], reverse=True)
-    for g in out:
+
+        # Potential upset — only on competitive lines (a single-digit dog our model
+        # flips to win outright), never a naive blowout-dog flip.
+        if hsp is not None and off_flag and abs(hsp) <= 9.5:
+            dog = away if hsp <= 0 else home
+            dog_margin = float(margin if dog == home else -margin)
+            if dog_margin > 0:
+                p_dog = 1 / (1 + math.exp(-dog_margin / WINK))
+                p_dog_mkt = 1 - 1 / (1 + math.exp(-abs(hsp) / WINK))
+                upsets.append({
+                    "dog": dog, "matchup": ("vs " + away) if dog == home else ("at " + home),
+                    "spread": "+" + str(abs(hsp)),
+                    "modelPct": round(100 * p_dog), "marketPct": round(100 * p_dog_mkt),
+                    "byPoints": round(dog_margin, 1),
+                })
+    cards.sort(key=lambda g: g["_interest"], reverse=True)
+    for g in cards:
         del g["_interest"]
-    return out[:limit]
+    upsets.sort(key=lambda u: u["modelPct"] - u["marketPct"], reverse=True)
+    return cards[:limit], upsets
 
 
 CARD_SEASON, CARD_WEEK, CARD_LIMIT = 2026, 1, 16
@@ -115,7 +232,9 @@ def main():
     completed = load_completed(DB, CARD_SEASON)
     cur_ratings = cp.fit_ratings(completed, LAM, CAP, prior_next)[0] if completed else prior_next
     card_week = detect_upcoming_week(DB, CARD_SEASON, CARD_WEEK)
-    card_games = project_week(DB, cur_ratings, hfa, CARD_SEASON, card_week, CARD_LIMIT)
+    scoring = team_scoring(DB, last, DECAY)
+    odds = fetch_ncaaf_odds()
+    card_games, upsets = build_card(DB, cur_ratings, hfa, CARD_SEASON, card_week, CARD_LIMIT, scoring, odds)
     confs = team_conferences(DB, last)
     ranked = sorted(final.items(), key=lambda kv: kv[1], reverse=True)
     top = [{"rank": i + 1, "team": t, "conf": confs.get(t, ""), "rating": round(r, 1)}
@@ -173,7 +292,8 @@ def main():
         "teamsRated": len(final), "top": top, "validation": valid, "ats": ats,
         "context": {"hfa": round(hfa, 1), "conferences": conferences},
         "value": {"games": ng, "keyNumbers": key_numbers, "bookShop": book_shop},
-        "card": {"season": CARD_SEASON, "week": card_week, "games": card_games},
+        "card": {"season": CARD_SEASON, "week": card_week,
+                 "games": card_games, "upsets": upsets},
     }
     body = ("// AUTO-GENERATED by cfb_export.py -- do not edit by hand.\n"
             "// Real, out-of-sample numbers from the CFB power rating over data/cfb.db.\n"
@@ -181,7 +301,11 @@ def main():
             "export type NcaafConf = { conf: string; avgRating: number; teams: number };\n"
             "export type NcaafKeyNum = { margin: number; pct: number; nfl: number };\n"
             "export type NcaafCardGame = { away: string; home: string; neutral: number;"
-            " fav: string; margin: number; date: string };\n"
+            " marketSpread: { fav: string; num: number } | null; marketTotal: number | null;"
+            " projSpread: { fav: string; num: number }; projTotal: number;"
+            " totalLean: { dir: string; num: number } | null; off: boolean };\n"
+            "export type NcaafUpset = { dog: string; matchup: string; spread: string;"
+            " modelPct: number; marketPct: number; byPoints: number };\n"
             "export const NCAAF_MODEL = " + json.dumps(data, indent=2) + " as const;\n")
     with open(OUT, "w", encoding="utf-8") as f:
         f.write(body)
@@ -194,10 +318,12 @@ def main():
           f"({conferences[0]['avgRating']})")
     print(f"  value: key# 3={key_numbers[0]['pct']}% 7={key_numbers[1]['pct']}%; "
           f"book spread avg {book_shop['avgRange']} pts, {book_shop['pctGap1']}% gap>=1")
-    if card_games:
-        g0 = card_games[0]
-        print(f"  card: {CARD_SEASON} wk{card_week}, {len(card_games)} games; "
-              f"top: {g0['fav']} by {g0['margin']} ({g0['away']} @ {g0['home']})")
+    matched = sum(1 for g in card_games if g["marketSpread"])
+    print(f"  card: {CARD_SEASON} wk{card_week}, {len(card_games)} games "
+          f"({matched} with market lines), {len(upsets)} upset(s)")
+    if upsets:
+        u = upsets[0]
+        print(f"  top upset: {u['dog']} {u['matchup']} — model {u['modelPct']}% vs market {u['marketPct']}%")
     return 0
 
 
