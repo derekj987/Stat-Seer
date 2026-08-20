@@ -91,10 +91,11 @@ export default function SiteNav() {
 
         <div className="snav__right">
           <span className="snav__crest" role="img" aria-label="StatSeer crest" />
-          {/* Create-an-Account CTA stays visible in the top bar regardless of session
-              (pre-launch: keep the signup path prominent; account actions live in the
-              drawer's User Options). Crest sits just to its left. */}
-          <a href="/signup" className="snav__signup">Create an Account</a>
+          {/* Forums button (green, always visible) sits between the crest and the signup CTA. */}
+          <a href="/forum" className="snav__forums">Visit the Forums</a>
+          {/* Create-an-Account only when signed OUT — it disappears once a member logs in.
+              (Account actions live in the drawer's User Options.) */}
+          {me === null && <a href="/signup" className="snav__signup">Create an Account</a>}
           {me === undefined ? (
             <span className="snav__slot" />
           ) : me ? (

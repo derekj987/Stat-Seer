@@ -26,7 +26,7 @@ export default function HomePromo() {
         <span className="hb-tav__title">Let&apos;s talk numbers — join our community!</span>
         <span className="hb-tav__hint">pull up a stool — see what members get</span>
         <span className="hb-tav__right">
-          <a href="/signup" className="hb-tav__join" onClick={(e) => e.stopPropagation()}>Become a member →</a>
+          {!member && <a href="/signup" className="hb-tav__join" onClick={(e) => e.stopPropagation()}>Become a member →</a>}
           <span className="hb-tav__ic hb-tav__ic--shut" aria-hidden="true">🍺</span>
           <span className="hb-tav__ic hb-tav__ic--open" aria-hidden="true">🍻</span>
           <span className="hb-tav__chev" aria-hidden="true">▾</span>

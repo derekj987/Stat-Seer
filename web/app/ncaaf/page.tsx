@@ -1,5 +1,4 @@
 import { NCAAF_MODEL, type NcaafCardGame, type NcaafUpset } from "./model-data";
-import SportStrip from "../SportStrip";
 
 // College Football home — mirrors the NFL homepage broadsheet: The Card (model vs
 // market), Potential Upsets, Players We Like, promo, and the 3-section nav. The Card
@@ -173,8 +172,6 @@ export default function Home() {
   return (
     <main className="hb">
       <div className="hb-main">
-      {/* eyes strip + sports bar pinned together below the site bar as the feed scrolls */}
-      <div className="hb-topstick">
       <header className="hb-mast">
         <div className="hb-mast__eyes">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -182,9 +179,6 @@ export default function Home() {
         </div>
         <div className="hb-mast__rule"></div>
       </header>
-
-      <SportStrip />
-      </div>
 
       <div className="hb-weeklabel">NCAAF Week {c.week} · {c.season}</div>
       <TheCard games={c.games} />

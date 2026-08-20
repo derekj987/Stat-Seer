@@ -3,7 +3,6 @@
 // honest: model columns read "—" until the week's predictions lock (see lib/home.ts).
 import { fetchHome, type CardRow, type UpsetRow, type PlayerPick } from "@/lib/home";
 import AddToSlip from "../AddToSlip";
-import SportStrip from "../SportStrip";
 
 export const revalidate = 120;
 const SEASON = 2026;
@@ -232,8 +231,6 @@ export default async function Home() {
   return (
     <main className="hb">
       <div className="hb-main">
-      {/* eyes strip + sports bar pinned together below the site bar as the feed scrolls */}
-      <div className="hb-topstick">
       <header className="hb-mast">
         <div className="hb-mast__eyes">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -243,9 +240,6 @@ export default async function Home() {
             masthead keeps only the seer-eyes strip. */}
         <div className="hb-mast__rule"></div>
       </header>
-
-      <SportStrip />
-      </div>
 
       <div className="hb-weeklabel">NFL Week {data.week} · {data.season}</div>
       <TheCard rows={data.card} />
