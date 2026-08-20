@@ -2,7 +2,7 @@ import { weekRange, fetchWeek, buildBoard } from "@/lib/board";
 import { fetchModelWeek, type ModelPrediction } from "@/lib/model";
 import { MODEL_TOTALS } from "@/lib/modelTotals";
 import { weekRefs } from "@/lib/refAssignments";
-import { Brand, FlowSteps, ContextSubnav, SportTabs } from "../Nav";
+import { Brand, FlowSteps, ContextSubnav } from "../Nav";
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -124,7 +124,6 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
       </header>
 
       <FlowSteps active="context" />
-      <SportTabs />
       <ContextSubnav active="upset" />
       <WeekNav min={min} max={max} current={week} />
 

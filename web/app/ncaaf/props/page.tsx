@@ -1,4 +1,4 @@
-import { Brand, FlowSteps, SportTabs, ShopSubnav, ValueFinderNote } from "../../Nav";
+import { Brand, FlowSteps, ShopSubnav, ValueFinderNote } from "../../Nav";
 import { NcaafSoon } from "../Soon";
 
 // College Football — Value Finder · Player Props. Props are the likeliest place a real
@@ -17,7 +17,6 @@ export default function Page() {
       </header>
 
       <FlowSteps active="value" base="ncaaf" />
-      <SportTabs active="ncaaf" />
       <ShopSubnav active="props" base="ncaaf" />
       <ValueFinderNote />
 

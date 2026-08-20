@@ -1,4 +1,4 @@
-import { Brand, FlowSteps, SportTabs, ContextSubnav } from "../../Nav";
+import { Brand, FlowSteps, ContextSubnav } from "../../Nav";
 import { NcaafSoon } from "../Soon";
 
 // College Football — Context · Upset Watch (Context landing). Flags underdogs the
@@ -17,7 +17,6 @@ export default function Page() {
       </header>
 
       <FlowSteps active="context" base="ncaaf" />
-      <SportTabs active="ncaaf" />
       <ContextSubnav active="upset" base="ncaaf" />
 
       <NcaafSoon

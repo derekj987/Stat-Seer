@@ -1,6 +1,6 @@
 import { weekRange } from "@/lib/board";
 import { fetchModelWeek, fetchCalibration, type ModelPrediction } from "@/lib/model";
-import { Brand, FlowSteps, SportTabs } from "../Nav";
+import { Brand, FlowSteps } from "../Nav";
 import AddToSlip from "../AddToSlip";
 import ModelClock from "../ModelClock";
 
@@ -127,7 +127,6 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
       </header>
 
       <FlowSteps active="analyze" />
-      <SportTabs />
       <p className="sportnote">
         <b>NFL first.</b> We perfect one sport before adding the next — MLB, NBA, College Football and NHL
         will turn on here once each has its own line-blind model with a public track record.

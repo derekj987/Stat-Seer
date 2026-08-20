@@ -7,7 +7,7 @@
 import { useCallback } from "react";
 import type { Game } from "@/lib/board";
 import type { PreRating } from "@/lib/preseason";
-import { ShopSubnav, SeasonSubnav, Brand, FlowSteps, SportTabs } from "./Nav";
+import { ShopSubnav, SeasonSubnav, Brand, FlowSteps } from "./Nav";
 import { useSlip } from "@/lib/slip";
 
 const kickFmt = new Intl.DateTimeFormat("en-US", {
@@ -168,7 +168,6 @@ export default function PreseasonView({
       </header>
 
       <FlowSteps active="value" />
-      <SportTabs />
       <ShopSubnav active="lines" />
       <SeasonSubnav area="lines" active="pre" />
 

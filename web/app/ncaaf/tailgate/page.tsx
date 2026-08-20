@@ -1,4 +1,4 @@
-import { Brand, FlowSteps, SportTabs, ContextSubnav } from "../../Nav";
+import { Brand, FlowSteps, ContextSubnav } from "../../Nav";
 import { NcaafSoon } from "../Soon";
 
 // College Football — Context · Fan Analysis. Fan sentiment from team boards — needs a
@@ -16,7 +16,6 @@ export default function Page() {
       </header>
 
       <FlowSteps active="context" base="ncaaf" />
-      <SportTabs active="ncaaf" />
       <ContextSubnav active="fan" base="ncaaf" />
 
       <NcaafSoon

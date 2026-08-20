@@ -1,4 +1,4 @@
-import { Brand, FlowSteps, SportTabs, ShopSubnav, ValueFinderNote } from "../../Nav";
+import { Brand, FlowSteps, ShopSubnav, ValueFinderNote } from "../../Nav";
 import { NCAAF_MODEL } from "../model-data";
 import { StatCard } from "../StatCard";
 import { NcaafSoon } from "../Soon";
@@ -23,7 +23,6 @@ export default function Page() {
       </header>
 
       <FlowSteps active="value" base="ncaaf" />
-      <SportTabs active="ncaaf" />
       <ShopSubnav active="lines" base="ncaaf" />
       <ValueFinderNote />
 

@@ -1,4 +1,4 @@
-import { Brand, FlowSteps, SportTabs, ContextSubnav } from "../../Nav";
+import { Brand, FlowSteps, ContextSubnav } from "../../Nav";
 import { NCAAF_MODEL, type NcaafConf } from "../model-data";
 import { StatCard } from "../StatCard";
 
@@ -22,7 +22,6 @@ export default function Page() {
       </header>
 
       <FlowSteps active="context" base="ncaaf" />
-      <SportTabs active="ncaaf" />
       <ContextSubnav active="special" base="ncaaf" />
 
       <section className="explainer">

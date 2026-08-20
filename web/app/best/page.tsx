@@ -1,6 +1,6 @@
 import { weekRange } from "@/lib/board";
 import { fetchBets, fetchBestProps, fmtOdds, type KeyPlay, type PropPlay } from "@/lib/bestbets";
-import { ShopSubnav, Brand, FlowSteps, ValueFinderNote, SportTabs } from "../Nav";
+import { ShopSubnav, Brand, FlowSteps, ValueFinderNote } from "../Nav";
 import SavableRow from "./SavableRow";
 
 export const revalidate = 120;
@@ -92,7 +92,6 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
       </header>
 
       <FlowSteps active="value" />
-      <SportTabs />
       <ShopSubnav active="best" />
       <ValueFinderNote />
       <WeekNav min={min} max={max} current={week} />

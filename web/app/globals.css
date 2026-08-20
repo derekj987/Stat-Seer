@@ -299,6 +299,21 @@ a.sporttab--active{text-decoration:none}
 .sporttab__soon{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-style:normal;
   color:#4a3c00;background:var(--spot);border-radius:20px;padding:1px 6px}
 .sportnote{font-size:12.5px;color:var(--muted);line-height:1.55;margin:4px 0 14px;max-width:72ch}
+
+/* Global sports strip — thin bar under the site header, on every page. Scrolls
+   horizontally on a phone so it stays one thin line. */
+.sportstrip{border-bottom:1px solid var(--line);background:var(--surface-2)}
+.sportstrip__in{display:flex;gap:2px;overflow-x:auto;max-width:1120px;margin:0 auto;padding:0 8px;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.sportstrip__in::-webkit-scrollbar{display:none}
+.sportstrip__i{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;padding:9px 14px;
+  font-size:12.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;text-decoration:none;
+  color:var(--muted);white-space:nowrap;border-bottom:2px solid transparent}
+a.sportstrip__i:hover{color:var(--ink)}
+.sportstrip__i--active{color:var(--accent);border-bottom-color:var(--accent)}
+.sportstrip__i--soon{opacity:.6;cursor:default}
+.sportstrip__soon{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;
+  font-style:normal;color:#4a3c00;background:var(--spot);border-radius:20px;padding:1px 5px}
 .sportnote b{color:var(--ink)}
 
 /* --- Context section --- */
