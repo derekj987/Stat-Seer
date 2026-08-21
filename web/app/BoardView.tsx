@@ -4,6 +4,21 @@ import { useCallback } from "react";
 import type { Game } from "@/lib/board";
 import { ShopSubnav, Brand, SlipCallout, FlowSteps, ValueFinderNote } from "./Nav";
 import { useSlip } from "@/lib/slip";
+import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
+
+const WX_BY_EVENT = new Map(GAME_WEATHER.map((w) => [w.eventId, w]));
+
+function WeatherChip({ wx }: { wx: GameWeather }) {
+  if (wx.indoor) return <span className="wxchip wxchip--indoor" title={wx.venue}>Indoor · roof</span>;
+  if (wx.status === "ok") {
+    return (
+      <span className={`wxchip${wx.windFlag ? " wxchip--wind" : ""}`} title={`${wx.venue} — ${wx.conditions ?? ""}`}>
+        {wx.windFlag && <b>⚑ </b>}{wx.windMph} mph · {wx.tempF}°{wx.conditions ? ` · ${wx.conditions}` : ""}
+      </span>
+    );
+  }
+  return null; // forecast pending (>~2 weeks out)
+}
 
 // ---- formatting (client-side; Intl has full ICU) ----
 const kickFmt = new Intl.DateTimeFormat("en-US", {
@@ -86,12 +101,15 @@ function GameCard({
     <SavableChip key={p.id} pick={p} saved={has(p.id)} best={best} onToggle={onToggle} />
   );
 
+  const wx = WX_BY_EVENT.get(g.eventId);
+  const showWx = wx && (wx.indoor || wx.status === "ok");
   return (
     <article className={s.key || t.key ? "game key" : "game"}>
       <header className="game__head">
         <span className="matchup">{g.away}<span className="at">@</span>{g.home}</span>
         <time className="kick">{et(g.commence, kickFmt)}</time>
       </header>
+      {showWx && <div className="game__wx"><WeatherChip wx={wx} /></div>}
 
       <div className="markets">
         <div className="mkt">

@@ -339,6 +339,32 @@ a.sportstrip__i:hover{color:var(--ink)}
   border:1px solid var(--line);border-radius:999px;padding:1px 9px;vertical-align:2px}
 .ctxsec__d{margin:0 0 12px;font-size:13px;color:var(--muted);max-width:none;line-height:1.6}
 .ctxsec__d b{color:var(--ink)}
+/* --- Game-site weather table --- */
+.wxtable{display:flex;flex-direction:column;gap:4px;margin:8px 0 6px}
+.wxrow{display:grid;grid-template-columns:minmax(88px,1fr) minmax(120px,1.6fr) minmax(150px,2fr);gap:12px;
+  align-items:baseline;padding:8px 12px;background:var(--surface);border:1px solid var(--line);
+  border-radius:8px;font-size:13px}
+.wxrow--head{background:none;border:0;font-size:11px;text-transform:uppercase;letter-spacing:.04em;
+  color:var(--muted);font-weight:600;padding:2px 12px}
+.wxrow__g{font-weight:600;white-space:nowrap}
+.wxrow__g .at{margin:0 4px;color:var(--muted);font-weight:400}
+.wxrow__v{color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wxrow__read{font-family:var(--font-mono);font-size:12.5px}
+.wx--indoor .wxrow__read,.wx--pending .wxrow__read{color:var(--muted);font-style:italic;font-family:inherit}
+.wx--wind{border-color:color-mix(in srgb,var(--spot) 55%,var(--line));background:var(--spot-soft)}
+.wx--wind .wxrow__read{color:var(--spot-ink);font-weight:700}
+.wxflag{color:var(--mkt);font-weight:800;margin-right:5px;font-family:inherit}
+/* small weather chip on the game-line cards */
+.game__wx{margin:-4px 0 8px}
+.wxchip{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;font-family:var(--font-mono);
+  color:var(--muted);background:var(--surface-2);border:1px solid var(--line);border-radius:20px;padding:2px 9px}
+.wxchip--indoor{color:var(--muted)}
+.wxchip--wind{color:var(--spot-ink);background:var(--spot-soft);border-color:color-mix(in srgb,var(--spot) 55%,var(--line))}
+.wxchip--wind b{color:var(--mkt)}
+@media (max-width:640px){
+  .wxrow{grid-template-columns:1fr;gap:2px;padding:8px 10px}
+  .wxrow--head{display:none}
+}
 .envcards{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
 .envcard{flex:1 1 160px;padding:10px 14px;border-radius:10px;border:1px solid var(--line);
   background:var(--surface);display:flex;flex-direction:column;gap:2px}

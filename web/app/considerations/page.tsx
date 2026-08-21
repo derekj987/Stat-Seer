@@ -2,7 +2,19 @@ import { weekRange, fetchWeek, buildBoard } from "@/lib/board";
 import { fetchModelWeek, type ModelPrediction } from "@/lib/model";
 import { weekRefs } from "@/lib/refAssignments";
 import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
+import { GAME_WEATHER, WEATHER_WEEK, WEATHER_UPDATED, type GameWeather } from "@/lib/weatherData";
 import { Brand, FlowSteps, ContextSubnav } from "../Nav";
+
+/** Plain-English weather read for a game — CONTEXT, never a pick. */
+function weatherRead(w: GameWeather): string {
+  if (w.indoor) return `${w.venue} is a ${w.roof === "dome" ? "dome/roofed stadium" : "retractable-roof stadium (usually closed for weather)"} — weather is a non-factor.`;
+  if (w.status !== "ok") return "";
+  const parts = [`${w.tempF}°`, `wind ${w.windMph} mph${w.gustMph ? ` (gusts ${w.gustMph})` : ""}`, w.conditions].filter(Boolean);
+  let t = parts.join(", ") + ".";
+  if (w.precipPct != null && w.precipPct >= 40) t += ` ${w.precipPct}% chance of precip.`;
+  if (w.windFlag) t += " Wind is at the 15+ mph level where the market tends to over-set the total — context, not a proven edge.";
+  return t;
+}
 
 const refByName = new Map(REF_STATS.map((s) => [s.name, s]));
 
@@ -56,11 +68,21 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
     for (const p of await fetchModelWeek(week, SEASON)) modelById.set(p.eventId, p);
   } catch { /* predictions may not be published yet */ }
   const refs = await weekRefs(week, SEASON);
+  const showWeather = week === WEATHER_WEEK;
+  const wxByEvent = new Map(GAME_WEATHER.map((w) => [w.eventId, w]));
 
   const games = board.map((g) => {
     const mp = modelById.get(g.eventId);
     const crew = refs.get(g.home);
     const items: Consideration[] = [];
+
+    // Weather — CONTEXT only. Indoor games note the non-factor; outdoor games show the
+    // forecast once it's within range (~2 weeks out); wind is flagged but never a pick.
+    const wx = showWeather ? wxByEvent.get(g.eventId) : undefined;
+    if (wx) {
+      const txt = weatherRead(wx);
+      if (txt) items.push({ kind: "Weather", text: txt });
+    }
 
     // Site / travel — from the schedule truth in the locked prediction.
     if (mp?.neutral) {
@@ -150,6 +172,39 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
               </details>
             ))}
           </div>
+        </details>
+      )}
+
+      {/* --- Game-site weather (Open-Meteo) — context, never a pick --- */}
+      {showWeather && GAME_WEATHER.length > 0 && (
+        <details className="ctxsec ctxdrop wxsec" open>
+          <summary className="ctxsec__h ctxsec__h--big">Game-site weather</summary>
+          <p className="ctxsec__d">
+            Forecast conditions at each stadium. <b>Wind is the one measured signal</b> — the market
+            under-sets totals ~1.3 pts at 15+ mph — but it fails the vig bar and uses realized wind, so treat
+            it as <b>context, not a proven edge</b>. Domes and roofed stadiums are non-factors; outdoor
+            forecasts fill in about <b>two weeks</b> before kickoff.
+          </p>
+          <div className="wxtable">
+            <div className="wxrow wxrow--head">
+              <span>Game</span><span>Venue</span><span>Conditions</span>
+            </div>
+            {GAME_WEATHER.map((w) => {
+              const read = w.indoor
+                ? { txt: w.roof === "dome" ? "Dome — weather non-factor" : "Roof — weather non-factor", cls: "wx--indoor" }
+                : w.status === "ok"
+                  ? { txt: `${w.windMph} mph · ${w.tempF}° · ${w.conditions}${w.precipPct != null && w.precipPct >= 40 ? ` · ${w.precipPct}% precip` : ""}`, cls: w.windFlag ? "wx--wind" : "" }
+                  : { txt: "Forecast arrives ~2 weeks out", cls: "wx--pending" };
+              return (
+                <div className={`wxrow ${read.cls}`} key={w.eventId}>
+                  <span className="wxrow__g">{w.away}<span className="at">@</span>{w.home}</span>
+                  <span className="wxrow__v">{w.venue}</span>
+                  <span className="wxrow__read">{w.windFlag && <b className="wxflag">⚑&nbsp;WIND</b>} {read.txt}</span>
+                </div>
+              );
+            })}
+          </div>
+          <p className="ctxsec__note">Open-Meteo forecast · updated {WEATHER_UPDATED} · indoor status per stadium roof.</p>
         </details>
       )}
 

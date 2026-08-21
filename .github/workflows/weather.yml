@@ -1,0 +1,52 @@
+name: Game weather
+
+# Refreshes web/lib/weatherData.ts from Open-Meteo (free, no key) for the current NFL week,
+# then commits it (triggering a Vercel redeploy). Runs every 8h during the season: forecasts
+# refine daily and games cross into the ~16-day forecast window as kickoff approaches.
+# Commits only when the file changes. All times UTC.
+
+on:
+  schedule:
+    - cron: "0 */8 * 8-12,1 *"   # every 8 hours, Aug-Jan
+  workflow_dispatch: {}
+
+concurrency:
+  group: game-weather
+  cancel-in-progress: false
+
+env:
+  SEASON: "2026"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi
+
+      - name: Build weather
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python weather_capture.py --season "$SEASON"
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- web/lib/weatherData.ts; then
+            echo "No weather changes — nothing to commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/lib/weatherData.ts
+          git commit -m "chore: refresh game weather (auto)"
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+          git push
