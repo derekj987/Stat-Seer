@@ -1376,6 +1376,8 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-body{border-top:1px solid var(--line);padding:14px 16px 8px}
 .hb-empty{font-size:13px;color:var(--muted);font-style:italic;padding:4px 0 12px;line-height:1.55}
 .hb-empty a{color:var(--accent);text-decoration:none;font-weight:600}
+.hb-note{font-size:13px;color:var(--muted);line-height:1.6;margin:0 0 12px}
+.hb-note b{color:var(--ink)}
 .hb-legend{font-size:11.5px;color:var(--muted);font-style:italic;margin:0 0 12px}
 .hb-dia{color:var(--gold)}
 .hb-dia--end{margin-left:8px;font-size:11px;vertical-align:1px}

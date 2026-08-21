@@ -35,7 +35,7 @@ export default function NflModelCard({ rows, open = true }: { rows: CardRow[]; o
   return (
     <details className="hb-panel hb-panel--card" open={open}>
       <summary className="hb-bar">
-        <span className="hb-bar__title hb-bar__title--gold">The Model Card — Snapshot View</span>
+        <span className="hb-bar__title hb-bar__title--gold">The Model — Snapshot View</span>
         <span className="hb-bar__count">{rows.length} games</span>
         <span className="hb-bar__hint">our model&apos;s read beside the market&apos;s, every game</span>
         <span className="hb-bar__chev" aria-hidden="true">▾</span>

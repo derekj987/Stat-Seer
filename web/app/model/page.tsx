@@ -249,10 +249,6 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
 
       <FlowSteps active="analyze" />
       <ModelSubnav active="game" />
-      <p className="sportnote">
-        <b>NFL first.</b> We perfect one sport before adding the next — MLB, NBA, College Football and NHL
-        will turn on here once each has its own line-blind model with a public track record.
-      </p>
       <WeekNav min={min} max={max} current={week} />
 
       <section className="explainer explainer--wide">

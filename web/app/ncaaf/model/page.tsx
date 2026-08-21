@@ -107,7 +107,7 @@ export default function Page() {
 
       {/* Snapshot — the first few ranked games, with a "see more" for the rest. */}
       <section className="ncf-sec">
-        <h2 className="ncf-h">The Model Card — Snapshot View
+        <h2 className="ncf-h">The Model — Snapshot View
           <span className="ncf-h__note">our line-blind read beside the market&apos;s number · Week {c.week}</span></h2>
         <div className="hb-legend">
           <span className="hb-dia">◆</span> Off-consensus — our read is on the other side from the market.

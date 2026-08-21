@@ -10,19 +10,25 @@ export interface PlayerCat {
   label: string;
   blurb: string;
   cols: string[];   // the columns this category's projection table will publish
+  note: string;     // category-specific line on how this prop is projected + validated
 }
 
 export const PLAYER_CATS: PlayerCat[] = [
   { key: "td", label: "Touchdowns", cols: ["Player", "Team", "Anytime TD %", "Proj. TDs"],
-    blurb: "Anytime-touchdown probability from projected goal-line and red-zone touches — volume first, never a raw efficiency guess." },
+    blurb: "Anytime-touchdown probability from projected goal-line and red-zone touches — volume first, never a raw efficiency guess.",
+    note: "Touchdown odds ride on projected goal-line and red-zone touches from the snap-share model — we model who gets the ball near the end zone, not a raw scoring-rate guess." },
   { key: "passing", label: "Passing", cols: ["Player", "Team", "Pass Yds", "Pass TDs", "Attempts"],
-    blurb: "Projected passing volume (attempts, completions) multiplied by a regressed yards-per-attempt baseline." },
+    blurb: "Projected passing volume (attempts, completions) multiplied by a regressed yards-per-attempt baseline.",
+    note: "Passing yards come from projected attempts and completions times a regressed yards-per-attempt baseline — volume is the stable part, efficiency is pulled toward the mean." },
   { key: "rushing", label: "Rushing", cols: ["Player", "Team", "Carries", "Rush Yds"],
-    blurb: "Projected carries from the snap-share model × a regressed yards-per-carry baseline — carries persist (r ≈ 0.68), efficiency doesn't." },
+    blurb: "Projected carries from the snap-share model × a regressed yards-per-carry baseline — carries persist (r ≈ 0.68), efficiency doesn't.",
+    note: "Rushing yards are our strongest prop — projected carries (+4.7% over baseline) times a regressed yards-per-carry, landing rushing yards +4.3% over a persistence baseline, because carries persist and yards-per-carry mostly doesn't." },
   { key: "receiving", label: "Receiving", cols: ["Player", "Team", "Targets", "Rec", "Rec Yds"],
-    blurb: "Projected target share converted to receptions and yards — the middle of the depth chart (35–60% snaps) is where this is most reliable." },
+    blurb: "Projected target share converted to receptions and yards — the middle of the depth chart (35–60% snaps) is where this is most reliable.",
+    note: "Receiving yards come from projected target share (targets +3.3% over baseline) times a regressed yards-per-target — receiving is efficiency-heavy, so the honest edge here is smaller (rec yds +1.8%)." },
   { key: "receptions", label: "Receptions", cols: ["Player", "Team", "Targets", "Receptions"],
-    blurb: "Projected catch volume from target share — the most persistent receiving signal we measured." },
+    blurb: "Projected catch volume from target share — the most persistent receiving signal we measured.",
+    note: "Receptions come straight from projected target share — the most persistent receiving signal we measured (receptions +2.2% over a persistence baseline)." },
 ];
 
 export const playerCatByKey = (k: string): PlayerCat =>
@@ -71,11 +77,11 @@ export default function PlayerModelView({ base, cat }: { base: "nfl" | "ncaaf"; 
           </div>
           <div className="pmempty" role="note">
             <span className="pmempty__tag">Projections arriving</span>
+            <p>{active.note}</p>
             <p>
-              The projection model is <b>built and validated</b> (availability AUC ≈ 0.86; rushing yards
-              <b> +4.3%</b> over a persistence baseline on change weeks). The weekly <b>{active.label.toLowerCase()}</b>{" "}
-              numbers publish here as each week&apos;s live usage is captured — snap-share can&apos;t be
-              backfilled, so it fills in with the season, not before.
+              The pipeline is <b>built and validated</b> (availability AUC ≈ 0.86). The weekly{" "}
+              <b>{active.label.toLowerCase()}</b> numbers publish here as each week&apos;s live usage is
+              captured — snap-share can&apos;t be backfilled, so it fills in with the season, not before.
             </p>
           </div>
         </div>

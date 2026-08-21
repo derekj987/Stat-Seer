@@ -12,7 +12,7 @@ type NcaafData = { week: number; games: NcaafCardGame[]; upsets: NcaafUpset[] };
 const numStr = (v: number | null) => (v === null ? "—" : String(v));
 
 const STEPS = [
-  { n: 1, key: "model", title: "See the Model", lead: "What the data says.", href: { nfl: "/model", ncaaf: "/ncaaf/model" } },
+  { n: 1, key: "model", title: "The Model", lead: "What the data says.", href: { nfl: "/model", ncaaf: "/ncaaf/model" } },
   { n: 2, key: "context", title: "Read the Room", lead: "The factors you may not have thought of.", href: { nfl: "/context", ncaaf: "/ncaaf/context" } },
   { n: 3, key: "value", title: "Find the Value", lead: "Decide your picks — we tell you where to place them.", href: { nfl: "/lines", ncaaf: "/ncaaf/lines" } },
 ] as const;
@@ -160,6 +160,41 @@ function PlayersTable({ players }: { players: PlayerPick[] }) {
   );
 }
 
+function FanAnalysisNote() {
+  return (
+    <p className="hb-note">
+      We scour the fan forums, RSS feeds, and beat writers to surface players you may not have heard about —
+      then apply a <b>hype rating</b> and give you the bottom line, like <b>take the over on their receptions</b>{" "}
+      or <b>the over on their rushing yards</b>.
+    </p>
+  );
+}
+
+// Player Model snapshot — same shape as the game Model Card (a read + "Our Model Suggests"),
+// but for player props. Projection output isn't wired to the web yet, so it previews the
+// columns and points to the full Player Model rather than inventing numbers.
+function PlayerSnapshot({ base }: { base: Sport }) {
+  const href = base === "ncaaf" ? "/ncaaf/model/players" : "/model/players";
+  return (
+    <>
+      <div className="hb-formwrap">
+        <table className="hb-form">
+          <thead><tr><th className="hb-l">Player</th><th>Team</th><th>Prop</th><th>Our Model Suggests</th></tr></thead>
+          <tbody>
+            <tr className="hb-off"><td className="hb-l" colSpan={4}>
+              Projections publish here as the season&apos;s usage is captured.
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p className="hb-empty">
+        The projection pipeline is <b>built and validated</b> (availability AUC ≈ 0.86); weekly numbers
+        wire in with live usage. See the <a href={href}>Player Model →</a>
+      </p>
+    </>
+  );
+}
+
 function UpsetCards({ children }: { children: React.ReactNode }) { return <div className="hb-cols">{children}</div>; }
 
 export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport: Sport; nfl: NflData; ncaaf: NcaafData }) {
@@ -182,11 +217,15 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
       <div className="lp-sport lp-sport--nfl">
         <Flow sport="nfl" label="NFL" />
         <div className="lp-snaplabel">NFL · Week {nfl.week} — a snapshot</div>
-        <Panel title="The Model Card — Snapshot View" count={`${nfl.card.length} games`} hint="our model’s read beside the market’s" open>
+        <Panel title="The Model — Snapshot View" count={`${nfl.card.length} games`} hint="our model’s read beside the market’s" open>
           <NflCardTable rows={nfl.card} />
           <p className="lp-cardfoot"><a href="/model">See the full model →</a></p>
         </Panel>
-        <Panel title="Players the model likes — NFL" count={nfl.players.length || "—"} hint="rising on the fan boards this week">
+        <Panel title="Player Model snapshot — NFL" count="props" hint="our line-blind player-prop projections">
+          <PlayerSnapshot base="nfl" />
+        </Panel>
+        <Panel title="Check out our fan analysis." count={nfl.players.length || "—"} hint="fan-sourced players, hype-rated">
+          <FanAnalysisNote />
           <PlayersTable players={nfl.players} />
         </Panel>
         <Panel title="Potential Upsets of the Week — NFL" count={nfl.upsets.length} hint="the market has them losing — our model says they win">
@@ -206,11 +245,15 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
       <div className="lp-sport lp-sport--ncaaf">
         <Flow sport="ncaaf" label="College Football" />
         <div className="lp-snaplabel">College Football · Week {ncaaf.week} — a snapshot</div>
-        <Panel title="The Model Card — Snapshot View" count={`${ncaaf.games.length} ranked`} hint="our line-blind read beside the market" open>
+        <Panel title="The Model — Snapshot View" count={`${ncaaf.games.length} ranked`} hint="our line-blind read beside the market" open>
           <NcaafCardTable games={ncaaf.games} />
           <p className="lp-cardfoot"><a href="/ncaaf/model">See the full model →</a></p>
         </Panel>
-        <Panel title="Players the model likes — NCAAF" count="—" hint="arriving with the season">
+        <Panel title="Player Model snapshot — NCAAF" count="props" hint="our line-blind player-prop projections">
+          <PlayerSnapshot base="ncaaf" />
+        </Panel>
+        <Panel title="Check out our fan analysis." count="—" hint="fan-sourced players, hype-rated">
+          <FanAnalysisNote />
           <p className="hb-empty">College player reads land here once the CFB fan scan is wired — the same read we run for the NFL on <a href="/ncaaf/tailgate">Fan Analysis</a>.</p>
         </Panel>
         <Panel title="Potential Upsets of the Week — NCAAF" count={ncaaf.upsets.length} hint="the market has them losing — our model says they win">
