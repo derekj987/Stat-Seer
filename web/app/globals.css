@@ -354,8 +354,10 @@ a.sportstrip__i:hover{color:var(--ink)}
 .improw{display:grid;grid-template-columns:minmax(120px,1fr) 72px 88px 56px 64px;gap:10px;
   align-items:center;padding:7px 12px;background:var(--surface);border:1px solid var(--line);
   border-radius:8px;font-size:13px}
+/* +1px inline padding vs .improw so the header tracks line up with the bordered
+   game rows (each .impgame adds a 1px border that shifts its grid inward). */
 .improw--head{background:none;border:0;color:var(--muted);font-size:11px;
-  text-transform:uppercase;letter-spacing:.04em;font-weight:600;padding:2px 12px;
+  text-transform:uppercase;letter-spacing:.04em;font-weight:600;padding:2px 13px;
   line-height:1.15;align-items:end}
 .improw--head span:not(:first-child){text-align:right}
 .improw__g{font-weight:600;display:flex;align-items:center;gap:6px}

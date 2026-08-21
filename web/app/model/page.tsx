@@ -42,8 +42,8 @@ function bottomLine(e: Env): { spread: string; total: string | null } | null {
   const dog = marketFavHome ? e.away : e.home;
   const modelMarginForFav = marketFavHome ? e.modelMarginHome : -e.modelMarginHome;
   const spread = mag < 0.5
-    ? "neither side (it's a pick'em)"
-    : modelMarginForFav >= mag ? `the ${e.favLabel} side` : `the underdog ${dog} +${mag.toFixed(1)}`;
+    ? "pick'em"
+    : modelMarginForFav >= mag ? e.favLabel : `${dog} +${mag.toFixed(1)}`;
   let total: string | null = null;
   if (e.modelTotal !== null && e.total !== null) {
     const d = e.modelTotal - e.total;
@@ -87,8 +87,8 @@ function ImpTable({ rows, refs }: { rows: Env[]; refs: Awaited<ReturnType<typeof
             <div className="impbottom">
               <span className="impbottom__k">Bottom line</span>
               {bl
-                ? <span className="impbottom__txt">Our model favors <b>{bl.spread}</b>{bl.total && <> and <b>{bl.total}</b></>}.</span>
-                : <span className="impbottom__txt impbottom__none">No model read for this game yet.</span>}
+                ? <span className="impbottom__txt"><b>{bl.spread}</b>{bl.total && <> and <b>{bl.total}</b></>}</span>
+                : <span className="impbottom__txt impbottom__none">No model read yet</span>}
               {crew && (
                 <span className="impbottom__crew">
                   Crew: <b>{crew.referee}</b> ({crew.tendency}, {crew.pen} pen/g)
@@ -306,22 +306,6 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
           The market&apos;s <b>spread</b> and <b>total</b> for each game, with our <b>line-blind model&apos;s</b>
           own read of each sitting right beside it.
         </p>
-        <details className="readbox">
-          <summary className="readbox__h">How to read a row</summary>
-          <p>
-            Take <b>NO @ DET</b>: the market has set <b>DET −7</b> with a <b>49</b> total; our model, which never
-            sees the line, independently reads it <b>DET −8.0</b> with a <b>46.3</b> total. This is our read
-            <em> next to</em> the market&apos;s — for understanding where we agree and differ, not a bet.
-          </p>
-          <p className="readbox__note">
-            The <b className="modh">model</b> columns are <b>our own line-blind projected spread and total</b> —
-            shown next to the market&apos;s for comparison, not as the market&apos;s numbers. (Our total is
-            calibrated but <b>not sharper than the market</b> — an honest read, not an edge.)
-            &nbsp;<span className="offcmark">⚑</span> means our model is <b>off consensus</b> on the spread.
-            <span className="ssmark">◆</span> marks a <b>sweet spot</b> — a spread or total on a key number; act
-            on it in <a href="/best">Sweet Spots</a>.
-          </p>
-        </details>
 
         {scored.length === 0 ? (
           <p className="foot">No lines captured for Week {week} yet.</p>
