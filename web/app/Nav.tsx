@@ -41,8 +41,8 @@ export function FlowSteps({ active, base = "nfl" }: {
 // built + validated. `home` is where the sport's tab links. The vision: every sport
 // gets the same layout across Home / The Model / Context / Value Finder.
 export const SPORTS = [
-  { key: "nfl", label: "NFL", live: true, home: "/nfl" },
-  { key: "ncaaf", label: "NCAAF", live: true, home: "/ncaaf" },
+  { key: "nfl", label: "NFL", live: true, home: "/?sport=nfl" },
+  { key: "ncaaf", label: "NCAAF", live: true, home: "/?sport=ncaaf" },
   { key: "mlb", label: "MLB", live: false, home: "" },
   { key: "nba", label: "NBA", live: false, home: "" },
   { key: "wnba", label: "WNBA", live: false, home: "" },
