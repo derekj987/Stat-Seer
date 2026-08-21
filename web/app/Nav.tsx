@@ -187,13 +187,13 @@ export function ContextSubnav({ active, base = "nfl" }: {
 export function ModelSubnav({ active = "game", base = "nfl" }: {
   active?: "game" | "player"; base?: "nfl" | "ncaaf";
 }) {
-  const home = base === "ncaaf" ? "/ncaaf/model" : "/model";
-  const props = base === "ncaaf" ? "/ncaaf/props" : "/props";
+  const game = base === "ncaaf" ? "/ncaaf/model" : "/model";
+  const player = base === "ncaaf" ? "/ncaaf/model/players" : "/model/players";
   return (
     <nav className="subnav subnav--model" aria-label="The Model view">
-      <a href={home} className={active === "game" ? "subnav__t active" : "subnav__t"}
+      <a href={game} className={active === "game" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "game" ? "page" : undefined}>Game Model (spreads, O/U&apos;s)</a>
-      <a href={props} className={active === "player" ? "subnav__t active" : "subnav__t"}
+      <a href={player} className={active === "player" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "player" ? "page" : undefined}>Player Model (props)</a>
     </nav>
   );

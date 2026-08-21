@@ -328,7 +328,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         )}
       </details>
 
-      <a href="/props" className="soonpanel soonpanel--link" id="player-model">
+      <a href="/model/players" className="soonpanel soonpanel--link" id="player-model">
         <span className="soonpanel__tag">Player Prop Model</span>
         <h2 className="soonpanel__h soonpanel__cta">
           Click here to see our Player Prop Model projections <span aria-hidden="true">→</span>
