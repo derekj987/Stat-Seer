@@ -1350,7 +1350,7 @@ details.statsdrop .stats{margin:12px 0 0}
 .pmdisc b{color:var(--ink)}
 /* Player Model footer text fills the page too (scoped so other footers keep their cap) */
 .foot--pm p{max-width:none}
-.pmgame{margin:0 0 16px;max-width:640px}
+.pmgame{margin:0 0 16px}
 .pmgame__h{font-size:14px;font-weight:800;color:var(--ink);margin:0 0 6px;letter-spacing:.02em}
 
 /* --- Fan Analysis: teams as dropdowns, colored + bigger headers --- */
