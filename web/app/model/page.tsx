@@ -52,6 +52,56 @@ function bottomLine(e: Env): { spread: string; total: string | null } | null {
   return { spread, total };
 }
 
+function ImpTable({ rows, refs }: { rows: Env[]; refs: Awaited<ReturnType<typeof weekRefs>> }) {
+  return (
+    <div className="imptable" role="table" aria-label="Lines and the model's read">
+      <div className="improw improw--head" role="row">
+        <span>game</span><span>spread</span>
+        <span className="improw__modh">model spread</span><span>total</span>
+        <span className="improw__modh">model total</span>
+      </div>
+      {rows.map((e) => {
+        const bl = bottomLine(e);
+        const crew = refs.get(e.home);
+        return (
+          <div className="impgame" key={e.eventId}>
+            <div className="improw" role="row">
+              <span className="improw__g">
+                {e.away}<span className="at">@</span>{e.home}
+                {e.neutral && <span className="badge neutral">NEUTRAL</span>}
+              </span>
+              <span className="improw__sp">
+                {e.favLabel}
+                {e.spreadKey && <span className="ssmark" title={`Sweet spot — key number ${e.spreadKey.num} (½pt ≈ ${e.spreadKey.cost.toFixed(0)}%)`}>◆</span>}
+              </span>
+              <span className="improw__mod">
+                {e.modelSpread ?? "—"}
+                {e.modelDisagree && <span className="offcmark" title="Off consensus — our model favors a different side than the market">⚑</span>}
+              </span>
+              <span className="improw__tot">
+                {e.total!.toFixed(1)}
+                {e.totalKey && <span className="ssmark" title={`Sweet spot — key total ${e.totalKey.num} (½pt ≈ ${e.totalKey.cost.toFixed(0)}%)`}>◆</span>}
+              </span>
+              <span className="improw__mod">{e.modelTotal !== null ? e.modelTotal.toFixed(1) : "—"}</span>
+            </div>
+            <div className="impbottom">
+              <span className="impbottom__k">Bottom line</span>
+              {bl
+                ? <span className="impbottom__txt">Our model favors <b>{bl.spread}</b>{bl.total && <> and <b>{bl.total}</b></>}.</span>
+                : <span className="impbottom__txt impbottom__none">No model read for this game yet.</span>}
+              {crew && (
+                <span className="impbottom__crew">
+                  Crew: <b>{crew.referee}</b> ({crew.tendency}, {crew.pen} pen/g)
+                </span>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 const kickFmt = new Intl.DateTimeFormat("en-US", {
   timeZone: "America/New_York",
   weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
@@ -228,14 +278,29 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
             <span className="gamesdrop__chev" aria-hidden="true">▾</span>
           </summary>
           <section className="grid">
-            {preds.map((p) => <PredictionCard key={p.eventId} p={p} />)}
+            {preds.slice(0, 6).map((p) => <PredictionCard key={p.eventId} p={p} />)}
           </section>
+          {preds.length > 6 && (
+            <details className="hb-more">
+              <summary className="hb-more__sum">
+                <span className="hb-more__chev" aria-hidden="true">▸</span>
+                See more ({preds.length - 6} more games)
+              </summary>
+              <section className="grid">
+                {preds.slice(6).map((p) => <PredictionCard key={p.eventId} p={p} />)}
+              </section>
+            </details>
+          )}
         </details>
       )}
 
-      {/* Lines & the model's read — market spread/total beside our line-blind projection. */}
-      <details className="ctxsec ctxdrop">
-        <summary className="ctxsec__h">Lines &amp; the model&apos;s read <span className="ctxsec__n">{scored.length} games</span></summary>
+      {/* Week's numbers crunched — market spread/total beside our line-blind projection. */}
+      <details className="gamesdrop">
+        <summary className="gamesdrop__h">
+          Week {week} numbers crunched
+          <span className="gamesdrop__n">{scored.length} games</span>
+          <span className="gamesdrop__chev" aria-hidden="true">▾</span>
+        </summary>
         <p className="ctxsec__d">
           The market&apos;s <b>spread</b> and <b>total</b> for each game, with our <b>line-blind model&apos;s</b>
           own read of each sitting right beside it.
@@ -260,51 +325,18 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         {scored.length === 0 ? (
           <p className="foot">No lines captured for Week {week} yet.</p>
         ) : (
-          <div className="imptable" role="table" aria-label="Lines and the model's read">
-            <div className="improw improw--head" role="row">
-              <span>game</span><span>spread</span>
-              <span className="improw__modh">model spread</span><span>total</span>
-              <span className="improw__modh">model total</span>
-            </div>
-            {scored.map((e) => {
-              const bl = bottomLine(e);
-              const crew = refs.get(e.home);
-              return (
-              <div className="impgame" key={e.eventId}>
-              <div className="improw" role="row">
-                <span className="improw__g">
-                  {e.away}<span className="at">@</span>{e.home}
-                  {e.neutral && <span className="badge neutral">NEUTRAL</span>}
-                </span>
-                <span className="improw__sp">
-                  {e.favLabel}
-                  {e.spreadKey && <span className="ssmark" title={`Sweet spot — key number ${e.spreadKey.num} (½pt ≈ ${e.spreadKey.cost.toFixed(0)}%)`}>◆</span>}
-                </span>
-                <span className="improw__mod">
-                  {e.modelSpread ?? "—"}
-                  {e.modelDisagree && <span className="offcmark" title="Off consensus — our model favors a different side than the market">⚑</span>}
-                </span>
-                <span className="improw__tot">
-                  {e.total!.toFixed(1)}
-                  {e.totalKey && <span className="ssmark" title={`Sweet spot — key total ${e.totalKey.num} (½pt ≈ ${e.totalKey.cost.toFixed(0)}%)`}>◆</span>}
-                </span>
-                <span className="improw__mod">{e.modelTotal !== null ? e.modelTotal.toFixed(1) : "—"}</span>
-              </div>
-              <div className="impbottom">
-                <span className="impbottom__k">Bottom line</span>
-                {bl
-                  ? <span>Our model favors <b>{bl.spread}</b>{bl.total && <> and <b>{bl.total}</b></>}.</span>
-                  : <span className="impbottom__none">No model read for this game yet.</span>}
-                {crew && (
-                  <span className="impbottom__crew">
-                    Crew: <b>{crew.referee}</b> ({crew.tendency}, {crew.pen} pen/g)
-                  </span>
-                )}
-              </div>
-              </div>
-              );
-            })}
-          </div>
+          <>
+            <ImpTable rows={scored.slice(0, 6)} refs={refs} />
+            {scored.length > 6 && (
+              <details className="hb-more">
+                <summary className="hb-more__sum">
+                  <span className="hb-more__chev" aria-hidden="true">▸</span>
+                  See more ({scored.length - 6} more games)
+                </summary>
+                <ImpTable rows={scored.slice(6)} refs={refs} />
+              </details>
+            )}
+          </>
         )}
       </details>
 
