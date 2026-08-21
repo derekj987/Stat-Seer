@@ -359,6 +359,20 @@ a.sportstrip__i:hover{color:var(--ink)}
 .wxchip--indoor{color:var(--muted)}
 .wxchip--wind{color:var(--spot-ink);background:var(--spot-soft);border-color:color-mix(in srgb,var(--spot) 55%,var(--line))}
 .wxchip--wind b{color:var(--mkt)}
+/* --- Special Considerations game cards (site+weather, referee, stakes per game) --- */
+.cxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;margin:8px 0 4px}
+.cxcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.cxcard--wind{border-color:color-mix(in srgb,var(--spot) 55%,var(--line))}
+.cxcard__head{display:flex;align-items:baseline;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.cxcard__head .matchup{font-weight:800;font-size:15px}
+.cxcard__head .kick{margin-left:auto;font-size:11px;color:var(--muted);font-family:var(--font-mono);white-space:nowrap}
+.cxcard__rows{margin:0;display:flex;flex-direction:column;gap:9px}
+.cxrow{display:grid;grid-template-columns:70px 1fr;gap:10px;align-items:baseline}
+.cxrow__k{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin:0}
+.cxrow__v{margin:0;font-size:12.5px;line-height:1.45;color:var(--ink)}
+.cxrow--wind .cxrow__v{color:var(--spot-ink);font-weight:600}
+.cxroof{color:var(--muted)}
+.cxref__h{font-size:14px;font-weight:800;margin:16px 0 6px;color:var(--ink)}
 @media (max-width:640px){
   .wxrow{grid-template-columns:1fr;gap:2px;padding:8px 10px}
   .wxrow--head{display:none}

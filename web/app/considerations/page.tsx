@@ -5,16 +5,26 @@ import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
 import { GAME_WEATHER, WEATHER_WEEK, WEATHER_UPDATED, type GameWeather } from "@/lib/weatherData";
 import { Brand, FlowSteps, ContextSubnav } from "../Nav";
 
-const wxPlace = (w: GameWeather) => `${w.venue}${w.city ? ` — ${w.city}, ${w.state}` : ""}`;
+// ---- per-game card fields (CONTEXT, never a pick) ----
+const wxSite = (w: GameWeather) => `${w.venue}${w.city ? ` · ${w.city}, ${w.state}` : ""}`;
+const roofLabel = (roof: string) => roof === "dome" ? "Dome" : roof === "retractable" ? "Retractable roof" : "Outdoor";
 
-/** Plain-English weather read for a game — CONTEXT, never a pick. */
-function weatherRead(w: GameWeather): string {
-  if (w.indoor) return `${wxPlace(w)}: a ${w.roof === "dome" ? "dome/roofed stadium" : "retractable-roof stadium (usually closed for weather)"} — weather is a non-factor.`;
-  if (w.status !== "ok") return "";
-  const parts = [`${w.tempF}°`, `wind ${w.windMph} mph${w.gustMph ? ` (gusts ${w.gustMph})` : ""}`, w.conditions].filter(Boolean);
-  let t = `${wxPlace(w)}: ` + parts.join(", ") + ".";
-  if (w.precipPct != null && w.precipPct >= 40) t += ` ${w.precipPct}% chance of precip.`;
-  if (w.windFlag) t += " Wind is at the 15+ mph level where the market tends to over-set the total — context, not a proven edge.";
+/** Short weather line for the card. */
+function weatherCell(w: GameWeather): string {
+  if (w.indoor) return "Indoor — weather is a non-factor";
+  if (w.status === "ok") {
+    const bits = [`${w.windMph} mph wind${w.gustMph ? ` (${w.gustMph} gust)` : ""}`, `${w.tempF}°`, w.conditions].filter(Boolean);
+    return bits.join(" · ") + (w.precipPct != null && w.precipPct >= 40 ? ` · ${w.precipPct}% precip` : "");
+  }
+  return "Forecast arrives ~2 weeks out";
+}
+
+/** Referee read — the persistent tendency is penalty rate; the rest is historical context. */
+function refereeCell(crew: { referee: string; tendency: string; pen: number }): string {
+  const s = refByName.get(crew.referee);
+  const read = crew.tendency === "flag-happy" ? "flag-heavy" : crew.tendency === "flag-light" ? "lets them play" : "average flags";
+  let t = `${crew.referee} — ${read}, ~${crew.pen}/g`;
+  if (s) t += ` · games avg ${s.total} pts (${s.over}% over), context not a lean`;
   return t;
 }
 
@@ -53,8 +63,6 @@ function WeekNav({ min, max, current }: { min: number; max: number; current: num
   );
 }
 
-interface Consideration { kind: string; text: string }
-
 export default async function Page({ searchParams }: PageProps<"/considerations">) {
   const sp = await searchParams;
   let range: { min: number; max: number } | null = null;
@@ -73,48 +81,13 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
   const showWeather = week === WEATHER_WEEK;
   const wxByEvent = new Map(GAME_WEATHER.map((w) => [w.eventId, w]));
 
-  const games = board.map((g) => {
-    const mp = modelById.get(g.eventId);
-    const crew = refs.get(g.home);
-    const items: Consideration[] = [];
-
-    // Weather — CONTEXT only. Indoor games note the non-factor; outdoor games show the
-    // forecast once it's within range (~2 weeks out); wind is flagged but never a pick.
-    const wx = showWeather ? wxByEvent.get(g.eventId) : undefined;
-    if (wx) {
-      const txt = weatherRead(wx);
-      if (txt) items.push({ kind: "Weather", text: txt });
-    }
-
-    // Site / travel — from the schedule truth in the locked prediction.
-    if (mp?.neutral) {
-      items.push({
-        kind: "Site",
-        text: `Neutral site${mp.venue ? ` — ${mp.venue}` : ""}. The Model applies no home-field edge; long travel/body-clock effects are real but too small to price.`,
-      });
-    }
-
-    // Referee crew — set only once assignments post game-week. Penalty rate is the
-    // one persistent tendency; the O/U + favorite/underdog history is context, not a lean.
-    if (crew) {
-      const s = refByName.get(crew.referee);
-      const read = crew.tendency === "flag-happy"
-        ? "flag-heavy — more penalties than average, so more variance"
-        : crew.tendency === "flag-light"
-          ? "lets them play — fewer flags than average"
-          : "average penalties";
-      let text = `${crew.referee} (${read}, ~${crew.pen}/g).`;
-      if (s) {
-        text += ` Their games average ${s.total} total points (${s.over}% over), and the favorite`
-          + ` covers ${s.atsFav}% ATS vs the underdog ${100 - s.atsFav}% — historical context, not a lean.`;
-      }
-      items.push({ kind: "Referee", text });
-    }
-
-    return { g, kickoff: g.commence, items };
-  });
-
-  const flagged = games.filter((x) => x.items.length > 0).length;
+  // One card per game — all its context rolled together (site + weather, referee, stakes).
+  const games = board.map((g) => ({
+    g,
+    mp: modelById.get(g.eventId),
+    crew: refs.get(g.home),
+    wx: showWeather ? wxByEvent.get(g.eventId) : undefined,
+  }));
 
   return (
     <main className="wrap">
@@ -126,105 +99,79 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
       <ContextSubnav active="special" />
       <WeekNav min={min} max={max} current={week} />
 
-      <section className="explainer">
+      <section className="explainer explainer--wide">
         <p>
-          <b>The stuff that doesn&apos;t fit in a number.</b> Every game, in one place: the situational
-          factors around it — site &amp; travel, weather, referee crew, player incentives, and what&apos;s at
-          stake. These <b>arm your judgment</b>; they are <b>not</b> an adjusted line. Open a game to see what&apos;s
-          flagged{flagged > 0 ? <> ({flagged} of {games.length} games have something this week)</> : null}.
+          <b>The stuff that doesn&apos;t fit in a number.</b> One card per game with the situational factors
+          around it — site &amp; weather, referee crew, and what&apos;s at stake. These <b>arm your judgment</b>;
+          they are <b>not</b> an adjusted line. (How we read each factor is in the reference below.)
         </p>
       </section>
 
       {games.length === 0 ? (
         <p className="foot">No games captured for Week {week} yet.</p>
       ) : (
-        <details className="tgweek">
-          <summary className="tgweek__h">
-            NFL Week {week}
-            <span className="tgweek__tag">Unique Factors</span>
-            <span className="tgweek__n">{games.length} games</span>
-            <span className="tgweek__chev" aria-hidden="true">▾</span>
-          </summary>
-          <div className="scglist">
-            {games.map(({ g, kickoff, items }) => (
-              <details className="scg" key={g.eventId}>
-                <summary className="scg__h">
-                  <span className="scg__game">{g.away}<span className="at">@</span>{g.home}</span>
-                  <time className="scg__time">{et(kickoff)}</time>
-                  {items.length > 0
-                    ? <span className="scg__count">{items.length}</span>
-                    : <span className="scg__count scg__count--none">—</span>}
-                  <span className="scg__chev" aria-hidden="true">▾</span>
-                </summary>
-                <div className="scg__body">
-                  {items.length > 0 ? (
-                    <ul className="scg__items">
-                      {items.map((it, i) => (
-                        <li key={i}><b className="scg__k">{it.kind}</b> {it.text}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="scg__none">Nothing flagged for this game yet.</p>
-                  )}
-                  <div className="scg__soon">
-                    <b>Arriving game week:</b> weather (wind &amp; rain — wind is our one measured edge), player
-                    incentives (contract bonuses in reach), referee assignment, and playoff stakes for late-season games.
+        <section className="cxgrid" aria-label={`Week ${week} considerations`}>
+          {games.map(({ g, mp, crew, wx }) => {
+            const neutral = mp?.neutral;
+            return (
+              <article className={`cxcard${wx?.windFlag ? " cxcard--wind" : ""}`} key={g.eventId}>
+                <header className="cxcard__head">
+                  <span className="matchup">{g.away}<span className="at">@</span>{g.home}</span>
+                  <time className="kick">{et(g.commence)}</time>
+                  {neutral && <span className="badge neutral">NEUTRAL</span>}
+                </header>
+                <dl className="cxcard__rows">
+                  <div className="cxrow">
+                    <dt className="cxrow__k">Site</dt>
+                    <dd className="cxrow__v">
+                      {wx ? wxSite(wx) : (mp?.venue ?? g.home)}
+                      {wx && <span className="cxroof"> · {roofLabel(wx.roof)}</span>}
+                      {neutral && <span className="cxroof"> · neutral site</span>}
+                    </dd>
                   </div>
-                </div>
-              </details>
-            ))}
-          </div>
-        </details>
+                  {wx && (
+                    <div className={`cxrow${wx.windFlag ? " cxrow--wind" : ""}`}>
+                      <dt className="cxrow__k">Weather</dt>
+                      <dd className="cxrow__v">{wx.windFlag && <b className="wxflag">⚑&nbsp;WIND</b>} {weatherCell(wx)}</dd>
+                    </div>
+                  )}
+                  <div className="cxrow">
+                    <dt className="cxrow__k">Referee</dt>
+                    <dd className="cxrow__v">{crew ? refereeCell(crew) : <span className="muted">Crew tagged game week</span>}</dd>
+                  </div>
+                </dl>
+              </article>
+            );
+          })}
+        </section>
       )}
 
-      {/* --- Game-site weather (Open-Meteo) — context, never a pick --- */}
-      {showWeather && GAME_WEATHER.length > 0 && (
-        <details className="ctxsec ctxdrop wxsec" open>
-          <summary className="ctxsec__h ctxsec__h--big">Game-site weather</summary>
-          <p className="ctxsec__d">
-            Forecast conditions at each stadium&apos;s home city. <b>Wind is the one measured signal</b> — the
-            market under-sets totals ~1.3 pts at 15+ mph — but it fails the vig bar and uses realized wind, so
-            treat it as <b>context, not a proven edge</b>. Outdoor forecasts fill in about <b>two weeks</b>
-            before kickoff.
-          </p>
-          <p className="ctxsec__d">
-            <b>Domes are higher-scoring — and the market knows.</b> Indoor games average <b>47.4</b> points vs
-            <b> 44.2</b> outdoors (2006–25), but books already set dome totals ~2 pts higher, so indoor overs hit
-            just <b>51.8%</b> — <b>below the 52.4% you need to beat the vig</b>. Tested and priced: a scoring
-            environment to understand, not an edge to bet.
-          </p>
-          <div className="wxtable">
-            <div className="wxrow wxrow--head">
-              <span>Game</span><span>Venue</span><span>Conditions</span>
-            </div>
-            {GAME_WEATHER.map((w) => {
-              const read = w.indoor
-                ? { txt: w.roof === "dome" ? "Dome — weather non-factor" : "Roof — weather non-factor", cls: "wx--indoor" }
-                : w.status === "ok"
-                  ? { txt: `${w.windMph} mph · ${w.tempF}° · ${w.conditions}${w.precipPct != null && w.precipPct >= 40 ? ` · ${w.precipPct}% precip` : ""}`, cls: w.windFlag ? "wx--wind" : "" }
-                  : { txt: "Forecast arrives ~2 weeks out", cls: "wx--pending" };
-              return (
-                <div className={`wxrow ${read.cls}`} key={w.eventId}>
-                  <span className="wxrow__g">{w.away}<span className="at">@</span>{w.home}</span>
-                  <span className="wxrow__v">{w.venue}{w.city ? ` · ${w.city}, ${w.state}` : ""}</span>
-                  <span className="wxrow__read">{w.windFlag && <b className="wxflag">⚑&nbsp;WIND</b>} {read.txt}</span>
-                </div>
-              );
-            })}
-          </div>
-          <p className="ctxsec__note">Open-Meteo forecast · updated {WEATHER_UPDATED} · indoor status per stadium roof.</p>
-        </details>
-      )}
+      {/* --- Reference: how we read each factor (collapsed; per-game data is in the cards) --- */}
+      <details className="ctxsec ctxdrop reftbl">
+        <summary className="ctxsec__h ctxsec__h--big">How we read these factors</summary>
 
-      {/* --- Referee crews (moved here from Upset Watch) --- */}
-      <details className="ctxsec ctxdrop reftbl" open>
-        <summary className="ctxsec__h ctxsec__h--big">Referee crews</summary>
+        <h3 className="cxref__h">Weather &amp; scoring</h3>
+        <p className="ctxsec__d">
+          <b>Wind is the one measured signal</b> — the market under-sets totals ~1.3 pts at 15+ mph — but it
+          fails the vig bar and uses realized wind, so treat it as <b>context, not a proven edge</b>. Domes are
+          weather non-factors; outdoor forecasts fill into the cards about <b>two weeks</b> before kickoff.
+        </p>
+        <p className="ctxsec__d">
+          <b>Domes are higher-scoring — and the market knows.</b> Indoor games average <b>47.4</b> pts vs
+          <b> 44.2</b> outdoors (2006–25), but books set dome totals ~2 pts higher, so indoor overs hit just
+          <b> 51.8%</b> — <b>below the 52.4% needed to beat the vig</b>. Tested and priced: a scoring environment
+          to understand, not an edge to bet.
+        </p>
+        {showWeather && <p className="ctxsec__note">Weather via Open-Meteo · updated {WEATHER_UPDATED} · indoor status per stadium roof.</p>}
+
+        <h3 className="cxref__h">Referee crews</h3>
         <div className="refbottom">
           <span className="refbottom__k">Bottom line — what to actually use</span>
           <p>
             One tendency carries over year to year: <b>how many flags a crew throws</b>.
             <b className="hot"> Flag-heavy</b> means more variance; <b className="cool">Lets them play</b> fewer.
-            The rest is <b>historical context, not a reliable lean</b>.
+            The rest is <b>historical context, not a reliable lean</b>. Crews are tagged onto each game&apos;s
+            card once weekly assignments post.
           </p>
         </div>
         <div className="reftable">

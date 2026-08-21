@@ -92,17 +92,6 @@ export default function PropsView({ games, embedded }: { games: PropGame[]; embe
 
   return (
     <>
-      {!embedded && (
-        <details className="readbox">
-          <summary className="readbox__h">What am I seeing here?</summary>
-          <p>
-            Every player prop with the <b>best available price across all books</b>. Tap a prop to add it to your
-            slip — StatSeer routes each leg to its best book and finds the single best book for a <b>parlay</b>.
-            No model, no pick: props are where pricing edges most plausibly live, because books post hundreds of
-            them semi-independently.
-          </p>
-        </details>
-      )}
       {!embedded && <BetslipPromo />}
       <p className="hint">{games.length} games · {players} players · best price on each, shopped across books.</p>
       <section className="propstack">

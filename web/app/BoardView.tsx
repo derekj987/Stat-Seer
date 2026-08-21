@@ -184,17 +184,6 @@ export default function BoardView({
 
         <WeekNav min={min} max={max} current={week} />
 
-        <details className="readbox">
-          <summary className="readbox__h">What am I seeing here?</summary>
-          <p>
-            Every game&apos;s betting lines — <b>moneyline, spread, and total</b> — with the <b>best available
-            number across all books</b> highlighted. Tap any line to add it to your slip; StatSeer tells you the
-            best sportsbook for each pick. A gold <b>Sweet Spot</b> badge means the spread or total sits on a key
-            number (a <b>3</b> or <b>7</b>), where the half-point is worth the most. No model, no pick — this is
-            line shopping: the same bet at a better price.
-          </p>
-        </details>
-
         {board.length === 0 ? (
           <p className="foot">No odds captured for Week {week} yet.</p>
         ) : (
