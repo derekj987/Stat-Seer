@@ -1913,7 +1913,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 #lps-nfl:checked ~ .lpf__head label[for="lps-nfl"],
 #lps-ncaaf:checked ~ .lpf__head label[for="lps-ncaaf"]{background:var(--accent);color:#fff}
 .lp-r:focus-visible ~ .lpf__head .lpf__toggle{outline:2px solid var(--accent);outline-offset:2px;border-radius:999px}
-.lpf__sub{margin:8px 0 16px;font-size:13.5px;color:var(--muted);max-width:78ch;line-height:1.55}
+.lpf__sub{margin:8px 0 16px;font-size:13.5px;color:var(--muted);max-width:none;line-height:1.55}
 .lpf__sub b{color:var(--ink)}
 .lpf__steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .lpf__step{position:relative;display:flex;flex-direction:column;gap:5px;padding:12px 13px 11px;border-radius:12px;
@@ -1933,7 +1933,9 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .lpf__steps{grid-template-columns:1fr}
   .lpf__step:not(:last-child)::after{content:"↓";right:auto;left:50%;top:auto;bottom:-13px;transform:translateX(-50%)}
 }
-.lp-snaplabel{margin:28px 0 6px;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.lp-snaplabel{margin:28px 0 8px;font-size:18px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#6a0f1c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lp-snaplabel{color:#a92133}}
+:root[data-theme="dark"] .lp-snaplabel{color:#a92133}
 .hb-plrtable .hb-plr__up{font-size:11px;margin-right:2px}
 .hb-plrlink{color:var(--ink);text-decoration:none;font-weight:700}
 .hb-plrlink:hover{color:var(--accent)}
