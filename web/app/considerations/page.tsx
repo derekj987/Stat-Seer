@@ -159,12 +159,9 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
         <div className="refbottom">
           <span className="refbottom__k">Bottom line — what to actually use</span>
           <p>
-            One crew tendency carries over year to year: <b>how many flags they throw</b>. Crews tagged
-            <b className="hot"> Flag-heavy</b> throw more than league average ({REF_LEAGUE.pen}/g) and
-            <b className="cool"> Lets them play</b> throw fewer — that&apos;s the real read (more flags = more
-            variance). The rest — average total, over/under lean, favorite vs underdog cover — is <b>historical
-            context, not a reliable lean</b>: mostly noise that doesn&apos;t carry to the next game. When a crew is
-            assigned game-week, its flag tendency shows up in that game&apos;s considerations above.
+            One tendency carries over year to year: <b>how many flags a crew throws</b>.
+            <b className="hot"> Flag-heavy</b> means more variance; <b className="cool">Lets them play</b> fewer.
+            The rest is <b>historical context, not a reliable lean</b>.
           </p>
         </div>
         <div className="reftable">
@@ -190,9 +187,11 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
             );
           })}
         </div>
-        <p className="ctxsec__note">
-          Historical crew tendencies, 2021–25. Assignments post during game week and map to each game above.
-        </p>
+        <p className="ctxsec__note">Historical crew tendencies, 2021–25.</p>
+        <div className="ref-soon">
+          <span className="ref-soon__tag">Coming soon</span>
+          Referee crews will be tagged to the games they&apos;ll be reffing.
+        </div>
       </details>
     </main>
   );
