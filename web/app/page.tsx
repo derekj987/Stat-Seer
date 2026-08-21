@@ -32,7 +32,9 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
     upsets: cfb.upsets as unknown as NcaafUpset[],
   };
   return (
-    <main className="lp">
+    <>
+      {/* Full-bleed hero — a body-level banner so the seer's eyes span the whole
+          viewport width, not just the centered content column below it. */}
       <header className="lp-hero">
         <div className="lp-hero__banner">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -41,6 +43,7 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
         <h1 className="lp-hero__wm">StatSeer</h1>
       </header>
 
+      <main className="lp">
       <LandingHub initialSport={initialSport} nfl={nfl} ncaaf={ncaaf} />
 
       <BetslipPromo />
@@ -64,6 +67,7 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
           track record, and the best price on every pick. <a href="/how">How our model works →</a>
         </p>
       </section>
-    </main>
+      </main>
+    </>
   );
 }
