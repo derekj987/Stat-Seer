@@ -6,6 +6,7 @@
 // Open to everyone — anonymous or signed-in; captures the page they were on and, if signed
 // in, their user id, plus an optional reply email.
 import { useState } from "react";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -58,11 +59,8 @@ export default function FeedbackWidget() {
         title="Have an idea, fix, or suggestion?"
         onClick={() => { setOpen(true); setStatus("idle"); }}
       >
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
-          strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <rect x="3" y="5" width="18" height="14" rx="2" />
-          <path d="m3 7 9 6 9-6" />
-        </svg>
+        <Image src="/pigeon.png" alt="" fill sizes="46px" aria-hidden="true"
+          className="fbw__pigeon" style={{ objectFit: "cover", objectPosition: "72% 40%" }} />
       </button>
 
       {open && (

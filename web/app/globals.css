@@ -1821,10 +1821,11 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 /* ================= Feedback mailbox (global) ================= */
 /* Floating envelope button, bottom-left so it clears the bet-slip bar (bottom-right). */
 .fbw__btn{position:fixed;left:16px;bottom:16px;z-index:60;width:46px;height:46px;border-radius:50%;
-  border:none;background:var(--accent);color:#fff;cursor:pointer;display:flex;align-items:center;
-  justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.28)}
+  border:2px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;display:flex;
+  align-items:center;justify-content:center;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.28)}
 .fbw__btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
 .fbw__btn svg{display:block}
+.fbw__pigeon{border-radius:50%}
 .fbw__scrim{position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:75;display:flex;
   align-items:center;justify-content:center;padding:20px}
 .fbw__card{background:var(--surface);border:1px solid var(--line);border-radius:16px;max-width:440px;
