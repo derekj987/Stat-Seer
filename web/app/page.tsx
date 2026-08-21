@@ -4,7 +4,6 @@
 // homepages. Then the bet-slip + community invites. Sections live at /model, /ncaaf/model, …
 import { fetchHome, type CardRow, type UpsetRow, type PlayerPick } from "@/lib/home";
 import { NCAAF_MODEL, type NcaafCardGame, type NcaafUpset } from "./ncaaf/model-data";
-import { SPORTS } from "./Nav";
 import LandingHub from "./LandingHub";
 import HomePromo from "./HomePromo";
 
@@ -65,9 +64,6 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
     games: cfb.games as unknown as NcaafCardGame[],
     upsets: cfb.upsets as unknown as NcaafUpset[],
   };
-  const liveCount = SPORTS.filter((s) => s.live).length;
-  const totalGames = nfl.card.length + cfb.games.length;
-
   return (
     <main className="lp">
       <header className="lp-hero">
@@ -81,8 +77,6 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
           market — and the <b>best price</b> on every pick.
         </p>
         <div className="lp-stats">
-          <div className="lp-stat"><span className="lp-stat__n">{liveCount}</span><span className="lp-stat__l">sports live</span></div>
-          <div className="lp-stat"><span className="lp-stat__n">{totalGames}</span><span className="lp-stat__l">games on the board</span></div>
           <div className="lp-stat"><span className="lp-stat__n">100%</span><span className="lp-stat__l">reads graded in public</span></div>
           <div className="lp-stat lp-stat--wide"><span className="lp-stat__n">Line-blind</span><span className="lp-stat__l">every read, before the line</span></div>
         </div>
