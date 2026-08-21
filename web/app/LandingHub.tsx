@@ -34,6 +34,7 @@ function NflConsiderations() {
             <header className="cxcard__head">
               <span className="matchup">{w.away}<span className="at">@</span>{w.home}</span>
               <time className="kick">{cxKick(w.commence)}</time>
+              {w.neutral && <span className="badge neutral">NEUTRAL</span>}
             </header>
             <dl className="cxcard__rows">
               <div className="cxrow"><dt className="cxrow__k">Site</dt><dd className="cxrow__v">{cxSite(w)}<span className="cxroof"> · {cxRoof(w.roof)}</span></dd></div>
@@ -43,7 +44,7 @@ function NflConsiderations() {
           </article>
         ))}
       </div>
-      <p className="lp-cardfoot"><a className="btn btn--primary" href="/considerations">For the full slate, click here →</a></p>
+      <div className="lp-cxbtn"><a className="btn btn--primary" href="/considerations">For the full slate, click here →</a></div>
     </>
   );
 }
@@ -68,7 +69,7 @@ function NcaafConsiderations() {
           </article>
         ))}
       </div>
-      <p className="lp-cardfoot"><a className="btn btn--primary" href="/ncaaf/considerations">For the full slate, click here →</a></p>
+      <div className="lp-cxbtn"><a className="btn btn--primary" href="/ncaaf/considerations">For the full slate, click here →</a></div>
     </>
   );
 }

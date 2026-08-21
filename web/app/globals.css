@@ -379,6 +379,7 @@ a.sportstrip__i:hover{color:var(--ink)}
 .cxcard__statv{font-size:22px;font-weight:800;color:var(--accent);line-height:1.1}
 .cxcard__statk{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .cxcard__statnote{margin:8px 0 0;font-size:12px;color:var(--muted);line-height:1.45}
+.lp-cxbtn{margin-top:12px}
 @media (max-width:640px){
   .wxrow{grid-template-columns:1fr;gap:2px;padding:8px 10px}
   .wxrow--head{display:none}
