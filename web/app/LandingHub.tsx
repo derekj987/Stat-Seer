@@ -92,29 +92,45 @@ function NflCardTable({ rows }: { rows: CardRow[] }) {
   );
 }
 
+function NcaafHead() {
+  return <thead><tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Our Model Suggests</th></tr></thead>;
+}
+function NcaafRows({ games }: { games: readonly NcaafCardGame[] }) {
+  return (
+    <>
+      {games.map((g) => {
+        const ms = g.marketSpread; const ps = g.projSpread; const tl = g.totalLean; const pk = g.pick;
+        const pick = pk ? `${pk.side} ${pk.num > 0 ? "+" : ""}${pk.num}` : `${ps.fav} ${ps.num}`;
+        return (
+          <tr key={`${g.away}-${g.home}`} className={g.off ? "hb-off" : undefined}>
+            <td className="hb-l"><span className="hb-game">{g.away}<span className="hb-at">at</span>{g.home}</span>{g.neutral ? <span className="ncf-site"> · N</span> : null}{g.off && <span className="hb-dia hb-dia--end">◆</span>}</td>
+            <td className="hb-num">{ms ? `${ms.fav} ${ms.num}` : "—"}</td>
+            <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
+            <td className="hb-suggest"><span className="hb-sugwrap"><span className="hb-sug"><span className="hb-sug__t">{pick}</span></span>{tl && <span className="hb-sug"><span className="hb-sug__t">{tl.dir === "OVER" ? "Over" : "Under"} {tl.num}</span></span>}</span></td>
+          </tr>
+        );
+      })}
+    </>
+  );
+}
 function NcaafCardTable({ games }: { games: NcaafCardGame[] }) {
   const featured = games.filter((g) => g.featured);
-  const show = (featured.length ? featured : games).slice(0, 14);
+  const src = featured.length ? featured : games;
+  const lead = src.slice(0, 6);   // snapshot — first 6 ranked games
+  const rest = src.slice(6);
   return (
-    <div className="hb-formwrap">
-      <table className="hb-form">
-        <thead><tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Our Model Suggests</th></tr></thead>
-        <tbody>
-          {show.map((g) => {
-            const ms = g.marketSpread; const ps = g.projSpread; const tl = g.totalLean; const pk = g.pick;
-            const pick = pk ? `${pk.side} ${pk.num > 0 ? "+" : ""}${pk.num}` : `${ps.fav} ${ps.num}`;
-            return (
-              <tr key={`${g.away}-${g.home}`} className={g.off ? "hb-off" : undefined}>
-                <td className="hb-l"><span className="hb-game">{g.away}<span className="hb-at">at</span>{g.home}</span>{g.neutral ? <span className="ncf-site"> · N</span> : null}{g.off && <span className="hb-dia hb-dia--end">◆</span>}</td>
-                <td className="hb-num">{ms ? `${ms.fav} ${ms.num}` : "—"}</td>
-                <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
-                <td className="hb-suggest"><span className="hb-sugwrap"><span className="hb-sug"><span className="hb-sug__t">{pick}</span></span>{tl && <span className="hb-sug"><span className="hb-sug__t">{tl.dir === "OVER" ? "Over" : "Under"} {tl.num}</span></span>}</span></td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+    <>
+      <div className="hb-formwrap"><table className="hb-form"><NcaafHead /><tbody><NcaafRows games={lead} /></tbody></table></div>
+      {rest.length > 0 && (
+        <details className="hb-more">
+          <summary className="hb-more__sum">
+            <span className="hb-more__chev" aria-hidden="true">▸</span>
+            See more ({rest.length} more games)
+          </summary>
+          <div className="hb-formwrap"><table className="hb-form"><NcaafHead /><tbody><NcaafRows games={rest} /></tbody></table></div>
+        </details>
+      )}
+    </>
   );
 }
 
