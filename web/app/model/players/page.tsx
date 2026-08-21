@@ -1,4 +1,5 @@
 import PlayerModelView from "../../PlayerModelView";
+import { PROJ_WEEK } from "@/lib/playerProjections";
 
 export const metadata = {
   title: "StatSeer — NFL Player Prop Model",
@@ -10,5 +11,7 @@ export default async function Page({ searchParams }: {
 }) {
   const sp = await searchParams;
   const cat = typeof sp.cat === "string" ? sp.cat : "td";
-  return <PlayerModelView base="nfl" cat={cat} />;
+  const w = typeof sp.week === "string" ? parseInt(sp.week, 10) : NaN;
+  const week = Number.isFinite(w) ? Math.min(18, Math.max(1, w)) : PROJ_WEEK;
+  return <PlayerModelView base="nfl" cat={cat} week={week} />;
 }

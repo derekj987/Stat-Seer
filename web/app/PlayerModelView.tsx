@@ -35,14 +35,33 @@ export const PLAYER_CATS: PlayerCat[] = [
 export const playerCatByKey = (k: string): PlayerCat =>
   PLAYER_CATS.find((c) => c.key === k) ?? PLAYER_CATS[0];
 
-export default function PlayerModelView({ base, cat }: { base: "nfl" | "ncaaf"; cat: string }) {
+function WeekNav({ base, cat, current }: { base: "nfl" | "ncaaf"; cat: string; current: number }) {
+  const home = base === "ncaaf" ? "/ncaaf/model/players" : "/model/players";
+  const weeks = Array.from({ length: 18 }, (_, i) => i + 1);
+  return (
+    <nav className="weeknav" aria-label="Select week">
+      <span className="weeknav__label">Week</span>
+      <div className="weeknav__list">
+        {weeks.map((w) => (
+          <a key={w} href={`${home}?cat=${cat}&week=${w}`}
+            className={w === current ? "weeknav__w active" : "weeknav__w"}
+            aria-current={w === current ? "page" : undefined}>{w}</a>
+        ))}
+      </div>
+    </nav>
+  );
+}
+
+export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "ncaaf"; cat: string; week: number }) {
   const active = playerCatByKey(cat);
   const home = base === "ncaaf" ? "/ncaaf/model/players" : "/model/players";
   const sportLabel = base === "ncaaf" ? "College Football" : "NFL";
+  const catHref = (c: string) => `${home}?cat=${c}&week=${week}`;
 
-  // Real projections exist for NFL only (prior-season baseline export). Group the active
+  // Real projections exist for NFL only, for the current projection week. Group the active
   // category's rows by game.
-  const rows: PlayerProj[] = base === "nfl" ? PLAYER_PROJECTIONS.filter((p) => p.cat === active.key) : [];
+  const onProjWeek = base === "nfl" && week === PROJ_WEEK;
+  const rows: PlayerProj[] = onProjWeek ? PLAYER_PROJECTIONS.filter((p) => p.cat === active.key) : [];
   const games: string[] = [];
   const byGame: Record<string, PlayerProj[]> = {};
   for (const r of rows) {
@@ -57,9 +76,6 @@ export default function PlayerModelView({ base, cat }: { base: "nfl" | "ncaaf"; 
         <Brand sub={`The Model · Player Prop Model · ${sportLabel}`} />
       </header>
 
-      <FlowSteps active="analyze" base={base} />
-      <ModelSubnav active="player" base={base} />
-
       <section className="explainer explainer--wide">
         <p>
           Our <b>line-blind player projections</b> — the layer that turns the snap-share model into
@@ -69,17 +85,20 @@ export default function PlayerModelView({ base, cat }: { base: "nfl" | "ncaaf"; 
         </p>
       </section>
 
+      <FlowSteps active="analyze" base={base} />
+      <ModelSubnav active="player" base={base} />
+
       <nav className="catnav" aria-label="Player prop category">
         {PLAYER_CATS.map((c) => (
-          <a key={c.key} href={`${home}?cat=${c.key}`}
+          <a key={c.key} href={catHref(c.key)}
             className={c.key === active.key ? "catnav__c active" : "catnav__c"}
             aria-current={c.key === active.key ? "page" : undefined}>{c.label}</a>
         ))}
       </nav>
 
+      <WeekNav base={base} cat={active.key} current={week} />
+
       <section className="pmcat">
-        <h2 className="pmcat__h">{active.label}</h2>
-        <p className="pmcat__blurb">{active.blurb}</p>
 
         {rows.length === 0 ? (
           <div className="pmempty pmempty--solo" role="note">
