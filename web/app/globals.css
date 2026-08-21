@@ -1309,7 +1309,9 @@ details.statsdrop .stats{margin:12px 0 0}
 .pmempty p{margin:0;font-size:13px;line-height:1.6;color:var(--muted)}
 .pmempty b{color:var(--ink)}
 /* data rows — projection beside the book line */
-.pmrow--data{display:grid;grid-template-columns:minmax(0,1.7fr) 0.55fr 0.9fr 0.9fr 1.5fr;gap:12px;
+.pmscroll{overflow-x:auto;max-width:100%}
+.pmtable--data{max-width:none;min-width:720px}
+.pmrow--data{display:grid;grid-template-columns:minmax(0,1.6fr) 0.5fr 0.85fr 0.85fr 1.3fr 1.3fr;gap:12px;
   align-items:baseline;border-top:1px solid var(--line);font-size:13px}
 .pmrow--head.pmrow--data{border-bottom:0;font-size:11px}
 .pmrow--data:first-child{border-top:0}

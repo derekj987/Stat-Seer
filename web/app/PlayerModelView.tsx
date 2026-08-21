@@ -108,38 +108,46 @@ export default function PlayerModelView({ base, cat }: { base: "nfl" | "ncaaf"; 
                 don&apos;t take it as a validated edge.
               </p>
               <p>
-                <b>Career % over</b> is the empirical check: across <b>every game of the player&apos;s
-                career</b> in our data (2016–{PROJ_PRIOR}, regular season + playoffs), how often they actually
-                cleared <b>this exact line</b>. Green ≥ 50%, red below. It&apos;s the grounded, verifiable
-                signal — and it shows QBs are not all &quot;unders,&quot; the way the raw projection implied.
+                <b>Career % over</b> = across <b>every game of the player&apos;s career</b> in our data
+                (2016–{PROJ_PRIOR}), how often they cleared <b>this exact line</b>. <b>Prior szn % over</b> = the
+                same thing for <b>{PROJ_PRIOR} only</b> — the recency check, since a career number is diluted by a
+                bygone peak (Cooper Kupp clears 27 rec yds 84% of his career but only 68% in {PROJ_PRIOR}). Green ≥
+                50%, red below.
               </p>
             </div>
             {games.map((g) => (
               <div className="pmgame" key={g}>
                 <div className="pmgame__h">{g}</div>
-                <div className="pmtable" role="table" aria-label={`${g} ${active.label} projections`}>
-                  <div className="pmrow pmrow--head pmrow--data" role="row">
-                    <span className="pmcell pmcell--player">Player</span>
-                    <span className="pmcell">Team</span>
-                    <span className="pmcell pmcell--num">Book line</span>
-                    <span className="pmcell pmcell--num">Our proj</span>
-                    <span className="pmcell pmcell--career">Career % over</span>
+                <div className="pmscroll">
+                  <div className="pmtable pmtable--data" role="table" aria-label={`${g} ${active.label} projections`}>
+                    <div className="pmrow pmrow--head pmrow--data" role="row">
+                      <span className="pmcell pmcell--player">Player</span>
+                      <span className="pmcell">Team</span>
+                      <span className="pmcell pmcell--num">Book line</span>
+                      <span className="pmcell pmcell--num">Our proj</span>
+                      <span className="pmcell pmcell--career">Career % over</span>
+                      <span className="pmcell pmcell--career">Prior szn % over</span>
+                    </div>
+                    {byGame[g].map((r) => {
+                      const cpct = r.cG ? Math.round((100 * r.cOver) / r.cG) : null;
+                      const ppct = r.pG ? Math.round((100 * r.pOver) / r.pG) : null;
+                      const cls = (v: number | null) => v === null ? "" : v >= 50 ? "pmread--over" : "pmread--under";
+                      return (
+                        <div className="pmrow pmrow--data" role="row" key={`${r.player}-${r.market}`}>
+                          <span className="pmcell pmcell--player">{r.player}</span>
+                          <span className="pmcell pmcell--team">{r.team}</span>
+                          <span className="pmcell pmcell--num">{r.book}{unit}</span>
+                          <span className="pmcell pmcell--num pmcell--proj">{r.proj}{unit}</span>
+                          <span className={`pmcell pmcell--career ${cls(cpct)}`}>
+                            {cpct === null ? "—" : <>{cpct}% <small className="pmcell__sub">{r.cOver}/{r.cG} gm</small></>}
+                          </span>
+                          <span className={`pmcell pmcell--career ${cls(ppct)}`}>
+                            {ppct === null ? <span className="pmcell__sub">no {PROJ_PRIOR}</span> : <>{ppct}% <small className="pmcell__sub">{r.pOver}/{r.pG} gm</small></>}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
-                  {byGame[g].map((r) => {
-                    const pct = r.cG ? Math.round((100 * r.cOver) / r.cG) : null;
-                    const hot = pct !== null && pct >= 50;
-                    return (
-                      <div className="pmrow pmrow--data" role="row" key={`${r.player}-${r.market}`}>
-                        <span className="pmcell pmcell--player">{r.player}</span>
-                        <span className="pmcell pmcell--team">{r.team}</span>
-                        <span className="pmcell pmcell--num">{r.book}{unit}</span>
-                        <span className="pmcell pmcell--num pmcell--proj">{r.proj}{unit}</span>
-                        <span className={`pmcell pmcell--career ${pct === null ? "" : hot ? "pmread--over" : "pmread--under"}`}>
-                          {pct === null ? "—" : <>{pct}% <small className="pmcell__sub">{r.cOver}/{r.cG} gm</small></>}
-                        </span>
-                      </div>
-                    );
-                  })}
                 </div>
               </div>
             ))}

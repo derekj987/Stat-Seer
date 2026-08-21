@@ -139,27 +139,37 @@ CAREER_STAT = {"pass_yds": "passing_yards", "rush_yds": "rushing_yards",
 
 
 def load_career(seasons):
-    """Every game log we have (REG + POST) per player, for the career hit-rate."""
-    keep = ["player_id", "attempts", "passing_yards", "rushing_yards", "receiving_yards", "receptions"]
+    """Every game log we have (REG + POST) per player, for the hit-rate columns."""
+    keep = ["player_id", "season", "season_type", "attempts",
+            "passing_yards", "rushing_yards", "receiving_yards", "receptions"]
     frames = []
     for y in seasons:
         s = pd.read_csv(f"data/stats_{y}.csv", low_memory=False)
         frames.append(s[[c for c in keep if c in s.columns]].copy())
     d = pd.concat(frames, ignore_index=True)
-    for c in keep[1:]:
+    for c in ["attempts", "passing_yards", "rushing_yards", "receiving_yards", "receptions"]:
         d[c] = pd.to_numeric(d.get(c), errors="coerce").fillna(0.0)
     return {pid: g for pid, g in d.groupby("player_id")}
 
 
-def career_over(career_by_pid, pid, market, line):
-    """(times over the line, eligible games) across the player's career in our data."""
-    g = career_by_pid.get(pid)
+def _over(g, market, line):
     if g is None or line is None:
         return (0, 0)
     if market == "pass_yds":
-        g = g[g.attempts >= 1]      # only count games he actually threw
+        g = g[g.attempts >= 1]      # only games he actually threw
     vals = g[CAREER_STAT[market]]
     return int((vals > line).sum()), int(len(vals))
+
+
+def career_over(career_by_pid, pid, market, line):
+    """(times over, games) across every game we have — the full career hit-rate."""
+    return _over(career_by_pid.get(pid), market, line)
+
+
+def prior_over(career_by_pid, pid, market, line, prior):
+    """(times over, games) in the prior season only — reflects the player's CURRENT role."""
+    g = career_by_pid.get(pid)
+    return _over(g[g.season == prior] if g is not None else None, market, line)
 
 
 def project(rate, base):
@@ -232,11 +242,12 @@ def main():
             continue
         proj = project(rate, base)[key]
         cover, cgames = career_over(career, rate["pid"], key, book)
+        pover, pgames = prior_over(career, rate["pid"], key, book, prior)
         matched += 1
         out.append({
             "game": game, "commence": commence, "player": rate["name"], "team": rate["team"],
             "pos": rate["pos"], "cat": cat, "market": key, "book": book, "proj": proj,
-            "g": rate["games"], "cOver": cover, "cG": cgames,
+            "g": rate["games"], "cOver": cover, "cG": cgames, "pOver": pover, "pG": pgames,
         })
 
     out.sort(key=lambda r: (r["commence"], r["game"], r["cat"], -(r["proj"] or 0)))
@@ -250,7 +261,7 @@ def main():
     ts += "// not graded against closing lines yet.\n"
     ts += "export interface PlayerProj { game: string; commence: string; player: string; team: string;\n"
     ts += "  pos: string; cat: string; market: string; book: number; proj: number; g: number;\n"
-    ts += "  cOver: number; cG: number }\n"
+    ts += "  cOver: number; cG: number; pOver: number; pG: number }\n"
     ts += f"export const PROJ_SEASON = {args.season};\nexport const PROJ_WEEK = {week};\nexport const PROJ_PRIOR = {prior};\n"
     ts += "export const PLAYER_PROJECTIONS: PlayerProj[] = [\n"
     for r in out:
