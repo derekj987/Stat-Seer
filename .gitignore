@@ -40,3 +40,6 @@ Thumbs.db
 
 # Local, per-machine Claude Code approvals — do not track
 .claude/settings.local.json
+
+# Local backfill progress state — regenerated per machine
+.backfill_progress.json
