@@ -104,11 +104,12 @@ def build_baselines(prior_seasons):
     base = {}
     for pos in ["RB", "FB", "WR", "TE", "QB"]:
         p = d[d.position == pos]
+        pa = p[p.attempts >= 15]   # starter games only, for a fair passing-YPA baseline
         base[pos] = {
             "ypc": p.rushing_yards.sum() / max(p.carries.sum(), 1),
             "catch": p.receptions.sum() / max(p.targets.sum(), 1),
             "ypr": p.receiving_yards.sum() / max(p.receptions.sum(), 1),
-            "ypa": p.passing_yards.sum() / max(p.attempts.sum(), 1),
+            "ypa": pa.passing_yards.sum() / max(pa.attempts.sum(), 1),
         }
     return base
 
@@ -130,6 +131,7 @@ def prior_year_rates(prior):
             "pid": row.player_id,
             "carries_pg": g.carries.sum() / n, "targets_pg": g.targets.sum() / n,
             "att_pg": g.attempts.sum() / n,
+            "pass_att": g.attempts.sum(), "pass_ypa": g.passing_yards.sum() / max(g.attempts.sum(), 1),
         }
     return rates
 
@@ -172,13 +174,21 @@ def prior_over(career_by_pid, pid, market, line, prior):
     return _over(g[g.season == prior] if g is not None else None, market, line)
 
 
+PASS_K = 300.0   # QB YPA persists (unlike RB/WR efficiency), so we regress the player's OWN
+                 # YPA toward the starter baseline by ~300 attempts, not strip it to league avg.
+
+
 def project(rate, base):
     b = base.get(rate["pos"], base["WR"])
+    # Passing: volume x the QB's own YPA regressed toward the starter league YPA. Using pure
+    # league YPA underrated every starting QB (they're an above-average sample) -> all "unders".
+    pa = rate.get("pass_att", 0.0)
+    reg_ypa = (rate.get("pass_ypa", b["ypa"]) * pa + b["ypa"] * PASS_K) / (pa + PASS_K)
     return {
         "rush_yds": round(rate["carries_pg"] * b["ypc"], 1),
         "rec_yds": round(rate["targets_pg"] * b["catch"] * b["ypr"], 1),
         "receptions": round(rate["targets_pg"] * b["catch"], 1),
-        "pass_yds": round(rate["att_pg"] * b["ypa"], 1),
+        "pass_yds": round(rate["att_pg"] * reg_ypa, 1),
     }
 
 

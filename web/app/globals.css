@@ -242,22 +242,23 @@ body{background:var(--bg);color:var(--ink);
 .tab:hover{border-color:var(--accent);color:var(--accent)}
 .tab.active{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.catnav{display:flex;gap:6px;overflow-x:auto;margin:10px 0 4px;padding-bottom:4px}
-.catnav__c{flex:0 0 auto;padding:6px 12px;border-radius:8px;text-decoration:none;
-  font-size:12.5px;font-weight:600;color:var(--muted);border:1px solid var(--line);
-  background:var(--surface);white-space:nowrap}
-.catnav__c:hover{border-color:var(--accent);color:var(--accent)}
-.catnav__c.active{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+/* category toggle — a connected, fully-rounded segmented switch (like the homepage sport toggle) */
+.catnav{display:inline-flex;gap:3px;overflow-x:auto;margin:10px 0 4px;padding:3px;max-width:100%;
+  border-radius:999px;background:var(--surface-2);border:1px solid var(--line);width:fit-content}
+.catnav__c{flex:0 0 auto;padding:6px 15px;border-radius:999px;text-decoration:none;
+  font-size:12.5px;font-weight:700;color:var(--muted);white-space:nowrap}
+.catnav__c:hover{color:var(--accent)}
+.catnav__c.active{background:var(--accent);color:#fff}
 .catnav__c:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-/* secondary toggle inside Value Finder (Game Lines / Player Props) */
-.subnav{display:flex;gap:4px;margin:8px 0 4px;padding:3px;border-radius:10px;
+/* section toggle (Game/Player Model · Line Shopping/Props · Considerations/Upset/Fan) —
+   a fully-rounded amber segmented switch matching the homepage toggle style */
+.subnav{display:inline-flex;gap:3px;margin:8px 0 4px;padding:3px;border-radius:999px;
   background:var(--amber-soft);border:1px solid color-mix(in srgb,var(--amber) 35%,transparent);
-  width:fit-content}
-.subnav__t{padding:6px 14px;border-radius:7px;text-decoration:none;font-size:12.5px;
-  font-weight:700;color:color-mix(in srgb,var(--amber) 78%,var(--muted))}
+  width:fit-content;max-width:100%;overflow-x:auto}
+.subnav__t{padding:6px 16px;border-radius:999px;text-decoration:none;font-size:12.5px;
+  font-weight:700;white-space:nowrap;color:color-mix(in srgb,var(--amber) 78%,var(--muted))}
 .subnav__t:hover{color:var(--amber)}
-.subnav__t.active{background:var(--amber);color:#fff;
-  box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.subnav__t.active{background:var(--amber);color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .subnav__t:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 /* Value Finder tabs slide right to sit under the "Value Finder" flow step (rightmost). */
 /* Value Finder + Context orange tabs are left-justified (like the flow above them). */

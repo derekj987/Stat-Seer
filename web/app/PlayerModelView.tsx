@@ -112,26 +112,6 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
           </div>
         ) : (
           <>
-            <details className="pmdisc pmdisc--drop">
-              <summary className="pmdisc__sum">
-                <span className="pmempty__tag">How to read this</span>
-                <span className="pmdisc__chev" aria-hidden="true">▾</span>
-              </summary>
-              <div className="pmdisc__body">
-              <p>
-                <b>Our proj</b> is a prior-season ({PROJ_PRIOR}) baseline (projected volume × position
-                efficiency) — an honest starting point, but it runs biased for some roles (QBs especially), so
-                don&apos;t take it as a validated edge.
-              </p>
-              <p>
-                <b>Career % over</b> = across <b>every game of the player&apos;s career</b> in our data
-                (2016–{PROJ_PRIOR}), how often they cleared <b>this exact line</b>. <b>Prior szn % over</b> = the
-                same thing for <b>{PROJ_PRIOR} only</b> — the recency check, since a career number is diluted by a
-                bygone peak (Cooper Kupp clears 27 rec yds 84% of his career but only 68% in {PROJ_PRIOR}). Green ≥
-                50%, red below.
-              </p>
-              </div>
-            </details>
             {games.map((g) => (
               <div className="pmgame" key={g}>
                 <div className="pmgame__h">{g}</div>
