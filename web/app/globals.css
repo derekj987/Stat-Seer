@@ -1900,3 +1900,9 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .reftbl .reflean__p{font-size:10.5px}
   .reftbl .refrow--head{font-size:9px;padding:2px 10px}
 }
+
+/* NCAAF model "how good is it?" dropdown — intro + honest scoreboard inside */
+.ncf-about__p{margin:0 0 14px;font-size:13.5px;line-height:1.6;color:var(--muted)}
+.ncf-about__p b{color:var(--ink)}
+.ncf-about .ncf-cards{margin:0 0 14px}
+.ncf-about .ncf-honest{margin:0}

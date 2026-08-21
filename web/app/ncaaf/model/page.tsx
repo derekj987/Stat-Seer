@@ -1,22 +1,66 @@
 import { Brand, FlowSteps } from "../../Nav";
-import { NCAAF_MODEL, type NcaafTeam } from "../model-data";
+import { NCAAF_MODEL, type NcaafCardGame } from "../model-data";
 import { StatCard } from "../StatCard";
 
-// College Football — The Model. A line-blind power rating, published with its real
-// out-of-sample track record: it predicts as well as a mature Elo, and we've verified
-// it does NOT beat the closing spread. That honesty is the point — this is Context /
-// trust, not a pick driver ("panels inform, they do not vote").
+// College Football — The Model. Mirrors the NFL Model page: the full model-vs-market
+// table leads, the honest track record (predicts as well as Elo, doesn't beat the spread)
+// is tucked into a dropdown, and college player projections are flagged as arriving.
 export const metadata = {
   title: "StatSeer — College Football Model",
-  description: "A line-blind CFB power rating, graded in public. Verified honest: predicts well, doesn't beat the market.",
+  description: "The full college-football model — our line-blind read beside the market on every game, with the honest track record.",
 };
 
 const M = NCAAF_MODEL;
+
+function pickTxt(g: NcaafCardGame): string {
+  const pk = g.pick;
+  return pk ? `${pk.side} ${pk.num > 0 ? "+" : ""}${pk.num}` : `${g.projSpread.fav} ${g.projSpread.num}`;
+}
+
+function CardHead() {
+  return (
+    <thead>
+      <tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Our Model Suggests</th></tr>
+    </thead>
+  );
+}
+
+function CardRows({ games }: { games: readonly NcaafCardGame[] }) {
+  return (
+    <>
+      {games.map((g) => {
+        const ms = g.marketSpread; const tl = g.totalLean;
+        return (
+          <tr key={`${g.away}-${g.home}`} className={g.off ? "hb-off" : undefined}>
+            <td className="hb-l">
+              <span className="hb-game">{g.away}<span className="hb-at">at</span>{g.home}</span>
+              {g.neutral ? <span className="ncf-site"> · N</span> : null}
+              {g.off && <span className="hb-dia hb-dia--end" aria-label="off consensus">◆</span>}
+            </td>
+            <td className="hb-num">{ms ? `${ms.fav} ${ms.num}` : "—"}</td>
+            <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
+            <td className="hb-suggest">
+              <span className="hb-sugwrap">
+                <span className="hb-sug"><span className="hb-sug__t">{pickTxt(g)}</span></span>
+                {tl && <span className="hb-sug"><span className="hb-sug__t">{tl.dir === "OVER" ? "Over" : "Under"} {tl.num}</span></span>}
+              </span>
+            </td>
+          </tr>
+        );
+      })}
+    </>
+  );
+}
 
 export default function Page() {
   const v = M.validation;
   const a = M.ats;
   const beatsMarket = a.atsPct > a.breakeven;
+  const c = M.card;
+  const featured = c.games.filter((g) => g.featured);
+  const rest = c.games.filter((g) => !g.featured);
+  const lead = featured.length ? featured : c.games;
+  const extra = featured.length ? rest : [];
 
   return (
     <main className="wrap">
@@ -26,57 +70,75 @@ export default function Page() {
 
       <FlowSteps active="analyze" base="ncaaf" />
 
-      <section className="explainer">
-        <p>
-          <b>The Model, for college football.</b> A line-blind power rating — every team&apos;s strength from
-          point differential alone (never win-loss), with home field and prior-season carryover baked in.
-          It is <b>published and gradeable</b>, and it drives <b>no picks</b>. Here&apos;s exactly how good it
-          is, measured out of sample — the good and the inconvenient.
-        </p>
+      {/* The honest record — what it is, how well it does, and why we show it — folded away. */}
+      <details className="ncf-method ncf-about">
+        <summary className="ncf-method__h">How good is it? — the model&apos;s honest track record</summary>
+        <div className="ncf-method__b">
+          <p className="ncf-about__p">
+            <b>The Model, for college football.</b> A line-blind power rating — every team&apos;s strength from
+            point differential alone (never win-loss), with home field and prior-season carryover baked in.
+            It is <b>published and gradeable</b>, and it drives <b>no picks</b>. Here&apos;s exactly how good it
+            is, measured out of sample — the good and the inconvenient.
+          </p>
+          <div className="ncf-cards">
+            <StatCard tone="good" label="Predicts as well as Elo"
+              value={`${v.ourSU}%`}
+              sub={`straight-up, ${v.games.toLocaleString()} games out of sample — vs CFBD Elo ${v.eloSU}% and a ${v.homeSU}% home-team baseline`} />
+            <StatCard tone="good" label="Margin error (RMSE)"
+              value={`${v.ourRMSE}`}
+              sub={`points per game — right with CFBD Elo (${v.eloRMSE}). A competent, honest rating.`} />
+            <StatCard tone="flat" label="Against the closing spread"
+              value={`${a.atsPct}%`}
+              sub={`${a.bets.toLocaleString()} bets — below the ${a.breakeven}% a −110 bettor must clear. It does ${beatsMarket ? "" : "NOT "}beat the market.`} />
+          </div>
+          <div className="ncf-honest" role="note">
+            <span className="ncf-honest__tag">Why we show you this</span>
+            <p>
+              Most sites would bury that last number. We lead with it. Our CFB model reads games as well as the
+              best public systems — but we <b>tested it against the closing line and it doesn&apos;t beat the
+              number</b>, the same result we found for NFL game lines. So we publish it as <b>context you can
+              trust</b>, graded in the open — <b>not</b> as a pick. A rating that can&apos;t beat the market is
+              still a great way to understand one. Panels inform; they don&apos;t vote.
+            </p>
+          </div>
+        </div>
+      </details>
+
+      {/* The full model — our line-blind read beside the market on every game. */}
+      <section className="ncf-sec">
+        <h2 className="ncf-h">Model vs market — Week {c.week}
+          <span className="ncf-h__note">our line-blind read beside the market&apos;s number, every game</span></h2>
+        <div className="hb-legend">
+          <span className="hb-dia">◆</span> Off-consensus — our read is on the other side from the market.
+          <span className="hb-x"> · <b>Our Model Suggests</b> is the side our line-blind rating covers —
+            informative, <b>not a guaranteed bet</b> (the rating doesn&apos;t beat the spread; see the record above).</span>
+        </div>
+        <div className="hb-formcap">Ranked matchups — every game with a top-25 team</div>
+        <div className="hb-formwrap">
+          <table className="hb-form"><CardHead /><tbody><CardRows games={lead} /></tbody></table>
+        </div>
+        {extra.length > 0 && (
+          <details className="hb-more">
+            <summary className="hb-more__sum">
+              <span className="hb-more__chev" aria-hidden="true">▸</span>
+              See all {extra.length} other games
+            </summary>
+            <div className="hb-formwrap">
+              <table className="hb-form"><CardHead /><tbody><CardRows games={extra} /></tbody></table>
+            </div>
+          </details>
+        )}
       </section>
 
-      {/* The honest scoreboard — this transparency is the product. */}
-      <div className="ncf-cards">
-        <StatCard tone="good" label="Predicts as well as Elo"
-          value={`${v.ourSU}%`}
-          sub={`straight-up, ${v.games.toLocaleString()} games out of sample — vs CFBD Elo ${v.eloSU}% and a ${v.homeSU}% home-team baseline`} />
-        <StatCard tone="good" label="Margin error (RMSE)"
-          value={`${v.ourRMSE}`}
-          sub={`points per game — right with CFBD Elo (${v.eloRMSE}). A competent, honest rating.`} />
-        <StatCard tone="flat" label="Against the closing spread"
-          value={`${a.atsPct}%`}
-          sub={`${a.bets.toLocaleString()} bets — below the ${a.breakeven}% a −110 bettor must clear. It does ${beatsMarket ? "" : "NOT "}beat the market.`} />
-      </div>
-
-      <div className="ncf-honest" role="note">
-        <span className="ncf-honest__tag">Why we show you this</span>
-        <p>
-          Most sites would bury that last number. We lead with it. Our CFB model reads games as well as the
-          best public systems — but we <b>tested it against the closing line and it doesn&apos;t beat the
-          number</b>, the same result we found for NFL game lines. So we publish it as <b>context you can
-          trust</b>, graded in the open — <b>not</b> as a pick. A rating that can&apos;t beat the market is
-          still a great way to understand one. Panels inform; they don&apos;t vote.
-        </p>
-      </div>
-
-      <section className="ncf-sec">
-        <h2 className="ncf-h">Power ratings — top 25 <span className="ncf-h__note">end of {M.season}, in points vs an average FBS team</span></h2>
-        <div className="ncf-tbl">
-          <div className="ncf-row ncf-row--head">
-            <span>#</span><span>Team</span><span>Conf</span><span>Rating</span>
-          </div>
-          {M.top.map((t: NcaafTeam) => (
-            <div className="ncf-row" key={t.team}>
-              <span className="ncf-row__rk">{t.rank}</span>
-              <span className="ncf-row__tm">{t.team}</span>
-              <span className="ncf-row__cf">{t.conf}</span>
-              <span className="ncf-row__rt">{t.rating > 0 ? "+" : ""}{t.rating}</span>
-            </div>
-          ))}
-        </div>
-        <p className="ncf-note">
-          Read it as a spread: a team rated +{Math.abs(M.top[0].rating)} over one rated +0 is favored by about
-          that many points on a neutral field, plus <b>{M.hfa} points</b> of home advantage for the host.
+      {/* College player props — the same layer we're building for the NFL, arriving with data. */}
+      <section className="soonpanel">
+        <span className="soonpanel__tag">Arriving with the season</span>
+        <h2 className="soonpanel__h">College player props</h2>
+        <p className="soonpanel__p">
+          The same player-level layer we&apos;re building for the NFL — projected <b>rushing and receiving yards,
+          receptions, and touches</b> for college players. It needs live in-season usage and a prop feed to
+          project honestly, so it turns on as the season&apos;s data flows. Until then, see{" "}
+          <a href="/ncaaf/props">Player Props</a>.
         </p>
       </section>
 
