@@ -12,6 +12,7 @@ import { fetchModelWeek, type ModelPrediction } from "./model";
 import { MODEL_TOTALS } from "./modelTotals";
 import { weekTailgate } from "./tailgate";
 import { weekProps } from "./props";
+import { isSeasonOut } from "./irList";
 
 export interface CardRow {
   eventId: string;
@@ -207,7 +208,11 @@ export async function fetchHome(season = 2026): Promise<HomeData> {
   let players: PlayerPick[] = [];
   try {
     const tg = await weekTailgate(week, season);
-    const top = tg.buzz.sort((a, z) => z.heat - a.heat).slice(0, 3);
+    // Drop players out for the season (IR) — they trend when hurt but read as false "unders".
+    const top = tg.buzz
+      .filter((b) => !isSeasonOut(b.player))
+      .sort((a, z) => z.heat - a.heat)
+      .slice(0, 6);
 
     let quotes: import("./props").Quote[] = [];
     try {

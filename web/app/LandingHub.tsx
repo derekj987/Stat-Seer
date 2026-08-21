@@ -6,6 +6,9 @@ import type { CardRow, UpsetRow, PlayerPick } from "@/lib/home";
 import type { NcaafCardGame, NcaafUpset } from "./ncaaf/model-data";
 import { NCAAF_MODEL } from "./ncaaf/model-data";
 import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
+import { PLAYER_PROJECTIONS } from "@/lib/playerProjections";
+
+const PROP_LABEL: Record<string, string> = { rush_yds: "Rush Yds", rec_yds: "Rec Yds", receptions: "Receptions", pass_yds: "Pass Yds" };
 
 const cxKickFmt = new Intl.DateTimeFormat("en-US", {
   timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
@@ -65,7 +68,7 @@ function NcaafConsiderations() {
           </article>
         ))}
       </div>
-      <p className="lp-cardfoot"><a className="btn btn--primary" href="/ncaaf/considerations">For the full context, click here →</a></p>
+      <p className="lp-cardfoot"><a className="btn btn--primary" href="/ncaaf/considerations">For the full slate, click here →</a></p>
     </>
   );
 }
@@ -235,27 +238,51 @@ function FanAnalysisNote() {
   );
 }
 
-// Player Model snapshot — same shape as the game Model Card (a read + "Our Model Suggests"),
-// but for player props. Projection output isn't wired to the web yet, so it previews the
-// columns and points to the full Player Model rather than inventing numbers.
+// Player Model snapshot — a few of our line-blind prop reads with "Our Model Suggests"
+// (the prior-season hit rate over the posted line). NFL only; NCAAF has no projections yet.
 function PlayerSnapshot({ base }: { base: Sport }) {
   const href = base === "ncaaf" ? "/ncaaf/model/players" : "/model/players";
+  const rows = base === "nfl"
+    ? [...PLAYER_PROJECTIONS]
+        .filter((r) => r.pG > 0)
+        .sort((a, b) => Math.abs(b.pOver / b.pG - 0.5) - Math.abs(a.pOver / a.pG - 0.5))
+        .slice(0, 6)
+    : [];
+  if (!rows.length) {
+    return (
+      <>
+        <div className="hb-formwrap">
+          <table className="hb-form">
+            <thead><tr><th className="hb-l">Player</th><th>Team</th><th>Prop</th><th>Our Model Suggests</th></tr></thead>
+            <tbody><tr className="hb-off"><td className="hb-l" colSpan={4}>Projections publish here as the season&apos;s usage is captured.</td></tr></tbody>
+          </table>
+        </div>
+        <p className="hb-empty">See the <a href={href}>Player Model →</a></p>
+      </>
+    );
+  }
   return (
     <>
       <div className="hb-formwrap">
         <table className="hb-form">
           <thead><tr><th className="hb-l">Player</th><th>Team</th><th>Prop</th><th>Our Model Suggests</th></tr></thead>
           <tbody>
-            <tr className="hb-off"><td className="hb-l" colSpan={4}>
-              Projections publish here as the season&apos;s usage is captured.
-            </td></tr>
+            {rows.map((r) => {
+              const pct = Math.round((100 * r.pOver) / r.pG);
+              const over = pct >= 50;
+              return (
+                <tr key={`${r.player}-${r.market}`}>
+                  <td className="hb-l"><a className="hb-plrlink" href={href}>{r.player}</a></td>
+                  <td className="hb-num">{r.team}</td>
+                  <td>{PROP_LABEL[r.market] ?? r.market} {r.book}</td>
+                  <td className="hb-suggest"><span className="hb-sugwrap"><span className="hb-sug"><span className="hb-sug__t">{over ? "Over" : "Under"} {r.book} · {pct}%</span></span></span></td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
-      <p className="hb-empty">
-        The projection pipeline is <b>built and validated</b> (availability AUC ≈ 0.86); weekly numbers
-        wire in with live usage. See the <a href={href}>Player Model →</a>
-      </p>
+      <p className="lp-cardfoot"><a href={href}>See the full Player Model →</a></p>
     </>
   );
 }
