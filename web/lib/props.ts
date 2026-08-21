@@ -106,6 +106,27 @@ async function pgAll(query: string): Promise<PropRow[]> {
   return out;
 }
 
+// Is quote `a` a better bet for the member than `b`? (Same player + side.) For Over, the
+// lower line is easier; for Under, the higher line; ties (or no line, e.g. ATTD) break on
+// the better price. Mirrors the game-board "best number, then best price" logic.
+function isBetter(a: Quote, b: Quote): boolean {
+  if (a.line !== null && b.line !== null && a.line !== b.line) {
+    if (a.side === "Over") return a.line < b.line;
+    if (a.side === "Under") return a.line > b.line;
+  }
+  return a.price > b.price;
+}
+// Collapse every book/line for a player+side down to the single best selection.
+function collapseBest(quotes: Quote[]): Quote[] {
+  const best = new Map<string, Quote>();
+  for (const q of quotes) {
+    const k = `${q.player}|${q.side}`;
+    const prev = best.get(k);
+    if (!prev || isBetter(q, prev)) best.set(k, q);
+  }
+  return [...best.values()].sort((a, b) => a.player.localeCompare(b.player) || a.side.localeCompare(b.side));
+}
+
 export async function weekProps(week: number, season = 2026): Promise<PropGame[]> {
   const rows = await pgAll(
     `?season=eq.${season}&week=eq.${week}&event_id=neq.test` + // exclude the dev test row
@@ -164,8 +185,8 @@ export async function weekProps(week: number, season = 2026): Promise<PropGame[]
     g.markets = [...mm.entries()]
       .map(([market, quotes]) => ({
         market, label: marketLabel(market),
-        // chalk first: lowest (most negative) best-price = most likely
-        quotes: quotes.sort((a, b) => a.price - b.price || a.player.localeCompare(b.player)),
+        // one row per player+side — the single best line/book across all books
+        quotes: collapseBest(quotes),
       }))
       .sort((a, b) => a.label.localeCompare(b.label));
     out.push(g);

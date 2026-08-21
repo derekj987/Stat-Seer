@@ -763,26 +763,26 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 }
 
 /* --- player props --- */
-.propstack{display:flex;flex-direction:column;gap:10px;max-width:680px}
-.propgame{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.propstack{display:flex;flex-direction:column;gap:8px;max-width:460px}
+.propgame{background:var(--surface);border:1px solid var(--line);border-radius:11px;overflow:hidden}
 .propgame__head{list-style:none;cursor:pointer;display:flex;align-items:baseline;
-  gap:10px;flex-wrap:wrap;padding:14px 18px}
+  gap:10px;flex-wrap:wrap;padding:10px 14px}
 .propgame__head::-webkit-details-marker{display:none}
 .propgame__head:hover{background:var(--surface-2)}
 .propgame__meta{margin-left:auto;color:var(--muted);font-size:12px;
   display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .propgame__chev{display:inline-block;transition:transform .15s;font-size:10px}
 .propgame[open] .propgame__chev{transform:rotate(90deg)}
-.propgame__body{padding:2px 18px 16px;border-top:1px solid var(--line)}
+.propgame__body{padding:2px 12px 12px;border-top:1px solid var(--line)}
 .propmkt{margin-top:10px}
 .propmkt+.propmkt{border-top:1px solid var(--surface-2);padding-top:10px}
 .propmkt__label{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;
   color:var(--muted);font-weight:700;margin-bottom:6px}
 .propq__list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
-.propq{display:grid;grid-template-columns:1fr auto auto auto auto;align-items:baseline;
-  gap:10px;font-size:12.5px;padding:4px 7px;width:100%;text-align:left;
-  border:1px solid transparent;border-radius:7px;background:none;cursor:pointer;
-  color:inherit;font:inherit}
+/* left-packed columns (no middle dead space): player · side · price · book · heart */
+.propq{display:grid;grid-template-columns:138px 54px 50px minmax(56px,max-content) 14px;
+  justify-content:start;align-items:baseline;gap:10px;font-size:12.5px;padding:4px 7px;width:100%;text-align:left;
+  border:1px solid transparent;border-radius:7px;background:none;cursor:pointer;color:inherit;font:inherit}
 .propq:hover{background:var(--surface-2)}
 .propq.saved{background:var(--save-soft);
   box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--save) 45%,transparent)}
