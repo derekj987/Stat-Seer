@@ -22,8 +22,10 @@ function Flow({ sport, label }: { sport: Sport; label: string }) {
     <div className="lpf__steps">
       {STEPS.map((s) => (
         <a key={s.key} href={s.href[sport]} className={`lpf__step lpf__step--${s.key}`}>
-          <span className="lpf__n">{s.n}</span>
-          <span className="lpf__title">{s.title}</span>
+          <span className="lpf__toprow">
+            <span className="lpf__title">{s.title}</span>
+            <span className="lpf__n">{s.n}</span>
+          </span>
           <span className="lpf__lead">{s.lead}</span>
           <span className="lpf__go">Open {label} →</span>
         </a>
