@@ -96,8 +96,6 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
       </header>
 
       <FlowSteps active="context" />
-      <ContextSubnav active="special" />
-      <WeekNav min={min} max={max} current={week} />
 
       <section className="explainer explainer--wide">
         <p>
@@ -106,6 +104,9 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
           they are <b>not</b> an adjusted line. (How we read each factor is in the reference below.)
         </p>
       </section>
+
+      <ContextSubnav active="special" />
+      <WeekNav min={min} max={max} current={week} />
 
       {games.length === 0 ? (
         <p className="foot">No games captured for Week {week} yet.</p>
