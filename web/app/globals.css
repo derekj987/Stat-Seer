@@ -1287,6 +1287,10 @@ details.statsdrop .stats{margin:12px 0 0}
 .soonpanel__h{font-size:18px;margin:0 0 6px;color:var(--ink)}
 .soonpanel__p{font-size:13.5px;line-height:1.6;color:var(--muted);margin:0;max-width:70ch}
 .soonpanel__p b{color:var(--ink)}
+.soonpanel--link{display:block;text-decoration:none;cursor:pointer;transition:border-color .15s,background .15s}
+.soonpanel--link:hover{border-color:var(--accent);border-style:solid;background:var(--accent-soft)}
+.soonpanel__cta{margin:0;color:var(--accent);font-size:17px}
+.soonpanel--link:hover .soonpanel__cta{filter:brightness(1.05)}
 
 /* --- Fan Analysis: teams as dropdowns, colored + bigger headers --- */
 details.tgteam{margin-bottom:12px}
