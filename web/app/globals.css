@@ -373,6 +373,12 @@ a.sportstrip__i:hover{color:var(--ink)}
 .cxrow--wind .cxrow__v{color:var(--spot-ink);font-weight:600}
 .cxroof{color:var(--muted)}
 .cxref__h{font-size:14px;font-weight:800;margin:16px 0 6px;color:var(--ink)}
+/* homepage "special considerations" snapshot (3 cards) */
+.cxgrid--snap{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-top:0}
+.cxcard--stat{display:flex;flex-direction:column;gap:2px}
+.cxcard__statv{font-size:22px;font-weight:800;color:var(--accent);line-height:1.1}
+.cxcard__statk{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.cxcard__statnote{margin:8px 0 0;font-size:12px;color:var(--muted);line-height:1.45}
 @media (max-width:640px){
   .wxrow{grid-template-columns:1fr;gap:2px;padding:8px 10px}
   .wxrow--head{display:none}

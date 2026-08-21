@@ -4,6 +4,71 @@
 // server-side and CSS shows the selected one. ?sport=ncaaf sets the initial pick.
 import type { CardRow, UpsetRow, PlayerPick } from "@/lib/home";
 import type { NcaafCardGame, NcaafUpset } from "./ncaaf/model-data";
+import { NCAAF_MODEL } from "./ncaaf/model-data";
+import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
+
+const cxKickFmt = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+});
+const cxKick = (iso: string) => cxKickFmt.format(new Date(iso)) + " ET";
+const cxSite = (w: GameWeather) => `${w.venue}${w.city ? ` · ${w.city}, ${w.state}` : ""}`;
+const cxRoof = (r: string) => r === "dome" ? "Dome" : r === "retractable" ? "Retractable roof" : "Outdoor";
+function cxWeather(w: GameWeather): string {
+  if (w.indoor) return "Indoor — weather is a non-factor";
+  if (w.status === "ok") return `${w.windMph} mph wind · ${w.tempF}°${w.conditions ? ` · ${w.conditions}` : ""}`;
+  return "Forecast arrives ~2 weeks out";
+}
+
+/** NFL: 3 per-game consideration cards + a button to the full slate. */
+function NflConsiderations() {
+  const cards = GAME_WEATHER.slice(0, 3);
+  if (!cards.length) return <p className="hb-empty">Considerations load with the week&apos;s board — see <a href="/considerations">Special Considerations</a>.</p>;
+  return (
+    <>
+      <div className="cxgrid cxgrid--snap">
+        {cards.map((w) => (
+          <article className={`cxcard${w.windFlag ? " cxcard--wind" : ""}`} key={w.eventId}>
+            <header className="cxcard__head">
+              <span className="matchup">{w.away}<span className="at">@</span>{w.home}</span>
+              <time className="kick">{cxKick(w.commence)}</time>
+            </header>
+            <dl className="cxcard__rows">
+              <div className="cxrow"><dt className="cxrow__k">Site</dt><dd className="cxrow__v">{cxSite(w)}<span className="cxroof"> · {cxRoof(w.roof)}</span></dd></div>
+              <div className="cxrow"><dt className="cxrow__k">Weather</dt><dd className="cxrow__v">{w.windFlag && <b className="wxflag">⚑&nbsp;WIND</b>} {cxWeather(w)}</dd></div>
+              <div className="cxrow"><dt className="cxrow__k">Referee</dt><dd className="cxrow__v"><span className="muted">Crew tagged game week</span></dd></div>
+            </dl>
+          </article>
+        ))}
+      </div>
+      <p className="lp-cardfoot"><a className="btn btn--primary" href="/considerations">For the full slate, click here →</a></p>
+    </>
+  );
+}
+
+/** NCAAF: the durable context (home field, league strength) as 3 cards + a button. */
+function NcaafConsiderations() {
+  const cx = NCAAF_MODEL.context;
+  const top = cx.conferences[0];
+  const items = [
+    { k: "Home field", v: `+${cx.hfa}`, note: "points, dropped to zero at neutral sites (bowls, kickoff classics)" },
+    { k: "Strongest league", v: top.conf, note: `top conference by our rating (avg +${top.avgRating} per team)` },
+    { k: "Game-week items", v: "Arriving", note: "weather, injuries & specific matchups fill in as the season runs" },
+  ];
+  return (
+    <>
+      <div className="cxgrid cxgrid--snap">
+        {items.map((it) => (
+          <article className="cxcard cxcard--stat" key={it.k}>
+            <span className="cxcard__statv">{it.v}</span>
+            <span className="cxcard__statk">{it.k}</span>
+            <p className="cxcard__statnote">{it.note}</p>
+          </article>
+        ))}
+      </div>
+      <p className="lp-cardfoot"><a className="btn btn--primary" href="/ncaaf/considerations">For the full context, click here →</a></p>
+    </>
+  );
+}
 
 type Sport = "nfl" | "ncaaf";
 type NflData = { week: number; card: CardRow[]; upsets: UpsetRow[]; players: PlayerPick[] };
@@ -228,6 +293,9 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
           <FanAnalysisNote />
           <PlayersTable players={nfl.players} />
         </Panel>
+        <Panel title="Check out our special considerations" count={`${GAME_WEATHER.length || 3} games`} hint="site, weather & referee context per game">
+          <NflConsiderations />
+        </Panel>
         <Panel title="Potential Upsets of the Week — NFL" count={nfl.upsets.length} hint="the market has them losing — our model says they win">
           {nfl.upsets.length === 0 ? <p className="hb-empty">No upset alerts this week — our model and the market agree on every game&apos;s side.</p> : (
             <UpsetCards>{nfl.upsets.map((u) => (
@@ -255,6 +323,9 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
         <Panel title="Check out our fan analysis." count="—" hint="fan-sourced players, hype-rated">
           <FanAnalysisNote />
           <p className="hb-empty">College player reads land here once the CFB fan scan is wired — the same read we run for the NFL on <a href="/ncaaf/tailgate">Fan Analysis</a>.</p>
+        </Panel>
+        <Panel title="Check out our special considerations" count="context" hint="home field, conference strength & more">
+          <NcaafConsiderations />
         </Panel>
         <Panel title="Potential Upsets of the Week — NCAAF" count={ncaaf.upsets.length} hint="the market has them losing — our model says they win">
           {ncaaf.upsets.length === 0 ? <p className="hb-empty">No upset alerts this week — our rating agrees with the market&apos;s favorite on the board.</p> : (
