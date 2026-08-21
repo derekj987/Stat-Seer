@@ -1554,9 +1554,13 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .hb-form th:nth-child(n),.hb-form td:nth-child(n){width:auto}
   .hb-form th,.hb-form td{font-size:11px}
   .hb-form td{padding-top:8px;padding-bottom:8px}
-  .hb-form td+td,.hb-form th+th{padding-left:9px}
-  .hb-game{font-size:11.5px}
-  .hb-at{margin:0 4px}
+  .hb-form td+td,.hb-form th+th{padding-left:10px}
+  /* stack the teams (away over home) so the Game column stays narrow and the rest of the
+     columns — including Our Model Suggests — fit without horizontal scrolling off-screen */
+  .hb-game{font-size:12px;display:inline-flex;flex-direction:column;align-items:flex-start;
+    line-height:1.16;border-bottom:0;padding-bottom:0}
+  .hb-at{margin:0;font-size:8px;letter-spacing:.04em;line-height:1.1;text-transform:lowercase}
+  .hb-l{vertical-align:top}
   /* stack the two suggested picks so the column stays narrow on a phone */
   .hb-sugwrap{flex-direction:column;align-items:flex-start;gap:5px}
   .hb-sug__t{font-size:11px}
