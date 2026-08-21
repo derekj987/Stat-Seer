@@ -43,6 +43,9 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
 
       <LandingHub initialSport={initialSport} nfl={nfl} ncaaf={ncaaf} />
 
+      <BetslipPromo />
+      <HomePromo />
+
       <section className="lp-tagline">
         <p className="lp-hero__tag">
           One model reads every game <b>line-blind</b>, then shows you exactly where it disagrees with the
@@ -53,9 +56,6 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
           <div className="lp-stat lp-stat--wide"><span className="lp-stat__n">Line-blind</span><span className="lp-stat__l">every read, before the line</span></div>
         </div>
       </section>
-
-      <BetslipPromo />
-      <HomePromo />
 
       <section className="hb-creed">
         <div className="hb-creed__h">Bet smarter. <b>Win more often.</b></div>
