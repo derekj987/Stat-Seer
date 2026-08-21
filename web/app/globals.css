@@ -350,8 +350,8 @@ a.sportstrip__i:hover{color:var(--ink)}
 .envcard__v{font-family:var(--font-mono);font-size:20px;font-weight:700}
 .envcard.hi .envcard__v{color:var(--accent)}
 .envcard.lo .envcard__v{color:var(--key)}
-.imptable{display:flex;flex-direction:column;gap:4px;overflow-x:auto;max-width:600px}
-.improw{display:grid;grid-template-columns:minmax(120px,1fr) 72px 88px 56px 64px;gap:10px;
+.imptable{display:flex;flex-direction:column;gap:8px;overflow-x:auto;max-width:500px}
+.improw{display:grid;grid-template-columns:150px 72px 88px 56px 64px;gap:10px;
   align-items:center;padding:7px 12px;background:var(--surface);border:1px solid var(--line);
   border-radius:8px;font-size:13px}
 /* +1px inline padding vs .improw so the header tracks line up with the bordered
@@ -361,6 +361,8 @@ a.sportstrip__i:hover{color:var(--ink)}
   line-height:1.15;align-items:end}
 .improw--head span:not(:first-child){text-align:left}
 .improw__g{font-weight:600;display:flex;align-items:center;gap:6px}
+/* NEUTRAL tag sits right after the teams, not pushed to the column edge */
+.improw__g .badge{margin-left:0;font-size:8.5px;padding:2px 7px}
 .improw__sp{font-family:var(--font-mono);text-align:left}
 .improw__mod{font-family:var(--font-mono);text-align:left;color:var(--offc-ink);font-weight:600}
 .improw__modh,.modh{color:var(--offc-ink)}
@@ -1819,13 +1821,19 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .lp-sections{margin-top:6px}
 
 /* ================= Feedback mailbox (global) ================= */
-/* Floating envelope button, bottom-left so it clears the bet-slip bar (bottom-right). */
-.fbw__btn{position:fixed;left:16px;bottom:16px;z-index:60;width:46px;height:46px;border-radius:50%;
-  border:2px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;display:flex;
-  align-items:center;justify-content:center;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.28)}
-.fbw__btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
-.fbw__btn svg{display:block}
+/* Floating "Message Us" pigeon launcher, bottom-left so it clears the bet-slip bar. */
+.fbw__launch{position:fixed;left:16px;bottom:16px;z-index:60;display:flex;flex-direction:column;
+  align-items:center;gap:5px;background:none;border:0;padding:0;cursor:pointer}
+.fbw__btn{position:relative;display:block;width:46px;height:46px;border-radius:50%;overflow:hidden;
+  box-shadow:0 4px 16px rgba(0,0,0,.3);transition:transform .12s ease,filter .12s ease}
+.fbw__launch:hover .fbw__btn{filter:brightness(1.05);transform:translateY(-1px)}
 .fbw__pigeon{border-radius:50%}
+.fbw__label{font-size:11px;font-weight:800;letter-spacing:.02em;color:var(--accent);line-height:1;
+  text-shadow:0 1px 2px color-mix(in srgb,var(--surface) 80%,transparent)}
+@media (max-width:640px){
+  .fbw__btn{width:60px;height:60px}
+  .fbw__label{font-size:12px}
+}
 .fbw__scrim{position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:75;display:flex;
   align-items:center;justify-content:center;padding:20px}
 .fbw__card{background:var(--surface);border:1px solid var(--line);border-radius:16px;max-width:440px;

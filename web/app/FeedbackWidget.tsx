@@ -54,13 +54,16 @@ export default function FeedbackWidget() {
   return (
     <>
       <button
-        className="fbw__btn"
+        className="fbw__launch"
         aria-label="Send feedback — have an idea, fix, or suggestion?"
         title="Have an idea, fix, or suggestion?"
         onClick={() => { setOpen(true); setStatus("idle"); }}
       >
-        <Image src="/pigeon.png" alt="" fill sizes="46px" aria-hidden="true"
-          className="fbw__pigeon" style={{ objectFit: "cover", objectPosition: "72% 40%" }} />
+        <span className="fbw__btn">
+          <Image src="/pigeon.png" alt="" fill sizes="64px" aria-hidden="true"
+            className="fbw__pigeon" style={{ objectFit: "cover", objectPosition: "72% 40%" }} />
+        </span>
+        <span className="fbw__label">Message Us</span>
       </button>
 
       {open && (
