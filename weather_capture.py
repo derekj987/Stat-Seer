@@ -29,42 +29,42 @@ try:
 except Exception:
     pass
 
-# team (nflverse/odds abbrev) -> (venue, lat, lon, roof)
+# team (nflverse/odds abbrev) -> (venue, city, state, lat, lon, roof)
 # roof: "outdoor" | "dome" (fixed indoor) | "retractable" (usually closed for weather)
 STADIUMS = {
-    "ARI": ("State Farm Stadium", 33.5277, -112.2626, "retractable"),
-    "ATL": ("Mercedes-Benz Stadium", 33.7554, -84.4009, "retractable"),
-    "BAL": ("M&T Bank Stadium", 39.2780, -76.6227, "outdoor"),
-    "BUF": ("Highmark Stadium", 42.7738, -78.7870, "outdoor"),
-    "CAR": ("Bank of America Stadium", 35.2258, -80.8528, "outdoor"),
-    "CHI": ("Soldier Field", 41.8623, -87.6167, "outdoor"),
-    "CIN": ("Paycor Stadium", 39.0955, -84.5161, "outdoor"),
-    "CLE": ("Huntington Bank Field", 41.5061, -81.6995, "outdoor"),
-    "DAL": ("AT&T Stadium", 32.7473, -97.0945, "retractable"),
-    "DEN": ("Empower Field at Mile High", 39.7439, -105.0201, "outdoor"),
-    "DET": ("Ford Field", 42.3400, -83.0456, "dome"),
-    "GB": ("Lambeau Field", 44.5013, -88.0622, "outdoor"),
-    "HOU": ("NRG Stadium", 29.6847, -95.4107, "retractable"),
-    "IND": ("Lucas Oil Stadium", 39.7601, -86.1639, "retractable"),
-    "JAX": ("EverBank Stadium", 30.3239, -81.6373, "outdoor"),
-    "KC": ("Arrowhead Stadium", 39.0489, -94.4839, "outdoor"),
-    "LA": ("SoFi Stadium", 33.9535, -118.3392, "dome"),        # fixed roof, climate-shielded
-    "LAC": ("SoFi Stadium", 33.9535, -118.3392, "dome"),
-    "LAR": ("SoFi Stadium", 33.9535, -118.3392, "dome"),
-    "LV": ("Allegiant Stadium", 36.0909, -115.1833, "dome"),
-    "MIA": ("Hard Rock Stadium", 25.9580, -80.2389, "outdoor"),
-    "MIN": ("U.S. Bank Stadium", 44.9737, -93.2578, "dome"),
-    "NE": ("Gillette Stadium", 42.0909, -71.2643, "outdoor"),
-    "NO": ("Caesars Superdome", 29.9511, -90.0812, "dome"),
-    "NYG": ("MetLife Stadium", 40.8135, -74.0745, "outdoor"),
-    "NYJ": ("MetLife Stadium", 40.8135, -74.0745, "outdoor"),
-    "PHI": ("Lincoln Financial Field", 39.9008, -75.1675, "outdoor"),
-    "PIT": ("Acrisure Stadium", 40.4468, -80.0158, "outdoor"),
-    "SEA": ("Lumen Field", 47.5952, -122.3316, "outdoor"),
-    "SF": ("Levi's Stadium", 37.4030, -121.9700, "outdoor"),
-    "TB": ("Raymond James Stadium", 27.9759, -82.5033, "outdoor"),
-    "TEN": ("Nissan Stadium", 36.1665, -86.7713, "outdoor"),
-    "WAS": ("Northwest Stadium", 38.9077, -76.8645, "outdoor"),
+    "ARI": ("State Farm Stadium", "Glendale", "AZ", 33.5277, -112.2626, "retractable"),
+    "ATL": ("Mercedes-Benz Stadium", "Atlanta", "GA", 33.7554, -84.4009, "retractable"),
+    "BAL": ("M&T Bank Stadium", "Baltimore", "MD", 39.2780, -76.6227, "outdoor"),
+    "BUF": ("Highmark Stadium", "Orchard Park", "NY", 42.7738, -78.7870, "outdoor"),
+    "CAR": ("Bank of America Stadium", "Charlotte", "NC", 35.2258, -80.8528, "outdoor"),
+    "CHI": ("Soldier Field", "Chicago", "IL", 41.8623, -87.6167, "outdoor"),
+    "CIN": ("Paycor Stadium", "Cincinnati", "OH", 39.0955, -84.5161, "outdoor"),
+    "CLE": ("Huntington Bank Field", "Cleveland", "OH", 41.5061, -81.6995, "outdoor"),
+    "DAL": ("AT&T Stadium", "Arlington", "TX", 32.7473, -97.0945, "retractable"),
+    "DEN": ("Empower Field at Mile High", "Denver", "CO", 39.7439, -105.0201, "outdoor"),
+    "DET": ("Ford Field", "Detroit", "MI", 42.3400, -83.0456, "dome"),
+    "GB": ("Lambeau Field", "Green Bay", "WI", 44.5013, -88.0622, "outdoor"),
+    "HOU": ("NRG Stadium", "Houston", "TX", 29.6847, -95.4107, "retractable"),
+    "IND": ("Lucas Oil Stadium", "Indianapolis", "IN", 39.7601, -86.1639, "retractable"),
+    "JAX": ("EverBank Stadium", "Jacksonville", "FL", 30.3239, -81.6373, "outdoor"),
+    "KC": ("Arrowhead Stadium", "Kansas City", "MO", 39.0489, -94.4839, "outdoor"),
+    "LA": ("SoFi Stadium", "Inglewood", "CA", 33.9535, -118.3392, "dome"),   # fixed roof
+    "LAC": ("SoFi Stadium", "Inglewood", "CA", 33.9535, -118.3392, "dome"),
+    "LAR": ("SoFi Stadium", "Inglewood", "CA", 33.9535, -118.3392, "dome"),
+    "LV": ("Allegiant Stadium", "Las Vegas", "NV", 36.0909, -115.1833, "dome"),
+    "MIA": ("Hard Rock Stadium", "Miami Gardens", "FL", 25.9580, -80.2389, "outdoor"),
+    "MIN": ("U.S. Bank Stadium", "Minneapolis", "MN", 44.9737, -93.2578, "dome"),
+    "NE": ("Gillette Stadium", "Foxborough", "MA", 42.0909, -71.2643, "outdoor"),
+    "NO": ("Caesars Superdome", "New Orleans", "LA", 29.9511, -90.0812, "dome"),
+    "NYG": ("MetLife Stadium", "East Rutherford", "NJ", 40.8135, -74.0745, "outdoor"),
+    "NYJ": ("MetLife Stadium", "East Rutherford", "NJ", 40.8135, -74.0745, "outdoor"),
+    "PHI": ("Lincoln Financial Field", "Philadelphia", "PA", 39.9008, -75.1675, "outdoor"),
+    "PIT": ("Acrisure Stadium", "Pittsburgh", "PA", 40.4468, -80.0158, "outdoor"),
+    "SEA": ("Lumen Field", "Seattle", "WA", 47.5952, -122.3316, "outdoor"),
+    "SF": ("Levi's Stadium", "Santa Clara", "CA", 37.4030, -121.9700, "outdoor"),
+    "TB": ("Raymond James Stadium", "Tampa", "FL", 27.9759, -82.5033, "outdoor"),
+    "TEN": ("Nissan Stadium", "Nashville", "TN", 36.1665, -86.7713, "outdoor"),
+    "WAS": ("Northwest Stadium", "Landover", "MD", 38.9077, -76.8645, "outdoor"),
 }
 
 # WMO weather codes -> short label (Open-Meteo `weathercode`)
@@ -175,14 +175,14 @@ def main():
     out = []
     for gm in games:
         home = gm["home_team"]
-        venue, lat, lon, roof = STADIUMS.get(home, (home, None, None, "outdoor"))
+        venue, city, state, lat, lon, roof = STADIUMS.get(home, (home, None, None, None, None, "outdoor"))
         commence = gm["commence_time"]
         kick = datetime.fromisoformat(commence.replace("Z", "+00:00"))
         indoor = roof in ("dome", "retractable")
         row = {
             "eventId": gm["event_id"], "game": f'{gm["away_team"]} @ {home}',
             "home": home, "away": gm["away_team"], "commence": commence,
-            "venue": venue, "roof": roof, "indoor": indoor,
+            "venue": venue, "city": city, "state": state, "roof": roof, "indoor": indoor,
             "status": "indoor" if indoor else "pending",
             "tempF": None, "windMph": None, "gustMph": None, "precipPct": None,
             "conditions": None, "windFlag": False,
@@ -210,7 +210,8 @@ def main():
     ts = "// AUTO-GENERATED by weather_capture.py — do not edit by hand.\n"
     ts += "// Game-site weather (Open-Meteo). CONTEXT, not a pick. Forecasts land ~16 days out.\n"
     ts += "export interface GameWeather { eventId: string; game: string; home: string; away: string;\n"
-    ts += "  commence: string; venue: string; roof: 'outdoor'|'dome'|'retractable'; indoor: boolean;\n"
+    ts += "  commence: string; venue: string; city: string|null; state: string|null;\n"
+    ts += "  roof: 'outdoor'|'dome'|'retractable'; indoor: boolean;\n"
     ts += "  status: 'ok'|'pending'|'indoor'; tempF: number|null; windMph: number|null;\n"
     ts += "  gustMph: number|null; precipPct: number|null; conditions: string|null; windFlag: boolean }\n"
     ts += f"export const WEATHER_SEASON = {args.season};\nexport const WEATHER_WEEK = {week};\n"

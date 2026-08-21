@@ -73,8 +73,8 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
       </header>
 
       <FlowSteps active="value" />
-      <ShopSubnav active="props" />
       <ValueFinderNote />
+      <ShopSubnav active="props" />
 
       {isPre ? (
         <div className="tgwall" role="note">

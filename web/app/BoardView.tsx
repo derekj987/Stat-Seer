@@ -8,11 +8,14 @@ import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
 
 const WX_BY_EVENT = new Map(GAME_WEATHER.map((w) => [w.eventId, w]));
 
+function wxPlace(wx: GameWeather): string {
+  return `${wx.venue}${wx.city ? ` — ${wx.city}, ${wx.state}` : ""}`;
+}
 function WeatherChip({ wx }: { wx: GameWeather }) {
-  if (wx.indoor) return <span className="wxchip wxchip--indoor" title={wx.venue}>Indoor · roof</span>;
+  if (wx.indoor) return <span className="wxchip wxchip--indoor" title={wxPlace(wx)}>Indoor · roof</span>;
   if (wx.status === "ok") {
     return (
-      <span className={`wxchip${wx.windFlag ? " wxchip--wind" : ""}`} title={`${wx.venue} — ${wx.conditions ?? ""}`}>
+      <span className={`wxchip${wx.windFlag ? " wxchip--wind" : ""}`} title={`${wxPlace(wx)}${wx.conditions ? ` · ${wx.conditions}` : ""}`}>
         {wx.windFlag && <b>⚑ </b>}{wx.windMph} mph · {wx.tempF}°{wx.conditions ? ` · ${wx.conditions}` : ""}
       </span>
     );
@@ -176,8 +179,8 @@ export default function BoardView({
         </header>
 
         <FlowSteps active="value" />
-        <ShopSubnav active="lines" />
         <ValueFinderNote />
+        <ShopSubnav active="lines" />
 
         <WeekNav min={min} max={max} current={week} />
 

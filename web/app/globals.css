@@ -260,9 +260,7 @@ body{background:var(--bg);color:var(--ink);
   box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .subnav__t:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 /* Value Finder tabs slide right to sit under the "Value Finder" flow step (rightmost). */
-.subnav--value{margin-left:auto}
-/* Context tabs sit under the middle "Context" flow step — centered + condensed to fit. */
-.subnav--context{margin-inline:auto}
+/* Value Finder + Context orange tabs are left-justified (like the flow above them). */
 .subnav--context .subnav__t{padding:6px 11px;font-size:12px}
 /* second-level season toggle (Regular / Preseason) — staggered in to the right under
    the area tabs, in darkish-yellow pills to set them apart from the amber area tabs. */

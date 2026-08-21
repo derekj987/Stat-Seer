@@ -5,12 +5,14 @@ import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
 import { GAME_WEATHER, WEATHER_WEEK, WEATHER_UPDATED, type GameWeather } from "@/lib/weatherData";
 import { Brand, FlowSteps, ContextSubnav } from "../Nav";
 
+const wxPlace = (w: GameWeather) => `${w.venue}${w.city ? ` — ${w.city}, ${w.state}` : ""}`;
+
 /** Plain-English weather read for a game — CONTEXT, never a pick. */
 function weatherRead(w: GameWeather): string {
-  if (w.indoor) return `${w.venue} is a ${w.roof === "dome" ? "dome/roofed stadium" : "retractable-roof stadium (usually closed for weather)"} — weather is a non-factor.`;
+  if (w.indoor) return `${wxPlace(w)}: a ${w.roof === "dome" ? "dome/roofed stadium" : "retractable-roof stadium (usually closed for weather)"} — weather is a non-factor.`;
   if (w.status !== "ok") return "";
   const parts = [`${w.tempF}°`, `wind ${w.windMph} mph${w.gustMph ? ` (gusts ${w.gustMph})` : ""}`, w.conditions].filter(Boolean);
-  let t = parts.join(", ") + ".";
+  let t = `${wxPlace(w)}: ` + parts.join(", ") + ".";
   if (w.precipPct != null && w.precipPct >= 40) t += ` ${w.precipPct}% chance of precip.`;
   if (w.windFlag) t += " Wind is at the 15+ mph level where the market tends to over-set the total — context, not a proven edge.";
   return t;
@@ -180,10 +182,16 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
         <details className="ctxsec ctxdrop wxsec" open>
           <summary className="ctxsec__h ctxsec__h--big">Game-site weather</summary>
           <p className="ctxsec__d">
-            Forecast conditions at each stadium. <b>Wind is the one measured signal</b> — the market
-            under-sets totals ~1.3 pts at 15+ mph — but it fails the vig bar and uses realized wind, so treat
-            it as <b>context, not a proven edge</b>. Domes and roofed stadiums are non-factors; outdoor
-            forecasts fill in about <b>two weeks</b> before kickoff.
+            Forecast conditions at each stadium&apos;s home city. <b>Wind is the one measured signal</b> — the
+            market under-sets totals ~1.3 pts at 15+ mph — but it fails the vig bar and uses realized wind, so
+            treat it as <b>context, not a proven edge</b>. Outdoor forecasts fill in about <b>two weeks</b>
+            before kickoff.
+          </p>
+          <p className="ctxsec__d">
+            <b>Domes are higher-scoring — and the market knows.</b> Indoor games average <b>47.4</b> points vs
+            <b> 44.2</b> outdoors (2006–25), but books already set dome totals ~2 pts higher, so indoor overs hit
+            just <b>51.8%</b> — <b>below the 52.4% you need to beat the vig</b>. Tested and priced: a scoring
+            environment to understand, not an edge to bet.
           </p>
           <div className="wxtable">
             <div className="wxrow wxrow--head">
@@ -198,7 +206,7 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
               return (
                 <div className={`wxrow ${read.cls}`} key={w.eventId}>
                   <span className="wxrow__g">{w.away}<span className="at">@</span>{w.home}</span>
-                  <span className="wxrow__v">{w.venue}</span>
+                  <span className="wxrow__v">{w.venue}{w.city ? ` · ${w.city}, ${w.state}` : ""}</span>
                   <span className="wxrow__read">{w.windFlag && <b className="wxflag">⚑&nbsp;WIND</b>} {read.txt}</span>
                 </div>
               );
