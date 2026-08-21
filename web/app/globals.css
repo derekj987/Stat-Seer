@@ -350,15 +350,15 @@ a.sportstrip__i:hover{color:var(--ink)}
 .envcard__v{font-family:var(--font-mono);font-size:20px;font-weight:700}
 .envcard.hi .envcard__v{color:var(--accent)}
 .envcard.lo .envcard__v{color:var(--key)}
-.imptable{display:flex;flex-direction:column;gap:8px;overflow-x:auto;max-width:500px}
-.improw{display:grid;grid-template-columns:150px 72px 88px 56px 64px;gap:10px;
+.imptable{display:flex;flex-direction:column;gap:8px;overflow-x:auto;max-width:640px}
+.improw{display:grid;grid-template-columns:160px 78px 104px 72px 92px;gap:20px;
   align-items:center;padding:7px 12px;background:var(--surface);border:1px solid var(--line);
   border-radius:8px;font-size:13px}
 /* +1px inline padding vs .improw so the header tracks line up with the bordered
    game rows (each .impgame adds a 1px border that shifts its grid inward). */
 .improw--head{background:none;border:0;color:var(--muted);font-size:11px;
   text-transform:uppercase;letter-spacing:.04em;font-weight:600;padding:2px 13px;
-  line-height:1.15;align-items:end}
+  line-height:1.15;align-items:end;white-space:nowrap}
 .improw--head span:not(:first-child){text-align:left}
 .improw__g{font-weight:600;display:flex;align-items:center;gap:6px}
 /* NEUTRAL tag sits right after the teams, not pushed to the column edge */
