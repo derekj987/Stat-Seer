@@ -1,4 +1,4 @@
-import { Brand, FlowSteps } from "../../Nav";
+import { Brand, FlowSteps, ModelSubnav } from "../../Nav";
 import { NCAAF_MODEL, type NcaafCardGame } from "../model-data";
 import { StatCard } from "../StatCard";
 
@@ -69,6 +69,7 @@ export default function Page() {
       </header>
 
       <FlowSteps active="analyze" base="ncaaf" />
+      <ModelSubnav active="game" base="ncaaf" />
 
       {/* The honest record — what it is, how well it does, and why we show it — folded away. */}
       <details className="ncf-method ncf-about">
@@ -145,7 +146,7 @@ export default function Page() {
       </details>
 
       {/* College player props — the same layer we're building for the NFL, arriving with data. */}
-      <section className="soonpanel">
+      <section className="soonpanel" id="player-model">
         <span className="soonpanel__tag">Arriving with the season</span>
         <h2 className="soonpanel__h">College player props</h2>
         <p className="soonpanel__p">

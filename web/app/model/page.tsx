@@ -3,7 +3,7 @@ import { fetchModelWeek, fetchCalibration, type ModelPrediction } from "@/lib/mo
 import { fetchHome, type CardRow } from "@/lib/home";
 import { MODEL_TOTALS } from "@/lib/modelTotals";
 import { weekRefs } from "@/lib/refAssignments";
-import { Brand, FlowSteps } from "../Nav";
+import { Brand, FlowSteps, ModelSubnav } from "../Nav";
 import AddToSlip from "../AddToSlip";
 import ModelClock from "../ModelClock";
 import NflModelCard from "../NflModelCard";
@@ -248,6 +248,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
       </header>
 
       <FlowSteps active="analyze" />
+      <ModelSubnav active="game" />
       <p className="sportnote">
         <b>NFL first.</b> We perfect one sport before adding the next — MLB, NBA, College Football and NHL
         will turn on here once each has its own line-blind model with a public track record.
@@ -271,7 +272,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
       {preds.length === 0 ? (
         <p className="foot">No reads published for Week {week} yet.</p>
       ) : (
-        <details className="gamesdrop">
+        <details className="gamesdrop" open>
           <summary className="gamesdrop__h">
             Week {week} Full Model
             <span className="gamesdrop__n">{preds.length} games</span>
@@ -295,7 +296,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
       )}
 
       {/* Week's numbers crunched — market spread/total beside our line-blind projection. */}
-      <details className="gamesdrop">
+      <details className="gamesdrop" open>
         <summary className="gamesdrop__h">
           Week {week} numbers crunched
           <span className="gamesdrop__n">{scored.length} games</span>
@@ -340,7 +341,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         )}
       </details>
 
-      <section className="soonpanel">
+      <section className="soonpanel" id="player-model">
         <span className="soonpanel__tag">Arriving Week 1</span>
         <h2 className="soonpanel__h">Player projections</h2>
         <p className="soonpanel__p">

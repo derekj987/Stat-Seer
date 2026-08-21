@@ -171,13 +171,29 @@ export function ContextSubnav({ active, base = "nfl" }: {
     ? { upset: "/ncaaf/context", special: "/ncaaf/considerations", fan: "/ncaaf/tailgate" }
     : { upset: "/context", special: "/considerations", fan: "/tailgate" };
   return (
-    <nav className="subnav" aria-label="Context view">
+    <nav className="subnav subnav--context" aria-label="Context view">
       <a href={h.special} className={active === "special" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "special" ? "page" : undefined}>Special Considerations</a>
       <a href={h.upset} className={active === "upset" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "upset" ? "page" : undefined}>Upset Watch</a>
       <a href={h.fan} className={active === "fan" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "fan" ? "page" : undefined}>Fan Analysis</a>
+    </nav>
+  );
+}
+
+/** Sub-tabs inside The Model (Game Model · Player Model). Sits under the leftmost
+ *  "The Model" flow step, so it left-aligns like the flow. */
+export function ModelSubnav({ active = "game", base = "nfl" }: {
+  active?: "game" | "player"; base?: "nfl" | "ncaaf";
+}) {
+  const home = base === "ncaaf" ? "/ncaaf/model" : "/model";
+  return (
+    <nav className="subnav subnav--model" aria-label="The Model view">
+      <a href={home} className={active === "game" ? "subnav__t active" : "subnav__t"}
+        aria-current={active === "game" ? "page" : undefined}>Game Model (spreads, O/U&apos;s)</a>
+      <a href={`${home}#player-model`} className={active === "player" ? "subnav__t active" : "subnav__t"}
+        aria-current={active === "player" ? "page" : undefined}>Player Model (props)</a>
     </nav>
   );
 }

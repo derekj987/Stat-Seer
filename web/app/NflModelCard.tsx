@@ -29,7 +29,7 @@ function CardRows({ rows }: { rows: CardRow[] }) {
   );
 }
 
-export default function NflModelCard({ rows, open = false }: { rows: CardRow[]; open?: boolean }) {
+export default function NflModelCard({ rows, open = true }: { rows: CardRow[]; open?: boolean }) {
   const lead = rows.slice(0, 6);
   const rest = rows.slice(6);
   return (
