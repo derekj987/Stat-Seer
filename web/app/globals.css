@@ -1921,3 +1921,8 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .ref-soon__tag{flex:0 0 auto;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
   color:var(--spot-ink);background:var(--spot-soft);border:1px solid color-mix(in srgb,var(--spot) 40%,var(--line));
   border-radius:999px;padding:2px 9px}
+
+/* Line Shopping page — section headings for Game lines / Player props */
+.ls-h{font-size:18px;margin:24px 0 10px;color:var(--ink);display:flex;align-items:center;gap:9px}
+.ls-h--props{margin-top:30px;border-top:1px solid var(--line);padding-top:20px}
+.ls-h__n{font-size:12px;color:var(--muted);font-weight:600;border:1px solid var(--line);border-radius:999px;padding:1px 9px}

@@ -4,6 +4,8 @@ import { useCallback } from "react";
 import type { Game } from "@/lib/board";
 import { ShopSubnav, Brand, SlipCallout, FlowSteps, ValueFinderNote } from "./Nav";
 import { useSlip } from "@/lib/slip";
+import type { PropGame } from "@/lib/props";
+import PropsView from "./props/PropsView";
 
 // ---- formatting (client-side; Intl has full ICU) ----
 const kickFmt = new Intl.DateTimeFormat("en-US", {
@@ -135,8 +137,8 @@ function GameCard({
 }
 
 export default function BoardView({
-  board, min, max, week, season, snapshot,
-}: { board: Game[]; min: number; max: number; week: number; season: number; snapshot: string }) {
+  board, min, max, week, season, snapshot, propGames = [],
+}: { board: Game[]; min: number; max: number; week: number; season: number; snapshot: string; propGames?: PropGame[] }) {
   const { has, toggle: slipToggle } = useSlip();
   const toggle = useCallback((p: Pick) => slipToggle({
     id: p.id, kind: "line",
@@ -153,7 +155,7 @@ export default function BoardView({
     <>
       <main className="wrap">
         <header className="masthead">
-          <Brand sub={`Value Finder · Game Lines · best price across books`} />
+          <Brand sub={`Value Finder · Line Shopping`} />
           {snapshot && <div className="asof">lines as of<br /><b>{et(snapshot, snapFmt)}</b></div>}
         </header>
 
@@ -190,15 +192,38 @@ export default function BoardView({
 
             <SlipCallout kind="lines" />
 
+            <h2 className="ls-h">Game lines <span className="ls-h__n">{board.length}</span></h2>
             <section className="grid">
-              {board.map((g) => <GameCard key={g.eventId} g={g} has={has} onToggle={toggle} />)}
+              {board.slice(0, 6).map((g) => <GameCard key={g.eventId} g={g} has={has} onToggle={toggle} />)}
             </section>
+            {board.length > 6 && (
+              <details className="hb-more">
+                <summary className="hb-more__sum">
+                  <span className="hb-more__chev" aria-hidden="true">▸</span>
+                  See more ({board.length - 6} more games)
+                </summary>
+                <section className="grid">
+                  {board.slice(6).map((g) => <GameCard key={g.eventId} g={g} has={has} onToggle={toggle} />)}
+                </section>
+              </details>
+            )}
+
+            <h2 className="ls-h ls-h--props">Player props <span className="ls-h__n">{propGames.length}</span></h2>
+            {propGames.length > 0 ? (
+              <PropsView games={propGames} embedded />
+            ) : (
+              <p className="foot">
+                No player props posted for Week {week} yet — books post most props closer to kickoff, so this
+                fills in on its own during game week. Every prop lands here with the best price across books and a
+                tap-to-slip <b>+</b>.
+              </p>
+            )}
 
             <footer className="foot">
               <p>
-                <b>No model. No pick.</b> This shows the <b>best available number across books</b> and where a
-                half-point sits on a <b>sweet spot</b> (a 3 or 7, worth the most) — the two places line shopping
-                actually pays. Prices move; this updates automatically as new odds are captured.
+                <b>No model. No pick.</b> Line shopping only — the <b>best available number across books</b> on
+                every game and player prop, plus where a half-point sits on a <b>sweet spot</b> (a 3 or 7).
+                Prices move; this updates automatically as new odds are captured.
               </p>
             </footer>
           </>

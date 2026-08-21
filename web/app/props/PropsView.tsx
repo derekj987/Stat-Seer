@@ -78,7 +78,7 @@ function PropGameCard({ g, open, has, toggle }: {
   );
 }
 
-export default function PropsView({ games }: { games: PropGame[] }) {
+export default function PropsView({ games, embedded }: { games: PropGame[]; embedded?: boolean }) {
   const { has, toggle: slipToggle } = useSlip();
   const toggle = useCallback((l: Leg) => slipToggle({
     id: l.id, kind: "prop",
@@ -92,27 +92,31 @@ export default function PropsView({ games }: { games: PropGame[] }) {
 
   return (
     <>
-      <details className="readbox">
-        <summary className="readbox__h">What am I seeing here?</summary>
-        <p>
-          Every player prop with the <b>best available price across all books</b>. Tap a prop to add it to your
-          slip — StatSeer routes each leg to its best book and finds the single best book for a <b>parlay</b>.
-          No model, no pick: props are where pricing edges most plausibly live, because books post hundreds of
-          them semi-independently.
-        </p>
-      </details>
-      <SlipCallout kind="props" />
+      {!embedded && (
+        <details className="readbox">
+          <summary className="readbox__h">What am I seeing here?</summary>
+          <p>
+            Every player prop with the <b>best available price across all books</b>. Tap a prop to add it to your
+            slip — StatSeer routes each leg to its best book and finds the single best book for a <b>parlay</b>.
+            No model, no pick: props are where pricing edges most plausibly live, because books post hundreds of
+            them semi-independently.
+          </p>
+        </details>
+      )}
+      {!embedded && <SlipCallout kind="props" />}
       <p className="hint">{games.length} games · {players} players · best price on each, shopped across books.</p>
       <section className="propstack">
         {games.map((g) => (
           <PropGameCard key={g.eventId} g={g} has={has} toggle={toggle} />
         ))}
       </section>
-      <footer className="foot">
-        <p><b>No model. No pick.</b> Just the best available price on each player prop across books — where props
-        edge most plausibly lives, since books price hundreds of them semi-independently. Projections (is the line
-        beatable?) come later. Prices move; updates as new odds are captured.</p>
-      </footer>
+      {!embedded && (
+        <footer className="foot">
+          <p><b>No model. No pick.</b> Just the best available price on each player prop across books — where props
+          edge most plausibly lives, since books price hundreds of them semi-independently. Projections (is the line
+          beatable?) come later. Prices move; updates as new odds are captured.</p>
+        </footer>
+      )}
     </>
   );
 }

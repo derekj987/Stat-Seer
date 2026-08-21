@@ -26,7 +26,7 @@ export default function Page() {
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={`Value Finder · College Football · Game Lines`} />
+        <Brand sub={`Value Finder · College Football · Line Shopping`} />
       </header>
 
       <FlowSteps active="value" base="ncaaf" />
