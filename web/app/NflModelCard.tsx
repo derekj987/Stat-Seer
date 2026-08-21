@@ -19,7 +19,7 @@ function CardRows({ rows }: { rows: CardRow[] }) {
             {r.spreadLean || r.totalLean ? (
               <span className="hb-sugwrap">
                 {r.spreadLean && <span className="hb-sug"><span className="hb-sug__t">{r.spreadLean.side} {r.spreadLean.num}</span></span>}
-                {r.totalLean && <span className="hb-sug"><span className="hb-sug__t">{r.totalLean.dir === "OVER" ? "Over" : "Under"} {r.totalLean.num}</span></span>}
+                {r.totalLean && <span className="hb-sug"><span className="hb-sug__t"><span className={`pmarrow pmarrow--${r.totalLean.dir === "OVER" ? "up" : "down"}`} aria-hidden="true">{r.totalLean.dir === "OVER" ? "▲" : "▼"}</span> {r.totalLean.dir === "OVER" ? "Over" : "Under"} {r.totalLean.num}</span></span>}
               </span>
             ) : <span className="hb-leannone">even</span>}
           </td>

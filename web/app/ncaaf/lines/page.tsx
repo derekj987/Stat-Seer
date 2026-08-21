@@ -69,7 +69,7 @@ export default function Page() {
                     <td className="hb-suggest">
                       <span className="hb-sugwrap">
                         <span className="hb-sug"><span className="hb-sug__t">{pickTxt(g)}</span></span>
-                        {tl && <span className="hb-sug"><span className="hb-sug__t">{tl.dir === "OVER" ? "Over" : "Under"} {tl.num}</span></span>}
+                        {tl && <span className="hb-sug"><span className="hb-sug__t"><span className={`pmarrow pmarrow--${tl.dir === "OVER" ? "up" : "down"}`} aria-hidden="true">{tl.dir === "OVER" ? "▲" : "▼"}</span> {tl.dir === "OVER" ? "Over" : "Under"} {tl.num}</span></span>}
                       </span>
                     </td>
                   </tr>

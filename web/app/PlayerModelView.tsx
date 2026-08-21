@@ -135,7 +135,10 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
                           <span className="pmcell pmcell--player">{r.player}</span>
                           <span className="pmcell pmcell--team">{r.team}</span>
                           <span className="pmcell pmcell--num">{r.book}{unit}</span>
-                          <span className="pmcell pmcell--num pmcell--proj">{r.proj}{unit}</span>
+                          <span className="pmcell pmcell--num pmcell--proj">
+                            {r.proj}{unit}{" "}
+                            <span className={`pmarrow ${r.proj >= r.book ? "pmarrow--up" : "pmarrow--down"}`} aria-hidden="true">{r.proj >= r.book ? "▲" : "▼"}</span>
+                          </span>
                           <span className={`pmcell pmcell--career ${cls(cpct)}`}>
                             {cpct === null ? "—" : <>{cpct}% <small className="pmcell__sub">{r.cOver}/{r.cG} gm</small></>}
                           </span>

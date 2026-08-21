@@ -132,7 +132,7 @@ function NflRows({ rows }: { rows: CardRow[] }) {
             {r.spreadLean || r.totalLean ? (
               <span className="hb-sugwrap">
                 {r.spreadLean && <span className="hb-sug"><span className="hb-sug__t">{r.spreadLean.side} {r.spreadLean.num}</span></span>}
-                {r.totalLean && <span className="hb-sug"><span className="hb-sug__t">{r.totalLean.dir === "OVER" ? "Over" : "Under"} {r.totalLean.num}</span></span>}
+                {r.totalLean && <span className="hb-sug"><span className="hb-sug__t"><span className={`pmarrow pmarrow--${r.totalLean.dir === "OVER" ? "up" : "down"}`} aria-hidden="true">{r.totalLean.dir === "OVER" ? "▲" : "▼"}</span> {r.totalLean.dir === "OVER" ? "Over" : "Under"} {r.totalLean.num}</span></span>}
               </span>
             ) : <span className="hb-leannone">even</span>}
           </td>
@@ -175,7 +175,7 @@ function NcaafRows({ games }: { games: readonly NcaafCardGame[] }) {
             <td className="hb-l"><span className="hb-game">{g.away}<span className="hb-at">at</span>{g.home}</span>{g.neutral ? <span className="ncf-site"> · N</span> : null}{g.off && <span className="hb-dia hb-dia--end">◆</span>}</td>
             <td className="hb-num">{ms ? `${ms.fav} ${ms.num}` : "—"}</td>
             <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
-            <td className="hb-suggest"><span className="hb-sugwrap"><span className="hb-sug"><span className="hb-sug__t">{pick}</span></span>{tl && <span className="hb-sug"><span className="hb-sug__t">{tl.dir === "OVER" ? "Over" : "Under"} {tl.num}</span></span>}</span></td>
+            <td className="hb-suggest"><span className="hb-sugwrap"><span className="hb-sug"><span className="hb-sug__t">{pick}</span></span>{tl && <span className="hb-sug"><span className="hb-sug__t"><span className={`pmarrow pmarrow--${tl.dir === "OVER" ? "up" : "down"}`} aria-hidden="true">{tl.dir === "OVER" ? "▲" : "▼"}</span> {tl.dir === "OVER" ? "Over" : "Under"} {tl.num}</span></span>}</span></td>
           </tr>
         );
       })}
@@ -245,8 +245,8 @@ function PlayerSnapshot({ base }: { base: Sport }) {
   const href = base === "ncaaf" ? "/ncaaf/model/players" : "/model/players";
   const rows = base === "nfl"
     ? [...PLAYER_PROJECTIONS]
-        .filter((r) => r.pG > 0)
-        .sort((a, b) => Math.abs(b.pOver / b.pG - 0.5) - Math.abs(a.pOver / a.pG - 0.5))
+        .filter((r) => r.book > 0)
+        .sort((a, b) => Math.abs(b.proj / b.book - 1) - Math.abs(a.proj / a.book - 1))
         .slice(0, 6)
     : [];
   if (!rows.length) {
@@ -269,14 +269,13 @@ function PlayerSnapshot({ base }: { base: Sport }) {
           <thead><tr><th className="hb-l">Player</th><th>Team</th><th>Prop</th><th>Our Model Suggests</th></tr></thead>
           <tbody>
             {rows.map((r) => {
-              const pct = Math.round((100 * r.pOver) / r.pG);
-              const over = pct >= 50;
+              const over = r.proj >= r.book;
               return (
                 <tr key={`${r.player}-${r.market}`}>
                   <td className="hb-l"><a className="hb-plrlink" href={href}>{r.player}</a></td>
                   <td className="hb-num">{r.team}</td>
                   <td>{PROP_LABEL[r.market] ?? r.market} {r.book}</td>
-                  <td className="hb-suggest"><span className="hb-sugwrap"><span className="hb-sug"><span className="hb-sug__t">{over ? "Over" : "Under"} {r.book} · {pct}%</span></span></span></td>
+                  <td className="hb-suggest"><span className="hb-sugwrap"><span className="hb-sug"><span className={`hb-sug__t pmarrow--${over ? "up" : "down"}`}>{over ? "▲ Over" : "▼ Under"} · proj {r.proj}</span></span></span></td>
                 </tr>
               );
             })}
