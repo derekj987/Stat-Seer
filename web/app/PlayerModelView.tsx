@@ -4,6 +4,7 @@
 // weekly projection OUTPUT wires in here as the season's usage data flows, so each
 // category currently scaffolds an honest "arriving" state rather than inventing numbers.
 import { Brand, FlowSteps, ModelSubnav } from "./Nav";
+import { PLAYER_PROJECTIONS, PROJ_WEEK, PROJ_PRIOR, type PlayerProj } from "@/lib/playerProjections";
 
 export interface PlayerCat {
   key: string;
@@ -39,6 +40,17 @@ export default function PlayerModelView({ base, cat }: { base: "nfl" | "ncaaf"; 
   const home = base === "ncaaf" ? "/ncaaf/model/players" : "/model/players";
   const sportLabel = base === "ncaaf" ? "College Football" : "NFL";
 
+  // Real projections exist for NFL only (prior-season baseline export). Group the active
+  // category's rows by game.
+  const rows: PlayerProj[] = base === "nfl" ? PLAYER_PROJECTIONS.filter((p) => p.cat === active.key) : [];
+  const games: string[] = [];
+  const byGame: Record<string, PlayerProj[]> = {};
+  for (const r of rows) {
+    if (!byGame[r.game]) { byGame[r.game] = []; games.push(r.game); }
+    byGame[r.game].push(r);
+  }
+  const unit = active.key === "receptions" ? "" : " yds";
+
   return (
     <main className="wrap">
       <header className="masthead">
@@ -69,22 +81,64 @@ export default function PlayerModelView({ base, cat }: { base: "nfl" | "ncaaf"; 
         <h2 className="pmcat__h">{active.label}</h2>
         <p className="pmcat__blurb">{active.blurb}</p>
 
-        <div className="pmtable" role="table" aria-label={`${active.label} projections`}>
-          <div className="pmrow pmrow--head" role="row">
-            {active.cols.map((col, i) => (
-              <span key={col} className={i === 0 ? "pmcell pmcell--player" : "pmcell"}>{col}</span>
+        {rows.length === 0 ? (
+          <div className="pmtable" role="table" aria-label={`${active.label} projections`}>
+            <div className="pmrow pmrow--head" role="row">
+              {active.cols.map((col, i) => (
+                <span key={col} className={i === 0 ? "pmcell pmcell--player" : "pmcell"}>{col}</span>
+              ))}
+            </div>
+            <div className="pmempty" role="note">
+              <span className="pmempty__tag">Projections arriving</span>
+              <p>{active.note}</p>
+              <p>
+                The pipeline is <b>built and validated</b> (availability AUC ≈ 0.86). The weekly{" "}
+                <b>{active.label.toLowerCase()}</b> numbers publish here as each week&apos;s live usage is
+                captured — snap-share can&apos;t be backfilled, so it fills in with the season, not before.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="pmdisc" role="note">
+              <span className="pmempty__tag">Preseason baseline</span>
+              <p>
+                A <b>prior-season ({PROJ_PRIOR}) baseline</b> — projected volume × position efficiency — shown
+                beside the book&apos;s Week {PROJ_WEEK} line. There&apos;s no {PROJ_WEEK > 1 ? "" : "in-season "}
+                usage yet, and we haven&apos;t graded these against closing lines, so read it as our number
+                next to theirs — <b>not a validated edge</b>.
+              </p>
+            </div>
+            {games.map((g) => (
+              <div className="pmgame" key={g}>
+                <div className="pmgame__h">{g}</div>
+                <div className="pmtable" role="table" aria-label={`${g} ${active.label} projections`}>
+                  <div className="pmrow pmrow--head pmrow--data" role="row">
+                    <span className="pmcell pmcell--player">Player</span>
+                    <span className="pmcell">Team</span>
+                    <span className="pmcell pmcell--num">Book line</span>
+                    <span className="pmcell pmcell--num">Our proj</span>
+                    <span className="pmcell pmcell--read">Our read</span>
+                  </div>
+                  {byGame[g].map((r) => {
+                    const over = r.proj > r.book;
+                    return (
+                      <div className="pmrow pmrow--data" role="row" key={`${r.player}-${r.market}`}>
+                        <span className="pmcell pmcell--player">{r.player}</span>
+                        <span className="pmcell pmcell--team">{r.team}</span>
+                        <span className="pmcell pmcell--num">{r.book}{unit}</span>
+                        <span className="pmcell pmcell--num pmcell--proj">{r.proj}{unit}</span>
+                        <span className={`pmcell pmcell--read ${over ? "pmread--over" : "pmread--under"}`}>
+                          {over ? "Over" : "Under"} {r.book}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             ))}
-          </div>
-          <div className="pmempty" role="note">
-            <span className="pmempty__tag">Projections arriving</span>
-            <p>{active.note}</p>
-            <p>
-              The pipeline is <b>built and validated</b> (availability AUC ≈ 0.86). The weekly{" "}
-              <b>{active.label.toLowerCase()}</b> numbers publish here as each week&apos;s live usage is
-              captured — snap-share can&apos;t be backfilled, so it fills in with the season, not before.
-            </p>
-          </div>
-        </div>
+          </>
+        )}
       </section>
 
       <footer className="foot">
