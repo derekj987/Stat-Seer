@@ -101,22 +101,6 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
       <ContextSubnav active="upset" />
       <WeekNav min={min} max={max} current={week} />
 
-      <details className="explainer explainer--drop">
-        <summary className="explainer__sum">
-          <b>Step 2: pressure-test your pick</b> — how Upset Watch works
-        </summary>
-        <p>
-          Upset Watch shows what could make a game go <em>sideways</em> — where our model disagrees with the
-          market. It arms <b>your</b> judgment; it does not fake an &quot;adjusted number.&quot;
-        </p>
-        <p className="explainer__p2">
-          The situational factors around each game — site, weather, referee crew, incentives — now live in their
-          own <a href="/considerations">Special Considerations</a> tab. We tested them against real results: they
-          add <b>uncertainty, not a knowable edge</b> (the market already prices them), so we flag <b>risk</b>,
-          never a &quot;lock.&quot; Then head to <a href="/best">Sweet Spots</a> to place what survives.
-        </p>
-      </details>
-
       {/* --- Upset Watch: where our model likes the underdog --- */}
       <section className="ctxsec">
         <h2 className="ctxsec__h">Upset watch</h2>

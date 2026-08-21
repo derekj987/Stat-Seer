@@ -26,21 +26,6 @@ export default function Page() {
       <FlowSteps active="context" base="ncaaf" />
       <ContextSubnav active="upset" base="ncaaf" />
 
-      <details className="explainer explainer--drop">
-        <summary className="explainer__sum">
-          <b>Step 2: pressure-test your pick</b> — how Upset Watch works
-        </summary>
-        <p>
-          Upset Watch shows where a game could go <em>sideways</em> — where our line-blind rating disagrees with
-          the market. It arms <b>your</b> judgment; it does not fake an &quot;adjusted number.&quot;
-        </p>
-        <p className="explainer__p2">
-          The durable, measured context — home field and conference strength — lives one tab over in{" "}
-          <a href="/ncaaf/considerations">Special Considerations</a>. Our rating predicts as well as Elo but{" "}
-          <b>does not beat the closing spread</b> (<a href="/ncaaf/model">verified on The Model</a>), so we flag{" "}
-          <b>divergence</b>, never a &quot;lock.&quot; Then head to <a href="/ncaaf/best">Sweet Spots</a> for the numbers to pay up for.
-        </p>
-      </details>
 
       {/* --- Upset Watch: where our rating backs the market's underdog --- */}
       <section className="ctxsec">

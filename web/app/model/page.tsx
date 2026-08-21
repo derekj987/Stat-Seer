@@ -247,8 +247,6 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         <div className="masthead__clock"><ModelClock /></div>
       </header>
 
-      <FlowSteps active="analyze" />
-
       <section className="explainer explainer--wide">
         <p>
           Our model never sees the betting line — it reads each game from team strength alone,
@@ -260,6 +258,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         </p>
       </section>
 
+      <FlowSteps active="analyze" />
       <ModelSubnav active="game" />
       <WeekNav min={min} max={max} current={week} />
 

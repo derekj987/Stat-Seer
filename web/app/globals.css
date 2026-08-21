@@ -1716,7 +1716,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
      section, not down on the creed's rule. */
   .hb-side{grid-column:2;grid-row:1;margin:0;align-self:stretch;min-height:0;position:relative;
     padding-bottom:clamp(24px,3vw,40px)}
-  .hb-creed{grid-column:1/-1;grid-row:2;margin-top:0;padding:13px clamp(24px,5vw,72px) 30px}
+  .hb-creed{grid-column:1/-1;grid-row:2;margin-top:0;padding:13px 0 30px}
   /* height:100% (of the content-sized column), capped at the viewport — so the seer
      matches the content height (line sits right after the tavern) yet still sticks
      and fills the viewport on a long, scrolled page. */

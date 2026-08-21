@@ -85,9 +85,6 @@ export default async function Page() {
         <Brand sub={`The Context · Fan Analysis · what fans are saying · Week ${week}, ${SEASON}`} />
       </header>
 
-      <FlowSteps active="context" />
-      <ContextSubnav active="fan" />
-
       {/* The wall: this is fan sentiment, NOT a StatSeer pick or model output. */}
       <div className="tgwall" role="note">
         <span className="tgwall__tag">Fan Stock</span>
@@ -99,6 +96,9 @@ export default async function Page() {
           we&apos;re handing you the word around the league. Do your own homework.
         </p>
       </div>
+
+      <FlowSteps active="context" />
+      <ContextSubnav active="fan" />
 
       {feed.sample && (
         <p className="tgsample">
