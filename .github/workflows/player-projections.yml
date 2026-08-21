@@ -1,0 +1,65 @@
+name: Player projections
+
+# Regenerates web/lib/playerProjections.ts from the posted props + prior-season nflverse
+# stats, then commits it (which triggers a Vercel redeploy). Runs twice a day during the
+# season — the projection numbers are prior-season baselines (stable), so the point of
+# re-running is to pick up NEW games/players and shifting book lines as props post through
+# game week. Commits only when the file actually changes, so quiet days cost nothing.
+#
+# 13:00 UTC ~= 9am ET (after morning lines post); 23:00 UTC ~= 6-7pm ET (evening lines).
+# All times UTC.
+
+on:
+  schedule:
+    - cron: "0 13,23 * 8-12,1 *"   # twice daily, Aug-Jan
+  workflow_dispatch: {}
+
+concurrency:
+  group: player-projections
+  cancel-in-progress: false
+
+env:
+  SEASON: "2026"   # bump each year; the workflow fetches the 3 prior seasons of stats
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write   # commit the regenerated projections file
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so the rebase-before-push works cleanly
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet pandas certifi
+
+      - name: Fetch prior-season nflverse player stats
+        run: |
+          mkdir -p data
+          for Y in $((SEASON-3)) $((SEASON-2)) $((SEASON-1)); do
+            echo "fetching stats_$Y.csv"
+            curl -fsSL --retry 3 -o "data/stats_$Y.csv" \
+              "https://github.com/nflverse/nflverse-data/releases/download/stats_player/stats_player_week_$Y.csv"
+          done
+
+      - name: Build projections
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python analysis/player_proj_export.py --season "$SEASON"
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- web/lib/playerProjections.ts; then
+            echo "No projection changes — nothing to commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/lib/playerProjections.ts
+          git commit -m "chore: refresh player projections (auto)"
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+          git push
