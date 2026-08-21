@@ -6,6 +6,7 @@ import { fetchHome, type CardRow, type UpsetRow, type PlayerPick } from "@/lib/h
 import { NCAAF_MODEL, type NcaafCardGame, type NcaafUpset } from "./ncaaf/model-data";
 import LandingHub from "./LandingHub";
 import HomePromo from "./HomePromo";
+import { BetslipPromo } from "./Nav";
 
 export const metadata = {
   title: "StatSeer — the model vs the market, every sport",
@@ -13,40 +14,6 @@ export const metadata = {
 };
 
 const SEASON = 2026;
-
-function Betslip() {
-  return (
-    <details className="hb-slipf">
-      <summary className="hb-slipf__bar">
-        <span className="hb-slipf__ic" aria-hidden="true">🎟️</span>
-        <span className="hb-slipf__h">Build your own bet slip — we tell you where to place it</span>
-        <span className="hb-tav__right">
-          <span className="hb-tav__ic hb-tav__ic--shut" aria-hidden="true">🍺</span>
-          <span className="hb-tav__ic hb-tav__ic--open" aria-hidden="true">🍻</span>
-          <span className="hb-tav__chev" aria-hidden="true">▾</span>
-        </span>
-      </summary>
-      <div className="hb-slipf__body">
-        <p className="hb-slipf__p">
-          Tap any pick anywhere on StatSeer — a model suggestion, a moneyline, a spread, a prop — and it
-          lands on your slip. When you&apos;re ready, we show you the <b>single best sportsbook for every
-          leg</b>, and for a parlay, the <b>one book with the best combined price</b>.
-        </p>
-        <div className="hb-slipf__steps">
-          <div className="hb-slipf__step"><span className="hb-slipf__n">1</span><b>Add your picks</b><span>Tap to save anything you like as you read the board.</span></div>
-          <div className="hb-slipf__step"><span className="hb-slipf__n">2</span><b>We shop it</b><span>StatSeer compares every book and finds the best price.</span></div>
-          <div className="hb-slipf__step"><span className="hb-slipf__n">3</span><b>You place it</b><span>Bet at the book we name — the same wager at a better number.</span></div>
-        </div>
-        <p className="hb-slipf__lead">Start on a game-lines board — tap a line to add it to your slip:</p>
-        <div className="hb-slipf__cta">
-          <a href="/lines" className="btn btn--primary">NFL Game Lines →</a>
-          <a href="/ncaaf/lines" className="btn btn--primary">College Football Game Lines →</a>
-          <a href="/how" className="btn">How it works →</a>
-        </div>
-      </div>
-    </details>
-  );
-}
 
 export default async function Landing({ searchParams }: PageProps<"/">) {
   const sp = await searchParams;
@@ -72,6 +39,11 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
           <img src="/seereyes.png" alt="" className="lp-hero__img" width={1983} height={793} />
         </div>
         <h1 className="lp-hero__wm">StatSeer</h1>
+      </header>
+
+      <LandingHub initialSport={initialSport} nfl={nfl} ncaaf={ncaaf} />
+
+      <section className="lp-tagline">
         <p className="lp-hero__tag">
           One model reads every game <b>line-blind</b>, then shows you exactly where it disagrees with the
           market — and the <b>best price</b> on every pick.
@@ -80,11 +52,9 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
           <div className="lp-stat"><span className="lp-stat__n">100%</span><span className="lp-stat__l">reads graded in public</span></div>
           <div className="lp-stat lp-stat--wide"><span className="lp-stat__n">Line-blind</span><span className="lp-stat__l">every read, before the line</span></div>
         </div>
-      </header>
+      </section>
 
-      <LandingHub initialSport={initialSport} nfl={nfl} ncaaf={ncaaf} />
-
-      <Betslip />
+      <BetslipPromo />
       <HomePromo />
 
       <section className="hb-creed">

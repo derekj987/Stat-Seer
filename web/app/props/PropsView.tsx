@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import type { PropGame, Quote } from "@/lib/props";
-import { SlipCallout } from "../Nav";
+import { BetslipPromo } from "../Nav";
 import { useSlip } from "@/lib/slip";
 
 const fmtOdds = (p: number) => (p > 0 ? `+${p}` : String(p));
@@ -41,7 +41,7 @@ function PropChip({ q, market, marketLabel, game, saved, onToggle }: {
       <span className="propq__side">{sideLabel(q.side, q.line)}</span>
       <span className="propq__price">{fmtOdds(q.price)}</span>
       <span className="propq__book">{q.books.join(" / ")}</span>
-      <span className="propq__heart" aria-hidden="true">{saved ? "♥" : "♡"}</span>
+      <span className="propq__add" aria-hidden="true">{saved ? "✓" : "+"}</span>
     </button>
   );
 }
@@ -103,7 +103,7 @@ export default function PropsView({ games, embedded }: { games: PropGame[]; embe
           </p>
         </details>
       )}
-      {!embedded && <SlipCallout kind="props" />}
+      {!embedded && <BetslipPromo />}
       <p className="hint">{games.length} games · {players} players · best price on each, shopped across books.</p>
       <section className="propstack">
         {games.map((g) => (
