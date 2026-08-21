@@ -579,16 +579,19 @@ a.fauthor:hover{text-decoration:underline}
 .upset__mkt{margin-left:auto;font-size:12px;color:var(--muted);font-family:var(--font-mono)}
 
 /* --- referee crews --- */
-.reftable{display:flex;flex-direction:column;gap:2px;overflow-x:auto}
-.refrow{display:grid;grid-template-columns:132px 44px 96px 42px 50px 76px 76px;gap:9px;align-items:center;
-  padding:7px 12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;font-size:13px}
+.reftable{display:flex;flex-direction:column;gap:4px;overflow-x:auto}
+/* flexible columns (fr) so the table stretches to fill the page instead of sitting cramped */
+.refrow{display:grid;
+  grid-template-columns:minmax(150px,2.3fr) 58px minmax(112px,1.5fr) 64px 82px minmax(104px,1.35fr) minmax(104px,1.35fr);
+  gap:14px;align-items:center;padding:12px 16px;background:var(--surface);border:1px solid var(--line);
+  border-radius:9px;font-size:14.5px}
 details.ctxdrop>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:8px;margin-bottom:8px}
 details.ctxdrop>summary::-webkit-details-marker{display:none}
 details.ctxdrop>summary::before{content:"▸";color:var(--muted);font-size:12px}
 details.ctxdrop[open]>summary::before{content:"▾"}
 details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
-.refrow--head{background:none;border:0;color:var(--muted);font-size:10.5px;text-transform:uppercase;
-  letter-spacing:.05em;font-weight:600;padding:2px 12px}
+.refrow--head{background:none;border:0;color:var(--muted);font-size:11px;text-transform:uppercase;
+  letter-spacing:.05em;font-weight:700;padding:2px 16px}
 .refrow--head span:nth-child(2),.refrow--head span:nth-child(4),.refrow--head span:nth-child(5){text-align:right}
 .refrow__name{font-weight:600;display:flex;align-items:baseline;gap:6px;min-width:0}
 .refrow__n{font-size:11px;color:var(--muted);font-weight:400}
@@ -597,12 +600,14 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .refrow__v.cool{color:var(--accent);font-weight:700}
 .refrow__v.muted{color:var(--muted)}
 /* the plain-English crew "read" column (penalty tendency), left-aligned */
-.refrow__read{font-size:12px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.refrow__read{font-size:13.5px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .refrow__read .hot{color:var(--key);font-weight:700}
 .refrow__read .cool{color:var(--accent);font-weight:700}
 .refrow__read .muted{color:var(--muted)}
-/* directional O/U and ATS lean cells (e.g. "Over 62%", "Fav 53%") — historical context */
-.refrow__lean{font-size:12px;text-align:left;white-space:nowrap;color:var(--ink)}
+/* directional O/U and ATS lean cells — bold direction + muted mono % (historical context) */
+.reflean{display:inline-flex;align-items:baseline;gap:6px;white-space:nowrap}
+.reflean__d{color:var(--ink);font-weight:700;font-size:13.5px}
+.reflean__p{font-family:var(--font-mono);color:var(--muted);font-size:12.5px}
 /* section bottom-line callout */
 .refbottom{margin:2px 0 14px;padding:12px 15px;border-radius:11px;
   background:var(--surface-2);border:1px solid color-mix(in srgb,var(--accent) 26%,var(--line))}
@@ -1872,3 +1877,19 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-plrlink{color:var(--ink);text-decoration:none;font-weight:700}
 .hb-plrlink:hover{color:var(--accent)}
 .hb-plr__srccell{color:var(--muted);font-size:12px}
+
+/* Model page: explainer stretched to full width */
+.explainer--wide p{max-width:none}
+/* Referee-crews heading — bigger, stands out */
+.ctxsec__h--big{font-size:21px;font-weight:800;color:var(--ink)}
+/* Referee table on phones: fill the width by dropping games + avg-total, wrap the rest */
+@media (max-width:640px){
+  .reftbl .refrow{grid-template-columns:minmax(0,1.85fr) minmax(0,1.45fr) 46px minmax(0,1fr) minmax(0,1fr);
+    gap:8px;padding:10px 11px;font-size:12px}
+  .reftbl .refrow>*:nth-child(2),.reftbl .refrow>*:nth-child(5){display:none}
+  .reftbl .refrow__name{white-space:normal}
+  .reftbl .refrow__read{white-space:normal;font-size:12px}
+  .reftbl .reflean__d{font-size:12px}
+  .reftbl .reflean__p{font-size:10.5px}
+  .reftbl .refrow--head{font-size:9px;padding:2px 11px}
+}

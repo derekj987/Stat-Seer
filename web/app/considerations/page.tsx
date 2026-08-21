@@ -153,8 +153,8 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
       )}
 
       {/* --- Referee crews (moved here from Upset Watch) --- */}
-      <details className="ctxsec ctxdrop">
-        <summary className="ctxsec__h">Referee crews</summary>
+      <details className="ctxsec ctxdrop reftbl" open>
+        <summary className="ctxsec__h ctxsec__h--big">Referee crews</summary>
         <div className="refbottom">
           <span className="refbottom__k">Bottom line — what to actually use</span>
           <p>
@@ -183,8 +183,8 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
                 </span>
                 <span className={r.pen >= REF_LEAGUE.pen ? "refrow__v hot" : "refrow__v cool"}>{r.pen}</span>
                 <span className="refrow__v">{r.total}</span>
-                <span className="refrow__lean">{ou.d} {ou.p}%</span>
-                <span className="refrow__lean">{ats.d} {ats.p}%</span>
+                <span className="reflean"><b className="reflean__d">{ou.d}</b><span className="reflean__p">{ou.p}%</span></span>
+                <span className="reflean"><b className="reflean__d">{ats.d}</b><span className="reflean__p">{ats.p}%</span></span>
               </div>
             );
           })}

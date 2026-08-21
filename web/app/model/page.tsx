@@ -1,8 +1,10 @@
 import { weekRange } from "@/lib/board";
 import { fetchModelWeek, fetchCalibration, type ModelPrediction } from "@/lib/model";
+import { fetchHome, type CardRow } from "@/lib/home";
 import { Brand, FlowSteps } from "../Nav";
 import AddToSlip from "../AddToSlip";
 import ModelClock from "../ModelClock";
+import NflModelCard from "../NflModelCard";
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -118,6 +120,8 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
   try { preds = await fetchModelWeek(week, SEASON); } catch { preds = []; }
   let calibration: Awaited<ReturnType<typeof fetchCalibration>> = [];
   try { calibration = await fetchCalibration(SEASON); } catch { calibration = []; }
+  let cardRows: CardRow[] = [];
+  try { cardRows = (await fetchHome(SEASON)).card; } catch { cardRows = []; }
 
   return (
     <main className="wrap">
@@ -133,7 +137,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
       </p>
       <WeekNav min={min} max={max} current={week} />
 
-      <section className="explainer">
+      <section className="explainer explainer--wide">
         <p>
           Our model never sees the betting line — it reads each game from team strength alone,
           then we show you <b>where it agrees with the market and where it doesn&apos;t.</b> An
@@ -144,10 +148,13 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         </p>
       </section>
 
+      {/* The Model Card — same model-vs-market snapshot as the home page, above the reads. */}
+      <NflModelCard rows={cardRows} />
+
       {preds.length === 0 ? (
         <p className="foot">No reads published for Week {week} yet.</p>
       ) : (
-        <details className="gamesdrop" open>
+        <details className="gamesdrop">
           <summary className="gamesdrop__h">
             Week {week} reads — model vs market
             <span className="gamesdrop__n">{preds.length} games</span>
