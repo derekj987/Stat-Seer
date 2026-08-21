@@ -248,8 +248,6 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
       </header>
 
       <FlowSteps active="analyze" />
-      <ModelSubnav active="game" />
-      <WeekNav min={min} max={max} current={week} />
 
       <section className="explainer explainer--wide">
         <p>
@@ -261,6 +259,9 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
           to claim.
         </p>
       </section>
+
+      <ModelSubnav active="game" />
+      <WeekNav min={min} max={max} current={week} />
 
       {/* The Model Card — same model-vs-market snapshot as the home page, above the reads. */}
       <NflModelCard rows={cardRows} />
