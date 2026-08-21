@@ -101,12 +101,17 @@ export default function PlayerModelView({ base, cat }: { base: "nfl" | "ncaaf"; 
         ) : (
           <>
             <div className="pmdisc" role="note">
-              <span className="pmempty__tag">Preseason baseline</span>
+              <span className="pmempty__tag">How to read this</span>
               <p>
-                A <b>prior-season ({PROJ_PRIOR}) baseline</b> — projected volume × position efficiency — shown
-                beside the book&apos;s Week {PROJ_WEEK} line. There&apos;s no {PROJ_WEEK > 1 ? "" : "in-season "}
-                usage yet, and we haven&apos;t graded these against closing lines, so read it as our number
-                next to theirs — <b>not a validated edge</b>.
+                <b>Our proj</b> is a prior-season ({PROJ_PRIOR}) baseline (projected volume × position
+                efficiency) — an honest starting point, but it runs biased for some roles (QBs especially), so
+                don&apos;t take it as a validated edge.
+              </p>
+              <p>
+                <b>Career % over</b> is the empirical check: across <b>every game of the player&apos;s
+                career</b> in our data (2016–{PROJ_PRIOR}, regular season + playoffs), how often they actually
+                cleared <b>this exact line</b>. Green ≥ 50%, red below. It&apos;s the grounded, verifiable
+                signal — and it shows QBs are not all &quot;unders,&quot; the way the raw projection implied.
               </p>
             </div>
             {games.map((g) => (
@@ -118,18 +123,19 @@ export default function PlayerModelView({ base, cat }: { base: "nfl" | "ncaaf"; 
                     <span className="pmcell">Team</span>
                     <span className="pmcell pmcell--num">Book line</span>
                     <span className="pmcell pmcell--num">Our proj</span>
-                    <span className="pmcell pmcell--read">Our read</span>
+                    <span className="pmcell pmcell--career">Career % over</span>
                   </div>
                   {byGame[g].map((r) => {
-                    const over = r.proj > r.book;
+                    const pct = r.cG ? Math.round((100 * r.cOver) / r.cG) : null;
+                    const hot = pct !== null && pct >= 50;
                     return (
                       <div className="pmrow pmrow--data" role="row" key={`${r.player}-${r.market}`}>
                         <span className="pmcell pmcell--player">{r.player}</span>
                         <span className="pmcell pmcell--team">{r.team}</span>
                         <span className="pmcell pmcell--num">{r.book}{unit}</span>
                         <span className="pmcell pmcell--num pmcell--proj">{r.proj}{unit}</span>
-                        <span className={`pmcell pmcell--read ${over ? "pmread--over" : "pmread--under"}`}>
-                          {over ? "Over" : "Under"} {r.book}
+                        <span className={`pmcell pmcell--career ${pct === null ? "" : hot ? "pmread--over" : "pmread--under"}`}>
+                          {pct === null ? "—" : <>{pct}% <small className="pmcell__sub">{r.cOver}/{r.cG} gm</small></>}
                         </span>
                       </div>
                     );

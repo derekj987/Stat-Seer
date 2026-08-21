@@ -127,10 +127,39 @@ def prior_year_rates(prior):
         row = g.iloc[-1]
         rates[norm(str(row.player_display_name))] = {
             "name": row.player_display_name, "pos": row.position, "team": row.team, "games": int(n),
+            "pid": row.player_id,
             "carries_pg": g.carries.sum() / n, "targets_pg": g.targets.sum() / n,
             "att_pg": g.attempts.sum() / n,
         }
     return rates
+
+
+CAREER_STAT = {"pass_yds": "passing_yards", "rush_yds": "rushing_yards",
+               "rec_yds": "receiving_yards", "receptions": "receptions"}
+
+
+def load_career(seasons):
+    """Every game log we have (REG + POST) per player, for the career hit-rate."""
+    keep = ["player_id", "attempts", "passing_yards", "rushing_yards", "receiving_yards", "receptions"]
+    frames = []
+    for y in seasons:
+        s = pd.read_csv(f"data/stats_{y}.csv", low_memory=False)
+        frames.append(s[[c for c in keep if c in s.columns]].copy())
+    d = pd.concat(frames, ignore_index=True)
+    for c in keep[1:]:
+        d[c] = pd.to_numeric(d.get(c), errors="coerce").fillna(0.0)
+    return {pid: g for pid, g in d.groupby("player_id")}
+
+
+def career_over(career_by_pid, pid, market, line):
+    """(times over the line, eligible games) across the player's career in our data."""
+    g = career_by_pid.get(pid)
+    if g is None or line is None:
+        return (0, 0)
+    if market == "pass_yds":
+        g = g[g.attempts >= 1]      # only count games he actually threw
+    vals = g[CAREER_STAT[market]]
+    return int((vals > line).sum()), int(len(vals))
 
 
 def project(rate, base):
@@ -173,6 +202,7 @@ def main():
     prior = args.season - 1
     base = build_baselines(range(args.season - 3, args.season))   # e.g. 2023-2025
     rates = prior_year_rates(prior)
+    career = load_career(range(2016, args.season))                # all game logs we have
 
     # median book line per (player, market) across books, for the yardage/reception markets
     ALIAS = {"LAR": "LA", "LAC": "LAC", "WSH": "WAS", "OAK": "LV", "SD": "LAC"}
@@ -201,11 +231,12 @@ def main():
             offteam.append(f'{player} ({rate["team"]} not in {teams})')
             continue
         proj = project(rate, base)[key]
+        cover, cgames = career_over(career, rate["pid"], key, book)
         matched += 1
         out.append({
             "game": game, "commence": commence, "player": rate["name"], "team": rate["team"],
             "pos": rate["pos"], "cat": cat, "market": key, "book": book, "proj": proj,
-            "g": rate["games"],
+            "g": rate["games"], "cOver": cover, "cG": cgames,
         })
 
     out.sort(key=lambda r: (r["commence"], r["game"], r["cat"], -(r["proj"] or 0)))
@@ -218,7 +249,8 @@ def main():
     ts += "// Prior-season (%d) baseline projections: volume x position efficiency. PRESEASON —\n" % prior
     ts += "// not graded against closing lines yet.\n"
     ts += "export interface PlayerProj { game: string; commence: string; player: string; team: string;\n"
-    ts += "  pos: string; cat: string; market: string; book: number; proj: number; g: number }\n"
+    ts += "  pos: string; cat: string; market: string; book: number; proj: number; g: number;\n"
+    ts += "  cOver: number; cG: number }\n"
     ts += f"export const PROJ_SEASON = {args.season};\nexport const PROJ_WEEK = {week};\nexport const PROJ_PRIOR = {prior};\n"
     ts += "export const PLAYER_PROJECTIONS: PlayerProj[] = [\n"
     for r in out:
