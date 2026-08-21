@@ -1296,7 +1296,7 @@ details.statsdrop .stats{margin:12px 0 0}
 /* --- Player Prop Model page --- */
 .pmcat{margin-top:6px}
 .pmcat__h{font-size:19px;margin:0 0 4px;color:var(--ink)}
-.pmcat__blurb{font-size:13px;color:var(--muted);line-height:1.55;margin:0 0 12px;max-width:72ch}
+.pmcat__blurb{font-size:13px;color:var(--muted);line-height:1.55;margin:0 0 12px;max-width:none}
 .pmtable{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface);max-width:640px}
 .pmrow{display:flex;gap:14px;padding:10px 16px}
 .pmrow--head{background:var(--surface-2);border-bottom:1px solid var(--line);font-size:11px;
@@ -1322,9 +1322,11 @@ details.statsdrop .stats{margin:12px 0 0}
 .pmread--over{color:var(--accent)}
 .pmread--under{color:var(--mkt)}
 .pmdisc{background:var(--gold-soft);border:1px solid color-mix(in srgb,var(--gold) 35%,var(--line));
-  border-radius:12px;padding:12px 16px;margin:0 0 14px;max-width:640px;display:flex;flex-direction:column;gap:8px}
+  border-radius:12px;padding:12px 16px;margin:0 0 14px;display:flex;flex-direction:column;gap:8px}
 .pmdisc p{margin:0;font-size:12.5px;line-height:1.55;color:var(--muted)}
 .pmdisc b{color:var(--ink)}
+/* Player Model footer text fills the page too (scoped so other footers keep their cap) */
+.foot--pm p{max-width:none}
 .pmgame{margin:0 0 16px;max-width:640px}
 .pmgame__h{font-size:14px;font-weight:800;color:var(--ink);margin:0 0 6px;letter-spacing:.02em}
 

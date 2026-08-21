@@ -141,7 +141,7 @@ export default function PlayerModelView({ base, cat }: { base: "nfl" | "ncaaf"; 
         )}
       </section>
 
-      <footer className="foot">
+      <footer className="foot foot--pm">
         <p>
           <b>Line-blind and graded in public.</b> These are our own projections, not book lines — for the best
           price on a prop you&apos;ve chosen, that&apos;s Value Finder&apos;s{" "}
