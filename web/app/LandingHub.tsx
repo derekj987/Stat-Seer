@@ -48,31 +48,47 @@ function Panel({ title, count, hint, open, children }: { title: string; count: R
   );
 }
 
+function NflHead() {
+  return <thead><tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Our Model Suggests</th></tr></thead>;
+}
+function NflRows({ rows }: { rows: CardRow[] }) {
+  return (
+    <>
+      {rows.map((r) => (
+        <tr key={r.eventId} className={r.off ? "hb-off" : undefined}>
+          <td className="hb-l"><span className="hb-game">{r.away}<span className="hb-at">at</span>{r.home}</span>{r.off && <span className="hb-dia hb-dia--end">◆</span>}</td>
+          <td className="hb-num">{r.marketSpread ?? "—"}</td>
+          <td className="hb-num hb-tot">{numStr(r.marketTotal)}</td>
+          <td className="hb-suggest">
+            {r.spreadLean || r.totalLean ? (
+              <span className="hb-sugwrap">
+                {r.spreadLean && <span className="hb-sug"><span className="hb-sug__t">{r.spreadLean.side} {r.spreadLean.num}</span></span>}
+                {r.totalLean && <span className="hb-sug"><span className="hb-sug__t">{r.totalLean.dir === "OVER" ? "Over" : "Under"} {r.totalLean.num}</span></span>}
+              </span>
+            ) : <span className="hb-leannone">even</span>}
+          </td>
+        </tr>
+      ))}
+    </>
+  );
+}
 function NflCardTable({ rows }: { rows: CardRow[] }) {
   if (!rows.length) return <p className="hb-empty">The NFL board opens when this week&apos;s odds and reads post.</p>;
+  const lead = rows.slice(0, 6);   // snapshot — first 6 games
+  const rest = rows.slice(6);
   return (
-    <div className="hb-formwrap">
-      <table className="hb-form">
-        <thead><tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Our Model Suggests</th></tr></thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.eventId} className={r.off ? "hb-off" : undefined}>
-              <td className="hb-l"><span className="hb-game">{r.away}<span className="hb-at">at</span>{r.home}</span>{r.off && <span className="hb-dia hb-dia--end">◆</span>}</td>
-              <td className="hb-num">{r.marketSpread ?? "—"}</td>
-              <td className="hb-num hb-tot">{numStr(r.marketTotal)}</td>
-              <td className="hb-suggest">
-                {r.spreadLean || r.totalLean ? (
-                  <span className="hb-sugwrap">
-                    {r.spreadLean && <span className="hb-sug"><span className="hb-sug__t">{r.spreadLean.side} {r.spreadLean.num}</span></span>}
-                    {r.totalLean && <span className="hb-sug"><span className="hb-sug__t">{r.totalLean.dir === "OVER" ? "Over" : "Under"} {r.totalLean.num}</span></span>}
-                  </span>
-                ) : <span className="hb-leannone">even</span>}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <>
+      <div className="hb-formwrap"><table className="hb-form"><NflHead /><tbody><NflRows rows={lead} /></tbody></table></div>
+      {rest.length > 0 && (
+        <details className="hb-more">
+          <summary className="hb-more__sum">
+            <span className="hb-more__chev" aria-hidden="true">▸</span>
+            See more ({rest.length} more games)
+          </summary>
+          <div className="hb-formwrap"><table className="hb-form"><NflHead /><tbody><NflRows rows={rest} /></tbody></table></div>
+        </details>
+      )}
+    </>
   );
 }
 
