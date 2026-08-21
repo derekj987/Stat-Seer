@@ -1,5 +1,4 @@
 import { fetchWeek, weekRange, buildBoard } from "@/lib/board";
-import { weekProps, type PropGame } from "@/lib/props";
 import { Brand, ShopSubnav } from "../Nav";
 import BoardView from "../BoardView";
 
@@ -46,8 +45,6 @@ export default async function Page({ searchParams }: PageProps<"/lines">) {
     : range.min;
 
   const board = buildBoard(await fetchWeek(week, SEASON));
-  let propGames: PropGame[] = [];
-  try { propGames = await weekProps(week, SEASON); } catch { propGames = []; }
   return (
     <BoardView
       board={board}
@@ -56,7 +53,6 @@ export default async function Page({ searchParams }: PageProps<"/lines">) {
       week={week}
       season={SEASON}
       snapshot={board[0]?.snapshot ?? ""}
-      propGames={propGames}
     />
   );
 }
