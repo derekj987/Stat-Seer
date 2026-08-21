@@ -19,62 +19,70 @@ const TEAM_COLOR: Record<string, string> = {
   "49ers": "#cb5a6e", Buccaneers: "#d84a3c", Titans: "#4aace0", Commanders: "#cf7a5c",
 };
 
+// One card per buzz item, same shape as the Special Considerations cards — the bottom line only.
 function BuzzCard({ b }: { b: Buzz }) {
   const label = stockLabel(b.direction, b.heat);
   return (
-    <article className={`tgcard tgcard--${b.direction} tgcard--h${b.heat}`}>
-      <header className="tgcard__head">
-        <div className="tgcard__id">
-          <span className="tgcard__player">{b.player}</span>
-          {b.matchup && <span className="tgcard__team">{b.matchup}</span>}
-        </div>
-        <span className={`tgstock tgstock--${b.direction}`}
-          title={`Fan stock: ${label} (${b.direction === "up" ? "bullish" : "bearish"})`}>
+    <article className={`cxcard cxcard--fan cxcard--${b.direction}`}>
+      <header className="cxcard__head">
+        <span className="matchup" style={{ color: TEAM_COLOR[b.team] ?? "var(--ink)" }}>{b.player}</span>
+        <span className={`tgstock tgstock--${b.direction}`} title={`Fan stock: ${label}`}>
           <span className="tgstock__arw" aria-hidden="true">{stockArrows(b.direction, b.heat)}</span>
           <span className="tgstock__l">{label}</span>
         </span>
       </header>
-
-      <div className="tgcard__angle">
-        {b.direction === "up" ? "Fans are on:" : "Fans are off:"} <b>{b.angle}</b>
-      </div>
-      <p className="tgcard__take">{b.take}</p>
-
-      <div className="tgcard__src">
-        <span className="tgcard__srck">Heard on</span>
-        {b.sources.map((s, i) => (
-          <span key={`${b.id}-${i}`} className="tgsrc">
-            {s.url ? <a href={s.url} target="_blank" rel="noopener noreferrer">{s.board}</a> : s.board}
-          </span>
-        ))}
-        <AddToSlip item={{ id: `fan-${b.id}`, kind: "fan", title: b.player, detail: `${b.team} — ${b.angle}` }} />
-      </div>
+      <dl className="cxcard__rows">
+        <div className="cxrow">
+          <dt className="cxrow__k">Team</dt>
+          <dd className="cxrow__v">{b.team}{b.matchup ? ` · ${b.matchup}` : ""}</dd>
+        </div>
+        <div className="cxrow">
+          <dt className="cxrow__k">Bottom line</dt>
+          <dd className="cxrow__v">{b.direction === "up" ? "Fans are buying" : "Fans are selling"} <b>{b.angle}</b>. {b.take}</dd>
+        </div>
+        <div className="cxrow">
+          <dt className="cxrow__k">Heard on</dt>
+          <dd className="cxrow__v cxfan__src">
+            {b.sources.map((s, i) => (
+              <span key={`${b.id}-${i}`} className="tgsrc">
+                {s.url ? <a href={s.url} target="_blank" rel="noopener noreferrer">{s.board}</a> : s.board}
+              </span>
+            ))}
+            <AddToSlip item={{ id: `fan-${b.id}`, kind: "fan", title: b.player, detail: `${b.team} — ${b.angle}` }} />
+          </dd>
+        </div>
+      </dl>
     </article>
   );
 }
 
-// Group the flat feed by team, buzziest team first (max heat, then count, then name).
-// Input is already heat-desc, so each team's cards stay heat-desc.
-function groupByTeam(buzz: Buzz[]): [string, Buzz[]][] {
-  const map = new Map<string, Buzz[]>();
-  for (const b of buzz) {
-    const list = map.get(b.team);
-    if (list) list.push(b);
-    else map.set(b.team, [b]);
-  }
-  return [...map.entries()].sort((a, z) => {
-    const ah = Math.max(...a[1].map((x) => x.heat));
-    const zh = Math.max(...z[1].map((x) => x.heat));
-    if (zh !== ah) return zh - ah;
-    if (z[1].length !== a[1].length) return z[1].length - a[1].length;
-    return a[0].localeCompare(z[0]);
-  });
+function WeekNav({ min, max, current }: { min: number; max: number; current: number }) {
+  const weeks: number[] = [];
+  for (let w = min; w <= max; w++) weeks.push(w);
+  return (
+    <nav className="weeknav" aria-label="Select week">
+      <span className="weeknav__label">Week</span>
+      <div className="weeknav__list">
+        {weeks.map((w) => (
+          <a key={w} href={`/tailgate?week=${w}`}
+            className={w === current ? "weeknav__w active" : "weeknav__w"}
+            aria-current={w === current ? "page" : undefined}>{w}</a>
+        ))}
+      </div>
+    </nav>
+  );
 }
 
-export default async function Page() {
+export default async function Page({ searchParams }: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await searchParams;
   let range: { min: number; max: number } | null = null;
   try { range = await weekRange(SEASON); } catch { range = null; }
-  const week = range?.min ?? 1;
+  const min = range?.min ?? 1;
+  const max = range?.max ?? 1;
+  const requested = typeof sp.week === "string" ? parseInt(sp.week, 10) : NaN;
+  const week = Number.isFinite(requested) ? Math.min(max, Math.max(min, requested)) : min;
 
   const feed = await weekTailgate(week, SEASON);
 
@@ -99,6 +107,7 @@ export default async function Page() {
 
       <FlowSteps active="context" />
       <ContextSubnav active="fan" />
+      <WeekNav min={min} max={max} current={week} />
 
       {feed.sample && (
         <p className="tgsample">
@@ -110,27 +119,9 @@ export default async function Page() {
       {feed.buzz.length === 0 ? (
         <p className="foot">No fan buzz gathered for Week {week} yet — check back closer to kickoff.</p>
       ) : (
-        <details className="tgweek" open>
-          <summary className="tgweek__h">
-            NFL Week {week}
-            <span className="tgweek__n">{groupByTeam(feed.buzz).length} teams</span>
-            <span className="tgweek__chev" aria-hidden="true">▾</span>
-          </summary>
-          <section className="tgfeed">
-            {groupByTeam(feed.buzz).map(([team, buzz]) => (
-              <details className="tgteam" key={team}>
-                <summary className="tgteam__h">
-                  <span className="tgteam__name" style={{ color: TEAM_COLOR[team] ?? "var(--gold)" }}>{team}</span>
-                  <span className="tgteam__n">{buzz.length}</span>
-                  <span className="tgteam__chev" aria-hidden="true">▸</span>
-                </summary>
-                <div className="tgteam__cards">
-                  {buzz.map((b) => <BuzzCard key={b.id} b={b} />)}
-                </div>
-              </details>
-            ))}
-          </section>
-        </details>
+        <section className="cxgrid" aria-label={`Week ${week} fan stock`}>
+          {feed.buzz.map((b) => <BuzzCard key={b.id} b={b} />)}
+        </section>
       )}
 
       <footer className="foot">

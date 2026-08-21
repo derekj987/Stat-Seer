@@ -380,6 +380,11 @@ a.sportstrip__i:hover{color:var(--ink)}
 .cxcard__statk{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .cxcard__statnote{margin:8px 0 0;font-size:12px;color:var(--muted);line-height:1.45}
 .lp-cxbtn{margin-top:12px}
+/* Fan Analysis cards reuse the considerations card shell */
+.cxcard--fan .tgstock{margin-left:auto;flex:0 0 auto}
+.cxcard--up{border-left:3px solid var(--accent)}
+.cxcard--down{border-left:3px solid var(--mkt)}
+.cxfan__src{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-size:11px}
 @media (max-width:640px){
   .wxrow{grid-template-columns:1fr;gap:2px;padding:8px 10px}
   .wxrow--head{display:none}
