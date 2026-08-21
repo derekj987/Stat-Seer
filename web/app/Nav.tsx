@@ -136,10 +136,10 @@ export function ContextSubnav({ active, base = "nfl" }: {
     : { upset: "/context", special: "/considerations", fan: "/tailgate" };
   return (
     <nav className="subnav" aria-label="Context view">
-      <a href={h.upset} className={active === "upset" ? "subnav__t active" : "subnav__t"}
-        aria-current={active === "upset" ? "page" : undefined}>Upset Watch</a>
       <a href={h.special} className={active === "special" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "special" ? "page" : undefined}>Special Considerations</a>
+      <a href={h.upset} className={active === "upset" ? "subnav__t active" : "subnav__t"}
+        aria-current={active === "upset" ? "page" : undefined}>Upset Watch</a>
       <a href={h.fan} className={active === "fan" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "fan" ? "page" : undefined}>Fan Analysis</a>
     </nav>

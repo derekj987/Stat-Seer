@@ -114,9 +114,10 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
       {games.length === 0 ? (
         <p className="foot">No games captured for Week {week} yet.</p>
       ) : (
-        <details className="tgweek" open>
+        <details className="tgweek">
           <summary className="tgweek__h">
             NFL Week {week}
+            <span className="tgweek__tag">Unique Factors</span>
             <span className="tgweek__n">{games.length} games</span>
             <span className="tgweek__chev" aria-hidden="true">▾</span>
           </summary>
@@ -183,8 +184,8 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
                 </span>
                 <span className={r.pen >= REF_LEAGUE.pen ? "refrow__v hot" : "refrow__v cool"}>{r.pen}</span>
                 <span className="refrow__v">{r.total}</span>
-                <span className="reflean"><b className="reflean__d">{ou.d}</b><span className="reflean__p">{ou.p}%</span></span>
-                <span className="reflean"><b className="reflean__d">{ats.d}</b><span className="reflean__p">{ats.p}%</span></span>
+                <span className="reflean"><b className="reflean__d">{ou.d}</b> <span className="reflean__p">({ou.p}%)</span></span>
+                <span className="reflean"><b className="reflean__d">{ats.d}</b> <span className="reflean__p">({ats.p}%)</span></span>
               </div>
             );
           })}

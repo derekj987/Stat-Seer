@@ -592,10 +592,11 @@ details.ctxdrop[open]>summary::before{content:"▾"}
 details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .refrow--head{background:none;border:0;color:var(--muted);font-size:11px;text-transform:uppercase;
   letter-spacing:.05em;font-weight:700;padding:2px 16px}
-.refrow--head span:nth-child(2),.refrow--head span:nth-child(4),.refrow--head span:nth-child(5){text-align:right}
+/* all columns justified left — numbers line up under their headers */
+.refrow--head span{text-align:left}
 .refrow__name{font-weight:600;display:flex;align-items:baseline;gap:6px;min-width:0}
 .refrow__n{font-size:11px;color:var(--muted);font-weight:400}
-.refrow__v{font-family:var(--font-mono);text-align:right}
+.refrow__v{font-family:var(--font-mono);text-align:left}
 .refrow__v.hot{color:var(--key);font-weight:700}
 .refrow__v.cool{color:var(--accent);font-weight:700}
 .refrow__v.muted{color:var(--muted)}
@@ -607,8 +608,8 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 /* directional O/U and ATS lean cells — bold direction + muted mono % (historical context) */
 /* direction sits in a fixed slot so every % lines up in a neat column, with clear space
    between the word (Fav/Dog/Over/Under) and the number. */
-.reflean{display:inline-flex;align-items:baseline;gap:10px;white-space:nowrap}
-.reflean__d{min-width:42px;color:var(--ink);font-weight:700;font-size:13.5px}
+.reflean{display:inline-flex;align-items:baseline;justify-content:flex-start;gap:4px;white-space:nowrap}
+.reflean__d{color:var(--ink);font-weight:700;font-size:13.5px}
 .reflean__p{font-family:var(--font-mono);color:var(--muted);font-size:12.5px}
 /* section bottom-line callout */
 .refbottom{margin:2px 0 14px;padding:12px 15px;border-radius:11px;
@@ -1895,8 +1896,8 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .reftbl .refrow>*:nth-child(2),.reftbl .refrow>*:nth-child(5){display:none}
   .reftbl .refrow__name{white-space:normal}
   .reftbl .refrow__read{white-space:normal;font-size:12px}
-  .reftbl .reflean{gap:7px}
-  .reftbl .reflean__d{min-width:30px;font-size:12px}
+  .reftbl .reflean{gap:4px}
+  .reftbl .reflean__d{font-size:12px}
   .reftbl .reflean__p{font-size:10.5px}
   .reftbl .refrow--head{font-size:9px;padding:2px 10px}
 }
@@ -1906,3 +1907,8 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .ncf-about__p b{color:var(--ink)}
 .ncf-about .ncf-cards{margin:0 0 14px}
 .ncf-about .ncf-honest{margin:0}
+
+/* "Unique Factors" tag beside the NFL Week box header — blue, per request */
+.tgweek__tag{font-size:12px;font-weight:800;letter-spacing:.02em;color:#2f6fe0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tgweek__tag{color:#79a9f2}}
+:root[data-theme="dark"] .tgweek__tag{color:#79a9f2}

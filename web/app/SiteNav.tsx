@@ -152,8 +152,8 @@ export default function SiteNav() {
 
                 <details className="snav__pgroup snav__pgroup--feat">
                   <summary className="snav__dfeat snav__psum">Context</summary>
-                  <a href="/context" className="snav__dsub">Upset Watch</a>
                   <a href="/considerations" className="snav__dsub">Special Considerations</a>
+                  <a href="/context" className="snav__dsub">Upset Watch</a>
                   <a href="/tailgate" className="snav__dsub">Fan Analysis</a>
                 </details>
 
@@ -180,8 +180,8 @@ export default function SiteNav() {
 
                 <details className="snav__pgroup snav__pgroup--feat">
                   <summary className="snav__dfeat snav__psum">Context</summary>
-                  <a href="/ncaaf/context" className="snav__dsub">Upset Watch</a>
                   <a href="/ncaaf/considerations" className="snav__dsub">Special Considerations</a>
+                  <a href="/ncaaf/context" className="snav__dsub">Upset Watch</a>
                   <a href="/ncaaf/tailgate" className="snav__dsub">Fan Analysis</a>
                 </details>
 
