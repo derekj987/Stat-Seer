@@ -58,9 +58,9 @@ export default function Page() {
   const beatsMarket = a.atsPct > a.breakeven;
   const c = M.card;
   const featured = c.games.filter((g) => g.featured);
-  const rest = c.games.filter((g) => !g.featured);
-  const lead = featured.length ? featured : c.games;
-  const extra = featured.length ? rest : [];
+  const ranked = featured.length ? featured : c.games;   // marquee games for the snapshot
+  const snapshot = ranked.slice(0, 5);                    // first 5 — a clean teaser
+  const snapshotRest = ranked.slice(5);                   // the rest of the ranked games
 
   return (
     <main className="wrap">
@@ -104,31 +104,45 @@ export default function Page() {
         </div>
       </details>
 
-      {/* The full model — our line-blind read beside the market on every game. */}
+      {/* Snapshot — the first few ranked games, with a "see more" for the rest. */}
       <section className="ncf-sec">
         <h2 className="ncf-h">Model vs market — Week {c.week}
-          <span className="ncf-h__note">our line-blind read beside the market&apos;s number, every game</span></h2>
+          <span className="ncf-h__note">our line-blind read beside the market&apos;s number</span></h2>
         <div className="hb-legend">
           <span className="hb-dia">◆</span> Off-consensus — our read is on the other side from the market.
           <span className="hb-x"> · <b>Our Model Suggests</b> is the side our line-blind rating covers —
             informative, <b>not a guaranteed bet</b> (the rating doesn&apos;t beat the spread; see the record above).</span>
         </div>
-        <div className="hb-formcap">Ranked matchups — every game with a top-25 team</div>
         <div className="hb-formwrap">
-          <table className="hb-form"><CardHead /><tbody><CardRows games={lead} /></tbody></table>
+          <table className="hb-form"><CardHead /><tbody><CardRows games={snapshot} /></tbody></table>
         </div>
-        {extra.length > 0 && (
+        {snapshotRest.length > 0 && (
           <details className="hb-more">
             <summary className="hb-more__sum">
               <span className="hb-more__chev" aria-hidden="true">▸</span>
-              See all {extra.length} other games
+              See more ({snapshotRest.length} more ranked games)
             </summary>
             <div className="hb-formwrap">
-              <table className="hb-form"><CardHead /><tbody><CardRows games={extra} /></tbody></table>
+              <table className="hb-form"><CardHead /><tbody><CardRows games={snapshotRest} /></tbody></table>
             </div>
           </details>
         )}
       </section>
+
+      {/* The FULL model — every game on the board, collapsed. */}
+      <details className="hb-panel">
+        <summary className="hb-bar">
+          <span className="hb-bar__title hb-bar__title--gold">Full Model — every game</span>
+          <span className="hb-bar__count">{c.games.length} games</span>
+          <span className="hb-bar__hint">the complete slate, not just the ranked snapshot</span>
+          <span className="hb-bar__chev" aria-hidden="true">▾</span>
+        </summary>
+        <div className="hb-body">
+          <div className="hb-formwrap">
+            <table className="hb-form"><CardHead /><tbody><CardRows games={c.games} /></tbody></table>
+          </div>
+        </div>
+      </details>
 
       {/* College player props — the same layer we're building for the NFL, arriving with data. */}
       <section className="soonpanel">
