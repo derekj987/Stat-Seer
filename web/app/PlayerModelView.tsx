@@ -82,21 +82,14 @@ export default function PlayerModelView({ base, cat }: { base: "nfl" | "ncaaf"; 
         <p className="pmcat__blurb">{active.blurb}</p>
 
         {rows.length === 0 ? (
-          <div className="pmtable" role="table" aria-label={`${active.label} projections`}>
-            <div className="pmrow pmrow--head" role="row">
-              {active.cols.map((col, i) => (
-                <span key={col} className={i === 0 ? "pmcell pmcell--player" : "pmcell"}>{col}</span>
-              ))}
-            </div>
-            <div className="pmempty" role="note">
-              <span className="pmempty__tag">Projections arriving</span>
-              <p>{active.note}</p>
-              <p>
-                The pipeline is <b>built and validated</b> (availability AUC ≈ 0.86). The weekly{" "}
-                <b>{active.label.toLowerCase()}</b> numbers publish here as each week&apos;s live usage is
-                captured — snap-share can&apos;t be backfilled, so it fills in with the season, not before.
-              </p>
-            </div>
+          <div className="pmempty pmempty--solo" role="note">
+            <span className="pmempty__tag">Projections arriving</span>
+            <p>{active.note}</p>
+            <p>
+              The pipeline is <b>built and validated</b> (availability AUC ≈ 0.86). The weekly{" "}
+              <b>{active.label.toLowerCase()}</b> numbers publish here as each week&apos;s live usage is
+              captured — snap-share can&apos;t be backfilled, so it fills in with the season, not before.
+            </p>
           </div>
         ) : (
           <>

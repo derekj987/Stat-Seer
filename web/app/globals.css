@@ -1310,9 +1310,12 @@ details.statsdrop .stats{margin:12px 0 0}
 .pmempty b{color:var(--ink)}
 /* data rows — projection beside the book line */
 .pmscroll{overflow-x:auto;max-width:100%}
-.pmtable--data{max-width:none;min-width:720px}
-.pmrow--data{display:grid;grid-template-columns:minmax(0,1.6fr) 0.5fr 0.85fr 0.85fr 1.3fr 1.3fr;gap:12px;
+.pmtable--data{max-width:none;min-width:760px}
+/* player flexes, team is compact, the four stat cols are equal width with an even gap —
+   identical on every row incl. the header, so columns line up on phone and desktop alike. */
+.pmrow--data{display:grid;grid-template-columns:minmax(110px,1.4fr) 52px repeat(4,1fr);gap:14px;
   align-items:baseline;border-top:1px solid var(--line);font-size:13px}
+.pmempty--solo{border:1px solid var(--line);border-radius:12px;background:var(--surface)}
 .pmrow--head.pmrow--data{border-bottom:0;font-size:11px}
 .pmrow--data:first-child{border-top:0}
 .pmrow--data .pmcell--player{overflow:hidden;text-overflow:ellipsis;font-weight:600}
