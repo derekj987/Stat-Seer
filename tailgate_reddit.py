@@ -422,15 +422,25 @@ def extract(nickname, snippets, env):
 
     client = anthropic.Anthropic(api_key=env["ANTHROPIC_API_KEY"])
     resp = client.messages.create(
-        model=MODEL, max_tokens=2000, thinking={"type": "disabled"},
+        model=MODEL, max_tokens=4000, thinking={"type": "disabled"},
         system=SYSTEM, messages=[{"role": "user", "content": user}],
         output_config={"format": {"type": "json_schema", "schema": BUZZ_SCHEMA}},
     )
     if resp.stop_reason == "refusal":
         print(f"  {nickname}: extraction refused; skipping", file=sys.stderr)
         return []
+    # A response cut off at the token cap leaves the JSON truncated -- don't let that
+    # one team's bad parse crash the whole shard (and email a failure). Log + skip.
+    if resp.stop_reason == "max_tokens":
+        print(f"  {nickname}: extraction hit max_tokens (truncated); skipping",
+              file=sys.stderr)
+        return []
     text = next((b.text for b in resp.content if b.type == "text"), "{}")
-    return json.loads(text).get("buzz", [])
+    try:
+        return json.loads(text).get("buzz", [])
+    except (json.JSONDecodeError, AttributeError) as e:
+        print(f"  {nickname}: unparseable extraction ({e}); skipping", file=sys.stderr)
+        return []
 
 
 def build_rows(abbrev, nickname, buzz, snippets, season, week):
@@ -541,6 +551,7 @@ def main(argv=None):
     print(f"  national feeds -> {len(national)} snippets pooled across all teams")
     start = time.monotonic()
     total_rows, empty_teams, rl_streak, done = 0, 0, 0, 0
+    extracted, errored = 0, 0   # teams we tried to extract/write, and how many threw
     for abbrev in which:
         if time.monotonic() - start > args.max_minutes * 60:
             print(f"\nTime budget ({args.max_minutes:g}m) hit -- stopping cleanly with "
@@ -569,20 +580,39 @@ def main(argv=None):
         print(f"  {abbrev:<4} {len(raw):>3} team + {len(national):>3} natl -> {len(kept):>3} on-topic")
         if args.no_extract or not kept:
             continue
-        buzz = extract(nickname, kept, env)
-        rows = build_rows(abbrev, nickname, buzz, kept, season, week)
-        total_rows += len(rows)
-        for r in rows:
-            tick = f"[{'UP' if r['direction'] == 'up' else 'DN'} x{r['heat']}]"
-            print(f"       {tick:<8} {r['player']} -- {r['angle']}")
-        if args.write:
-            sb_write(env, season, week, nickname, rows)
+        # The extract (Claude) + write (Supabase) are the two steps that reach the
+        # network for real work. A transient hiccup on ONE team (API overload, a
+        # Supabase blip) must not crash the whole shard and email a failure -- the
+        # pipeline is designed to be partial, so log the team and move on. A genuinely
+        # systemic break (bad key, every team failing) still surfaces via the exit
+        # code below.
+        extracted += 1
+        try:
+            buzz = extract(nickname, kept, env)
+            rows = build_rows(abbrev, nickname, buzz, kept, season, week)
+            for r in rows:
+                tick = f"[{'UP' if r['direction'] == 'up' else 'DN'} x{r['heat']}]"
+                print(f"       {tick:<8} {r['player']} -- {r['angle']}")
+            if args.write:
+                sb_write(env, season, week, nickname, rows)
+            total_rows += len(rows)
+        except Exception as e:  # noqa: BLE001 -- one team's failure never kills the shard
+            errored += 1
+            print(f"  {abbrev}: extract/write failed ({type(e).__name__}: {e}); "
+                  f"skipping this team", file=sys.stderr)
 
     if empty_teams and empty_teams == done:
         print("\nWARNING: every team attempted returned 0 snippets -- Reddit is rate-"
               "limiting/blocking this IP (403/429 above).", file=sys.stderr)
     print(f"\n{total_rows} buzz row(s) {'written' if args.write else 'found (dry run)'} "
           f"across {done} team(s).")
+    # Fail the run ONLY if every team we tried to extract/write threw -- that's a real
+    # systemic outage (revoked key, Supabase down) worth an email. A few transient
+    # per-team failures are expected and stay quiet.
+    if extracted and errored == extracted:
+        print(f"\nERROR: all {extracted} extract/write attempt(s) failed -- systemic "
+              f"outage (see per-team errors above).", file=sys.stderr)
+        return 1
     return 0
 
 
