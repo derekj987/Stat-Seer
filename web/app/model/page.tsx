@@ -310,7 +310,10 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         {scored.length === 0 ? (
           <p className="foot">No lines captured for Week {week} yet.</p>
         ) : (
-          <>
+          <div className="imp-wrap">
+            <p className="imp-scrollhint" aria-hidden="true">
+              Swipe for totals <span className="imp-scrollhint__a">→</span>
+            </p>
             <ImpTable rows={scored.slice(0, 6)} refs={refs} />
             {scored.length > 6 && (
               <details className="hb-more">
@@ -321,7 +324,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
                 <ImpTable rows={scored.slice(6)} refs={refs} />
               </details>
             )}
-          </>
+          </div>
         )}
       </details>
 
