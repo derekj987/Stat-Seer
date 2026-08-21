@@ -3,7 +3,7 @@
 // Value Finder's price-shopping props. The Python pipeline is built + validated; the
 // weekly projection OUTPUT wires in here as the season's usage data flows, so each
 // category currently scaffolds an honest "arriving" state rather than inventing numbers.
-import { Brand, FlowSteps, ModelSubnav } from "./Nav";
+import { Brand, FlowSteps, ModelSubnav, ScrollHint } from "./Nav";
 import { PLAYER_PROJECTIONS, PROJ_WEEK, PROJ_PRIOR, type PlayerProj } from "@/lib/playerProjections";
 
 export interface PlayerCat {
@@ -93,8 +93,12 @@ export default function PlayerModelView({ base, cat }: { base: "nfl" | "ncaaf"; 
           </div>
         ) : (
           <>
-            <div className="pmdisc" role="note">
-              <span className="pmempty__tag">How to read this</span>
+            <details className="pmdisc pmdisc--drop">
+              <summary className="pmdisc__sum">
+                <span className="pmempty__tag">How to read this</span>
+                <span className="pmdisc__chev" aria-hidden="true">▾</span>
+              </summary>
+              <div className="pmdisc__body">
               <p>
                 <b>Our proj</b> is a prior-season ({PROJ_PRIOR}) baseline (projected volume × position
                 efficiency) — an honest starting point, but it runs biased for some roles (QBs especially), so
@@ -107,10 +111,12 @@ export default function PlayerModelView({ base, cat }: { base: "nfl" | "ncaaf"; 
                 bygone peak (Cooper Kupp clears 27 rec yds 84% of his career but only 68% in {PROJ_PRIOR}). Green ≥
                 50%, red below.
               </p>
-            </div>
+              </div>
+            </details>
             {games.map((g) => (
               <div className="pmgame" key={g}>
                 <div className="pmgame__h">{g}</div>
+                <ScrollHint />
                 <div className="pmscroll">
                   <div className="pmtable pmtable--data" role="table" aria-label={`${g} ${active.label} projections`}>
                     <div className="pmrow pmrow--head pmrow--data" role="row">

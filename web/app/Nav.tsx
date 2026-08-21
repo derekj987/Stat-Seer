@@ -182,6 +182,16 @@ export function ContextSubnav({ active, base = "nfl" }: {
   );
 }
 
+/** Mobile-only "there's more to the right" nudge for horizontally-scrolling tables.
+ *  Hidden on desktop; shown (with an animated arrow) only on phone widths. */
+export function ScrollHint({ label = "Scroll for more" }: { label?: string }) {
+  return (
+    <p className="scrollnudge" aria-hidden="true">
+      {label} <span className="scrollnudge__a">→</span>
+    </p>
+  );
+}
+
 /** Sub-tabs inside The Model (Game Model · Player Model). Sits under the leftmost
  *  "The Model" flow step, so it left-aligns like the flow. */
 export function ModelSubnav({ active = "game", base = "nfl" }: {
