@@ -190,7 +190,7 @@ export function ShopSubnav({ active, base = "nfl" }: {
     ? { lines: "/ncaaf/lines", props: "/ncaaf/props", best: "/ncaaf/best" }
     : { lines: "/lines", props: "/props", best: "/best" };
   return (
-    <nav className="subnav" aria-label="Value Finder view">
+    <nav className="subnav subnav--value" aria-label="Value Finder view">
       <a href={h.lines} className={active === "lines" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "lines" ? "page" : undefined}>Line Shopping</a>
       <a href={h.props} className={active === "props" ? "subnav__t active" : "subnav__t"}

@@ -259,6 +259,8 @@ body{background:var(--bg);color:var(--ink);
 .subnav__t.active{background:var(--amber);color:#fff;
   box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .subnav__t:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+/* Value Finder tabs slide right to sit under the "Value Finder" flow step (rightmost). */
+.subnav--value{margin-left:auto}
 /* second-level season toggle (Regular / Preseason) — staggered in to the right under
    the area tabs, in darkish-yellow pills to set them apart from the amber area tabs. */
 .subnav--season{background:transparent;border:0;padding:0;gap:8px;margin:2px 0 12px 32px}

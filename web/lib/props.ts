@@ -36,9 +36,6 @@ export const CATEGORIES: Category[] = [
   { key: "passing", label: "Passing", markets: ["player_pass_yds", "player_pass_tds", "player_pass_completions", "player_pass_attempts", "player_pass_interceptions", "player_pass_longest_completion"] },
   { key: "rushing", label: "Rushing", markets: ["player_rush_yds", "player_rush_attempts", "player_rush_longest"] },
   { key: "receiving", label: "Receiving", markets: ["player_reception_yds", "player_receptions", "player_reception_longest"] },
-  { key: "combo", label: "Combo", markets: ["player_rush_reception_yds", "player_pass_rush_reception_yds", "player_pass_rush_reception_tds"] },
-  { key: "kicking", label: "Kicking", markets: ["player_kicking_points", "player_field_goals", "player_pats"] },
-  { key: "defense", label: "Defense", markets: ["player_tackles_assists", "player_sacks", "player_solo_tackles", "player_defensive_interceptions"] },
 ];
 export const categoryByKey = (k: string): Category => CATEGORIES.find((c) => c.key === k) ?? CATEGORIES[0];
 

@@ -1,7 +1,6 @@
 import { weekRange, fetchWeek, buildBoard } from "@/lib/board";
 import { fetchModelWeek, type ModelPrediction } from "@/lib/model";
 import { MODEL_TOTALS } from "@/lib/modelTotals";
-import { weekRefs } from "@/lib/refAssignments";
 import { Brand, FlowSteps, ContextSubnav } from "../Nav";
 
 export const revalidate = 300;
@@ -43,27 +42,6 @@ interface Env {
   modelDisagree: boolean;       // model favors a different side than the market
 }
 
-/** Plain-English read: which side of the MARKET spread the model favors (cover, not
- * just winner), and its over/under lean. */
-function bottomLine(e: Env): { spread: string; total: string | null } | null {
-  if (e.spread === null || e.modelMarginHome === null) return null;
-  const mag = Math.abs(e.spread);
-  const marketFavHome = e.spread < 0;
-  const dog = marketFavHome ? e.away : e.home;
-  const modelMarginForFav = marketFavHome ? e.modelMarginHome : -e.modelMarginHome;
-  const spread = mag < 0.5
-    ? "neither side (it's a pick'em)"
-    : modelMarginForFav >= mag
-      ? `the ${e.favLabel} side`
-      : `the underdog ${dog} +${mag.toFixed(1)}`;
-  let total: string | null = null;
-  if (e.modelTotal !== null && e.total !== null) {
-    const d = e.modelTotal - e.total;
-    total = Math.abs(d) < 1 ? null : d < 0 ? "the under" : "the over";
-  }
-  return { spread, total };
-}
-
 function favLabel(home: string, away: string, spread: number | null): string {
   if (spread === null) return "—";
   if (spread === 0) return "PK";
@@ -86,9 +64,6 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
   try {
     for (const p of await fetchModelWeek(week, SEASON)) modelById.set(p.eventId, p);
   } catch { /* predictions may not be published for this week yet */ }
-
-  // Per-game referee crew (empty until assignments post game-week).
-  const refs = await weekRefs(week, SEASON);
 
   const envs: Env[] = board.map((g) => {
     const total = g.total.consensus;
@@ -114,7 +89,6 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
     };
   });
 
-  const scored = envs.filter((e) => e.total !== null).sort((a, b) => (b.total! - a.total!));
   const upsets = envs.filter((e) => e.modelDisagree && e.modelFav); // model likes the market's dog
 
   return (
@@ -165,82 +139,10 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
         )}
       </section>
 
-      {/* --- Scoring environment: implied team totals (collapsible) --- */}
-      <details className="ctxsec ctxdrop" open>
-        <summary className="ctxsec__h">Lines &amp; the model&apos;s read</summary>
-        <p className="ctxsec__d">
-          The market&apos;s <b>spread</b> and <b>total</b> for each game, with our <b>line-blind model&apos;s</b>
-          own read of each sitting right beside it.
-        </p>
-        <details className="readbox">
-          <summary className="readbox__h">How to read a row</summary>
-          <p>
-            Take <b>NO @ DET</b>: the market has set <b>DET −7</b> with a <b>49</b> total; our model, which never
-            sees the line, independently reads it <b>DET −8.0</b> with a <b>46.3</b> total. This is our read
-            <em> next to</em> the market&apos;s — for understanding where we agree and differ, not a bet.
-          </p>
-          <p className="readbox__note">
-            The <b className="modh">model</b> columns are <b>our own line-blind projected spread and total</b> —
-            shown next to the market&apos;s for comparison, not as the market&apos;s numbers. (Our total is
-            calibrated but <b>not sharper than the market</b> — an honest read, not an edge.)
-            &nbsp;<span className="offcmark">⚑</span> means our model is <b>off consensus</b> on the spread; see
-            <a href="/model"> The Model</a>. <span className="ssmark">◆</span> marks a <b>sweet spot</b> — a
-            spread or total on a key number; act on it in <a href="/best">Sweet Spots</a>.
-          </p>
-        </details>
-
-        {scored.length === 0 ? (
-          <p className="foot">No lines captured for Week {week} yet.</p>
-        ) : (
-          <>
-            <div className="imptable" role="table" aria-label="Lines and implied team totals">
-              <div className="improw improw--head" role="row">
-                <span>game</span><span>spread</span>
-                <span className="improw__modh">model spread</span><span>total</span>
-                <span className="improw__modh">model total</span>
-              </div>
-              {scored.map((e) => {
-                const bl = bottomLine(e);
-                const crew = refs.get(e.home);
-                return (
-                <div className="impgame" key={e.eventId}>
-                <div className="improw" role="row">
-                  <span className="improw__g">
-                    {e.away}<span className="at">@</span>{e.home}
-                    {e.neutral && <span className="badge neutral">NEUTRAL</span>}
-                  </span>
-                  <span className="improw__sp">
-                    {e.favLabel}
-                    {e.spreadKey && <span className="ssmark" title={`Sweet spot — key number ${e.spreadKey.num} (½pt ≈ ${e.spreadKey.cost.toFixed(0)}%)`}>◆</span>}
-                  </span>
-                  <span className="improw__mod">
-                    {e.modelSpread ?? "—"}
-                    {e.modelDisagree && <span className="offcmark" title="Off consensus — our model favors a different side than the market">⚑</span>}
-                  </span>
-                  <span className="improw__tot">
-                    {e.total!.toFixed(1)}
-                    {e.totalKey && <span className="ssmark" title={`Sweet spot — key total ${e.totalKey.num} (½pt ≈ ${e.totalKey.cost.toFixed(0)}%)`}>◆</span>}
-                  </span>
-                  <span className="improw__mod">{e.modelTotal !== null ? e.modelTotal.toFixed(1) : "—"}</span>
-                </div>
-                <div className="impbottom">
-                  <span className="impbottom__k">Bottom line</span>
-                  {bl
-                    ? <span>Our model favors <b>{bl.spread}</b>{bl.total && <> and <b>{bl.total}</b></>}.</span>
-                    : <span className="impbottom__none">No model read for this game yet.</span>}
-                  {crew && (
-                    <span className="impbottom__crew">
-                      Crew: <b>{crew.referee}</b> ({crew.tendency}, {crew.pen} pen/g)
-                    </span>
-                  )}
-                </div>
-                </div>
-                );
-              })}
-            </div>
-          </>
-        )}
-      </details>
+      <p className="ctxsec__d">
+        Looking for the market&apos;s line beside our read on every game? That full model view now
+        lives on <a href="/model">The Model</a>.
+      </p>
 
       {/* --- Honest roadmap: data-dependent panels not yet live --- */}
       <section className="ctxsec">

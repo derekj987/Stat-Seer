@@ -1,5 +1,5 @@
 import { Brand, FlowSteps, ContextSubnav } from "../../Nav";
-import { NCAAF_MODEL, type NcaafCardGame, type NcaafUpset } from "../model-data";
+import { NCAAF_MODEL, type NcaafUpset } from "../model-data";
 
 // College Football — Context · Upset Watch (Context landing). Mirrors the NFL Context
 // page: underdogs our line-blind rating backs against the market, then every game's line
@@ -13,22 +13,8 @@ export const metadata = {
 
 const M = NCAAF_MODEL;
 
-/** Honest per-game read. The CFB rating is compressed and verified NOT to beat the
- *  spread, so we never emit a cover pick — we state agreement/disagreement on the
- *  favorite and show our line-blind number beside the market's. */
-function bottomLine(g: NcaafCardGame): string {
-  const ps = g.projSpread;
-  const ms = g.marketSpread;
-  const tl = g.totalLean;
-  const totalBit = tl ? ` Total read leans ${tl.dir === "OVER" ? "over" : "under"} ${tl.num}.` : "";
-  if (!ms) return `Our line-blind read: ${ps.fav} ${ps.num}.${totalBit}`;
-  if (g.off) return `Off consensus — the market favors ${ms.fav}, our rating leans ${ps.fav}. A divergence to understand, not a bet.${totalBit}`;
-  return `Model and market agree ${ms.fav} is the side; our line-blind margin is ${Math.abs(ps.num)} vs the market's ${Math.abs(ms.num)}.${totalBit}`;
-}
-
 export default function Page() {
   const c = M.card;
-  const games: readonly NcaafCardGame[] = c.games;
   const upsets: readonly NcaafUpset[] = c.upsets;
 
   return (
@@ -81,64 +67,10 @@ export default function Page() {
         )}
       </section>
 
-      {/* --- Lines & the model's read: every game, market beside our projection --- */}
-      <details className="ctxsec ctxdrop" open>
-        <summary className="ctxsec__h">Lines &amp; the model&apos;s read <span className="ctxsec__n">{games.length} games</span></summary>
-        <p className="ctxsec__d">
-          The market&apos;s <b>spread</b> and <b>total</b> for each game, with our <b>line-blind rating&apos;s</b> own
-          read of each sitting right beside it — top-25 matchups first.
-        </p>
-        <details className="readbox">
-          <summary className="readbox__h">How to read a row</summary>
-          <p>
-            Take a game with the market at <b>Georgia −6.5</b> and a <b>52.5</b> total: our rating, which never sees
-            the line, independently reads it <b>Georgia −3.2</b>. That&apos;s our read <em>next to</em> the
-            market&apos;s — for understanding where we agree and differ, not a bet.
-          </p>
-          <p className="readbox__note">
-            The <b className="modh">model</b> columns are <b>our own line-blind projected spread and total</b>, shown
-            next to the market&apos;s for comparison — <b>not</b> sharper than the market (our rating is compressed and
-            doesn&apos;t beat the number; see <a href="/ncaaf/model">The Model</a>).
-            &nbsp;<span className="offcmark">⚑</span> means our rating is <b>off consensus</b> on who&apos;s favored.
-          </p>
-        </details>
-
-        {games.length === 0 ? (
-          <p className="foot">No lines on the board for Week {c.week} yet.</p>
-        ) : (
-          <div className="imptable" role="table" aria-label="Lines and the model's read">
-            <div className="improw improw--head" role="row">
-              <span>game</span><span>spread</span>
-              <span className="improw__modh">model spread</span><span>total</span>
-              <span className="improw__modh">model total</span>
-            </div>
-            {games.map((g) => {
-              const ms = g.marketSpread; const ps = g.projSpread;
-              return (
-                <div className="impgame" key={`${g.away}-${g.home}`}>
-                  <div className="improw" role="row">
-                    <span className="improw__g">
-                      {g.away}<span className="at">@</span>{g.home}
-                      {g.neutral ? <span className="badge neutral">NEUTRAL</span> : null}
-                    </span>
-                    <span className="improw__sp">{ms ? `${ms.fav} ${ms.num}` : "—"}</span>
-                    <span className="improw__mod">
-                      {ps.fav} {ps.num}
-                      {g.off && <span className="offcmark" title="Off consensus — our rating favors a different side than the market">⚑</span>}
-                    </span>
-                    <span className="improw__tot">{g.marketTotal !== null ? g.marketTotal.toFixed(1) : "—"}</span>
-                    <span className="improw__mod">{g.projTotal.toFixed(1)}</span>
-                  </div>
-                  <div className="impbottom">
-                    <span className="impbottom__k">Bottom line</span>
-                    <span>{bottomLine(g)}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </details>
+      <p className="ctxsec__d">
+        Looking for the market&apos;s line beside our read on every game? That full model view lives on{" "}
+        <a href="/ncaaf/model">The Model</a>.
+      </p>
 
       {/* --- Honest roadmap: data-dependent panels not yet live for CFB --- */}
       <section className="ctxsec">

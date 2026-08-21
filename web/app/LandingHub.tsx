@@ -182,7 +182,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
       <div className="lp-sport lp-sport--nfl">
         <Flow sport="nfl" label="NFL" />
         <div className="lp-snaplabel">NFL · Week {nfl.week} — a snapshot</div>
-        <Panel title="The Model Card — NFL" count={`${nfl.card.length} games`} hint="our model’s read beside the market’s" open>
+        <Panel title="The Model Card — Snapshot View" count={`${nfl.card.length} games`} hint="our model’s read beside the market’s" open>
           <NflCardTable rows={nfl.card} />
           <p className="lp-cardfoot"><a href="/model">See the full model →</a></p>
         </Panel>
@@ -206,7 +206,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
       <div className="lp-sport lp-sport--ncaaf">
         <Flow sport="ncaaf" label="College Football" />
         <div className="lp-snaplabel">College Football · Week {ncaaf.week} — a snapshot</div>
-        <Panel title="The Model Card — NCAAF" count={`${ncaaf.games.length} ranked`} hint="our line-blind read beside the market" open>
+        <Panel title="The Model Card — Snapshot View" count={`${ncaaf.games.length} ranked`} hint="our line-blind read beside the market" open>
           <NcaafCardTable games={ncaaf.games} />
           <p className="lp-cardfoot"><a href="/ncaaf/model">See the full model →</a></p>
         </Panel>
