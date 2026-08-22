@@ -14,8 +14,10 @@ export interface SlipItem {
   kind: SlipKind;
   title: string;       // main label, e.g. "Spread BUF -2.5" / "Josh Allen O 249.5"
   detail?: string;     // secondary, e.g. the matchup or the source
-  price?: number;      // american odds, when the item has a price
+  price?: number;      // american odds (best across books), when the item has a price
   books?: string[];    // best-price sportsbook(s), when known
+  byBook?: Record<string, number>;  // EVERY book's american price for this leg — the raw
+                                     // material for "best book per leg" + best combined parlay
 }
 
 const KEY = "statseer.slip.v2";

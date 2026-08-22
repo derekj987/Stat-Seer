@@ -43,6 +43,7 @@ export interface Pick {
   label: string;
   price: number;
   books: string[];
+  byBook?: Record<string, number>;
 }
 
 function BookTag({ books }: { books: string[] }) {
@@ -97,8 +98,8 @@ function GameCard({
   const bestEdge = ml.reduce((m, [, s]) => Math.max(m, s.edge), 0);
   const s = g.spread;
   const t = g.total;
-  const mk = (market: string, label: string, price: number, books: string[]): Pick => ({
-    id: `${g.eventId}:${market}:${label}`, game: g.matchup, market, label, price, books,
+  const mk = (market: string, label: string, price: number, books: string[], byBook?: Record<string, number>): Pick => ({
+    id: `${g.eventId}:${market}:${label}`, game: g.matchup, market, label, price, books, byBook,
   });
   const chip = (p: Pick, best?: boolean) => (
     <SavableChip key={p.id} pick={p} saved={has(p.id)} best={best} onToggle={onToggle} />
@@ -118,7 +119,7 @@ function GameCard({
         <div className="mkt">
           <span className="mkt__label">Moneyline</span>
           <div className="lines">
-            {ml.map(([side, m]) => chip(mk("ML", side, m.price, m.books), side === bestSide))}
+            {ml.map(([side, m]) => chip(mk("ML", side, m.price, m.books, m.byBook), side === bestSide))}
           </div>
           <div className="mkt__note"><span className="edge">shop&nbsp;+{bestEdge.toFixed(1)}%</span></div>
         </div>
@@ -127,8 +128,8 @@ function GameCard({
           <div className="mkt">
             <span className="mkt__label">Spread</span>
             <div className="lines">
-              {chip(mk("Spread", `${g.home} ${fmtPt(s.home.point)}`, s.home.price, s.home.books))}
-              {chip(mk("Spread", `${g.away} ${fmtPt(s.away.point)}`, s.away.price, s.away.books))}
+              {chip(mk("Spread", `${g.home} ${fmtPt(s.home.point)}`, s.home.price, s.home.books, s.home.byBook))}
+              {chip(mk("Spread", `${g.away} ${fmtPt(s.away.point)}`, s.away.price, s.away.books, s.away.byBook))}
             </div>
             <div className="mkt__note">
               {s.key && <span className="badge sm">SWEET SPOT</span>}
@@ -141,8 +142,8 @@ function GameCard({
           <div className="mkt">
             <span className="mkt__label">Total</span>
             <div className="lines">
-              {chip(mk("Total", `O ${t.over.point}`, t.over.price, t.over.books))}
-              {chip(mk("Total", `U ${t.under.point}`, t.under.price, t.under.books))}
+              {chip(mk("Total", `O ${t.over.point}`, t.over.price, t.over.books, t.over.byBook))}
+              {chip(mk("Total", `U ${t.under.point}`, t.under.price, t.under.books, t.under.byBook))}
             </div>
             <div className="mkt__note">
               {t.key && <span className="badge sm">SWEET SPOT</span>}
@@ -162,7 +163,7 @@ export default function BoardView({
   const toggle = useCallback((p: Pick) => slipToggle({
     id: p.id, kind: "line",
     title: `${p.market} ${p.label}`, detail: p.game,
-    price: p.price, books: p.books,
+    price: p.price, books: p.books, byBook: p.byBook,
   }), [slipToggle]);
 
   const edges = board.flatMap((g) => Object.values(g.ml).map((s) => s.edge));

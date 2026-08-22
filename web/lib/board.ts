@@ -25,10 +25,12 @@ export interface Line {
   point: number | null;
   price: number;
   books: string[];
+  byBook: Record<string, number>;   // every book's best price at this point
 }
 export interface MlSide {
   price: number;
   books: string[];
+  byBook: Record<string, number>;   // every book's best price for this side
   edge: number;
   n: number;
 }
@@ -76,10 +78,14 @@ export function median(xs: number[]): number {
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 
-function bestPrice(rows: OddsRow[]): { price: number; books: string[] } {
+function bestPrice(rows: OddsRow[]): { price: number; books: string[]; byBook: Record<string, number> } {
+  const byBook: Record<string, number> = {};
+  for (const r of rows) {
+    if (byBook[r.book] === undefined || r.price_american > byBook[r.book]) byBook[r.book] = r.price_american;
+  }
   const top = Math.max(...rows.map((r) => r.price_american));
   const books = [...new Set(rows.filter((r) => r.price_american === top).map((r) => r.book))].sort();
-  return { price: top, books };
+  return { price: top, books, byBook };
 }
 
 function moneyline(rows: OddsRow[]): Record<string, MlSide> {
@@ -87,9 +93,9 @@ function moneyline(rows: OddsRow[]): Record<string, MlSide> {
   for (const r of rows) (sides[r.outcome_name] ??= []).push(r);
   const out: Record<string, MlSide> = {};
   for (const [side, rs] of Object.entries(sides)) {
-    const { price, books } = bestPrice(rs);
+    const { price, books, byBook } = bestPrice(rs);
     const edge = (median(rs.map((r) => implied(r.price_american))) - implied(price)) * 100;
-    out[side] = { price, books, edge, n: rs.length };
+    out[side] = { price, books, byBook, edge, n: rs.length };
   }
   return out;
 }
@@ -99,8 +105,8 @@ function lineSide(rows: OddsRow[], want: "max" | "min"): Line | null {
   if (!pts.length) return null;
   const tgt = want === "max" ? Math.max(...pts) : Math.min(...pts);
   const at = rows.filter((r) => r.outcome_point === tgt);
-  const { price, books } = bestPrice(at);
-  return { point: tgt, price, books };
+  const { price, books, byBook } = bestPrice(at);
+  return { point: tgt, price, books, byBook };
 }
 
 // Books trade in half-points, but a median across an even number of books can land on

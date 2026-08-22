@@ -19,6 +19,7 @@ interface Leg {
   bet: string; // e.g. "ATTD" / "O 249.5"
   best: number;
   books: string[];
+  byBook?: Record<string, number>;
 }
 
 function PropChip({ q, market, marketLabel, game, saved, onToggle }: {
@@ -27,7 +28,7 @@ function PropChip({ q, market, marketLabel, game, saved, onToggle }: {
   const bet = marketLabel === "ATTD" ? "ATTD" : sideLabel(q.side, q.line) || q.side;
   const leg: Leg = {
     id: `${q.eventId}:${market}:${q.player}:${q.side}:${q.line}`,
-    game, player: q.player, bet, best: q.price, books: q.books,
+    game, player: q.player, bet, best: q.price, books: q.books, byBook: q.byBook,
   };
   return (
     <button
@@ -83,7 +84,7 @@ export default function PropsView({ games, embedded }: { games: PropGame[]; embe
   const toggle = useCallback((l: Leg) => slipToggle({
     id: l.id, kind: "prop",
     title: `${l.player} ${l.bet}`, detail: l.game,
-    price: l.best, books: l.books,
+    price: l.best, books: l.books, byBook: l.byBook,
   }), [slipToggle]);
 
   const players = games.reduce(
