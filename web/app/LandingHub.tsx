@@ -412,17 +412,17 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
           <NflCardTable rows={nfl.card} />
           <p className="lp-cardfoot"><a href="/model">See the full model →</a></p>
         </Panel>
-        <Panel title="Player Model snapshot — NFL" count="props" hint="our line-blind player-prop projections">
+        <Panel title="Player Model snapshot — NFL" count="props" hint="our line-blind player-prop projections" open>
           <PlayerSnapshot base="nfl" />
         </Panel>
-        <Panel title="Check out our fan analysis." count={nfl.players.length || "—"} hint="fan-sourced players, hype-rated">
+        <Panel title="Check out our fan analysis." count={nfl.players.length || "—"} hint="fan-sourced players, hype-rated" open>
           <FanAnalysisNote />
           <PlayersTable players={nfl.players} />
         </Panel>
-        <Panel title="Check out our special considerations" count={`${GAME_WEATHER.length || 3} games`} hint="site, weather & referee context per game">
+        <Panel title="Check out our special considerations" count={`${GAME_WEATHER.length || 3} games`} hint="site, weather & referee context per game" open>
           <NflConsiderations />
         </Panel>
-        <Panel title="Potential Upsets of the Week — NFL" count={nfl.upsets.length} hint="the market has them losing — our model says they win">
+        <Panel title="Potential Upsets of the Week — NFL" count={nfl.upsets.length} hint="the market has them losing — our model says they win" open>
           {nfl.upsets.length === 0 ? <p className="hb-empty">No upset alerts this week — our model and the market agree on every game&apos;s side.</p> : (
             <UpsetCards>{nfl.upsets.map((u) => (
               <div className="hb-up" key={u.eventId}>
@@ -433,7 +433,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
             ))}</UpsetCards>
           )}
         </Panel>
-        <Panel title="Referee Crew Analysis" count={`${REF_STATS.length} crews`} hint="how many flags each crew throws — the one tendency that carries over">
+        <Panel title="Referee Crew Analysis" count={`${REF_STATS.length} crews`} hint="how many flags each crew throws — the one tendency that carries over" open>
           <RefereeAnalysis />
         </Panel>
       </div>
@@ -446,17 +446,17 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
           <NcaafCardTable games={ncaaf.games} />
           <p className="lp-cardfoot"><a href="/ncaaf/model">See the full model →</a></p>
         </Panel>
-        <Panel title="Player Model snapshot — NCAAF" count="props" hint="our line-blind player-prop projections">
+        <Panel title="Player Model snapshot — NCAAF" count="props" hint="our line-blind player-prop projections" open>
           <PlayerSnapshot base="ncaaf" />
         </Panel>
-        <Panel title="Check out our fan analysis." count="—" hint="fan-sourced players, hype-rated">
+        <Panel title="Check out our fan analysis." count="—" hint="fan-sourced players, hype-rated" open>
           <FanAnalysisNote />
           <p className="hb-empty">College player reads land here once the CFB fan scan is wired — the same read we run for the NFL on <a href="/ncaaf/tailgate">Fan Analysis</a>.</p>
         </Panel>
-        <Panel title="Check out our special considerations" count="context" hint="home field, conference strength & more">
+        <Panel title="Check out our special considerations" count="context" hint="home field, conference strength & more" open>
           <NcaafConsiderations />
         </Panel>
-        <Panel title="Potential Upsets of the Week — NCAAF" count={ncaaf.upsets.length} hint="the market has them losing — our model says they win">
+        <Panel title="Potential Upsets of the Week — NCAAF" count={ncaaf.upsets.length} hint="the market has them losing — our model says they win" open>
           {ncaaf.upsets.length === 0 ? <p className="hb-empty">No upset alerts this week — our rating agrees with the market&apos;s favorite on the board.</p> : (
             <UpsetCards>{ncaaf.upsets.map((u) => (
               <div className="hb-up" key={`${u.dog}-${u.matchup}`}>
