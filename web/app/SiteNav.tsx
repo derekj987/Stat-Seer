@@ -15,7 +15,7 @@ type Me = { username: string; role: string; title: string | null } | null;
 const LINKS = [
   { href: "/", label: "Home", on: (p: string) => p === "/" },
   { href: "/model", label: "The Model", on: (p: string) => p.startsWith("/model") },
-  { href: "/context", label: "Context", on: (p: string) => ["/context", "/considerations", "/tailgate"].some((x) => p.startsWith(x)) },
+  { href: "/considerations", label: "Context", on: (p: string) => ["/context", "/considerations", "/tailgate"].some((x) => p.startsWith(x)) },
   { href: "/lines", label: "Value Finder", on: (p: string) => ["/lines", "/props", "/preseason", "/best"].some((x) => p.startsWith(x)) },
   { href: "/forum", label: "Community", on: (p: string) => p.startsWith("/forum") },
 ];

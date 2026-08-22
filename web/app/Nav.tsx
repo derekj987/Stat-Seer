@@ -13,8 +13,8 @@ export function FlowSteps({ active, base = "nfl" }: {
   active: "analyze" | "context" | "value"; base?: "nfl" | "ncaaf";
 }) {
   const hrefs = base === "ncaaf"
-    ? { analyze: "/ncaaf/model", context: "/ncaaf/context", value: "/ncaaf/lines" }
-    : { analyze: "/model", context: "/context", value: "/lines" };
+    ? { analyze: "/ncaaf/model", context: "/ncaaf/considerations", value: "/ncaaf/lines" }
+    : { analyze: "/model", context: "/considerations", value: "/lines" };
   const steps = [
     { key: "analyze", n: "1", label: "The Model", sub: "make your analysis", href: hrefs.analyze },
     { key: "context", n: "2", label: "Context", sub: "read the room", href: hrefs.context },

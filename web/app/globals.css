@@ -1505,7 +1505,15 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-formcap{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
   font-weight:700;margin:0 0 8px}
 /* "See all N other games" — the rest of the slate, folded away by default */
-.hb-more{margin-top:2px;padding-top:4px}
+/* The "see more" toggle sits at the BOTTOM of its list: the expanded rows (order 1)
+   render above the summary button (order 2), so opening never splits the table in half
+   — the rows stay contiguous with the lead rows and the button drops below them.
+   NOTE: display:flex on <details> defeats the browser's native hide-when-closed, so we
+   re-hide the non-summary content ourselves when the panel is closed. */
+.hb-more{margin-top:2px;padding-top:4px;display:flex;flex-direction:column}
+.hb-more>*{order:1}
+.hb-more>summary{order:2;margin-top:12px}
+.hb-more:not([open])>*:not(summary){display:none}
 .hb-more__sum{list-style:none;cursor:pointer;display:flex;justify-content:center;align-items:center;gap:7px;
   font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:var(--accent)}
 .hb-more__sum::-webkit-details-marker{display:none}

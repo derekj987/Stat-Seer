@@ -149,7 +149,7 @@ const numStr = (v: number | null) => (v === null ? "—" : String(v));
 
 const STEPS = [
   { n: 1, key: "model", title: "The Model", lead: "What the data says.", href: { nfl: "/model", ncaaf: "/ncaaf/model" } },
-  { n: 2, key: "context", title: "Read the Room", lead: "The factors you may not have thought of.", href: { nfl: "/context", ncaaf: "/ncaaf/context" } },
+  { n: 2, key: "context", title: "Read the Room", lead: "The factors you may not have thought of.", href: { nfl: "/considerations", ncaaf: "/ncaaf/considerations" } },
   { n: 3, key: "value", title: "Find the Value", lead: "Decide your picks — we tell you where to place them.", href: { nfl: "/lines", ncaaf: "/ncaaf/lines" } },
 ] as const;
 
