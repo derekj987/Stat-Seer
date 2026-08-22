@@ -381,29 +381,12 @@ a.sportstrip__i:hover{color:var(--ink)}
 .cxcard__statk{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .cxcard__statnote{margin:8px 0 0;font-size:12px;color:var(--muted);line-height:1.45}
 .lp-cxbtn{margin-top:12px}
-/* Referee-crew snapshot inside the homepage considerations panel — set off from the
-   game cards above by a divider, with the same gold call-out as the full page. */
-.lp-refsnap{margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
-.lp-refsnap__h{margin:0;font-size:17px;font-weight:800;letter-spacing:-.01em;color:var(--gold)}
-.lp-refsnap__sub{margin:5px 0 12px;font-size:12.5px;line-height:1.5;color:var(--muted)}
+/* Referee Crew Analysis snapshot on the landing page (its own panel). */
+.lp-refsnap__sub{margin:0 0 12px;font-size:12.5px;line-height:1.5;color:var(--muted)}
 .lp-refsnap__sub b{color:var(--ink)}
-/* Homepage considerations "see more": one centered pure-CSS toggle reveals the rest of
-   the game cards AND the rest of the referee crews (hidden blocks are .cxsnap-extra). */
-.cxsnap-toggle{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-.cxsnap-extra{display:none}
-/* two-class hide so it beats the later `.reftable{display:flex}` rule on specificity */
-.reftable.cxsnap-extra{display:none;margin-top:4px}
-.cxgrid.cxsnap-extra{display:none}
-.cxsnap-toggle:checked ~ .cxgrid.cxsnap-extra{display:grid;margin-top:12px}
-.cxsnap-toggle:checked ~ .lp-refsnap .reftable.cxsnap-extra{display:flex}
-.cxsnap-more{display:flex;justify-content:center;align-items:center;gap:7px;cursor:pointer;
-  margin-top:16px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:var(--accent)}
-.cxsnap-more:hover{filter:brightness(1.12)}
-.cxsnap-more__chev{display:inline-block;font-size:10px;transition:transform .15s ease}
-.cxsnap-toggle:checked ~ .cxsnap-more .cxsnap-more__chev{transform:rotate(180deg)}
-.cxsnap-more__close{display:none}
-.cxsnap-toggle:checked ~ .cxsnap-more .cxsnap-more__open{display:none}
-.cxsnap-toggle:checked ~ .cxsnap-more .cxsnap-more__close{display:inline}
+/* "see more" bodies on the landing page get a little breathing room above the extra rows */
+.lp-moregrid{margin-top:12px}
+.lp-moretbl{margin-top:4px}
 /* Fan Analysis cards reuse the considerations card shell */
 .cxcard--fan .tgstock{margin-left:auto;flex:0 0 auto}
 .cxcard--up{border-left:3px solid var(--accent)}
@@ -676,9 +659,10 @@ a.fauthor:hover{text-decoration:underline}
 
 /* --- referee crews --- */
 .reftable{display:flex;flex-direction:column;gap:4px;overflow-x:auto}
-/* flexible columns (fr) so the table stretches to fill the page instead of sitting cramped */
+/* flexible columns (fr) so the table stretches to fill the page instead of sitting cramped.
+   Order: Crew (games in parens) · Avg Total · Leans O/U · Leans ATS · Pen/G · Read */
 .refrow{display:grid;
-  grid-template-columns:minmax(150px,2.2fr) 54px minmax(108px,1.4fr) 60px 78px minmax(112px,1.25fr) minmax(112px,1.25fr);
+  grid-template-columns:minmax(150px,2fr) 78px minmax(112px,1.2fr) minmax(112px,1.2fr) 64px minmax(120px,1.35fr);
   gap:12px;align-items:center;padding:10px 16px;background:var(--surface);border:1px solid var(--line);
   border-radius:9px;font-size:14.5px}
 details.ctxdrop>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:8px;margin-bottom:8px}
@@ -2079,17 +2063,18 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .explainer--wide p{max-width:none}
 /* Referee-crews heading — bigger, stands out */
 .ctxsec__h--big{font-size:21px;font-weight:800;color:var(--ink)}
-/* Referee table on phones: fill the width by dropping games + avg-total, wrap the rest */
+/* Referee table on phones: fill the width by dropping Avg Total (col 2) + Read (col 6),
+   leaving Crew · O/U · ATS · Pen/G. (games are inline in the crew name now.) */
 @media (max-width:640px){
-  .reftbl .refrow{grid-template-columns:minmax(0,1.5fr) minmax(0,1.55fr) 38px minmax(0,1.05fr) minmax(0,1.05fr);
+  .reftable .refrow{grid-template-columns:minmax(0,1.7fr) minmax(0,1.1fr) minmax(0,1.1fr) 40px;
     gap:7px;padding:8px 10px;font-size:12px}
-  .reftbl .refrow>*:nth-child(2),.reftbl .refrow>*:nth-child(5){display:none}
-  .reftbl .refrow__name{white-space:normal}
-  .reftbl .refrow__read{white-space:normal;font-size:12px}
-  .reftbl .reflean{gap:4px}
-  .reftbl .reflean__d{font-size:12px}
-  .reftbl .reflean__p{font-size:10.5px}
-  .reftbl .refrow--head{font-size:9px;padding:2px 10px}
+  .reftable .refrow>*:nth-child(2),.reftable .refrow>*:nth-child(6){display:none}
+  .reftable .refrow__name{white-space:normal}
+  .reftable .refrow__read{white-space:normal;font-size:12px}
+  .reftable .reflean{gap:4px}
+  .reftable .reflean__d{font-size:12px}
+  .reftable .reflean__p{font-size:10.5px}
+  .reftable .refrow--head{font-size:9px;padding:2px 10px}
 }
 
 /* NCAAF model "how good is it?" dropdown — intro + honest scoreboard inside */

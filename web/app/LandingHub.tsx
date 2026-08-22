@@ -55,53 +55,63 @@ function refRowEl(r: (typeof REF_STATS)[number]) {
   const ats = r.atsFav >= 50 ? { d: "Fav", p: r.atsFav } : { d: "Dog", p: 100 - r.atsFav };
   return (
     <div className="refrow" key={r.name}>
-      <span className="refrow__name">{r.name}</span>
-      <span className="refrow__v muted">{r.games}</span>
-      <span className="refrow__read">{flag ? <b className={flag.tone}>{flag.label}</b> : <span className="muted">Average flags</span>}</span>
-      <span className={r.pen >= REF_LEAGUE.pen ? "refrow__v hot" : "refrow__v cool"}>{r.pen}</span>
+      <span className="refrow__name">{r.name} <span className="refrow__n">({r.games})</span></span>
       <span className="refrow__v">{r.total}</span>
       <span className="reflean"><b className="reflean__d">{ou.d}</b> <span className="reflean__p">({ou.p}%)</span></span>
       <span className="reflean"><b className="reflean__d">{ats.d}</b> <span className="reflean__p">({ats.p}%)</span></span>
+      <span className={r.pen >= REF_LEAGUE.pen ? "refrow__v hot" : "refrow__v cool"}>{r.pen}</span>
+      <span className="refrow__read">{flag ? <b className={flag.tone}>{flag.label}</b> : <span className="muted">Average flags</span>}</span>
     </div>
   );
 }
 
-/** NFL considerations snapshot: first 3 game cards + first 4 referee crews shown by
- *  default, one centered "See more" (pure-CSS toggle) reveals the rest of both, plus a
- *  link to the full Special Considerations page. */
+/** NFL considerations snapshot: first 3 per-game cards, "see more" for the rest. */
 function NflConsiderations() {
   const all = GAME_WEATHER;
   if (!all.length) return <p className="hb-empty">Considerations load with the week&apos;s board — see <a href="/considerations">Special Considerations</a>.</p>;
-  const leadCards = all.slice(0, 3);
-  const restCards = all.slice(3);
-  const leadCrews = REF_STATS.slice(0, 4);
-  const restCrews = REF_STATS.slice(4);
-  const hasMore = restCards.length > 0 || restCrews.length > 0;
+  const lead = all.slice(0, 3);
+  const rest = all.slice(3);
   return (
     <>
-      {/* pure-CSS "see more": the checkbox toggles both hidden blocks below it */}
-      <input type="checkbox" id="cxsnap-nfl" className="cxsnap-toggle" aria-hidden="true" tabIndex={-1} />
-      <div className="cxgrid cxgrid--snap">{leadCards.map(cxCardEl)}</div>
-      {restCards.length > 0 && <div className="cxgrid cxgrid--snap cxsnap-extra">{restCards.map(cxCardEl)}</div>}
-      <div className="lp-refsnap">
-        <h3 className="lp-refsnap__h">Referee Crews</h3>
-        <p className="lp-refsnap__sub">The one crew tendency that carries over year to year — <b>how many flags they throw</b>.</p>
-        <div className="reftable">
-          <div className="refrow refrow--head">
-            <span>crew</span><span>games</span><span>read</span><span>pen/g</span><span>avg total</span><span>leans O/U</span><span>leans ATS</span>
-          </div>
-          {leadCrews.map(refRowEl)}
-        </div>
-        {restCrews.length > 0 && <div className="reftable cxsnap-extra">{restCrews.map(refRowEl)}</div>}
-      </div>
-      {hasMore && (
-        <label htmlFor="cxsnap-nfl" className="cxsnap-more">
-          <span className="cxsnap-more__chev" aria-hidden="true">▾</span>
-          <span className="cxsnap-more__open">See more</span>
-          <span className="cxsnap-more__close">See less</span>
-        </label>
+      <div className="cxgrid cxgrid--snap">{lead.map(cxCardEl)}</div>
+      {rest.length > 0 && (
+        <details className="hb-more">
+          <summary className="hb-more__sum">
+            <span className="hb-more__chev" aria-hidden="true">▸</span>
+            See more ({rest.length} more games)
+          </summary>
+          <div className="cxgrid cxgrid--snap lp-moregrid">{rest.map(cxCardEl)}</div>
+        </details>
       )}
       <div className="lp-cxbtn"><a className="btn btn--primary" href="/considerations">For the full slate, click here →</a></div>
+    </>
+  );
+}
+
+/** Referee Crew Analysis snapshot — first 3 crews, "see more" for the rest, link to the
+ *  full breakdown. Its own panel on the landing page (under Potential Upsets). */
+function RefereeAnalysis() {
+  const lead = REF_STATS.slice(0, 3);
+  const rest = REF_STATS.slice(3);
+  return (
+    <>
+      <p className="lp-refsnap__sub">The one crew tendency that carries over year to year — <b>how many flags they throw</b>. Everything else is historical context, not a lean.</p>
+      <div className="reftable">
+        <div className="refrow refrow--head">
+          <span>crew</span><span>avg total</span><span>leans O/U</span><span>leans ATS</span><span>pen/g</span><span>read</span>
+        </div>
+        {lead.map(refRowEl)}
+      </div>
+      {rest.length > 0 && (
+        <details className="hb-more">
+          <summary className="hb-more__sum">
+            <span className="hb-more__chev" aria-hidden="true">▸</span>
+            See {rest.length} more crews
+          </summary>
+          <div className="reftable lp-moretbl">{rest.map(refRowEl)}</div>
+        </details>
+      )}
+      <div className="lp-cxbtn"><a className="btn btn--primary" href="/considerations">See the full analysis →</a></div>
     </>
   );
 }
@@ -200,8 +210,8 @@ function NflRows({ rows }: { rows: CardRow[] }) {
 }
 function NflCardTable({ rows }: { rows: CardRow[] }) {
   if (!rows.length) return <p className="hb-empty">The NFL board opens when this week&apos;s odds and reads post.</p>;
-  const lead = rows.slice(0, 6);   // snapshot — first 6 games
-  const rest = rows.slice(6);
+  const lead = rows.slice(0, 3);   // snapshot — first 3 games
+  const rest = rows.slice(3);
   return (
     <>
       <div className="hb-formwrap"><table className="hb-form"><NflHead /><tbody><NflRows rows={lead} /></tbody></table></div>
@@ -242,8 +252,8 @@ function NcaafRows({ games }: { games: readonly NcaafCardGame[] }) {
 function NcaafCardTable({ games }: { games: NcaafCardGame[] }) {
   const featured = games.filter((g) => g.featured);
   const src = featured.length ? featured : games;
-  const lead = src.slice(0, 6);   // snapshot — first 6 ranked games
-  const rest = src.slice(6);
+  const lead = src.slice(0, 3);   // snapshot — first 3 ranked games
+  const rest = src.slice(3);
   return (
     <>
       <div className="hb-formwrap"><table className="hb-form"><NcaafHead /><tbody><NcaafRows games={lead} /></tbody></table></div>
@@ -264,25 +274,42 @@ function playLine(p: PlayerPick): string {
   if (p.side === "Yes") { const l = p.marketLabel ?? "anytime TD"; return l.charAt(0).toUpperCase() + l.slice(1); }
   return [p.side, p.line != null ? String(p.line) : null, p.marketLabel].filter(Boolean).join(" ");
 }
+function PlrHead() {
+  return <thead><tr><th className="hb-l">Player</th><th>Team</th><th>The play</th><th>Best book</th><th>Trending on</th></tr></thead>;
+}
+function PlrRows({ players }: { players: PlayerPick[] }) {
+  return (
+    <>
+      {players.map((p) => (
+        <tr key={p.id}>
+          <td className="hb-l"><a className="hb-plrlink" href="/tailgate">{p.player}</a></td>
+          <td className="hb-num">{p.team}</td>
+          <td><span className={p.dir === "down" ? "hb-plr__up hb-plr__down" : "hb-plr__up"} aria-hidden="true">{p.dir === "down" ? "▼" : "▲"}</span> {playLine(p)}</td>
+          <td>{p.book ?? "—"}</td>
+          <td className="hb-plr__srccell">{p.sources.length ? p.sources.join(" · ") : "—"}</td>
+        </tr>
+      ))}
+    </>
+  );
+}
 function PlayersTable({ players }: { players: PlayerPick[] }) {
   if (!players.length) return <p className="hb-empty">Player reads post with the week&apos;s props — see <a href="/tailgate">Fan Analysis</a>.</p>;
+  const capped = players.slice(0, 14);
+  const lead = capped.slice(0, 3);
+  const rest = capped.slice(3);
   return (
-    <div className="hb-formwrap">
-      <table className="hb-form hb-plrtable">
-        <thead><tr><th className="hb-l">Player</th><th>Team</th><th>The play</th><th>Best book</th><th>Trending on</th></tr></thead>
-        <tbody>
-          {players.slice(0, 14).map((p) => (
-            <tr key={p.id}>
-              <td className="hb-l"><a className="hb-plrlink" href="/tailgate">{p.player}</a></td>
-              <td className="hb-num">{p.team}</td>
-              <td><span className={p.dir === "down" ? "hb-plr__up hb-plr__down" : "hb-plr__up"} aria-hidden="true">{p.dir === "down" ? "▼" : "▲"}</span> {playLine(p)}</td>
-              <td>{p.book ?? "—"}</td>
-              <td className="hb-plr__srccell">{p.sources.length ? p.sources.join(" · ") : "—"}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <>
+      <div className="hb-formwrap"><table className="hb-form hb-plrtable"><PlrHead /><tbody><PlrRows players={lead} /></tbody></table></div>
+      {rest.length > 0 && (
+        <details className="hb-more">
+          <summary className="hb-more__sum">
+            <span className="hb-more__chev" aria-hidden="true">▸</span>
+            See more ({rest.length} more players)
+          </summary>
+          <div className="hb-formwrap"><table className="hb-form hb-plrtable"><PlrHead /><tbody><PlrRows players={rest} /></tbody></table></div>
+        </details>
+      )}
+    </>
   );
 }
 
@@ -319,26 +346,41 @@ function PlayerSnapshot({ base }: { base: Sport }) {
       </>
     );
   }
+  const psnapRow = (r: (typeof rows)[number]) => {
+    const over = r.proj >= r.book;
+    return (
+      <tr key={`${r.player}-${r.market}`}>
+        <td className="hb-l"><a className="hb-plrlink" href={href}>{r.player}</a></td>
+        <td className="hb-num">{r.team}</td>
+        <td>{PROP_LABEL[r.market] ?? r.market} {r.book}</td>
+        <td className="hb-suggest"><span className="hb-sugwrap"><span className="hb-sug"><span className={`hb-sug__t pmarrow--${over ? "up" : "down"}`}>{over ? "▲ Over" : "▼ Under"} · proj {r.proj}</span></span></span></td>
+      </tr>
+    );
+  };
+  const lead = rows.slice(0, 3);
+  const rest = rows.slice(3);
   return (
     <>
       <div className="hb-formwrap">
         <table className="hb-form">
           <thead><tr><th className="hb-l">Player</th><th>Team</th><th>Prop</th><th>Our Model Suggests</th></tr></thead>
-          <tbody>
-            {rows.map((r) => {
-              const over = r.proj >= r.book;
-              return (
-                <tr key={`${r.player}-${r.market}`}>
-                  <td className="hb-l"><a className="hb-plrlink" href={href}>{r.player}</a></td>
-                  <td className="hb-num">{r.team}</td>
-                  <td>{PROP_LABEL[r.market] ?? r.market} {r.book}</td>
-                  <td className="hb-suggest"><span className="hb-sugwrap"><span className="hb-sug"><span className={`hb-sug__t pmarrow--${over ? "up" : "down"}`}>{over ? "▲ Over" : "▼ Under"} · proj {r.proj}</span></span></span></td>
-                </tr>
-              );
-            })}
-          </tbody>
+          <tbody>{lead.map(psnapRow)}</tbody>
         </table>
       </div>
+      {rest.length > 0 && (
+        <details className="hb-more">
+          <summary className="hb-more__sum">
+            <span className="hb-more__chev" aria-hidden="true">▸</span>
+            See more ({rest.length} more)
+          </summary>
+          <div className="hb-formwrap">
+            <table className="hb-form">
+              <thead><tr><th className="hb-l">Player</th><th>Team</th><th>Prop</th><th>Our Model Suggests</th></tr></thead>
+              <tbody>{rest.map(psnapRow)}</tbody>
+            </table>
+          </div>
+        </details>
+      )}
       <p className="lp-cardfoot"><a href={href}>See the full Player Model →</a></p>
     </>
   );
@@ -390,6 +432,9 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
               </div>
             ))}</UpsetCards>
           )}
+        </Panel>
+        <Panel title="Referee Crew Analysis" count={`${REF_STATS.length} crews`} hint="how many flags each crew throws — the one tendency that carries over">
+          <RefereeAnalysis />
         </Panel>
       </div>
 

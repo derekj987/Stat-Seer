@@ -44,15 +44,14 @@ function refRow(r: (typeof REF_STATS)[number]) {
   const ats = r.atsFav >= 50 ? { d: "Fav", p: r.atsFav } : { d: "Dog", p: 100 - r.atsFav };
   return (
     <div className="refrow" key={r.name}>
-      <span className="refrow__name">{r.name}</span>
-      <span className="refrow__v muted">{r.games}</span>
-      <span className="refrow__read">
-        {flag ? <b className={flag.tone}>{flag.label}</b> : <span className="muted">Average flags</span>}
-      </span>
-      <span className={r.pen >= REF_LEAGUE.pen ? "refrow__v hot" : "refrow__v cool"}>{r.pen}</span>
+      <span className="refrow__name">{r.name} <span className="refrow__n">({r.games})</span></span>
       <span className="refrow__v">{r.total}</span>
       <span className="reflean"><b className="reflean__d">{ou.d}</b> <span className="reflean__p">({ou.p}%)</span></span>
       <span className="reflean"><b className="reflean__d">{ats.d}</b> <span className="reflean__p">({ats.p}%)</span></span>
+      <span className={r.pen >= REF_LEAGUE.pen ? "refrow__v hot" : "refrow__v cool"}>{r.pen}</span>
+      <span className="refrow__read">
+        {flag ? <b className={flag.tone}>{flag.label}</b> : <span className="muted">Average flags</span>}
+      </span>
     </div>
   );
 }
@@ -189,7 +188,7 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
              persistent, called-out tendency). --- */}
       <section className="ctxsec cxfeat" aria-label="Referee crews">
         <div className="cxfeat__bar">
-          <h2 className="cxfeat__h">Referee Crews</h2>
+          <h2 className="cxfeat__h">Referee Crew Analysis</h2>
           <p className="cxfeat__sub">
             The one crew tendency that carries over year to year — <b>how many flags they throw</b>. Everything
             else here is historical context, not a lean.
@@ -206,7 +205,7 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
         </div>
         <div className="reftable">
           <div className="refrow refrow--head">
-            <span>crew</span><span>games</span><span>read</span><span>pen/g</span><span>avg total</span><span>leans O/U</span><span>leans ATS</span>
+            <span>crew</span><span>avg total</span><span>leans O/U</span><span>leans ATS</span><span>pen/g</span><span>read</span>
           </div>
           {REF_STATS.slice(0, 6).map(refRow)}
         </div>
