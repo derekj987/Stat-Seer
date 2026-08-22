@@ -1,0 +1,70 @@
+name: Refresh CFB ratings
+
+# Rebuilds the CFB power rating + homepage Card and commits web/app/ncaaf/model-data.ts
+# (which auto-deploys via Vercel). This is the cloud replacement for the local Windows
+# Task "StatSeer-CFB-Refresh" / cfb_refresh.cmd, so the ratings no longer depend on a
+# laptop being on.
+#
+# The model reads data/cfb.db (SQLite, gitignored) which does NOT exist on a fresh runner,
+# so we rebuild it from source each run: cfb_backfill (games) -> cfb_lines (betting lines,
+# needed by the ATS backtest + book-shop numbers) -> cfb_export (writes model-data.ts).
+# CFBD is cheap (a few calls/season) and ratings only move on game days, so weekly
+# (post-weekend) is the useful cadence. All times UTC.
+
+on:
+  schedule:
+    - cron: "0 8 * 8-12,1 2"   # weekly, Tuesday 08:00 UTC, Aug-Jan (through the playoff)
+  workflow_dispatch: {}         # manual "Run workflow"
+
+concurrency:
+  group: refresh-cfb-ratings
+  cancel-in-progress: false
+
+env:
+  SEASON: "2026"   # bump each year (cfb_export's CARD_SEASON constant bumps too)
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write   # commit the regenerated model-data.ts
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so the rebase-before-push works cleanly
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet numpy certifi
+
+      - name: Rebuild cfb.db — games (2020..current) + betting lines
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+        run: |
+          python cfb_backfill.py --start 2020 --end "$SEASON"
+          python cfb_lines.py --start 2020 --end 2024
+
+      - name: Export /ncaaf model-data.ts
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: python cfb_export.py
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- web/app/ncaaf/model-data.ts; then
+            echo "No CFB rating/card change — nothing to commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/app/ncaaf/model-data.ts
+          git commit -m "chore: refresh CFB ratings + card (auto)"
+          # Several bots push this branch; a push can lose the race (non-fast-forward)
+          # even right after a rebase. Retry rebase+push a few times before failing.
+          for i in 1 2 3 4 5; do
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || git rebase --abort || true
+            if git push; then echo "pushed on attempt $i"; exit 0; fi
+            echo "push attempt $i lost the race; retrying..."; sleep $((RANDOM % 5 + 2))
+          done
+          echo "push still rejected after 5 attempts"; exit 1
