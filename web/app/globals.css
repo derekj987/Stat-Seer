@@ -387,6 +387,23 @@ a.sportstrip__i:hover{color:var(--ink)}
 .lp-refsnap__h{margin:0;font-size:17px;font-weight:800;letter-spacing:-.01em;color:var(--gold)}
 .lp-refsnap__sub{margin:5px 0 12px;font-size:12.5px;line-height:1.5;color:var(--muted)}
 .lp-refsnap__sub b{color:var(--ink)}
+/* Homepage considerations "see more": one centered pure-CSS toggle reveals the rest of
+   the game cards AND the rest of the referee crews (hidden blocks are .cxsnap-extra). */
+.cxsnap-toggle{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.cxsnap-extra{display:none}
+/* two-class hide so it beats the later `.reftable{display:flex}` rule on specificity */
+.reftable.cxsnap-extra{display:none;margin-top:4px}
+.cxgrid.cxsnap-extra{display:none}
+.cxsnap-toggle:checked ~ .cxgrid.cxsnap-extra{display:grid;margin-top:12px}
+.cxsnap-toggle:checked ~ .lp-refsnap .reftable.cxsnap-extra{display:flex}
+.cxsnap-more{display:flex;justify-content:center;align-items:center;gap:7px;cursor:pointer;
+  margin-top:16px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:var(--accent)}
+.cxsnap-more:hover{filter:brightness(1.12)}
+.cxsnap-more__chev{display:inline-block;font-size:10px;transition:transform .15s ease}
+.cxsnap-toggle:checked ~ .cxsnap-more .cxsnap-more__chev{transform:rotate(180deg)}
+.cxsnap-more__close{display:none}
+.cxsnap-toggle:checked ~ .cxsnap-more .cxsnap-more__open{display:none}
+.cxsnap-toggle:checked ~ .cxsnap-more .cxsnap-more__close{display:inline}
 /* Fan Analysis cards reuse the considerations card shell */
 .cxcard--fan .tgstock{margin-left:auto;flex:0 0 auto}
 .cxcard--up{border-left:3px solid var(--accent)}

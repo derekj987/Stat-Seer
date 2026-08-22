@@ -30,62 +30,78 @@ function refFlag(pen: number): { label: string; tone: "hot" | "cool" } | null {
   return null;
 }
 
-/** Snapshot of the Referee Crews table — the first 6 crews + a "come inside" button. */
-function RefereeSnapshot() {
+/** One per-game consideration card (site + weather). */
+function cxCardEl(w: GameWeather) {
   return (
-    <div className="lp-refsnap">
-      <h3 className="lp-refsnap__h">Referee Crews</h3>
-      <p className="lp-refsnap__sub">The one crew tendency that carries over year to year — <b>how many flags they throw</b>.</p>
-      <div className="reftable">
-        <div className="refrow refrow--head">
-          <span>crew</span><span>games</span><span>read</span><span>pen/g</span><span>avg total</span><span>leans O/U</span><span>leans ATS</span>
-        </div>
-        {REF_STATS.slice(0, 6).map((r) => {
-          const flag = refFlag(r.pen);
-          const ou = r.over >= 50 ? { d: "Over", p: r.over } : { d: "Under", p: 100 - r.over };
-          const ats = r.atsFav >= 50 ? { d: "Fav", p: r.atsFav } : { d: "Dog", p: 100 - r.atsFav };
-          return (
-            <div className="refrow" key={r.name}>
-              <span className="refrow__name">{r.name}</span>
-              <span className="refrow__v muted">{r.games}</span>
-              <span className="refrow__read">{flag ? <b className={flag.tone}>{flag.label}</b> : <span className="muted">Average flags</span>}</span>
-              <span className={r.pen >= REF_LEAGUE.pen ? "refrow__v hot" : "refrow__v cool"}>{r.pen}</span>
-              <span className="refrow__v">{r.total}</span>
-              <span className="reflean"><b className="reflean__d">{ou.d}</b> <span className="reflean__p">({ou.p}%)</span></span>
-              <span className="reflean"><b className="reflean__d">{ats.d}</b> <span className="reflean__p">({ats.p}%)</span></span>
-            </div>
-          );
-        })}
-      </div>
-      <div className="lp-cxbtn"><a className="btn btn--primary" href="/considerations">To see the rest, come inside! →</a></div>
+    <article className={`cxcard${w.windFlag ? " cxcard--wind" : ""}`} key={w.eventId}>
+      <header className="cxcard__head">
+        <span className="matchup">{w.away}<span className="at">@</span>{w.home}</span>
+        <time className="kick">{cxKick(w.commence)}</time>
+        {w.neutral && <span className="badge neutral">NEUTRAL</span>}
+      </header>
+      <dl className="cxcard__rows">
+        <div className="cxrow"><dt className="cxrow__k">Site</dt><dd className="cxrow__v">{cxSite(w)}<span className="cxroof"> · {cxRoof(w.roof)}</span></dd></div>
+        <div className="cxrow"><dt className="cxrow__k">Weather</dt><dd className="cxrow__v">{w.windFlag && <b className="wxflag">⚑&nbsp;WIND</b>} {cxWeather(w)}</dd></div>
+        <div className="cxrow"><dt className="cxrow__k">Referee</dt><dd className="cxrow__v"><span className="muted">Crew tagged game week</span></dd></div>
+      </dl>
+    </article>
+  );
+}
+
+/** One crew row in the referee snapshot table. */
+function refRowEl(r: (typeof REF_STATS)[number]) {
+  const flag = refFlag(r.pen);
+  const ou = r.over >= 50 ? { d: "Over", p: r.over } : { d: "Under", p: 100 - r.over };
+  const ats = r.atsFav >= 50 ? { d: "Fav", p: r.atsFav } : { d: "Dog", p: 100 - r.atsFav };
+  return (
+    <div className="refrow" key={r.name}>
+      <span className="refrow__name">{r.name}</span>
+      <span className="refrow__v muted">{r.games}</span>
+      <span className="refrow__read">{flag ? <b className={flag.tone}>{flag.label}</b> : <span className="muted">Average flags</span>}</span>
+      <span className={r.pen >= REF_LEAGUE.pen ? "refrow__v hot" : "refrow__v cool"}>{r.pen}</span>
+      <span className="refrow__v">{r.total}</span>
+      <span className="reflean"><b className="reflean__d">{ou.d}</b> <span className="reflean__p">({ou.p}%)</span></span>
+      <span className="reflean"><b className="reflean__d">{ats.d}</b> <span className="reflean__p">({ats.p}%)</span></span>
     </div>
   );
 }
 
-/** NFL: 3 per-game consideration cards + a referee-crew snapshot + buttons to the full slate. */
+/** NFL considerations snapshot: first 3 game cards + first 4 referee crews shown by
+ *  default, one centered "See more" (pure-CSS toggle) reveals the rest of both, plus a
+ *  link to the full Special Considerations page. */
 function NflConsiderations() {
-  const cards = GAME_WEATHER.slice(0, 3);
-  if (!cards.length) return <p className="hb-empty">Considerations load with the week&apos;s board — see <a href="/considerations">Special Considerations</a>.</p>;
+  const all = GAME_WEATHER;
+  if (!all.length) return <p className="hb-empty">Considerations load with the week&apos;s board — see <a href="/considerations">Special Considerations</a>.</p>;
+  const leadCards = all.slice(0, 3);
+  const restCards = all.slice(3);
+  const leadCrews = REF_STATS.slice(0, 4);
+  const restCrews = REF_STATS.slice(4);
+  const hasMore = restCards.length > 0 || restCrews.length > 0;
   return (
     <>
-      <div className="cxgrid cxgrid--snap">
-        {cards.map((w) => (
-          <article className={`cxcard${w.windFlag ? " cxcard--wind" : ""}`} key={w.eventId}>
-            <header className="cxcard__head">
-              <span className="matchup">{w.away}<span className="at">@</span>{w.home}</span>
-              <time className="kick">{cxKick(w.commence)}</time>
-              {w.neutral && <span className="badge neutral">NEUTRAL</span>}
-            </header>
-            <dl className="cxcard__rows">
-              <div className="cxrow"><dt className="cxrow__k">Site</dt><dd className="cxrow__v">{cxSite(w)}<span className="cxroof"> · {cxRoof(w.roof)}</span></dd></div>
-              <div className="cxrow"><dt className="cxrow__k">Weather</dt><dd className="cxrow__v">{w.windFlag && <b className="wxflag">⚑&nbsp;WIND</b>} {cxWeather(w)}</dd></div>
-              <div className="cxrow"><dt className="cxrow__k">Referee</dt><dd className="cxrow__v"><span className="muted">Crew tagged game week</span></dd></div>
-            </dl>
-          </article>
-        ))}
+      {/* pure-CSS "see more": the checkbox toggles both hidden blocks below it */}
+      <input type="checkbox" id="cxsnap-nfl" className="cxsnap-toggle" aria-hidden="true" tabIndex={-1} />
+      <div className="cxgrid cxgrid--snap">{leadCards.map(cxCardEl)}</div>
+      {restCards.length > 0 && <div className="cxgrid cxgrid--snap cxsnap-extra">{restCards.map(cxCardEl)}</div>}
+      <div className="lp-refsnap">
+        <h3 className="lp-refsnap__h">Referee Crews</h3>
+        <p className="lp-refsnap__sub">The one crew tendency that carries over year to year — <b>how many flags they throw</b>.</p>
+        <div className="reftable">
+          <div className="refrow refrow--head">
+            <span>crew</span><span>games</span><span>read</span><span>pen/g</span><span>avg total</span><span>leans O/U</span><span>leans ATS</span>
+          </div>
+          {leadCrews.map(refRowEl)}
+        </div>
+        {restCrews.length > 0 && <div className="reftable cxsnap-extra">{restCrews.map(refRowEl)}</div>}
       </div>
+      {hasMore && (
+        <label htmlFor="cxsnap-nfl" className="cxsnap-more">
+          <span className="cxsnap-more__chev" aria-hidden="true">▾</span>
+          <span className="cxsnap-more__open">See more</span>
+          <span className="cxsnap-more__close">See less</span>
+        </label>
+      )}
       <div className="lp-cxbtn"><a className="btn btn--primary" href="/considerations">For the full slate, click here →</a></div>
-      <RefereeSnapshot />
     </>
   );
 }
