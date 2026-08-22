@@ -18,7 +18,10 @@ Two honest limits, handled explicitly:
 import argparse
 import json
 import os
+import re
 import sys
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
@@ -100,12 +103,25 @@ def load_env(path=".env"):
                 os.environ.setdefault(k.strip(), v.strip())
 
 
-def sb(path):
+def sb(path, tries=3):
+    """Supabase read with transient-retry. A network blip / 5xx is retried with
+    backoff; a persistent failure raises after the last attempt (a real outage
+    should surface). PostgREST returns 200 [] for 'no rows', so empty is not an
+    error here — this only guards against transient failures."""
     url = os.environ["SUPABASE_URL"].rstrip("/")
     key = os.environ["SUPABASE_SERVICE_KEY"]
     req = urllib.request.Request(f"{url}/rest/v1/{path}",
                                  headers={"apikey": key, "Authorization": f"Bearer {key}"})
-    return json.loads(urllib.request.urlopen(req, timeout=45).read())
+    for attempt in range(tries):
+        try:
+            return json.loads(urllib.request.urlopen(req, timeout=45).read())
+        except (urllib.error.URLError, urllib.error.HTTPError) as e:
+            code = getattr(e, "code", None)
+            if code and code < 500:
+                raise   # 4xx = genuine (bad path/permission), surface it
+            if attempt < tries - 1:
+                time.sleep(2 * (attempt + 1)); continue
+            raise       # persistent 5xx / network outage -> real, let it email
 
 
 def current_week_games(season, week):
@@ -239,6 +255,20 @@ def main():
     for r in out:
         ts += "  " + json.dumps(r) + ",\n"
     ts += "];\n"
+
+    # Stability: WEATHER_UPDATED changes every run, which would make the file differ
+    # (and the workflow commit + push) on EVERY run even when no forecast changed --
+    # needless churn + exposure to the concurrent-push race. If the only difference
+    # from the existing file is that timestamp line, keep the old file byte-for-byte so
+    # `git diff --quiet` is satisfied and nothing is committed.
+    def _strip_ts(s):
+        return re.sub(r'export const WEATHER_UPDATED = "[^"]*";', "", s)
+    if os.path.exists(args.out):
+        with open(args.out, "r", encoding="utf-8") as f:
+            old = f.read()
+        if _strip_ts(old) == _strip_ts(ts):
+            print(f"no weather change ({len(out)} games) — kept existing file")
+            return
     with open(args.out, "w", encoding="utf-8") as f:
         f.write(ts)
     print(f"wrote {len(out)} games -> {args.out}")

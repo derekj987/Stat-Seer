@@ -19,12 +19,19 @@ import argparse
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone, timedelta
 
 import odds_client as oc
+
+
+class TransientError(Exception):
+    """A network blip or upstream 5xx that should make the run skip cleanly
+    (exit 0) rather than email a FAILURE. Genuine problems (bad key -> 401,
+    quota -> 429, schema/permission 4xx) are NOT transient and still surface."""
 
 BASE = "https://api.the-odds-api.com/v4/sports/americanfootball_nfl"
 DEFAULT_MARKETS = (
@@ -40,19 +47,35 @@ DEFAULT_MARKETS = (
 FIXTURE = os.path.join("fixtures", "props_event_raw.json")
 
 
-def _get(url):
-    try:
-        r = urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "statseer/1.0"}), timeout=60)
-        return r.getcode(), r.headers, r.read()
-    except urllib.error.HTTPError as e:
-        return e.code, e.headers, e.read()
+def _get(url, tries=3):
+    """GET with transient-retry. Returns (status, headers, body). A 5xx or a
+    network error is retried with backoff; if it still fails, a network error
+    surfaces as status 0 (callers treat 0 and 5xx as transient). 4xx bodies are
+    returned as-is so the caller can tell a genuine 401/429 from a blip."""
+    for attempt in range(tries):
+        try:
+            r = urllib.request.urlopen(
+                urllib.request.Request(url, headers={"User-Agent": "statseer/1.0"}), timeout=60)
+            return r.getcode(), r.headers, r.read()
+        except urllib.error.HTTPError as e:
+            if 500 <= e.code < 600 and attempt < tries - 1:
+                time.sleep(2 * (attempt + 1)); continue
+            return e.code, e.headers, e.read()
+        except urllib.error.URLError as e:   # timeout / DNS / connection reset
+            if attempt < tries - 1:
+                time.sleep(2 * (attempt + 1)); continue
+            return 0, {}, str(e).encode()
+    return 0, {}, b"unreachable"
 
 
 def fetch_events(key):
     status, hdr, body = _get(f"{BASE}/events?apiKey={key}")
-    if status != 200:
-        raise RuntimeError(f"events HTTP {status}: {body[:200]!r}")
-    return json.loads(body)
+    if status == 200:
+        return json.loads(body)
+    # 0 (network) or 5xx = transient -> skip the run, don't email.
+    if status == 0 or 500 <= status <= 599:
+        raise TransientError(f"events list HTTP {status} (transient)")
+    raise RuntimeError(f"events HTTP {status}: {body[:200]!r}")  # 401/429 = genuine
 
 
 def fetch_event_props(key, event_id, markets, regions):
@@ -121,9 +144,18 @@ def write_props(rows, env, batch=500):
         chunk = rows[i:i + batch]
         req = urllib.request.Request(endpoint, data=json.dumps(chunk).encode("utf-8"),
                                      headers=headers, method="POST")
-        with urllib.request.urlopen(req, timeout=60) as r:
-            if r.getcode() in (200, 201, 204):
-                written += len(chunk)
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                if r.getcode() in (200, 201, 204):
+                    written += len(chunk)
+        except urllib.error.HTTPError as e:
+            detail = e.read().decode("utf-8", "replace")[:300]
+            print(f"  ! props batch {i // batch}: HTTP {e.code} {detail}", file=sys.stderr)
+            if e.code < 500:
+                raise   # 4xx = genuine schema/permission problem, owner must fix
+            raise TransientError(f"Supabase write HTTP {e.code} (transient)")
+        except urllib.error.URLError as e:
+            raise TransientError(f"Supabase write network error ({e.reason})")
     return written
 
 
@@ -166,7 +198,11 @@ def main(argv=None):
         if not key:
             print("ERROR: ODDS_API_KEY missing", file=sys.stderr); return 1
         oc.ensure_ssl_certs()
-        events = fetch_events(key)
+        try:
+            events = fetch_events(key)
+        except TransientError as e:
+            print(f"transient: {e}; skipping this run (no email)", file=sys.stderr)
+            return 0
         if args.commence_within is not None:
             events = [e for e in events if within_window(e["commence_time"], args.commence_within)]
         if args.max_events:
@@ -204,7 +240,11 @@ def main(argv=None):
     if not args.write:
         print("\nDRY RUN — nothing written. Add --write to insert into prop_snapshots.")
         return 0
-    n = write_props(all_rows, env)
+    try:
+        n = write_props(all_rows, env)
+    except TransientError as e:
+        print(f"transient: {e}; skipping this run (no email)", file=sys.stderr)
+        return 0
     print(f"\nwrote {n} rows to prop_snapshots")
     return 0
 

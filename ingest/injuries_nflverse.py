@@ -115,7 +115,11 @@ def fetch_injuries(season):
     except urllib.error.HTTPError as e:
         if e.code == 404:
             return None, f"no injuries file for {season} yet (404 — pre-Week-1)"
+        if 500 <= e.code < 600:   # transient upstream error — skip today, don't email
+            return None, f"nflverse HTTP {e.code} (transient) — skipping today"
         raise
+    except urllib.error.URLError as e:   # timeout / DNS / reset — transient
+        return None, f"network error fetching injuries ({e.reason}) — skipping today"
     return list(csv.DictReader(io.StringIO(text))), url
 
 
@@ -237,6 +241,11 @@ def main(argv=None):
         source_url = note
         week = args.week or (latest_week(rows) if args.current else None)
         if week is None:
+            # --current but the file exists with no populated week yet (the pre-Week-1
+            # boundary): a normal no-op, not an error. Only a real --season misuse fails.
+            if args.current:
+                print("no injury rows with a resolvable week yet — nothing to do")
+                return 0
             print("ERROR: --season needs --week (or use --current)", file=sys.stderr)
             return 1
 

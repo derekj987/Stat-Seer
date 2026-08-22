@@ -104,11 +104,15 @@ def _get(env, table, query):
 
 
 def fetch_fresh_games():
-    """Download the latest nflverse games.csv (updated with results during the season)."""
+    """Download the latest nflverse games.csv (updated with results during the season).
+    Returns None on a transient fetch failure so the caller can fall back / skip."""
     oc.ensure_ssl_certs()
     req = urllib.request.Request(oc.GAMES_URL, headers={"User-Agent": "statseer/1.0"})
-    with urllib.request.urlopen(req, timeout=60) as r:
-        data = r.read()
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            data = r.read()
+    except (urllib.error.URLError, urllib.error.HTTPError):
+        return None
     with open(GAMES_LOCAL, "wb") as fh:
         fh.write(data)
     return pd.read_csv(GAMES_LOCAL, low_memory=False)
@@ -117,18 +121,34 @@ def fetch_fresh_games():
 def live(write, fetch):
     env = oc.load_env()
     oc.ensure_ssl_certs()
-    g = fetch_fresh_games() if fetch else pd.read_csv(GAMES_LOCAL, low_memory=False)
+    if fetch:
+        g = fetch_fresh_games()
+        if g is None:   # transient fetch failure — use local copy, or skip today
+            if os.path.exists(GAMES_LOCAL):
+                print("games.csv fetch failed (transient) — using local copy")
+                g = pd.read_csv(GAMES_LOCAL, low_memory=False)
+            else:
+                print("games.csv fetch failed (transient) and no local copy — skipping today")
+                return 0
+    else:
+        g = pd.read_csv(GAMES_LOCAL, low_memory=False)
 
     # subject is the HOME team; model_prob is P(home wins). We grade WIN/LOSS on the
     # home team so it lines up with the public_calibration view (which calibrates
     # model_prob against the home outcome).
     # Only grade the current model version — superseded versions (e.g. the pre-
     # calibration v1) stay in the ledger as an audit trail but out of the record.
-    preds = _get(env, "prediction_ledger",
-                 f"?section=eq.MODEL&model_version=eq.{gm.MODEL_VERSION}"
-                 "&select=id,event_id,season,week,subject,model_prob&limit=5000")
-    graded = {r["prediction_id"] for r in
-              _get(env, "prediction_results", "?select=prediction_id&limit=10000")}
+    try:
+        preds = _get(env, "prediction_ledger",
+                     f"?section=eq.MODEL&model_version=eq.{gm.MODEL_VERSION}"
+                     "&select=id,event_id,season,week,subject,model_prob&limit=5000")
+        graded = {r["prediction_id"] for r in
+                  _get(env, "prediction_results", "?select=prediction_id&limit=10000")}
+    except (urllib.error.URLError, urllib.error.HTTPError) as e:
+        # Transient Supabase read failure — skip today rather than email a FAILURE.
+        # A persistent outage just means grades land on the next daily run.
+        print(f"Supabase read failed (transient): {e} — skipping today")
+        return 0
 
     fin = g[g.home_score.notna()]
     results = {(int(r.season), int(r.week), r.home_team): r for _, r in fin.iterrows()}

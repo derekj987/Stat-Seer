@@ -16,6 +16,8 @@ import argparse
 import json
 import os
 import sys
+import time
+import urllib.error
 import urllib.request
 from collections import defaultdict
 
@@ -46,8 +48,18 @@ def pg(query):
             f"{url}/rest/v1/prop_snapshots{query}",
             headers={"apikey": key, "Authorization": f"Bearer {key}",
                      "Range": f"{off}-{off+PAGE-1}", "Range-Unit": "items"})
-        with urllib.request.urlopen(req, timeout=60) as r:
-            page = json.loads(r.read())
+        # Transient-retry: a Supabase 5xx / network blip is retried with backoff; a
+        # persistent failure or a genuine 4xx raises so a real outage still surfaces.
+        for attempt in range(3):
+            try:
+                with urllib.request.urlopen(req, timeout=60) as r:
+                    page = json.loads(r.read())
+                break
+            except (urllib.error.URLError, urllib.error.HTTPError) as e:
+                code = getattr(e, "code", None)
+                if (code and code < 500) or attempt == 2:
+                    raise
+                time.sleep(2 * (attempt + 1))
         out += page
         if len(page) < PAGE:
             break

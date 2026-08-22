@@ -36,6 +36,7 @@ import argparse
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -324,10 +325,21 @@ def fetch_live(api_key, markets, regions, odds_format="american"):
         "oddsFormat": odds_format,
     }
     url = ODDS_ENDPOINT + "?" + urllib.parse.urlencode(params)
-    try:
-        resp = urllib.request.urlopen(urllib.request.Request(url, method="GET"), timeout=60)
-    except urllib.error.HTTPError as e:
-        resp = e
+    resp = None
+    for attempt in range(3):
+        try:
+            resp = urllib.request.urlopen(urllib.request.Request(url, method="GET"), timeout=60)
+            break
+        except urllib.error.HTTPError as e:
+            if 500 <= e.code < 600 and attempt < 2:   # transient upstream 5xx: retry
+                time.sleep(2 * (attempt + 1)); continue
+            resp = e
+            break
+        except urllib.error.URLError as e:            # timeout / DNS / reset: retry
+            if attempt < 2:
+                time.sleep(2 * (attempt + 1)); continue
+            # Persistent network failure -> status 0; main treats it as transient (skip).
+            return 0, None, str(e), {"last": None, "used": None, "remaining": None}
     status = resp.getcode()
     headers = resp.headers
     body = resp.read().decode("utf-8", errors="replace")
@@ -366,7 +378,12 @@ def write_supabase(rows, url, service_key, batch=500):
         except urllib.error.HTTPError as e:
             detail = e.read().decode("utf-8", errors="replace")[:500]
             print(f"  ! batch {i//batch} failed: HTTP {e.code} {detail}", file=sys.stderr)
-            raise
+            if e.code < 500:
+                raise   # 4xx = genuine schema/permission problem, owner must fix
+            break       # transient 5xx: keep what landed, don't email a FAILURE
+        except urllib.error.URLError as e:
+            print(f"  ! batch {i//batch} network error: {e}", file=sys.stderr)
+            break       # transient: keep what landed, don't email
     return written
 
 
@@ -393,7 +410,12 @@ def write_preseason(rows, url, service_key, batch=500):
         except urllib.error.HTTPError as e:
             detail = e.read().decode("utf-8", errors="replace")[:500]
             print(f"  ! preseason batch {i//batch} failed: HTTP {e.code} {detail}", file=sys.stderr)
-            raise
+            if e.code < 500:
+                raise   # 4xx = genuine
+            break       # transient 5xx
+        except urllib.error.URLError as e:
+            print(f"  ! preseason batch {i//batch} network error: {e}", file=sys.stderr)
+            break       # transient
     return written
 
 
@@ -448,16 +470,29 @@ def main(argv=None):
         print(f"  HTTP {status}  |  credit cost (x-requests-last): {credit['last']}"
               f"  used={credit['used']} remaining={credit['remaining']}")
         if status != 200:
-            print(f"  API returned non-200; body: {events}", file=sys.stderr)
-            return 1
+            print(f"  API returned {status}; body: {events}", file=sys.stderr)
+            # 0 (network) or 5xx = transient -> skip this run quietly. A genuine
+            # 401/403 (bad key) or 429 (quota) still exits non-zero so it emails.
+            return 0 if (status == 0 or 500 <= status <= 599) else 1
     else:
         print(f"FIXTURE  {args.fixture}")
         with open(args.fixture, "r", encoding="utf-8") as fh:
             events = json.load(fh)
 
     # 2. Parse. Split preseason (exhibition, isolated lane) from regular season.
-    week_map = load_week_map()
-    season_starts = load_season_starts()
+    # The schedule (games.csv) is fetched from GitHub when not committed locally; a
+    # transient fetch blip should skip this run, not email a FAILURE.
+    try:
+        week_map = load_week_map()
+        season_starts = load_season_starts()
+    except urllib.error.HTTPError as e:
+        if e.code >= 500:
+            print(f"transient: schedule fetch HTTP {e.code}; skipping run", file=sys.stderr)
+            return 0
+        raise   # a genuine 404 (release moved/renamed) should still surface
+    except urllib.error.URLError as e:
+        print(f"transient: schedule fetch failed ({e}); skipping run", file=sys.stderr)
+        return 0
     reg_events, pre_events = split_events(events, season_starts)
     snapshot_at = snapshot_time_from_events(events)
     rows, unresolved = parse_snapshot(reg_events, snapshot_at, args.reason, week_map)

@@ -14,6 +14,7 @@ to a game-week assignments scrape — the table + UI stay the same.
 """
 import argparse
 import json
+import os
 import sys
 import urllib.error
 import urllib.request
@@ -26,10 +27,15 @@ GAMES_LOCAL = "data/games.csv"
 
 
 def fetch_games():
+    """Download the schedule. Returns a DataFrame, or None on a transient fetch
+    failure (network / 5xx) so the caller can fall back to a local copy or skip."""
     oc.ensure_ssl_certs()
     req = urllib.request.Request(oc.GAMES_URL, headers={"User-Agent": "statseer/1.0"})
-    with urllib.request.urlopen(req, timeout=60) as r:
-        data = r.read()
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            data = r.read()
+    except (urllib.error.URLError, urllib.error.HTTPError):
+        return None
     with open(GAMES_LOCAL, "wb") as fh:
         fh.write(data)
     return pd.read_csv(GAMES_LOCAL, low_memory=False)
@@ -43,7 +49,17 @@ def main(argv=None):
     args = ap.parse_args(argv)
 
     env = oc.load_env()
-    g = pd.read_csv(GAMES_LOCAL, low_memory=False) if args.no_fetch else fetch_games()
+    if args.no_fetch:
+        g = pd.read_csv(GAMES_LOCAL, low_memory=False)
+    else:
+        g = fetch_games()
+        if g is None:   # transient fetch failure — use the local copy, or skip today
+            if os.path.exists(GAMES_LOCAL):
+                print("games.csv fetch failed (transient) — using local copy")
+                g = pd.read_csv(GAMES_LOCAL, low_memory=False)
+            else:
+                print("games.csv fetch failed (transient) and no local copy — skipping today")
+                return 0
     s = g[(g.season == args.season) & (g.game_type == "REG") & g.referee.notna()]
     rows = [{"season": int(r.season), "week": int(r.week), "home_team": r.home_team,
              "away_team": r.away_team, "referee": r.referee} for _, r in s.iterrows()]

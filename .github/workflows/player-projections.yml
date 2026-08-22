@@ -62,5 +62,12 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add web/lib/playerProjections.ts
           git commit -m "chore: refresh player projections (auto)"
-          git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
-          git push
+          # Several bots push this branch; a push can lose the race (non-fast-forward)
+          # even right after a rebase. Retry rebase+push a few times before failing, so
+          # a lost race doesn't email a FAILURE.
+          for i in 1 2 3 4 5; do
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || git rebase --abort || true
+            if git push; then echo "pushed on attempt $i"; exit 0; fi
+            echo "push attempt $i lost the race; retrying..."; sleep $((RANDOM % 5 + 2))
+          done
+          echo "push still rejected after 5 attempts"; exit 1
