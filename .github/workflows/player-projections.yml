@@ -52,16 +52,19 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: python analysis/player_proj_export.py --season "$SEASON"
 
+      - name: Build depth chart (realistic-player filter)
+        run: python analysis/depth_export.py
+
       - name: Commit if changed
         run: |
-          if git diff --quiet -- web/lib/playerProjections.ts; then
-            echo "No projection changes — nothing to commit."
+          if git diff --quiet -- web/lib/playerProjections.ts web/lib/depthChart.ts; then
+            echo "No projection/depth changes — nothing to commit."
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add web/lib/playerProjections.ts
-          git commit -m "chore: refresh player projections (auto)"
+          git add web/lib/playerProjections.ts web/lib/depthChart.ts
+          git commit -m "chore: refresh player projections + depth chart (auto)"
           # Several bots push this branch; a push can lose the race (non-fast-forward)
           # even right after a rebase. Retry rebase+push a few times before failing, so
           # a lost race doesn't email a FAILURE.

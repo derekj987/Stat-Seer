@@ -8,6 +8,7 @@ import { NCAAF_MODEL } from "./ncaaf/model-data";
 import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
 import { PLAYER_PROJECTIONS } from "@/lib/playerProjections";
 import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
+import { isRealistic } from "@/lib/depthChart";
 
 const PROP_LABEL: Record<string, string> = { rush_yds: "Rush Yds", rec_yds: "Rec Yds", receptions: "Receptions", pass_yds: "Pass Yds" };
 
@@ -275,7 +276,7 @@ function playLine(p: PlayerPick): string {
   return [p.side, p.line != null ? String(p.line) : null, p.marketLabel].filter(Boolean).join(" ");
 }
 function PlrHead() {
-  return <thead><tr><th className="hb-l">Player</th><th>Team</th><th>The play</th><th>Best book</th><th>Trending on</th></tr></thead>;
+  return <thead><tr><th className="hb-l">Player</th><th>Team</th><th>Wk</th><th>The play</th><th>Best book</th><th>Trending on</th></tr></thead>;
 }
 function PlrRows({ players }: { players: PlayerPick[] }) {
   return (
@@ -284,6 +285,7 @@ function PlrRows({ players }: { players: PlayerPick[] }) {
         <tr key={p.id}>
           <td className="hb-l"><a className="hb-plrlink" href="/tailgate">{p.player}</a></td>
           <td className="hb-num">{p.team}</td>
+          <td className="hb-num">{p.week}</td>
           <td><span className={p.dir === "down" ? "hb-plr__up hb-plr__down" : "hb-plr__up"} aria-hidden="true">{p.dir === "down" ? "▼" : "▲"}</span> {playLine(p)}</td>
           <td>{p.book ?? "—"}</td>
           <td className="hb-plr__srccell">{p.sources.length ? p.sources.join(" · ") : "—"}</td>
@@ -329,7 +331,7 @@ function PlayerSnapshot({ base }: { base: Sport }) {
   const href = base === "ncaaf" ? "/ncaaf/model/players" : "/model/players";
   const rows = base === "nfl"
     ? [...PLAYER_PROJECTIONS]
-        .filter((r) => r.book > 0)
+        .filter((r) => r.book > 0 && isRealistic(r.player))
         .sort((a, b) => Math.abs(b.proj / b.book - 1) - Math.abs(a.proj / a.book - 1))
         .slice(0, 6)
     : [];

@@ -38,4 +38,4 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: >
           python props_client.py --live --write --reason SCHEDULED --max-events 32
-          --markets "player_rush_yds,player_reception_yds,player_receptions,player_pass_yds,player_anytime_td,player_1st_td"
+          --markets "player_rush_yds,player_reception_yds,player_receptions,player_pass_yds,player_pass_tds,player_anytime_td,player_1st_td"

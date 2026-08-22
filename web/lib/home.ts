@@ -13,6 +13,7 @@ import { MODEL_TOTALS } from "./modelTotals";
 import { weekTailgate } from "./tailgate";
 import { weekProps } from "./props";
 import { isSeasonOut } from "./irList";
+import { isRealistic } from "./depthChart";
 
 export interface CardRow {
   eventId: string;
@@ -53,6 +54,7 @@ export interface PlayerPick {
   line: number | null;            // the prop number, e.g. 2.5
   marketLabel: string | null;     // e.g. "receptions", "receiving yards", "anytime TD"
   book: string | null;            // sportsbook the prop is quoted at
+  week: number;                   // the NFL week this read is for
   sources: string[];  // boards/blogs the player was mentioned on
 }
 
@@ -208,9 +210,11 @@ export async function fetchHome(season = 2026): Promise<HomeData> {
   let players: PlayerPick[] = [];
   try {
     const tg = await weekTailgate(week, season);
-    // Drop players out for the season (IR) — they trend when hurt but read as false "unders".
+    // Only realistic bets: drop players out for the season (IR) and deep backups (e.g. a
+    // QB3 who won't throw a TD unless the starter goes down) — both trend in camp chatter
+    // but aren't bettable. A player not on our depth chart passes (we don't over-filter).
     const top = tg.buzz
-      .filter((b) => !isSeasonOut(b.player))
+      .filter((b) => !isSeasonOut(b.player) && isRealistic(b.player))
       .sort((a, z) => z.heat - a.heat)
       .slice(0, 6);
 
@@ -233,6 +237,7 @@ export async function fetchHome(season = 2026): Promise<HomeData> {
         line: q?.line ?? p.line,
         marketLabel: p.marketLabel,
         book: q?.books?.[0] ?? b.book ?? null,
+        week,
         sources: b.sources.map((s) => s.board),
       };
     });

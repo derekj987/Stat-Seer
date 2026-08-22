@@ -5,6 +5,7 @@
 // category currently scaffolds an honest "arriving" state rather than inventing numbers.
 import { Brand, FlowSteps, ModelSubnav, ScrollHint } from "./Nav";
 import { PLAYER_PROJECTIONS, PROJ_WEEK, PROJ_PRIOR, type PlayerProj } from "@/lib/playerProjections";
+import { isRealistic } from "@/lib/depthChart";
 
 export interface PlayerCat {
   key: string;
@@ -61,7 +62,9 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
   // Real projections exist for NFL only, for the current projection week. Group the active
   // category's rows by game.
   const onProjWeek = base === "nfl" && week === PROJ_WEEK;
-  const rows: PlayerProj[] = onProjWeek ? PLAYER_PROJECTIONS.filter((p) => p.cat === active.key) : [];
+  const rows: PlayerProj[] = onProjWeek
+    ? PLAYER_PROJECTIONS.filter((p) => p.cat === active.key && isRealistic(p.player))
+    : [];
   const games: string[] = [];
   const byGame: Record<string, PlayerProj[]> = {};
   for (const r of rows) {
