@@ -37,6 +37,26 @@ function crewFlag(pen: number): { label: string; tone: "hot" | "cool" } | null {
   return null;
 }
 
+/** One crew row in the featured referee table. */
+function refRow(r: (typeof REF_STATS)[number]) {
+  const flag = crewFlag(r.pen);
+  const ou = r.over >= 50 ? { d: "Over", p: r.over } : { d: "Under", p: 100 - r.over };
+  const ats = r.atsFav >= 50 ? { d: "Fav", p: r.atsFav } : { d: "Dog", p: 100 - r.atsFav };
+  return (
+    <div className="refrow" key={r.name}>
+      <span className="refrow__name">{r.name}</span>
+      <span className="refrow__v muted">{r.games}</span>
+      <span className="refrow__read">
+        {flag ? <b className={flag.tone}>{flag.label}</b> : <span className="muted">Average flags</span>}
+      </span>
+      <span className={r.pen >= REF_LEAGUE.pen ? "refrow__v hot" : "refrow__v cool"}>{r.pen}</span>
+      <span className="refrow__v">{r.total}</span>
+      <span className="reflean"><b className="reflean__d">{ou.d}</b> <span className="reflean__p">({ou.p}%)</span></span>
+      <span className="reflean"><b className="reflean__d">{ats.d}</b> <span className="reflean__p">({ats.p}%)</span></span>
+    </div>
+  );
+}
+
 export const revalidate = 300;
 const SEASON = 2026;
 
@@ -188,25 +208,19 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
           <div className="refrow refrow--head">
             <span>crew</span><span>games</span><span>read</span><span>pen/g</span><span>avg total</span><span>leans O/U</span><span>leans ATS</span>
           </div>
-          {REF_STATS.map((r) => {
-            const flag = crewFlag(r.pen);
-            const ou = r.over >= 50 ? { d: "Over", p: r.over } : { d: "Under", p: 100 - r.over };
-            const ats = r.atsFav >= 50 ? { d: "Fav", p: r.atsFav } : { d: "Dog", p: 100 - r.atsFav };
-            return (
-              <div className="refrow" key={r.name}>
-                <span className="refrow__name">{r.name}</span>
-                <span className="refrow__v muted">{r.games}</span>
-                <span className="refrow__read">
-                  {flag ? <b className={flag.tone}>{flag.label}</b> : <span className="muted">Average flags</span>}
-                </span>
-                <span className={r.pen >= REF_LEAGUE.pen ? "refrow__v hot" : "refrow__v cool"}>{r.pen}</span>
-                <span className="refrow__v">{r.total}</span>
-                <span className="reflean"><b className="reflean__d">{ou.d}</b> <span className="reflean__p">({ou.p}%)</span></span>
-                <span className="reflean"><b className="reflean__d">{ats.d}</b> <span className="reflean__p">({ats.p}%)</span></span>
-              </div>
-            );
-          })}
+          {REF_STATS.slice(0, 6).map(refRow)}
         </div>
+        {REF_STATS.length > 6 && (
+          <details className="hb-more cxmore">
+            <summary className="hb-more__sum">
+              <span className="hb-more__chev" aria-hidden="true">▸</span>
+              See {REF_STATS.length - 6} more crews
+            </summary>
+            <div className="reftable">
+              {REF_STATS.slice(6).map(refRow)}
+            </div>
+          </details>
+        )}
         <p className="ctxsec__note">Historical crew tendencies, 2021–25.</p>
         <div className="ref-soon">
           <span className="ref-soon__tag">Coming soon</span>

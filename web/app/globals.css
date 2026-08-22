@@ -700,7 +700,7 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
   border-radius:14px;padding:16px 18px;background:var(--surface)}
 .cxfeat__bar{margin:0 0 12px}
 .cxfeat__h{margin:0;font-size:clamp(19px,3vw,24px);font-weight:800;letter-spacing:-.01em;color:var(--gold)}
-.cxfeat__sub{margin:6px 0 0;font-size:13px;line-height:1.55;color:var(--muted);max-width:72ch}
+.cxfeat__sub{margin:6px 0 0;font-size:13px;line-height:1.55;color:var(--muted)}
 .cxfeat__sub b{color:var(--ink)}
 /* Cards "see more": the dropdown body is a grid of the remaining game cards. */
 .hb-more.cxmore .cxgrid{margin-top:12px}
