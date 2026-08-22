@@ -7,6 +7,7 @@ import type { NcaafCardGame, NcaafUpset } from "./ncaaf/model-data";
 import { NCAAF_MODEL } from "./ncaaf/model-data";
 import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
 import { PLAYER_PROJECTIONS } from "@/lib/playerProjections";
+import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
 
 const PROP_LABEL: Record<string, string> = { rush_yds: "Rush Yds", rec_yds: "Rec Yds", receptions: "Receptions", pass_yds: "Pass Yds" };
 
@@ -22,7 +23,46 @@ function cxWeather(w: GameWeather): string {
   return "Forecast arrives ~2 weeks out";
 }
 
-/** NFL: 3 per-game consideration cards + a button to the full slate. */
+/** The one crew tendency that carries over year to year is the penalty rate. */
+function refFlag(pen: number): { label: string; tone: "hot" | "cool" } | null {
+  if (pen >= REF_LEAGUE.pen + 0.8) return { label: "Flag-heavy", tone: "hot" };
+  if (pen <= REF_LEAGUE.pen - 0.8) return { label: "Lets them play", tone: "cool" };
+  return null;
+}
+
+/** Snapshot of the Referee Crews table — the first 6 crews + a "come inside" button. */
+function RefereeSnapshot() {
+  return (
+    <div className="lp-refsnap">
+      <h3 className="lp-refsnap__h">Referee Crews</h3>
+      <p className="lp-refsnap__sub">The one crew tendency that carries over year to year — <b>how many flags they throw</b>.</p>
+      <div className="reftable">
+        <div className="refrow refrow--head">
+          <span>crew</span><span>games</span><span>read</span><span>pen/g</span><span>avg total</span><span>leans O/U</span><span>leans ATS</span>
+        </div>
+        {REF_STATS.slice(0, 6).map((r) => {
+          const flag = refFlag(r.pen);
+          const ou = r.over >= 50 ? { d: "Over", p: r.over } : { d: "Under", p: 100 - r.over };
+          const ats = r.atsFav >= 50 ? { d: "Fav", p: r.atsFav } : { d: "Dog", p: 100 - r.atsFav };
+          return (
+            <div className="refrow" key={r.name}>
+              <span className="refrow__name">{r.name}</span>
+              <span className="refrow__v muted">{r.games}</span>
+              <span className="refrow__read">{flag ? <b className={flag.tone}>{flag.label}</b> : <span className="muted">Average flags</span>}</span>
+              <span className={r.pen >= REF_LEAGUE.pen ? "refrow__v hot" : "refrow__v cool"}>{r.pen}</span>
+              <span className="refrow__v">{r.total}</span>
+              <span className="reflean"><b className="reflean__d">{ou.d}</b> <span className="reflean__p">({ou.p}%)</span></span>
+              <span className="reflean"><b className="reflean__d">{ats.d}</b> <span className="reflean__p">({ats.p}%)</span></span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="lp-cxbtn"><a className="btn btn--primary" href="/considerations">To see the rest, come inside! →</a></div>
+    </div>
+  );
+}
+
+/** NFL: 3 per-game consideration cards + a referee-crew snapshot + buttons to the full slate. */
 function NflConsiderations() {
   const cards = GAME_WEATHER.slice(0, 3);
   if (!cards.length) return <p className="hb-empty">Considerations load with the week&apos;s board — see <a href="/considerations">Special Considerations</a>.</p>;
@@ -45,6 +85,7 @@ function NflConsiderations() {
         ))}
       </div>
       <div className="lp-cxbtn"><a className="btn btn--primary" href="/considerations">For the full slate, click here →</a></div>
+      <RefereeSnapshot />
     </>
   );
 }

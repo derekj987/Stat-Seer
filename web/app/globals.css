@@ -381,6 +381,12 @@ a.sportstrip__i:hover{color:var(--ink)}
 .cxcard__statk{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .cxcard__statnote{margin:8px 0 0;font-size:12px;color:var(--muted);line-height:1.45}
 .lp-cxbtn{margin-top:12px}
+/* Referee-crew snapshot inside the homepage considerations panel — set off from the
+   game cards above by a divider, with the same gold call-out as the full page. */
+.lp-refsnap{margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
+.lp-refsnap__h{margin:0;font-size:17px;font-weight:800;letter-spacing:-.01em;color:var(--gold)}
+.lp-refsnap__sub{margin:5px 0 12px;font-size:12.5px;line-height:1.5;color:var(--muted)}
+.lp-refsnap__sub b{color:var(--ink)}
 /* Fan Analysis cards reuse the considerations card shell */
 .cxcard--fan .tgstock{margin-left:auto;flex:0 0 auto}
 .cxcard--up{border-left:3px solid var(--accent)}
