@@ -142,19 +142,23 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
             <dt className="cxrow__k">Referee</dt>
             <dd className="cxrow__v">{crew ? refereeCell(crew) : <span className="muted">Crew tagged game week</span>}</dd>
           </div>
-          {incs.length > 0 && (
-            <div className="cxrow cxrow--inc">
-              <dt className="cxrow__k">Incentive</dt>
-              <dd className="cxrow__v">
-                {incs.map((i) => (
+          <div className="cxrow cxrow--inc">
+            <dt className="cxrow__k">Incentive</dt>
+            <dd className="cxrow__v">
+              {incs.length > 0 ? (
+                incs.map((i) => (
                   <span className="cxinc" key={`${i.player}-${i.stat}`}>
                     <b>{i.player}</b> — {i.remaining} {i.stat} from {i.label}{" "}
                     <span className="cxinc__prog">({i.current}/{i.threshold}, {i.pct}%)</span>
                   </span>
-                ))}
-              </dd>
-            </div>
-          )}
+                ))
+              ) : INCENTIVE_WATCH.length === 0 ? (
+                <span className="muted">Player Incentives: coming soon</span>
+              ) : (
+                <span className="muted">No player near an incentive</span>
+              )}
+            </dd>
+          </div>
         </dl>
       </article>
     );
