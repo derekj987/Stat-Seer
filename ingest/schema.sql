@@ -642,3 +642,44 @@ create policy "tailgate readable by all" on tailgate_buzz for select using (true
 
 grant select on tailgate_buzz to anon, authenticated;
 grant select, insert, update, delete on tailgate_buzz to service_role;
+
+-- ============================================================================
+-- CFB player-prop capture  (cfb_props.py --supabase)
+-- ----------------------------------------------------------------------------
+-- The college-football analogue of prop_snapshots. Prop history CANNOT be
+-- backfilled (books post props a few days out and the number moves), so a
+-- scheduled Action (.github/workflows/capture-cfb-props.yml) appends a
+-- timestamped snapshot here through the season. It writes to Supabase, NOT the
+-- local data/cfb.db, because a GitHub runner's filesystem is ephemeral. Same
+-- discipline as the NFL prop table: append-only, service-key writer only.
+-- Columns mirror the cfb_props.py SQLite schema (COLS in that file).
+-- ============================================================================
+create table if not exists cfb_prop_snapshots (
+    id          bigserial   primary key,
+    snapshot_at timestamptz not null,
+    event_id    text        not null,
+    commence    timestamptz,
+    home_team   text,
+    away_team   text,
+    book        text        not null,
+    market      text        not null,   -- e.g. player_pass_yds, player_anytime_td
+    player      text,                    -- as posted by the book (outcome.description)
+    side        text,                    -- Over / Under / Yes / No
+    line        numeric(7,2),            -- prop line; null for yes/no markets
+    price       integer,
+    captured_at timestamptz not null default now()
+);
+create index if not exists cfb_prop_event_idx  on cfb_prop_snapshots (event_id, market, book);
+create index if not exists cfb_prop_time_idx   on cfb_prop_snapshots (snapshot_at);
+create index if not exists cfb_prop_player_idx on cfb_prop_snapshots (player);
+-- Dedupe target for the writer's ON CONFLICT (ignore-duplicates). nulls not distinct
+-- so a null player/side still dedupes (Postgres 15+, same as prop_snapshots).
+create unique index if not exists cfb_prop_snapshots_dedupe on cfb_prop_snapshots
+    (snapshot_at, event_id, book, market, player, side) nulls not distinct;
+
+revoke update, delete on cfb_prop_snapshots from public, anon, authenticated;
+drop trigger if exists no_update_cfb_props on cfb_prop_snapshots;
+create trigger no_update_cfb_props before update or delete on cfb_prop_snapshots
+    for each row execute function block_mutation();
+grant select, insert on cfb_prop_snapshots to service_role;
+grant usage, select on all sequences in schema public to service_role;

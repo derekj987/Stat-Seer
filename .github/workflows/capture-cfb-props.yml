@@ -1,0 +1,40 @@
+name: Capture CFB props
+
+# College-football player-prop capture -> Supabase cfb_prop_snapshots.
+#
+# Prop history CANNOT be backfilled: books post props a few days before kickoff and the
+# number moves, so a snapshot exists only if captured that day. This runs on a schedule
+# through the CFB season; each run appends a timestamped snapshot. It writes to SUPABASE
+# (not the local data/cfb.db) because a GitHub runner's filesystem is ephemeral -- a
+# SQLite file written on the runner is discarded when the job ends.
+#
+# Cost (Odds API) = markets x regions per event that HAS props; events with none cost 0,
+# so early-week runs (props not posted yet) are nearly free. --within-days 8 limits it to
+# the near-term slate and --max-events 40 caps a busy Saturday. Twice daily (00/12 UTC)
+# catches morning and evening line posts. All times UTC.
+
+on:
+  schedule:
+    - cron: "0 0,12 * 8-12,1 *"   # twice daily, late Aug - Jan (CFB season + bowls)
+  workflow_dispatch: {}            # manual "Run workflow" for testing
+
+concurrency:
+  group: capture-cfb-props
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi
+      - name: Capture CFB props -> Supabase
+        env:
+          ODDS_API_KEY:         ${{ secrets.ODDS_API_KEY }}
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python cfb_props.py --supabase --within-days 8 --max-events 40
