@@ -4,7 +4,13 @@ import { weekRefs } from "@/lib/refAssignments";
 import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
 import { GAME_WEATHER, WEATHER_WEEK, WEATHER_UPDATED, type GameWeather } from "@/lib/weatherData";
 import { INCENTIVE_WATCH } from "@/lib/incentiveWatch";
+import { TEAM_RATINGS } from "@/lib/teamRatings";
 import { Brand, FlowSteps, ContextSubnav } from "../Nav";
+
+const ord = (n: number) => {
+  const s = ["th", "st", "nd", "rd"], v = n % 100;
+  return `${n}${s[(v - 20) % 10] ?? s[v] ?? s[0]}`;
+};
 
 // ---- per-game card fields (CONTEXT, never a pick) ----
 const wxSite = (w: GameWeather) => `${w.venue}${w.city ? ` · ${w.city}, ${w.state}` : ""}`;
@@ -116,6 +122,9 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
     const neutral = mp?.neutral;
     // Players in this game who are close to a contract incentive (live context, not a pick).
     const incs = INCENTIVE_WATCH.filter((i) => i.team === g.home || i.team === g.away);
+    // Current-season team ratings (points/gm + league rank). Empty until the season runs.
+    const ra = TEAM_RATINGS[g.away], rh = TEAM_RATINGS[g.home];
+    const hasRatings = Boolean(ra && rh);
     return (
       <article className={`cxcard${wx?.windFlag ? " cxcard--wind" : ""}`} key={g.eventId}>
         <header className="cxcard__head">
@@ -132,6 +141,23 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
               {neutral && <span className="cxroof"> · neutral site</span>}
             </dd>
           </div>
+          {hasRatings ? (
+            <>
+              <div className="cxrow">
+                <dt className="cxrow__k">Offense</dt>
+                <dd className="cxrow__v">{g.away} <b>{ra!.off}</b> <span className="cxrank">({ord(ra!.offRank)})</span> · {g.home} <b>{rh!.off}</b> <span className="cxrank">({ord(rh!.offRank)})</span> <span className="cxinc__prog">pts/gm</span></dd>
+              </div>
+              <div className="cxrow">
+                <dt className="cxrow__k">Defense</dt>
+                <dd className="cxrow__v">{g.away} <b>{ra!.def}</b> <span className="cxrank">({ord(ra!.defRank)})</span> · {g.home} <b>{rh!.def}</b> <span className="cxrank">({ord(rh!.defRank)})</span> <span className="cxinc__prog">pts/gm allowed</span></dd>
+              </div>
+            </>
+          ) : (
+            <div className="cxrow">
+              <dt className="cxrow__k">Ratings</dt>
+              <dd className="cxrow__v"><span className="muted">Off/def ratings arrive with the season</span></dd>
+            </div>
+          )}
           {wx && (
             <div className={`cxrow${wx.windFlag ? " cxrow--wind" : ""}`}>
               <dt className="cxrow__k">Weather</dt>

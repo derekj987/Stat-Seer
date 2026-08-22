@@ -58,16 +58,20 @@ jobs:
       - name: Build incentive watch (Over The Cap weekly incentives)
         run: python analysis/incentive_scrape.py
 
+      - name: Build team ratings (current-season off/def points per game)
+        run: python analysis/team_ratings_export.py
+
       - name: Commit if changed
         run: |
-          if git diff --quiet -- web/lib/playerProjections.ts web/lib/depthChart.ts web/lib/incentiveWatch.ts; then
-            echo "No projection/depth/incentive changes — nothing to commit."
+          FILES="web/lib/playerProjections.ts web/lib/depthChart.ts web/lib/incentiveWatch.ts web/lib/teamRatings.ts"
+          if git diff --quiet -- $FILES; then
+            echo "No projection/depth/incentive/ratings changes — nothing to commit."
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add web/lib/playerProjections.ts web/lib/depthChart.ts web/lib/incentiveWatch.ts
-          git commit -m "chore: refresh player projections + depth chart + incentives (auto)"
+          git add $FILES
+          git commit -m "chore: refresh projections + depth + incentives + team ratings (auto)"
           # Several bots push this branch; a push can lose the race (non-fast-forward)
           # even right after a rebase. Retry rebase+push a few times before failing, so
           # a lost race doesn't email a FAILURE.
