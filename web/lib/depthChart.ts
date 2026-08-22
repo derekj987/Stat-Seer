@@ -1034,6 +1034,12 @@ export const DEPTH: Record<string, DepthEntry> = {
 };
 
 // How deep at each position still counts as a realistic bettable role.
+// Positions are NOT built the same, so caps are per-position:
+//   QB 1  — only the starter throws; a QB2/QB3 (e.g. Ty Simpson) produces nothing unless the starter is hurt.
+//   WR 4  — 3-4 WR sets are standard, so a WR3 (Cooper Kupp) or rotational WR4 still contributes; WR5+ are camp bodies.
+//   TE 2  — 12-personnel means a receiving TE2 (Tyler Higbee) plays real snaps; TE3+ are blocking depth.
+//   RB 3  — committee/change-of-pace/3rd-down backs all touch the ball; RB4+ don't without an injury.
+//   FB 1  — only the starting fullback sees goal-line/short-yardage work.
 const REALISTIC_RANK: Record<string, number> = { QB: 1, RB: 3, WR: 4, TE: 2, FB: 1 };
 
 const norm = (n: string) =>

@@ -3,6 +3,7 @@ import { fetchModelWeek, type ModelPrediction } from "@/lib/model";
 import { weekRefs } from "@/lib/refAssignments";
 import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
 import { GAME_WEATHER, WEATHER_WEEK, WEATHER_UPDATED, type GameWeather } from "@/lib/weatherData";
+import { INCENTIVE_WATCH } from "@/lib/incentiveWatch";
 import { Brand, FlowSteps, ContextSubnav } from "../Nav";
 
 // ---- per-game card fields (CONTEXT, never a pick) ----
@@ -113,6 +114,8 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
 
   const renderCard = ({ g, mp, crew, wx }: (typeof games)[number]) => {
     const neutral = mp?.neutral;
+    // Players in this game who are close to a contract incentive (live context, not a pick).
+    const incs = INCENTIVE_WATCH.filter((i) => i.team === g.home || i.team === g.away);
     return (
       <article className={`cxcard${wx?.windFlag ? " cxcard--wind" : ""}`} key={g.eventId}>
         <header className="cxcard__head">
@@ -139,6 +142,19 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
             <dt className="cxrow__k">Referee</dt>
             <dd className="cxrow__v">{crew ? refereeCell(crew) : <span className="muted">Crew tagged game week</span>}</dd>
           </div>
+          {incs.length > 0 && (
+            <div className="cxrow cxrow--inc">
+              <dt className="cxrow__k">Incentive</dt>
+              <dd className="cxrow__v">
+                {incs.map((i) => (
+                  <span className="cxinc" key={`${i.player}-${i.stat}`}>
+                    <b>{i.player}</b> — {i.remaining} {i.stat} from {i.label}{" "}
+                    <span className="cxinc__prog">({i.current}/{i.threshold}, {i.pct}%)</span>
+                  </span>
+                ))}
+              </dd>
+            </div>
+          )}
         </dl>
       </article>
     );
