@@ -694,6 +694,17 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .refbottom b.hot{color:var(--key)}
 .refbottom b.cool{color:var(--accent)}
 
+/* Featured Referee Crews block on Special Considerations — pulled up front + called out
+   with a gold-topped card so the table it wraps reads as a highlight, not a footnote. */
+.cxfeat{margin-top:28px;border:1px solid var(--line);border-top:3px solid var(--gold);
+  border-radius:14px;padding:16px 18px;background:var(--surface)}
+.cxfeat__bar{margin:0 0 12px}
+.cxfeat__h{margin:0;font-size:clamp(19px,3vw,24px);font-weight:800;letter-spacing:-.01em;color:var(--gold)}
+.cxfeat__sub{margin:6px 0 0;font-size:13px;line-height:1.55;color:var(--muted);max-width:72ch}
+.cxfeat__sub b{color:var(--ink)}
+/* Cards "see more": the dropdown body is a grid of the remaining game cards. */
+.hb-more.cxmore .cxgrid{margin-top:12px}
+
 /* Upset Watch intro collapsed into a dropdown */
 .explainer--drop{padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);overflow:hidden}
 .explainer--drop>.explainer__sum{list-style:none;cursor:pointer;padding:12px 16px;font-size:13.5px}

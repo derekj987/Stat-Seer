@@ -88,6 +88,42 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
     crew: refs.get(g.home),
     wx: showWeather ? wxByEvent.get(g.eventId) : undefined,
   }));
+  // Lead with the first 6; the rest live behind a centered "see more".
+  const lead = games.slice(0, 6);
+  const rest = games.slice(6);
+
+  const renderCard = ({ g, mp, crew, wx }: (typeof games)[number]) => {
+    const neutral = mp?.neutral;
+    return (
+      <article className={`cxcard${wx?.windFlag ? " cxcard--wind" : ""}`} key={g.eventId}>
+        <header className="cxcard__head">
+          <span className="matchup">{g.away}<span className="at">@</span>{g.home}</span>
+          <time className="kick">{et(g.commence)}</time>
+          {neutral && <span className="badge neutral">NEUTRAL</span>}
+        </header>
+        <dl className="cxcard__rows">
+          <div className="cxrow">
+            <dt className="cxrow__k">Site</dt>
+            <dd className="cxrow__v">
+              {wx ? wxSite(wx) : (mp?.venue ?? g.home)}
+              {wx && <span className="cxroof"> · {roofLabel(wx.roof)}</span>}
+              {neutral && <span className="cxroof"> · neutral site</span>}
+            </dd>
+          </div>
+          {wx && (
+            <div className={`cxrow${wx.windFlag ? " cxrow--wind" : ""}`}>
+              <dt className="cxrow__k">Weather</dt>
+              <dd className="cxrow__v">{wx.windFlag && <b className="wxflag">⚑&nbsp;WIND</b>} {weatherCell(wx)}</dd>
+            </div>
+          )}
+          <div className="cxrow">
+            <dt className="cxrow__k">Referee</dt>
+            <dd className="cxrow__v">{crew ? refereeCell(crew) : <span className="muted">Crew tagged game week</span>}</dd>
+          </div>
+        </dl>
+      </article>
+    );
+  };
 
   return (
     <main className="wrap">
@@ -111,61 +147,34 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
       {games.length === 0 ? (
         <p className="foot">No games captured for Week {week} yet.</p>
       ) : (
-        <section className="cxgrid" aria-label={`Week ${week} considerations`}>
-          {games.map(({ g, mp, crew, wx }) => {
-            const neutral = mp?.neutral;
-            return (
-              <article className={`cxcard${wx?.windFlag ? " cxcard--wind" : ""}`} key={g.eventId}>
-                <header className="cxcard__head">
-                  <span className="matchup">{g.away}<span className="at">@</span>{g.home}</span>
-                  <time className="kick">{et(g.commence)}</time>
-                  {neutral && <span className="badge neutral">NEUTRAL</span>}
-                </header>
-                <dl className="cxcard__rows">
-                  <div className="cxrow">
-                    <dt className="cxrow__k">Site</dt>
-                    <dd className="cxrow__v">
-                      {wx ? wxSite(wx) : (mp?.venue ?? g.home)}
-                      {wx && <span className="cxroof"> · {roofLabel(wx.roof)}</span>}
-                      {neutral && <span className="cxroof"> · neutral site</span>}
-                    </dd>
-                  </div>
-                  {wx && (
-                    <div className={`cxrow${wx.windFlag ? " cxrow--wind" : ""}`}>
-                      <dt className="cxrow__k">Weather</dt>
-                      <dd className="cxrow__v">{wx.windFlag && <b className="wxflag">⚑&nbsp;WIND</b>} {weatherCell(wx)}</dd>
-                    </div>
-                  )}
-                  <div className="cxrow">
-                    <dt className="cxrow__k">Referee</dt>
-                    <dd className="cxrow__v">{crew ? refereeCell(crew) : <span className="muted">Crew tagged game week</span>}</dd>
-                  </div>
-                </dl>
-              </article>
-            );
-          })}
-        </section>
+        <>
+          <section className="cxgrid" aria-label={`Week ${week} considerations`}>
+            {lead.map(renderCard)}
+          </section>
+          {rest.length > 0 && (
+            <details className="hb-more cxmore">
+              <summary className="hb-more__sum">
+                <span className="hb-more__chev" aria-hidden="true">▸</span>
+                See {rest.length} more {rest.length === 1 ? "game" : "games"}
+              </summary>
+              <section className="cxgrid" aria-label={`Week ${week} considerations — more games`}>
+                {rest.map(renderCard)}
+              </section>
+            </details>
+          )}
+        </>
       )}
 
-      {/* --- Reference: how we read each factor (collapsed; per-game data is in the cards) --- */}
-      <details className="ctxsec ctxdrop reftbl">
-        <summary className="ctxsec__h ctxsec__h--big">How we read these factors</summary>
-
-        <h3 className="cxref__h">Weather &amp; scoring</h3>
-        <p className="ctxsec__d">
-          <b>Wind is the one measured signal</b> — the market under-sets totals ~1.3 pts at 15+ mph — but it
-          fails the vig bar and uses realized wind, so treat it as <b>context, not a proven edge</b>. Domes are
-          weather non-factors; outdoor forecasts fill into the cards about <b>two weeks</b> before kickoff.
-        </p>
-        <p className="ctxsec__d">
-          <b>Domes are higher-scoring — and the market knows.</b> Indoor games average <b>47.4</b> pts vs
-          <b> 44.2</b> outdoors (2006–25), but books set dome totals ~2 pts higher, so indoor overs hit just
-          <b> 51.8%</b> — <b>below the 52.4% needed to beat the vig</b>. Tested and priced: a scoring environment
-          to understand, not an edge to bet.
-        </p>
-        {showWeather && <p className="ctxsec__note">Weather via Open-Meteo · updated {WEATHER_UPDATED} · indoor status per stadium roof.</p>}
-
-        <h3 className="cxref__h">Referee crews</h3>
+      {/* --- Featured: the Referee Crews table (pulled up front; the one factor with a
+             persistent, called-out tendency). --- */}
+      <section className="ctxsec cxfeat" aria-label="Referee crews">
+        <div className="cxfeat__bar">
+          <h2 className="cxfeat__h">Referee Crews</h2>
+          <p className="cxfeat__sub">
+            The one crew tendency that carries over year to year — <b>how many flags they throw</b>. Everything
+            else here is historical context, not a lean.
+          </p>
+        </div>
         <div className="refbottom">
           <span className="refbottom__k">Bottom line — what to actually use</span>
           <p>
@@ -203,6 +212,23 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
           <span className="ref-soon__tag">Coming soon</span>
           Referee crews will be tagged to the games they&apos;ll be reffing.
         </div>
+      </section>
+
+      {/* --- Reference: how we read weather & scoring (collapsed; per-game data is in the cards) --- */}
+      <details className="ctxsec ctxdrop reftbl">
+        <summary className="ctxsec__h ctxsec__h--big">How we read weather &amp; scoring</summary>
+        <p className="ctxsec__d">
+          <b>Wind is the one measured signal</b> — the market under-sets totals ~1.3 pts at 15+ mph — but it
+          fails the vig bar and uses realized wind, so treat it as <b>context, not a proven edge</b>. Domes are
+          weather non-factors; outdoor forecasts fill into the cards about <b>two weeks</b> before kickoff.
+        </p>
+        <p className="ctxsec__d">
+          <b>Domes are higher-scoring — and the market knows.</b> Indoor games average <b>47.4</b> pts vs
+          <b> 44.2</b> outdoors (2006–25), but books set dome totals ~2 pts higher, so indoor overs hit just
+          <b> 51.8%</b> — <b>below the 52.4% needed to beat the vig</b>. Tested and priced: a scoring environment
+          to understand, not an edge to bet.
+        </p>
+        {showWeather && <p className="ctxsec__note">Weather via Open-Meteo · updated {WEATHER_UPDATED} · indoor status per stadium roof.</p>}
       </details>
     </main>
   );
