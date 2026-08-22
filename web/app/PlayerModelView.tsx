@@ -120,7 +120,7 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
                 <div className="pmgame__h">{g}</div>
                 <ScrollHint />
                 <div className="pmscroll">
-                  <div className="pmtable pmtable--data" role="table" aria-label={`${g} ${active.label} projections`}>
+                  <div className={`pmtable pmtable--data${active.key === "passing" ? " pmtable--ha" : ""}`} role="table" aria-label={`${g} ${active.label} projections`}>
                     <div className="pmrow pmrow--head pmrow--data" role="row">
                       <span className="pmcell pmcell--player">Player</span>
                       <span className="pmcell">Team</span>
@@ -128,10 +128,16 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
                       <span className="pmcell pmcell--num">Our proj</span>
                       <span className="pmcell pmcell--career">Career % over</span>
                       <span className="pmcell pmcell--career">Prior szn % over</span>
+                      {active.key === "passing" && <>
+                        <span className="pmcell pmcell--career">Home % over</span>
+                        <span className="pmcell pmcell--career">Road % over</span>
+                      </>}
                     </div>
                     {byGame[g].map((r) => {
                       const cpct = r.cG ? Math.round((100 * r.cOver) / r.cG) : null;
                       const ppct = r.pG ? Math.round((100 * r.pOver) / r.pG) : null;
+                      const hpct = r.hG ? Math.round((100 * r.hOver) / r.hG) : null;
+                      const rpct = r.rG ? Math.round((100 * r.rOver) / r.rG) : null;
                       const cls = (v: number | null) => v === null ? "" : v >= 50 ? "pmread--over" : "pmread--under";
                       return (
                         <div className="pmrow pmrow--data" role="row" key={`${r.player}-${r.market}`}>
@@ -148,6 +154,14 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
                           <span className={`pmcell pmcell--career ${cls(ppct)}`}>
                             {ppct === null ? <span className="pmcell__sub">no {PROJ_PRIOR}</span> : <>{ppct}% <small className="pmcell__sub">{r.pOver}/{r.pG} gm</small></>}
                           </span>
+                          {active.key === "passing" && <>
+                            <span className={`pmcell pmcell--career ${cls(hpct)}`}>
+                              {hpct === null ? "—" : <>{hpct}% <small className="pmcell__sub">{r.hOver}/{r.hG} gm</small></>}
+                            </span>
+                            <span className={`pmcell pmcell--career ${cls(rpct)}`}>
+                              {rpct === null ? "—" : <>{rpct}% <small className="pmcell__sub">{r.rOver}/{r.rG} gm</small></>}
+                            </span>
+                          </>}
                         </div>
                       );
                     })}

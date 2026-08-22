@@ -1389,6 +1389,9 @@ details.statsdrop .stats{margin:12px 0 0}
    identical on every row incl. the header, so columns line up on phone and desktop alike. */
 .pmrow--data{display:grid;grid-template-columns:minmax(110px,1.4fr) 52px repeat(4,1fr);gap:14px;
   align-items:baseline;border-top:1px solid var(--line);font-size:13px}
+/* passing table adds Home % / Road % → six stat columns instead of four */
+.pmtable--ha{min-width:940px}
+.pmtable--ha .pmrow--data{grid-template-columns:minmax(110px,1.4fr) 52px repeat(6,1fr)}
 .pmempty--solo{border:1px solid var(--line);border-radius:12px;background:var(--surface)}
 .pmrow--head.pmrow--data{border-bottom:0;font-size:11px}
 .pmrow--data:first-child{border-top:0}
@@ -1412,8 +1415,10 @@ details.statsdrop .stats{margin:12px 0 0}
     font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--accent)}
   .scrollnudge__a{font-size:15px;animation:impswipe 1.3s ease-in-out infinite}
   .pmtable--data{min-width:540px}
+  .pmtable--ha{min-width:720px}
   .pmrow{padding:8px 10px}
   .pmrow--data{gap:9px;grid-template-columns:minmax(84px,1.3fr) 36px repeat(4,1fr);font-size:12px}
+  .pmtable--ha .pmrow--data{grid-template-columns:minmax(84px,1.3fr) 36px repeat(6,1fr)}
   .pmcell--career{font-size:12px}
   .pmcell__sub{font-size:9px}
 }

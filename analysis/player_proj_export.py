@@ -13,6 +13,7 @@ projects the markets books have up, and writes web/lib/player-projections.json.
     python analysis/player_proj_export.py            # build + write the JSON
 """
 import argparse
+import io
 import json
 import os
 import sys
@@ -22,6 +23,33 @@ import urllib.request
 from collections import defaultdict
 
 import pandas as pd
+
+GAMES_LOCAL = "data/games.csv"
+GAMES_URL = "https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv"
+
+
+def load_venue_sets():
+    """(season, week, team) sets for HOME and AWAY games, from the nflverse schedule, so a
+    career game log can be split by venue for the home/road hit-rate columns. Degrades to
+    empty (no split) if the schedule can't be loaded."""
+    try:
+        if os.path.exists(GAMES_LOCAL):
+            g = pd.read_csv(GAMES_LOCAL, low_memory=False)
+        else:
+            req = urllib.request.Request(GAMES_URL, headers={"User-Agent": "statseer/1.0"})
+            with urllib.request.urlopen(req, timeout=60) as r:
+                g = pd.read_csv(io.StringIO(r.read().decode("utf-8", "replace")), low_memory=False)
+    except Exception as e:  # noqa: BLE001 — degrade to no venue split
+        print(f"  games.csv unavailable ({e}); home/road split skipped", file=sys.stderr)
+        return set(), set()
+    g = g.dropna(subset=["season", "week", "home_team", "away_team"])
+    wk = pd.to_numeric(g["week"], errors="coerce")
+    g = g[wk.notna()]
+    s = g["season"].astype(int)
+    w = pd.to_numeric(g["week"]).astype(int)
+    home = set(zip(s, w, g["home_team"].astype(str)))
+    away = set(zip(s, w, g["away_team"].astype(str)))
+    return home, away
 
 try:
     import certifi
@@ -152,9 +180,10 @@ CAREER_STAT = {"pass_yds": "passing_yards", "rush_yds": "rushing_yards",
                "rec_yds": "receiving_yards", "receptions": "receptions"}
 
 
-def load_career(seasons):
-    """Every game log we have (REG + POST) per player, for the hit-rate columns."""
-    keep = ["player_id", "season", "season_type", "attempts",
+def load_career(seasons, home_set=frozenset(), away_set=frozenset()):
+    """Every game log we have (REG + POST) per player, for the hit-rate columns. Each row is
+    tagged venue "H"/"A"/"?" via the schedule so the hit-rate can be split home vs road."""
+    keep = ["player_id", "season", "week", "team", "recent_team", "season_type", "attempts",
             "passing_yards", "rushing_yards", "receiving_yards", "receptions"]
     frames = []
     for y in seasons:
@@ -163,6 +192,17 @@ def load_career(seasons):
     d = pd.concat(frames, ignore_index=True)
     for c in ["attempts", "passing_yards", "rushing_yards", "receiving_yards", "receptions"]:
         d[c] = pd.to_numeric(d.get(c), errors="coerce").fillna(0.0)
+    # unify the team column (older releases used recent_team)
+    if "team" not in d.columns:
+        d["team"] = d.get("recent_team", "")
+    elif "recent_team" in d.columns:
+        d["team"] = d["team"].fillna(d["recent_team"])
+    if (home_set or away_set) and "week" in d.columns:
+        wk = pd.to_numeric(d["week"], errors="coerce").fillna(-1).astype(int)
+        key = list(zip(d["season"].astype(int), wk, d["team"].astype(str)))
+        d["venue"] = ["H" if k in home_set else ("A" if k in away_set else "?") for k in key]
+    else:
+        d["venue"] = "?"
     return {pid: g for pid, g in d.groupby("player_id")}
 
 
@@ -184,6 +224,17 @@ def prior_over(career_by_pid, pid, market, line, prior):
     """(times over, games) in the prior season only — reflects the player's CURRENT role."""
     g = career_by_pid.get(pid)
     return _over(g[g.season == prior] if g is not None else None, market, line)
+
+
+def home_road_over(career_by_pid, pid, market, line):
+    """(home_over, home_games, road_over, road_games) across the career — how often the
+    player cleared this line at home vs on the road."""
+    g = career_by_pid.get(pid)
+    if g is None or "venue" not in g.columns:
+        return (0, 0, 0, 0)
+    ho, hg = _over(g[g.venue == "H"], market, line)
+    ao, ag = _over(g[g.venue == "A"], market, line)
+    return (ho, hg, ao, ag)
 
 
 PASS_K = 300.0   # QB YPA persists (unlike RB/WR efficiency), so we regress the player's OWN
@@ -234,7 +285,7 @@ def main():
     prior = args.season - 1
     base = build_baselines(range(args.season - 3, args.season))   # e.g. 2023-2025
     rates = prior_year_rates(prior)
-    career = load_career(range(2016, args.season))                # all game logs we have
+    career = load_career(range(2016, args.season), *load_venue_sets())   # all game logs, venue-tagged
 
     # median book line per (player, market) across books, for the yardage/reception markets
     ALIAS = {"LAR": "LA", "LAC": "LAC", "WSH": "WAS", "OAK": "LV", "SD": "LAC"}
@@ -265,11 +316,13 @@ def main():
         proj = project(rate, base)[key]
         cover, cgames = career_over(career, rate["pid"], key, book)
         pover, pgames = prior_over(career, rate["pid"], key, book, prior)
+        hOver, hG, rOver, rG = home_road_over(career, rate["pid"], key, book)
         matched += 1
         out.append({
             "game": game, "commence": commence, "player": rate["name"], "team": rate["team"],
             "pos": rate["pos"], "cat": cat, "market": key, "book": book, "proj": proj,
             "g": rate["games"], "cOver": cover, "cG": cgames, "pOver": pover, "pG": pgames,
+            "hOver": hOver, "hG": hG, "rOver": rOver, "rG": rG,
         })
 
     out.sort(key=lambda r: (r["commence"], r["game"], r["cat"], -(r["proj"] or 0)))
@@ -283,7 +336,8 @@ def main():
     ts += "// not graded against closing lines yet.\n"
     ts += "export interface PlayerProj { game: string; commence: string; player: string; team: string;\n"
     ts += "  pos: string; cat: string; market: string; book: number; proj: number; g: number;\n"
-    ts += "  cOver: number; cG: number; pOver: number; pG: number }\n"
+    ts += "  cOver: number; cG: number; pOver: number; pG: number;\n"
+    ts += "  hOver: number; hG: number; rOver: number; rG: number }\n"
     ts += f"export const PROJ_SEASON = {args.season};\nexport const PROJ_WEEK = {week};\nexport const PROJ_PRIOR = {prior};\n"
     ts += "export const PLAYER_PROJECTIONS: PlayerProj[] = [\n"
     for r in out:
