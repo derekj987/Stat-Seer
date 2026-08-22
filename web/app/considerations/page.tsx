@@ -147,9 +147,9 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
             <dd className="cxrow__v">
               {incs.length > 0 ? (
                 incs.map((i) => (
-                  <span className="cxinc" key={`${i.player}-${i.stat}`}>
-                    <b>{i.player}</b> — {i.remaining} {i.stat} from {i.label}{" "}
-                    <span className="cxinc__prog">({i.current}/{i.threshold}, {i.pct}%)</span>
+                  <span className="cxinc" key={`${i.player}-${i.requirement}`}>
+                    <b>{i.player}</b> — {i.needed} from {i.amount}{" "}
+                    <span className="cxinc__prog">({i.requirement}; now {i.currently})</span>
                   </span>
                 ))
               ) : INCENTIVE_WATCH.length === 0 ? (

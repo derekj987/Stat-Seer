@@ -55,8 +55,8 @@ jobs:
       - name: Build depth chart (realistic-player filter)
         run: python analysis/depth_export.py
 
-      - name: Build incentive watch (players close to a contract incentive)
-        run: python analysis/incentive_export.py
+      - name: Build incentive watch (Over The Cap weekly incentives)
+        run: python analysis/incentive_scrape.py
 
       - name: Commit if changed
         run: |
