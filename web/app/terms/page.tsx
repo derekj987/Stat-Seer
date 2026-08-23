@@ -140,7 +140,7 @@ export default function Terms() {
         <section className="legal__sec">
           <h2>12. Governing law &amp; contact</h2>
           <p>
-            These Terms are governed by the laws of the State of [Your State], without regard to conflict-of-laws rules.
+            These Terms are governed by the laws of the State of Indiana, without regard to conflict-of-laws rules.
             Questions? Reach us through the <b>&ldquo;Message Us&rdquo;</b> widget on the site.
           </p>
         </section>
