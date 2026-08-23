@@ -243,7 +243,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub="NFL - THE MODEL" art={{ src: "/nflpic.png?v=1", alt: "NFL" }} />
+        <Brand sub={<><span className="brand__sport">NFL</span> · The Model</>} art={{ src: "/nflpic.png?v=1", alt: "NFL" }} />
         <div className="masthead__clock"><ModelClock /></div>
       </header>
 

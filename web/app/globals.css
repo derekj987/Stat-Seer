@@ -74,6 +74,11 @@ body{background:var(--bg);color:var(--ink);
 /* Per-sport image to the right of the model subtitle (Heisman on NCAAF, NFL mark on NFL). */
 .brand__art{flex:0 0 auto;height:clamp(40px,8vw,56px);width:auto;margin-left:6px;
   filter:drop-shadow(0 1px 3px rgba(0,0,0,.22))}
+/* The Model masthead label (the two sport pages that pass an image): make it a proper,
+   prominent page title — big, bold, uppercase, sport name in gold, "THE MODEL" in ink. */
+.brand:has(.brand__art) .brand__sub{font-size:clamp(19px,2.7vw,26px);font-weight:800;
+  text-transform:uppercase;letter-spacing:.09em;line-height:1.04;color:var(--ink)}
+.brand__sport{color:var(--gold);text-shadow:0 1px 1px rgba(0,0,0,.14)}
 .asof{text-align:right;color:var(--muted);font-size:12px;
   text-transform:uppercase;letter-spacing:.08em;line-height:1.7}
 .asof b{color:var(--ink);font-family:var(--font-mono);font-size:13px;

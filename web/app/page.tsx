@@ -59,7 +59,7 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
             <p className="lp-pitch__sub">
               In a typical year, about <b>60% of bettors finish down</b>. The average wins just{" "}
               <b>48% of their bets</b> — short of the <b>52.4%</b> you need just to <b>break even</b>. (Sportsbooks
-              take a cut on every bet, so the break-even line sits above 50%.) Only <b>~3% turn a lasting profit</b>.
+              take a cut on every bet, so the break-even line sits above 50%.) Only <b>~3% turn a lasting profit</b>.{" "}
               <b className="lp-pitch__key">StatSeer is built to move you past that line:</b> <b>line-blind projections</b>, the <b>single best price</b>{" "}
               on every pick, and the <b>context</b> that moves markets. Every call graded against the closing line.
             </p>
