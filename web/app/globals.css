@@ -2123,6 +2123,54 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 /* The value-prop section runs on our gold, not the site green — flip --accent for the
    whole drawer so the headline accent, break-even bar, CTA and pinned tab all go gold. */
 .lp-drawer{--accent:var(--gold)}
+
+/* ===== Value Finder drawer — mirror of .lp-drawer on the RIGHT edge ===== */
+.vf-drawer__chk{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.vf-drawer__tab{position:fixed;right:0;top:44%;z-index:60;cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;gap:8px;padding:16px 7px;border-radius:14px 0 0 14px;background:var(--accent);color:#fff;
+  box-shadow:-2px 3px 14px rgba(0,0,0,.28);transition:transform .2s ease,opacity .25s ease}
+.vf-drawer__tab:hover{transform:translateX(-2px)}
+.vf-drawer__tabtext{writing-mode:vertical-rl;white-space:nowrap;font-size:12px;font-weight:800;
+  letter-spacing:.08em;text-transform:uppercase}
+.vf-drawer__chev{font-size:15px;font-weight:800;line-height:1}
+.vf-drawer__chk:checked ~ .vf-drawer__tab{opacity:0;pointer-events:none;transform:translateX(100%)}
+.vf-drawer__scrim{position:fixed;inset:0;z-index:61;background:rgba(0,0,0,.3);opacity:0;pointer-events:none;
+  transition:opacity .3s ease}
+.vf-drawer__chk:checked ~ .vf-drawer__scrim{opacity:1;pointer-events:auto;cursor:pointer}
+.vf-drawer__panel{position:fixed;right:0;top:0;bottom:0;z-index:62;width:min(430px,92vw);max-height:100dvh;
+  overflow-y:auto;background:linear-gradient(180deg,var(--surface),var(--surface-2));border-left:1px solid var(--line);
+  box-shadow:-6px 0 30px rgba(0,0,0,.28);transform:translateX(100%);transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+.vf-drawer__chk:checked ~ .vf-drawer__panel{transform:translateX(0)}
+.vf-drawer__close{position:absolute;top:10px;left:12px;z-index:2;cursor:pointer;width:30px;height:30px;display:flex;
+  align-items:center;justify-content:center;border-radius:50%;font-size:16px;line-height:1;color:var(--muted);background:var(--surface-2)}
+.vf-drawer__close:hover{color:var(--ink)}
+@media (min-width:900px){.vf-drawer__panel{width:min(560px,46vw)}}
+/* VF panel content */
+.vf-pitch{display:flex;flex-direction:column;padding:34px 24px 26px}
+.vf-pitch__h{margin:0 0 8px;font-size:clamp(22px,3.4vw,28px);line-height:1.16;color:var(--ink);letter-spacing:-.01em}
+.vf-pitch__h b{color:var(--accent)}
+.vf-pitch__sub{margin:0 0 18px;font-size:14px;line-height:1.6;color:var(--ink)}
+.vf-slip{border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden}
+.vf-slip__tag{padding:9px 14px;background:var(--surface-2);border-bottom:1px solid var(--line);
+  font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.vf-slip__legs{list-style:none;margin:0;padding:4px 0}
+.vf-slip__leg{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;
+  padding:9px 14px;border-bottom:1px solid var(--line)}
+.vf-slip__leg:last-child{border-bottom:0}
+.vf-slip__bet{display:flex;flex-direction:column;line-height:1.2;font-size:13.5px;color:var(--ink)}
+.vf-slip__bet b{font-weight:800}
+.vf-slip__bet small{font-size:10.5px;color:var(--muted);font-weight:600}
+.vf-slip__book{font-size:11px;font-weight:700;color:var(--muted)}
+.vf-slip__odds{font-family:var(--font-mono),ui-monospace,monospace;font-weight:800;font-size:13px;color:var(--accent);min-width:44px;text-align:right}
+.vf-slip__best{padding:12px 14px;background:var(--gold-soft);border-top:1px solid var(--line)}
+.vf-slip__besth{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.vf-slip__besth b{color:var(--gold);font-size:13px}
+.vf-slip__bestrow{margin-top:6px;display:flex;align-items:baseline;gap:8px;font-size:13px;color:var(--ink)}
+.vf-slip__bestrow span{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+.vf-slip__bestrow b{font-family:var(--font-mono),ui-monospace,monospace;font-weight:800;color:var(--accent);font-size:15px}
+.vf-slip__bestnote{margin:8px 0 0;font-size:11px;line-height:1.5;color:var(--muted)}
+.vf-slip__bestnote b{color:var(--ink)}
+.vf-pitch__cta{margin-top:18px;align-self:flex-start}
 /* "Three steps" flow at the bottom of the board — set off with a divider */
 .lpf__flowhead{margin-top:30px;padding-top:20px;border-top:1px solid var(--line)}
 .lpf__flowhead .lpf__h{margin:0}

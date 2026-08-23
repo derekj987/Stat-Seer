@@ -83,6 +83,59 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
         </aside>
       </div>
 
+      {/* Value Finder PINNED to the RIGHT edge — mirrors the left drawer, slides an example
+          betslip out over the page. Collapsed by default (a slim tab); click to slide out. */}
+      <div className="vf-drawer">
+        <input type="checkbox" id="vf-toggle" className="vf-drawer__chk" aria-hidden="true" tabIndex={-1} />
+        <label htmlFor="vf-toggle" className="vf-drawer__tab" title="Value Finder">
+          <span className="vf-drawer__chev" aria-hidden="true">‹</span>
+          <span className="vf-drawer__tabtext">Find the best price</span>
+        </label>
+        <label htmlFor="vf-toggle" className="vf-drawer__scrim" aria-hidden="true" />
+        <aside className="vf-drawer__panel" aria-label="Value Finder">
+          <label htmlFor="vf-toggle" className="vf-drawer__close" title="Close" aria-label="Close">✕</label>
+          <section className="vf-pitch">
+            <h2 className="vf-pitch__h">Find the <b>best price</b>.</h2>
+            <p className="vf-pitch__sub">
+              <b>Value Finder</b> shops every pick across <b>~10 sportsbooks</b> and shows you the single
+              best place to bet each one — plus the <b>one book that pays the most</b> on your whole parlay.
+              Same bets, better price.
+            </p>
+
+            <div className="vf-slip">
+              <div className="vf-slip__tag">Example slip · 3 picks</div>
+              <ul className="vf-slip__legs">
+                <li className="vf-slip__leg">
+                  <span className="vf-slip__bet">NE <b>+3.5</b><small>NE @ SEA</small></span>
+                  <span className="vf-slip__book">FanDuel</span>
+                  <span className="vf-slip__odds">-108</span>
+                </li>
+                <li className="vf-slip__leg">
+                  <span className="vf-slip__bet">Under <b>48.5</b><small>SF @ LA</small></span>
+                  <span className="vf-slip__book">DraftKings</span>
+                  <span className="vf-slip__odds">-105</span>
+                </li>
+                <li className="vf-slip__leg">
+                  <span className="vf-slip__bet">D. Maye <b>o223.5</b><small>pass yds</small></span>
+                  <span className="vf-slip__book">FanDuel</span>
+                  <span className="vf-slip__odds">-110</span>
+                </li>
+              </ul>
+              <div className="vf-slip__best">
+                <div className="vf-slip__besth">Best book to place this slip: <b>FanDuel</b></div>
+                <div className="vf-slip__bestrow"><span>One-book parlay</span><b>+592</b> on all 3</div>
+                <p className="vf-slip__bestnote">
+                  vs <b>+618</b> placing each leg at its own best book above — Value Finder finds both, and the
+                  real winner isn&apos;t always the book that&apos;s best on the most legs.
+                </p>
+              </div>
+            </div>
+
+            <a href="/lines" className="btn btn--primary vf-pitch__cta">Open the Value Finder →</a>
+          </section>
+        </aside>
+      </div>
+
       <main className="lp">
       <LandingHub initialSport={initialSport} nfl={nfl} ncaaf={ncaaf} />
 
