@@ -169,6 +169,11 @@ body{background:var(--bg);color:var(--ink);
 .line.savable:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .slipbar{position:fixed;left:0;right:0;bottom:0;z-index:50;
   display:flex;justify-content:center;padding:0 12px 12px;pointer-events:none}
+/* Phone: clear the bottom-left "Message Us" pigeon (16px + 60px wide) by shifting the
+   slip to the right so the two no longer overlap. */
+@media (max-width:640px){
+  .slipbar{justify-content:flex-end;padding-left:88px}
+}
 .slipbar__inner{pointer-events:auto;width:100%;max-width:640px;background:var(--surface);
   border:1px solid var(--line);border-radius:14px;
   box-shadow:0 10px 34px rgba(0,0,0,.22);overflow:hidden}
@@ -817,7 +822,7 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
   border:1px solid color-mix(in srgb,var(--accent) 30%,transparent)}
 .slipcta__icon{font-size:22px;line-height:1.15;flex:0 0 auto}
 .slipcta__text{display:flex;flex-direction:column;gap:3px;font-size:13px;line-height:1.55;
-  color:var(--ink);max-width:78ch}
+  color:var(--ink);flex:1 1 auto;min-width:0}
 .slipcta__h{font-size:13.5px;color:var(--accent);letter-spacing:.01em}
 
 /* --- Best Bets --- */
@@ -1956,7 +1961,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 /* See-through on every device: a light tint + light blur so the homepage clearly reads
    through the panel (a window, not frosted glass). */
 .lp-drawer__panel{position:fixed;left:0;top:0;bottom:0;z-index:62;width:min(430px,92vw);max-height:100dvh;
-  overflow-y:auto;--pitch-bot:color-mix(in srgb, var(--surface) 42%, transparent);
+  overflow-y:auto;--pitch-bot:color-mix(in srgb, var(--surface) 30%, transparent);
   background:linear-gradient(180deg,
     color-mix(in srgb, var(--surface) 94%, transparent) 0%,
     color-mix(in srgb, var(--surface) 90%, transparent) 44%,
@@ -1981,7 +1986,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 /* Phone: the panel nearly fills the screen, so push transparency further and lighten
    the scrim more, so the board reads clearly behind the pitch. */
 @media (max-width:767px){
-  .lp-drawer__panel{--pitch-bot:color-mix(in srgb, var(--surface) 30%, transparent)}
+  .lp-drawer__panel{--pitch-bot:color-mix(in srgb, var(--surface) 20%, transparent)}
   .lp-drawer__scrim{background:rgba(0,0,0,.1)}
 }
 .lp-pitch__h{margin:0;font-size:clamp(22px,3.4vw,28px);line-height:1.16;color:var(--ink);letter-spacing:-.01em}
