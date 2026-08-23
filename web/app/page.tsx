@@ -58,10 +58,10 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
             <h2 className="lp-pitch__h">Raise your <b>hit rate</b>.</h2>
             <p className="lp-pitch__sub">
               In a typical year, about <b>6 in 10 bettors finish down</b>. The average wins just{" "}
-              <b>48% of their bets</b> — short of the <b>52.4%</b> you need to beat the vig — and only{" "}
-              <b>~3% turn a lasting profit</b>. StatSeer is built to move you toward that line: <b>line-blind
-              projections</b>, the <b>single best price</b> on every pick, and the <b>context</b> that moves
-              markets. Every call graded against the closing line.
+              <b>48% of their bets</b> — short of the <b>52.4%</b> you need just to <b>break even</b>. (Sportsbooks
+              take a cut on every bet, so the break-even line sits above 50%.) Only <b>~3% turn a lasting profit</b>.
+              StatSeer is built to move you past that line: <b>line-blind projections</b>, the <b>single best price</b>{" "}
+              on every pick, and the <b>context</b> that moves markets. Every call graded against the closing line.
             </p>
             <div className="lp-pitch__bars">
               <div className="lp-pitch__row lp-pitch__row--a">
@@ -70,9 +70,9 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
                 <span className="lp-pitch__n">48<span className="lp-pitch__slash">%</span></span>
               </div>
               <div className="lp-pitch__row lp-pitch__row--b">
-                <span className="lp-pitch__label">Beat the vig</span>
+                <span className="lp-pitch__label">Break-even line</span>
                 <span className="lp-pitch__bar"><span className="lp-pitch__fill lp-pitch__fill--good" style={{ ["--w" as string]: "52.4%" }} /></span>
-                <span className="lp-pitch__n">52.4<span className="lp-pitch__slash">%</span> <small>the line</small></span>
+                <span className="lp-pitch__n">52.4<span className="lp-pitch__slash">%</span></span>
               </div>
             </div>
             <p className="lp-pitch__cap">Only about 3% of bettors clear it. That&apos;s the line we&apos;re built to move you past.</p>
