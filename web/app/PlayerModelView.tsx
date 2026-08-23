@@ -4,6 +4,7 @@
 // weekly projection OUTPUT wires in here as the season's usage data flows, so each
 // category currently scaffolds an honest "arriving" state rather than inventing numbers.
 import { Brand, FlowSteps, ModelSubnav, ScrollHint } from "./Nav";
+import Tip from "./Tip";
 import { PLAYER_PROJECTIONS, PROJ_WEEK, PROJ_PRIOR, type PlayerProj } from "@/lib/playerProjections";
 import { isRealistic } from "@/lib/depthChart";
 
@@ -107,6 +108,10 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
       <WeekNav base={base} cat={active.key} current={week} />
 
       <section className="pmcat">
+        <div className="pmcat__legend">
+          <span className="pmcat__legendlabel">{active.label} — how to read this table</span>
+          <Tip text={<>Each player&apos;s sportsbook <b>Book line</b> vs <b>Our proj</b>, our line-blind projection (▲ = we lean over, ▼ = under). <b>Career&nbsp;% over</b> = how often they&apos;ve cleared a similar line across their career; <b>Prior szn&nbsp;% over</b> = last season only.{active.key === "passing" ? <> <b>Home&nbsp;% over</b> / <b>Road&nbsp;% over</b> split that rate by venue.</> : null} Higher means they go over more often. We project volume first, then a regressed efficiency baseline.</>} />
+        </div>
 
         {rows.length === 0 ? (
           <div className="pmempty pmempty--solo" role="note">

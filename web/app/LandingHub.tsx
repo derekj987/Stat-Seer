@@ -9,6 +9,19 @@ import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
 import { PLAYER_PROJECTIONS, PROJ_PRIOR, type PlayerProj } from "@/lib/playerProjections";
 import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
 import { isRealistic } from "@/lib/depthChart";
+import Tip from "./Tip";
+
+// Plain-English explanations shown behind each section's medieval "?" seal.
+const TIPS = {
+  gameModel: <>Every game this week with the book&apos;s <b>Market Spread</b> and <b>Market O/U</b> beside <b>Our Model Suggests</b> — our line-blind lean (the model never sees the betting line). A ◆ marks an <b>off-consensus</b> game where we disagree with the market. Snapshots graded in public, not guaranteed picks.</>,
+  passing: <>Each starting QB&apos;s sportsbook <b>passing-yards line</b> vs <b>our line-blind projection</b> (▲ = we lean over, ▼ = under). <b>Career&nbsp;% over</b> = how often they&apos;ve cleared a similar line across their career; <b>Prior szn&nbsp;% over</b> = last season only; <b>Home&nbsp;% over</b> / <b>Road&nbsp;% over</b> = that same rate split by venue. Higher means they go over more often.</>,
+  playerModel: <>Our line-blind player-prop projections: we project <b>volume</b> (carries, targets) first, then apply a regressed efficiency baseline. The ▲/▼ shows whether our number lands over or under the book&apos;s line.</>,
+  fan: <>Players surfaced from fan forums, beat writers and RSS feeds, then <b>hype-rated</b> with a plain bottom line (e.g. take the over on receptions). For discovery — not a graded pick.</>,
+  considNfl: <>Per-game context that can move a number but isn&apos;t itself an edge: the <b>site &amp; roof</b>, the <b>weather</b> (⚑ marks notable wind), and the <b>referee crew</b>.</>,
+  considNcaaf: <>Durable context for the slate: <b>home-field</b> value, <b>conference strength</b>, and game-week items (weather, injuries) as they firm up.</>,
+  upsets: <>Games where the market has a team losing but <b>our model has them winning outright</b>. The number shown is how much more likely our model thinks they are to win than the market implies.</>,
+  referee: <>Each crew&apos;s tendencies. The one thing that carries over year to year is <b>penalties per game</b> — the O/U and ATS leans are historical context, not a lean.</>,
+} as const;
 
 const PROP_LABEL: Record<string, string> = { rush_yds: "Rush Yds", rec_yds: "Rec Yds", receptions: "Receptions", pass_yds: "Pass Yds" };
 
@@ -171,13 +184,13 @@ function Flow({ sport, label }: { sport: Sport; label: string }) {
   );
 }
 
-function Panel({ title, count, hint, open, children }: { title: string; count: React.ReactNode; hint: string; open?: boolean; children: React.ReactNode }) {
+function Panel({ title, count, hint, open, children }: { title: string; count: React.ReactNode; hint: React.ReactNode; open?: boolean; children: React.ReactNode }) {
   return (
     <details className="hb-panel" open={open}>
       <summary className="hb-bar">
         <span className="hb-bar__title hb-bar__title--gold">{title}</span>
         <span className="hb-bar__count hb-bar__count--gold">{count}</span>
-        <span className="hb-bar__hint">{hint}</span>
+        <Tip text={hint} />
         <span className="hb-bar__chev" aria-hidden="true">▾</span>
       </summary>
       <div className="hb-body">{children}</div>
@@ -490,29 +503,29 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
       {/* NFL panel */}
       <div className="lp-sport lp-sport--nfl">
         <div className="lp-snaplabel">NFL WEEK {nfl.week} SNAPSHOT</div>
-        <Panel title="The Model — Snapshot View" count={`${nfl.card.length} games`} hint="our model’s read beside the market’s" open>
+        <Panel title="The Model — Snapshot View" count={`${nfl.card.length} games`} hint={TIPS.gameModel} open>
           <NflCardTable rows={nfl.card} />
           <p className="lp-cardfoot"><a href="/model">See the full model →</a></p>
         </Panel>
         <Panel
           title="Quarterback Passing Props — Snapshot"
           count={`${PLAYER_PROJECTIONS.filter((r) => r.cat === "passing" && r.book > 0 && isRealistic(r.player)).length} QBs`}
-          hint="book line vs our line-blind projection, with over-rates"
+          hint={TIPS.passing}
           open
         >
           <PassingSnapshot />
         </Panel>
-        <Panel title="Player Model snapshot — NFL" count="props" hint="our line-blind player-prop projections" open>
+        <Panel title="Player Model snapshot — NFL" count="props" hint={TIPS.playerModel} open>
           <PlayerSnapshot base="nfl" />
         </Panel>
-        <Panel title="Check out our fan analysis." count={nfl.players.length || "—"} hint="fan-sourced players, hype-rated" open>
+        <Panel title="Check out our fan analysis." count={nfl.players.length || "—"} hint={TIPS.fan} open>
           <FanAnalysisNote />
           <PlayersTable players={nfl.players} />
         </Panel>
-        <Panel title="Check out our special considerations" count={`${GAME_WEATHER.length || 3} games`} hint="site, weather & referee context per game" open>
+        <Panel title="Check out our special considerations" count={`${GAME_WEATHER.length || 3} games`} hint={TIPS.considNfl} open>
           <NflConsiderations />
         </Panel>
-        <Panel title="Potential Upsets of the Week — NFL" count={nfl.upsets.length} hint="the market has them losing — our model says they win" open>
+        <Panel title="Potential Upsets of the Week — NFL" count={nfl.upsets.length} hint={TIPS.upsets} open>
           {nfl.upsets.length === 0 ? <p className="hb-empty">No upset alerts this week — our model and the market agree on every game&apos;s side.</p> : (
             <UpsetCards>{nfl.upsets.map((u) => (
               <div className="hb-up" key={u.eventId}>
@@ -523,7 +536,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
             ))}</UpsetCards>
           )}
         </Panel>
-        <Panel title="Referee Crew Analysis" count={`${REF_STATS.length} crews`} hint="how many flags each crew throws — the one tendency that carries over" open>
+        <Panel title="Referee Crew Analysis" count={`${REF_STATS.length} crews`} hint={TIPS.referee} open>
           <RefereeAnalysis />
         </Panel>
         {/* How to use it — moved below the board, so the value + data lead. */}
@@ -537,21 +550,21 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
       {/* NCAAF panel */}
       <div className="lp-sport lp-sport--ncaaf">
         <div className="lp-snaplabel">COLLEGE FOOTBALL WEEK {ncaaf.week} SNAPSHOT</div>
-        <Panel title="The Model — Snapshot View" count={`${ncaaf.games.length} ranked`} hint="our line-blind read beside the market" open>
+        <Panel title="The Model — Snapshot View" count={`${ncaaf.games.length} ranked`} hint={TIPS.gameModel} open>
           <NcaafCardTable games={ncaaf.games} />
           <p className="lp-cardfoot"><a href="/ncaaf/model">See the full model →</a></p>
         </Panel>
-        <Panel title="Player Model snapshot — NCAAF" count="props" hint="our line-blind player-prop projections" open>
+        <Panel title="Player Model snapshot — NCAAF" count="props" hint={TIPS.playerModel} open>
           <PlayerSnapshot base="ncaaf" />
         </Panel>
-        <Panel title="Check out our fan analysis." count="—" hint="fan-sourced players, hype-rated" open>
+        <Panel title="Check out our fan analysis." count="—" hint={TIPS.fan} open>
           <FanAnalysisNote />
           <p className="hb-empty">College player reads land here once the CFB fan scan is wired — the same read we run for the NFL on <a href="/ncaaf/tailgate">Fan Analysis</a>.</p>
         </Panel>
-        <Panel title="Check out our special considerations" count="context" hint="home field, conference strength & more" open>
+        <Panel title="Check out our special considerations" count="context" hint={TIPS.considNcaaf} open>
           <NcaafConsiderations />
         </Panel>
-        <Panel title="Potential Upsets of the Week — NCAAF" count={ncaaf.upsets.length} hint="the market has them losing — our model says they win" open>
+        <Panel title="Potential Upsets of the Week — NCAAF" count={ncaaf.upsets.length} hint={TIPS.upsets} open>
           {ncaaf.upsets.length === 0 ? <p className="hb-empty">No upset alerts this week — our rating agrees with the market&apos;s favorite on the board.</p> : (
             <UpsetCards>{ncaaf.upsets.map((u) => (
               <div className="hb-up" key={`${u.dog}-${u.matchup}`}>

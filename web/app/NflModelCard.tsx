@@ -1,4 +1,5 @@
 import type { CardRow } from "@/lib/home";
+import Tip from "./Tip";
 
 // The Model Card (snapshot view) — the same table the landing shows, reusable on The
 // Model page. Collapsed by default; shows the first 6 games with a "see more" for the rest.
@@ -37,7 +38,7 @@ export default function NflModelCard({ rows, open = true }: { rows: CardRow[]; o
       <summary className="hb-bar">
         <span className="hb-bar__title hb-bar__title--gold">The Model — Snapshot View</span>
         <span className="hb-bar__count">{rows.length} games</span>
-        <span className="hb-bar__hint">our model&apos;s read beside the market&apos;s, every game</span>
+        <Tip text={<>Every game this week with the book&apos;s <b>Market Spread</b> and <b>Market O/U</b> beside <b>Our Model Suggests</b> — our line-blind lean (the model never sees the betting line). A ◆ marks an <b>off-consensus</b> game where we disagree with the market. Snapshots graded in public, not guaranteed picks.</>} />
         <span className="hb-bar__chev" aria-hidden="true">▾</span>
       </summary>
       <div className="hb-body">

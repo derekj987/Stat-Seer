@@ -1572,6 +1572,26 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-bar__hint{font-size:11.5px;color:var(--muted);font-style:italic}
 .hb-bar__chev{margin-left:auto;color:var(--muted);font-size:13px;transition:transform .2s;flex:0 0 auto}
 .hb-panel[open] .hb-bar__chev{transform:rotate(180deg)}
+
+/* ===== Medieval "?" tooltips (Tip.tsx) — explain what each table shows =====
+   Pure CSS: hover on desktop, :focus (tap) on phones. */
+.tip{position:relative;display:inline-flex;align-items:center;flex:0 0 auto}
+.tip__seal{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;
+  border-radius:50%;border:1.5px solid var(--gold);background:var(--gold-soft);color:var(--gold);
+  font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;font-size:13px;font-weight:400;
+  line-height:1;cursor:help;padding:0;flex:0 0 auto;user-select:none;transition:background .12s,color .12s,transform .12s}
+.tip__seal:hover,.tip__seal:focus,.tip__seal:focus-visible{background:var(--gold);color:#fff;outline:none;transform:translateY(-1px)}
+.tip__bubble{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);z-index:60;
+  width:max-content;max-width:min(300px,80vw);
+  background:var(--surface);border:1px solid var(--gold);border-radius:10px;padding:11px 13px;
+  font-size:12.5px;line-height:1.5;color:var(--ink);font-style:normal;font-weight:400;letter-spacing:0;
+  text-transform:none;text-align:left;box-shadow:0 12px 32px rgba(0,0,0,.30);
+  opacity:0;visibility:hidden;pointer-events:none;transition:opacity .13s ease}
+.tip__bubble b{color:var(--gold);font-weight:800}
+.tip:hover .tip__bubble,.tip__seal:focus + .tip__bubble,.tip__seal:focus-visible + .tip__bubble{
+  opacity:1;visibility:visible;pointer-events:auto}
+.pmcat__legend{display:flex;align-items:center;gap:8px;margin:0 0 12px}
+.pmcat__legendlabel{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
 .hb-body{border-top:1px solid var(--line);padding:14px 16px 8px}
 .hb-empty{font-size:13px;color:var(--muted);font-style:italic;padding:4px 0 12px;line-height:1.55}
 .hb-empty a{color:var(--accent);text-decoration:none;font-weight:600}
@@ -2251,9 +2271,9 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .lpf__steps{grid-template-columns:1fr}
   .lpf__step:not(:last-child)::after{content:"↓";right:auto;left:50%;top:auto;bottom:-13px;transform:translateX(-50%)}
 }
-.lp-snaplabel{margin:28px 0 8px;font-size:18px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#6a0f1c}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lp-snaplabel{color:#a92133}}
-:root[data-theme="dark"] .lp-snaplabel{color:#a92133}
+.lp-snaplabel{margin:26px 0 12px;font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;
+  font-size:clamp(23px,4.6vw,33px);font-weight:400;letter-spacing:.03em;color:var(--gold);line-height:1.1;
+  text-shadow:0 1px 2px rgba(0,0,0,.25),0 0 10px color-mix(in srgb,var(--gold) 30%,transparent)}
 .hb-plrtable .hb-plr__up{font-size:11px;margin-right:2px}
 .hb-plrlink{color:var(--ink);text-decoration:none;font-weight:700}
 .hb-plrlink:hover{color:var(--accent)}
