@@ -5,6 +5,7 @@ import SiteNav from "./SiteNav";
 import SportStrip from "./SportStrip";
 import SlipBar from "./SlipBar";
 import FeedbackWidget from "./FeedbackWidget";
+import VisitBeacon from "./VisitBeacon";
 
 // Medieval display face for the STATSEER wordmark, exposed as a CSS var so any
 // masthead can use it (matches the tavern / seer tone).
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {children}
         <SlipBar />
         <FeedbackWidget />
+        <VisitBeacon />
         <footer className="sitefoot">
           <p>
             StatSeer is statistical analysis, <b>not betting or financial advice</b>. For adults of legal

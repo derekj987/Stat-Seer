@@ -109,6 +109,7 @@ export default function SiteNav() {
               </button>
               {userOpen && (
                 <div className="snav__menu">
+                  {me.role === "founder" && <a href="/creator" className="snav__mi snav__mi--founder">★ Creator dashboard</a>}
                   <a href={`/u/${me.username}`} className="snav__mi">My profile</a>
                   <a href="/settings" className="snav__mi">Account settings</a>
                   {MOD.includes(me.role) && <a href="/forum/reports" className="snav__mi">Reports</a>}
@@ -208,6 +209,7 @@ export default function SiteNav() {
             <summary className="snav__dtop snav__psum">User Options</summary>
             {me === undefined ? null : me ? (
               <>
+                {me.role === "founder" && <a href="/creator" className="snav__dusr snav__mi--founder">★ Creator dashboard</a>}
                 <a href={`/u/${me.username}`} className="snav__dusr">My profile</a>
                 <a href="/settings" className="snav__dusr">Account settings</a>
                 {MOD.includes(me.role) && <a href="/forum/reports" className="snav__dusr">Reports</a>}
