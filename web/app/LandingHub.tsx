@@ -97,7 +97,7 @@ function NflConsiderations() {
           <div className="cxgrid cxgrid--snap lp-moregrid">{rest.map(cxCardEl)}</div>
         </details>
       )}
-      <div className="lp-cxbtn"><a className="btn btn--primary" href="/considerations">For the full slate, click here →</a></div>
+      <p className="lp-cardfoot"><a href="/considerations">See our Context Model →</a></p>
     </>
   );
 }
@@ -150,7 +150,7 @@ function NcaafConsiderations() {
           </article>
         ))}
       </div>
-      <div className="lp-cxbtn"><a className="btn btn--primary" href="/ncaaf/considerations">For the full slate, click here →</a></div>
+      <p className="lp-cardfoot"><a href="/ncaaf/considerations">See our Context Model →</a></p>
     </>
   );
 }
