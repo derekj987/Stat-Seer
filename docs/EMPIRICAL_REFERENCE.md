@@ -516,6 +516,38 @@ players above a volume floor with ≥4 games; low-volume/early-season is out of 
 
 ---
 
+## 9b. Projection vs. the closing line — out of sample (`proj_edge_backtest.py`)
+
+The test §9 left open: now that the backfilled prop history exists, does our
+line-blind projection actually **beat the closing line**? Walk-forward projections
+(strictly prior data) vs. the **consensus closing line** (backfilled
+`prop_snapshots`) vs. the **actual result**. Our lean = OVER if proj > line. Season
+2024, **6,457 graded props** with a result.
+
+| Market | n | Our lean win% | vs. vig (52.4%) |
+|---|---|---|---|
+| Rushing yds | 944 | 48.4% | −4.0 |
+| Receiving yds | 2,853 | 50.0% | −2.4 |
+| Receptions | 2,660 | 51.0% | −1.4 |
+| **All** | **6,457** | **50.2%** | **−2.2** |
+
+**We do not beat the line.** ~50% overall — a coin flip, below the 52.4% break-even.
+And the conviction gradient runs the **wrong way**: the bigger our disagreement with
+the line, the *worse* we do — 0–2 yds 50.9%, 2–5 51.8%, **5–10 48.5%, 10+ 48.4%**.
+The recency-weighted volume variant is the same story (all 50.7%, 10+ bucket 47.5%).
+
+**Reading.** §9 showed the projection is *accurate* (beats persistence/season-avg on
+MAE) and §9a that it's *calibrated*. But the closing line is a far stronger baseline
+than persistence — and it already prices everything our volume×efficiency model
+knows, plus what it can't see (game script, matchup, late news). When we deviate far
+from the line we are usually the one who's wrong. **This is priced.** It confirms the
+architecture: the Player Model is a trust/context engine (published, graded, honest),
+**not** a bet signal — the edge lives in Value Finder (price), not in the projection
+beating the market. Grades rush/rec/receptions only; passing yds + game lines untested
+here (the game-line rating was already shown to be noise, §5).
+
+---
+
 ## 10. Errors caught during this work
 
 Recorded because these are the failure modes that produce confident, wrong betting
