@@ -103,7 +103,7 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
             </p>
 
             <div className="vf-slip">
-              <div className="vf-slip__tag">Example slip · 3 picks</div>
+              <div className="vf-slip__tag">Example slip · 5 picks</div>
               <ul className="vf-slip__legs">
                 <li className="vf-slip__leg">
                   <span className="vf-slip__bet">NE <b>+3.5</b><small>NE @ SEA</small></span>
@@ -116,17 +116,29 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
                   <span className="vf-slip__odds">-105</span>
                 </li>
                 <li className="vf-slip__leg">
-                  <span className="vf-slip__bet">D. Maye <b>o223.5</b><small>pass yds</small></span>
+                  <span className="vf-slip__bet">D. Maye <b>o223.5</b><small>Pass Yds</small></span>
                   <span className="vf-slip__book">FanDuel</span>
                   <span className="vf-slip__odds">-110</span>
                 </li>
+                <li className="vf-slip__leg">
+                  <span className="vf-slip__bet">C. McCaffrey <b>o59.5</b><small>Rush Yds</small></span>
+                  <span className="vf-slip__book">BetMGM</span>
+                  <span className="vf-slip__odds">-112</span>
+                </li>
+                <li className="vf-slip__leg">
+                  <span className="vf-slip__bet">P. Nacua <b>o5.5</b><small>Rec</small></span>
+                  <span className="vf-slip__book">Caesars</span>
+                  <span className="vf-slip__odds">-120</span>
+                </li>
               </ul>
               <div className="vf-slip__best">
-                <div className="vf-slip__besth">Best book to place this slip: <b>FanDuel</b></div>
-                <div className="vf-slip__bestrow"><span>One-book parlay</span><b>+592</b> on all 3</div>
+                <div className="vf-slip__besth">Best book for this slip: <b>FanDuel</b></div>
+                <div className="vf-slip__bestrow"><span>Parlay all 5 at FanDuel</span><b>+2280</b></div>
+                <div className="vf-slip__bestrow"><span>Each leg at its own best book</span><b>+2391</b></div>
                 <p className="vf-slip__bestnote">
-                  vs <b>+618</b> placing each leg at its own best book above — Value Finder finds both, and the
-                  real winner isn&apos;t always the book that&apos;s best on the most legs.
+                  Two ways to play — Value Finder shows you both: put the whole parlay on <b>one book</b>
+                  (FanDuel pays the most here), or bet each leg <b>separately</b> at its own best price for a
+                  slightly bigger payout.
                 </p>
               </div>
             </div>

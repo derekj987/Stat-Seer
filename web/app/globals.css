@@ -2176,7 +2176,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .vf-slip__best{padding:12px 14px;background:var(--gold-soft);border-top:1px solid var(--line)}
 .vf-slip__besth{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
 .vf-slip__besth b{color:var(--gold);font-size:13px}
-.vf-slip__bestrow{margin-top:6px;display:flex;align-items:baseline;gap:8px;font-size:13px;color:var(--ink)}
+.vf-slip__bestrow{margin-top:6px;display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:13px;color:var(--ink)}
 .vf-slip__bestrow span{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
 .vf-slip__bestrow b{font-family:var(--font-mono),ui-monospace,monospace;font-weight:800;color:var(--accent);font-size:15px}
 .vf-slip__bestnote{margin:8px 0 0;font-size:11px;line-height:1.5;color:var(--muted)}
