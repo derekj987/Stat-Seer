@@ -83,7 +83,7 @@ body{background:var(--bg);color:var(--ink);
   text-transform:uppercase;letter-spacing:.08em;line-height:1.7}
 .asof b{color:var(--ink);font-family:var(--font-mono);font-size:13px;
   letter-spacing:0;text-transform:none}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0 28px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:22px 0 28px}
 .stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;
   padding:16px 18px;display:flex;flex-direction:column;gap:4px}
 .stat__v{font-family:var(--font-mono);font-size:clamp(20px,3vw,26px);
@@ -1458,13 +1458,16 @@ details.statsdrop .stats{margin:12px 0 0}
 .pmtable--data{max-width:none;min-width:760px}
 /* player flexes, team is compact, the four stat cols are equal width with an even gap —
    identical on every row incl. the header, so columns line up on phone and desktop alike. */
-.pmrow--data{display:grid;grid-template-columns:minmax(110px,1.4fr) 52px repeat(4,1fr);gap:14px;
+.pmrow--data{display:grid;grid-template-columns:minmax(110px,1.4fr) 52px repeat(4,minmax(0,1fr));gap:14px;
   align-items:baseline;border-top:1px solid var(--line);font-size:13px}
 /* passing table adds Home % / Road % → six stat columns instead of four */
 .pmtable--ha{min-width:940px}
-.pmtable--ha .pmrow--data{grid-template-columns:minmax(110px,1.4fr) 52px repeat(6,1fr)}
+.pmtable--ha .pmrow--data{grid-template-columns:minmax(110px,1.4fr) 52px repeat(6,minmax(0,1fr))}
 .pmempty--solo{border:1px solid var(--line);border-radius:12px;background:var(--surface)}
 .pmrow--head.pmrow--data{border-bottom:0;font-size:11px}
+/* header labels are longer than the data — let them wrap inside the equal columns so the
+   numbers below stay lined up under them (never widen the header's column) */
+.pmrow--head .pmcell{white-space:normal;line-height:1.2;align-self:end}
 .pmrow--data:first-child{border-top:0}
 .pmrow--data .pmcell--player{overflow:hidden;text-overflow:ellipsis;font-weight:600}
 .pmcell--num{font-family:var(--font-mono);color:var(--muted);text-align:left}
@@ -1488,8 +1491,8 @@ details.statsdrop .stats{margin:12px 0 0}
   .pmtable--data{min-width:540px}
   .pmtable--ha{min-width:720px}
   .pmrow{padding:8px 10px}
-  .pmrow--data{gap:9px;grid-template-columns:minmax(84px,1.3fr) 36px repeat(4,1fr);font-size:12px}
-  .pmtable--ha .pmrow--data{grid-template-columns:minmax(84px,1.3fr) 36px repeat(6,1fr)}
+  .pmrow--data{gap:9px;grid-template-columns:minmax(84px,1.3fr) 36px repeat(4,minmax(0,1fr));font-size:12px}
+  .pmtable--ha .pmrow--data{grid-template-columns:minmax(84px,1.3fr) 36px repeat(6,minmax(0,1fr))}
   .pmcell--career{font-size:12px}
   .pmcell__sub{font-size:9px}
 }
