@@ -1,0 +1,76 @@
+name: Backfill odds
+
+# One-click historical-odds backfill: pulls timestamped game lines + player props from The
+# Odds API's historical archive into odds_snapshots / prop_snapshots (capture_reason=BACKFILL).
+# Manual only — NOT scheduled. Fill in the form and Run workflow. Defaults to a cheap DRY RUN
+# (no writes); switch mode to "write" to persist. A hard credit cap protects the monthly budget.
+#
+# Backfill data uses capture_reason=BACKFILL, so it never shows on the live board (which reads
+# only SCHEDULED/MANUAL) — it's there for prop-edge / CLV / line-movement analysis.
+
+on:
+  workflow_dispatch:
+    inputs:
+      season:
+        description: "Season (e.g. 2024)"
+        required: true
+        default: "2024"
+      weeks:
+        description: "Weeks (e.g. 1-18, or 1,2,3)"
+        required: true
+        default: "1-18"
+      offsets:
+        description: "Hours before kickoff to snapshot (0.1 = closing; 0.1,24 adds a day-out)"
+        required: true
+        default: "0.1"
+      max_credits:
+        description: "Hard credit budget for this run"
+        required: true
+        default: "60000"
+      mode:
+        description: "dry-run (preview, no writes) or write (persist to Supabase)"
+        type: choice
+        options: [dry-run, write]
+        default: dry-run
+      no_props:
+        description: "Game lines only (skip the pricier props)?"
+        type: boolean
+        default: false
+
+concurrency:
+  group: backfill-odds
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi
+
+      - name: Fetch schedule (games.csv)
+        run: |
+          mkdir -p data
+          curl -fsSL --retry 3 -o data/games.csv \
+            "https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv"
+
+      - name: Backfill historical odds
+        env:
+          ODDS_API_KEY:         ${{ secrets.ODDS_API_KEY }}
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          FLAGS=""
+          if [ "${{ inputs.mode }}" = "write" ]; then FLAGS="$FLAGS --write"; fi
+          if [ "${{ inputs.no_props }}" = "true" ]; then FLAGS="$FLAGS --no-props"; fi
+          echo "Running: season=${{ inputs.season }} weeks=${{ inputs.weeks }} offsets=${{ inputs.offsets }} max-credits=${{ inputs.max_credits }} mode=${{ inputs.mode }} $FLAGS"
+          python backfill_odds.py \
+            --season "${{ inputs.season }}" \
+            --weeks "${{ inputs.weeks }}" \
+            --offsets "${{ inputs.offsets }}" \
+            --max-credits "${{ inputs.max_credits }}" \
+            $FLAGS
