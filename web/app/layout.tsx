@@ -23,6 +23,9 @@ export const metadata: Metadata = {
     type: "website",
   },
   twitter: { card: "summary_large_image" },
+  // Pre-launch: keep StatSeer out of search results until you're ready to advertise.
+  // Flip both to true (or delete this block) to let Google index the site at launch.
+  robots: { index: false, follow: false },
 };
 
 export const viewport: Viewport = {
@@ -43,6 +46,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             StatSeer is statistical analysis, <b>not betting or financial advice</b>. For adults of legal
             age only (18+). Please gamble responsibly — if it stops being fun, help is available:
             call <b>1-800-GAMBLER</b>.
+          </p>
+          <p className="sitefoot__links">
+            <a href="/terms">Terms of Service</a> · <a href="/privacy">Privacy Policy</a>
           </p>
         </footer>
       </body>

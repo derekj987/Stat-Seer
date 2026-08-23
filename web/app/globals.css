@@ -820,6 +820,23 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
   line-height:1.6;text-align:center}
 .sitefoot p{margin:0;max-width:78ch;margin-left:auto;margin-right:auto}
 .sitefoot b{color:var(--ink)}
+.sitefoot__links{margin-top:8px!important}
+.sitefoot__links a{color:var(--muted);text-decoration:underline;font-weight:600}
+.sitefoot__links a:hover{color:var(--accent)}
+
+/* ===== Legal pages (Terms / Privacy) ===== */
+.legal{max-width:760px;margin:8px auto 40px;color:var(--ink);font-size:15px;line-height:1.65}
+.legal__meta{color:var(--muted);font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;margin:0 0 18px}
+.legal__lead{font-size:16px;line-height:1.6;margin:0 0 8px}
+.legal__sec{margin-top:26px}
+.legal__sec h2{font-size:17px;font-weight:800;color:var(--ink);margin:0 0 8px;letter-spacing:.01em}
+.legal__sec p{margin:0 0 10px}
+.legal__sec ul{margin:0 0 10px;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.legal__sec li{line-height:1.55}
+.legal b{color:var(--ink)}
+.legal a{color:var(--accent);text-decoration:underline}
+.legal__foot{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);
+  color:var(--muted);font-size:13px;line-height:1.6}
 
 /* --- Build-your-betslip callout (Game Lines / Player Props) --- */
 .slipcta{display:flex;gap:13px;align-items:flex-start;margin:14px 0 10px;padding:13px 16px;
