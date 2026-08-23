@@ -9,6 +9,7 @@ import type { Game } from "@/lib/board";
 import type { PreRating } from "@/lib/preseason";
 import { ShopSubnav, SeasonSubnav, Brand, FlowSteps } from "./Nav";
 import { useSlip } from "@/lib/slip";
+import Tip from "@/app/Tip";
 
 const kickFmt = new Intl.DateTimeFormat("en-US", {
   timeZone: "America/New_York",
@@ -188,9 +189,15 @@ export default function PreseasonView({
           picks them up; outside the preseason window this page is empty by design.
         </p>
       ) : (
-        <section className="grid">
-          {board.map((g) => <GameCard key={g.eventId} g={g} has={has} onToggle={toggle} />)}
-        </section>
+        <>
+          <div className="tblhelp">
+            <span className="tblhelp__label">How to read these</span>
+            <Tip text={<>Exhibition (preseason) game lines shown at the <b>best price across sportsbooks</b>. Preseason results are noisy and starters barely play — treat this as <b>line-shopping only</b>, not a signal about the season.</>} />
+          </div>
+          <section className="grid">
+            {board.map((g) => <GameCard key={g.eventId} g={g} has={has} onToggle={toggle} />)}
+          </section>
+        </>
       )}
 
       <SandboxModel ratings={ratings} />

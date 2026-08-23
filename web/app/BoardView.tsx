@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import type { Game } from "@/lib/board";
 import { ShopSubnav, Brand, SlipCallout, FlowSteps, ValueFinderNote } from "./Nav";
+import Tip from "@/app/Tip";
 import { useSlip } from "@/lib/slip";
 import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
 
@@ -200,6 +201,11 @@ export default function BoardView({
             </details>
 
             <SlipCallout kind="lines" />
+
+            <div className="tblhelp">
+              <span className="tblhelp__label">How to read the lines</span>
+              <Tip text={<>For every game, each <b>moneyline, spread, and total</b> is shown at the <b>single best price across ~10 sportsbooks</b> (tap any to add it to your slip). <b>shop +x%</b> is the edge you pick up by taking that best number instead of the consensus. A ◆ marks an <b>off-consensus</b> game. No model, no pick here — just the best available number.</>} />
+            </div>
 
             <section className="grid">
               {board.slice(0, 6).map((g) => <GameCard key={g.eventId} g={g} has={has} onToggle={toggle} />)}

@@ -38,10 +38,13 @@ export default function NflModelCard({ rows, open = true }: { rows: CardRow[]; o
       <summary className="hb-bar">
         <span className="hb-bar__title hb-bar__title--gold">The Model — Snapshot View</span>
         <span className="hb-bar__count">{rows.length} games</span>
-        <Tip text={<>Every game this week with the book&apos;s <b>Market Spread</b> and <b>Market O/U</b> beside <b>Our Model Suggests</b> — our line-blind lean (the model never sees the betting line). A ◆ marks an <b>off-consensus</b> game where we disagree with the market. Snapshots graded in public, not guaranteed picks.</>} />
         <span className="hb-bar__chev" aria-hidden="true">▾</span>
       </summary>
       <div className="hb-body">
+        <div className="tblhelp">
+          <span className="tblhelp__label">What am I looking at?</span>
+          <Tip text={<>Every game this week with the book&apos;s <b>Market Spread</b> and <b>Market O/U</b> beside <b>Our Model Suggests</b> — our line-blind lean (the model never sees the betting line). A ◆ marks an <b>off-consensus</b> game where we disagree with the market. Snapshots graded in public, not guaranteed picks.</>} />
+        </div>
         {rows.length === 0 ? (
           <p className="hb-empty">The board opens when this week&apos;s odds and reads post.</p>
         ) : (

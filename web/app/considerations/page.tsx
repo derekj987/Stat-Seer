@@ -6,6 +6,7 @@ import { GAME_WEATHER, WEATHER_WEEK, WEATHER_UPDATED, type GameWeather } from "@
 import { INCENTIVE_WATCH } from "@/lib/incentiveWatch";
 import { TEAM_RATINGS } from "@/lib/teamRatings";
 import { Brand, FlowSteps, ContextSubnav } from "../Nav";
+import Tip from "@/app/Tip";
 
 const ord = (n: number) => {
   const s = ["th", "st", "nd", "rd"], v = n % 100;
@@ -213,6 +214,10 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
         <p className="foot">No games captured for Week {week} yet.</p>
       ) : (
         <>
+          <div className="tblhelp">
+            <span className="tblhelp__label">What am I looking at?</span>
+            <Tip text={<>One card per game with the context around it: the <b>site &amp; roof</b>, the <b>weather</b> (⚑ marks notable wind), the <b>referee crew</b>, and each team&apos;s offense/defense ratings. These arm your judgment — they are <b>not</b> an adjusted line or a pick.</>} />
+          </div>
           <section className="cxgrid" aria-label={`Week ${week} considerations`}>
             {lead.map(renderCard)}
           </section>

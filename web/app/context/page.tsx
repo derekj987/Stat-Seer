@@ -2,6 +2,7 @@ import { weekRange, fetchWeek, buildBoard } from "@/lib/board";
 import { fetchModelWeek, type ModelPrediction } from "@/lib/model";
 import { MODEL_TOTALS } from "@/lib/modelTotals";
 import { Brand, FlowSteps, ContextSubnav } from "../Nav";
+import Tip from "@/app/Tip";
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -103,7 +104,7 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
 
       {/* --- Upset Watch: where our model likes the underdog --- */}
       <section className="ctxsec">
-        <h2 className="ctxsec__h">Upset watch</h2>
+        <h2 className="ctxsec__h">Upset watch <Tip text={<>Games where our <b>line-blind model likes the underdog</b> that the market favors — shown with our model&apos;s pick &amp; projected spread next to the market&apos;s favorite. Not locks (the market is usually right); these are our independent <b>disagreements</b>, not graded picks.</>} /></h2>
         <p className="ctxsec__d">
           Games where our <b>line-blind model likes the underdog</b> the market favors. These aren&apos;t locks —
           the market is usually right — but they&apos;re where a surprise is most in play by our independent read.

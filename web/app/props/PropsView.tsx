@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import type { PropGame, Quote } from "@/lib/props";
 import { BetslipPromo } from "../Nav";
 import { useSlip } from "@/lib/slip";
+import Tip from "@/app/Tip";
 
 const fmtOdds = (p: number) => (p > 0 ? `+${p}` : String(p));
 function sideLabel(side: string, line: number | null): string {
@@ -95,6 +96,10 @@ export default function PropsView({ games, embedded }: { games: PropGame[]; embe
     <>
       {!embedded && <BetslipPromo />}
       <p className="hint">{games.length} games · {players} players · best price on each, shopped across books.</p>
+      <div className="tblhelp">
+        <span className="tblhelp__label">How to read these props</span>
+        <Tip text={<>Every player prop with the <b>best available price across ~10 sportsbooks</b> (tap any to add it to your slip), and the edge you gain by shopping it there. Prices only — for our own line-blind projections on props, see the <b>Player Model</b>.</>} />
+      </div>
       <section className="propstack">
         {games.map((g) => (
           <PropGameCard key={g.eventId} g={g} has={has} toggle={toggle} />

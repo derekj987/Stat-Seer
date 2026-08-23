@@ -190,10 +190,15 @@ function Panel({ title, count, hint, open, children }: { title: string; count: R
       <summary className="hb-bar">
         <span className="hb-bar__title hb-bar__title--gold">{title}</span>
         <span className="hb-bar__count hb-bar__count--gold">{count}</span>
-        <Tip text={hint} />
         <span className="hb-bar__chev" aria-hidden="true">▾</span>
       </summary>
-      <div className="hb-body">{children}</div>
+      <div className="hb-body">
+        <div className="tblhelp">
+          <span className="tblhelp__label">What am I looking at?</span>
+          <Tip text={hint} />
+        </div>
+        {children}
+      </div>
     </details>
   );
 }

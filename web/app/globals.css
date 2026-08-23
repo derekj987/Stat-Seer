@@ -1573,26 +1573,28 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-bar__chev{margin-left:auto;color:var(--muted);font-size:13px;transition:transform .2s;flex:0 0 auto}
 .hb-panel[open] .hb-bar__chev{transform:rotate(180deg)}
 
-/* ===== Medieval "?" tooltips (Tip.tsx) — explain what each table shows =====
-   Pure CSS: hover on desktop, :focus (tap) on phones. */
+/* ===== Scroll "?" tooltips (Tip.tsx) — explain what each table shows =====
+   Client-toggled: hover on desktop, tap on phones. Bubble is position:fixed + clamped to
+   the viewport, so it never clips or runs off-screen. Placed in the body, never a summary. */
 .tip{position:relative;display:inline-flex;align-items:center;flex:0 0 auto}
 .tip__seal{display:inline-flex;align-items:center;justify-content:center;cursor:help;flex:0 0 auto;
   padding:0;border:0;background:none;line-height:0;user-select:none;border-radius:5px;
-  transition:transform .12s ease,filter .12s ease}
-.tip__seal:hover,.tip__seal:focus,.tip__seal:focus-visible{outline:none;
+  -webkit-tap-highlight-color:transparent;transition:transform .12s ease,filter .12s ease}
+.tip__seal:hover,.tip__seal:focus-visible{outline:none;
   transform:translateY(-1px) scale(1.1);filter:drop-shadow(0 1px 3px rgba(0,0,0,.3))}
+.tip__seal[aria-expanded="true"]{transform:scale(1.12);filter:drop-shadow(0 1px 3px rgba(0,0,0,.3))}
 .tip__icon{width:22px;height:22px;object-fit:contain;display:block}
-.tip__bubble{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);z-index:60;
-  width:max-content;max-width:min(300px,80vw);
+.tip__scrim{position:fixed;inset:0;z-index:198}
+.tip__bubble{position:fixed;z-index:199;transform:translateX(-50%);width:max-content;max-width:min(300px,calc(100vw - 24px));
   background:var(--surface);border:1px solid var(--gold);border-radius:10px;padding:11px 13px;
   font-size:12.5px;line-height:1.5;color:var(--ink);font-style:normal;font-weight:400;letter-spacing:0;
-  text-transform:none;text-align:left;box-shadow:0 12px 32px rgba(0,0,0,.30);
-  opacity:0;visibility:hidden;pointer-events:none;transition:opacity .13s ease}
+  text-transform:none;text-align:left;box-shadow:0 12px 32px rgba(0,0,0,.32)}
 .tip__bubble b{color:var(--gold);font-weight:800}
-.tip:hover .tip__bubble,.tip__seal:focus + .tip__bubble,.tip__seal:focus-visible + .tip__bubble{
-  opacity:1;visibility:visible;pointer-events:auto}
 .pmcat__legend{display:flex;align-items:center;gap:8px;margin:0 0 12px}
 .pmcat__legendlabel{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+/* generic "what am I looking at?" legend used above subpage tables */
+.tblhelp{display:flex;align-items:center;gap:8px;margin:6px 0 14px}
+.tblhelp__label{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
 .hb-body{border-top:1px solid var(--line);padding:14px 16px 8px}
 .hb-empty{font-size:13px;color:var(--muted);font-style:italic;padding:4px 0 12px;line-height:1.55}
 .hb-empty a{color:var(--accent);text-decoration:none;font-weight:600}
