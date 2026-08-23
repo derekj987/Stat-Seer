@@ -1956,7 +1956,11 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 /* See-through on every device: a light tint + light blur so the homepage clearly reads
    through the panel (a window, not frosted glass). */
 .lp-drawer__panel{position:fixed;left:0;top:0;bottom:0;z-index:62;width:min(430px,92vw);max-height:100dvh;
-  overflow-y:auto;background:color-mix(in srgb, var(--surface) 42%, transparent);
+  overflow-y:auto;--pitch-bot:color-mix(in srgb, var(--surface) 42%, transparent);
+  background:linear-gradient(180deg,
+    color-mix(in srgb, var(--surface) 94%, transparent) 0%,
+    color-mix(in srgb, var(--surface) 90%, transparent) 44%,
+    var(--pitch-bot) 64%, var(--pitch-bot) 100%);
   -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);border-right:1px solid var(--line);
   box-shadow:6px 0 30px rgba(0,0,0,.28);transform:translateX(-100%);transition:transform .35s cubic-bezier(.2,.7,.2,1)}
 .lp-drawer__chk:checked ~ .lp-drawer__panel{transform:translateX(0)}
@@ -1977,14 +1981,15 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 /* Phone: the panel nearly fills the screen, so push transparency further and lighten
    the scrim more, so the board reads clearly behind the pitch. */
 @media (max-width:767px){
-  .lp-drawer__panel{background:color-mix(in srgb, var(--surface) 32%, transparent);
-    -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+  .lp-drawer__panel{--pitch-bot:color-mix(in srgb, var(--surface) 30%, transparent)}
   .lp-drawer__scrim{background:rgba(0,0,0,.1)}
 }
 .lp-pitch__h{margin:0;font-size:clamp(22px,3.4vw,28px);line-height:1.16;color:var(--ink);letter-spacing:-.01em}
 .lp-pitch__h b{color:var(--accent)}
-.lp-pitch__sub{margin:10px 0 0;font-size:14px;line-height:1.6;color:var(--muted)}
+.lp-pitch__sub{margin:10px 0 0;font-size:14px;line-height:1.6;color:#243a2e}
 .lp-pitch__sub b{color:var(--ink)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lp-pitch__sub{color:#cfe0d4}}
+:root[data-theme="dark"] .lp-pitch__sub{color:#cfe0d4}
 .lp-pitch__bars{margin:20px 0 2px;display:flex;flex-direction:column;gap:12px}
 .lp-pitch__row{display:flex;align-items:center;gap:12px}
 .lp-pitch__label{flex:0 0 84px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
@@ -1999,7 +2004,10 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .lp-pitch__slash{color:var(--muted);font-weight:600;font-size:12px}
 .lp-pitch__n small{display:block;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
 .lp-pitch__cap{margin:12px 0 0;font-size:12px;line-height:1.5;color:var(--muted);font-style:italic}
-.lp-pitch__cta{margin-top:18px;display:inline-block;cursor:pointer}
+.lp-pitch__cta{margin-top:18px;display:inline-block;cursor:pointer;color:#2c2206}
+/* The value-prop section runs on our gold, not the site green — flip --accent for the
+   whole drawer so the headline accent, break-even bar, CTA and pinned tab all go gold. */
+.lp-drawer{--accent:var(--gold)}
 /* "Three steps" flow at the bottom of the board — set off with a divider */
 .lpf__flowhead{margin-top:30px;padding-top:20px;border-top:1px solid var(--line)}
 .lpf__flowhead .lpf__h{margin:0}
