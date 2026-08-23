@@ -57,25 +57,21 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
             <section className="lp-pitch" aria-label="Why StatSeer">
               <h2 className="lp-pitch__h">Raise your <b>hit rate</b>.</h2>
               <p className="lp-pitch__sub">
-                If you&apos;re hitting around <b>3 in 10</b>, you&apos;re leaving money on the table. StatSeer gives
-                you <b>line-blind projections</b>, the <b>single best price</b> on every pick, and the <b>context</b>{" "}
-                that moves markets — the same inputs the sharps rely on. The goal is simple: fewer guesses, more
-                hits, every call graded against the closing line.
+                If you&apos;re annually hitting around <b>28%</b> of the bets you place, you could be leaving money
+                on the table. Our goal is to raise that number — say, from <b>28% to 40% or higher</b> — with{" "}
+                <b>line-blind projections</b>, the <b>single best price</b> on every pick, and the <b>context</b>{" "}
+                that moves markets. The same inputs the sharps rely on, every call graded against the closing line.
               </p>
               <div className="lp-pitch__bars">
                 <div className="lp-pitch__row lp-pitch__row--a">
                   <span className="lp-pitch__label">On your own</span>
-                  <span className="lp-pitch__dots">
-                    {Array.from({ length: 10 }, (_, i) => <span key={i} className={`lp-dot${i < 3 ? " lp-dot--on" : ""}`} />)}
-                  </span>
-                  <span className="lp-pitch__n">3<span className="lp-pitch__slash">/10</span></span>
+                  <span className="lp-pitch__bar"><span className="lp-pitch__fill" style={{ ["--w" as string]: "28%" }} /></span>
+                  <span className="lp-pitch__n">28<span className="lp-pitch__slash">%</span></span>
                 </div>
                 <div className="lp-pitch__row lp-pitch__row--b">
                   <span className="lp-pitch__label">With StatSeer</span>
-                  <span className="lp-pitch__dots lp-pitch__dots--good">
-                    {Array.from({ length: 10 }, (_, i) => <span key={i} className={`lp-dot${i < 6 ? " lp-dot--on lp-dot--good" : ""}`} />)}
-                  </span>
-                  <span className="lp-pitch__n">6<span className="lp-pitch__slash">/10</span> <small>the goal</small></span>
+                  <span className="lp-pitch__bar"><span className="lp-pitch__fill lp-pitch__fill--good" style={{ ["--w" as string]: "40%" }} /></span>
+                  <span className="lp-pitch__n">40<span className="lp-pitch__slash">%+</span> <small>the goal</small></span>
                 </div>
               </div>
               <a href="#lp-board" className="btn btn--primary lp-pitch__cta">Show me this week&apos;s board →</a>
