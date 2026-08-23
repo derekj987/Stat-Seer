@@ -43,43 +43,43 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
         </div>
       </header>
 
-      <main className="lp">
-      {/* Why you'd use this — the first thing a new visitor sees. Tucks away behind a
-          left-edge arrow (pure-CSS collapse), open by default. */}
-      <div className="lp-pitchwrap">
-        <input type="checkbox" id="lp-pitch-toggle" className="lp-pitchwrap__chk" defaultChecked aria-hidden="true" tabIndex={-1} />
-        <label htmlFor="lp-pitch-toggle" className="lp-pitchwrap__handle" title="Show or hide">
-          <span className="lp-pitchwrap__arrow lp-pitchwrap__arrow--o" aria-hidden="true">‹</span>
-          <span className="lp-pitchwrap__arrow lp-pitchwrap__arrow--c" aria-hidden="true">›</span>
+      {/* Value prop PINNED to the left edge like the "Message Us" widget — a slim tab that
+          slides the panel out OVER the page when clicked. Out of the content flow entirely. */}
+      <div className="lp-drawer">
+        <input type="checkbox" id="lp-pitch-toggle" className="lp-drawer__chk" aria-hidden="true" tabIndex={-1} />
+        <label htmlFor="lp-pitch-toggle" className="lp-drawer__tab" title="Why StatSeer">
+          <span className="lp-drawer__tabtext">Raise your hit rate</span>
+          <span className="lp-drawer__chev" aria-hidden="true">›</span>
         </label>
-        <div className="lp-pitchwrap__reveal">
-          <div className="lp-pitchwrap__inner">
-            <section className="lp-pitch" aria-label="Why StatSeer">
-              <h2 className="lp-pitch__h">Raise your <b>hit rate</b>.</h2>
-              <p className="lp-pitch__sub">
-                If you&apos;re annually hitting around <b>28%</b> of the bets you place, you could be leaving money
-                on the table. Our goal is to raise that number — say, from <b>28% to 40% or higher</b> — with{" "}
-                <b>line-blind projections</b>, the <b>single best price</b> on every pick, and the <b>context</b>{" "}
-                that moves markets. The same inputs the sharps rely on, every call graded against the closing line.
-              </p>
-              <div className="lp-pitch__bars">
-                <div className="lp-pitch__row lp-pitch__row--a">
-                  <span className="lp-pitch__label">On your own</span>
-                  <span className="lp-pitch__bar"><span className="lp-pitch__fill" style={{ ["--w" as string]: "28%" }} /></span>
-                  <span className="lp-pitch__n">28<span className="lp-pitch__slash">%</span></span>
-                </div>
-                <div className="lp-pitch__row lp-pitch__row--b">
-                  <span className="lp-pitch__label">With StatSeer</span>
-                  <span className="lp-pitch__bar"><span className="lp-pitch__fill lp-pitch__fill--good" style={{ ["--w" as string]: "40%" }} /></span>
-                  <span className="lp-pitch__n">40<span className="lp-pitch__slash">%+</span> <small>the goal</small></span>
-                </div>
+        <label htmlFor="lp-pitch-toggle" className="lp-drawer__scrim" aria-hidden="true" />
+        <aside className="lp-drawer__panel" aria-label="Why StatSeer">
+          <label htmlFor="lp-pitch-toggle" className="lp-drawer__close" title="Close" aria-label="Close">✕</label>
+          <section className="lp-pitch">
+            <h2 className="lp-pitch__h">Raise your <b>hit rate</b>.</h2>
+            <p className="lp-pitch__sub">
+              If you&apos;re annually hitting around <b>28%</b> of the bets you place, you could be leaving money
+              on the table. Our goal is to raise that number — say, from <b>28% to 40% or higher</b> — with{" "}
+              <b>line-blind projections</b>, the <b>single best price</b> on every pick, and the <b>context</b>{" "}
+              that moves markets. The same inputs the sharps rely on, every call graded against the closing line.
+            </p>
+            <div className="lp-pitch__bars">
+              <div className="lp-pitch__row lp-pitch__row--a">
+                <span className="lp-pitch__label">On your own</span>
+                <span className="lp-pitch__bar"><span className="lp-pitch__fill" style={{ ["--w" as string]: "28%" }} /></span>
+                <span className="lp-pitch__n">28<span className="lp-pitch__slash">%</span></span>
               </div>
-              <a href="#lp-board" className="btn btn--primary lp-pitch__cta">Show me this week&apos;s board →</a>
-            </section>
-          </div>
-        </div>
+              <div className="lp-pitch__row lp-pitch__row--b">
+                <span className="lp-pitch__label">With StatSeer</span>
+                <span className="lp-pitch__bar"><span className="lp-pitch__fill lp-pitch__fill--good" style={{ ["--w" as string]: "40%" }} /></span>
+                <span className="lp-pitch__n">40<span className="lp-pitch__slash">%+</span> <small>the goal</small></span>
+              </div>
+            </div>
+            <label htmlFor="lp-pitch-toggle" className="btn btn--primary lp-pitch__cta">Got it — show me the board →</label>
+          </section>
+        </aside>
       </div>
 
+      <main className="lp">
       <LandingHub initialSport={initialSport} nfl={nfl} ncaaf={ncaaf} />
 
       <BetslipPromo />
