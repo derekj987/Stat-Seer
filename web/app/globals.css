@@ -169,10 +169,13 @@ body{background:var(--bg);color:var(--ink);
 .line.savable:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .slipbar{position:fixed;left:0;right:0;bottom:0;z-index:50;
   display:flex;justify-content:center;padding:0 12px 12px;pointer-events:none}
-/* Phone: clear the bottom-left "Message Us" pigeon (16px + 60px wide) by shifting the
-   slip to the right so the two no longer overlap. */
+/* Phone: collapsed, the slip is a slim pill hugging the right edge (clear of the
+   bottom-left "Message Us" pigeon); opened, it expands back to full width. */
 @media (max-width:640px){
   .slipbar{justify-content:flex-end;padding-left:88px}
+  .slipbar .slipbar__inner{width:auto;max-width:100%}
+  .slipbar .slipbar__inner.is-open{width:100%}
+  .slipbar .slipbar__inner:not(.is-open) .slipbar__rec{display:none}
 }
 .slipbar__inner{pointer-events:auto;width:100%;max-width:640px;background:var(--surface);
   border:1px solid var(--line);border-radius:14px;
@@ -205,6 +208,7 @@ body{background:var(--bg);color:var(--ink);
   padding:11px 13px;margin:2px 0 12px}
 .slipbest__h{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
   color:var(--gold);margin-bottom:7px}
+.slipbest__hbook{color:var(--ink)}
 .slipbest__row{display:flex;gap:10px;align-items:baseline;padding:3px 0;font-size:12.5px}
 .slipbest__k{flex:0 0 108px;color:var(--muted);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
 .slipbest__v{flex:1 1 auto;color:var(--ink);line-height:1.45}

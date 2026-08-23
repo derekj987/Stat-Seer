@@ -67,6 +67,12 @@ export default function SlipBar() {
   // Placing each leg at its OWN best book (straight bets) — the theoretical max combined.
   const bestEach = legs.length ? legs.reduce((acc, i) => acc * toDecimal(legBest(i).best), 1) : 0;
   const parlay = legs.length ? bestParlayBook(legs) : { full: null, partial: null };
+  // The single best book to place the whole slip: the one-book parlay winner when a book
+  // prices every leg; else the lone leg's best book; else the book covering the most legs.
+  const bestBook = parlay.full ? bookName(parlay.full.book)
+    : legs.length === 1 ? bookName(legBest(legs[0]).books[0])
+    : parlay.partial ? bookName(parlay.partial.book)
+    : null;
 
   const groups = ORDER
     .map((k) => [k, items.filter((i) => i.kind === k)] as const)
@@ -111,7 +117,7 @@ export default function SlipBar() {
 
   return (
     <div className="slipbar">
-      <div className="slipbar__inner">
+      <div className={open ? "slipbar__inner is-open" : "slipbar__inner"}>
         <button className="slipbar__summary" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
           <span className="slipbar__count">{items.length}</span>
           <span>Value Finder</span>
@@ -145,7 +151,7 @@ export default function SlipBar() {
             ))}
             {legs.length >= 1 && (
               <div className="slipbest">
-                <div className="slipbest__h">Best book to place this slip</div>
+                <div className="slipbest__h">Best book to place this slip{bestBook && <span className="slipbest__hbook">: {bestBook}</span>}</div>
                 <div className="slipbest__row">
                   <span className="slipbest__k">Straight bets</span>
                   <span className="slipbest__v">each leg at its own best book above{legs.length > 1 && <> · all {legs.length} together pay <b>{decToAmerican(bestEach)}</b></>}</span>
