@@ -5,7 +5,6 @@ import { MODEL_TOTALS } from "@/lib/modelTotals";
 import { weekRefs } from "@/lib/refAssignments";
 import { Brand, FlowSteps, ModelSubnav } from "../Nav";
 import AddToSlip from "../AddToSlip";
-import ModelClock from "../ModelClock";
 import NflModelCard from "../NflModelCard";
 
 export const revalidate = 300;
@@ -244,7 +243,6 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
     <main className="wrap">
       <header className="masthead">
         <Brand sub={<><span className="brand__sport">NFL</span> · The Model</>} art={{ src: "/nflpic.png?v=1", alt: "NFL" }} />
-        <div className="masthead__clock"><ModelClock /></div>
       </header>
 
       <section className="explainer explainer--wide explainer--clamp">
