@@ -6,7 +6,7 @@ import type { CardRow, UpsetRow, PlayerPick } from "@/lib/home";
 import type { NcaafCardGame, NcaafUpset } from "./ncaaf/model-data";
 import { NCAAF_MODEL } from "./ncaaf/model-data";
 import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
-import { PLAYER_PROJECTIONS } from "@/lib/playerProjections";
+import { PLAYER_PROJECTIONS, PROJ_PRIOR, type PlayerProj } from "@/lib/playerProjections";
 import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
 import { isRealistic } from "@/lib/depthChart";
 
@@ -388,6 +388,89 @@ function PlayerSnapshot({ base }: { base: Sport }) {
   );
 }
 
+// Quarterback Passing snapshot — the rich per-QB passing table from the Player Model,
+// surfaced on the homepage right under the game-line snapshot. Book line vs our
+// line-blind projection, plus career / prior-season / home / road over-rates. The
+// same markup + styling as /model/players?cat=passing so it reads identically.
+function pmPct(over: number, g: number): number | null { return g ? Math.round((100 * over) / g) : null; }
+function pmCls(v: number | null): string { return v === null ? "" : v >= 50 ? "pmread--over" : "pmread--under"; }
+
+function PassingSnapshot() {
+  const rows = PLAYER_PROJECTIONS.filter((r) => r.cat === "passing" && r.book > 0 && isRealistic(r.player));
+  if (!rows.length) {
+    return <p className="hb-empty">Passing projections publish here as the season&apos;s usage is captured — see the <a href="/model/players?cat=passing">Player Model →</a></p>;
+  }
+  const games: string[] = [];
+  const byGame: Record<string, PlayerProj[]> = {};
+  for (const r of rows) {
+    if (!byGame[r.game]) { byGame[r.game] = []; games.push(r.game); }
+    byGame[r.game].push(r);
+  }
+  const gameTable = (g: string) => (
+    <div className="pmgame" key={g}>
+      <div className="pmgame__h">{g}</div>
+      <div className="pmscroll">
+        <div className="pmtable pmtable--data pmtable--ha" role="table" aria-label={`${g} passing projections`}>
+          <div className="pmrow pmrow--head pmrow--data" role="row">
+            <span className="pmcell pmcell--player">Player</span>
+            <span className="pmcell">Team</span>
+            <span className="pmcell pmcell--num">Book line</span>
+            <span className="pmcell pmcell--num">Our proj</span>
+            <span className="pmcell pmcell--career">Career % over</span>
+            <span className="pmcell pmcell--career">Prior szn % over</span>
+            <span className="pmcell pmcell--career">Home % over</span>
+            <span className="pmcell pmcell--career">Road % over</span>
+          </div>
+          {byGame[g].map((r) => {
+            const cpct = pmPct(r.cOver, r.cG), ppct = pmPct(r.pOver, r.pG);
+            const hpct = pmPct(r.hOver, r.hG), rpct = pmPct(r.rOver, r.rG);
+            return (
+              <div className="pmrow pmrow--data" role="row" key={`${r.player}-${r.market}`}>
+                <span className="pmcell pmcell--player">{r.player}</span>
+                <span className="pmcell pmcell--team">{r.team}</span>
+                <span className="pmcell pmcell--num">{r.book} yds</span>
+                <span className="pmcell pmcell--num pmcell--proj">
+                  {r.proj} yds{" "}
+                  <span className={`pmarrow ${r.proj >= r.book ? "pmarrow--up" : "pmarrow--down"}`} aria-hidden="true">{r.proj >= r.book ? "▲" : "▼"}</span>
+                </span>
+                <span className={`pmcell pmcell--career ${pmCls(cpct)}`}>
+                  {cpct === null ? "—" : <>{cpct}% <small className="pmcell__sub">{r.cOver}/{r.cG} gm</small></>}
+                </span>
+                <span className={`pmcell pmcell--career ${pmCls(ppct)}`}>
+                  {ppct === null ? <span className="pmcell__sub">no {PROJ_PRIOR}</span> : <>{ppct}% <small className="pmcell__sub">{r.pOver}/{r.pG} gm</small></>}
+                </span>
+                <span className={`pmcell pmcell--career ${pmCls(hpct)}`}>
+                  {hpct === null ? "—" : <>{hpct}% <small className="pmcell__sub">{r.hOver}/{r.hG} gm</small></>}
+                </span>
+                <span className={`pmcell pmcell--career ${pmCls(rpct)}`}>
+                  {rpct === null ? "—" : <>{rpct}% <small className="pmcell__sub">{r.rOver}/{r.rG} gm</small></>}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+  const lead = games.slice(0, 2);
+  const rest = games.slice(2);
+  return (
+    <>
+      {lead.map(gameTable)}
+      {rest.length > 0 && (
+        <details className="hb-more">
+          <summary className="hb-more__sum">
+            <span className="hb-more__chev" aria-hidden="true">▸</span>
+            See more ({rest.length} more {rest.length === 1 ? "game" : "games"})
+          </summary>
+          {rest.map(gameTable)}
+        </details>
+      )}
+      <p className="lp-cardfoot"><a href="/model/players?cat=passing">See the full Player Model →</a></p>
+    </>
+  );
+}
+
 function UpsetCards({ children }: { children: React.ReactNode }) { return <div className="hb-cols">{children}</div>; }
 
 export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport: Sport; nfl: NflData; ncaaf: NcaafData }) {
@@ -410,6 +493,14 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
         <Panel title="The Model — Snapshot View" count={`${nfl.card.length} games`} hint="our model’s read beside the market’s" open>
           <NflCardTable rows={nfl.card} />
           <p className="lp-cardfoot"><a href="/model">See the full model →</a></p>
+        </Panel>
+        <Panel
+          title="Quarterback Passing Props — Snapshot"
+          count={`${PLAYER_PROJECTIONS.filter((r) => r.cat === "passing" && r.book > 0 && isRealistic(r.player)).length} QBs`}
+          hint="book line vs our line-blind projection, with over-rates"
+          open
+        >
+          <PassingSnapshot />
         </Panel>
         <Panel title="Player Model snapshot — NFL" count="props" hint="our line-blind player-prop projections" open>
           <PlayerSnapshot base="nfl" />
