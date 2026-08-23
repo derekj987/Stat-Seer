@@ -61,14 +61,14 @@ export interface PlayerPick {
 // Map fan-angle wording to an odds market key + a human label. Ordered: the more
 // specific "… yards" markets must be tested before the bare volume markets.
 const PROP_MARKETS: [RegExp, string, string][] = [
-  [/reception\s*y(ar)?ds?|receiving\s*y(ar)?ds?|\brec\s*yds?\b/i, "player_reception_yds", "receiving yards"],
-  [/receptions?|catches/i, "player_receptions", "receptions"],
-  [/rush(ing)?\s*y(ar)?ds?/i, "player_rush_yds", "rushing yards"],
-  [/(rush(ing)?\s*(attempts?|att))|carries/i, "player_rush_attempts", "rush attempts"],
-  [/pass(ing)?\s*(tds?|touchdowns?)/i, "player_pass_tds", "passing TDs"],
-  [/pass(ing)?\s*y(ar)?ds?/i, "player_pass_yds", "passing yards"],
-  [/interceptions?|\bints?\b/i, "player_pass_interceptions", "interceptions"],
-  [/receiving\s*(tds?|touchdowns?)/i, "player_anytime_td", "receiving TD"],
+  [/reception\s*y(ar)?ds?|receiving\s*y(ar)?ds?|\brec\s*yds?\b/i, "player_reception_yds", "Rec Yds"],
+  [/receptions?|catches/i, "player_receptions", "Rec"],
+  [/rush(ing)?\s*y(ar)?ds?/i, "player_rush_yds", "Rush Yds"],
+  [/(rush(ing)?\s*(attempts?|att))|carries/i, "player_rush_attempts", "Rush Att"],
+  [/pass(ing)?\s*(tds?|touchdowns?)/i, "player_pass_tds", "Pass TDs"],
+  [/pass(ing)?\s*y(ar)?ds?/i, "player_pass_yds", "Pass Yds"],
+  [/interceptions?|\bints?\b/i, "player_pass_interceptions", "Int"],
+  [/receiving\s*(tds?|touchdowns?)/i, "player_anytime_td", "Rec TD"],
 ];
 
 /** Break a free-text fan angle into a bet side, a numeric line, and a market. */

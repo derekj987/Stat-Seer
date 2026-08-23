@@ -23,7 +23,7 @@ const TIPS = {
   referee: <>Each crew&apos;s tendencies. The one thing that carries over year to year is <b>penalties per game</b> — the O/U and ATS leans are historical context, not a lean.</>,
 } as const;
 
-const PROP_LABEL: Record<string, string> = { rush_yds: "Rush Yds", rec_yds: "Rec Yds", receptions: "Receptions", pass_yds: "Pass Yds" };
+const PROP_LABEL: Record<string, string> = { rush_yds: "Rush Yds", rec_yds: "Rec Yds", receptions: "Rec", pass_yds: "Pass Yds" };
 
 const cxKickFmt = new Intl.DateTimeFormat("en-US", {
   timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
