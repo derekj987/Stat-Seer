@@ -57,23 +57,25 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
           <section className="lp-pitch">
             <h2 className="lp-pitch__h">Raise your <b>hit rate</b>.</h2>
             <p className="lp-pitch__sub">
-              If you&apos;re annually hitting around <b>28%</b> of the bets you place, you could be leaving money
-              on the table. Our goal is to raise that number — say, from <b>28% to 40% or higher</b> — with{" "}
-              <b>line-blind projections</b>, the <b>single best price</b> on every pick, and the <b>context</b>{" "}
-              that moves markets. The same inputs the sharps rely on, every call graded against the closing line.
+              In a typical year, about <b>6 in 10 bettors finish down</b>. The average wins just{" "}
+              <b>48% of their bets</b> — short of the <b>52.4%</b> you need to beat the vig — and only{" "}
+              <b>~3% turn a lasting profit</b>. StatSeer is built to move you toward that line: <b>line-blind
+              projections</b>, the <b>single best price</b> on every pick, and the <b>context</b> that moves
+              markets. Every call graded against the closing line.
             </p>
             <div className="lp-pitch__bars">
               <div className="lp-pitch__row lp-pitch__row--a">
-                <span className="lp-pitch__label">On your own</span>
-                <span className="lp-pitch__bar"><span className="lp-pitch__fill" style={{ ["--w" as string]: "28%" }} /></span>
-                <span className="lp-pitch__n">28<span className="lp-pitch__slash">%</span></span>
+                <span className="lp-pitch__label">Average bettor</span>
+                <span className="lp-pitch__bar"><span className="lp-pitch__fill" style={{ ["--w" as string]: "48%" }} /></span>
+                <span className="lp-pitch__n">48<span className="lp-pitch__slash">%</span></span>
               </div>
               <div className="lp-pitch__row lp-pitch__row--b">
-                <span className="lp-pitch__label">With StatSeer</span>
-                <span className="lp-pitch__bar"><span className="lp-pitch__fill lp-pitch__fill--good" style={{ ["--w" as string]: "40%" }} /></span>
-                <span className="lp-pitch__n">40<span className="lp-pitch__slash">%+</span> <small>the goal</small></span>
+                <span className="lp-pitch__label">Beat the vig</span>
+                <span className="lp-pitch__bar"><span className="lp-pitch__fill lp-pitch__fill--good" style={{ ["--w" as string]: "52.4%" }} /></span>
+                <span className="lp-pitch__n">52.4<span className="lp-pitch__slash">%</span> <small>the line</small></span>
               </div>
             </div>
+            <p className="lp-pitch__cap">Only about 3% of bettors clear it. That&apos;s the line we&apos;re built to move you past.</p>
             <label htmlFor="lp-pitch-toggle" className="btn btn--primary lp-pitch__cta">Got it — show me the board →</label>
           </section>
         </aside>

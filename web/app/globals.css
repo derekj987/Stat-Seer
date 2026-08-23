@@ -1978,6 +1978,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .lp-pitch__n{flex:0 0 auto;font-weight:800;font-size:16px;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.05}
 .lp-pitch__slash{color:var(--muted);font-weight:600;font-size:12px}
 .lp-pitch__n small{display:block;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+.lp-pitch__cap{margin:12px 0 0;font-size:12px;line-height:1.5;color:var(--muted);font-style:italic}
 .lp-pitch__cta{margin-top:18px;display:inline-block;cursor:pointer}
 /* "Three steps" flow at the bottom of the board — set off with a divider */
 .lpf__flowhead{margin-top:30px;padding-top:20px;border-top:1px solid var(--line)}
