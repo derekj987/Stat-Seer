@@ -130,10 +130,12 @@ export function BetslipPromo() {
 
 /** Masthead brand: logo mark + a section subtitle. The "StatSeer" wordmark lives in
  *  the global top bar now, so the masthead no longer repeats it. */
-export function Brand({ sub }: { sub: import("react").ReactNode }) {
+export function Brand({ sub, art }: { sub: import("react").ReactNode; art?: { src: string; alt: string } }) {
   // Returns two masthead-level siblings: the brand cluster (left) and the sport badge.
   // As a flex sibling the badge sits in the masthead's open band without ever
   // overlapping the subtitle. It renders nothing on non-sport pages.
+  // `art` is an optional per-sport image shown to the right of the subtitle (e.g. the
+  // Heisman on NCAAF, the NFL mark on NFL — the model pages pass it).
   return (
     <>
       <div className="brand">
@@ -144,6 +146,10 @@ export function Brand({ sub }: { sub: import("react").ReactNode }) {
         <div className="brand__text">
           {sub ? <span className="brand__sub">{sub}</span> : null}
         </div>
+        {art ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={art.src} alt={art.alt} className="brand__art" />
+        ) : null}
       </div>
       <MastheadSport />
     </>

@@ -71,6 +71,9 @@ body{background:var(--bg);color:var(--ink);
   font-size:clamp(24px,5vw,38px);margin:0;text-shadow:0 1px 2px rgba(0,0,0,.25)}
 .brand__sub{display:block;color:var(--muted);font-size:15px;margin-top:0;
   letter-spacing:.01em;line-height:1.35}
+/* Per-sport image to the right of the model subtitle (Heisman on NCAAF, NFL mark on NFL). */
+.brand__art{flex:0 0 auto;height:clamp(40px,8vw,56px);width:auto;margin-left:6px;
+  filter:drop-shadow(0 1px 3px rgba(0,0,0,.22))}
 .asof{text-align:right;color:var(--muted);font-size:12px;
   text-transform:uppercase;letter-spacing:.08em;line-height:1.7}
 .asof b{color:var(--ink);font-family:var(--font-mono);font-size:13px;
@@ -1551,12 +1554,29 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-more__chev{display:inline-block;font-size:10px;transition:transform .15s ease}
 .hb-more[open] .hb-more__chev{transform:rotate(90deg)}
 .hb-more__sum:hover{filter:brightness(1.12)}
-.hb-more .hb-formwrap{margin-top:12px}
+.hb-more .hb-formwrap{margin-top:0}
+/* table splits: no gap between the lead rows and the revealed "see more" rows */
+.hb-more:has(.hb-formwrap){margin-top:0;padding-top:0}
 /* The "see more" body is a second table of the SAME columns as the lead table above it,
    so its header row is a duplicate that lands mid-table when expanded — hide it. (The
    lead table's <thead> is outside .hb-more, so it stays.) */
 .hb-more thead{display:none}
-.hb-form{border-collapse:collapse;table-layout:auto;width:100%}
+.hb-form{border-collapse:collapse;table-layout:fixed;width:100%}
+/* Fixed, shared column widths so a split table's lead rows and its "see more" rows
+   (rendered as two separate <table>s) always line up. Widths are set on BOTH th and td so
+   the two tables agree even though the see-more table's <thead> is hidden. 4-col
+   game/model/player-snapshot tables: */
+.hb-form th:nth-child(1),.hb-form td:nth-child(1){width:28%}
+.hb-form th:nth-child(2),.hb-form td:nth-child(2){width:22%}
+.hb-form th:nth-child(3),.hb-form td:nth-child(3){width:16%}
+.hb-form th:nth-child(4),.hb-form td:nth-child(4){width:34%}
+/* 6-col Fan Analysis player table (Player·Team·Wk·The play·Best book·Trending on): */
+.hb-plrtable th:nth-child(1),.hb-plrtable td:nth-child(1){width:21%}
+.hb-plrtable th:nth-child(2),.hb-plrtable td:nth-child(2){width:9%}
+.hb-plrtable th:nth-child(3),.hb-plrtable td:nth-child(3){width:8%}
+.hb-plrtable th:nth-child(4),.hb-plrtable td:nth-child(4){width:29%}
+.hb-plrtable th:nth-child(5),.hb-plrtable td:nth-child(5){width:16.5%}
+.hb-plrtable th:nth-child(6),.hb-plrtable td:nth-child(6){width:16.5%}
 .hb-form th,.hb-form td{text-align:left}
 .hb-form th{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
   font-weight:700;padding:0 0 6px;border-bottom:1px solid var(--line)}
@@ -1757,9 +1777,10 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .hb-mast__row{gap:9px}
   /* phone: drop the kickoff column; keep Game · Market Spread · Market O/U · Our Model Suggests */
   .hb-x{display:none}
-  .hb-form{min-width:0;table-layout:auto}
-  .hb-form th:nth-child(n),.hb-form td:nth-child(n){width:auto}
-  .hb-form th,.hb-form td{font-size:11px}
+  /* keep fixed layout (so lead + see-more columns align) — let cells wrap instead of
+     forcing auto widths, which is what made split tables disagree on phones. */
+  .hb-form{min-width:0}
+  .hb-form th,.hb-form td{font-size:11px;white-space:normal;vertical-align:top}
   .hb-form td{padding-top:8px;padding-bottom:8px}
   .hb-form td+td,.hb-form th+th{padding-left:10px}
   /* stack the teams (away over home) so the Game column stays narrow and the rest of the
@@ -1997,6 +2018,8 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .lp-pitch__h b{color:var(--accent)}
 .lp-pitch__sub{margin:10px 0 0;font-size:14px;line-height:1.6;color:#243a2e}
 .lp-pitch__sub b{color:var(--ink)}
+/* the one line that states the point — bold gold to make it pop */
+.lp-pitch__sub b.lp-pitch__key{color:var(--accent);font-weight:800}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lp-pitch__sub{color:#cfe0d4}}
 :root[data-theme="dark"] .lp-pitch__sub{color:#cfe0d4}
 .lp-pitch__bars{margin:20px 0 2px;display:flex;flex-direction:column;gap:12px}

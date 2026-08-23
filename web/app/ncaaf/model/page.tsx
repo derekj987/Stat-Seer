@@ -65,7 +65,7 @@ export default function Page() {
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={`The Model · College Football · line-blind power rating · ${M.season}`} />
+        <Brand sub="NCAAF - THE MODEL" art={{ src: "/heisman.png?v=1", alt: "Heisman Trophy" }} />
       </header>
 
       <FlowSteps active="analyze" base="ncaaf" />
