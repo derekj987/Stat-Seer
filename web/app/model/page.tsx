@@ -51,7 +51,7 @@ function bottomLine(e: Env): { spread: string; total: string | null } | null {
   return { spread, total };
 }
 
-function ImpTable({ rows, refs }: { rows: Env[]; refs: Awaited<ReturnType<typeof weekRefs>> }) {
+function ImpTable({ rows, refs, moreFrom }: { rows: Env[]; refs: Awaited<ReturnType<typeof weekRefs>>; moreFrom?: number }) {
   return (
     <div className="imptable" role="table" aria-label="Lines and the model's read">
       <div className="improw improw--head" role="row">
@@ -59,11 +59,11 @@ function ImpTable({ rows, refs }: { rows: Env[]; refs: Awaited<ReturnType<typeof
         <span className="improw__modh">model spread</span><span>total</span>
         <span className="improw__modh">model total</span>
       </div>
-      {rows.map((e) => {
+      {rows.map((e, i) => {
         const bl = bottomLine(e);
         const crew = refs.get(e.home);
         return (
-          <div className="impgame" key={e.eventId}>
+          <div className={moreFrom !== undefined && i >= moreFrom ? "impgame hb-row--more" : "impgame"} key={e.eventId}>
             <div className="improw" role="row">
               <span className="improw__g">
                 {e.away}<span className="at">@</span>{e.home}
@@ -309,19 +309,18 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         {scored.length === 0 ? (
           <p className="foot">No lines captured for Week {week} yet.</p>
         ) : (
-          <div className="imp-wrap">
+          <div className="imp-wrap hb-moretbl">
+            <input type="checkbox" id="imp-more" className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
             <p className="imp-scrollhint" aria-hidden="true">
               Swipe for totals <span className="imp-scrollhint__a">→</span>
             </p>
-            <ImpTable rows={scored.slice(0, 6)} refs={refs} />
+            <ImpTable rows={scored} refs={refs} moreFrom={6} />
             {scored.length > 6 && (
-              <details className="hb-more">
-                <summary className="hb-more__sum">
-                  <span className="hb-more__chev" aria-hidden="true">▸</span>
-                  See more ({scored.length - 6} more games)
-                </summary>
-                <ImpTable rows={scored.slice(6)} refs={refs} />
-              </details>
+              <label htmlFor="imp-more" className="hb-moretbl__sum">
+                <span className="hb-more__chev" aria-hidden="true">▸</span>
+                <span className="hb-moretbl__more">See more ({scored.length - 6} more games)</span>
+                <span className="hb-moretbl__less">See less</span>
+              </label>
             )}
           </div>
         )}

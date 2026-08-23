@@ -1,4 +1,4 @@
-import { Brand, FlowSteps, ModelSubnav } from "../../Nav";
+import { Brand, FlowSteps, ModelSubnav, MoreTable } from "../../Nav";
 import Tip from "@/app/Tip";
 import { NCAAF_MODEL, type NcaafCardGame } from "../model-data";
 import { StatCard } from "../StatCard";
@@ -26,13 +26,13 @@ function CardHead() {
   );
 }
 
-function CardRows({ games }: { games: readonly NcaafCardGame[] }) {
+function CardRows({ games, moreFrom }: { games: readonly NcaafCardGame[]; moreFrom?: number }) {
   return (
     <>
-      {games.map((g) => {
+      {games.map((g, i) => {
         const ms = g.marketSpread; const tl = g.totalLean;
         return (
-          <tr key={`${g.away}-${g.home}`} className={g.off ? "hb-off" : undefined}>
+          <tr key={`${g.away}-${g.home}`} className={[g.off ? "hb-off" : "", moreFrom !== undefined && i >= moreFrom ? "hb-row--more" : ""].filter(Boolean).join(" ") || undefined}>
             <td className="hb-l">
               <span className="hb-game">{g.away}<span className="hb-at">at</span>{g.home}</span>
               {g.neutral ? <span className="ncf-site"> · N</span> : null}
@@ -60,8 +60,7 @@ export default function Page() {
   const c = M.card;
   const featured = c.games.filter((g) => g.featured);
   const ranked = featured.length ? featured : c.games;   // marquee games for the snapshot
-  const snapshot = ranked.slice(0, 5);                    // first 5 — a clean teaser
-  const snapshotRest = ranked.slice(5);                   // the rest of the ranked games
+  const snapshotRest = ranked.slice(5);                   // ranked games beyond the first 5 (see-more)
 
   return (
     <main className="wrap">
@@ -118,20 +117,9 @@ export default function Page() {
           <span className="hb-x"> · <b>Our Model Suggests</b> is the side our line-blind rating covers —
             informative, <b>not a guaranteed bet</b> (the rating doesn&apos;t beat the spread; see the record above).</span>
         </div>
-        <div className="hb-formwrap">
-          <table className="hb-form"><CardHead /><tbody><CardRows games={snapshot} /></tbody></table>
-        </div>
-        {snapshotRest.length > 0 && (
-          <details className="hb-more">
-            <summary className="hb-more__sum">
-              <span className="hb-more__chev" aria-hidden="true">▸</span>
-              See more ({snapshotRest.length} more ranked games)
-            </summary>
-            <div className="hb-formwrap">
-              <table className="hb-form"><CardHead /><tbody><CardRows games={snapshotRest} /></tbody></table>
-            </div>
-          </details>
-        )}
+        <MoreTable id="ncaaf-snap-more" head={<CardHead />} extra={snapshotRest.length} noun="ranked games">
+          <CardRows games={ranked} moreFrom={5} />
+        </MoreTable>
       </section>
 
       {/* The FULL model — every game on the board, collapsed. */}

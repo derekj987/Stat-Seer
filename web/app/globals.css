@@ -1637,6 +1637,17 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-more[open] > .hb-more__sum{font-size:0;gap:5px}
 .hb-more[open] > .hb-more__sum::after{content:"Collapse";font-size:11.5px}
 .hb-more__sum:hover{filter:brightness(1.12)}
+/* Single-table "see more": one <table>, overflow rows toggled by a hidden checkbox — so a
+   wide, horizontally-scrolling table has ONE scroll container, not two stacked tables. */
+.hb-moretbl__chk{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.hb-moretbl__chk:not(:checked) ~ * .hb-row--more{display:none}
+.hb-moretbl__sum{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:12px;
+  cursor:pointer;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:var(--accent)}
+.hb-moretbl__sum:hover{filter:brightness(1.12)}
+.hb-moretbl__less{display:none}
+.hb-moretbl__chk:checked ~ .hb-moretbl__sum .hb-moretbl__more{display:none}
+.hb-moretbl__chk:checked ~ .hb-moretbl__sum .hb-moretbl__less{display:inline}
+.hb-moretbl__chk:checked ~ .hb-moretbl__sum .hb-more__chev{transform:rotate(90deg)}
 .hb-more .hb-formwrap{margin-top:0}
 /* table splits: no gap between the lead rows and the revealed "see more" rows */
 .hb-more:has(.hb-formwrap){margin-top:0;padding-top:0}
@@ -1864,6 +1875,10 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
      forcing auto widths, which is what made split tables disagree on phones. */
   .hb-form{min-width:0}
   .hb-form th,.hb-form td{font-size:11px;white-space:normal;vertical-align:top}
+  /* Fan Analysis (6 cols) can't wrap sensibly on a phone — let it scroll sideways as ONE
+     table with nowrap cells (the "The play" text stays on one line), with the swipe hint. */
+  .hb-plrtable{min-width:560px}
+  .hb-form.hb-plrtable th,.hb-form.hb-plrtable td{white-space:nowrap}
   .hb-form td{padding-top:8px;padding-bottom:8px}
   .hb-form td+td,.hb-form th+th{padding-left:10px}
   /* stack the teams (away over home) so the Game column stays narrow and the rest of the

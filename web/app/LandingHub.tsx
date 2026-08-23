@@ -10,6 +10,7 @@ import { PLAYER_PROJECTIONS, PROJ_PRIOR, type PlayerProj } from "@/lib/playerPro
 import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
 import { isRealistic } from "@/lib/depthChart";
 import Tip from "./Tip";
+import { ScrollHint, MoreTable } from "./Nav";
 
 // Plain-English explanations shown behind each section's medieval "?" seal.
 const TIPS = {
@@ -203,11 +204,11 @@ function Panel({ title, count, hint, open, children }: { title: string; count: R
 function NflHead() {
   return <thead><tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Our Model Suggests</th></tr></thead>;
 }
-function NflRows({ rows }: { rows: CardRow[] }) {
+function NflRows({ rows, moreFrom }: { rows: CardRow[]; moreFrom?: number }) {
   return (
     <>
-      {rows.map((r) => (
-        <tr key={r.eventId} className={r.off ? "hb-off" : undefined}>
+      {rows.map((r, i) => (
+        <tr key={r.eventId} className={[r.off ? "hb-off" : "", moreFrom !== undefined && i >= moreFrom ? "hb-row--more" : ""].filter(Boolean).join(" ") || undefined}>
           <td className="hb-l"><span className="hb-game">{r.away}<span className="hb-at">at</span>{r.home}</span>{r.off && <span className="hb-dia hb-dia--end">◆</span>}</td>
           <td className="hb-num">{r.marketSpread ?? "—"}</td>
           <td className="hb-num hb-tot">{numStr(r.marketTotal)}</td>
@@ -226,35 +227,24 @@ function NflRows({ rows }: { rows: CardRow[] }) {
 }
 function NflCardTable({ rows }: { rows: CardRow[] }) {
   if (!rows.length) return <p className="hb-empty">The NFL board opens when this week&apos;s odds and reads post.</p>;
-  const lead = rows.slice(0, 3);   // snapshot — first 3 games
-  const rest = rows.slice(3);
   return (
-    <>
-      <div className="hb-formwrap"><table className="hb-form"><NflHead /><tbody><NflRows rows={lead} /></tbody></table></div>
-      {rest.length > 0 && (
-        <details className="hb-more">
-          <summary className="hb-more__sum">
-            <span className="hb-more__chev" aria-hidden="true">▸</span>
-            See more ({rest.length} more games)
-          </summary>
-          <div className="hb-formwrap"><table className="hb-form"><NflHead /><tbody><NflRows rows={rest} /></tbody></table></div>
-        </details>
-      )}
-    </>
+    <MoreTable id="gm-more-nfl" head={<NflHead />} extra={Math.max(0, rows.length - 3)} noun="games">
+      <NflRows rows={rows} moreFrom={3} />
+    </MoreTable>
   );
 }
 
 function NcaafHead() {
   return <thead><tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Our Model Suggests</th></tr></thead>;
 }
-function NcaafRows({ games }: { games: readonly NcaafCardGame[] }) {
+function NcaafRows({ games, moreFrom }: { games: readonly NcaafCardGame[]; moreFrom?: number }) {
   return (
     <>
-      {games.map((g) => {
+      {games.map((g, i) => {
         const ms = g.marketSpread; const ps = g.projSpread; const tl = g.totalLean; const pk = g.pick;
         const pick = pk ? `${pk.side} ${pk.num > 0 ? "+" : ""}${pk.num}` : `${ps.fav} ${ps.num}`;
         return (
-          <tr key={`${g.away}-${g.home}`} className={g.off ? "hb-off" : undefined}>
+          <tr key={`${g.away}-${g.home}`} className={[g.off ? "hb-off" : "", moreFrom !== undefined && i >= moreFrom ? "hb-row--more" : ""].filter(Boolean).join(" ") || undefined}>
             <td className="hb-l"><span className="hb-game">{g.away}<span className="hb-at">at</span>{g.home}</span>{g.neutral ? <span className="ncf-site"> · N</span> : null}{g.off && <span className="hb-dia hb-dia--end">◆</span>}</td>
             <td className="hb-num">{ms ? `${ms.fav} ${ms.num}` : "—"}</td>
             <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
@@ -268,21 +258,10 @@ function NcaafRows({ games }: { games: readonly NcaafCardGame[] }) {
 function NcaafCardTable({ games }: { games: NcaafCardGame[] }) {
   const featured = games.filter((g) => g.featured);
   const src = featured.length ? featured : games;
-  const lead = src.slice(0, 3);   // snapshot — first 3 ranked games
-  const rest = src.slice(3);
   return (
-    <>
-      <div className="hb-formwrap"><table className="hb-form"><NcaafHead /><tbody><NcaafRows games={lead} /></tbody></table></div>
-      {rest.length > 0 && (
-        <details className="hb-more">
-          <summary className="hb-more__sum">
-            <span className="hb-more__chev" aria-hidden="true">▸</span>
-            See more ({rest.length} more games)
-          </summary>
-          <div className="hb-formwrap"><table className="hb-form"><NcaafHead /><tbody><NcaafRows games={rest} /></tbody></table></div>
-        </details>
-      )}
-    </>
+    <MoreTable id="gm-more-ncaaf" head={<NcaafHead />} extra={Math.max(0, src.length - 3)} noun="games">
+      <NcaafRows games={src} moreFrom={3} />
+    </MoreTable>
   );
 }
 
@@ -293,17 +272,17 @@ function playLine(p: PlayerPick): string {
 function PlrHead() {
   return <thead><tr><th className="hb-l">Player</th><th>Team</th><th>Wk</th><th>The play</th><th>Best book</th><th>Trending on</th></tr></thead>;
 }
-function PlrRows({ players }: { players: PlayerPick[] }) {
+function PlrRows({ players, moreFrom }: { players: PlayerPick[]; moreFrom?: number }) {
   return (
     <>
-      {players.map((p) => (
-        <tr key={p.id}>
+      {players.map((p, i) => (
+        <tr key={p.id} className={moreFrom !== undefined && i >= moreFrom ? "hb-row--more" : undefined}>
           <td className="hb-l"><a className="hb-plrlink" href="/tailgate">{p.player}</a></td>
           <td className="hb-num">{p.team}</td>
           <td className="hb-num">{p.week}</td>
           <td><span className={p.dir === "down" ? "hb-plr__up hb-plr__down" : "hb-plr__up"} aria-hidden="true">{p.dir === "down" ? "▼" : "▲"}</span> {playLine(p)}</td>
           <td>{p.book ?? "—"}</td>
-          <td className="hb-plr__srccell">{p.sources.length ? p.sources.join(" · ") : "—"}</td>
+          <td className="hb-plr__srccell">{p.sources.length ? [...new Set(p.sources)].join(" · ") : "—"}</td>
         </tr>
       ))}
     </>
@@ -312,21 +291,10 @@ function PlrRows({ players }: { players: PlayerPick[] }) {
 function PlayersTable({ players }: { players: PlayerPick[] }) {
   if (!players.length) return <p className="hb-empty">Player reads post with the week&apos;s props — see <a href="/tailgate">Fan Analysis</a>.</p>;
   const capped = players.slice(0, 14);
-  const lead = capped.slice(0, 3);
-  const rest = capped.slice(3);
   return (
-    <>
-      <div className="hb-formwrap"><table className="hb-form hb-plrtable"><PlrHead /><tbody><PlrRows players={lead} /></tbody></table></div>
-      {rest.length > 0 && (
-        <details className="hb-more">
-          <summary className="hb-more__sum">
-            <span className="hb-more__chev" aria-hidden="true">▸</span>
-            See more ({rest.length} more players)
-          </summary>
-          <div className="hb-formwrap"><table className="hb-form hb-plrtable"><PlrHead /><tbody><PlrRows players={rest} /></tbody></table></div>
-        </details>
-      )}
-    </>
+    <MoreTable id="fanmore-nfl" head={<PlrHead />} extra={Math.max(0, capped.length - 3)} noun="players" plr>
+      <PlrRows players={capped} moreFrom={3} />
+    </MoreTable>
   );
 }
 
@@ -363,10 +331,10 @@ function PlayerSnapshot({ base }: { base: Sport }) {
       </>
     );
   }
-  const psnapRow = (r: (typeof rows)[number]) => {
+  const psnapRow = (r: (typeof rows)[number], i: number) => {
     const over = r.proj >= r.book;
     return (
-      <tr key={`${r.player}-${r.market}`}>
+      <tr key={`${r.player}-${r.market}`} className={i >= 3 ? "hb-row--more" : undefined}>
         <td className="hb-l"><a className="hb-plrlink" href={href}>{r.player}</a></td>
         <td className="hb-num">{r.team}</td>
         <td>{PROP_LABEL[r.market] ?? r.market} {r.book}</td>
@@ -374,30 +342,11 @@ function PlayerSnapshot({ base }: { base: Sport }) {
       </tr>
     );
   };
-  const lead = rows.slice(0, 3);
-  const rest = rows.slice(3);
   return (
     <>
-      <div className="hb-formwrap">
-        <table className="hb-form">
-          <thead><tr><th className="hb-l">Player</th><th>Team</th><th>Prop</th><th>Our Model Suggests</th></tr></thead>
-          <tbody>{lead.map(psnapRow)}</tbody>
-        </table>
-      </div>
-      {rest.length > 0 && (
-        <details className="hb-more">
-          <summary className="hb-more__sum">
-            <span className="hb-more__chev" aria-hidden="true">▸</span>
-            See more ({rest.length} more)
-          </summary>
-          <div className="hb-formwrap">
-            <table className="hb-form">
-              <thead><tr><th className="hb-l">Player</th><th>Team</th><th>Prop</th><th>Our Model Suggests</th></tr></thead>
-              <tbody>{rest.map(psnapRow)}</tbody>
-            </table>
-          </div>
-        </details>
-      )}
+      <MoreTable id={`psnap-more-${base}`} head={<thead><tr><th className="hb-l">Player</th><th>Team</th><th>Prop</th><th>Our Model Suggests</th></tr></thead>} extra={Math.max(0, rows.length - 3)} noun="picks">
+        {rows.map(psnapRow)}
+      </MoreTable>
       <p className="lp-cardfoot"><a href={href}>See the full Player Model →</a></p>
     </>
   );
@@ -424,6 +373,7 @@ function PassingSnapshot() {
   const gameTable = (g: string) => (
     <div className="pmgame" key={g}>
       <div className="pmgame__h">{g}</div>
+      <ScrollHint />
       <div className="pmscroll">
         <div className="pmtable pmtable--data pmtable--ha" role="table" aria-label={`${g} passing projections`}>
           <div className="pmrow pmrow--head pmrow--data" role="row">

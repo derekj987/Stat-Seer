@@ -198,6 +198,30 @@ export function ScrollHint({ label = "Scroll for more" }: { label?: string }) {
   );
 }
 
+/** One table with a "see more" toggle that reveals the overflow rows IN PLACE — so there's
+ *  a single <table> (one scroll container) instead of two stacked tables. Mark overflow
+ *  <tr>s with className="hb-row--more". `plr` adds the wide 6-col style + a swipe hint. */
+export function MoreTable({ id, head, extra, noun, plr, children }: {
+  id: string; head: import("react").ReactNode; extra: number; noun: string; plr?: boolean; children: import("react").ReactNode;
+}) {
+  return (
+    <div className="hb-moretbl">
+      <input type="checkbox" id={id} className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
+      {plr && <ScrollHint />}
+      <div className="hb-formwrap">
+        <table className={plr ? "hb-form hb-plrtable" : "hb-form"}>{head}<tbody>{children}</tbody></table>
+      </div>
+      {extra > 0 && (
+        <label htmlFor={id} className="hb-moretbl__sum">
+          <span className="hb-more__chev" aria-hidden="true">▸</span>
+          <span className="hb-moretbl__more">See more ({extra} more {noun})</span>
+          <span className="hb-moretbl__less">See less</span>
+        </label>
+      )}
+    </div>
+  );
+}
+
 /** Sub-tabs inside The Model (Game Model · Player Model). Sits under the leftmost
  *  "The Model" flow step, so it left-aligns like the flow. */
 export function ModelSubnav({ active = "game", base = "nfl" }: {

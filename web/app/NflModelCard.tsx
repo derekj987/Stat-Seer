@@ -1,5 +1,6 @@
 import type { CardRow } from "@/lib/home";
 import Tip from "./Tip";
+import { MoreTable } from "./Nav";
 
 // The Model Card (snapshot view) — the same table the landing shows, reusable on The
 // Model page. Collapsed by default; shows the first 6 games with a "see more" for the rest.
@@ -8,11 +9,11 @@ const numStr = (v: number | null) => (v === null ? "—" : String(v));
 function CardHead() {
   return <thead><tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Our Model Suggests</th></tr></thead>;
 }
-function CardRows({ rows }: { rows: CardRow[] }) {
+function CardRows({ rows, moreFrom }: { rows: CardRow[]; moreFrom?: number }) {
   return (
     <>
-      {rows.map((r) => (
-        <tr key={r.eventId} className={r.off ? "hb-off" : undefined}>
+      {rows.map((r, i) => (
+        <tr key={r.eventId} className={[r.off ? "hb-off" : "", moreFrom !== undefined && i >= moreFrom ? "hb-row--more" : ""].filter(Boolean).join(" ") || undefined}>
           <td className="hb-l"><span className="hb-game">{r.away}<span className="hb-at">at</span>{r.home}</span>{r.off && <span className="hb-dia hb-dia--end">◆</span>}</td>
           <td className="hb-num">{r.marketSpread ?? "—"}</td>
           <td className="hb-num hb-tot">{numStr(r.marketTotal)}</td>
@@ -31,8 +32,6 @@ function CardRows({ rows }: { rows: CardRow[] }) {
 }
 
 export default function NflModelCard({ rows, open = true }: { rows: CardRow[]; open?: boolean }) {
-  const lead = rows.slice(0, 6);
-  const rest = rows.slice(6);
   return (
     <details className="hb-panel hb-panel--card" open={open}>
       <summary className="hb-bar">
@@ -45,22 +44,9 @@ export default function NflModelCard({ rows, open = true }: { rows: CardRow[]; o
         {rows.length === 0 ? (
           <p className="hb-empty">The board opens when this week&apos;s odds and reads post.</p>
         ) : (
-          <>
-            <div className="hb-formwrap">
-              <table className="hb-form"><CardHead /><tbody><CardRows rows={lead} /></tbody></table>
-            </div>
-            {rest.length > 0 && (
-              <details className="hb-more">
-                <summary className="hb-more__sum">
-                  <span className="hb-more__chev" aria-hidden="true">▸</span>
-                  See more ({rest.length} more games)
-                </summary>
-                <div className="hb-formwrap">
-                  <table className="hb-form"><CardHead /><tbody><CardRows rows={rest} /></tbody></table>
-                </div>
-              </details>
-            )}
-          </>
+          <MoreTable id="modelcard-more" head={<CardHead />} extra={Math.max(0, rows.length - 6)} noun="games">
+            <CardRows rows={rows} moreFrom={6} />
+          </MoreTable>
         )}
       </div>
     </details>

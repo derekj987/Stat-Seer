@@ -43,7 +43,7 @@ function BuzzCard({ b }: { b: Buzz }) {
         <div className="cxrow">
           <dt className="cxrow__k">Heard on</dt>
           <dd className="cxrow__v cxfan__src">
-            {b.sources.map((s, i) => (
+            {[...new Map(b.sources.map((s) => [s.board, s])).values()].map((s, i) => (
               <span key={`${b.id}-${i}`} className="tgsrc">
                 {s.url ? <a href={s.url} target="_blank" rel="noopener noreferrer">{s.board}</a> : s.board}
               </span>
