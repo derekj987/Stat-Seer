@@ -1582,8 +1582,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .tip__seal{display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;
   padding:0;border:0;background:none;line-height:0;user-select:none;border-radius:5px;
   -webkit-tap-highlight-color:transparent;transition:transform .12s ease,filter .12s ease}
-.tip__seal:hover,.tip:has(.tip__chk:checked) .tip__seal{
-  transform:translateY(-1px) scale(1.1);filter:drop-shadow(0 1px 3px rgba(0,0,0,.3))}
+.tip:has(.tip__chk:checked) .tip__seal{transform:translateY(-1px) scale(1.1);filter:drop-shadow(0 1px 3px rgba(0,0,0,.3))}
 .tip__icon{width:22px;height:22px;object-fit:contain;display:block}
 .tip__bubble{position:absolute;left:0;right:0;top:calc(100% + 8px);z-index:60;
   background:var(--surface);border:1px solid var(--gold);border-radius:10px;padding:11px 13px;
@@ -1591,7 +1590,13 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   text-transform:none;text-align:left;box-shadow:0 12px 32px rgba(0,0,0,.32);
   opacity:0;visibility:hidden;pointer-events:none;transition:opacity .13s ease}
 .tip__bubble b{color:var(--gold);font-weight:800}
-.tip:hover .tip__bubble,.tip:has(.tip__chk:checked) .tip__bubble{opacity:1;visibility:visible;pointer-events:auto}
+.tip:has(.tip__chk:checked) .tip__bubble{opacity:1;visibility:visible;pointer-events:auto}
+/* hover reveal only on real pointer devices — on touch, iOS keeps a stuck :hover that would
+   prevent the re-tap from collapsing the bubble, so phones use the checkbox toggle alone. */
+@media (hover:hover){
+  .tip__seal:hover{transform:translateY(-1px) scale(1.1);filter:drop-shadow(0 1px 3px rgba(0,0,0,.3))}
+  .tip:hover .tip__bubble{opacity:1;visibility:visible;pointer-events:auto}
+}
 .pmcat__legend{position:relative;display:flex;align-items:center;gap:8px;margin:0 0 12px}
 .pmcat__legendlabel{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
 /* generic "what am I looking at?" legend used above subpage tables */
