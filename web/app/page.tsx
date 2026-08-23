@@ -6,7 +6,6 @@ import { fetchHome, type CardRow, type UpsetRow, type PlayerPick } from "@/lib/h
 import { NCAAF_MODEL, type NcaafCardGame, type NcaafUpset } from "./ncaaf/model-data";
 import LandingHub from "./LandingHub";
 import HomePromo from "./HomePromo";
-import PitchAutoClose from "./PitchAutoClose";
 import { BetslipPromo } from "./Nav";
 
 export const metadata = {
@@ -48,7 +47,6 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
           slides the panel out OVER the page when clicked. Out of the content flow entirely. */}
       <div className="lp-drawer">
         <input type="checkbox" id="lp-pitch-toggle" className="lp-drawer__chk" defaultChecked aria-hidden="true" tabIndex={-1} />
-        <PitchAutoClose />
         <label htmlFor="lp-pitch-toggle" className="lp-drawer__tab" title="Why StatSeer">
           <span className="lp-drawer__tabtext">Raise your hit rate</span>
           <span className="lp-drawer__chev" aria-hidden="true">›</span>

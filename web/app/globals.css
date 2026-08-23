@@ -1950,11 +1950,13 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
 .lp-drawer__chev{font-size:15px;font-weight:800;line-height:1}
 .lp-drawer__chk:checked ~ .lp-drawer__tab{opacity:0;pointer-events:none;transform:translateX(-100%)}
-.lp-drawer__scrim{position:fixed;inset:0;z-index:61;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;
+.lp-drawer__scrim{position:fixed;inset:0;z-index:61;background:rgba(0,0,0,.3);opacity:0;pointer-events:none;
   transition:opacity .3s ease}
 .lp-drawer__chk:checked ~ .lp-drawer__scrim{opacity:1;pointer-events:auto;cursor:pointer}
+/* Translucent on every device: a tinted, blurred panel so the board reads through it. */
 .lp-drawer__panel{position:fixed;left:0;top:0;bottom:0;z-index:62;width:min(430px,92vw);max-height:100dvh;
-  overflow-y:auto;background:linear-gradient(180deg,var(--surface),var(--surface-2));border-right:1px solid var(--line);
+  overflow-y:auto;background:color-mix(in srgb, var(--surface) 72%, transparent);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-right:1px solid var(--line);
   box-shadow:6px 0 30px rgba(0,0,0,.28);transform:translateX(-100%);transition:transform .35s cubic-bezier(.2,.7,.2,1)}
 .lp-drawer__chk:checked ~ .lp-drawer__panel{transform:translateX(0)}
 .lp-drawer__close{position:absolute;top:10px;right:12px;z-index:2;cursor:pointer;width:30px;height:30px;display:flex;
@@ -1971,12 +1973,12 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .lp-pitch{padding:52px 46px 44px}
   .lp-pitch__crest{width:clamp(200px,54%,300px);transform:translateX(-16px)}
 }
-/* Phone: the panel nearly fills the screen, so make it semi-transparent + blurred and
-   lighten the scrim, so the board stays visible behind the pitch. */
+/* Phone: the panel nearly fills the screen, so push transparency further and lighten
+   the scrim more, so the board reads clearly behind the pitch. */
 @media (max-width:767px){
-  .lp-drawer__panel{background:color-mix(in srgb, var(--surface) 80%, transparent);
-    -webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px)}
-  .lp-drawer__scrim{background:rgba(0,0,0,.22)}
+  .lp-drawer__panel{background:color-mix(in srgb, var(--surface) 55%, transparent);
+    -webkit-backdrop-filter:blur(11px);backdrop-filter:blur(11px)}
+  .lp-drawer__scrim{background:rgba(0,0,0,.14)}
 }
 .lp-pitch__h{margin:0;font-size:clamp(22px,3.4vw,28px);line-height:1.16;color:var(--ink);letter-spacing:-.01em}
 .lp-pitch__h b{color:var(--accent)}
