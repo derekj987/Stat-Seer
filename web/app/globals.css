@@ -1551,6 +1551,12 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-more__sum::-webkit-details-marker{display:none}
 .hb-more__chev{display:inline-block;font-size:10px;transition:transform .15s ease}
 .hb-more[open] .hb-more__chev{transform:rotate(90deg)}
+/* When the dropdown is already open there's nothing more to reveal, so the summary reads
+   "Collapse" instead of "See more (…)". Pure CSS — hides the see-more text (font-size:0,
+   the chevron keeps its own size) and prints Collapse via ::after. Applies to every
+   hb-more dropdown across the site. */
+.hb-more[open] > .hb-more__sum{font-size:0;gap:5px}
+.hb-more[open] > .hb-more__sum::after{content:"Collapse";font-size:11.5px}
 .hb-more__sum:hover{filter:brightness(1.12)}
 .hb-more .hb-formwrap{margin-top:0}
 /* table splits: no gap between the lead rows and the revealed "see more" rows */
