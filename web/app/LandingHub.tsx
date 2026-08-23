@@ -125,7 +125,7 @@ function RefereeAnalysis() {
           <div className="reftable lp-moretbl">{rest.map(refRowEl)}</div>
         </details>
       )}
-      <div className="lp-cxbtn"><a className="btn btn--primary" href="/considerations">See the full analysis →</a></div>
+      <p className="lp-cardfoot"><a href="/considerations">Review our Special Considerations →</a></p>
     </>
   );
 }
