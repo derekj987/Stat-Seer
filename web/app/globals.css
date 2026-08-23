@@ -1632,7 +1632,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:var(--accent)}
 .hb-more__sum::-webkit-details-marker{display:none}
 .hb-more__chev{display:inline-block;font-size:10px;transition:transform .15s ease}
-.hb-more[open] .hb-more__chev{transform:rotate(90deg)}
+.hb-more[open] .hb-more__chev{transform:rotate(-90deg)}
 /* When the dropdown is already open there's nothing more to reveal, so the summary reads
    "Collapse" instead of "See more (…)". Pure CSS — hides the see-more text (font-size:0,
    the chevron keeps its own size) and prints Collapse via ::after. Applies to every
@@ -1650,7 +1650,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-moretbl__less{display:none}
 .hb-moretbl__chk:checked ~ .hb-moretbl__sum .hb-moretbl__more{display:none}
 .hb-moretbl__chk:checked ~ .hb-moretbl__sum .hb-moretbl__less{display:inline}
-.hb-moretbl__chk:checked ~ .hb-moretbl__sum .hb-more__chev{transform:rotate(90deg)}
+.hb-moretbl__chk:checked ~ .hb-moretbl__sum .hb-more__chev{transform:rotate(-90deg)}
 .hb-more .hb-formwrap{margin-top:0}
 /* table splits: no gap between the lead rows and the revealed "see more" rows */
 .hb-more:has(.hb-formwrap){margin-top:0;padding-top:0}
