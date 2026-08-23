@@ -392,23 +392,21 @@ function UpsetCards({ children }: { children: React.ReactNode }) { return <div c
 
 export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport: Sport; nfl: NflData; ncaaf: NcaafData }) {
   return (
-    <section className="lp-hub" aria-label="How StatSeer works">
+    <section className="lp-hub" id="lp-board" aria-label="This week's board">
       {/* pure-CSS sport toggle — no client JS needed */}
       <input type="radio" name="lpsport" id="lps-nfl" className="lp-r" defaultChecked={initialSport === "nfl"} />
       <input type="radio" name="lpsport" id="lps-ncaaf" className="lp-r" defaultChecked={initialSport === "ncaaf"} />
 
       <div className="lpf__head">
-        <h2 className="lpf__h">Three steps, in order.</h2>
+        <h2 className="lpf__h">This week&apos;s board</h2>
         <div className="lpf__toggle" role="tablist" aria-label="Choose a sport">
           <label htmlFor="lps-nfl" className="lpf__t">NFL</label>
           <label htmlFor="lps-ncaaf" className="lpf__t">NCAAF</label>
         </div>
       </div>
-      <p className="lpf__sub">Read what the model sees, weigh what it can&apos;t, then find the best price. Everything below opens the sport you pick.</p>
 
       {/* NFL panel */}
       <div className="lp-sport lp-sport--nfl">
-        <Flow sport="nfl" label="NFL" />
         <div className="lp-snaplabel">NFL · Week {nfl.week} — a snapshot</div>
         <Panel title="The Model — Snapshot View" count={`${nfl.card.length} games`} hint="our model’s read beside the market’s" open>
           <NflCardTable rows={nfl.card} />
@@ -438,11 +436,16 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
         <Panel title="Referee Crew Analysis" count={`${REF_STATS.length} crews`} hint="how many flags each crew throws — the one tendency that carries over" open>
           <RefereeAnalysis />
         </Panel>
+        {/* How to use it — moved below the board, so the value + data lead. */}
+        <div className="lpf__flowhead">
+          <h2 className="lpf__h">Three steps, in order.</h2>
+          <p className="lpf__sub">Read what the model sees, weigh what it can&apos;t, then find the best price. Each opens the full section.</p>
+        </div>
+        <Flow sport="nfl" label="NFL" />
       </div>
 
       {/* NCAAF panel */}
       <div className="lp-sport lp-sport--ncaaf">
-        <Flow sport="ncaaf" label="College Football" />
         <div className="lp-snaplabel">College Football · Week {ncaaf.week} — a snapshot</div>
         <Panel title="The Model — Snapshot View" count={`${ncaaf.games.length} ranked`} hint="our line-blind read beside the market" open>
           <NcaafCardTable games={ncaaf.games} />
@@ -469,6 +472,11 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
             ))}</UpsetCards>
           )}
         </Panel>
+        <div className="lpf__flowhead">
+          <h2 className="lpf__h">Three steps, in order.</h2>
+          <p className="lpf__sub">Read what the model sees, weigh what it can&apos;t, then find the best price. Each opens the full section.</p>
+        </div>
+        <Flow sport="ncaaf" label="College Football" />
       </div>
     </section>
   );

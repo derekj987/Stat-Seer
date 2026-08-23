@@ -1929,8 +1929,48 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .lp-hero__banner{position:relative;height:clamp(88px,14vw,158px);overflow:hidden;
   border-bottom:1px solid var(--line)}
 .lp-hero__img{width:100%;height:100%;object-fit:cover;object-position:center 55%;display:block}
-.lp-hero__wm{margin:16px 0 0;font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;
-  font-weight:400;font-size:clamp(32px,6.5vw,58px);line-height:1;letter-spacing:.02em;color:var(--gold)}
+/* darken the bottom-left corner so the overlaid wordmark stays legible over the image */
+.lp-hero__banner::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(105deg,rgba(0,0,0,.62) 0%,rgba(0,0,0,.28) 30%,transparent 58%)}
+.lp-hero__wm{position:absolute;left:clamp(14px,4vw,44px);bottom:clamp(6px,1.6vw,16px);margin:0;z-index:2;
+  font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;font-weight:400;
+  font-size:clamp(22px,4.6vw,40px);line-height:1;letter-spacing:.02em;color:var(--gold);
+  text-shadow:0 2px 10px rgba(0,0,0,.75),0 1px 2px rgba(0,0,0,.9)}
+
+/* ===== Value prop — the "why use this" that now leads the page ===== */
+.lp-pitch{margin:6px 0 26px;padding:20px clamp(16px,4vw,28px);border-radius:16px;overflow:hidden;
+  border:1px solid var(--line);background:linear-gradient(180deg,var(--surface),var(--surface-2))}
+.lp-pitch__h{margin:0;font-size:clamp(20px,3.6vw,30px);line-height:1.16;color:var(--ink);letter-spacing:-.01em}
+.lp-pitch__h b{color:var(--accent)}
+.lp-pitch__sub{margin:10px 0 0;max-width:72ch;font-size:clamp(13px,1.7vw,15px);line-height:1.6;color:var(--muted)}
+.lp-pitch__sub b{color:var(--ink)}
+.lp-pitch__bars{margin:18px 0 2px;display:flex;flex-direction:column;gap:10px;max-width:560px}
+.lp-pitch__row{display:flex;align-items:center;gap:12px}
+.lp-pitch__label{flex:0 0 92px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.lp-pitch__dots{display:inline-flex;gap:5px;flex:1 1 auto;flex-wrap:nowrap;min-width:0}
+.lp-dot{width:14px;height:14px;border-radius:50%;flex:0 0 auto;background:var(--line);box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+.lp-dot--on{background:var(--muted)}
+.lp-dot--good{background:var(--accent)}
+.lp-pitch__n{flex:0 0 auto;font-weight:800;font-size:16px;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.05}
+.lp-pitch__slash{color:var(--muted);font-weight:600;font-size:12px}
+.lp-pitch__n small{display:block;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+.lp-pitch__cta{margin-top:16px}
+/* "on your own" slides in from the left, "with StatSeer" from the right */
+@keyframes lpSlideL{from{opacity:0;transform:translateX(-34px)}to{opacity:1;transform:none}}
+@keyframes lpSlideR{from{opacity:0;transform:translateX(34px)}to{opacity:1;transform:none}}
+.lp-pitch__row--a{animation:lpSlideL .7s cubic-bezier(.2,.7,.2,1) both}
+.lp-pitch__row--b{animation:lpSlideR .7s cubic-bezier(.2,.7,.2,1) .18s both}
+@media (prefers-reduced-motion:reduce){.lp-pitch__row--a,.lp-pitch__row--b{animation:none}}
+/* "Three steps" flow, now at the bottom of the board — set off with a divider */
+.lpf__flowhead{margin-top:30px;padding-top:20px;border-top:1px solid var(--line)}
+.lpf__flowhead .lpf__h{margin:0}
+.lpf__flowhead .lpf__sub{margin:4px 0 14px}
+@media (max-width:430px){
+  .lp-pitch__label{flex:0 0 auto}
+  .lp-dot{width:11px;height:11px}
+  .lp-pitch__dots{gap:4px}
+  .lp-pitch__bars{gap:8px}
+}
 .lp-hero__tag{margin:12px auto 0;max-width:76ch;text-align:center;
   font-size:clamp(15px,2.3vw,20px);line-height:1.5;color:var(--muted)}
 .lp-hero__tag b{color:var(--ink)}
