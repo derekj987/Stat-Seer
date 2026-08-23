@@ -144,7 +144,7 @@ export default function SiteNav() {
                 that several sports share the list. Template for every future sport. */}
             <details className="snav__pgroup snav__sportgroup">
               <summary className="snav__sportsum">
-                <a href="/nfl" className="snav__sportname" onClick={(e) => e.stopPropagation()}>NFL</a>
+                <a href="/model" className="snav__sportname" onClick={(e) => e.stopPropagation()}>NFL</a>
                 <span className="snav__sportchev" aria-hidden="true">▾</span>
               </summary>
               <div className="snav__sportkids">
@@ -172,7 +172,7 @@ export default function SiteNav() {
                 with the season's odds/props/fan data. */}
             <details className="snav__pgroup snav__sportgroup">
               <summary className="snav__sportsum">
-                <a href="/ncaaf" className="snav__sportname" onClick={(e) => e.stopPropagation()}>NCAAF</a>
+                <a href="/ncaaf/model" className="snav__sportname" onClick={(e) => e.stopPropagation()}>NCAAF</a>
                 <span className="snav__sportchev" aria-hidden="true">▾</span>
               </summary>
               <div className="snav__sportkids">
