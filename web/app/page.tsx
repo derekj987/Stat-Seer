@@ -46,7 +46,7 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
       {/* Value prop PINNED to the left edge like the "Message Us" widget — a slim tab that
           slides the panel out OVER the page when clicked. Out of the content flow entirely. */}
       <div className="lp-drawer">
-        <input type="checkbox" id="lp-pitch-toggle" className="lp-drawer__chk" aria-hidden="true" tabIndex={-1} />
+        <input type="checkbox" id="lp-pitch-toggle" className="lp-drawer__chk" defaultChecked aria-hidden="true" tabIndex={-1} />
         <label htmlFor="lp-pitch-toggle" className="lp-drawer__tab" title="Why StatSeer">
           <span className="lp-drawer__tabtext">Raise your hit rate</span>
           <span className="lp-drawer__chev" aria-hidden="true">›</span>
@@ -77,6 +77,8 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
             </div>
             <p className="lp-pitch__cap">Only about 3% of bettors clear it. That&apos;s the line we&apos;re built to move you past.</p>
             <label htmlFor="lp-pitch-toggle" className="btn btn--primary lp-pitch__cta">Got it — show me the board →</label>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/crest.png?v=3" alt="" className="lp-pitch__crest" width={120} height={128} />
           </section>
         </aside>
       </div>

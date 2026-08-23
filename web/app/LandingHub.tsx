@@ -397,8 +397,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
       <input type="radio" name="lpsport" id="lps-nfl" className="lp-r" defaultChecked={initialSport === "nfl"} />
       <input type="radio" name="lpsport" id="lps-ncaaf" className="lp-r" defaultChecked={initialSport === "ncaaf"} />
 
-      <div className="lpf__head">
-        <h2 className="lpf__h">This week&apos;s board</h2>
+      <div className="lpf__head lpf__head--notitle">
         <div className="lpf__toggle" role="tablist" aria-label="Choose a sport">
           <label htmlFor="lps-nfl" className="lpf__t">NFL</label>
           <label htmlFor="lps-ncaaf" className="lpf__t">NCAAF</label>
@@ -407,7 +406,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
 
       {/* NFL panel */}
       <div className="lp-sport lp-sport--nfl">
-        <div className="lp-snaplabel">NFL · Week {nfl.week} — a snapshot</div>
+        <div className="lp-snaplabel">NFL WEEK {nfl.week} SNAPSHOT</div>
         <Panel title="The Model — Snapshot View" count={`${nfl.card.length} games`} hint="our model’s read beside the market’s" open>
           <NflCardTable rows={nfl.card} />
           <p className="lp-cardfoot"><a href="/model">See the full model →</a></p>
@@ -446,7 +445,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
 
       {/* NCAAF panel */}
       <div className="lp-sport lp-sport--ncaaf">
-        <div className="lp-snaplabel">College Football · Week {ncaaf.week} — a snapshot</div>
+        <div className="lp-snaplabel">COLLEGE FOOTBALL WEEK {ncaaf.week} SNAPSHOT</div>
         <Panel title="The Model — Snapshot View" count={`${ncaaf.games.length} ranked`} hint="our line-blind read beside the market" open>
           <NcaafCardTable games={ncaaf.games} />
           <p className="lp-cardfoot"><a href="/ncaaf/model">See the full model →</a></p>

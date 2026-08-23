@@ -1960,7 +1960,10 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .lp-drawer__close{position:absolute;top:10px;right:12px;z-index:2;cursor:pointer;width:30px;height:30px;display:flex;
   align-items:center;justify-content:center;border-radius:50%;font-size:16px;line-height:1;color:var(--muted);background:var(--surface-2)}
 .lp-drawer__close:hover{color:var(--ink)}
-.lp-pitch{padding:34px 22px 24px;background:none;border:0}
+.lp-pitch{display:flex;flex-direction:column;min-height:100%;padding:34px 22px 26px;background:none;border:0}
+/* dragon crest fills + centers the empty space below the CTA */
+.lp-pitch__crest{margin:auto;width:clamp(120px,42%,168px);height:auto;opacity:.9;
+  filter:drop-shadow(0 4px 14px rgba(0,0,0,.14))}
 .lp-pitch__h{margin:0;font-size:clamp(22px,3.4vw,28px);line-height:1.16;color:var(--ink);letter-spacing:-.01em}
 .lp-pitch__h b{color:var(--accent)}
 .lp-pitch__sub{margin:10px 0 0;font-size:14px;line-height:1.6;color:var(--muted)}
