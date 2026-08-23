@@ -488,6 +488,26 @@ function PassingSnapshot() {
 
 function UpsetCards({ children }: { children: React.ReactNode }) { return <div className="hb-cols">{children}</div>; }
 
+// Show the first 2 upset cards, tuck the rest behind a "see more" dropdown like the tables.
+function UpsetSplit({ cards }: { cards: React.ReactNode[] }) {
+  const lead = cards.slice(0, 2);
+  const rest = cards.slice(2);
+  return (
+    <>
+      <UpsetCards>{lead}</UpsetCards>
+      {rest.length > 0 && (
+        <details className="hb-more">
+          <summary className="hb-more__sum">
+            <span className="hb-more__chev" aria-hidden="true">▸</span>
+            See more ({rest.length} more {rest.length === 1 ? "game" : "games"})
+          </summary>
+          <UpsetCards>{rest}</UpsetCards>
+        </details>
+      )}
+    </>
+  );
+}
+
 export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport: Sport; nfl: NflData; ncaaf: NcaafData }) {
   return (
     <section className="lp-hub" id="lp-board" aria-label="This week's board">
@@ -529,13 +549,13 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
         </Panel>
         <Panel title="Potential Upsets of the Week — NFL" count={nfl.upsets.length} hint={TIPS.upsets} open>
           {nfl.upsets.length === 0 ? <p className="hb-empty">No upset alerts this week — our model and the market agree on every game&apos;s side.</p> : (
-            <UpsetCards>{nfl.upsets.map((u) => (
+            <UpsetSplit cards={nfl.upsets.map((u) => (
               <div className="hb-up" key={u.eventId}>
                 <div className="hb-up__hd"><span className="hb-up__team">{u.dog}<small>{u.matchup}</small></span>{u.spread && <span className="hb-up__spread">{u.spread}</span>}</div>
                 <div className="hb-up__note">The market has the {u.dog} losing. Our model has them <b>winning</b> by {u.byPoints.toFixed(1)}.</div>
                 <div className="hb-up__ft"><span className="hb-up__edge">Model likes them +{u.modelPct - u.marketPct}%</span></div>
               </div>
-            ))}</UpsetCards>
+            ))} />
           )}
         </Panel>
         <Panel title="Referee Crew Analysis" count={`${REF_STATS.length} crews`} hint={TIPS.referee} open>
@@ -568,13 +588,13 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
         </Panel>
         <Panel title="Potential Upsets of the Week — NCAAF" count={ncaaf.upsets.length} hint={TIPS.upsets} open>
           {ncaaf.upsets.length === 0 ? <p className="hb-empty">No upset alerts this week — our rating agrees with the market&apos;s favorite on the board.</p> : (
-            <UpsetCards>{ncaaf.upsets.map((u) => (
+            <UpsetSplit cards={ncaaf.upsets.map((u) => (
               <div className="hb-up" key={`${u.dog}-${u.matchup}`}>
                 <div className="hb-up__hd"><span className="hb-up__team">{u.dog}<small>{u.matchup}</small></span><span className="hb-up__spread">{u.spread}</span></div>
                 <div className="hb-up__note">The market has the {u.dog} losing. Our model has them <b>winning</b> by {u.byPoints.toFixed(1)}.</div>
                 <div className="hb-up__ft"><span className="hb-up__edge">Model likes them +{u.modelPct - u.marketPct}%</span></div>
               </div>
-            ))}</UpsetCards>
+            ))} />
           )}
         </Panel>
         <div className="lpf__flowhead">
