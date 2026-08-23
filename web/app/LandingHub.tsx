@@ -8,6 +8,7 @@ import { NCAAF_MODEL } from "./ncaaf/model-data";
 import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
 import { PLAYER_PROJECTIONS, PROJ_PRIOR, type PlayerProj } from "@/lib/playerProjections";
 import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
+import { INCENTIVE_WATCH } from "@/lib/incentiveWatch";
 import { isRealistic } from "@/lib/depthChart";
 import Tip from "./Tip";
 import { ScrollHint, MoreTable } from "./Nav";
@@ -47,6 +48,7 @@ function refFlag(pen: number): { label: string; tone: "hot" | "cool" } | null {
 
 /** One per-game consideration card (site + weather). */
 function cxCardEl(w: GameWeather) {
+  const incs = INCENTIVE_WATCH.filter((it) => it.team === w.home || it.team === w.away);
   return (
     <article className={`cxcard${w.windFlag ? " cxcard--wind" : ""}`} key={w.eventId}>
       <header className="cxcard__head">
@@ -58,6 +60,7 @@ function cxCardEl(w: GameWeather) {
         <div className="cxrow"><dt className="cxrow__k">Site</dt><dd className="cxrow__v">{cxSite(w)}<span className="cxroof"> · {cxRoof(w.roof)}</span></dd></div>
         <div className="cxrow"><dt className="cxrow__k">Weather</dt><dd className="cxrow__v">{w.windFlag && <b className="wxflag">⚑&nbsp;WIND</b>} {cxWeather(w)}</dd></div>
         <div className="cxrow"><dt className="cxrow__k">Referee</dt><dd className="cxrow__v"><span className="muted">Crew tagged game week</span></dd></div>
+        <div className="cxrow"><dt className="cxrow__k">Incentives</dt><dd className="cxrow__v">{incs.length ? <>{incs.length} player{incs.length === 1 ? "" : "s"} near an incentive</> : <span className="muted">Player incentives coming soon</span>}</dd></div>
       </dl>
     </article>
   );
