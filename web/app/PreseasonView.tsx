@@ -191,7 +191,6 @@ export default function PreseasonView({
       ) : (
         <>
           <div className="tblhelp">
-            <span className="tblhelp__label">How to read these</span>
             <Tip text={<>Exhibition (preseason) game lines shown at the <b>best price across sportsbooks</b>. Preseason results are noisy and starters barely play — treat this as <b>line-shopping only</b>, not a signal about the season.</>} />
           </div>
           <section className="grid">

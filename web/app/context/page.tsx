@@ -110,7 +110,6 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
           the market is usually right — but they&apos;re where a surprise is most in play by our independent read.
         </p>
         <div className="tblhelp">
-          <span className="tblhelp__label">What am I looking at?</span>
           <Tip text={<>Games where our <b>line-blind model likes the underdog</b> that the market favors — shown with our model&apos;s pick &amp; projected spread next to the market&apos;s favorite. Not locks (the market is usually right); these are our independent <b>disagreements</b>, not graded picks.</>} />
         </div>
         {upsets.length === 0 ? (

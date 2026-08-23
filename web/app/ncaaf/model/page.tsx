@@ -111,7 +111,6 @@ export default function Page() {
         <h2 className="ncf-h">The Model — Snapshot View
           <span className="ncf-h__note">our line-blind read beside the market&apos;s number · Week {c.week}</span></h2>
         <div className="tblhelp">
-          <span className="tblhelp__label">What am I looking at?</span>
           <Tip text={<>Every ranked game with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Model Suggests</b> — our line-blind lean. A ◆ marks an <b>off-consensus</b> game. Our CFB rating ties Elo but doesn&apos;t beat the spread, so this is context you can check, <b>not a pick</b>.</>} />
         </div>
         <div className="hb-legend">

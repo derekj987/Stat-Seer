@@ -1562,7 +1562,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 /* collapsible panels (The Card / Upsets) */
 .hb-panel{margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface-2)}
 .hb-panel--alert{border-color:color-mix(in srgb,var(--spot) 45%,var(--line))}
-.hb-bar{list-style:none;display:flex;align-items:center;gap:11px;padding:13px 16px;cursor:pointer}
+.hb-bar{position:relative;list-style:none;display:flex;align-items:center;gap:11px;padding:13px 16px;cursor:pointer}
 .hb-bar::-webkit-details-marker{display:none}
 .hb-bar__title{font-size:13.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
 .hb-bar__title--gold{color:var(--gold)}
@@ -2175,10 +2175,9 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .vf-slip__odds{font-family:var(--font-mono),ui-monospace,monospace;font-weight:800;font-size:13px;color:var(--accent);min-width:44px;text-align:right}
 .vf-slip__best{padding:12px 14px;background:var(--gold-soft);border-top:1px solid var(--line)}
 .vf-slip__besth{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
-.vf-slip__besth b{color:var(--gold);font-size:13px}
-.vf-slip__bestrow{margin-top:6px;display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:13px;color:var(--ink)}
-.vf-slip__bestrow span{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
-.vf-slip__bestrow b{font-family:var(--font-mono),ui-monospace,monospace;font-weight:800;color:var(--accent);font-size:15px}
+.vf-slip__bestbig{margin-top:5px;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.vf-slip__bestbook{color:var(--gold);font-size:20px;font-weight:800;letter-spacing:-.01em}
+.vf-slip__bestodds{font-family:var(--font-mono),ui-monospace,monospace;font-weight:800;color:var(--accent);font-size:22px}
 .vf-slip__bestnote{margin:8px 0 0;font-size:11px;line-height:1.5;color:var(--muted)}
 .vf-slip__bestnote b{color:var(--ink)}
 .vf-pitch__cta{margin-top:18px;align-self:flex-start}

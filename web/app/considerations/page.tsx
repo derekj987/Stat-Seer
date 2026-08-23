@@ -215,7 +215,6 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
       ) : (
         <>
           <div className="tblhelp">
-            <span className="tblhelp__label">What am I looking at?</span>
             <Tip text={<>One card per game with the context around it: the <b>site &amp; roof</b>, the <b>weather</b> (⚑ marks notable wind), the <b>referee crew</b>, and each team&apos;s offense/defense ratings. These arm your judgment — they are <b>not</b> an adjusted line or a pick.</>} />
           </div>
           <section className="cxgrid" aria-label={`Week ${week} considerations`}>

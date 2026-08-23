@@ -203,7 +203,6 @@ export default function BoardView({
             <SlipCallout kind="lines" />
 
             <div className="tblhelp">
-              <span className="tblhelp__label">How to read the lines</span>
               <Tip text={<>For every game, each <b>moneyline, spread, and total</b> is shown at the <b>single best price across ~10 sportsbooks</b> (tap any to add it to your slip). <b>shop +x%</b> is the edge you pick up by taking that best number instead of the consensus. A ◆ marks an <b>off-consensus</b> game. No model, no pick here — just the best available number.</>} />
             </div>
 

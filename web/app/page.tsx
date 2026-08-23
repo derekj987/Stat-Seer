@@ -132,13 +132,14 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
                 </li>
               </ul>
               <div className="vf-slip__best">
-                <div className="vf-slip__besth">Best book for this slip: <b>FanDuel</b></div>
-                <div className="vf-slip__bestrow"><span>Parlay all 5 at FanDuel</span><b>+2280</b></div>
-                <div className="vf-slip__bestrow"><span>Each leg at its own best book</span><b>+2391</b></div>
+                <div className="vf-slip__besth">Best book for all 5 picks</div>
+                <div className="vf-slip__bestbig">
+                  <b className="vf-slip__bestbook">FanDuel</b>
+                  <span className="vf-slip__bestodds">+2280</span>
+                </div>
                 <p className="vf-slip__bestnote">
-                  Two ways to play — Value Finder shows you both: put the whole parlay on <b>one book</b>
-                  (FanDuel pays the most here), or bet each leg <b>separately</b> at its own best price for a
-                  slightly bigger payout.
+                  The single sportsbook that pays the most on this exact 5-pick parlay — Value Finder
+                  checks all ~10 books for you and gives you the winner.
                 </p>
               </div>
             </div>

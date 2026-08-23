@@ -46,7 +46,6 @@ export default function Page() {
         <h2 className="ncf-h">Game lines — Week {c.week}
           <span className="ncf-h__note">{games.length} games with a market line</span></h2>
         <div className="tblhelp">
-          <span className="tblhelp__label">What am I looking at?</span>
           <Tip text={<>Every game with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Model Suggests</b> — the side our line-blind rating covers. A ◆ marks an <b>off-consensus</b> game. Our CFB rating ties Elo but doesn&apos;t beat the spread, so treat this as informative context, not a guaranteed bet.</>} />
         </div>
         <div className="hb-legend">
