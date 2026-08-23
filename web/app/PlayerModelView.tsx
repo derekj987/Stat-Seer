@@ -79,13 +79,18 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
         <Brand sub={`The Model · Player Prop Model · ${sportLabel}`} />
       </header>
 
-      <section className="explainer explainer--wide">
-        <p>
+      <section className="explainer explainer--wide explainer--clamp">
+        <input type="checkbox" id="xclamp-pm" className="xclamp-toggle" aria-hidden="true" tabIndex={-1} />
+        <p className="xclamp-text">
           Our <b>line-blind player projections</b> — the layer that turns the snap-share model into
           per-player prop numbers. The rule we never break: <b>project volume, then multiply by a regressed
           efficiency baseline</b> (carries and targets persist; yards-per-touch is mostly noise). Like the
           game model, these are <b>published and graded in public</b> — not sold as locks.
         </p>
+        <label htmlFor="xclamp-pm" className="xclamp-btn">
+          <span className="xclamp-btn__more">See more ▾</span>
+          <span className="xclamp-btn__less">See less ▴</span>
+        </label>
       </section>
 
       <FlowSteps active="analyze" base={base} />

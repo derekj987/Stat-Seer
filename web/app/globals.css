@@ -2095,6 +2095,19 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 
 /* Model page: explainer stretched to full width */
 .explainer--wide p{max-width:none}
+/* Long intro explainers: on PHONES, clamp the text to 2 lines with a pure-CSS "see more".
+   Desktop has room, so it shows the full text and the toggle stays hidden. */
+.xclamp-toggle{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.xclamp-btn{display:none}
+@media (max-width:640px){
+  .explainer--clamp .xclamp-text{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .explainer--clamp .xclamp-toggle:checked ~ .xclamp-text{-webkit-line-clamp:unset;overflow:visible;display:block}
+  .explainer--clamp .xclamp-btn{display:inline-flex;align-items:center;gap:5px;cursor:pointer;margin-top:6px;
+    font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .explainer--clamp .xclamp-btn__less{display:none}
+  .explainer--clamp .xclamp-toggle:checked ~ .xclamp-btn .xclamp-btn__more{display:none}
+  .explainer--clamp .xclamp-toggle:checked ~ .xclamp-btn .xclamp-btn__less{display:inline}
+}
 /* Referee-crews heading — bigger, stands out */
 .ctxsec__h--big{font-size:21px;font-weight:800;color:var(--ink)}
 /* Referee table on phones: fill the width by dropping Avg Total (col 2) + Read (col 6),

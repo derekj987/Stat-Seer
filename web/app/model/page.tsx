@@ -247,8 +247,9 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         <div className="masthead__clock"><ModelClock /></div>
       </header>
 
-      <section className="explainer explainer--wide">
-        <p>
+      <section className="explainer explainer--wide explainer--clamp">
+        <input type="checkbox" id="xclamp-gm" className="xclamp-toggle" aria-hidden="true" tabIndex={-1} />
+        <p className="xclamp-text">
           Our model never sees the betting line — it reads each game from team strength alone,
           then we show you <b>where it agrees with the market and where it doesn&apos;t.</b> An
           <span className="chip offc">Off Consensus</span> game is one where the model likes a different
@@ -256,6 +257,10 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
           calibration below grades every one in public — so the track record is yours to check, not ours
           to claim.
         </p>
+        <label htmlFor="xclamp-gm" className="xclamp-btn">
+          <span className="xclamp-btn__more">See more ▾</span>
+          <span className="xclamp-btn__less">See less ▴</span>
+        </label>
       </section>
 
       <FlowSteps active="analyze" />
