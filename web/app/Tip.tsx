@@ -6,7 +6,10 @@
 export default function Tip({ text, label = "What am I looking at?" }: { text: React.ReactNode; label?: string }) {
   return (
     <span className="tip">
-      <span className="tip__seal" tabIndex={0} role="button" aria-label={label}>?</span>
+      <span className="tip__seal" tabIndex={0} role="button" aria-label={label}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/scroll.png?v=1" alt="" className="tip__icon" width={22} height={22} />
+      </span>
       <span className="tip__bubble" role="tooltip">{text}</span>
     </span>
   );

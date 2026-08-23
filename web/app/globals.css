@@ -1576,11 +1576,12 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 /* ===== Medieval "?" tooltips (Tip.tsx) — explain what each table shows =====
    Pure CSS: hover on desktop, :focus (tap) on phones. */
 .tip{position:relative;display:inline-flex;align-items:center;flex:0 0 auto}
-.tip__seal{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;
-  border-radius:50%;border:1.5px solid var(--gold);background:var(--gold-soft);color:var(--gold);
-  font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;font-size:13px;font-weight:400;
-  line-height:1;cursor:help;padding:0;flex:0 0 auto;user-select:none;transition:background .12s,color .12s,transform .12s}
-.tip__seal:hover,.tip__seal:focus,.tip__seal:focus-visible{background:var(--gold);color:#fff;outline:none;transform:translateY(-1px)}
+.tip__seal{display:inline-flex;align-items:center;justify-content:center;cursor:help;flex:0 0 auto;
+  padding:0;border:0;background:none;line-height:0;user-select:none;border-radius:5px;
+  transition:transform .12s ease,filter .12s ease}
+.tip__seal:hover,.tip__seal:focus,.tip__seal:focus-visible{outline:none;
+  transform:translateY(-1px) scale(1.1);filter:drop-shadow(0 1px 3px rgba(0,0,0,.3))}
+.tip__icon{width:22px;height:22px;object-fit:contain;display:block}
 .tip__bubble{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);z-index:60;
   width:max-content;max-width:min(300px,80vw);
   background:var(--surface);border:1px solid var(--gold);border-radius:10px;padding:11px 13px;
