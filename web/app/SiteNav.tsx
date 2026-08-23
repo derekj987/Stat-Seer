@@ -66,7 +66,7 @@ export default function SiteNav() {
       <div className="snav__bar">
         <a href="/" className="snav__home" aria-label="StatSeer home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-mark.png?v=4" alt="" className="snav__logo" width={34} height={34} />
+          <img src="/logo-mark.png?v=5" alt="" className="snav__logo" width={34} height={34} />
         </a>
 
         <button className="snav__burger" aria-label="Menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
@@ -132,7 +132,7 @@ export default function SiteNav() {
           <button className="snav__dclose" onClick={() => setOpen(false)} aria-label="Close menu">✕</button>
           <a href="/" className="snav__dtop snav__dhome">Home
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/crest.png?v=2" alt="" className="snav__dcrest" width={22} height={22} />
+            <img src="/crest.png?v=3" alt="" className="snav__dcrest" width={22} height={22} />
           </a>
 
           <details className="snav__pgroup" open>

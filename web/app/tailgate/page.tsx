@@ -137,7 +137,7 @@ export default async function Page({ searchParams }: {
           on the right); on mobile she drops below the feed in a framed card. */}
       <div className="tg-side" aria-hidden="true">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/newimage.png" alt="" className="tg-seerimg" width={1535} height={1024} />
+        <img src="/newimage.jpg" alt="" className="tg-seerimg" width={1200} height={801} />
       </div>
     </main>
   );

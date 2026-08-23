@@ -38,7 +38,7 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
       <header className="lp-hero">
         <div className="lp-hero__banner">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/seereyes.png" alt="" className="lp-hero__img" width={1983} height={793} />
+          <img src="/seereyes.jpg" alt="" className="lp-hero__img" width={1600} height={640} />
         </div>
         <h1 className="lp-hero__wm">StatSeer</h1>
       </header>

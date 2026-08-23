@@ -43,7 +43,7 @@ export default function SharedSlip() {
     <main className="wrap sharepage">
       <div className="sharehero">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo-mark.png?v=4" alt="" className="sharehero__logo" width={52} height={52} />
+        <img src="/logo-mark.png?v=5" alt="" className="sharehero__logo" width={52} height={52} />
         <div>
           <h1 className="sharehero__h">A StatSeer slip was shared with you</h1>
           <p className="sharehero__p">
