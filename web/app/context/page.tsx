@@ -97,7 +97,7 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
       <header className="masthead">
         <Brand
           sub={<><span className="brand__sport">NFL</span> · Upset Watch</>}
-          art={{ src: "/coach.png?v=1", alt: "Coach" }}
+          art={{ src: "/upset.png?v=1", alt: "Upset Watch" }}
         />
       </header>
 

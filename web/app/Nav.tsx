@@ -43,7 +43,7 @@ export function FlowSteps({ active, base = "nfl" }: {
 export const SPORTS = [
   { key: "nfl", label: "NFL", live: true, home: "/model" },
   { key: "ncaaf", label: "NCAAF", live: true, home: "/ncaaf/model" },
-  { key: "mlb", label: "MLB", live: false, home: "" },
+  { key: "mlb", label: "MLB", live: false, home: "/mlb" },
   { key: "nba", label: "NBA", live: false, home: "" },
   { key: "wnba", label: "WNBA", live: false, home: "" },
   { key: "soccer", label: "Soccer", live: false, home: "" },

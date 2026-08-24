@@ -1362,24 +1362,19 @@ details.statsdrop .stats{margin:12px 0 0}
    rail on desktop, mirroring the homepage seer (which sits on the right). */
 .tg{max-width:1120px;margin:0 auto;padding:clamp(20px,4vw,44px);padding-bottom:96px}
 .tg-main{min-width:0}
-.tg-side{margin:26px auto 6px;max-width:540px;border-radius:14px;overflow:hidden;line-height:0;
-  border:1px solid var(--line)}
-.tg-seerimg{display:block;width:100%;height:auto}
-@media (min-width:1100px){
-  .tg{max-width:none;margin:0;padding:0;display:grid;grid-template-columns:22vw 1fr;align-items:start}
-  .tg-side{grid-column:1;grid-row:1;margin:0;max-width:none;border:0;border-radius:0;overflow:visible;
-    align-self:stretch;min-height:0;position:relative;padding-bottom:clamp(24px,3vw,40px)}
-  .tg-main{grid-column:2;grid-row:1;
-    padding:clamp(20px,2vw,40px) clamp(24px,5vw,72px) 96px clamp(24px,3vw,40px)}
-  /* sticky so she stays pinned as the feed scrolls; the inner (right) edge feathers
-     into the content via the mask. */
-  /* the seer sits on the right of a wide image, so focus the crop there to show
-     her (face + figure) rather than the dashboard wall at the center. */
-  .tg-seerimg{position:sticky;top:0;height:100%;max-height:100vh;width:100%;
-    object-fit:cover;object-position:80% 28%;
-    -webkit-mask-image:linear-gradient(90deg,#000 80%,transparent);
-    mask-image:linear-gradient(90deg,#000 80%,transparent)}
-}
+/* MLB coming-soon landing — the seer hero (moved off Fan Analysis) beside the teaser copy */
+.mlbhero{display:grid;grid-template-columns:1fr;gap:clamp(16px,3vw,32px);margin:18px 0 44px;align-items:center}
+.mlbhero__img{width:100%;height:auto;max-height:480px;object-fit:cover;object-position:78% 28%;
+  display:block;border:1px solid var(--line);border-radius:16px}
+.mlbhero__tag{display:inline-block;font-size:11px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.09em;color:var(--gold);border:1px solid color-mix(in srgb,var(--gold) 45%,transparent);
+  border-radius:999px;padding:3px 11px;margin-bottom:12px}
+.mlbhero__h{font-size:clamp(24px,3.4vw,34px);font-weight:800;line-height:1.1;margin:0 0 12px;color:var(--ink)}
+.mlbhero__p{margin:0 0 12px;font-size:15px;line-height:1.6;color:var(--ink)}
+.mlbhero__p b{color:var(--ink);font-weight:700}
+.mlbhero__p--muted{color:var(--muted);font-size:13.5px}
+.mlbhero__p--muted a{color:var(--accent);font-weight:600}
+@media (min-width:820px){.mlbhero{grid-template-columns:1.05fr 1fr}}
 /* "NFL Week N" wrapper dropdown holding all the team dropdowns */
 .tgweek{margin:8px 0}
 .tgweek__h{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:11px 15px;

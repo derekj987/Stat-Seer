@@ -13,6 +13,7 @@ const NFL_PREFIXES = [
 
 function activeSport(path: string): string | null {
   if (path === "/ncaaf" || path.startsWith("/ncaaf/")) return "ncaaf";
+  if (path === "/mlb" || path.startsWith("/mlb/")) return "mlb";
   if (path === "/nfl") return "nfl";
   if (NFL_PREFIXES.some((p) => path === p || path.startsWith(p + "/"))) return "nfl";
   return null; // non-sport pages (forum, settings, auth, …) highlight nothing
@@ -26,10 +27,16 @@ export default function SportStrip() {
       <div className="sportstrip__in">
         {SPORTS.map((s) => {
           if (!s.live) {
-            return (
-              <span key={s.key} className="sportstrip__i sportstrip__i--soon">
-                {s.label}<em className="sportstrip__soon">Soon</em>
-              </span>
+            // Not built yet: still shows a "Soon" tag, but if it has a teaser home
+            // (e.g. MLB) the tab links there instead of being a dead label.
+            const soonInner = <>{s.label}<em className="sportstrip__soon">Soon</em></>;
+            const soonActive = s.key === active;
+            return s.home ? (
+              <a key={s.key} href={s.home}
+                className={soonActive ? "sportstrip__i sportstrip__i--soon sportstrip__i--active" : "sportstrip__i sportstrip__i--soon"}
+                aria-current={soonActive ? "page" : undefined}>{soonInner}</a>
+            ) : (
+              <span key={s.key} className="sportstrip__i sportstrip__i--soon">{soonInner}</span>
             );
           }
           const isActive = s.key === active;
