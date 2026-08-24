@@ -143,14 +143,15 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
         />
       </header>
 
+      <h1 className="ncf-h ncf-h--page">Upset Watch</h1>
       <FlowSteps active="context" />
       <ContextSubnav active="upset" />
       <WeekNav min={min} max={max} current={week} />
 
-      {/* --- Upset Watch: where our model likes the underdog --- */}
+      {/* --- Upset Model: where our line-blind model likes the underdog --- */}
       <section className="ctxsec">
         <div className="ctxsec__head">
-          <h2 className="ctxsec__h">Upset watch</h2>
+          <h2 className="ncf-h">Upset Model</h2>
           <Tip text={<>Games where our <b>line-blind model likes the underdog</b> that the market favors — shown with our model&apos;s pick &amp; projected spread next to the market&apos;s favorite. Not locks (the market is usually right); these are our independent <b>disagreements</b>, not graded picks.</>} />
         </div>
         <p className="ctxsec__d">

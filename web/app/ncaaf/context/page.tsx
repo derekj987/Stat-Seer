@@ -47,13 +47,13 @@ export default function Page() {
         />
       </header>
 
+      <h1 className="ncf-h ncf-h--page">Upset Watch</h1>
       <FlowSteps active="context" base="ncaaf" />
       <ContextSubnav active="upset" base="ncaaf" />
 
-
-      {/* --- Upset Watch: where our rating backs the market's underdog --- */}
+      {/* --- Upset Model: where our rating backs the market's underdog --- */}
       <section className="ctxsec">
-        <h2 className="ctxsec__h">Upset watch</h2>
+        <h2 className="ncf-h">Upset Model</h2>
         <p className="ctxsec__d">
           Games where our <b>line-blind rating outright picks the underdog</b> the market favors — on a competitive
           line. These aren&apos;t locks (the market is usually right, and our rating doesn&apos;t beat it against the
