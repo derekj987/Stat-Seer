@@ -4,7 +4,7 @@ import { MODEL_TOTALS } from "@/lib/modelTotals";
 import { Brand, FlowSteps, ContextSubnav } from "../Nav";
 import { ChaosBoard } from "../ChaosBoard";
 import { buildChaosBoard, returnFromSpread, comfortInfo, type ChaosInput } from "@/lib/chaos";
-import { NFL_CHAOS, NFL_ENV, CHAOS_WINDOW } from "@/lib/chaosTraits";
+import { NFL_CHAOS, NFL_ENV, NFL_IMPROVE, CHAOS_WINDOW } from "@/lib/chaosTraits";
 import { GAME_WEATHER } from "@/lib/weatherData";
 import Tip from "@/app/Tip";
 
@@ -128,6 +128,7 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
         windMph: wx && !wx.indoor ? wx.windMph : null,
         comfortPct: cz ? cz.score : dog === g.home ? 100 : undefined,
         comfortNote: cz?.note || undefined,
+        improvePct: NFL_IMPROVE[dog]?.improvePct,
       };
     });
   const chaos = buildChaosBoard(chaosInputs, 6);

@@ -14,6 +14,7 @@ const PIPS: { key: keyof ChaosEntry["subs"]; label: string }[] = [
 ];
 const EARLY_PIP: { key: keyof ChaosEntry["subs"]; label: string } = { key: "early", label: "Early X-factor" };
 const COMFORT_PIP: { key: keyof ChaosEntry["subs"]; label: string } = { key: "comfort", label: "Comfort zone" };
+const IMPROVE_PIP: { key: keyof ChaosEntry["subs"]; label: string } = { key: "improved", label: "Improved?" };
 
 // A legend chip that explains its factor on hover (desktop) or tap (mobile) — pure CSS, no JS,
 // same mechanism as the Tip component (a hidden checkbox flipped by the <label> reveals the note).
@@ -39,6 +40,7 @@ export function ChaosBoard({
   if (entries.length === 0) return null;
   const earlyOn = entries.some((e) => e.earlyActive);
   const comfortOn = entries.some((e) => e.comfortActive);
+  const improveOn = entries.some((e) => e.improveActive);
   return (
     <section className="ctxsec cb">
       <div className="ctxsec__head">
@@ -60,11 +62,8 @@ export function ChaosBoard({
           <b>⚡ Early X-factor is live (weeks 1–3).</b> The season&apos;s first few weeks are its most
           chaotic: rosters were overhauled and no one has current-season form, so the market works with
           the least information — and dogs win a bit more often at the same price (~+1.5 pts vs mid-season).
-          This factor rewards a live dog in the sweet spot
-          {entries.some((e) => (e.riserPct ?? 0) >= 40)
-            ? ", plus an underdog whose preseason rating jumped well past last year — an improved team a favorite can look past"
-            : ""}
-          . It fades to zero after week 3, and it&apos;s a variance flag, <b>not an edge</b> —{" "}
+          This factor rewards a live dog in the sweet spot. It fades to zero after week 3, and it&apos;s a
+          variance flag, <b>not an edge</b> —{" "}
           {sport === "NFL"
             ? "early NFL dogs still cover only ~53.5% ATS, within a coin flip of the vig"
             : "early college dogs actually cover under 50% ATS (the early slate is full of cupcake blowouts), so there's no dog edge here at all"}.
@@ -84,6 +83,10 @@ export function ChaosBoard({
           tip="Weeks 1–3 only: the season's start is its most chaotic — new rosters, no current form — so live dogs spring more surprises. Fades to zero after week 3." />}
         {comfortOn && <FactorChip emoji="🏟" label="Comfort zone" cls="cb__chip--comfort"
           tip="Is the road dog in a stadium like home? A dome team at another dome is at ease; a warm/dome team out in the late-season cold is not." />}
+        {improveOn && <FactorChip emoji="📈" label="Improved?" cls="cb__chip--improve"
+          tip={sport === "NFL"
+            ? "How much the dog's roster improved this offseason — ESPN's preseason power index vs where they ended last year (draft + free agency). A rising team a favorite can underestimate."
+            : "How much the dog's preseason rating (SP+) jumped above last year's results — an improved/underrated team the market is slow to respect."} />}
         <span className="cb__win">traits: last 2 seasons ({windowLabel})</span>
       </div>
 
@@ -101,8 +104,8 @@ export function ChaosBoard({
               </div>
               <p className="cb__story">{e.story}</p>
               <div className="cb__pips">
-                {[...PIPS, ...(e.earlyActive ? [EARLY_PIP] : []), ...(e.comfortActive ? [COMFORT_PIP] : [])].map((p) => (
-                  <div className={`cb__pip${p.key === "early" ? " cb__pip--early" : p.key === "comfort" ? " cb__pip--comfort" : ""}`} key={p.key}>
+                {[...PIPS, ...(e.earlyActive ? [EARLY_PIP] : []), ...(e.comfortActive ? [COMFORT_PIP] : []), ...(e.improveActive ? [IMPROVE_PIP] : [])].map((p) => (
+                  <div className={`cb__pip${p.key === "early" ? " cb__pip--early" : p.key === "comfort" ? " cb__pip--comfort" : p.key === "improved" ? " cb__pip--improve" : ""}`} key={p.key}>
                     <span className="cb__piplab">{p.label}</span>
                     <span className="cb__piptrack">
                       <span className="cb__pipfill" style={{ width: `${Math.round(e.subs[p.key])}%` }} />

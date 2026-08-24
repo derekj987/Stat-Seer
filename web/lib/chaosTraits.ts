@@ -3,6 +3,7 @@
 // completed seasons. NOT predictive; never feeds The Model or Value Finder.
 export interface ChaosTrait { vol: number; ceiling: number; g: number; volPct: number; ceilPct: number }
 export interface StadiumEnv { indoor: boolean; climate: string; surface: string }
+export interface TeamImprove { delta: number; improvePct: number }
 export const CHAOS_WINDOW = ["2024", "2025"] as const;
 export const NFL_CHAOS: Record<string, ChaosTrait> = {
 "KC": {
@@ -1344,5 +1345,135 @@ export const NFL_ENV: Record<string, StadiumEnv> = {
 "indoor": false,
 "climate": "mild",
 "surface": "grass"
+}
+};
+export const NFL_IMPROVE: Record<string, TeamImprove> = {
+"LA": {
+"delta": -0.8,
+"improvePct": 26
+},
+"BUF": {
+"delta": 0.5,
+"improvePct": 42
+},
+"BAL": {
+"delta": 0.4,
+"improvePct": 39
+},
+"SEA": {
+"delta": -3.6,
+"improvePct": 0
+},
+"SF": {
+"delta": 1.1,
+"improvePct": 58
+},
+"GB": {
+"delta": -0.8,
+"improvePct": 23
+},
+"LAC": {
+"delta": 1.0,
+"improvePct": 55
+},
+"DET": {
+"delta": -1.2,
+"improvePct": 13
+},
+"KC": {
+"delta": 4.4,
+"improvePct": 90
+},
+"PHI": {
+"delta": -1.6,
+"improvePct": 10
+},
+"DAL": {
+"delta": 3.1,
+"improvePct": 81
+},
+"CIN": {
+"delta": 0.1,
+"improvePct": 35
+},
+"HOU": {
+"delta": -2.1,
+"improvePct": 3
+},
+"NE": {
+"delta": -1.1,
+"improvePct": 16
+},
+"DEN": {
+"delta": 0.8,
+"improvePct": 52
+},
+"CHI": {
+"delta": 0.7,
+"improvePct": 45
+},
+"JAX": {
+"delta": -1.7,
+"improvePct": 6
+},
+"TB": {
+"delta": 1.8,
+"improvePct": 68
+},
+"MIN": {
+"delta": 6.3,
+"improvePct": 100
+},
+"IND": {
+"delta": 1.7,
+"improvePct": 65
+},
+"WAS": {
+"delta": 2.4,
+"improvePct": 74
+},
+"PIT": {
+"delta": -0.0,
+"improvePct": 32
+},
+"NYG": {
+"delta": -1.0,
+"improvePct": 19
+},
+"ATL": {
+"delta": 2.1,
+"improvePct": 71
+},
+"NO": {
+"delta": 0.7,
+"improvePct": 48
+},
+"CAR": {
+"delta": 1.1,
+"improvePct": 61
+},
+"TEN": {
+"delta": 4.7,
+"improvePct": 97
+},
+"LV": {
+"delta": 2.5,
+"improvePct": 77
+},
+"ARI": {
+"delta": -0.2,
+"improvePct": 29
+},
+"CLE": {
+"delta": 4.4,
+"improvePct": 94
+},
+"NYJ": {
+"delta": 3.8,
+"improvePct": 84
+},
+"MIA": {
+"delta": 3.9,
+"improvePct": 87
 }
 };

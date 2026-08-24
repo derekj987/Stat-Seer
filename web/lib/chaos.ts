@@ -18,9 +18,9 @@ export interface ChaosInput {
   favTrait?: ChaosTrait;
   dogTrait?: ChaosTrait;
   windMph?: number | null;
-  riserPct?: number; // 0-100: dog's preseason SP+ rank above last year's (CFB only)
   comfortPct?: number; // 0-100: how much the venue resembles the dog's home (NFL only)
   comfortNote?: string; // one-line reason when the dog is notably in/out of its element
+  improvePct?: number; // 0-100: how much the dog improved this offseason (CFB SP+ riser / NFL FPI)
 }
 
 export interface ChaosEntry extends ChaosInput {
@@ -28,7 +28,8 @@ export interface ChaosEntry extends ChaosInput {
   tier: "hot" | "warm" | "cool";
   earlyActive: boolean;
   comfortActive: boolean;
-  subs: { boom: number; ceiling: number; wild: number; payout: number; early: number; comfort: number };
+  improveActive: boolean;
+  subs: { boom: number; ceiling: number; wild: number; payout: number; early: number; comfort: number; improved: number };
   story: string;
 }
 
@@ -89,18 +90,21 @@ export function scoreChaos(g: ChaosInput): ChaosEntry {
   const wild = clamp(25 + (wind > 0 ? Math.min(60, wind * 3) : 0)); // variance amplifiers
   const payout = payoutScore(g.dogReturn);
   const earlyActive = g.week <= 3;
-  const early = earlyActive ? clamp(30 + liveZone(g.line) + (g.riserPct ?? 0) * 0.4) : 0;
+  const early = earlyActive ? clamp(30 + liveZone(g.line)) : 0;
   const comfortActive = g.comfortPct != null;
   const comfort = g.comfortPct ?? 0;
+  const improveActive = g.improvePct != null;
+  const improved = g.improvePct ?? 0;
 
   // Relative weights; inactive factors drop out and the rest renormalize, so the scale stays
   // 0-100 whichever factors a game has. boom/ceiling stay dominant so the board differentiates.
   const wRaw: Record<string, number> = {
-    boom: 26, ceiling: 24, wild: 14, payout: 16,
+    boom: 24, ceiling: 22, wild: 14, payout: 16,
     early: earlyActive ? 12 : 0,
     comfort: comfortActive ? 12 : 0,
+    improved: improveActive ? 12 : 0,
   };
-  const subs = { boom, ceiling, wild, payout, early, comfort };
+  const subs = { boom, ceiling, wild, payout, early, comfort, improved };
   const wsum = Object.values(wRaw).reduce((a, b) => a + b, 0);
   const index = Math.round(
     (Object.keys(wRaw) as (keyof typeof subs)[]).reduce((s, k) => s + wRaw[k] * subs[k], 0) / wsum,
@@ -112,14 +116,14 @@ export function scoreChaos(g: ChaosInput): ChaosEntry {
     [boom, `${g.fav} run hot and cold — ${Math.round(boom)}th-percentile boom/bust margins.`],
     [ceiling, `${g.dog} carry a monster ceiling — one big day and this flips.`],
     [wind > 0 ? wild : 0, wind > 0 ? `A ${Math.round(wind)} mph wind drags this toward a coin flip.` : ""],
-    [earlyActive ? (g.riserPct ?? 0) : 0, `${g.dog} come in underrated — preseason ratings jumped them well past last year, and early-season favorites get caught looking.`],
+    [improveActive && improved >= 72 ? improved : 0, `${g.dog} come in much improved — the preseason numbers have them well up on last year, and a rising team catches favorites looking.`],
     [earlyActive ? 52 : 0, `Weeks 1-3 wildcard — rosters and rhythm aren't settled yet, and a live dog can steal one.`],
     [comfortActive && comfort >= 88 && g.comfortNote ? comfort : 0, g.comfortNote || ""],
-    [payout, `A genuine long shot — but $100 comes back $${g.dogReturn.toLocaleString()}.`],
+    [payout, `A genuine long shot — but a $100 ticket comes back $${g.dogReturn.toLocaleString()} if they win outright.`],
   ];
   const story = parts.filter((p) => p[1]).sort((a, b) => b[0] - a[0])[0][1];
 
-  return { ...g, index, tier, earlyActive, comfortActive, subs, story };
+  return { ...g, index, tier, earlyActive, comfortActive, improveActive, subs, story };
 }
 
 /** Score, rank hottest-first, and keep the top N. */
