@@ -193,14 +193,19 @@ export default function BoardView({
           <p className="foot">No odds captured for Week {week} yet.</p>
         ) : (
           <>
-            <details className="statsdrop">
-              <summary className="statsdrop__h">Snapshot Statistics</summary>
-              <section className="stats" aria-label="summary">
-                <div className="stat"><span className="stat__v">+{avgEdge.toFixed(2)}%</span><span className="stat__l">avg shopping edge / side</span></div>
-                <div className="stat"><span className="stat__v">{keyGames}</span><span className="stat__l">sweet-spot games</span></div>
-                <div className="stat"><span className="stat__v">+{maxEdge.toFixed(2)}%</span><span className="stat__l">best shopping edge</span></div>
-                <div className="stat"><span className="stat__v">10</span><span className="stat__l">books compared</span></div>
-              </section>
+            <details className="hb-panel hb-panel--card">
+              <summary className="hb-bar">
+                <span className="hb-bar__title hb-bar__title--gold">Snapshot Statistics</span>
+                <span className="hb-bar__chev" aria-hidden="true">▾</span>
+              </summary>
+              <div className="hb-body">
+                <section className="stats" aria-label="summary">
+                  <div className="stat"><span className="stat__v">+{avgEdge.toFixed(2)}%</span><span className="stat__l">avg shopping edge / side</span></div>
+                  <div className="stat"><span className="stat__v">{keyGames}</span><span className="stat__l">sweet-spot games</span></div>
+                  <div className="stat"><span className="stat__v">+{maxEdge.toFixed(2)}%</span><span className="stat__l">best shopping edge</span></div>
+                  <div className="stat"><span className="stat__v">10</span><span className="stat__l">books compared</span></div>
+                </section>
+              </div>
             </details>
 
             <SlipCallout kind="lines" />

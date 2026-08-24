@@ -106,21 +106,24 @@ export default function Page() {
       </details>
 
       {/* Snapshot — the first few ranked games, with a "see more" for the rest. */}
-      <section className="ncf-sec">
-        <div className="ncf-hrow">
-          <h2 className="ncf-h">The Model — Snapshot View
-            <span className="ncf-h__note">our line-blind read beside the market&apos;s number · Week {c.week}</span></h2>
+      <details className="hb-panel hb-panel--card" open>
+        <summary className="hb-bar">
+          <span className="hb-bar__title hb-bar__title--gold">The Model — Snapshot View</span>
           <Tip text={<>Every ranked game with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Model Suggests</b> — our line-blind lean. A ◆ marks an <b>off-consensus</b> game. Our CFB rating ties Elo but doesn&apos;t beat the spread, so this is context you can check, <b>not a pick</b>.</>} />
+          <span className="hb-bar__hint">our line-blind read beside the market&apos;s number · Week {c.week}</span>
+          <span className="hb-bar__chev" aria-hidden="true">▾</span>
+        </summary>
+        <div className="hb-body">
+          <div className="hb-legend">
+            <span className="hb-dia">◆</span> Off-consensus — our read is on the other side from the market.
+            <span className="hb-x"> · <b>Our Model Suggests</b> is the side our line-blind rating covers —
+              informative, <b>not a guaranteed bet</b> (the rating doesn&apos;t beat the spread; see the record above).</span>
+          </div>
+          <MoreTable id="ncaaf-snap-more" head={<CardHead />} extra={snapshotRest.length} noun="ranked games">
+            <CardRows games={ranked} moreFrom={5} />
+          </MoreTable>
         </div>
-        <div className="hb-legend">
-          <span className="hb-dia">◆</span> Off-consensus — our read is on the other side from the market.
-          <span className="hb-x"> · <b>Our Model Suggests</b> is the side our line-blind rating covers —
-            informative, <b>not a guaranteed bet</b> (the rating doesn&apos;t beat the spread; see the record above).</span>
-        </div>
-        <MoreTable id="ncaaf-snap-more" head={<CardHead />} extra={snapshotRest.length} noun="ranked games">
-          <CardRows games={ranked} moreFrom={5} />
-        </MoreTable>
-      </section>
+      </details>
 
       {/* The FULL model — every game on the board, collapsed. */}
       <details className="hb-panel">

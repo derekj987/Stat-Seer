@@ -271,36 +271,39 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
       {preds.length === 0 ? (
         <p className="foot">No reads published for Week {week} yet.</p>
       ) : (
-        <details className="gamesdrop" open>
-          <summary className="gamesdrop__h">
-            Week {week} Full Model
-            <span className="gamesdrop__n">{preds.length} games</span>
-            <span className="gamesdrop__chev" aria-hidden="true">▾</span>
+        <details className="hb-panel hb-panel--card" open>
+          <summary className="hb-bar">
+            <span className="hb-bar__title hb-bar__title--gold">Week {week} Full Model</span>
+            <span className="hb-bar__count">{preds.length} games</span>
+            <span className="hb-bar__chev" aria-hidden="true">▾</span>
           </summary>
-          <section className="grid">
-            {preds.slice(0, 6).map((p) => <PredictionCard key={p.eventId} p={p} />)}
-          </section>
-          {preds.length > 6 && (
-            <details className="hb-more">
-              <summary className="hb-more__sum">
-                <span className="hb-more__chev" aria-hidden="true">▸</span>
-                See more ({preds.length - 6} more games)
-              </summary>
-              <section className="grid">
-                {preds.slice(6).map((p) => <PredictionCard key={p.eventId} p={p} />)}
-              </section>
-            </details>
-          )}
+          <div className="hb-body">
+            <section className="grid">
+              {preds.slice(0, 6).map((p) => <PredictionCard key={p.eventId} p={p} />)}
+            </section>
+            {preds.length > 6 && (
+              <details className="hb-more">
+                <summary className="hb-more__sum">
+                  <span className="hb-more__chev" aria-hidden="true">▸</span>
+                  See more ({preds.length - 6} more games)
+                </summary>
+                <section className="grid">
+                  {preds.slice(6).map((p) => <PredictionCard key={p.eventId} p={p} />)}
+                </section>
+              </details>
+            )}
+          </div>
         </details>
       )}
 
       {/* Week's numbers crunched — market spread/total beside our line-blind projection. */}
-      <details className="gamesdrop" open>
-        <summary className="gamesdrop__h">
-          Week {week} numbers crunched
-          <span className="gamesdrop__n">{scored.length} games</span>
-          <span className="gamesdrop__chev" aria-hidden="true">▾</span>
+      <details className="hb-panel hb-panel--card" open>
+        <summary className="hb-bar">
+          <span className="hb-bar__title hb-bar__title--gold">Week {week} numbers crunched</span>
+          <span className="hb-bar__count">{scored.length} games</span>
+          <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
+        <div className="hb-body">
         <p className="ctxsec__d">
           The market&apos;s <b>spread</b> and <b>total</b> for each game, with our <b>line-blind model&apos;s</b>
           own read of each sitting right beside it.
@@ -324,6 +327,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
             )}
           </div>
         )}
+        </div>
       </details>
 
       <a href="/model/players" className="soonpanel soonpanel--link" id="player-model">

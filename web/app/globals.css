@@ -315,16 +315,6 @@ body{background:var(--bg);color:var(--ink);
 .vfnote a{color:var(--accent);text-decoration:none;font-weight:600}
 
 /* The Model: collapse the game cards into a dropdown so the page isn't a wall of games */
-.gamesdrop{margin:14px 0}
-.gamesdrop__h{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;
-  padding:11px 15px;border:1px solid var(--line);border-radius:11px;background:var(--surface-2);
-  font-weight:800;font-size:14.5px}
-.gamesdrop__h::-webkit-details-marker{display:none}
-.gamesdrop__n{font-size:12px;color:var(--muted);font-weight:600;border:1px solid var(--line);
-  border-radius:20px;padding:2px 9px}
-.gamesdrop__chev{margin-left:auto;color:var(--muted);transition:transform .15s}
-.gamesdrop[open]>.gamesdrop__h{margin-bottom:14px;border-color:color-mix(in srgb,var(--accent) 32%,var(--line))}
-.gamesdrop[open]>.gamesdrop__h .gamesdrop__chev{transform:rotate(180deg)}
 
 
 /* Sport selector on The Model — NFL live, others on the roadmap */
@@ -1334,15 +1324,6 @@ a.snav__dfeat{display:block}
 .acctpromo__login{font-size:13px;font-weight:600;color:var(--accent);text-decoration:none;white-space:nowrap}
 .acctpromo__login:hover{text-decoration:underline}
 
-/* ---------------- Game Lines: collapsible Snapshot Statistics ---------------- */
-details.statsdrop{margin:22px 0 26px}
-details.statsdrop>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:8px;
-  font-size:11px;text-transform:uppercase;letter-spacing:.07em;font-weight:800;color:var(--muted)}
-details.statsdrop>summary::-webkit-details-marker{display:none}
-details.statsdrop>summary::before{content:"▸";color:var(--muted);font-size:11px}
-details.statsdrop[open]>summary::before{content:"▾"}
-details.statsdrop .stats{margin:12px 0 0}
-
 /* ---------------- Tailgate: fan-sentiment feed ---------------- */
 /* "The wall" — the visible label that this is fan chatter, not a StatSeer pick. */
 .tgwall{display:flex;flex-direction:column;gap:8px;background:var(--spot-soft);
@@ -2028,9 +2009,6 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .ncf-honest p{margin:0;font-size:13.5px;line-height:1.6}
 
 .ncf-sec{margin:22px 0 10px}
-/* heading row carrying an inline help scroll; position:relative anchors its bubble */
-.ncf-hrow{position:relative;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 10px}
-.ncf-hrow .ncf-h{margin:0}
 .ncf-h{font-size:16px;margin:0 0 10px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .ncf-h__note{font-size:11.5px;font-weight:400;color:var(--muted)}
 .ncf-tbl{border:1px solid var(--line);border-radius:12px;overflow:hidden}
