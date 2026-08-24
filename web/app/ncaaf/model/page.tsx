@@ -152,20 +152,6 @@ export default function Page() {
         </p>
       </section>
 
-      <details className="ncf-method">
-        <summary className="ncf-method__h">How the rating is built</summary>
-        <div className="ncf-method__b">
-          <ul>
-            <li><b>Point differential, never win-loss.</b> A 3-point win and a 30-point win are different evidence; a win and a loss on the scoreboard hide it.</li>
-            <li><b>Ridge-regularized</b> so a team with a thin or lopsided early schedule is pulled toward the mean instead of ballooning on noise.</li>
-            <li><b>Prior-season carryover.</b> Each season starts from last year&apos;s regressed rating, then the new games take over — so week 3 isn&apos;t a coin flip.</li>
-            <li><b>Blowouts capped</b> at {28} points — running up the score is barely more information than a comfortable win.</li>
-            <li><b>Home field = {M.hfa} points</b>, estimated from the data, dropped entirely at neutral sites.</li>
-            <li><b>Fit on {M.seasons}</b>, {M.teamsRated} FBS teams, tested walk-forward (each week predicted only from earlier weeks).</li>
-          </ul>
-        </div>
-      </details>
-
       <footer className="foot">
         <p>
           <b>Line-blind and graded in public.</b> These reads never see the betting line before they&apos;re set,

@@ -10,27 +10,16 @@ import { isRealistic } from "@/lib/depthChart";
 export interface PlayerCat {
   key: string;
   label: string;
-  blurb: string;
-  cols: string[];   // the columns this category's projection table will publish
-  note: string;     // category-specific line on how this prop is projected + validated
 }
 
+// Method/blurb text intentionally omitted — how each number is calculated is not published
+// on the public pages (see the pending "How we make our calculations" decision).
 export const PLAYER_CATS: PlayerCat[] = [
-  { key: "td", label: "Touchdowns", cols: ["Player", "Team", "Book %", "Our %", "Career TD rate", "Prior TD rate"],
-    blurb: "Anytime-touchdown probability — projected carries and receptions × the league TD-per-touch rate, as P(≥1 TD). A Yes/No prop, so we show our % beside the book's implied %.",
-    note: "Anytime-TD probability = projected carries × league rush-TD-per-carry + projected receptions × league rec-TD-per-reception, turned into P(scores ≥1) with a Poisson. We use LEAGUE TD-per-touch rates because scoring barely persists — the signal is who gets the VOLUME, not a goal-line-role guess we can't yet see. The Book % is the Yes-odds implied probability WITH the house margin (we only capture the Yes side, so it isn't de-vigged) — our estimate sitting a little lower is mostly that margin. Context, not a claimed edge." },
-  { key: "passing", label: "Passing", cols: ["Player", "Team", "Pass Yds", "Pass TDs", "Att"],
-    blurb: "Projected passing volume (attempts, completions) multiplied by a regressed yards-per-attempt baseline; passing TDs from volume × a regressed league TD rate.",
-    note: "Passing yards come from projected attempts × a regressed yards-per-attempt baseline — volume is the stable part, efficiency is pulled toward the mean. Passing TDs are projected attempts × the LEAGUE starter TD-per-attempt rate (a QB's own scoring rate doesn't persist, so these sit near the book line — scoring isn't where a projection edge lives)." },
-  { key: "rushing", label: "Rushing", cols: ["Player", "Team", "Carries", "Rush Yds"],
-    blurb: "Projected carries from the snap-share model × a regressed yards-per-carry baseline — carries persist (r ≈ 0.68), efficiency doesn't.",
-    note: "Rushing yards are our strongest prop — projected carries (+4.7% over baseline) times a regressed yards-per-carry, landing rushing yards +4.3% over a persistence baseline, because carries persist and yards-per-carry mostly doesn't." },
-  { key: "receiving", label: "Receiving", cols: ["Player", "Team", "Tgts", "Rec", "Rec Yds"],
-    blurb: "Projected target share converted to receptions and yards — the middle of the depth chart (35–60% snaps) is where this is most reliable.",
-    note: "Receiving yards come from projected target share (targets +3.3% over baseline) times a regressed yards-per-target — receiving is efficiency-heavy, so the honest edge here is smaller (rec yds +1.8%)." },
-  { key: "receptions", label: "Receptions", cols: ["Player", "Team", "Tgts", "Rec"],
-    blurb: "Projected catch volume from target share — the most persistent receiving signal we measured.",
-    note: "Receptions come straight from projected target share — the most persistent receiving signal we measured (receptions +2.2% over a persistence baseline)." },
+  { key: "td", label: "Touchdowns" },
+  { key: "passing", label: "Passing" },
+  { key: "rushing", label: "Rushing" },
+  { key: "receiving", label: "Receiving" },
+  { key: "receptions", label: "Receptions" },
 ];
 
 export const playerCatByKey = (k: string): PlayerCat =>
@@ -70,6 +59,7 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
     if (!byGame[r.game]) { byGame[r.game] = []; games.push(r.game); }
     byGame[r.game].push(r);
   }
+  const LEAD = 4;   // rows shown before "see more"
   // Per-row unit — the passing category mixes markets (yards + TDs); anytime-TD is a %.
   const unitFor = (market: string) =>
     market === "receptions" ? "" : market === "pass_tds" ? " TD" : market === "anytime_td" ? "%" : " yds";
@@ -96,10 +86,9 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
       <section className="explainer explainer--wide explainer--clamp">
         <input type="checkbox" id="xclamp-pm" className="xclamp-toggle" aria-hidden="true" tabIndex={-1} />
         <p className="xclamp-text">
-          Our <b>line-blind player projections</b> — the layer that turns the snap-share model into
-          per-player prop numbers. The rule we never break: <b>project volume, then multiply by a regressed
-          efficiency baseline</b> (carries and targets persist; yards-per-touch is mostly noise). Like the
-          game model, these are <b>published and graded in public</b> — not sold as locks.
+          Our <b>line-blind player-prop projections</b> — our own number for each prop, set without looking
+          at the book&apos;s line, shown beside it with an over/under lean. Like the game model, these are
+          <b> published and graded in public</b> — not sold as locks.
         </p>
         <label htmlFor="xclamp-pm" className="xclamp-btn">
           <span className="xclamp-btn__more">See more ▾</span>
@@ -124,23 +113,25 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
         {rows.length === 0 ? (
           <div className="pmempty pmempty--solo" role="note">
             <span className="pmempty__tag">Projections arriving</span>
-            <p>{active.note}</p>
             <p>
-              The pipeline is <b>built and validated</b> (availability AUC ≈ 0.86). The weekly{" "}
-              <b>{active.label.toLowerCase()}</b> numbers publish here as each week&apos;s live usage is
-              captured — snap-share can&apos;t be backfilled, so it fills in with the season, not before.
+              Our line-blind <b>{active.label.toLowerCase()}</b> projections publish here as each
+              week&apos;s data comes in — they can&apos;t be filled in before the season runs.
             </p>
           </div>
         ) : (
           <>
-            <p className="pmcat__note" role="note">{active.note}</p>
-            {games.map((g) => (
+            {games.map((g, gi) => (
               <details className="pmgame" key={g} open>
                 <summary className="pmgame__h">{g}<span className="pmgame__chev" aria-hidden="true">▾</span></summary>
                 <div className="pmgame__body">
                 <ScrollHint />
-                {sectionsFor(g).map((sec) => (
-                  <div className="pmscroll" key={sec.label ?? "all"}>
+                {sectionsFor(g).map((sec, si) => {
+                  const moreId = `pm-${base}-${active.key}-${gi}-${si}`;
+                  const extra = Math.max(0, sec.rows.length - LEAD);
+                  return (
+                  <div className="hb-moretbl" key={sec.label ?? "all"}>
+                    <input type="checkbox" id={moreId} className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
+                    <div className="pmscroll">
                     {sec.label && <div className="pmsec__h">{sec.label}</div>}
                     <div className={`pmtable pmtable--data${active.key === "passing" ? " pmtable--ha" : ""}`} role="table" aria-label={`${g} ${sec.label ?? active.label} projections`}>
                       <div className="pmrow pmrow--head pmrow--data" role="row">
@@ -149,20 +140,20 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
                         <span className="pmcell pmcell--num">{isTd ? "Book %" : "Book line"}</span>
                         <span className="pmcell pmcell--num">{isTd ? "Our %" : "Our proj"}</span>
                         <span className="pmcell pmcell--career">{isTd ? "Career TD rate" : "Career % over"}</span>
-                        <span className="pmcell pmcell--career">{isTd ? "Prior TD rate" : "Prior szn % over"}</span>
+                        <span className="pmcell pmcell--career">{isTd ? "Prior szn TD rate" : "Prior szn % over"}</span>
                         {active.key === "passing" && <>
                           <span className="pmcell pmcell--career">Home % over</span>
                           <span className="pmcell pmcell--career">Road % over</span>
                         </>}
                       </div>
-                      {sec.rows.map((r) => {
+                      {sec.rows.map((r, ri) => {
                         const cpct = r.cG ? Math.round((100 * r.cOver) / r.cG) : null;
                         const ppct = r.pG ? Math.round((100 * r.pOver) / r.pG) : null;
                         const hpct = r.hG ? Math.round((100 * r.hOver) / r.hG) : null;
                         const rpct = r.rG ? Math.round((100 * r.rOver) / r.rG) : null;
                         const cls = (v: number | null) => v === null ? "" : v >= 50 ? "pmread--over" : "pmread--under";
                         return (
-                          <div className="pmrow pmrow--data" role="row" key={`${r.player}-${r.market}`}>
+                          <div className={`pmrow pmrow--data${ri >= LEAD ? " hb-row--more" : ""}`} role="row" key={`${r.player}-${r.market}`}>
                             <span className="pmcell pmcell--player">{r.player}</span>
                             <span className="pmcell pmcell--team">{r.team}</span>
                             <span className="pmcell pmcell--num">{r.book}{unitFor(r.market)}</span>
@@ -188,8 +179,17 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
                         );
                       })}
                     </div>
+                    </div>
+                    {extra > 0 && (
+                      <label htmlFor={moreId} className="hb-moretbl__sum">
+                        <span className="hb-more__chev" aria-hidden="true">▸</span>
+                        <span className="hb-moretbl__more">See more ({extra} more player{extra === 1 ? "" : "s"})</span>
+                        <span className="hb-moretbl__less">See less</span>
+                      </label>
+                    )}
                   </div>
-                ))}
+                  );
+                })}
                 </div>
               </details>
             ))}
