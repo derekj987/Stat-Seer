@@ -283,6 +283,10 @@ body{background:var(--bg);color:var(--ink);
 .catnav__c:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* section toggle (Game/Player Model · Line Shopping/Props · Considerations/Upset/Fan) —
    a fully-rounded amber segmented switch matching the homepage toggle style */
+/* subnav pill bar + an inline help scroll beside it; position:relative anchors the
+   scroll's bubble so it drops full-width below the row. */
+.subnavrow{position:relative;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 4px}
+.subnavrow .subnav{margin:0}
 .subnav{display:inline-flex;gap:3px;margin:8px 0 4px;padding:3px;border-radius:999px;
   background:var(--amber-soft);border:1px solid color-mix(in srgb,var(--amber) 35%,transparent);
   width:fit-content;max-width:100%;overflow-x:auto}
