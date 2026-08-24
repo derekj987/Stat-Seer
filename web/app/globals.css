@@ -1537,6 +1537,10 @@ a.snav__dfeat{display:block}
 .foot--pm p{max-width:none}
 .pmgame{margin:0 0 16px}
 .pmgame__h{font-size:14px;font-weight:800;color:var(--ink);margin:0 0 6px;letter-spacing:.02em}
+/* subsection label inside a game (e.g. Passing Yards / Passing TDs) */
+.pmsec__h{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--accent);margin:10px 0 5px}
+.pmscroll:first-of-type .pmsec__h{margin-top:2px}
 
 /* --- Fan Analysis: teams as dropdowns, colored + bigger headers --- */
 details.tgteam{margin-bottom:12px}

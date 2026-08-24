@@ -16,12 +16,12 @@ export interface PlayerCat {
 }
 
 export const PLAYER_CATS: PlayerCat[] = [
-  { key: "td", label: "Touchdowns", cols: ["Player", "Team", "Book line", "Our proj", "Career % over", "Prior szn % over"],
-    blurb: "Quarterback passing touchdowns — projected pass volume × a regressed league TD-per-attempt rate. Scoring rate barely persists, so this lands near the market by design.",
-    note: "Passing-TD projections are projected attempts times the LEAGUE starter TD-per-attempt rate — we don't credit a QB's own scoring rate, because it doesn't persist year to year, so these sit near the book line (scoring isn't where a projection edge lives). Anytime-TD for ball-carriers arrives as red-zone usage is captured." },
+  { key: "td", label: "Touchdowns", cols: ["Player", "Team", "Anytime TD %"],
+    blurb: "Anytime-touchdown probability from projected goal-line and red-zone touches — volume first, never a raw efficiency guess.",
+    note: "Anytime-touchdown odds ride on projected goal-line and red-zone touches from the snap-share model — we model who gets the ball near the end zone, not a raw scoring-rate guess. This is a Yes/No prop (not an over/under), so it publishes here as red-zone usage is captured." },
   { key: "passing", label: "Passing", cols: ["Player", "Team", "Pass Yds", "Pass TDs", "Att"],
-    blurb: "Projected passing volume (attempts, completions) multiplied by a regressed yards-per-attempt baseline.",
-    note: "Passing yards come from projected attempts and completions times a regressed yards-per-attempt baseline — volume is the stable part, efficiency is pulled toward the mean." },
+    blurb: "Projected passing volume (attempts, completions) multiplied by a regressed yards-per-attempt baseline; passing TDs from volume × a regressed league TD rate.",
+    note: "Passing yards come from projected attempts × a regressed yards-per-attempt baseline — volume is the stable part, efficiency is pulled toward the mean. Passing TDs are projected attempts × the LEAGUE starter TD-per-attempt rate (a QB's own scoring rate doesn't persist, so these sit near the book line — scoring isn't where a projection edge lives)." },
   { key: "rushing", label: "Rushing", cols: ["Player", "Team", "Carries", "Rush Yds"],
     blurb: "Projected carries from the snap-share model × a regressed yards-per-carry baseline — carries persist (r ≈ 0.68), efficiency doesn't.",
     note: "Rushing yards are our strongest prop — projected carries (+4.7% over baseline) times a regressed yards-per-carry, landing rushing yards +4.3% over a persistence baseline, because carries persist and yards-per-carry mostly doesn't." },
@@ -70,7 +70,16 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
     if (!byGame[r.game]) { byGame[r.game] = []; games.push(r.game); }
     byGame[r.game].push(r);
   }
-  const unit = active.key === "receptions" ? "" : active.key === "td" ? " TD" : " yds";
+  // Per-row unit — the passing category mixes markets (yards + TDs).
+  const unitFor = (market: string) => market === "receptions" ? "" : market === "pass_tds" ? " TD" : " yds";
+  // Passing splits into a Yards table and a Passing-TDs table (all QBs, still per game).
+  const sectionsFor = (g: string): { label: string | null; rows: PlayerProj[] }[] =>
+    active.key === "passing"
+      ? [
+          { label: "Passing Yards", rows: byGame[g].filter((r) => r.market === "pass_yds") },
+          { label: "Passing TDs", rows: byGame[g].filter((r) => r.market === "pass_tds") },
+        ].filter((s) => s.rows.length > 0)
+      : [{ label: null, rows: byGame[g] }];
 
   return (
     <main className="wrap">
@@ -125,54 +134,57 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
               <div className="pmgame" key={g}>
                 <div className="pmgame__h">{g}</div>
                 <ScrollHint />
-                <div className="pmscroll">
-                  <div className={`pmtable pmtable--data${active.key === "passing" ? " pmtable--ha" : ""}`} role="table" aria-label={`${g} ${active.label} projections`}>
-                    <div className="pmrow pmrow--head pmrow--data" role="row">
-                      <span className="pmcell pmcell--player">Player</span>
-                      <span className="pmcell">Team</span>
-                      <span className="pmcell pmcell--num">Book line</span>
-                      <span className="pmcell pmcell--num">Our proj</span>
-                      <span className="pmcell pmcell--career">Career % over</span>
-                      <span className="pmcell pmcell--career">Prior szn % over</span>
-                      {active.key === "passing" && <>
-                        <span className="pmcell pmcell--career">Home % over</span>
-                        <span className="pmcell pmcell--career">Road % over</span>
-                      </>}
+                {sectionsFor(g).map((sec) => (
+                  <div className="pmscroll" key={sec.label ?? "all"}>
+                    {sec.label && <div className="pmsec__h">{sec.label}</div>}
+                    <div className={`pmtable pmtable--data${active.key === "passing" ? " pmtable--ha" : ""}`} role="table" aria-label={`${g} ${sec.label ?? active.label} projections`}>
+                      <div className="pmrow pmrow--head pmrow--data" role="row">
+                        <span className="pmcell pmcell--player">Player</span>
+                        <span className="pmcell">Team</span>
+                        <span className="pmcell pmcell--num">Book line</span>
+                        <span className="pmcell pmcell--num">Our proj</span>
+                        <span className="pmcell pmcell--career">Career % over</span>
+                        <span className="pmcell pmcell--career">Prior szn % over</span>
+                        {active.key === "passing" && <>
+                          <span className="pmcell pmcell--career">Home % over</span>
+                          <span className="pmcell pmcell--career">Road % over</span>
+                        </>}
+                      </div>
+                      {sec.rows.map((r) => {
+                        const cpct = r.cG ? Math.round((100 * r.cOver) / r.cG) : null;
+                        const ppct = r.pG ? Math.round((100 * r.pOver) / r.pG) : null;
+                        const hpct = r.hG ? Math.round((100 * r.hOver) / r.hG) : null;
+                        const rpct = r.rG ? Math.round((100 * r.rOver) / r.rG) : null;
+                        const cls = (v: number | null) => v === null ? "" : v >= 50 ? "pmread--over" : "pmread--under";
+                        return (
+                          <div className="pmrow pmrow--data" role="row" key={`${r.player}-${r.market}`}>
+                            <span className="pmcell pmcell--player">{r.player}</span>
+                            <span className="pmcell pmcell--team">{r.team}</span>
+                            <span className="pmcell pmcell--num">{r.book}{unitFor(r.market)}</span>
+                            <span className="pmcell pmcell--num pmcell--proj">
+                              {r.proj}{unitFor(r.market)}{" "}
+                              <span className={`pmarrow ${r.proj >= r.book ? "pmarrow--up" : "pmarrow--down"}`} aria-hidden="true">{r.proj >= r.book ? "▲" : "▼"}</span>
+                            </span>
+                            <span className={`pmcell pmcell--career ${cls(cpct)}`}>
+                              {cpct === null ? "—" : <>{cpct}% <small className="pmcell__sub">{r.cOver}/{r.cG} gm</small></>}
+                            </span>
+                            <span className={`pmcell pmcell--career ${cls(ppct)}`}>
+                              {ppct === null ? <span className="pmcell__sub">no {PROJ_PRIOR}</span> : <>{ppct}% <small className="pmcell__sub">{r.pOver}/{r.pG} gm</small></>}
+                            </span>
+                            {active.key === "passing" && <>
+                              <span className={`pmcell pmcell--career ${cls(hpct)}`}>
+                                {hpct === null ? "—" : <>{hpct}% <small className="pmcell__sub">{r.hOver}/{r.hG} gm</small></>}
+                              </span>
+                              <span className={`pmcell pmcell--career ${cls(rpct)}`}>
+                                {rpct === null ? "—" : <>{rpct}% <small className="pmcell__sub">{r.rOver}/{r.rG} gm</small></>}
+                              </span>
+                            </>}
+                          </div>
+                        );
+                      })}
                     </div>
-                    {byGame[g].map((r) => {
-                      const cpct = r.cG ? Math.round((100 * r.cOver) / r.cG) : null;
-                      const ppct = r.pG ? Math.round((100 * r.pOver) / r.pG) : null;
-                      const hpct = r.hG ? Math.round((100 * r.hOver) / r.hG) : null;
-                      const rpct = r.rG ? Math.round((100 * r.rOver) / r.rG) : null;
-                      const cls = (v: number | null) => v === null ? "" : v >= 50 ? "pmread--over" : "pmread--under";
-                      return (
-                        <div className="pmrow pmrow--data" role="row" key={`${r.player}-${r.market}`}>
-                          <span className="pmcell pmcell--player">{r.player}</span>
-                          <span className="pmcell pmcell--team">{r.team}</span>
-                          <span className="pmcell pmcell--num">{r.book}{unit}</span>
-                          <span className="pmcell pmcell--num pmcell--proj">
-                            {r.proj}{unit}{" "}
-                            <span className={`pmarrow ${r.proj >= r.book ? "pmarrow--up" : "pmarrow--down"}`} aria-hidden="true">{r.proj >= r.book ? "▲" : "▼"}</span>
-                          </span>
-                          <span className={`pmcell pmcell--career ${cls(cpct)}`}>
-                            {cpct === null ? "—" : <>{cpct}% <small className="pmcell__sub">{r.cOver}/{r.cG} gm</small></>}
-                          </span>
-                          <span className={`pmcell pmcell--career ${cls(ppct)}`}>
-                            {ppct === null ? <span className="pmcell__sub">no {PROJ_PRIOR}</span> : <>{ppct}% <small className="pmcell__sub">{r.pOver}/{r.pG} gm</small></>}
-                          </span>
-                          {active.key === "passing" && <>
-                            <span className={`pmcell pmcell--career ${cls(hpct)}`}>
-                              {hpct === null ? "—" : <>{hpct}% <small className="pmcell__sub">{r.hOver}/{r.hG} gm</small></>}
-                            </span>
-                            <span className={`pmcell pmcell--career ${cls(rpct)}`}>
-                              {rpct === null ? "—" : <>{rpct}% <small className="pmcell__sub">{r.rOver}/{r.rG} gm</small></>}
-                            </span>
-                          </>}
-                        </div>
-                      );
-                    })}
                   </div>
-                </div>
+                ))}
               </div>
             ))}
           </>

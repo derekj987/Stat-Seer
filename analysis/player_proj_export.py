@@ -129,7 +129,7 @@ MARKET_MAP = {
     "player_reception_yds": ("receiving", "rec_yds"),
     "player_receptions": ("receptions", "receptions"),
     "player_pass_yds": ("passing", "pass_yds"),
-    "player_pass_tds": ("td", "pass_tds"),
+    "player_pass_tds": ("passing", "pass_tds"),
 }
 
 
