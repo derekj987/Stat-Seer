@@ -16,9 +16,9 @@ export interface PlayerCat {
 }
 
 export const PLAYER_CATS: PlayerCat[] = [
-  { key: "td", label: "Touchdowns", cols: ["Player", "Team", "Anytime TD %"],
-    blurb: "Anytime-touchdown probability from projected goal-line and red-zone touches — volume first, never a raw efficiency guess.",
-    note: "Anytime-touchdown odds ride on projected goal-line and red-zone touches from the snap-share model — we model who gets the ball near the end zone, not a raw scoring-rate guess. This is a Yes/No prop (not an over/under), so it publishes here as red-zone usage is captured." },
+  { key: "td", label: "Touchdowns", cols: ["Player", "Team", "Book %", "Our %", "Career TD rate", "Prior TD rate"],
+    blurb: "Anytime-touchdown probability — projected carries and receptions × the league TD-per-touch rate, as P(≥1 TD). A Yes/No prop, so we show our % beside the book's implied %.",
+    note: "Anytime-TD probability = projected carries × league rush-TD-per-carry + projected receptions × league rec-TD-per-reception, turned into P(scores ≥1) with a Poisson. We use LEAGUE TD-per-touch rates because scoring barely persists — the signal is who gets the VOLUME, not a goal-line-role guess we can't yet see. The Book % is the Yes-odds implied probability WITH the house margin (we only capture the Yes side, so it isn't de-vigged) — our estimate sitting a little lower is mostly that margin. Context, not a claimed edge." },
   { key: "passing", label: "Passing", cols: ["Player", "Team", "Pass Yds", "Pass TDs", "Att"],
     blurb: "Projected passing volume (attempts, completions) multiplied by a regressed yards-per-attempt baseline; passing TDs from volume × a regressed league TD rate.",
     note: "Passing yards come from projected attempts × a regressed yards-per-attempt baseline — volume is the stable part, efficiency is pulled toward the mean. Passing TDs are projected attempts × the LEAGUE starter TD-per-attempt rate (a QB's own scoring rate doesn't persist, so these sit near the book line — scoring isn't where a projection edge lives)." },
@@ -70,8 +70,11 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
     if (!byGame[r.game]) { byGame[r.game] = []; games.push(r.game); }
     byGame[r.game].push(r);
   }
-  // Per-row unit — the passing category mixes markets (yards + TDs).
-  const unitFor = (market: string) => market === "receptions" ? "" : market === "pass_tds" ? " TD" : " yds";
+  // Per-row unit — the passing category mixes markets (yards + TDs); anytime-TD is a %.
+  const unitFor = (market: string) =>
+    market === "receptions" ? "" : market === "pass_tds" ? " TD" : market === "anytime_td" ? "%" : " yds";
+  // The Touchdowns tab is a Yes/No prop: relabel the numeric + hit-rate headers.
+  const isTd = active.key === "td";
   // Passing splits into a Yards table and a Passing-TDs table (all QBs, still per game).
   const sectionsFor = (g: string): { label: string | null; rows: PlayerProj[] }[] =>
     active.key === "passing"
@@ -130,6 +133,7 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
           </div>
         ) : (
           <>
+            <p className="pmcat__note" role="note">{active.note}</p>
             {games.map((g) => (
               <div className="pmgame" key={g}>
                 <div className="pmgame__h">{g}</div>
@@ -141,10 +145,10 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
                       <div className="pmrow pmrow--head pmrow--data" role="row">
                         <span className="pmcell pmcell--player">Player</span>
                         <span className="pmcell">Team</span>
-                        <span className="pmcell pmcell--num">Book line</span>
-                        <span className="pmcell pmcell--num">Our proj</span>
-                        <span className="pmcell pmcell--career">Career % over</span>
-                        <span className="pmcell pmcell--career">Prior szn % over</span>
+                        <span className="pmcell pmcell--num">{isTd ? "Book %" : "Book line"}</span>
+                        <span className="pmcell pmcell--num">{isTd ? "Our %" : "Our proj"}</span>
+                        <span className="pmcell pmcell--career">{isTd ? "Career TD rate" : "Career % over"}</span>
+                        <span className="pmcell pmcell--career">{isTd ? "Prior TD rate" : "Prior szn % over"}</span>
                         {active.key === "passing" && <>
                           <span className="pmcell pmcell--career">Home % over</span>
                           <span className="pmcell pmcell--career">Road % over</span>

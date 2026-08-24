@@ -15,6 +15,7 @@ projects the markets books have up, and writes web/lib/player-projections.json.
 import argparse
 import io
 import json
+import math
 import os
 import sys
 import time
@@ -130,7 +131,19 @@ MARKET_MAP = {
     "player_receptions": ("receptions", "receptions"),
     "player_pass_yds": ("passing", "pass_yds"),
     "player_pass_tds": ("passing", "pass_tds"),
+    "player_anytime_td": ("td", "anytime_td"),
 }
+
+
+def implied_prob(american):
+    """American odds -> implied probability (as a percent). Includes the book's margin —
+    we only capture the Yes side, so this isn't de-vigged; it's the book's Yes price."""
+    try:
+        a = float(american)
+    except (TypeError, ValueError):
+        return None
+    p = 100.0 / (a + 100.0) if a > 0 else (-a) / (-a + 100.0)
+    return round(100.0 * p, 1)
 
 
 def build_baselines(prior_seasons):
@@ -141,7 +154,7 @@ def build_baselines(prior_seasons):
         frames.append(s[s.season_type == "REG"])
     d = pd.concat(frames, ignore_index=True)
     for c in ["carries", "rushing_yards", "targets", "receptions", "receiving_yards",
-              "attempts", "passing_yards", "passing_tds"]:
+              "attempts", "passing_yards", "passing_tds", "rushing_tds", "receiving_tds"]:
         d[c] = pd.to_numeric(d.get(c), errors="coerce").fillna(0.0)
     base = {}
     for pos in ["RB", "FB", "WR", "TE", "QB"]:
@@ -152,9 +165,11 @@ def build_baselines(prior_seasons):
             "catch": p.receptions.sum() / max(p.targets.sum(), 1),
             "ypr": p.receiving_yards.sum() / max(p.receptions.sum(), 1),
             "ypa": pa.passing_yards.sum() / max(pa.attempts.sum(), 1),
-            # league passing-TD-per-attempt. TD rate barely persists year to year, so we use
-            # the league starter rate (volume x league efficiency), not the QB's own rate.
-            "tdr": pa.passing_tds.sum() / max(pa.attempts.sum(), 1),
+            # league TD-per-touch rates by position. TD rate barely persists year to year, so
+            # we use the league rate (volume x league efficiency), not the player's own rate.
+            "tdr": pa.passing_tds.sum() / max(pa.attempts.sum(), 1),        # pass TD / attempt
+            "rush_tdr": p.rushing_tds.sum() / max(p.carries.sum(), 1),      # rush TD / carry
+            "rec_tdr": p.receiving_tds.sum() / max(p.receptions.sum(), 1),  # rec TD / reception
         }
     return base
 
@@ -190,13 +205,15 @@ def load_career(seasons, home_set=frozenset(), away_set=frozenset()):
     """Every game log we have (REG + POST) per player, for the hit-rate columns. Each row is
     tagged venue "H"/"A"/"?" via the schedule so the hit-rate can be split home vs road."""
     keep = ["player_id", "season", "week", "team", "recent_team", "season_type", "attempts",
-            "passing_yards", "rushing_yards", "receiving_yards", "receptions", "passing_tds"]
+            "passing_yards", "rushing_yards", "receiving_yards", "receptions", "passing_tds",
+            "rushing_tds", "receiving_tds"]
     frames = []
     for y in seasons:
         s = pd.read_csv(f"data/stats_{y}.csv", low_memory=False)
         frames.append(s[[c for c in keep if c in s.columns]].copy())
     d = pd.concat(frames, ignore_index=True)
-    for c in ["attempts", "passing_yards", "rushing_yards", "receiving_yards", "receptions", "passing_tds"]:
+    for c in ["attempts", "passing_yards", "rushing_yards", "receiving_yards", "receptions",
+              "passing_tds", "rushing_tds", "receiving_tds"]:
         d[c] = pd.to_numeric(d.get(c), errors="coerce").fillna(0.0)
     # unify the team column (older releases used recent_team)
     if "team" not in d.columns:
@@ -213,7 +230,13 @@ def load_career(seasons, home_set=frozenset(), away_set=frozenset()):
 
 
 def _over(g, market, line):
-    if g is None or line is None:
+    if g is None:
+        return (0, 0)
+    if market == "anytime_td":
+        # hit = the player scored (rush or rec TD) that game; the "line" (book prob) is N/A.
+        scored = (g["rushing_tds"] + g["receiving_tds"]) >= 1
+        return int(scored.sum()), int(len(g))
+    if line is None:
         return (0, 0)
     if market in ("pass_yds", "pass_tds"):
         g = g[g.attempts >= 1]      # only games he actually threw
@@ -253,6 +276,12 @@ def project(rate, base):
     # league YPA underrated every starting QB (they're an above-average sample) -> all "unders".
     pa = rate.get("pass_att", 0.0)
     reg_ypa = (rate.get("pass_ypa", b["ypa"]) * pa + b["ypa"] * PASS_K) / (pa + PASS_K)
+    # Anytime TD: expected TDs this game = projected carries x league rush-TD/carry +
+    # projected receptions x league rec-TD/reception, then P(>=1 TD) = 1 - e^-lambda
+    # (Poisson). League TD-per-touch rates (scoring doesn't persist), so the signal is who
+    # gets the VOLUME near league scoring rates — not a goal-line-role guess we can't see.
+    rec_pg = rate["targets_pg"] * b["catch"]
+    lam = rate["carries_pg"] * b.get("rush_tdr", 0.0) + rec_pg * b.get("rec_tdr", 0.0)
     return {
         "rush_yds": round(rate["carries_pg"] * b["ypc"], 1),
         "rec_yds": round(rate["targets_pg"] * b["catch"] * b["ypr"], 1),
@@ -262,6 +291,8 @@ def project(rate, base):
         # YPA, a QB's TD rate doesn't persist, so we don't credit his own rate — this lands
         # near the book line by design (scoring is not where a projection edge lives).
         "pass_tds": round(rate["att_pg"] * b.get("tdr", 0.0), 2),
+        # anytime-TD probability, as a percent
+        "anytime_td": round(100.0 * (1.0 - math.exp(-lam)), 1),
     }
 
 
@@ -300,12 +331,20 @@ def main():
     # median book line per (player, market) across books, for the yardage/reception markets
     ALIAS = {"LAR": "LA", "LAC": "LAC", "WSH": "WAS", "OAK": "LV", "SD": "LAC"}
     def team_norm(t): return ALIAS.get(t, t)
-    lines = defaultdict(list)   # (player, market) -> [line]
+    lines = defaultdict(list)   # (player, market) -> [line]  (implied % for anytime_td)
     meta = {}                   # player -> (game, commence, {teams})
     for r in props:
-        if r["market"] not in MARKET_MAP or r["line"] is None:
+        if r["market"] not in MARKET_MAP:
             continue
-        lines[(r["player_name"], r["market"])].append(float(r["line"]))
+        if r["market"] == "player_anytime_td":
+            ip = implied_prob(r["price_american"])   # Yes-side odds -> implied % (the "book")
+            if ip is None:
+                continue
+            lines[(r["player_name"], r["market"])].append(ip)
+        elif r["line"] is not None:
+            lines[(r["player_name"], r["market"])].append(float(r["line"]))
+        else:
+            continue
         teams = {team_norm(r["away_team"]), team_norm(r["home_team"])}
         meta[r["player_name"]] = (f'{r["away_team"]} @ {r["home_team"]}', r["commence_time"], teams)
 
