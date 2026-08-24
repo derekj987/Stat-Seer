@@ -57,6 +57,11 @@ def main():
         # injuries: gz exists for recent seasons only, plain csv for older
         jobs.append((f"inj_{y}.csv.gz", f"{BASE}/injuries/injuries_{y}.csv.gz"))
 
+    # play-by-play (compressed) — recent seasons only, for coach tendencies
+    # (4th-down aggressiveness, pass-rate-over-expected). ~19 MB/season.
+    for y in range(2021, 2025):
+        jobs.append((f"pbp_{y}.csv.gz", f"{BASE}/pbp/play_by_play_{y}.csv.gz"))
+
     failed = []
     for name, url in jobs:
         dest = os.path.join(DATA, name)

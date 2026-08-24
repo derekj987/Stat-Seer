@@ -5,6 +5,7 @@ import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
 import { GAME_WEATHER, WEATHER_WEEK, WEATHER_UPDATED, type GameWeather } from "@/lib/weatherData";
 import { INCENTIVE_WATCH } from "@/lib/incentiveWatch";
 import { TEAM_RATINGS } from "@/lib/teamRatings";
+import { COACH_TENDENCIES } from "@/lib/coachTendencies";
 import { Brand, FlowSteps, ContextSubnav } from "../Nav";
 import Tip from "@/app/Tip";
 
@@ -12,6 +13,20 @@ const ord = (n: number) => {
   const s = ["th", "st", "nd", "rd"], v = n % 100;
   return `${n}${s[(v - 20) % 10] ?? s[v] ?? s[0]}`;
 };
+
+/** One coach's tendency line: aggressiveness + pass lean (CONTEXT, not a pick). */
+function coachLine(team: string) {
+  const c = COACH_TENDENCIES[team];
+  if (!c) return null;
+  return (
+    <span className="cxcoach__t" key={team}>
+      {team} <b className="cxcoach__nm">{c.coach}</b>
+      {c.rated
+        ? <> — <b className="cxcoach__agg">{c.aggLabel}</b> on 4th{c.proeLabel ? <> · {c.proeLabel}</> : null}</>
+        : <span className="muted"> — first year, no book yet</span>}
+    </span>
+  );
+}
 
 // ---- per-game card fields (CONTEXT, never a pick) ----
 const wxSite = (w: GameWeather) => `${w.venue}${w.city ? ` · ${w.city}, ${w.state}` : ""}`;
@@ -157,6 +172,12 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
             <div className="cxrow">
               <dt className="cxrow__k">Ratings</dt>
               <dd className="cxrow__v"><span className="muted">Off/def ratings arrive with the season</span></dd>
+            </div>
+          )}
+          {(COACH_TENDENCIES[g.away] || COACH_TENDENCIES[g.home]) && (
+            <div className="cxrow cxrow--coach">
+              <dt className="cxrow__k">Coaching</dt>
+              <dd className="cxrow__v cxcoach">{coachLine(g.away)}{coachLine(g.home)}</dd>
             </div>
           )}
           {wx && (

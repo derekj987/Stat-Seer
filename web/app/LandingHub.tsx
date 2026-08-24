@@ -9,6 +9,7 @@ import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
 import { PLAYER_PROJECTIONS, PROJ_PRIOR, type PlayerProj } from "@/lib/playerProjections";
 import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
 import { INCENTIVE_WATCH } from "@/lib/incentiveWatch";
+import { COACH_TENDENCIES } from "@/lib/coachTendencies";
 import { isRealistic } from "@/lib/depthChart";
 import Tip from "./Tip";
 import { ScrollHint, MoreTable } from "./Nav";
@@ -46,6 +47,20 @@ function refFlag(pen: number): { label: string; tone: "hot" | "cool" } | null {
   return null;
 }
 
+/** One coach's tendency line (CONTEXT, not a pick). */
+function cxCoach(team: string) {
+  const c = COACH_TENDENCIES[team];
+  if (!c) return null;
+  return (
+    <span className="cxcoach__t" key={team}>
+      {team} <b className="cxcoach__nm">{c.coach}</b>
+      {c.rated
+        ? <> — <b className="cxcoach__agg">{c.aggLabel}</b> on 4th{c.proeLabel ? <> · {c.proeLabel}</> : null}</>
+        : <span className="muted"> — first year</span>}
+    </span>
+  );
+}
+
 /** One per-game consideration card (site + weather). */
 function cxCardEl(w: GameWeather) {
   const incs = INCENTIVE_WATCH.filter((it) => it.team === w.home || it.team === w.away);
@@ -60,6 +75,9 @@ function cxCardEl(w: GameWeather) {
         <div className="cxrow"><dt className="cxrow__k">Site</dt><dd className="cxrow__v">{cxSite(w)}<span className="cxroof"> · {cxRoof(w.roof)}</span></dd></div>
         <div className="cxrow"><dt className="cxrow__k">Weather</dt><dd className="cxrow__v">{w.windFlag && <b className="wxflag">⚑&nbsp;WIND</b>} {cxWeather(w)}</dd></div>
         <div className="cxrow"><dt className="cxrow__k">Referee</dt><dd className="cxrow__v"><span className="muted">Crew tagged game week</span></dd></div>
+        {(COACH_TENDENCIES[w.away] || COACH_TENDENCIES[w.home]) && (
+          <div className="cxrow cxrow--coach"><dt className="cxrow__k">Coaching</dt><dd className="cxrow__v cxcoach">{cxCoach(w.away)}{cxCoach(w.home)}</dd></div>
+        )}
         <div className="cxrow"><dt className="cxrow__k">Incentives</dt><dd className="cxrow__v">{incs.length ? <>{incs.length} player{incs.length === 1 ? "" : "s"} near an incentive</> : <span className="muted">Player incentives coming soon</span>}</dd></div>
       </dl>
     </article>

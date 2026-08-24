@@ -398,6 +398,11 @@ a.sportstrip__i:hover{color:var(--ink)}
 .cxinc{display:block;line-height:1.5}
 .cxinc + .cxinc{margin-top:3px}
 .cxinc__prog{color:var(--muted);font-size:11.5px}
+/* Coaching tendencies (Special Considerations) — one line per coach */
+.cxcoach{display:flex;flex-direction:column;gap:3px}
+.cxcoach__t{font-size:12px;line-height:1.4;color:var(--muted)}
+.cxcoach__nm{color:var(--ink);font-weight:700}
+.cxcoach__agg{color:var(--accent);font-weight:800}
 .cxrank{color:var(--muted);font-size:11.5px;font-variant-numeric:tabular-nums}
 .cxroof{color:var(--muted)}
 .cxref__h{font-size:14px;font-weight:800;margin:16px 0 6px;color:var(--ink)}
