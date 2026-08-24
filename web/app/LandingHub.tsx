@@ -10,6 +10,7 @@ import { PLAYER_PROJECTIONS, PROJ_PRIOR, type PlayerProj } from "@/lib/playerPro
 import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
 import { INCENTIVE_WATCH } from "@/lib/incentiveWatch";
 import { COACH_TENDENCIES } from "@/lib/coachTendencies";
+import { CONTENTION } from "@/lib/contention";
 import { isRealistic } from "@/lib/depthChart";
 import Tip from "./Tip";
 import { ScrollHint, MoreTable } from "./Nav";
@@ -61,6 +62,18 @@ function cxCoach(team: string) {
   );
 }
 
+/** One team's playoff-picture line (CONTEXT; flags reduced-stakes games). */
+function cxStake(team: string) {
+  const c = CONTENTION[team];
+  if (!c) return null;
+  const caution = c.status === "Clinched" || c.status === "Eliminated";
+  return (
+    <span className="cxstake__t" key={team}>
+      {team} <span className="cxstake__rec">({c.record})</span> — <b className={caution ? "cxstake__s cxstake__s--caution" : "cxstake__s"}>{c.status}</b>
+    </span>
+  );
+}
+
 /** One per-game consideration card (site + weather). */
 function cxCardEl(w: GameWeather) {
   const incs = INCENTIVE_WATCH.filter((it) => it.team === w.home || it.team === w.away);
@@ -77,6 +90,9 @@ function cxCardEl(w: GameWeather) {
         <div className="cxrow"><dt className="cxrow__k">Referee</dt><dd className="cxrow__v"><span className="muted">Crew tagged game week</span></dd></div>
         {(COACH_TENDENCIES[w.away] || COACH_TENDENCIES[w.home]) && (
           <div className="cxrow cxrow--coach"><dt className="cxrow__k">Coaching</dt><dd className="cxrow__v cxcoach">{cxCoach(w.away)}{cxCoach(w.home)}</dd></div>
+        )}
+        {(CONTENTION[w.away] || CONTENTION[w.home]) && (
+          <div className="cxrow cxrow--stake"><dt className="cxrow__k">Stakes</dt><dd className="cxrow__v cxcoach">{cxStake(w.away)}{cxStake(w.home)}</dd></div>
         )}
         <div className="cxrow"><dt className="cxrow__k">Incentives</dt><dd className="cxrow__v">{incs.length ? <>{incs.length} player{incs.length === 1 ? "" : "s"} near an incentive</> : <span className="muted">Player incentives coming soon</span>}</dd></div>
       </dl>

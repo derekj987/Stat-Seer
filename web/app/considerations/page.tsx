@@ -6,6 +6,7 @@ import { GAME_WEATHER, WEATHER_WEEK, WEATHER_UPDATED, type GameWeather } from "@
 import { INCENTIVE_WATCH } from "@/lib/incentiveWatch";
 import { TEAM_RATINGS } from "@/lib/teamRatings";
 import { COACH_TENDENCIES } from "@/lib/coachTendencies";
+import { CONTENTION } from "@/lib/contention";
 import { Brand, FlowSteps, ContextSubnav } from "../Nav";
 import Tip from "@/app/Tip";
 
@@ -24,6 +25,19 @@ function coachLine(team: string) {
       {c.rated
         ? <> — <b className="cxcoach__agg">{c.aggLabel}</b> on 4th{c.proeLabel ? <> · {c.proeLabel}</> : null}</>
         : <span className="muted"> — first year, no book yet</span>}
+    </span>
+  );
+}
+
+/** One team's playoff-picture line. "Clinched"/"Eliminated" flag reduced-stakes games
+ *  (resting starters) — a betting caution, not a pick. */
+function stakesLine(team: string) {
+  const c = CONTENTION[team];
+  if (!c) return null;
+  const caution = c.status === "Clinched" || c.status === "Eliminated";
+  return (
+    <span className="cxstake__t" key={team}>
+      {team} <span className="cxstake__rec">({c.record})</span> — <b className={caution ? "cxstake__s cxstake__s--caution" : "cxstake__s"}>{c.status}</b>: {c.note}
     </span>
   );
 }
@@ -180,6 +194,12 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
               <dd className="cxrow__v cxcoach">{coachLine(g.away)}{coachLine(g.home)}</dd>
             </div>
           )}
+          {(CONTENTION[g.away] || CONTENTION[g.home]) && (
+            <div className="cxrow cxrow--stake">
+              <dt className="cxrow__k">Stakes</dt>
+              <dd className="cxrow__v cxcoach">{stakesLine(g.away)}{stakesLine(g.home)}</dd>
+            </div>
+          )}
           {wx && (
             <div className={`cxrow${wx.windFlag ? " cxrow--wind" : ""}`}>
               <dt className="cxrow__k">Weather</dt>
@@ -215,10 +235,11 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={`The Context · Special Considerations · Week ${week}, ${SEASON}`} />
+        <Brand
+          sub={<><span className="brand__sport">NFL</span> · Special Considerations</>}
+          art={{ src: "/coach.png?v=1", alt: "Coach" }}
+        />
       </header>
-
-      <FlowSteps active="context" />
 
       <section className="explainer explainer--wide">
         <p>
@@ -227,6 +248,8 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
           they are <b>not</b> an adjusted line. (How we read each factor is in the reference below.)
         </p>
       </section>
+
+      <FlowSteps active="context" />
 
       <ContextSubnav active="special" />
       <WeekNav min={min} max={max} current={week} />
