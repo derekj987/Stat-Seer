@@ -68,17 +68,15 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
     <main className="wrap">
       <header className="masthead">
         <Brand
-          sub={isPre
-            ? `Value Finder · Player Props · Preseason`
-            : `Value Finder · Player Props · ${cat.label}`}
+          sub={<><span className="brand__sport">NFL</span> · Player Props</>}
           tip={<Tip text={<>Every player prop with the <b>best available price across ~10 sportsbooks</b> (tap any to add it to your slip), and the edge you gain by shopping it there. Prices only — for our own line-blind projections on props, see the <b>Player Model</b>.</>} />}
         />
         {!isPre && snap && <div className="asof">props as of<br /><b>{et(snap)}</b></div>}
       </header>
 
       <FlowSteps active="value" />
-      <ValueFinderNote />
       <ShopSubnav active="props" />
+      <ValueFinderNote />
 
       {isPre ? (
         <div className="tgwall" role="note">

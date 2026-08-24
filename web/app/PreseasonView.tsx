@@ -165,7 +165,7 @@ export default function PreseasonView({
     <main className="wrap">
       <header className="masthead">
         <Brand
-          sub={`Value Finder · Preseason · exhibition lines · ${season}`}
+          sub={<><span className="brand__sport">NFL</span> · Preseason</>}
           tip={<Tip text={<>Exhibition (preseason) game lines shown at the <b>best price across sportsbooks</b>. Preseason results are noisy and starters barely play — treat this as <b>line-shopping only</b>, not a signal about the season.</>} />}
         />
         {snapshot && <div className="asof">lines as of<br /><b>{et(snapshot, snapFmt)}</b></div>}

@@ -4,7 +4,6 @@
 // weekly projection OUTPUT wires in here as the season's usage data flows, so each
 // category currently scaffolds an honest "arriving" state rather than inventing numbers.
 import { Brand, FlowSteps, ModelSubnav, ScrollHint } from "./Nav";
-import Tip from "./Tip";
 import { PLAYER_PROJECTIONS, PROJ_WEEK, PROJ_PRIOR, type PlayerProj } from "@/lib/playerProjections";
 import { isRealistic } from "@/lib/depthChart";
 
@@ -57,7 +56,6 @@ function WeekNav({ base, cat, current }: { base: "nfl" | "ncaaf"; cat: string; c
 export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "ncaaf"; cat: string; week: number }) {
   const active = playerCatByKey(cat);
   const home = base === "ncaaf" ? "/ncaaf/model/players" : "/model/players";
-  const sportLabel = base === "ncaaf" ? "College Football" : "NFL";
   const catHref = (c: string) => `${home}?cat=${c}&week=${week}`;
 
   // Real projections exist for NFL only, for the current projection week. Group the active
@@ -78,8 +76,8 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
     <main className="wrap">
       <header className="masthead">
         <Brand
-          sub={`The Model · Player Prop Model · ${sportLabel}`}
-          tip={<Tip text={<>Each player&apos;s sportsbook <b>Book line</b> vs <b>Our proj</b>, our line-blind projection (▲ = we lean over, ▼ = under). <b>Career&nbsp;% over</b> = how often they&apos;ve cleared a similar line across their career; <b>Prior szn&nbsp;% over</b> = last season only. <b>Home&nbsp;% over</b> / <b>Road&nbsp;% over</b> split that rate by venue where shown. Higher means they go over more often. We project volume first, then a regressed efficiency baseline.</>} />}
+          sub={<><span className="brand__sport">{base === "ncaaf" ? "NCAAF" : "NFL"}</span> · Player Prop Model</>}
+          art={{ src: "/player.png?v=1", alt: "Player Prop Model" }}
         />
       </header>
 

@@ -27,17 +27,10 @@ export default function Page() {
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand
-          sub={`Value Finder · College Football · Line Shopping`}
-          tip={<Tip text={<>Every game with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Model Suggests</b> — the side our line-blind rating covers. A ◆ marks an <b>off-consensus</b> game. Our CFB rating ties Elo but doesn&apos;t beat the spread, so treat this as informative context, not a guaranteed bet.</>} />}
-        />
+        <Brand sub={<><span className="brand__sport">NCAAF</span> · Line Shopping</>} />
       </header>
 
-      <FlowSteps active="value" base="ncaaf" />
-      <ShopSubnav active="lines" base="ncaaf" />
-      <ValueFinderNote />
-
-      <section className="explainer">
+      <section className="explainer explainer--wide">
         <p>
           <b>The board.</b> Every game with the market&apos;s <b>spread</b> and <b>total</b>, beside our
           line-blind read of which side it covers. The market number is a consensus snapshot; the per-book
@@ -45,9 +38,15 @@ export default function Page() {
         </p>
       </section>
 
+      <FlowSteps active="value" base="ncaaf" />
+      <ShopSubnav active="lines" base="ncaaf" />
+      <ValueFinderNote />
+
       <section className="ncf-sec">
         <h2 className="ncf-h">Game lines — Week {c.week}
-          <span className="ncf-h__note">{games.length} games with a market line</span></h2>
+          <span className="ncf-h__note">{games.length} games with a market line</span>
+          <Tip text={<>Every game with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Model Suggests</b> — the side our line-blind rating covers. A ◆ marks an <b>off-consensus</b> game. Our CFB rating ties Elo but doesn&apos;t beat the spread, so treat this as informative context, not a guaranteed bet.</>} />
+        </h2>
         <div className="hb-legend">
           <span className="hb-dia">◆</span> Off-consensus — our read is on the other side from the market.
           <span className="hb-x"> · <b>Our Model Suggests</b> is the side our line-blind rating covers — informative,

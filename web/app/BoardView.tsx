@@ -177,15 +177,15 @@ export default function BoardView({
       <main className="wrap">
         <header className="masthead">
           <Brand
-            sub={`Value Finder · Line Shopping`}
+            sub={<><span className="brand__sport">NFL</span> · Line Shopping</>}
             tip={<Tip text={<>For every game, each <b>moneyline, spread, and total</b> is shown at the <b>single best price across ~10 sportsbooks</b> (tap any to add it to your slip). <b>shop +x%</b> is the edge you pick up by taking that best number instead of the consensus. A ◆ marks an <b>off-consensus</b> game. No model, no pick here — just the best available number.</>} />}
           />
           {snapshot && <div className="asof">lines as of<br /><b>{et(snapshot, snapFmt)}</b></div>}
         </header>
 
         <FlowSteps active="value" />
-        <ValueFinderNote />
         <ShopSubnav active="lines" />
+        <ValueFinderNote />
 
         <WeekNav min={min} max={max} current={week} />
 
