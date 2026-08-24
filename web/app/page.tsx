@@ -6,7 +6,7 @@ import { fetchHome, type CardRow, type UpsetRow, type PlayerPick } from "@/lib/h
 import { NCAAF_MODEL, type NcaafCardGame, type NcaafUpset } from "./ncaaf/model-data";
 import LandingHub from "./LandingHub";
 import HomePromo from "./HomePromo";
-import { BetslipPromo } from "./Nav";
+import { BetslipPromo, ValueFinderDrawer } from "./Nav";
 
 export const metadata = {
   title: "StatSeer — the model vs the market, every sport",
@@ -83,71 +83,8 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
         </aside>
       </div>
 
-      {/* Value Finder PINNED to the RIGHT edge — mirrors the left drawer, slides an example
-          betslip out over the page. Collapsed by default (a slim tab); click to slide out. */}
-      <div className="vf-drawer">
-        <input type="checkbox" id="vf-toggle" className="vf-drawer__chk" aria-hidden="true" tabIndex={-1} />
-        <label htmlFor="vf-toggle" className="vf-drawer__tab" title="Value Finder">
-          <span className="vf-drawer__chev" aria-hidden="true">‹</span>
-          <span className="vf-drawer__tabtext">Find the best price</span>
-        </label>
-        <label htmlFor="vf-toggle" className="vf-drawer__scrim" aria-hidden="true" />
-        <aside className="vf-drawer__panel" aria-label="Value Finder">
-          <label htmlFor="vf-toggle" className="vf-drawer__close" title="Close" aria-label="Close">✕</label>
-          <section className="vf-pitch">
-            <h2 className="vf-pitch__h">Find the <b>best price</b>.</h2>
-            <p className="vf-pitch__sub">
-              <b>Value Finder</b> shops every pick across <b>~10 sportsbooks</b> and shows you the single
-              best place to bet each one — plus the <b>one book that pays the most</b> on your whole parlay.
-              Same bets, better price.
-            </p>
-
-            <div className="vf-slip">
-              <div className="vf-slip__tag">Example slip · 5 picks</div>
-              <ul className="vf-slip__legs">
-                <li className="vf-slip__leg">
-                  <span className="vf-slip__bet">NE <b>+3.5</b><small>NE @ SEA</small></span>
-                  <span className="vf-slip__book">FanDuel</span>
-                  <span className="vf-slip__odds">-108</span>
-                </li>
-                <li className="vf-slip__leg">
-                  <span className="vf-slip__bet">Under <b>48.5</b><small>SF @ LA</small></span>
-                  <span className="vf-slip__book">DraftKings</span>
-                  <span className="vf-slip__odds">-105</span>
-                </li>
-                <li className="vf-slip__leg">
-                  <span className="vf-slip__bet">D. Maye <b>o223.5</b><small>Pass Yds</small></span>
-                  <span className="vf-slip__book">FanDuel</span>
-                  <span className="vf-slip__odds">-110</span>
-                </li>
-                <li className="vf-slip__leg">
-                  <span className="vf-slip__bet">C. McCaffrey <b>o59.5</b><small>Rush Yds</small></span>
-                  <span className="vf-slip__book">BetMGM</span>
-                  <span className="vf-slip__odds">-112</span>
-                </li>
-                <li className="vf-slip__leg">
-                  <span className="vf-slip__bet">P. Nacua <b>o5.5</b><small>Rec</small></span>
-                  <span className="vf-slip__book">Caesars</span>
-                  <span className="vf-slip__odds">-120</span>
-                </li>
-              </ul>
-              <div className="vf-slip__best">
-                <div className="vf-slip__besth">Best book for all 5 picks</div>
-                <div className="vf-slip__bestbig">
-                  <b className="vf-slip__bestbook">FanDuel</b>
-                  <span className="vf-slip__bestodds">+2280</span>
-                </div>
-                <p className="vf-slip__bestnote">
-                  The single sportsbook that pays the most on this exact 5-pick parlay — Value Finder
-                  checks all ~10 books for you and gives you the winner.
-                </p>
-              </div>
-            </div>
-
-            <a href="/lines" className="btn btn--primary vf-pitch__cta">Open the Value Finder →</a>
-          </section>
-        </aside>
-      </div>
+      {/* Value Finder slide-out pinned to the right edge (shared with the Value Finder pages). */}
+      <ValueFinderDrawer />
 
       <main className="lp">
       <LandingHub initialSport={initialSport} nfl={nfl} ncaaf={ncaaf} />

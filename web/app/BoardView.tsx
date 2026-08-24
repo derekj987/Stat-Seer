@@ -2,8 +2,7 @@
 
 import { useCallback } from "react";
 import type { Game } from "@/lib/board";
-import { ShopSubnav, Brand, SlipCallout, FlowSteps, ValueFinderNote } from "./Nav";
-import Tip from "@/app/Tip";
+import { ShopSubnav, Brand, ValueFinderDrawer, FlowSteps, ValueFinderNote } from "./Nav";
 import { useSlip } from "@/lib/slip";
 import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
 
@@ -178,14 +177,16 @@ export default function BoardView({
         <header className="masthead">
           <Brand
             sub={<><span className="brand__sport">NFL</span> · Line Shopping</>}
-            tip={<Tip text={<>For every game, each <b>moneyline, spread, and total</b> is shown at the <b>single best price across ~10 sportsbooks</b> (tap any to add it to your slip). <b>shop +x%</b> is the edge you pick up by taking that best number instead of the consensus. A ◆ marks an <b>off-consensus</b> game. No model, no pick here — just the best available number.</>} />}
+            art={{ src: "/bag.png?v=1", alt: "Value Finder" }}
           />
           {snapshot && <div className="asof">lines as of<br /><b>{et(snapshot, snapFmt)}</b></div>}
         </header>
 
+        <ValueFinderDrawer />
+
+        <ValueFinderNote />
         <FlowSteps active="value" />
         <ShopSubnav active="lines" />
-        <ValueFinderNote />
 
         <WeekNav min={min} max={max} current={week} />
 
@@ -207,8 +208,6 @@ export default function BoardView({
                 </section>
               </div>
             </details>
-
-            <SlipCallout kind="lines" />
 
             <section className="grid">
               {board.slice(0, 6).map((g) => <GameCard key={g.eventId} g={g} has={has} onToggle={toggle} />)}

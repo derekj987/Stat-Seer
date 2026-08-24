@@ -1,7 +1,6 @@
 import { weekRange } from "@/lib/board";
 import { weekProps, CATEGORIES, categoryByKey } from "@/lib/props";
 import { ShopSubnav, Brand, FlowSteps, ValueFinderNote } from "../Nav";
-import Tip from "@/app/Tip";
 import PropsView from "./PropsView";
 
 export const revalidate = 120;
@@ -69,14 +68,14 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
       <header className="masthead">
         <Brand
           sub={<><span className="brand__sport">NFL</span> · Player Props</>}
-          tip={<Tip text={<>Every player prop with the <b>best available price across ~10 sportsbooks</b> (tap any to add it to your slip), and the edge you gain by shopping it there. Prices only — for our own line-blind projections on props, see the <b>Player Model</b>.</>} />}
+          art={{ src: "/bag.png?v=1", alt: "Value Finder" }}
         />
         {!isPre && snap && <div className="asof">props as of<br /><b>{et(snap)}</b></div>}
       </header>
 
+      <ValueFinderNote />
       <FlowSteps active="value" />
       <ShopSubnav active="props" />
-      <ValueFinderNote />
 
       {isPre ? (
         <div className="tgwall" role="note">

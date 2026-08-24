@@ -27,7 +27,10 @@ export default function Page() {
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={<><span className="brand__sport">NCAAF</span> · Line Shopping</>} />
+        <Brand
+          sub={<><span className="brand__sport">NCAAF</span> · Line Shopping</>}
+          art={{ src: "/bag.png?v=1", alt: "Value Finder" }}
+        />
       </header>
 
       <section className="explainer explainer--wide">

@@ -88,12 +88,15 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={`Value Finder · Sweet Spots`} />
+        <Brand
+          sub={<><span className="brand__sport">NFL</span> · Sweet Spots</>}
+          art={{ src: "/bag.png?v=1", alt: "Value Finder" }}
+        />
       </header>
 
+      <ValueFinderNote />
       <FlowSteps active="value" />
       <ShopSubnav active="best" />
-      <ValueFinderNote />
       <WeekNav min={min} max={max} current={week} />
 
       <details className="readbox">

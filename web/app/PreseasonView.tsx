@@ -9,7 +9,6 @@ import type { Game } from "@/lib/board";
 import type { PreRating } from "@/lib/preseason";
 import { ShopSubnav, SeasonSubnav, Brand, FlowSteps } from "./Nav";
 import { useSlip } from "@/lib/slip";
-import Tip from "@/app/Tip";
 
 const kickFmt = new Intl.DateTimeFormat("en-US", {
   timeZone: "America/New_York",
@@ -166,7 +165,7 @@ export default function PreseasonView({
       <header className="masthead">
         <Brand
           sub={<><span className="brand__sport">NFL</span> · Preseason</>}
-          tip={<Tip text={<>Exhibition (preseason) game lines shown at the <b>best price across sportsbooks</b>. Preseason results are noisy and starters barely play — treat this as <b>line-shopping only</b>, not a signal about the season.</>} />}
+          art={{ src: "/bag.png?v=1", alt: "Value Finder" }}
         />
         {snapshot && <div className="asof">lines as of<br /><b>{et(snapshot, snapFmt)}</b></div>}
       </header>

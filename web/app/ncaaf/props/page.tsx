@@ -13,12 +13,15 @@ export default function Page() {
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={<><span className="brand__sport">NCAAF</span> · Player Props</>} />
+        <Brand
+          sub={<><span className="brand__sport">NCAAF</span> · Player Props</>}
+          art={{ src: "/bag.png?v=1", alt: "Value Finder" }}
+        />
       </header>
 
+      <ValueFinderNote />
       <FlowSteps active="value" base="ncaaf" />
       <ShopSubnav active="props" base="ncaaf" />
-      <ValueFinderNote />
 
       <NcaafSoon
         title="Player props — the place an edge might actually live"

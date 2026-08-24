@@ -18,7 +18,10 @@ export default function Page() {
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={`Value Finder · College Football · Sweet Spots · key numbers`} />
+        <Brand
+          sub={<><span className="brand__sport">NCAAF</span> · Sweet Spots</>}
+          art={{ src: "/bag.png?v=1", alt: "Value Finder" }}
+        />
       </header>
 
       <FlowSteps active="value" base="ncaaf" />
