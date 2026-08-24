@@ -150,7 +150,7 @@ def team_scoring(db, season, decay):
 WINK = 11.0  # margin -> win-prob logistic scale (a 7-pt edge ~ 65%)
 
 
-def build_card(db, ratings, hfa, season, week, top_set, scoring, odds):
+def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=None):
     """Model-vs-Market card + upsets for `week`, mirroring the NFL board. Each game gets
     the market spread + total and our model's projection; `featured` flags games with a
     top-25 team (the homepage leads with those, the rest go behind a 'see all' dropdown).
@@ -200,6 +200,7 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds):
 
         cards.append({
             "away": away, "home": home, "neutral": 1 if neu else 0,
+            "conf": (confs or {}).get(home) or "Other",   # HOME team's conference (for grouping)
             "marketSpread": market_spread, "marketTotal": mtot,
             "projSpread": proj_spread, "projTotal": round(float(ptot), 1),
             "pick": pick, "totalLean": total_lean, "off": off_flag,
@@ -262,8 +263,8 @@ def main():
     top_set = {t for t, _ in sorted(final.items(), key=lambda kv: kv[1], reverse=True)[:25]}
     scoring = team_scoring(DB, last, DECAY)
     odds = fetch_ncaaf_odds()
-    card_games, upsets = build_card(DB, cur_ratings, hfa, CARD_SEASON, card_week, top_set, scoring, odds)
     confs = team_conferences(DB, last)
+    card_games, upsets = build_card(DB, cur_ratings, hfa, CARD_SEASON, card_week, top_set, scoring, odds, confs)
     ranked = sorted(final.items(), key=lambda kv: kv[1], reverse=True)
     top = [{"rank": i + 1, "team": t, "conf": confs.get(t, ""), "rating": round(r, 1)}
            for i, (t, r) in enumerate(ranked[:25])]
@@ -328,7 +329,7 @@ def main():
             "export type NcaafTeam = { rank: number; team: string; conf: string; rating: number };\n"
             "export type NcaafConf = { conf: string; avgRating: number; teams: number };\n"
             "export type NcaafKeyNum = { margin: number; pct: number; nfl: number };\n"
-            "export type NcaafCardGame = { away: string; home: string; neutral: number;"
+            "export type NcaafCardGame = { away: string; home: string; neutral: number; conf: string;"
             " marketSpread: { fav: string; num: number } | null; marketTotal: number | null;"
             " projSpread: { fav: string; num: number }; projTotal: number;"
             " pick: { side: string; num: number } | null;"

@@ -2022,6 +2022,13 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .ncf-h{position:relative;font-size:13.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
   color:var(--gold);margin:0 0 10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .ncf-h__note{font-size:11.5px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--muted)}
+/* Full-model table grouped by conference — a labeled sub-table per conference */
+.ncf-confgrp{margin:0 0 20px}
+.ncf-confgrp:last-child{margin-bottom:0}
+.ncf-confgrp__h{display:flex;align-items:baseline;gap:8px;margin:16px 0 7px;
+  font-size:12.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--gold)}
+.ncf-confgrp:first-child .ncf-confgrp__h{margin-top:2px}
+.ncf-confgrp__n{font-size:10.5px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0}
 .ncf-tbl{border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .ncf-row{display:grid;grid-template-columns:40px 1fr 140px 72px;align-items:center;gap:8px;
   padding:9px 14px;border-top:1px solid var(--line);font-size:14px}

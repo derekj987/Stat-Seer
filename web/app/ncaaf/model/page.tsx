@@ -13,6 +13,22 @@ export const metadata = {
 
 const M = NCAAF_MODEL;
 
+// Full-model table is grouped by the HOME team's conference so 50+ games aren't one wall.
+const CONF_ORDER = ["SEC", "Big Ten", "Big 12", "ACC", "Pac-12", "American Athletic",
+  "Mountain West", "Sun Belt", "Mid-American", "Conference USA", "FBS Independents", "Other"];
+
+function groupByConf(games: readonly NcaafCardGame[]): { conf: string; games: NcaafCardGame[] }[] {
+  const by = new Map<string, NcaafCardGame[]>();
+  for (const g of games) {
+    const k = g.conf || "Other";
+    (by.get(k) ?? by.set(k, []).get(k)!).push(g);
+  }
+  const rank = (c: string) => { const i = CONF_ORDER.indexOf(c); return i === -1 ? CONF_ORDER.length : i; };
+  return [...by.entries()]
+    .sort((a, b) => rank(a[0]) - rank(b[0]) || b[1].length - a[1].length || a[0].localeCompare(b[0]))
+    .map(([conf, gs]) => ({ conf, games: gs }));
+}
+
 function pickTxt(g: NcaafCardGame): string {
   const pk = g.pick;
   return pk ? `${pk.side} ${pk.num > 0 ? "+" : ""}${pk.num}` : `${g.projSpread.fav} ${g.projSpread.num}`;
@@ -134,9 +150,14 @@ export default function Page() {
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
-          <div className="hb-formwrap">
-            <table className="hb-form"><CardHead /><tbody><CardRows games={c.games} /></tbody></table>
-          </div>
+          {groupByConf(c.games).map((grp) => (
+            <section className="ncf-confgrp" key={grp.conf}>
+              <h3 className="ncf-confgrp__h">{grp.conf}<span className="ncf-confgrp__n">{grp.games.length} game{grp.games.length === 1 ? "" : "s"}</span></h3>
+              <div className="hb-formwrap">
+                <table className="hb-form"><CardHead /><tbody><CardRows games={grp.games} /></tbody></table>
+              </div>
+            </section>
+          ))}
         </div>
       </details>
 
