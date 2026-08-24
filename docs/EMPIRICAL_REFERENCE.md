@@ -548,6 +548,56 @@ here (the game-line rating was already shown to be noise, §5).
 
 ---
 
+## 9c. Upsets — the spread already prices them, both sports (`upset_study.py`)
+
+Prompted by the CFB card flagging only 1 "upset" of 52 after the SP+ seed made our
+projection agree with the market. Question, tested the honest way: an upset = the market
+**underdog wins outright** (moneyline upset); does any variable predict upsets **beyond
+what the spread already prices**? NFL from `data/games.csv` (nflverse, 7,245 games with a
+real dog, 2016–2025); NCAAF from `data/cfb.db` (3,625 FBS-vs-FBS with a consensus spread).
+
+**The spread is a near-perfect upset predictor, and it's priced.** NFL upset rate by
+spread bucket tracks the de-vigged moneyline-implied rate almost exactly:
+
+| \|spread\| | n | upset% | ML-implied% |
+|---|---|---|---|
+| 1–3 | 1,450 | 47.0 | 45.8 |
+| 3–7 | 3,593 | 36.0 | 35.5 |
+| 7–10 | 1,299 | 23.9 | 24.4 |
+| 10–14 | 688 | 17.0 | 17.7 |
+| 14–21 | 211 | 9.0 | 11.5 |
+
+NCAAF is the same clean monotonic curve (48.4% at 1–3 → 5.5% at 21+); no historical ML in
+the store, so its price test is blocked (same wall as §9/CFB props).
+
+**No auxiliary variable beats the spread — in either sport.** Logistic `upset ~ |spread| +
+X` (X standardized), every candidate |z| below the 2.0 bar:
+
+| Variable | NFL z | NCAAF z |
+|---|---|---|
+| home dog (dog at home) | −1.0 | +0.8 |
+| divisional / cross-conference | −0.0 | +0.6 |
+| dog rest edge / short week | +0.5 / −1.8 | — |
+| game total | −1.3 | — |
+| Elo gap (home basis) | — | −0.9 |
+| dog is Power-conf / neutral / late | — | 0.0 / +1.1 / −0.1 |
+
+The famous **home-dog** angle is a spread confound: raw home-dog upset rate looks higher
+(NFL 35.4% vs road-dog 32.4%; NCAAF 30.6% vs 25.0%) **only because home dogs carry smaller
+spreads** (home field is already in the number). Match on spread size (games inside 7 pts)
+and it vanishes — NFL home-dogs upset *less* (38.5% vs 39.6%). The lone NFL variable within
+sight of significance, dog-on-short-week (z=−1.8, p=.08, one of 14 tests), points the
+*wrong* way vs folklore (short-week dogs upset slightly less) and dies under multiple
+comparisons.
+
+**Reading.** Same result as §4/§5/§9b, now for upsets: the market spread already contains
+everything our public variables know about who wins outright. This is *why* a
+well-calibrated model flags few upsets — genuine off-market upset signal is ~nonexistent;
+flagging more would mean manufacturing it. Upset context (home dog, division, rest,
+letdown/lookahead) is true and worth showing, but it is **not** a pick driver.
+
+---
+
 ## 10. Errors caught during this work
 
 Recorded because these are the failure modes that produce confident, wrong betting
