@@ -176,7 +176,10 @@ export default function BoardView({
     <>
       <main className="wrap">
         <header className="masthead">
-          <Brand sub={`Value Finder · Line Shopping`} />
+          <Brand
+            sub={`Value Finder · Line Shopping`}
+            tip={<Tip text={<>For every game, each <b>moneyline, spread, and total</b> is shown at the <b>single best price across ~10 sportsbooks</b> (tap any to add it to your slip). <b>shop +x%</b> is the edge you pick up by taking that best number instead of the consensus. A ◆ marks an <b>off-consensus</b> game. No model, no pick here — just the best available number.</>} />}
+          />
           {snapshot && <div className="asof">lines as of<br /><b>{et(snapshot, snapFmt)}</b></div>}
         </header>
 
@@ -201,10 +204,6 @@ export default function BoardView({
             </details>
 
             <SlipCallout kind="lines" />
-
-            <div className="tblhelp">
-              <Tip text={<>For every game, each <b>moneyline, spread, and total</b> is shown at the <b>single best price across ~10 sportsbooks</b> (tap any to add it to your slip). <b>shop +x%</b> is the edge you pick up by taking that best number instead of the consensus. A ◆ marks an <b>off-consensus</b> game. No model, no pick here — just the best available number.</>} />
-            </div>
 
             <section className="grid">
               {board.slice(0, 6).map((g) => <GameCard key={g.eventId} g={g} has={has} onToggle={toggle} />)}

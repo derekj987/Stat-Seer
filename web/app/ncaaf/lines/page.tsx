@@ -27,7 +27,10 @@ export default function Page() {
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={`Value Finder · College Football · Line Shopping`} />
+        <Brand
+          sub={`Value Finder · College Football · Line Shopping`}
+          tip={<Tip text={<>Every game with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Model Suggests</b> — the side our line-blind rating covers. A ◆ marks an <b>off-consensus</b> game. Our CFB rating ties Elo but doesn&apos;t beat the spread, so treat this as informative context, not a guaranteed bet.</>} />}
+        />
       </header>
 
       <FlowSteps active="value" base="ncaaf" />
@@ -45,9 +48,6 @@ export default function Page() {
       <section className="ncf-sec">
         <h2 className="ncf-h">Game lines — Week {c.week}
           <span className="ncf-h__note">{games.length} games with a market line</span></h2>
-        <div className="tblhelp">
-          <Tip text={<>Every game with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Model Suggests</b> — the side our line-blind rating covers. A ◆ marks an <b>off-consensus</b> game. Our CFB rating ties Elo but doesn&apos;t beat the spread, so treat this as informative context, not a guaranteed bet.</>} />
-        </div>
         <div className="hb-legend">
           <span className="hb-dia">◆</span> Off-consensus — our read is on the other side from the market.
           <span className="hb-x"> · <b>Our Model Suggests</b> is the side our line-blind rating covers — informative,

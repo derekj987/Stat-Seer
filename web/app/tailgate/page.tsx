@@ -90,7 +90,10 @@ export default async function Page({ searchParams }: {
     <main className="tg">
       <div className="tg-main">
       <header className="masthead">
-        <Brand sub={`The Context · Fan Analysis · what fans are saying · Week ${week}, ${SEASON}`} />
+        <Brand
+          sub={<><span className="brand__sport">NFL</span> · Fan Analysis</>}
+          art={{ src: "/coach.png?v=1", alt: "Coach" }}
+        />
       </header>
 
       {/* The wall: this is fan sentiment, NOT a StatSeer pick or model output. */}

@@ -65,7 +65,8 @@ export default function Page() {
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={<><span className="brand__sport">NCAAF</span> · The Model</>} art={{ src: "/heisman.png?v=1", alt: "Heisman Trophy" }} />
+        <Brand sub={<><span className="brand__sport">NCAAF</span> · The Model</>} art={{ src: "/heisman.png?v=1", alt: "Heisman Trophy" }}
+          tip={<Tip text={<>Every ranked game with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Model Suggests</b> — our line-blind lean. A ◆ marks an <b>off-consensus</b> game. Our CFB rating ties Elo but doesn&apos;t beat the spread, so this is context you can check, <b>not a pick</b>.</>} />} />
       </header>
 
       <FlowSteps active="analyze" base="ncaaf" />
@@ -109,9 +110,6 @@ export default function Page() {
       <section className="ncf-sec">
         <h2 className="ncf-h">The Model — Snapshot View
           <span className="ncf-h__note">our line-blind read beside the market&apos;s number · Week {c.week}</span></h2>
-        <div className="tblhelp">
-          <Tip text={<>Every ranked game with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Model Suggests</b> — our line-blind lean. A ◆ marks an <b>off-consensus</b> game. Our CFB rating ties Elo but doesn&apos;t beat the spread, so this is context you can check, <b>not a pick</b>.</>} />
-        </div>
         <div className="hb-legend">
           <span className="hb-dia">◆</span> Off-consensus — our read is on the other side from the market.
           <span className="hb-x"> · <b>Our Model Suggests</b> is the side our line-blind rating covers —

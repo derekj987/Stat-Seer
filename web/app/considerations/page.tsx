@@ -225,6 +225,7 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
         <Brand
           sub={<><span className="brand__sport">NFL</span> · Special Considerations</>}
           art={{ src: "/coach.png?v=1", alt: "Coach" }}
+          tip={<Tip text={<>One card per game with the context around it: the <b>site &amp; roof</b>, the <b>weather</b> (⚑ marks notable wind), the <b>referee crew</b>, and each team&apos;s offense/defense ratings. These arm your judgment — they are <b>not</b> an adjusted line or a pick.</>} />}
         />
       </header>
 
@@ -245,9 +246,6 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
         <p className="foot">No games captured for Week {week} yet.</p>
       ) : (
         <>
-          <div className="tblhelp">
-            <Tip text={<>One card per game with the context around it: the <b>site &amp; roof</b>, the <b>weather</b> (⚑ marks notable wind), the <b>referee crew</b>, and each team&apos;s offense/defense ratings. These arm your judgment — they are <b>not</b> an adjusted line or a pick.</>} />
-          </div>
           <section className="cxgrid" aria-label={`Week ${week} considerations`}>
             {lead.map(renderCard)}
           </section>

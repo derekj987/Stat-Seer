@@ -77,7 +77,10 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={`The Model · Player Prop Model · ${sportLabel}`} />
+        <Brand
+          sub={`The Model · Player Prop Model · ${sportLabel}`}
+          tip={<Tip text={<>Each player&apos;s sportsbook <b>Book line</b> vs <b>Our proj</b>, our line-blind projection (▲ = we lean over, ▼ = under). <b>Career&nbsp;% over</b> = how often they&apos;ve cleared a similar line across their career; <b>Prior szn&nbsp;% over</b> = last season only. <b>Home&nbsp;% over</b> / <b>Road&nbsp;% over</b> split that rate by venue where shown. Higher means they go over more often. We project volume first, then a regressed efficiency baseline.</>} />}
+        />
       </header>
 
       <section className="explainer explainer--wide explainer--clamp">
@@ -108,10 +111,6 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
       <WeekNav base={base} cat={active.key} current={week} />
 
       <section className="pmcat">
-        <div className="pmcat__legend">
-          <Tip text={<>Each player&apos;s sportsbook <b>Book line</b> vs <b>Our proj</b>, our line-blind projection (▲ = we lean over, ▼ = under). <b>Career&nbsp;% over</b> = how often they&apos;ve cleared a similar line across their career; <b>Prior szn&nbsp;% over</b> = last season only.{active.key === "passing" ? <> <b>Home&nbsp;% over</b> / <b>Road&nbsp;% over</b> split that rate by venue.</> : null} Higher means they go over more often. We project volume first, then a regressed efficiency baseline.</>} />
-        </div>
-
         {rows.length === 0 ? (
           <div className="pmempty pmempty--solo" role="note">
             <span className="pmempty__tag">Projections arriving</span>

@@ -79,6 +79,9 @@ body{background:var(--bg);color:var(--ink);
 .brand:has(.brand__art) .brand__sub{font-size:clamp(19px,2.7vw,26px);font-weight:800;
   text-transform:uppercase;letter-spacing:.09em;line-height:1.04;color:var(--ink)}
 .brand__sport{color:var(--gold);text-shadow:0 1px 1px rgba(0,0,0,.14)}
+/* help scroll shown inline beside the masthead title; its bubble anchors to the
+   position:relative .masthead so it drops full-width below the header. */
+.brand__tip{display:inline-flex;align-items:center;flex:0 0 auto;margin-left:2px}
 .asof{text-align:right;color:var(--muted);font-size:12px;
   text-transform:uppercase;letter-spacing:.08em;line-height:1.7}
 .asof b{color:var(--ink);font-family:var(--font-mono);font-size:13px;
@@ -355,6 +358,10 @@ a.sportstrip__i:hover{color:var(--ink)}
 /* --- Context section --- */
 .ctxsec{margin-top:22px}
 .ctxsec__h{font-size:16px;margin:0 0 4px}
+/* section-heading row carrying an inline help scroll (e.g. Upset Watch). Full-width flex
+   so the scroll sits beside the heading and its bubble spans the content width. */
+.ctxsec__head{position:relative;display:flex;align-items:center;gap:8px;margin:0 0 4px}
+.ctxsec__head .ctxsec__h{margin:0}
 .ctxsec__n{margin-left:8px;font-size:12px;color:var(--muted);font-weight:600;
   border:1px solid var(--line);border-radius:999px;padding:1px 9px;vertical-align:2px}
 .ctxsec__d{margin:0 0 12px;font-size:13px;color:var(--muted);max-width:none;line-height:1.6}
