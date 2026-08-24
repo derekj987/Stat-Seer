@@ -14,11 +14,6 @@ export const metadata = {
 
 const M = NCAAF_MODEL;
 
-function pickTxt(g: NcaafCardGame): string {
-  const pk = g.pick;
-  return pk ? `${pk.side} ${pk.num > 0 ? "+" : ""}${pk.num}` : `${g.projSpread.fav} ${g.projSpread.num}`;
-}
-
 export default function Page() {
   const bs = M.value.bookShop;
   const c = M.card;
@@ -48,21 +43,21 @@ export default function Page() {
       <section className="ncf-sec">
         <h2 className="ncf-h">Game lines — Week {c.week}
           <span className="ncf-h__note">{games.length} games with a market line</span>
-          <Tip text={<>Every game with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Model Suggests</b> — the side our line-blind rating covers. A ◆ marks an <b>off-consensus</b> game. Our CFB rating ties Elo but doesn&apos;t beat the spread, so treat this as informative context, not a guaranteed bet.</>} />
+          <Tip text={<>Every game with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Projection</b> — our own line-blind spread &amp; total. A ◆ marks an <b>off-consensus</b> game (our number is well off the market&apos;s). Our CFB rating ties Elo but doesn&apos;t beat the spread, so treat this as informative context, <b>not a pick</b>.</>} />
         </h2>
         <div className="hb-legend">
-          <span className="hb-dia">◆</span> Off-consensus — our read is on the other side from the market.
-          <span className="hb-x"> · <b>Our Model Suggests</b> is the side our line-blind rating covers — informative,
-            not a guaranteed bet (the rating doesn&apos;t beat the spread; see <a href="/ncaaf/model">The Model</a>).</span>
+          <span className="hb-dia">◆</span> Off-consensus — our projected line is well off the market&apos;s.
+          <span className="hb-x"> · <b>Our Projection</b> is our line-blind spread &amp; total, shown to compare against
+            the market — <b>not a pick</b> (the rating doesn&apos;t beat the spread; see <a href="/ncaaf/model">The Model</a>).</span>
         </div>
         <div className="hb-formwrap">
           <table className="hb-form">
             <thead>
-              <tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Our Model Suggests</th></tr>
+              <tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Our Projection</th></tr>
             </thead>
             <tbody>
               {games.map((g) => {
-                const ms = g.marketSpread!; const tl = g.totalLean;
+                const ms = g.marketSpread!;
                 return (
                   <tr key={`${g.away}-${g.home}`} className={g.off ? "hb-off" : undefined}>
                     <td className="hb-l">
@@ -74,8 +69,8 @@ export default function Page() {
                     <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
                     <td className="hb-suggest">
                       <span className="hb-sugwrap">
-                        <span className="hb-sug"><span className="hb-sug__t">{pickTxt(g)}</span></span>
-                        {tl && <span className="hb-sug"><span className="hb-sug__t"><span className={`pmarrow pmarrow--${tl.dir === "OVER" ? "up" : "down"}`} aria-hidden="true">{tl.dir === "OVER" ? "▲" : "▼"}</span> {tl.dir === "OVER" ? "Over" : "Under"} {tl.num}</span></span>}
+                        <span className="hb-sug"><span className="hb-sug__t">{g.projSpread.fav} {g.projSpread.num}</span></span>
+                        <span className="hb-sug"><span className="hb-sug__t hb-sug__tot">O/U {g.projTotal}</span></span>
                       </span>
                     </td>
                   </tr>
