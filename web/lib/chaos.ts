@@ -33,25 +33,26 @@ export interface ChaosEntry extends ChaosInput {
 }
 
 /** How much the venue resembles the away dog's own home (0-100) + a one-line reason. Not
- * weather — structural: a dome team at another dome, or a warm/indoor team dropped in the
- * cold. Tested: comfortable away dogs win outright ~33% vs ~27% for hostile ones (a real
+ * weather — structural: a warm/indoor team dropped into a genuinely COLD outdoor venue is
+ * the real disadvantage, and only LATE in the season when those venues are actually cold (a
+ * dome team in mild September weather is fine — we don't assume indoor teams struggle
+ * outdoors). Tested: comfortable away dogs win outright ~33% vs ~27% for hostile ones (a real
  * upset-frequency gap), but it's ~priced ATS, so it's chaos flavor, not an edge. */
-export function comfortInfo(dog: string, away: StadiumEnv, venue: StadiumEnv): { score: number; note: string } {
+export function comfortInfo(dog: string, away: StadiumEnv, venue: StadiumEnv, week: number): { score: number; note: string } {
   let c = 100;
-  const venueColdOutdoor = !venue.indoor && venue.climate === "cold";
-  if (venueColdOutdoor && (away.climate === "controlled" || away.climate === "warm")) c -= 50;
-  if (away.indoor && !venue.indoor) c -= 15;
-  if (away.surface !== venue.surface) c -= 10;
+  const coldSeason = week >= 10; // northern outdoor venues are only truly cold late in the year
+  const hostileCold = coldSeason && !venue.indoor && venue.climate === "cold" &&
+    (away.climate === "controlled" || away.climate === "warm");
+  if (hostileCold) c -= 45; // a warm/dome team out in the late-season cold
+  if (away.surface !== venue.surface) c -= 8; // turf<->grass, minor
   c = clamp(c);
   let note = "";
-  if (c >= 90) {
-    note = away.indoor && venue.indoor
-      ? `${dog} bring their dome game to another dome — right at home, no elements to fight.`
-      : away.climate === "cold" && venue.climate === "cold"
-        ? `${dog} are a cold-weather team in the cold — right in their element.`
-        : `${dog} land in a stadium just like home — nothing to adjust to.`;
-  } else if (c <= 55) {
-    note = `${dog} are out of their element — a warm/indoor team exposed to a cold outdoor field.`;
+  if (hostileCold) {
+    note = `${dog} are out of their element — a warm/indoor team out in a cold ${venue.indoor ? "" : "outdoor "}venue this late.`;
+  } else if (away.indoor && venue.indoor && c >= 92) {
+    note = `${dog} bring their dome game to another dome — right at home, nothing to adjust to.`;
+  } else if (away.climate === "cold" && venue.climate === "cold" && coldSeason && c >= 92) {
+    note = `${dog} are a cold-weather team in the cold — right in their element.`;
   }
   return { score: c, note };
 }

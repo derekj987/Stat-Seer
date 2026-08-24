@@ -78,7 +78,8 @@ export function ChaosBoard({
             <div className="cb__mid">
               <div className="cb__match">
                 <b>{e.dog}</b> <span className="cb__line">+{e.line}</span>
-                <span className="cb__at"> at {e.fav}</span>
+                <span className="cb__at"> {e.dog === e.home ? "vs" : "at"} {e.fav}</span>
+                {e.dog === e.home && <span className="cb__home">home dog</span>}
               </div>
               <p className="cb__story">{e.story}</p>
               <div className="cb__pips">

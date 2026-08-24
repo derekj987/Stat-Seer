@@ -88,9 +88,12 @@ def main():
         away_win = 1.0 if hmg < 0 else 0.0
         # away covers iff away_margin + (points they're getting) > 0; away_line = +home_fav_pts
         away_cover = None if (-hmg) == -home_fav_pts else (1.0 if (-hmg) > -home_fav_pts else 0.0)
+        outdoor = str(r.roof) not in INDOOR
+        cold_game = outdoor and pd.notna(r.temp) and float(r.temp) < 40
         rows.append({"line": line, "away_dog": home_fav_pts > 0, "away_win": away_win,
                      "away_cover": away_cover, "comfort": comfort(ap, vp),
                      "venue_cold": (not vp["indoor"]) and vp["climate"] == "cold",
+                     "cold_game": cold_game,
                      "away_soft": ap["climate"] in ("controlled", "warm")})
     print(f"NFL 2010-2025: {len(rows)} away-team games with profiles\n")
 
@@ -109,12 +112,24 @@ def main():
         print(f"  {lab:<14}{len(rs):>6}{su:>9.1f}%{ats:>11.1f}% (n={na})")
 
     # --- B. the specific case: soft (warm/dome) away team in a cold outdoor venue ---
-    print("\nB. Soft (warm/dome) away team IN a cold outdoor venue vs elsewhere:")
+    # NOTE: uses the venue's STATIC 'cold' label, which over-counts mild early-season games at
+    # northern stadiums. The honest magnitude comes from B2 below (realized game temp), which
+    # is what the live Chaos Board approximates by gating the cold penalty to late season.
+    print("\nB. Soft (warm/dome) away team IN a cold-labelled venue vs elsewhere (static — overstates):")
     hostile = [x for x in rows if x["away_soft"] and x["venue_cold"]]
     other = [x for x in rows if not (x["away_soft"] and x["venue_cold"])]
     for lab, rs in (("soft-in-cold", hostile), ("everyone else", other)):
         su, _ = rate(rs, "away_win"); ats, na = rate(rs, "away_cover")
         print(f"  {lab:<14}{len(rs):>6}  SU {su:5.1f}%   ATS {ats:5.1f}% (n={na})")
+
+    # --- B2. the HONEST version: realized game temp < 40F (a truly cold game) ---
+    print("\nB2. Soft away team in a TRULY cold game (realized temp <40F) -- the real magnitude:")
+    for lab, keep in (("soft-in-cold", True), ("everyone else", False)):
+        rs = [x for x in rows if bool(x["away_soft"] and x["cold_game"]) == keep]
+        su, _ = rate(rs, "away_win"); ats, na = rate(rs, "away_cover")
+        print(f"  {lab:<14}{len(rs):>6}  SU {su:5.1f}%   ATS {ats:5.1f}% (n={na})")
+    print("  reading: a modest, mostly-priced effect that only shows up in genuinely cold games "
+          "-- so the live board only docks comfort late in the season, not in mild September.")
 
     # --- C. controlling for the spread: away-DOG cover% by comfort, within spread buckets ---
     print("\nC. AWAY UNDERDOGS only -- ATS cover% by comfort, within spread buckets\n"

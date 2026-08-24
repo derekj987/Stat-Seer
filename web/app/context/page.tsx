@@ -117,15 +117,16 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
         returnEst = true;
       }
       const wx = weatherByEvent.get(g.eventId);
-      // Comfort zone: only meaningful for a ROAD dog. A home dog is trivially at home (neutral).
+      // Comfort zone: a ROAD dog can be displaced from its home environment; a HOME dog is
+      // literally at home (max comfort). The venue is the HOME team's stadium.
       const dogEnv = NFL_ENV[dog], venueEnv = NFL_ENV[g.home];
-      const cz = dog !== g.home && dogEnv && venueEnv ? comfortInfo(dog, dogEnv, venueEnv) : null;
+      const cz = dog !== g.home && dogEnv && venueEnv ? comfortInfo(dog, dogEnv, venueEnv, week) : null;
       return {
         sport: "NFL" as const, away: g.away, home: g.home, dog, fav, line, week,
         dogReturn, returnEst,
         favTrait: NFL_CHAOS[fav], dogTrait: NFL_CHAOS[dog],
         windMph: wx && !wx.indoor ? wx.windMph : null,
-        comfortPct: cz ? cz.score : dog === g.home ? 70 : undefined,
+        comfortPct: cz ? cz.score : dog === g.home ? 100 : undefined,
         comfortNote: cz?.note || undefined,
       };
     });

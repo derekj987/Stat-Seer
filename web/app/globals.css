@@ -745,6 +745,8 @@ a.fauthor:hover{text-decoration:underline}
 .cb__match b{font-weight:800}
 .cb__line{font-family:var(--font-mono);font-weight:700;color:var(--key);font-size:13px}
 .cb__at{color:var(--muted);font-size:14px}
+.cb__home{font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);
+  background:var(--accent-soft);border-radius:5px;padding:1px 5px;margin-left:6px;vertical-align:middle}
 .cb__story{margin:5px 0 9px;font-size:12.5px;line-height:1.45;color:var(--muted)}
 .cb__pips{display:flex;flex-wrap:wrap;gap:8px 10px;max-width:540px}
 .cb__pip{flex:1 1 72px;min-width:64px}
