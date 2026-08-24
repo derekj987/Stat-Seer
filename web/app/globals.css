@@ -408,11 +408,34 @@ a.sportstrip__i:hover{color:var(--ink)}
 .cxstake__rec{font-variant-numeric:tabular-nums}
 .cxstake__s{color:var(--ink);font-weight:700}
 .cxstake__s--caution{color:var(--gold);font-weight:800}
+/* Coach production table (mirrors the Player Model QB tables): career vs prior-season
+   offensive yards/game + points/game, one row per coach. */
+.cxrow--wide{display:block}
+.cxrow--wide .cxrow__k{display:block;margin-bottom:6px}
+.cxctscroll{overflow-x:auto}
+.cxcoachtbl{display:flex;flex-direction:column;gap:4px;min-width:336px}
+.cxctrow{display:grid;grid-template-columns:minmax(92px,1.5fr) repeat(4,minmax(46px,1fr));
+  gap:6px;align-items:center}
+.cxctrow--head{border-bottom:1px solid var(--line);padding-bottom:4px;align-items:end}
+.cxctrow--head .cxctcell{font-size:9px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.03em;color:var(--muted);text-align:right;line-height:1.05}
+.cxctrow--head .cxctcell small{display:block;font-size:8.5px;font-weight:700;opacity:.75;
+  letter-spacing:0;text-transform:none}
+.cxctcell{font-size:12px;text-align:right;font-family:var(--font-mono);
+  font-variant-numeric:tabular-nums;color:var(--ink)}
+.cxctcell--tm{text-align:left;font-family:inherit;color:var(--muted);
+  font-variant-numeric:normal;white-space:nowrap}
+.cxct__nm{color:var(--ink);font-weight:700}
+.cxctcell--none{grid-column:2 / -1;text-align:left;font-family:inherit;font-size:11px;
+  color:var(--muted);font-style:italic}
+.cxct__foot{margin:6px 0 0;font-size:9.5px;color:var(--muted);letter-spacing:.02em}
 .cxrank{color:var(--muted);font-size:11.5px;font-variant-numeric:tabular-nums}
 .cxroof{color:var(--muted)}
 .cxref__h{font-size:14px;font-weight:800;margin:16px 0 6px;color:var(--ink)}
-/* homepage "special considerations" snapshot (3 cards) */
-.cxgrid--snap{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-top:0}
+/* homepage "special considerations" snapshot — 2 cards across (1 on phones) so each has
+   room for the coach production table. */
+.cxgrid--snap{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:0}
+@media (max-width:640px){.cxgrid--snap{grid-template-columns:1fr}}
 .cxcard--stat{display:flex;flex-direction:column;gap:2px}
 .cxcard__statv{font-size:22px;font-weight:800;color:var(--accent);line-height:1.1}
 .cxcard__statk{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
@@ -446,13 +469,19 @@ a.sportstrip__i:hover{color:var(--ink)}
 .envcard.lo .envcard__v{color:var(--key)}
 /* wrapper caps the table width to 640. Its "see more" is LEFT-justified here (this table
    only) — overriding the site-wide centered default. */
-.imp-wrap{max-width:640px}
+.imp-wrap{max-width:none}
 .imp-wrap .hb-more__sum{justify-content:flex-start}
 /* mobile swipe hint — the 5-column table is wider than a phone, so it scrolls */
 .imp-scrollhint{display:none}
-.imptable{display:flex;flex-direction:column;align-items:flex-start;gap:8px;overflow-x:auto;max-width:640px}
-.improw{display:grid;grid-template-columns:160px 78px 104px 72px 92px;gap:20px;
-  align-items:center;padding:7px 12px;background:var(--surface);border:1px solid var(--line);
+/* Fill the page: rows stretch to the container width (align-items:stretch); the
+   fractional columns below spread the extra space. The minmax() mins still sum
+   wider than a phone, so on mobile each row keeps its min-width and the table
+   scrolls (overflow-x). */
+.imptable{display:flex;flex-direction:column;align-items:stretch;gap:8px;overflow-x:auto;
+  max-width:none;width:100%}
+.improw{display:grid;
+  grid-template-columns:minmax(150px,1.9fr) minmax(74px,1fr) minmax(96px,1.15fr) minmax(66px,.92fr) minmax(96px,1.15fr);
+  gap:20px;align-items:center;padding:7px 12px;background:var(--surface);border:1px solid var(--line);
   border-radius:8px;font-size:13px}
 /* +1px inline padding vs .improw so the header tracks line up with the bordered
    game rows (each .impgame adds a 1px border that shifts its grid inward). */

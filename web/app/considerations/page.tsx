@@ -9,25 +9,12 @@ import { COACH_TENDENCIES } from "@/lib/coachTendencies";
 import { CONTENTION } from "@/lib/contention";
 import { Brand, FlowSteps, ContextSubnav } from "../Nav";
 import Tip from "@/app/Tip";
+import CoachTable from "../CoachTable";
 
 const ord = (n: number) => {
   const s = ["th", "st", "nd", "rd"], v = n % 100;
   return `${n}${s[(v - 20) % 10] ?? s[v] ?? s[0]}`;
 };
-
-/** One coach's tendency line: aggressiveness + pass lean (CONTEXT, not a pick). */
-function coachLine(team: string) {
-  const c = COACH_TENDENCIES[team];
-  if (!c) return null;
-  return (
-    <span className="cxcoach__t" key={team}>
-      {team} <b className="cxcoach__nm">{c.coach}</b>
-      {c.rated
-        ? <> — <b className="cxcoach__agg">{c.aggLabel}</b> on 4th{c.proeLabel ? <> · {c.proeLabel}</> : null}</>
-        : <span className="muted"> — first year, no book yet</span>}
-    </span>
-  );
-}
 
 /** One team's playoff-picture line. "Clinched"/"Eliminated" flag reduced-stakes games
  *  (resting starters) — a betting caution, not a pick. */
@@ -189,9 +176,9 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
             </div>
           )}
           {(COACH_TENDENCIES[g.away] || COACH_TENDENCIES[g.home]) && (
-            <div className="cxrow cxrow--coach">
+            <div className="cxrow cxrow--coach cxrow--wide">
               <dt className="cxrow__k">Coaching</dt>
-              <dd className="cxrow__v cxcoach">{coachLine(g.away)}{coachLine(g.home)}</dd>
+              <dd className="cxrow__v"><CoachTable away={g.away} home={g.home} /></dd>
             </div>
           )}
           {(CONTENTION[g.away] || CONTENTION[g.home]) && (

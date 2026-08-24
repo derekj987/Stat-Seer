@@ -46,7 +46,7 @@ def coach_maps():
 def load_pbp():
     keep = {"season", "week", "posteam", "play_type", "down", "ydstogo", "yardline_100",
             "field_goal_attempt", "punt_attempt", "qb_kneel", "qb_spike",
-            "xpass", "pass_oe", "wp"}
+            "xpass", "pass_oe", "wp", "game_id", "yards_gained"}
     frames = []
     for y in SEASONS:
         p = D / f"pbp_{y}.csv.gz"
@@ -67,12 +67,53 @@ def label_proe(v):
             else "Run-heavy" if v <= -3 else "Run-leaning" if v <= -1 else "Balanced")
 
 
+PRIOR_SEASON = 2024      # last completed season -> the "prior season" column
+MIN_PROD_G = 8           # games needed before we show a production number
+
+
+def points_by_coach():
+    """Per-coach points scored per game, from final scores in games.csv.
+    Career = the 2021-2024 window (kept in step with the play-by-play span used for
+    yards, so the two columns describe the same games); prior = 2024 only."""
+    g = pd.read_csv(D / "games.csv", low_memory=False)
+    rows = []
+    for _, r in g.iterrows():
+        if pd.isna(r.get("season")):
+            continue
+        s = int(r["season"])
+        if s not in set(SEASONS):
+            continue
+        for side in ("home", "away"):
+            coach, score = r.get(f"{side}_coach"), r.get(f"{side}_score")
+            if pd.isna(coach) or pd.isna(score):
+                continue
+            rows.append((coach, s, float(score)))
+    p = pd.DataFrame(rows, columns=["coach", "season", "pts"])
+    career = p.groupby("coach")["pts"].agg(pts="mean", g="count")
+    prior = p[p.season == PRIOR_SEASON].groupby("coach")["pts"].agg(pts="mean", g="count")
+    return career, prior
+
+
+def yards_by_coach(pbp):
+    """Per-coach team offensive yards per game (run + pass yards_gained, summed per game
+    then averaged). Same career/prior split as points."""
+    off = pbp[pbp["play_type"].isin(["run", "pass"])].copy()
+    per_game = off.groupby(["coach", "season", "game_id"])["yards_gained"].sum().reset_index()
+    career = per_game.groupby("coach")["yards_gained"].agg(yds="mean", g="count")
+    prior = per_game[per_game.season == PRIOR_SEASON].groupby("coach")["yards_gained"].agg(yds="mean", g="count")
+    return career, prior
+
+
 def main():
     per_game, current = coach_maps()
     pbp = load_pbp()
     pbp["coach"] = [per_game.get((int(s), int(w), t)) if pd.notna(t) else None
                     for s, w, t in zip(pbp.season, pbp.week, pbp.posteam)]
     pbp = pbp[pbp["coach"].notna()].copy()
+
+    # --- production: yards/game + points/game, career (2021-24) and prior season ---
+    yds_career, yds_prior = yards_by_coach(pbp)
+    pts_career, pts_prior = points_by_coach()
 
     comp = pbp["wp"].between(0.10, 0.90)
     not_qb = (pbp["qb_kneel"] != 1) & (pbp["qb_spike"] != 1)
@@ -118,32 +159,57 @@ def main():
     def num(v):
         return None if (v is None or (isinstance(v, float) and np.isnan(v))) else round(float(v), 3)
 
+    def prod(frame, coach, key):
+        if coach not in frame.index:
+            return None, None
+        row = frame.loc[coach]
+        if row["g"] < MIN_PROD_G:
+            return None, int(row["g"])
+        return round(float(row[key]), 1 if key == "pts" else 0), int(row["g"])
+
     entries = {}
     for team, coach in sorted(current.items()):
+        yc, ycg = prod(yds_career, coach, "yds")
+        yp, ypg = prod(yds_prior, coach, "yds")
+        pc, _ = prod(pts_career, coach, "pts")
+        pp, _ = prod(pts_prior, coach, "pts")
+        e = {"team": team, "coach": coach}
+        # production (the current card): yards/game + points/game, career & prior season
+        e.update({
+            "ydsCareer": yc, "ydsPrior": yp, "ptsCareer": pc, "ptsPrior": pp,
+            "gCareer": ycg, "gPrior": ypg,
+        })
+        # aggressiveness / pass tendency kept in the data for later (not shown for now)
         r = tbl.loc[coach] if coach in tbl.index else None
-        if r is None or pd.isna(r.get("agg_pct")):
-            entries[team] = {"team": team, "coach": coach, "rated": False}
-            continue
-        entries[team] = {
-            "team": team, "coach": coach, "rated": True,
-            "goRate": round(100 * r["go_rate"], 1),
-            "goRateLg": round(100 * lg_go, 1),
-            "aggPct": round(r["agg_pct"]),
-            "aggLabel": label_agg(r["agg_pct"]),
-            "fourthN": int(r["n"]),
-            "proe": num(r["proe"]) if pd.notna(r.get("proe")) and r["plays"] >= MIN_ED else None,
-            "proeLabel": label_proe(r["proe"]) if pd.notna(r.get("proe")) and r["plays"] >= MIN_ED else None,
-        }
+        if r is not None and pd.notna(r.get("agg_pct")):
+            e.update({
+                "rated": True,
+                "goRate": round(100 * r["go_rate"], 1),
+                "goRateLg": round(100 * lg_go, 1),
+                "aggPct": round(r["agg_pct"]),
+                "aggLabel": label_agg(r["agg_pct"]),
+                "fourthN": int(r["n"]),
+                "proe": num(r["proe"]) if pd.notna(r.get("proe")) and r["plays"] >= MIN_ED else None,
+                "proeLabel": label_proe(r["proe"]) if pd.notna(r.get("proe")) and r["plays"] >= MIN_ED else None,
+            })
+        else:
+            e["rated"] = False
+        entries[team] = e
 
     import json
     body = ",\n  ".join(f'"{t}": {json.dumps(e)}' for t, e in entries.items())
     ts = (
         "// AUTO-GENERATED by analysis/coach_tendencies.py — do not edit by hand.\n"
-        "// Head-coach CONTEXT (not an edge): 4th-down aggressiveness (gray-zone go rate vs\n"
-        "// the league) + pass tendency (PROE), from 2021-2024 play-by-play, keyed by each\n"
-        "// team's current coach. `rated:false` = new coach / not enough history yet.\n"
+        "// Head-coach CONTEXT (not an edge), keyed by each team's current coach.\n"
+        "// Shown now: production — offensive yards/game + points/game, career (2021-24, the\n"
+        "// span of our play-by-play) and the prior season (2024). null = under a half-season\n"
+        "// of games with us. Aggressiveness (gray-zone 4th-down go rate) + pass tendency (PROE)\n"
+        "// are also carried for later use; `rated:false` = new coach / not enough history yet.\n"
         "export interface CoachTendency {\n"
         "  team: string; coach: string; rated: boolean;\n"
+        "  ydsCareer?: number | null; ydsPrior?: number | null;\n"
+        "  ptsCareer?: number | null; ptsPrior?: number | null;\n"
+        "  gCareer?: number | null; gPrior?: number | null;\n"
         "  goRate?: number; goRateLg?: number; aggPct?: number; aggLabel?: string; fourthN?: number;\n"
         "  proe?: number | null; proeLabel?: string | null;\n"
         "}\n"

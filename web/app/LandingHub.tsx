@@ -12,6 +12,7 @@ import { INCENTIVE_WATCH } from "@/lib/incentiveWatch";
 import { COACH_TENDENCIES } from "@/lib/coachTendencies";
 import { CONTENTION } from "@/lib/contention";
 import { isRealistic } from "@/lib/depthChart";
+import CoachTable from "./CoachTable";
 import Tip from "./Tip";
 import { ScrollHint, MoreTable } from "./Nav";
 
@@ -48,20 +49,6 @@ function refFlag(pen: number): { label: string; tone: "hot" | "cool" } | null {
   return null;
 }
 
-/** One coach's tendency line (CONTEXT, not a pick). */
-function cxCoach(team: string) {
-  const c = COACH_TENDENCIES[team];
-  if (!c) return null;
-  return (
-    <span className="cxcoach__t" key={team}>
-      {team} <b className="cxcoach__nm">{c.coach}</b>
-      {c.rated
-        ? <> — <b className="cxcoach__agg">{c.aggLabel}</b> on 4th{c.proeLabel ? <> · {c.proeLabel}</> : null}</>
-        : <span className="muted"> — first year</span>}
-    </span>
-  );
-}
-
 /** One team's playoff-picture line (CONTEXT; flags reduced-stakes games). */
 function cxStake(team: string) {
   const c = CONTENTION[team];
@@ -89,7 +76,7 @@ function cxCardEl(w: GameWeather) {
         <div className="cxrow"><dt className="cxrow__k">Weather</dt><dd className="cxrow__v">{w.windFlag && <b className="wxflag">⚑&nbsp;WIND</b>} {cxWeather(w)}</dd></div>
         <div className="cxrow"><dt className="cxrow__k">Referee</dt><dd className="cxrow__v"><span className="muted">Crew tagged game week</span></dd></div>
         {(COACH_TENDENCIES[w.away] || COACH_TENDENCIES[w.home]) && (
-          <div className="cxrow cxrow--coach"><dt className="cxrow__k">Coaching</dt><dd className="cxrow__v cxcoach">{cxCoach(w.away)}{cxCoach(w.home)}</dd></div>
+          <div className="cxrow cxrow--coach cxrow--wide"><dt className="cxrow__k">Coaching</dt><dd className="cxrow__v"><CoachTable away={w.away} home={w.home} /></dd></div>
         )}
         {(CONTENTION[w.away] || CONTENTION[w.home]) && (
           <div className="cxrow cxrow--stake"><dt className="cxrow__k">Stakes</dt><dd className="cxrow__v cxcoach">{cxStake(w.away)}{cxStake(w.home)}</dd></div>
