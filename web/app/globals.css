@@ -2028,6 +2028,9 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .ncf-honest p{margin:0;font-size:13.5px;line-height:1.6}
 
 .ncf-sec{margin:22px 0 10px}
+/* heading row carrying an inline help scroll; position:relative anchors its bubble */
+.ncf-hrow{position:relative;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+.ncf-hrow .ncf-h{margin:0}
 .ncf-h{font-size:16px;margin:0 0 10px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .ncf-h__note{font-size:11.5px;font-weight:400;color:var(--muted)}
 .ncf-tbl{border:1px solid var(--line);border-radius:12px;overflow:hidden}
