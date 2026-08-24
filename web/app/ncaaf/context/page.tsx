@@ -29,9 +29,10 @@ export default function Page() {
       const dog = fav === g.home ? g.away : g.home;
       const line = Math.abs(g.marketSpread!.num);
       return {
-        sport: "CFB" as const, away: g.away, home: g.home, dog, fav, line,
+        sport: "CFB" as const, away: g.away, home: g.home, dog, fav, line, week: c.week,
         dogReturn: returnFromSpread(line, "CFB"), returnEst: true,
         favTrait: CFB_CHAOS[fav], dogTrait: CFB_CHAOS[dog], windMph: null,
+        riserPct: fav === g.home ? g.awayRiser : g.homeRiser,
       };
     });
   const chaos = buildChaosBoard(chaosInputs, 6);

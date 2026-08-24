@@ -87,6 +87,24 @@ def fetch_preseason_sp(season):
             if d.get("team") and d.get("team") != "nationalAverages" and d.get("rating") is not None}
 
 
+def compute_risers(final, sp):
+    """Per-team 'riser' score (0-100): how far preseason SP+ ranks a team ABOVE where last
+    season's results-based rating did. A high value = an improved/underrated team the market
+    may lag early. Zero when SP+ ranks it the same or lower. Speculative Chaos Board only."""
+    if not sp:
+        return {}
+    def pctl(d):
+        order = sorted(d.values())
+        n = len(order)
+        return {t: (0.0 if n < 2 else 100.0 * order.index(v) / (n - 1)) for t, v in d.items()}
+    sp_p, fin_p = pctl(sp), pctl(final)
+    out = {}
+    for t in final:
+        if t in sp_p:
+            out[t] = max(0.0, sp_p[t] - fin_p.get(t, 0.0))
+    return out
+
+
 def seed_preseason_prior(final, sp, blend):
     """Blend last season's results-based carryover `final` (a compressed, ridge-scale team
     rating) with preseason SP+ so the forward card starts from a credible number. SP+ is on
@@ -200,7 +218,7 @@ def team_scoring(db, season, decay):
 WINK = 11.0  # margin -> win-prob logistic scale (a 7-pt edge ~ 65%)
 
 
-def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=None):
+def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=None, risers=None):
     """Model-vs-Market card + upsets for `week`, mirroring the NFL board. Each game gets
     the market spread + total and our model's projection; `featured` flags games with a
     top-25 team (the homepage leads with those, the rest go behind a 'see all' dropdown).
@@ -253,6 +271,11 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
             "conf": (confs or {}).get(home) or "Other",   # HOME team's conference (for grouping)
             "marketSpread": market_spread, "marketTotal": mtot,
             "projSpread": proj_spread, "projTotal": round(float(ptot), 1),
+            # "riser" = how much preseason SP+ ranks a team ABOVE where last season's results
+            # did (0-100). A high-riser underdog is an improved/underrated team the market may
+            # be slow to respect early -- fuel for the speculative early-season Chaos Board.
+            "homeRiser": round((risers or {}).get(home, 0.0)),
+            "awayRiser": round((risers or {}).get(away, 0.0)),
             "pick": pick, "totalLean": total_lean, "off": off_flag,
             "featured": bool(home in top_set or away in top_set),
             "_interest": min(rh, ra),
@@ -318,7 +341,8 @@ def main():
     scoring = team_scoring(DB, last, DECAY)
     odds = fetch_ncaaf_odds()
     confs = team_conferences(DB, last)
-    card_games, upsets = build_card(DB, cur_ratings, hfa, CARD_SEASON, card_week, top_set, scoring, odds, confs)
+    risers = compute_risers(final, sp)
+    card_games, upsets = build_card(DB, cur_ratings, hfa, CARD_SEASON, card_week, top_set, scoring, odds, confs, risers)
     ranked = sorted(final.items(), key=lambda kv: kv[1], reverse=True)
     top = [{"rank": i + 1, "team": t, "conf": confs.get(t, ""), "rating": round(r, 1)}
            for i, (t, r) in enumerate(ranked[:25])]
@@ -386,6 +410,7 @@ def main():
             "export type NcaafCardGame = { away: string; home: string; neutral: number; conf: string;"
             " marketSpread: { fav: string; num: number } | null; marketTotal: number | null;"
             " projSpread: { fav: string; num: number }; projTotal: number;"
+            " homeRiser: number; awayRiser: number;"
             " pick: { side: string; num: number } | null;"
             " totalLean: { dir: string; num: number } | null; off: boolean; featured: boolean };\n"
             "export type NcaafUpset = { dog: string; matchup: string; spread: string;"

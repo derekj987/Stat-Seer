@@ -12,6 +12,7 @@ const PIPS: { key: keyof ChaosEntry["subs"]; label: string }[] = [
   { key: "wild", label: "Wildcard" },
   { key: "payout", label: "Payout" },
 ];
+const EARLY_PIP: { key: keyof ChaosEntry["subs"]; label: string } = { key: "early", label: "Early X-factor" };
 
 export function ChaosBoard({
   sport,
@@ -23,6 +24,7 @@ export function ChaosBoard({
   windowLabel: string;
 }) {
   if (entries.length === 0) return null;
+  const earlyOn = entries.some((e) => e.earlyActive);
   return (
     <section className="ctxsec cb">
       <div className="ctxsec__head">
@@ -38,12 +40,28 @@ export function ChaosBoard({
         a fat payout) and openly ignores the priced factors. The market thinks all of these are long shots —
         <b> that&apos;s the appeal</b>. Just for fun; not a pick.
       </p>
+      {earlyOn && (
+        <p className="cb__early">
+          <b>⚡ Early X-factor is live (weeks 1–3).</b> The season&apos;s first few weeks are its most
+          chaotic: rosters were overhauled and no one has current-season form, so the market works with
+          the least information — and dogs win a bit more often at the same price (~+1.5 pts vs mid-season).
+          This factor rewards a live dog in the sweet spot
+          {entries.some((e) => (e.riserPct ?? 0) >= 40)
+            ? ", plus an underdog whose preseason rating jumped well past last year — an improved team a favorite can look past"
+            : ""}
+          . It fades to zero after week 3, and it&apos;s a variance flag, <b>not an edge</b> —{" "}
+          {sport === "NFL"
+            ? "early NFL dogs still cover only ~53.5% ATS, within a coin flip of the vig"
+            : "early college dogs actually cover under 50% ATS (the early slate is full of cupcake blowouts), so there's no dog edge here at all"}.
+        </p>
+      )}
       <div className="cb__legend">
         <span className="cb__legttl">Chaos Index blends</span>
         <span className="cb__chip">🌪 Boom/bust favorite</span>
         <span className="cb__chip">🚀 Dog ceiling</span>
         <span className="cb__chip">🎲 Wildcard</span>
         <span className="cb__chip">💰 Payout</span>
+        {earlyOn && <span className="cb__chip cb__chip--early">⚡ Early X-factor</span>}
         <span className="cb__win">traits: last 2 seasons ({windowLabel})</span>
       </div>
 
@@ -61,8 +79,8 @@ export function ChaosBoard({
               </div>
               <p className="cb__story">{e.story}</p>
               <div className="cb__pips">
-                {PIPS.map((p) => (
-                  <div className="cb__pip" key={p.key}>
+                {(e.earlyActive ? [...PIPS, EARLY_PIP] : PIPS).map((p) => (
+                  <div className={`cb__pip${p.key === "early" ? " cb__pip--early" : ""}`} key={p.key}>
                     <span className="cb__piplab">{p.label}</span>
                     <span className="cb__piptrack">
                       <span className="cb__pipfill" style={{ width: `${Math.round(e.subs[p.key])}%` }} />

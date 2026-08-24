@@ -118,7 +118,7 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
       }
       const wx = weatherByEvent.get(g.eventId);
       return {
-        sport: "NFL" as const, away: g.away, home: g.home, dog, fav, line,
+        sport: "NFL" as const, away: g.away, home: g.home, dog, fav, line, week,
         dogReturn, returnEst,
         favTrait: NFL_CHAOS[fav], dogTrait: NFL_CHAOS[dog],
         windMph: wx && !wx.indoor ? wx.windMph : null,
