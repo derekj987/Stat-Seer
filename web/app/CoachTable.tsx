@@ -15,9 +15,9 @@ function CoachLine({ team }: { team: string }) {
     <div className="cxcoachln">
       <span className="cxcoachln__tm">{team} <b className="cxcoachln__nm">{lastName(c.coach)}</b></span>
       {noHist ? (
-        <span className="cxcoachln__none">first year — no head-coach history yet</span>
+        <span className="cxcoachln__none"> — first year, no head-coach history yet</span>
       ) : (
-        <span className="cxcoachln__stats">
+        <span className="cxcoachln__stats">{" — "}
           <b>{fmtP(c.ptsCareer)}</b> pts/g · <b>{fmtY(c.ydsCareer)}</b> off yds/g ·{" "}
           <b>{fmtY(c.defYdsCareer)}</b> def yds/g allowed
         </span>
@@ -33,7 +33,6 @@ export default function CoachTable({ away, home }: { away: string; home: string 
     <div className="cxcoachlns">
       <CoachLine team={away} />
       <CoachLine team={home} />
-      <p className="cxcoachlns__foot">Per game, under this coach · 2021–24</p>
     </div>
   );
 }
