@@ -1714,6 +1714,11 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-form--mkt th:nth-child(3),.hb-form--mkt td:nth-child(3){width:13%}
 .hb-form--mkt th:nth-child(4),.hb-form--mkt td:nth-child(4){width:21%}
 .hb-form--mkt th:nth-child(5),.hb-form--mkt td:nth-child(5){width:20%}
+/* player-snapshot 4-col: Player · Team · Prop(book) · Our proj */
+.hb-form--psnap th:nth-child(1),.hb-form--psnap td:nth-child(1){width:34%}
+.hb-form--psnap th:nth-child(2),.hb-form--psnap td:nth-child(2){width:12%}
+.hb-form--psnap th:nth-child(3),.hb-form--psnap td:nth-child(3){width:30%}
+.hb-form--psnap th:nth-child(4),.hb-form--psnap td:nth-child(4){width:24%}
 .hb-form th,.hb-form td{text-align:left}
 .hb-form th{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
   font-weight:700;padding:0 0 6px;border-bottom:1px solid var(--line)}
@@ -2417,6 +2422,8 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   font-size:clamp(23px,4.6vw,33px);font-weight:400;letter-spacing:.03em;color:var(--gold);line-height:1.1;
   text-shadow:0 1px 2px rgba(0,0,0,.25),0 0 10px color-mix(in srgb,var(--gold) 30%,transparent)}
 .hb-plrtable .hb-plr__up{font-size:11px;margin-right:2px}
+.hb-plrpos{font-size:9.5px;font-weight:700;color:var(--muted);letter-spacing:.03em;
+  border:1px solid var(--line);border-radius:4px;padding:1px 4px;margin-left:3px;white-space:nowrap}
 .hb-plrlink{color:var(--ink);text-decoration:none;font-weight:700}
 .hb-plrlink:hover{color:var(--accent)}
 .hb-plr__srccell{color:var(--muted);font-size:12px}

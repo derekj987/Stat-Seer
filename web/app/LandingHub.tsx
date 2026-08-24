@@ -11,7 +11,7 @@ import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
 import { INCENTIVE_WATCH } from "@/lib/incentiveWatch";
 import { COACH_TENDENCIES } from "@/lib/coachTendencies";
 import { CONTENTION } from "@/lib/contention";
-import { isRealistic } from "@/lib/depthChart";
+import { isRealistic, DEPTH } from "@/lib/depthChart";
 import CoachTable from "./CoachTable";
 import Tip from "./Tip";
 import { ScrollHint, MoreTable } from "./Nav";
@@ -28,7 +28,14 @@ const TIPS = {
   referee: <>Each crew&apos;s tendencies. The one thing that carries over year to year is <b>penalties per game</b> — the O/U and ATS leans are historical context, not a lean.</>,
 } as const;
 
-const PROP_LABEL: Record<string, string> = { rush_yds: "Rush Yds", rec_yds: "Rec Yds", receptions: "Rec", pass_yds: "Pass Yds" };
+const PROP_LABEL: Record<string, string> = { rush_yds: "Rush Yds", rec_yds: "Rec Yds", receptions: "Rec", pass_yds: "Pass Yds", pass_tds: "Pass TDs", anytime_td: "ATTD" };
+// unit appended to the book/proj number for a market ("%" for the anytime-TD probability)
+const PROP_UNIT: Record<string, string> = { anytime_td: "%", rush_yds: " yds", rec_yds: " yds", pass_yds: " yds" };
+// position + depth-chart tag, e.g. "RB1", "WR3" (from the nflverse depth chart)
+function depthTag(player: string, pos: string): string {
+  const e = DEPTH[player.toLowerCase().replace(/[^a-z ]/g, "").replace(/\b(jr|sr|ii|iii|iv|v)\b/g, "").replace(/\s+/g, " ").trim()];
+  return e ? `${e.pos}${e.rank}` : pos;
+}
 
 const cxKickFmt = new Intl.DateTimeFormat("en-US", {
   timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
@@ -328,20 +335,42 @@ function FanAnalysisNote() {
 
 // Player Model snapshot — a few of our line-blind prop reads with "Our Model Suggests"
 // (the prior-season hit rate over the posted line). NFL only; NCAAF has no projections yet.
+// A starter / primary contributor (depth rank <= 2); unknown players pass (don't over-filter).
+function isStarter(player: string): boolean {
+  const e = DEPTH[player.toLowerCase().replace(/[^a-z ]/g, "").replace(/\b(jr|sr|ii|iii|iv|v)\b/g, "").replace(/\s+/g, " ").trim()];
+  return !e || e.rank <= 2;
+}
 function PlayerSnapshot({ base }: { base: Sport }) {
   const href = base === "ncaaf" ? "/ncaaf/model/players" : "/model/players";
-  const rows = base === "nfl"
-    ? [...PLAYER_PROJECTIONS]
-        .filter((r) => r.book > 0 && isRealistic(r.player))
-        .sort((a, b) => Math.abs(b.proj / b.book - 1) - Math.abs(a.proj / a.book - 1))
-        .slice(0, 6)
-    : [];
+  // One row per starter — their biggest book-vs-projection gap — so we don't repeat a
+  // player or surface deep-backup noise. Sorted by that gap, top 6.
+  let rows: PlayerProj[] = [];
+  if (base === "nfl") {
+    // Only meaningful props — a real scoring threat / real yardage line, not a fullback's
+    // 3% anytime-TD. Floors are per market so the book value is comparable within it.
+    const MIN_BOOK: Record<string, number> = { anytime_td: 30, rush_yds: 40, rec_yds: 40, receptions: 3, pass_yds: 200, pass_tds: 1 };
+    const gap = (r: PlayerProj) => Math.abs(r.proj / r.book - 1);
+    const best = new Map<string, PlayerProj>();
+    for (const r of PLAYER_PROJECTIONS) {
+      if (!isStarter(r.player) || r.book < (MIN_BOOK[r.market] ?? 0)) continue;
+      const cur = best.get(r.player);
+      if (!cur || gap(r) > gap(cur)) best.set(r.player, r);
+    }
+    // Take the top 6, but at most 2 per market so it's a varied mix, not six anytime-TDs.
+    const perMkt: Record<string, number> = {};
+    for (const r of [...best.values()].sort((a, b) => gap(b) - gap(a))) {
+      if (rows.length >= 6) break;
+      if ((perMkt[r.market] ?? 0) >= 2) continue;
+      perMkt[r.market] = (perMkt[r.market] ?? 0) + 1;
+      rows.push(r);
+    }
+  }
   if (!rows.length) {
     return (
       <>
         <div className="hb-formwrap">
           <table className="hb-form">
-            <thead><tr><th className="hb-l">Player</th><th>Team</th><th>Prop</th><th>Our Model Suggests</th></tr></thead>
+            <thead><tr><th className="hb-l">Player</th><th>Team</th><th>Prop (book)</th><th>Our proj</th></tr></thead>
             <tbody><tr className="hb-off"><td className="hb-l" colSpan={4}>Projections publish here as the season&apos;s usage is captured.</td></tr></tbody>
           </table>
         </div>
@@ -349,20 +378,21 @@ function PlayerSnapshot({ base }: { base: Sport }) {
       </>
     );
   }
-  const psnapRow = (r: (typeof rows)[number], i: number) => {
+  const psnapRow = (r: PlayerProj, i: number) => {
+    const unit = PROP_UNIT[r.market] ?? "";
     const over = r.proj >= r.book;
     return (
       <tr key={`${r.player}-${r.market}`} className={i >= 3 ? "hb-row--more" : undefined}>
-        <td className="hb-l"><a className="hb-plrlink" href={href}>{r.player}</a></td>
+        <td className="hb-l"><a className="hb-plrlink" href={href}>{r.player}</a> <span className="hb-plrpos">{depthTag(r.player, r.pos)}</span></td>
         <td className="hb-num">{r.team}</td>
-        <td>{PROP_LABEL[r.market] ?? r.market} {r.book}</td>
-        <td className="hb-suggest"><span className="hb-sugwrap"><span className="hb-sug"><span className={`hb-sug__t pmarrow--${over ? "up" : "down"}`}>{over ? "▲ Over" : "▼ Under"} · proj {r.proj}</span></span></span></td>
+        <td>{PROP_LABEL[r.market] ?? r.market} <span className="hb-num hb-tot">{r.book}{unit}</span></td>
+        <td className="hb-num"><span className={`hb-model pmarrow--${over ? "up" : "down"}`}>{r.proj}{unit} {over ? "▲" : "▼"}</span></td>
       </tr>
     );
   };
   return (
     <>
-      <MoreTable id={`psnap-more-${base}`} head={<thead><tr><th className="hb-l">Player</th><th>Team</th><th>Prop</th><th>Our Model Suggests</th></tr></thead>} extra={Math.max(0, rows.length - 3)} noun="picks">
+      <MoreTable id={`psnap-more-${base}`} cls="hb-form--psnap" head={<thead><tr><th className="hb-l">Player</th><th>Team</th><th>Prop (book)</th><th>Our proj</th></tr></thead>} extra={Math.max(0, rows.length - 3)} noun="players">
         {rows.map(psnapRow)}
       </MoreTable>
       <p className="lp-cardfoot"><a href={href}>See the full Player Model →</a></p>
