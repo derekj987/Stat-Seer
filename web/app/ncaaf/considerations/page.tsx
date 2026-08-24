@@ -18,7 +18,10 @@ export default function Page() {
   return (
     <main className="wrap">
       <header className="masthead">
-        <Brand sub={`The Context · College Football · Special Considerations · ${M.season}`} />
+        <Brand
+          sub={<><span className="brand__sport">NCAAF</span> · Special Considerations</>}
+          art={{ src: "/coach.png?v=1", alt: "Coach" }}
+        />
       </header>
 
       <FlowSteps active="context" base="ncaaf" />
