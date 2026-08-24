@@ -126,6 +126,12 @@ export default function Page() {
             <span className="hb-x"> · <b>Our Projection</b> is our line-blind spread &amp; total, shown so you can compare
               it to the market — <b>not a pick</b> (our rating predicts about as well as Elo but doesn&apos;t beat the
               spread; see the record above).</span>
+            {c.preseasonSeeded && (
+              <span className="hb-x"> · <b>Preseason note:</b> with no {c.season} games played yet, these projections
+                are seeded with published preseason ratings (SP+) blended with our own carryover, so the early number is
+                credible instead of leaning on last season alone. As real games are played our in-season rating takes
+                over and the seed washes out by about week 5.</span>
+            )}
           </div>
           <MoreTable id="ncaaf-snap-more" head={<CardHead />} extra={snapshotRest.length} noun="ranked games" cls="hb-form--mkt">
             <CardRows games={ranked} moreFrom={5} />

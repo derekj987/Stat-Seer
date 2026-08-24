@@ -18,11 +18,27 @@ import urllib.request
 
 import cfb_power as cp
 import cfb_ats as ca
+import cfbd_client as cc
 import odds_client as oc
 
 DB = "data/cfb.db"
 LAM, CAP, DECAY, FROM_WEEK = 5.0, 28, 0.6, 6
 OUT = "web/app/ncaaf/model-data.ts"
+
+# Preseason seed. With NO current-season games, our forward projection would otherwise
+# lean only on last season's results-based rating -- which we measured to be badly off the
+# board (MAE 8.2 pts vs the market, and it even picks the WRONG favorite in a handful of
+# reload/rebuild spots our results-only carryover can't see). Preseason SP+ (Bill
+# Connelly's published, line-blind efficiency projection, pulled the day the card is built
+# so there's no hindsight) prices returning production + recruiting + transfers, fixing
+# both the ordering and the compression. We blend it with our own carryover so the number
+# stays partly ours, and it WASHES OUT: once real 2026 games arrive the ridge refit (LAM=5)
+# moves off this prior, ~parity by week 5-6. This seed touches ONLY the forward card -- the
+# published walk-forward track record (SU/RMSE/ATS) never sees SP+ and is unchanged.
+# NOTE: the /ratings/sp endpoint archives only each PAST season's FINAL SP+, so this can't
+# be cleanly back-tested as a preseason prior; the justification is SP+'s published
+# preseason record plus the ordering/compression fixes visible on the live board.
+SP_BLEND = 0.65
 
 
 def team_conferences(db, season):
@@ -49,6 +65,40 @@ def season_final_ratings(games, upto):
         if s == upto:
             break
     return final, hfa
+
+
+def fetch_preseason_sp(season):
+    """Preseason SP+ ratings for `season` -> {team: rating} on a net-points-vs-average
+    scale (the same scale as a projected neutral-field margin). Pulled live from CFBD; the
+    call is preseason so the ratings are forward-looking, not hindsight. Empty on any
+    failure (the caller then falls back to the last-season carryover, i.e. prior behavior)."""
+    key = oc.load_env().get("CFBD_API_KEY")
+    if not key:
+        return {}
+    try:
+        st, data = cc.cfbd_get("/ratings/sp", {"year": season}, key)
+    except Exception as e:  # noqa: BLE001
+        print("  SP+ fetch failed: %s" % e, file=sys.stderr)
+        return {}
+    if st != 200 or not isinstance(data, list):
+        print("  SP+ fetch HTTP %s" % st, file=sys.stderr)
+        return {}
+    return {d["team"]: float(d["rating"]) for d in data
+            if d.get("team") and d.get("team") != "nationalAverages" and d.get("rating") is not None}
+
+
+def seed_preseason_prior(final, sp, blend):
+    """Blend last season's results-based carryover `final` (a compressed, ridge-scale team
+    rating) with preseason SP+ so the forward card starts from a credible number. SP+ is on
+    the de-compressed margin scale, so divide by CARD_SCALE to bring it onto `final`'s scale
+    before mixing; teams SP+ doesn't cover keep their pure carryover. Returns a new dict."""
+    if not sp:
+        return dict(final)
+    out = {}
+    for t, r in final.items():
+        s = sp.get(t)
+        out[t] = (blend * (s / CARD_SCALE) + (1 - blend) * r) if s is not None else r
+    return out
 
 
 def load_completed(db, season):
@@ -253,12 +303,16 @@ def main():
 
     final, hfa = season_final_ratings(games, last)
     # The Card: line-blind projections for the UPCOMING week. The preseason strength
-    # estimate is last season's UNDECAYED final rating (validated: lower early-season
-    # error than the old 0.6x shrink); CARD_SCALE then de-compresses it. As the season
-    # runs, games already played refit toward that full prior, so a scheduled refresh
-    # stays correct. Week auto-advances.
+    # estimate seeds last season's UNDECAYED final rating with preseason SP+ (see SP_BLEND)
+    # so the forward number is credible before any 2026 games exist; CARD_SCALE then
+    # de-compresses it. As the season runs, games already played refit toward that seeded
+    # prior and the SP+ portion washes out, so a scheduled refresh stays correct. Week
+    # auto-advances.
+    sp = fetch_preseason_sp(CARD_SEASON)
+    prior_pre = seed_preseason_prior(final, sp, SP_BLEND)
     completed = load_completed(DB, CARD_SEASON)
-    cur_ratings = cp.fit_ratings(completed, LAM, CAP, final)[0] if completed else final
+    cur_ratings = cp.fit_ratings(completed, LAM, CAP, prior_pre)[0] if completed else prior_pre
+    preseason_seeded = bool(sp) and not completed
     card_week = detect_upcoming_week(DB, CARD_SEASON, CARD_WEEK)
     top_set = {t for t, _ in sorted(final.items(), key=lambda kv: kv[1], reverse=True)[:25]}
     scoring = team_scoring(DB, last, DECAY)
@@ -321,7 +375,7 @@ def main():
         "teamsRated": len(final), "top": top, "validation": valid, "ats": ats,
         "context": {"hfa": round(hfa, 1), "conferences": conferences},
         "value": {"games": ng, "keyNumbers": key_numbers, "bookShop": book_shop},
-        "card": {"season": CARD_SEASON, "week": card_week,
+        "card": {"season": CARD_SEASON, "week": card_week, "preseasonSeeded": preseason_seeded,
                  "games": card_games, "upsets": upsets},
     }
     body = ("// AUTO-GENERATED by cfb_export.py -- do not edit by hand.\n"
@@ -349,8 +403,10 @@ def main():
     print(f"  value: key# 3={key_numbers[0]['pct']}% 7={key_numbers[1]['pct']}%; "
           f"book spread avg {book_shop['avgRange']} pts, {book_shop['pctGap1']}% gap>=1")
     matched = sum(1 for g in card_games if g["marketSpread"])
+    seed_txt = (f"SP+-seeded (blend {SP_BLEND}, {len(sp)} teams)" if preseason_seeded
+                else ("carryover (in-season)" if completed else "carryover (no SP+)"))
     print(f"  card: {CARD_SEASON} wk{card_week}, {len(card_games)} games "
-          f"({matched} with market lines), {len(upsets)} upset(s)")
+          f"({matched} with market lines), {len(upsets)} upset(s); preseason prior: {seed_txt}")
     if upsets:
         u = upsets[0]
         print(f"  top upset: {u['dog']} {u['matchup']} — model {u['modelPct']}% vs market {u['marketPct']}%")

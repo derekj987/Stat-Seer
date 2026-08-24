@@ -49,6 +49,11 @@ export default function Page() {
           <span className="hb-dia">◆</span> Off-consensus — our projected line is well off the market&apos;s.
           <span className="hb-x"> · <b>Our Projection</b> is our line-blind spread &amp; total, shown to compare against
             the market — <b>not a pick</b> (the rating doesn&apos;t beat the spread; see <a href="/ncaaf/model">The Model</a>).</span>
+          {c.preseasonSeeded && (
+            <span className="hb-x"> · <b>Preseason note:</b> with no {c.season} games played yet, these projections are
+              seeded with published preseason ratings (SP+) blended with our own carryover; our in-season rating takes
+              over as games are played.</span>
+          )}
         </div>
         <div className="hb-formwrap">
           <table className="hb-form hb-form--mkt">
