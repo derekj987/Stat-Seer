@@ -15,6 +15,18 @@ const PIPS: { key: keyof ChaosEntry["subs"]; label: string }[] = [
 const EARLY_PIP: { key: keyof ChaosEntry["subs"]; label: string } = { key: "early", label: "Early X-factor" };
 const COMFORT_PIP: { key: keyof ChaosEntry["subs"]; label: string } = { key: "comfort", label: "Comfort zone" };
 
+// A legend chip that explains its factor on hover (desktop) or tap (mobile) — pure CSS, no JS,
+// same mechanism as the Tip component (a hidden checkbox flipped by the <label> reveals the note).
+function FactorChip({ emoji, label, tip, cls }: { emoji: string; label: string; tip: string; cls?: string }) {
+  return (
+    <label className={`cb__chip cb__chip--tip${cls ? " " + cls : ""}`}>
+      <input type="checkbox" className="cb__chiptchk" tabIndex={-1} aria-hidden="true" />
+      <span>{emoji} {label}</span>
+      <span className="cb__chiptip" role="tooltip">{tip}</span>
+    </label>
+  );
+}
+
 export function ChaosBoard({
   sport,
   entries,
@@ -37,10 +49,11 @@ export function ChaosBoard({
           point. <b>Not a pick, not an edge</b> — it never touches our model.</>} />
       </div>
       <p className="ctxsec__d">
-        For the aggressive bettor: which games <em>could</em> blow up — ranked by <b>chaos potential</b>,
-        not how likely it is. It rewards upside and mayhem (a shaky favorite, a high-ceiling dog, weather,
-        a fat payout) and openly ignores the priced factors. The market thinks all of these are long shots —
-        <b> that&apos;s the appeal</b>. Just for fun; not a pick.
+        For the aggressive bettor: which underdogs <em>could</em> pull the outright upset — <b>win the game
+        straight up</b> (the moneyline, not the spread) — ranked by <b>chaos potential</b>, not how likely it is.
+        It rewards upside and mayhem (a shaky favorite, a high-ceiling dog, weather, a fat payout) and openly
+        ignores the priced factors. The market thinks all of these are long shots — <b>that&apos;s the appeal</b>.
+        Just for fun; not a pick.
       </p>
       {earlyOn && (
         <p className="cb__early">
@@ -58,13 +71,19 @@ export function ChaosBoard({
         </p>
       )}
       <div className="cb__legend">
-        <span className="cb__legttl">Chaos Index blends</span>
-        <span className="cb__chip">🌪 Boom/bust favorite</span>
-        <span className="cb__chip">🚀 Dog ceiling</span>
-        <span className="cb__chip">🎲 Wildcard</span>
-        <span className="cb__chip">💰 Payout</span>
-        {earlyOn && <span className="cb__chip cb__chip--early">⚡ Early X-factor</span>}
-        {comfortOn && <span className="cb__chip cb__chip--comfort">🏟 Comfort zone</span>}
+        <span className="cb__legttl">Chaos Index blends <span className="cb__legttl-hint">(hover / tap a chip)</span></span>
+        <FactorChip emoji="🌪" label="Boom/bust favorite"
+          tip="How wildly the favorite's scores swing week to week. A boom-or-bust favorite is easier to catch on an off day." />
+        <FactorChip emoji="🚀" label="Dog ceiling"
+          tip="The underdog's best-day ceiling — how big they can go when everything clicks, not their average." />
+        <FactorChip emoji="🎲" label="Wildcard"
+          tip="Variance amplifiers that push a game toward a coin flip — chiefly high wind at kickoff." />
+        <FactorChip emoji="💰" label="Payout"
+          tip="What a $100 bet on the underdog pays if it hits. Longer shots pay more — the aggressive-bettor draw." />
+        {earlyOn && <FactorChip emoji="⚡" label="Early X-factor" cls="cb__chip--early"
+          tip="Weeks 1–3 only: the season's start is its most chaotic — new rosters, no current form — so live dogs spring more surprises. Fades to zero after week 3." />}
+        {comfortOn && <FactorChip emoji="🏟" label="Comfort zone" cls="cb__chip--comfort"
+          tip="Is the road dog in a stadium like home? A dome team at another dome is at ease; a warm/dome team out in the late-season cold is not." />}
         <span className="cb__win">traits: last 2 seasons ({windowLabel})</span>
       </div>
 
@@ -77,8 +96,7 @@ export function ChaosBoard({
             </div>
             <div className="cb__mid">
               <div className="cb__match">
-                <b>{e.dog}</b> <span className="cb__line">+{e.line}</span>
-                <span className="cb__at"> {e.dog === e.home ? "vs" : "at"} {e.fav}</span>
+                <b>{e.dog}</b> <span className="cb__at">to win outright {e.dog === e.home ? "vs" : "at"} {e.fav}</span>
                 {e.dog === e.home && <span className="cb__home">home dog</span>}
               </div>
               <p className="cb__story">{e.story}</p>
@@ -98,8 +116,8 @@ export function ChaosBoard({
               <span className="cb__chaos">{e.index}</span>
               <span className="cb__meter"><span className="cb__meterfill" style={{ width: `${e.index}%` }} /></span>
               <span className="cb__pay">
-                if it hits · $100 → <b>${e.dogReturn.toLocaleString()}</b>
-                {e.returnEst && <span className="cb__est"> est</span>}
+                moneyline <b>+{(e.dogReturn - 100).toLocaleString()}</b>{e.returnEst && <span className="cb__est"> est</span>}
+                <br />wins → $100 returns <b>${e.dogReturn.toLocaleString()}</b>
               </span>
             </div>
           </li>

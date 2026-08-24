@@ -728,6 +728,15 @@ a.fauthor:hover{text-decoration:underline}
 .cb__legttl{font-size:11px;color:var(--muted);font-weight:700}
 .cb__chip{font-size:11.5px;font-weight:600;color:var(--ink);background:var(--surface);
   border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+.cb__legttl-hint{font-weight:500;color:var(--muted);font-size:10px}
+.cb__chip--tip{position:relative;cursor:help}
+.cb__chiptchk{position:absolute;opacity:0;width:0;height:0;margin:0;pointer-events:none}
+.cb__chiptip{position:absolute;left:0;top:calc(100% + 6px);z-index:30;width:max-content;max-width:250px;
+  padding:8px 11px;font-size:11.5px;line-height:1.45;font-weight:500;color:var(--ink);text-align:left;
+  background:var(--surface);border:1px solid var(--line);border-radius:9px;box-shadow:0 8px 22px rgba(0,0,0,.16);
+  opacity:0;visibility:hidden;transition:opacity .12s ease}
+.cb__chip--tip:hover .cb__chiptip,
+.cb__chip--tip:has(.cb__chiptchk:checked) .cb__chiptip{opacity:1;visibility:visible}
 .cb__win{margin-left:auto;font-size:11px;color:var(--muted);font-family:var(--font-mono)}
 .cb__board{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:9px}
 .cb__card{display:grid;grid-template-columns:50px 1fr 170px;gap:14px;align-items:center;
