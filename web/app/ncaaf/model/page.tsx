@@ -29,15 +29,10 @@ function groupByConf(games: readonly NcaafCardGame[]): { conf: string; games: Nc
     .map(([conf, gs]) => ({ conf, games: gs }));
 }
 
-function pickTxt(g: NcaafCardGame): string {
-  const pk = g.pick;
-  return pk ? `${pk.side} ${pk.num > 0 ? "+" : ""}${pk.num}` : `${g.projSpread.fav} ${g.projSpread.num}`;
-}
-
 function CardHead() {
   return (
     <thead>
-      <tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Our Model Suggests</th></tr>
+      <tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Our Projection</th></tr>
     </thead>
   );
 }
@@ -46,7 +41,7 @@ function CardRows({ games, moreFrom }: { games: readonly NcaafCardGame[]; moreFr
   return (
     <>
       {games.map((g, i) => {
-        const ms = g.marketSpread; const tl = g.totalLean;
+        const ms = g.marketSpread;
         return (
           <tr key={`${g.away}-${g.home}`} className={[g.off ? "hb-off" : "", moreFrom !== undefined && i >= moreFrom ? "hb-row--more" : ""].filter(Boolean).join(" ") || undefined}>
             <td className="hb-l">
@@ -58,8 +53,8 @@ function CardRows({ games, moreFrom }: { games: readonly NcaafCardGame[]; moreFr
             <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
             <td className="hb-suggest">
               <span className="hb-sugwrap">
-                <span className="hb-sug"><span className="hb-sug__t">{pickTxt(g)}</span></span>
-                {tl && <span className="hb-sug"><span className="hb-sug__t"><span className={`pmarrow pmarrow--${tl.dir === "OVER" ? "up" : "down"}`} aria-hidden="true">{tl.dir === "OVER" ? "▲" : "▼"}</span> {tl.dir === "OVER" ? "Over" : "Under"} {tl.num}</span></span>}
+                <span className="hb-sug"><span className="hb-sug__t">{g.projSpread.fav} {g.projSpread.num}</span></span>
+                <span className="hb-sug"><span className="hb-sug__t hb-sug__tot">O/U {g.projTotal}</span></span>
               </span>
             </td>
           </tr>
@@ -125,15 +120,16 @@ export default function Page() {
       <details className="hb-panel hb-panel--card" open>
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">The Model — Snapshot View</span>
-          <Tip text={<>Every ranked game with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Model Suggests</b> — our line-blind lean. A ◆ marks an <b>off-consensus</b> game. Our CFB rating ties Elo but doesn&apos;t beat the spread, so this is context you can check, <b>not a pick</b>.</>} />
+          <Tip text={<>Every ranked game with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Projection</b> — our own line-blind spread &amp; total. A ◆ marks an <b>off-consensus</b> game (our number is well off the market&apos;s). Our CFB rating ties Elo but doesn&apos;t beat the spread, so this is context you can check, <b>not a pick</b>.</>} />
           <span className="hb-bar__hint">our line-blind read beside the market&apos;s number · Week {c.week}</span>
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
           <div className="hb-legend">
-            <span className="hb-dia">◆</span> Off-consensus — our read is on the other side from the market.
-            <span className="hb-x"> · <b>Our Model Suggests</b> is the side our line-blind rating covers —
-              informative, <b>not a guaranteed bet</b> (the rating doesn&apos;t beat the spread; see the record above).</span>
+            <span className="hb-dia">◆</span> Off-consensus — our projected line is well off the market&apos;s.
+            <span className="hb-x"> · <b>Our Projection</b> is our line-blind spread &amp; total, shown so you can compare
+              it to the market — <b>not a pick</b> (our rating predicts about as well as Elo but doesn&apos;t beat the
+              spread; see the record above).</span>
           </div>
           <MoreTable id="ncaaf-snap-more" head={<CardHead />} extra={snapshotRest.length} noun="ranked games">
             <CardRows games={ranked} moreFrom={5} />

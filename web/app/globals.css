@@ -1736,6 +1736,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   border-radius:8px;padding:3px 9px;margin:0 0 0 -10px;background:color-mix(in srgb,var(--offc) 6%,transparent)}
 .hb-sug{display:inline-flex;align-items:center;gap:5px}
 .hb-sug__t{font-size:11.5px;font-weight:700;color:var(--offc-ink);white-space:nowrap}
+.hb-sug__tot{font-weight:600;color:var(--muted)}
 .hb-leannone{font-size:11px;color:var(--muted);font-style:italic}
 /* "Our Model Suggests" header: hover reveals a note + links into The Model */
 .hb-modeltip{position:relative;color:inherit;text-decoration:none;cursor:help;
