@@ -1535,8 +1535,17 @@ a.snav__dfeat{display:block}
 .pmdisc b{color:var(--ink)}
 /* Player Model footer text fills the page too (scoped so other footers keep their cap) */
 .foot--pm p{max-width:none}
-.pmgame{margin:0 0 16px}
-.pmgame__h{font-size:14px;font-weight:800;color:var(--ink);margin:0 0 6px;letter-spacing:.02em}
+/* each game is a collapsible dropdown (uniform across every player-prop category) */
+details.pmgame{margin:0 0 12px;border:1px solid var(--line);border-radius:12px;
+  overflow:hidden;background:var(--surface-2)}
+.pmgame__h{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;
+  padding:11px 15px;font-size:14px;font-weight:800;color:var(--ink);letter-spacing:.02em;margin:0}
+.pmgame__h::-webkit-details-marker{display:none}
+.pmgame__h:hover{background:color-mix(in srgb,var(--accent) 5%,transparent)}
+.pmgame__chev{margin-left:auto;color:var(--muted);font-size:13px;transition:transform .2s}
+details.pmgame[open]>.pmgame__h{border-bottom:1px solid var(--line)}
+details.pmgame[open]>.pmgame__h .pmgame__chev{transform:rotate(180deg)}
+.pmgame__body{padding:6px 15px 12px}
 /* how the active category is projected — shown above the tables (honest method + caveats) */
 .pmcat__note{margin:0 0 16px;font-size:12.5px;line-height:1.55;color:var(--muted);max-width:82ch}
 .pmcat__note b{color:var(--ink)}

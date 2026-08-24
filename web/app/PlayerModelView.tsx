@@ -135,8 +135,9 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
           <>
             <p className="pmcat__note" role="note">{active.note}</p>
             {games.map((g) => (
-              <div className="pmgame" key={g}>
-                <div className="pmgame__h">{g}</div>
+              <details className="pmgame" key={g} open>
+                <summary className="pmgame__h">{g}<span className="pmgame__chev" aria-hidden="true">▾</span></summary>
+                <div className="pmgame__body">
                 <ScrollHint />
                 {sectionsFor(g).map((sec) => (
                   <div className="pmscroll" key={sec.label ?? "all"}>
@@ -189,7 +190,8 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
                     </div>
                   </div>
                 ))}
-              </div>
+                </div>
+              </details>
             ))}
           </>
         )}
