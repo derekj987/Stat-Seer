@@ -182,7 +182,7 @@ export default function BoardView({
           {snapshot && <div className="asof">lines as of<br /><b>{et(snapshot, snapFmt)}</b></div>}
         </header>
 
-        <ValueFinderDrawer />
+        <ValueFinderDrawer defaultOpen />
 
         <ValueFinderNote />
         <FlowSteps active="value" />

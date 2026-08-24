@@ -77,10 +77,10 @@ export function SportTabs({ active = "nfl" }: { active?: string }) {
 
 /** The "Find the best price" right-edge slide-out (same one as the homepage). A pure-CSS
  *  checkbox drawer: a slim tab pinned to the right; click to slide an example slip out. */
-export function ValueFinderDrawer() {
+export function ValueFinderDrawer({ defaultOpen = false }: { defaultOpen?: boolean }) {
   return (
     <div className="vf-drawer">
-      <input type="checkbox" id="vf-toggle" className="vf-drawer__chk" aria-hidden="true" tabIndex={-1} />
+      <input type="checkbox" id="vf-toggle" className="vf-drawer__chk" aria-hidden="true" tabIndex={-1} defaultChecked={defaultOpen} />
       <label htmlFor="vf-toggle" className="vf-drawer__tab" title="Value Finder">
         <span className="vf-drawer__chev" aria-hidden="true">‹</span>
         <span className="vf-drawer__tabtext">Find the best price</span>

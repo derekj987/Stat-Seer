@@ -129,6 +129,7 @@ MARKET_MAP = {
     "player_reception_yds": ("receiving", "rec_yds"),
     "player_receptions": ("receptions", "receptions"),
     "player_pass_yds": ("passing", "pass_yds"),
+    "player_pass_tds": ("td", "pass_tds"),
 }
 
 
@@ -139,17 +140,21 @@ def build_baselines(prior_seasons):
         s = pd.read_csv(f"data/stats_{y}.csv", low_memory=False)
         frames.append(s[s.season_type == "REG"])
     d = pd.concat(frames, ignore_index=True)
-    for c in ["carries", "rushing_yards", "targets", "receptions", "receiving_yards", "attempts", "passing_yards"]:
+    for c in ["carries", "rushing_yards", "targets", "receptions", "receiving_yards",
+              "attempts", "passing_yards", "passing_tds"]:
         d[c] = pd.to_numeric(d.get(c), errors="coerce").fillna(0.0)
     base = {}
     for pos in ["RB", "FB", "WR", "TE", "QB"]:
         p = d[d.position == pos]
-        pa = p[p.attempts >= 15]   # starter games only, for a fair passing-YPA baseline
+        pa = p[p.attempts >= 15]   # starter games only, for a fair passing-YPA / TD-rate baseline
         base[pos] = {
             "ypc": p.rushing_yards.sum() / max(p.carries.sum(), 1),
             "catch": p.receptions.sum() / max(p.targets.sum(), 1),
             "ypr": p.receiving_yards.sum() / max(p.receptions.sum(), 1),
             "ypa": pa.passing_yards.sum() / max(pa.attempts.sum(), 1),
+            # league passing-TD-per-attempt. TD rate barely persists year to year, so we use
+            # the league starter rate (volume x league efficiency), not the QB's own rate.
+            "tdr": pa.passing_tds.sum() / max(pa.attempts.sum(), 1),
         }
     return base
 
@@ -177,20 +182,21 @@ def prior_year_rates(prior):
 
 
 CAREER_STAT = {"pass_yds": "passing_yards", "rush_yds": "rushing_yards",
-               "rec_yds": "receiving_yards", "receptions": "receptions"}
+               "rec_yds": "receiving_yards", "receptions": "receptions",
+               "pass_tds": "passing_tds"}
 
 
 def load_career(seasons, home_set=frozenset(), away_set=frozenset()):
     """Every game log we have (REG + POST) per player, for the hit-rate columns. Each row is
     tagged venue "H"/"A"/"?" via the schedule so the hit-rate can be split home vs road."""
     keep = ["player_id", "season", "week", "team", "recent_team", "season_type", "attempts",
-            "passing_yards", "rushing_yards", "receiving_yards", "receptions"]
+            "passing_yards", "rushing_yards", "receiving_yards", "receptions", "passing_tds"]
     frames = []
     for y in seasons:
         s = pd.read_csv(f"data/stats_{y}.csv", low_memory=False)
         frames.append(s[[c for c in keep if c in s.columns]].copy())
     d = pd.concat(frames, ignore_index=True)
-    for c in ["attempts", "passing_yards", "rushing_yards", "receiving_yards", "receptions"]:
+    for c in ["attempts", "passing_yards", "rushing_yards", "receiving_yards", "receptions", "passing_tds"]:
         d[c] = pd.to_numeric(d.get(c), errors="coerce").fillna(0.0)
     # unify the team column (older releases used recent_team)
     if "team" not in d.columns:
@@ -209,7 +215,7 @@ def load_career(seasons, home_set=frozenset(), away_set=frozenset()):
 def _over(g, market, line):
     if g is None or line is None:
         return (0, 0)
-    if market == "pass_yds":
+    if market in ("pass_yds", "pass_tds"):
         g = g[g.attempts >= 1]      # only games he actually threw
     vals = g[CAREER_STAT[market]]
     return int((vals > line).sum()), int(len(vals))
@@ -252,6 +258,10 @@ def project(rate, base):
         "rec_yds": round(rate["targets_pg"] * b["catch"] * b["ypr"], 1),
         "receptions": round(rate["targets_pg"] * b["catch"], 1),
         "pass_yds": round(rate["att_pg"] * reg_ypa, 1),
+        # Passing TDs: projected attempts x the LEAGUE starter TD-per-attempt rate. Unlike
+        # YPA, a QB's TD rate doesn't persist, so we don't credit his own rate — this lands
+        # near the book line by design (scoring is not where a projection edge lives).
+        "pass_tds": round(rate["att_pg"] * b.get("tdr", 0.0), 2),
     }
 
 

@@ -16,9 +16,9 @@ export interface PlayerCat {
 }
 
 export const PLAYER_CATS: PlayerCat[] = [
-  { key: "td", label: "Touchdowns", cols: ["Player", "Team", "Anytime TD %", "Proj. TDs"],
-    blurb: "Anytime-touchdown probability from projected goal-line and red-zone touches — volume first, never a raw efficiency guess.",
-    note: "Touchdown odds ride on projected goal-line and red-zone touches from the snap-share model — we model who gets the ball near the end zone, not a raw scoring-rate guess." },
+  { key: "td", label: "Touchdowns", cols: ["Player", "Team", "Book line", "Our proj", "Career % over", "Prior szn % over"],
+    blurb: "Quarterback passing touchdowns — projected pass volume × a regressed league TD-per-attempt rate. Scoring rate barely persists, so this lands near the market by design.",
+    note: "Passing-TD projections are projected attempts times the LEAGUE starter TD-per-attempt rate — we don't credit a QB's own scoring rate, because it doesn't persist year to year, so these sit near the book line (scoring isn't where a projection edge lives). Anytime-TD for ball-carriers arrives as red-zone usage is captured." },
   { key: "passing", label: "Passing", cols: ["Player", "Team", "Pass Yds", "Pass TDs", "Att"],
     blurb: "Projected passing volume (attempts, completions) multiplied by a regressed yards-per-attempt baseline.",
     note: "Passing yards come from projected attempts and completions times a regressed yards-per-attempt baseline — volume is the stable part, efficiency is pulled toward the mean." },
@@ -70,7 +70,7 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
     if (!byGame[r.game]) { byGame[r.game] = []; games.push(r.game); }
     byGame[r.game].push(r);
   }
-  const unit = active.key === "receptions" ? "" : " yds";
+  const unit = active.key === "receptions" ? "" : active.key === "td" ? " TD" : " yds";
 
   return (
     <main className="wrap">
