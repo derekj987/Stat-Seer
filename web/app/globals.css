@@ -719,6 +719,62 @@ a.fauthor:hover{text-decoration:underline}
 .upset__mspread{color:var(--muted);font-family:var(--font-mono);font-size:12px}
 .upset__mkt{margin-left:auto;font-size:12px;color:var(--muted);font-family:var(--font-mono)}
 
+/* --- The Upset Lab / Chaos Board (speculative panel) --- */
+.cb{margin-top:22px}
+.cb__tag{font-family:var(--font-mono);font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--key);background:var(--key-soft);border-radius:5px;padding:2px 6px;vertical-align:middle;margin-left:6px}
+.cb__legend{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:0 0 12px;padding:9px 11px;
+  background:var(--surface-2);border:1px solid var(--line);border-radius:10px}
+.cb__legttl{font-size:11px;color:var(--muted);font-weight:700}
+.cb__chip{font-size:11.5px;font-weight:600;color:var(--ink);background:var(--surface);
+  border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+.cb__win{margin-left:auto;font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+.cb__board{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:9px}
+.cb__card{display:grid;grid-template-columns:50px 1fr 170px;gap:14px;align-items:center;
+  background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--muted);
+  border-radius:12px;padding:13px 15px}
+.cb__card--hot{border-left-color:var(--key)}
+.cb__card--warm{border-left-color:var(--amber)}
+.cb__card--cool{border-left-color:var(--offc)}
+.cb__rank{display:flex;flex-direction:column;align-items:center;gap:5px}
+.cb__no{font-family:var(--font-mono);font-size:20px;font-weight:800;color:var(--muted)}
+.cb__sport{font-family:var(--font-mono);font-size:9px;font-weight:800;letter-spacing:.06em;padding:2px 5px;border-radius:5px}
+.cb__sport--nfl{color:var(--offc-ink);background:var(--offc-soft)}
+.cb__sport--cfb{color:var(--accent);background:var(--accent-soft)}
+.cb__match{font-size:15px;letter-spacing:-.01em}
+.cb__match b{font-weight:800}
+.cb__line{font-family:var(--font-mono);font-weight:700;color:var(--key);font-size:13px}
+.cb__at{color:var(--muted);font-size:14px}
+.cb__story{margin:5px 0 9px;font-size:12.5px;line-height:1.45;color:var(--muted)}
+.cb__pips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:440px}
+.cb__piplab{display:block;font-size:9px;font-weight:700;letter-spacing:.02em;color:var(--muted);
+  text-transform:uppercase;margin-bottom:3px}
+.cb__piptrack{display:block;height:5px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.cb__pipfill{display:block;height:100%;background:var(--muted);border-radius:99px}
+.cb__score{display:flex;flex-direction:column;align-items:flex-start;gap:2px;
+  border-left:1px solid var(--line);padding-left:14px}
+.cb__chaoslab{font-family:var(--font-mono);font-size:9px;font-weight:800;letter-spacing:.14em;color:var(--muted)}
+.cb__chaos{font-size:32px;font-weight:800;line-height:1;letter-spacing:-.03em;color:var(--muted)}
+.cb__card--hot .cb__chaos{color:var(--key)}
+.cb__card--warm .cb__chaos{color:var(--amber)}
+.cb__card--cool .cb__chaos{color:var(--offc-ink)}
+.cb__meter{width:100%;height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin:3px 0 2px}
+.cb__meterfill{display:block;height:100%;border-radius:99px;background:var(--muted)}
+.cb__card--hot .cb__meterfill{background:var(--key)}
+.cb__card--warm .cb__meterfill{background:var(--amber)}
+.cb__card--cool .cb__meterfill{background:var(--offc)}
+.cb__pay{font-size:11.5px;color:var(--muted)}
+.cb__pay b{color:var(--accent);font-family:var(--font-mono);font-weight:700}
+.cb__est{font-size:9px;text-transform:uppercase;letter-spacing:.05em;opacity:.7}
+.cb__foot{margin-top:12px;font-size:11.5px;line-height:1.5;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+@media(max-width:640px){
+  .cb__card{grid-template-columns:40px 1fr}
+  .cb__score{grid-column:1/-1;border-left:0;border-top:1px solid var(--line);padding-left:0;padding-top:9px;
+    flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px}
+  .cb__meter{order:3;flex:1 1 100%}
+  .cb__pips{max-width:none}
+}
+
 /* --- referee crews --- */
 .reftable{display:flex;flex-direction:column;gap:4px;overflow-x:auto}
 /* flexible columns (fr) so the table stretches to fill the page instead of sitting cramped.

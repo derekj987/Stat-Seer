@@ -2,6 +2,10 @@ import { weekRange, fetchWeek, buildBoard } from "@/lib/board";
 import { fetchModelWeek, type ModelPrediction } from "@/lib/model";
 import { MODEL_TOTALS } from "@/lib/modelTotals";
 import { Brand, FlowSteps, ContextSubnav } from "../Nav";
+import { ChaosBoard } from "../ChaosBoard";
+import { buildChaosBoard, returnFromSpread, type ChaosInput } from "@/lib/chaos";
+import { NFL_CHAOS, CHAOS_WINDOW } from "@/lib/chaosTraits";
+import { GAME_WEATHER } from "@/lib/weatherData";
 import Tip from "@/app/Tip";
 
 export const revalidate = 300;
@@ -92,6 +96,37 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
 
   const upsets = envs.filter((e) => e.modelDisagree && e.modelFav); // model likes the market's dog
 
+  // Speculative Chaos Board — the live board scored on chaos potential (not probability).
+  // Payout comes from the real dog moneyline when present, else derived from the spread.
+  const weatherByEvent = new Map(GAME_WEATHER.map((w) => [w.eventId, w]));
+  const chaosInputs: ChaosInput[] = board
+    .filter((g) => g.spread.consensus != null && Math.abs(g.spread.consensus) >= 3)
+    .map((g) => {
+      const spr = g.spread.consensus as number; // home perspective, neg = home favored
+      const fav = spr < 0 ? g.home : g.away;
+      const dog = spr < 0 ? g.away : g.home;
+      const line = Math.abs(spr);
+      const dogMl = g.ml[dog]?.price;
+      let dogReturn: number, returnEst: boolean;
+      if (typeof dogMl === "number") {
+        const profit = dogMl > 0 ? dogMl : 10000 / -dogMl;
+        dogReturn = Math.round((100 + profit) / 10) * 10;
+        returnEst = false;
+      } else {
+        dogReturn = returnFromSpread(line, "NFL");
+        returnEst = true;
+      }
+      const wx = weatherByEvent.get(g.eventId);
+      return {
+        sport: "NFL" as const, away: g.away, home: g.home, dog, fav, line,
+        dogReturn, returnEst,
+        favTrait: NFL_CHAOS[fav], dogTrait: NFL_CHAOS[dog],
+        windMph: wx && !wx.indoor ? wx.windMph : null,
+      };
+    });
+  const chaos = buildChaosBoard(chaosInputs, 6);
+  const winLabel = `${CHAOS_WINDOW[0]}–${CHAOS_WINDOW[1].slice(2)}`;
+
   return (
     <main className="wrap">
       <header className="masthead">
@@ -134,6 +169,9 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
         Looking for the market&apos;s line beside our read on every game? That full model view now
         lives on <a href="/model">The Model</a>.
       </p>
+
+      {/* --- The Upset Lab: a speculative chaos board, under our model's honest read --- */}
+      <ChaosBoard sport="NFL" entries={chaos} windowLabel={winLabel} />
 
       {/* --- Honest roadmap: data-dependent panels not yet live --- */}
       <section className="ctxsec">

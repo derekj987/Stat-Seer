@@ -1,5 +1,8 @@
 import { Brand, FlowSteps, ContextSubnav } from "../../Nav";
 import { NCAAF_MODEL, type NcaafUpset } from "../model-data";
+import { ChaosBoard } from "../../ChaosBoard";
+import { buildChaosBoard, returnFromSpread, type ChaosInput } from "@/lib/chaos";
+import { CFB_CHAOS, CHAOS_WINDOW } from "@/lib/chaosTraits";
 
 // College Football — Context · Upset Watch (Context landing). Mirrors the NFL Context
 // page: underdogs our line-blind rating backs against the market, then every game's line
@@ -16,6 +19,23 @@ const M = NCAAF_MODEL;
 export default function Page() {
   const c = M.card;
   const upsets: readonly NcaafUpset[] = c.upsets;
+
+  // Speculative Chaos Board — every game with a real underdog, scored on chaos potential
+  // (not probability). Payout is derived from the spread (no live CFB moneyline).
+  const chaosInputs: ChaosInput[] = c.games
+    .filter((g) => g.marketSpread && Math.abs(g.marketSpread.num) >= 3)
+    .map((g) => {
+      const fav = g.marketSpread!.fav;
+      const dog = fav === g.home ? g.away : g.home;
+      const line = Math.abs(g.marketSpread!.num);
+      return {
+        sport: "CFB" as const, away: g.away, home: g.home, dog, fav, line,
+        dogReturn: returnFromSpread(line, "CFB"), returnEst: true,
+        favTrait: CFB_CHAOS[fav], dogTrait: CFB_CHAOS[dog], windMph: null,
+      };
+    });
+  const chaos = buildChaosBoard(chaosInputs, 6);
+  const winLabel = `${CHAOS_WINDOW[0]}–${CHAOS_WINDOW[1].slice(2)}`;
 
   return (
     <main className="wrap">
@@ -59,6 +79,9 @@ export default function Page() {
         Looking for the market&apos;s line beside our read on every game? That full model view lives on{" "}
         <a href="/ncaaf/model">The Model</a>.
       </p>
+
+      {/* --- The Upset Lab: a speculative chaos board, under our model's honest read --- */}
+      <ChaosBoard sport="NCAAF" entries={chaos} windowLabel={winLabel} />
 
       {/* --- Honest roadmap: data-dependent panels not yet live for CFB --- */}
       <section className="ctxsec">
