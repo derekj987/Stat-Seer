@@ -755,6 +755,9 @@ a.fauthor:hover{text-decoration:underline}
 .cb__pip--early .cb__piplab{color:var(--spot-ink)}
 .cb__pip--early .cb__pipfill{background:var(--spot)}
 .cb__chip--early{color:var(--spot-ink);background:var(--spot-soft);border-color:color-mix(in srgb,var(--spot) 45%,var(--line))}
+.cb__pip--comfort .cb__piplab{color:var(--accent)}
+.cb__pip--comfort .cb__pipfill{background:var(--accent)}
+.cb__chip--comfort{color:var(--accent);background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
 .cb__early{margin:0 0 12px;padding:10px 12px;font-size:12px;line-height:1.55;color:var(--ink);
   background:var(--spot-soft);border:1px solid color-mix(in srgb,var(--spot) 40%,var(--line));border-radius:10px}
 .cb__early b{color:var(--spot-ink)}

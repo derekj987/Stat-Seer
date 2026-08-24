@@ -2,6 +2,7 @@
 // Speculative 'Chaos Board' traits (margin volatility + ceiling) over the last two
 // completed seasons. NOT predictive; never feeds The Model or Value Finder.
 export interface ChaosTrait { vol: number; ceiling: number; g: number; volPct: number; ceilPct: number }
+export interface StadiumEnv { indoor: boolean; climate: string; surface: string }
 export const CHAOS_WINDOW = ["2024", "2025"] as const;
 export const NFL_CHAOS: Record<string, ChaosTrait> = {
 "KC": {
@@ -1181,5 +1182,167 @@ export const CFB_CHAOS: Record<string, ChaosTrait> = {
 "g": 12,
 "volPct": 61.0,
 "ceilPct": 31.0
+}
+};
+export const NFL_ENV: Record<string, StadiumEnv> = {
+"ARI": {
+"indoor": true,
+"climate": "controlled",
+"surface": "grass"
+},
+"ATL": {
+"indoor": true,
+"climate": "controlled",
+"surface": "turf"
+},
+"BAL": {
+"indoor": false,
+"climate": "mild",
+"surface": "grass"
+},
+"BUF": {
+"indoor": false,
+"climate": "cold",
+"surface": "turf"
+},
+"CAR": {
+"indoor": false,
+"climate": "mild",
+"surface": "grass"
+},
+"CHI": {
+"indoor": false,
+"climate": "cold",
+"surface": "grass"
+},
+"CIN": {
+"indoor": false,
+"climate": "mild",
+"surface": "turf"
+},
+"CLE": {
+"indoor": false,
+"climate": "cold",
+"surface": "grass"
+},
+"DAL": {
+"indoor": true,
+"climate": "controlled",
+"surface": "turf"
+},
+"DEN": {
+"indoor": false,
+"climate": "mild",
+"surface": "grass"
+},
+"DET": {
+"indoor": true,
+"climate": "controlled",
+"surface": "turf"
+},
+"GB": {
+"indoor": false,
+"climate": "cold",
+"surface": "grass"
+},
+"HOU": {
+"indoor": true,
+"climate": "controlled",
+"surface": "turf"
+},
+"IND": {
+"indoor": true,
+"climate": "controlled",
+"surface": "turf"
+},
+"JAX": {
+"indoor": false,
+"climate": "warm",
+"surface": "grass"
+},
+"KC": {
+"indoor": false,
+"climate": "mild",
+"surface": "grass"
+},
+"LA": {
+"indoor": true,
+"climate": "controlled",
+"surface": "turf"
+},
+"LAC": {
+"indoor": true,
+"climate": "controlled",
+"surface": "turf"
+},
+"LV": {
+"indoor": true,
+"climate": "controlled",
+"surface": "grass"
+},
+"MIA": {
+"indoor": false,
+"climate": "warm",
+"surface": "grass"
+},
+"MIN": {
+"indoor": true,
+"climate": "controlled",
+"surface": "turf"
+},
+"NE": {
+"indoor": false,
+"climate": "cold",
+"surface": "turf"
+},
+"NO": {
+"indoor": true,
+"climate": "controlled",
+"surface": "turf"
+},
+"NYG": {
+"indoor": false,
+"climate": "cold",
+"surface": "turf"
+},
+"NYJ": {
+"indoor": false,
+"climate": "mild",
+"surface": "turf"
+},
+"PHI": {
+"indoor": false,
+"climate": "cold",
+"surface": "grass"
+},
+"PIT": {
+"indoor": false,
+"climate": "cold",
+"surface": "grass"
+},
+"SEA": {
+"indoor": false,
+"climate": "cold",
+"surface": "turf"
+},
+"SF": {
+"indoor": false,
+"climate": "mild",
+"surface": "grass"
+},
+"TB": {
+"indoor": false,
+"climate": "warm",
+"surface": "grass"
+},
+"TEN": {
+"indoor": false,
+"climate": "mild",
+"surface": "grass"
+},
+"WAS": {
+"indoor": false,
+"climate": "mild",
+"surface": "grass"
 }
 };

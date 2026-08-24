@@ -3,7 +3,7 @@
 // size-independent flavors (a boom/bust favorite, a high-ceiling dog, wildcard variance)
 // plus the dog's payout. It never feeds The Model, calibration, or Value Finder, and the
 // UI states plainly that the market thinks these are long shots.
-import type { ChaosTrait } from "./chaosTraits";
+import type { ChaosTrait, StadiumEnv } from "./chaosTraits";
 
 export interface ChaosInput {
   sport: "NFL" | "CFB";
@@ -19,14 +19,41 @@ export interface ChaosInput {
   dogTrait?: ChaosTrait;
   windMph?: number | null;
   riserPct?: number; // 0-100: dog's preseason SP+ rank above last year's (CFB only)
+  comfortPct?: number; // 0-100: how much the venue resembles the dog's home (NFL only)
+  comfortNote?: string; // one-line reason when the dog is notably in/out of its element
 }
 
 export interface ChaosEntry extends ChaosInput {
   index: number;
   tier: "hot" | "warm" | "cool";
   earlyActive: boolean;
-  subs: { boom: number; ceiling: number; wild: number; payout: number; early: number };
+  comfortActive: boolean;
+  subs: { boom: number; ceiling: number; wild: number; payout: number; early: number; comfort: number };
   story: string;
+}
+
+/** How much the venue resembles the away dog's own home (0-100) + a one-line reason. Not
+ * weather — structural: a dome team at another dome, or a warm/indoor team dropped in the
+ * cold. Tested: comfortable away dogs win outright ~33% vs ~27% for hostile ones (a real
+ * upset-frequency gap), but it's ~priced ATS, so it's chaos flavor, not an edge. */
+export function comfortInfo(dog: string, away: StadiumEnv, venue: StadiumEnv): { score: number; note: string } {
+  let c = 100;
+  const venueColdOutdoor = !venue.indoor && venue.climate === "cold";
+  if (venueColdOutdoor && (away.climate === "controlled" || away.climate === "warm")) c -= 50;
+  if (away.indoor && !venue.indoor) c -= 15;
+  if (away.surface !== venue.surface) c -= 10;
+  c = clamp(c);
+  let note = "";
+  if (c >= 90) {
+    note = away.indoor && venue.indoor
+      ? `${dog} bring their dome game to another dome — right at home, no elements to fight.`
+      : away.climate === "cold" && venue.climate === "cold"
+        ? `${dog} are a cold-weather team in the cold — right in their element.`
+        : `${dog} land in a stadium just like home — nothing to adjust to.`;
+  } else if (c <= 55) {
+    note = `${dog} are out of their element — a warm/indoor team exposed to a cold outdoor field.`;
+  }
+  return { score: c, note };
 }
 
 const clamp = (x: number, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, x));
@@ -62,13 +89,21 @@ export function scoreChaos(g: ChaosInput): ChaosEntry {
   const payout = payoutScore(g.dogReturn);
   const earlyActive = g.week <= 3;
   const early = earlyActive ? clamp(30 + liveZone(g.line) + (g.riserPct ?? 0) * 0.4) : 0;
+  const comfortActive = g.comfortPct != null;
+  const comfort = g.comfortPct ?? 0;
 
-  // Keep boom/ceiling in the driver's seat so the board stays differentiated; the early
-  // factor is a modest tilt toward live-dog / riser games, not a uniform floor.
-  const w = earlyActive
-    ? { boom: 0.27, ceiling: 0.25, wild: 0.16, payout: 0.17, early: 0.15 }
-    : { boom: 0.3, ceiling: 0.28, wild: 0.2, payout: 0.22, early: 0 };
-  const index = Math.round(w.boom * boom + w.ceiling * ceiling + w.wild * wild + w.payout * payout + w.early * early);
+  // Relative weights; inactive factors drop out and the rest renormalize, so the scale stays
+  // 0-100 whichever factors a game has. boom/ceiling stay dominant so the board differentiates.
+  const wRaw: Record<string, number> = {
+    boom: 26, ceiling: 24, wild: 14, payout: 16,
+    early: earlyActive ? 12 : 0,
+    comfort: comfortActive ? 12 : 0,
+  };
+  const subs = { boom, ceiling, wild, payout, early, comfort };
+  const wsum = Object.values(wRaw).reduce((a, b) => a + b, 0);
+  const index = Math.round(
+    (Object.keys(wRaw) as (keyof typeof subs)[]).reduce((s, k) => s + wRaw[k] * subs[k], 0) / wsum,
+  );
   const tier = index >= 72 ? "hot" : index >= 58 ? "warm" : "cool";
 
   // Story: lead with the loudest ingredient, always keep the payout as a candidate.
@@ -78,11 +113,12 @@ export function scoreChaos(g: ChaosInput): ChaosEntry {
     [wind > 0 ? wild : 0, wind > 0 ? `A ${Math.round(wind)} mph wind drags this toward a coin flip.` : ""],
     [earlyActive ? (g.riserPct ?? 0) : 0, `${g.dog} come in underrated — preseason ratings jumped them well past last year, and early-season favorites get caught looking.`],
     [earlyActive ? 52 : 0, `Weeks 1-3 wildcard — rosters and rhythm aren't settled yet, and a live dog can steal one.`],
+    [comfortActive && comfort >= 88 && g.comfortNote ? comfort : 0, g.comfortNote || ""],
     [payout, `A genuine long shot — but $100 comes back $${g.dogReturn.toLocaleString()}.`],
   ];
   const story = parts.filter((p) => p[1]).sort((a, b) => b[0] - a[0])[0][1];
 
-  return { ...g, index, tier, earlyActive, subs: { boom, ceiling, wild, payout, early }, story };
+  return { ...g, index, tier, earlyActive, comfortActive, subs, story };
 }
 
 /** Score, rank hottest-first, and keep the top N. */

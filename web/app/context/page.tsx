@@ -3,8 +3,8 @@ import { fetchModelWeek, type ModelPrediction } from "@/lib/model";
 import { MODEL_TOTALS } from "@/lib/modelTotals";
 import { Brand, FlowSteps, ContextSubnav } from "../Nav";
 import { ChaosBoard } from "../ChaosBoard";
-import { buildChaosBoard, returnFromSpread, type ChaosInput } from "@/lib/chaos";
-import { NFL_CHAOS, CHAOS_WINDOW } from "@/lib/chaosTraits";
+import { buildChaosBoard, returnFromSpread, comfortInfo, type ChaosInput } from "@/lib/chaos";
+import { NFL_CHAOS, NFL_ENV, CHAOS_WINDOW } from "@/lib/chaosTraits";
 import { GAME_WEATHER } from "@/lib/weatherData";
 import Tip from "@/app/Tip";
 
@@ -117,11 +117,16 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
         returnEst = true;
       }
       const wx = weatherByEvent.get(g.eventId);
+      // Comfort zone: only meaningful for a ROAD dog. A home dog is trivially at home (neutral).
+      const dogEnv = NFL_ENV[dog], venueEnv = NFL_ENV[g.home];
+      const cz = dog !== g.home && dogEnv && venueEnv ? comfortInfo(dog, dogEnv, venueEnv) : null;
       return {
         sport: "NFL" as const, away: g.away, home: g.home, dog, fav, line, week,
         dogReturn, returnEst,
         favTrait: NFL_CHAOS[fav], dogTrait: NFL_CHAOS[dog],
         windMph: wx && !wx.indoor ? wx.windMph : null,
+        comfortPct: cz ? cz.score : dog === g.home ? 70 : undefined,
+        comfortNote: cz?.note || undefined,
       };
     });
   const chaos = buildChaosBoard(chaosInputs, 6);

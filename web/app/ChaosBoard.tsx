@@ -13,6 +13,7 @@ const PIPS: { key: keyof ChaosEntry["subs"]; label: string }[] = [
   { key: "payout", label: "Payout" },
 ];
 const EARLY_PIP: { key: keyof ChaosEntry["subs"]; label: string } = { key: "early", label: "Early X-factor" };
+const COMFORT_PIP: { key: keyof ChaosEntry["subs"]; label: string } = { key: "comfort", label: "Comfort zone" };
 
 export function ChaosBoard({
   sport,
@@ -25,6 +26,7 @@ export function ChaosBoard({
 }) {
   if (entries.length === 0) return null;
   const earlyOn = entries.some((e) => e.earlyActive);
+  const comfortOn = entries.some((e) => e.comfortActive);
   return (
     <section className="ctxsec cb">
       <div className="ctxsec__head">
@@ -62,6 +64,7 @@ export function ChaosBoard({
         <span className="cb__chip">🎲 Wildcard</span>
         <span className="cb__chip">💰 Payout</span>
         {earlyOn && <span className="cb__chip cb__chip--early">⚡ Early X-factor</span>}
+        {comfortOn && <span className="cb__chip cb__chip--comfort">🏟 Comfort zone</span>}
         <span className="cb__win">traits: last 2 seasons ({windowLabel})</span>
       </div>
 
@@ -79,8 +82,8 @@ export function ChaosBoard({
               </div>
               <p className="cb__story">{e.story}</p>
               <div className="cb__pips">
-                {(e.earlyActive ? [...PIPS, EARLY_PIP] : PIPS).map((p) => (
-                  <div className={`cb__pip${p.key === "early" ? " cb__pip--early" : ""}`} key={p.key}>
+                {[...PIPS, ...(e.earlyActive ? [EARLY_PIP] : []), ...(e.comfortActive ? [COMFORT_PIP] : [])].map((p) => (
+                  <div className={`cb__pip${p.key === "early" ? " cb__pip--early" : p.key === "comfort" ? " cb__pip--comfort" : ""}`} key={p.key}>
                     <span className="cb__piplab">{p.label}</span>
                     <span className="cb__piptrack">
                       <span className="cb__pipfill" style={{ width: `${Math.round(e.subs[p.key])}%` }} />
