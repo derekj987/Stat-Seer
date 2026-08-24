@@ -18,7 +18,7 @@ import { ScrollHint, MoreTable } from "./Nav";
 
 // Plain-English explanations shown behind each section's medieval "?" seal.
 const TIPS = {
-  gameModel: <>Every game this week with the book&apos;s <b>Market Spread</b> and <b>Market O/U</b> beside <b>Our Model Suggests</b> — our line-blind lean (the model never sees the betting line). A ◆ marks an <b>off-consensus</b> game where we disagree with the market. Snapshots graded in public, not guaranteed picks.</>,
+  gameModel: <>Every game this week with the book&apos;s <b>Market Spread</b> and <b>Market O/U</b> beside our own <b>Model Spread</b> and <b>Model O/U</b> — our line-blind projection (the model never sees the betting line), shown so you can compare it to the market. A ◆ marks an <b>off-consensus</b> game. Graded in public — <b>not a pick</b>.</>,
   passing: <>Each starting QB&apos;s sportsbook <b>passing-yards line</b> vs <b>our line-blind projection</b> (▲ = we lean over, ▼ = under). <b>Career&nbsp;% over</b> = how often they&apos;ve cleared a similar line across their career; <b>Prior szn&nbsp;% over</b> = last season only; <b>Home&nbsp;% over</b> / <b>Road&nbsp;% over</b> = that same rate split by venue. Higher means they go over more often.</>,
   playerModel: <>Our <b>line-blind</b> player-prop projections shown beside the book&apos;s line. The ▲/▼ shows whether our number lands over or under it. Published and graded in public — not sold as locks.</>,
   fan: <>Players surfaced from fan forums, beat writers and RSS feeds, then <b>hype-rated</b> with a plain bottom line (e.g. take the over on receptions). For discovery — not a graded pick.</>,
@@ -226,7 +226,7 @@ function Panel({ title, count, hint, open, children }: { title: string; count: R
 }
 
 function NflHead() {
-  return <thead><tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Our Model Suggests</th></tr></thead>;
+  return <thead><tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Model Spread</th><th>Model O/U</th></tr></thead>;
 }
 function NflRows({ rows, moreFrom }: { rows: CardRow[]; moreFrom?: number }) {
   return (
@@ -236,14 +236,8 @@ function NflRows({ rows, moreFrom }: { rows: CardRow[]; moreFrom?: number }) {
           <td className="hb-l"><span className="hb-game">{r.away}<span className="hb-at">at</span>{r.home}</span>{r.off && <span className="hb-dia hb-dia--end">◆</span>}</td>
           <td className="hb-num">{r.marketSpread ?? "—"}</td>
           <td className="hb-num hb-tot">{numStr(r.marketTotal)}</td>
-          <td className="hb-suggest">
-            {r.spreadLean || r.totalLean ? (
-              <span className="hb-sugwrap">
-                {r.spreadLean && <span className="hb-sug"><span className="hb-sug__t">{r.spreadLean.side} {r.spreadLean.num}</span></span>}
-                {r.totalLean && <span className="hb-sug"><span className="hb-sug__t"><span className={`pmarrow pmarrow--${r.totalLean.dir === "OVER" ? "up" : "down"}`} aria-hidden="true">{r.totalLean.dir === "OVER" ? "▲" : "▼"}</span> {r.totalLean.dir === "OVER" ? "Over" : "Under"} {r.totalLean.num}</span></span>}
-              </span>
-            ) : <span className="hb-leannone">even</span>}
-          </td>
+          <td className="hb-num hb-model">{r.modelSpread ?? "—"}</td>
+          <td className="hb-num hb-model">{numStr(r.modelTotal)}</td>
         </tr>
       ))}
     </>
@@ -252,27 +246,27 @@ function NflRows({ rows, moreFrom }: { rows: CardRow[]; moreFrom?: number }) {
 function NflCardTable({ rows }: { rows: CardRow[] }) {
   if (!rows.length) return <p className="hb-empty">The NFL board opens when this week&apos;s odds and reads post.</p>;
   return (
-    <MoreTable id="gm-more-nfl" head={<NflHead />} extra={Math.max(0, rows.length - 3)} noun="games">
+    <MoreTable id="gm-more-nfl" head={<NflHead />} extra={Math.max(0, rows.length - 3)} noun="games" cls="hb-form--mkt">
       <NflRows rows={rows} moreFrom={3} />
     </MoreTable>
   );
 }
 
 function NcaafHead() {
-  return <thead><tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Our Model Suggests</th></tr></thead>;
+  return <thead><tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Model Spread</th><th>Model O/U</th></tr></thead>;
 }
 function NcaafRows({ games, moreFrom }: { games: readonly NcaafCardGame[]; moreFrom?: number }) {
   return (
     <>
       {games.map((g, i) => {
-        const ms = g.marketSpread; const ps = g.projSpread; const tl = g.totalLean; const pk = g.pick;
-        const pick = pk ? `${pk.side} ${pk.num > 0 ? "+" : ""}${pk.num}` : `${ps.fav} ${ps.num}`;
+        const ms = g.marketSpread;
         return (
           <tr key={`${g.away}-${g.home}`} className={[g.off ? "hb-off" : "", moreFrom !== undefined && i >= moreFrom ? "hb-row--more" : ""].filter(Boolean).join(" ") || undefined}>
             <td className="hb-l"><span className="hb-game">{g.away}<span className="hb-at">at</span>{g.home}</span>{g.neutral ? <span className="ncf-site"> · N</span> : null}{g.off && <span className="hb-dia hb-dia--end">◆</span>}</td>
             <td className="hb-num">{ms ? `${ms.fav} ${ms.num}` : "—"}</td>
             <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
-            <td className="hb-suggest"><span className="hb-sugwrap"><span className="hb-sug"><span className="hb-sug__t">{pick}</span></span>{tl && <span className="hb-sug"><span className="hb-sug__t"><span className={`pmarrow pmarrow--${tl.dir === "OVER" ? "up" : "down"}`} aria-hidden="true">{tl.dir === "OVER" ? "▲" : "▼"}</span> {tl.dir === "OVER" ? "Over" : "Under"} {tl.num}</span></span>}</span></td>
+            <td className="hb-num hb-model">{g.projSpread.fav} {g.projSpread.num}</td>
+            <td className="hb-num hb-model">{g.projTotal}</td>
           </tr>
         );
       })}
@@ -283,7 +277,7 @@ function NcaafCardTable({ games }: { games: NcaafCardGame[] }) {
   const featured = games.filter((g) => g.featured);
   const src = featured.length ? featured : games;
   return (
-    <MoreTable id="gm-more-ncaaf" head={<NcaafHead />} extra={Math.max(0, src.length - 3)} noun="games">
+    <MoreTable id="gm-more-ncaaf" head={<NcaafHead />} extra={Math.max(0, src.length - 3)} noun="games" cls="hb-form--mkt">
       <NcaafRows games={src} moreFrom={3} />
     </MoreTable>
   );

@@ -51,9 +51,9 @@ export default function Page() {
             the market — <b>not a pick</b> (the rating doesn&apos;t beat the spread; see <a href="/ncaaf/model">The Model</a>).</span>
         </div>
         <div className="hb-formwrap">
-          <table className="hb-form">
+          <table className="hb-form hb-form--mkt">
             <thead>
-              <tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Our Projection</th></tr>
+              <tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Model Spread</th><th>Model O/U</th></tr>
             </thead>
             <tbody>
               {games.map((g) => {
@@ -67,12 +67,8 @@ export default function Page() {
                     </td>
                     <td className="hb-num">{ms.fav} {ms.num}</td>
                     <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
-                    <td className="hb-suggest">
-                      <span className="hb-sugwrap">
-                        <span className="hb-sug"><span className="hb-sug__t">{g.projSpread.fav} {g.projSpread.num}</span></span>
-                        <span className="hb-sug"><span className="hb-sug__t hb-sug__tot">O/U {g.projTotal}</span></span>
-                      </span>
-                    </td>
+                    <td className="hb-num hb-model">{g.projSpread.fav} {g.projSpread.num}</td>
+                    <td className="hb-num hb-model">{g.projTotal}</td>
                   </tr>
                 );
               })}

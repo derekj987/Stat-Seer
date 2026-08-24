@@ -1708,6 +1708,12 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-plrtable th:nth-child(4),.hb-plrtable td:nth-child(4){width:29%}
 .hb-plrtable th:nth-child(5),.hb-plrtable td:nth-child(5){width:16.5%}
 .hb-plrtable th:nth-child(6),.hb-plrtable td:nth-child(6){width:16.5%}
+/* 5-col model tables: Game · Market Spread · Market O/U · Model Spread · Model O/U */
+.hb-form--mkt th:nth-child(1),.hb-form--mkt td:nth-child(1){width:27%}
+.hb-form--mkt th:nth-child(2),.hb-form--mkt td:nth-child(2){width:19%}
+.hb-form--mkt th:nth-child(3),.hb-form--mkt td:nth-child(3){width:13%}
+.hb-form--mkt th:nth-child(4),.hb-form--mkt td:nth-child(4){width:21%}
+.hb-form--mkt th:nth-child(5),.hb-form--mkt td:nth-child(5){width:20%}
 .hb-form th,.hb-form td{text-align:left}
 .hb-form th{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
   font-weight:700;padding:0 0 6px;border-bottom:1px solid var(--line)}
@@ -1720,6 +1726,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-num{font-variant-numeric:tabular-nums}
 .hb-model{color:var(--accent);font-weight:700}
 .hb-tot{color:var(--muted)}
+.hb-model{color:var(--offc-ink);font-weight:700;font-variant-numeric:tabular-nums}
 /* Off-consensus (model disagrees with the market) — flag the disagreeing pick in
    blue so it jumps out: blue row wash, blue ◆, blue model-spread pick + lean chip. */
 .hb-off td{background:color-mix(in srgb,var(--offc) 13%,transparent)}

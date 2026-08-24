@@ -32,7 +32,7 @@ function groupByConf(games: readonly NcaafCardGame[]): { conf: string; games: Nc
 function CardHead() {
   return (
     <thead>
-      <tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Our Projection</th></tr>
+      <tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Model Spread</th><th>Model O/U</th></tr>
     </thead>
   );
 }
@@ -51,12 +51,8 @@ function CardRows({ games, moreFrom }: { games: readonly NcaafCardGame[]; moreFr
             </td>
             <td className="hb-num">{ms ? `${ms.fav} ${ms.num}` : "—"}</td>
             <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
-            <td className="hb-suggest">
-              <span className="hb-sugwrap">
-                <span className="hb-sug"><span className="hb-sug__t">{g.projSpread.fav} {g.projSpread.num}</span></span>
-                <span className="hb-sug"><span className="hb-sug__t hb-sug__tot">O/U {g.projTotal}</span></span>
-              </span>
-            </td>
+            <td className="hb-num hb-model">{g.projSpread.fav} {g.projSpread.num}</td>
+            <td className="hb-num hb-model">{g.projTotal}</td>
           </tr>
         );
       })}
@@ -131,7 +127,7 @@ export default function Page() {
               it to the market — <b>not a pick</b> (our rating predicts about as well as Elo but doesn&apos;t beat the
               spread; see the record above).</span>
           </div>
-          <MoreTable id="ncaaf-snap-more" head={<CardHead />} extra={snapshotRest.length} noun="ranked games">
+          <MoreTable id="ncaaf-snap-more" head={<CardHead />} extra={snapshotRest.length} noun="ranked games" cls="hb-form--mkt">
             <CardRows games={ranked} moreFrom={5} />
           </MoreTable>
         </div>
@@ -150,7 +146,7 @@ export default function Page() {
             <section className="ncf-confgrp" key={grp.conf}>
               <h3 className="ncf-confgrp__h">{grp.conf}<span className="ncf-confgrp__n">{grp.games.length} game{grp.games.length === 1 ? "" : "s"}</span></h3>
               <div className="hb-formwrap">
-                <table className="hb-form"><CardHead /><tbody><CardRows games={grp.games} /></tbody></table>
+                <table className="hb-form hb-form--mkt"><CardHead /><tbody><CardRows games={grp.games} /></tbody></table>
               </div>
             </section>
           ))}
