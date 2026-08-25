@@ -1,6 +1,7 @@
 import { weekRange } from "@/lib/board";
 import { weekTailgate, stockLabel, stockArrows, type Buzz } from "@/lib/tailgate";
 import { Brand, FlowSteps, ContextSubnav } from "../Nav";
+import Tip from "../Tip";
 import AddToSlip from "../AddToSlip";
 
 export const revalidate = 300;
@@ -33,12 +34,15 @@ function BuzzCard({ b }: { b: Buzz }) {
       </header>
       <dl className="cxcard__rows">
         <div className="cxrow">
-          <dt className="cxrow__k">Team</dt>
-          <dd className="cxrow__v">{b.team}{b.matchup ? ` · ${b.matchup}` : ""}</dd>
+          <dt className="cxrow__k">Prop</dt>
+          <dd className="cxrow__v">
+            <b className="tgprop">{b.angle}</b>
+            <span className={`tgside tgside--${b.direction}`}>{b.direction === "up" ? "fans buying ▲" : "fans selling ▼"}</span>
+          </dd>
         </div>
         <div className="cxrow">
-          <dt className="cxrow__k">Bottom line</dt>
-          <dd className="cxrow__v">{b.direction === "up" ? "Fans are buying" : "Fans are selling"} <b>{b.angle}</b>. {b.take}</dd>
+          <dt className="cxrow__k">Why</dt>
+          <dd className="cxrow__v">{b.take}{b.matchup ? ` (${b.matchup})` : ""}</dd>
         </div>
         <div className="cxrow">
           <dt className="cxrow__k">Heard on</dt>
@@ -86,6 +90,11 @@ export default async function Page({ searchParams }: {
 
   const feed = await weekTailgate(week, SEASON);
 
+  // Consolidate the wall by team: one labelled group per team, busiest first.
+  const teamMap = new Map<string, Buzz[]>();
+  for (const b of feed.buzz) (teamMap.get(b.team) ?? teamMap.set(b.team, []).get(b.team)!).push(b);
+  const byTeam = [...teamMap.entries()].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]));
+
   return (
     <main className="tg">
       <div className="tg-main">
@@ -96,20 +105,15 @@ export default async function Page({ searchParams }: {
         />
       </header>
 
-      {/* The wall: this is fan sentiment, NOT a StatSeer pick or model output. */}
-      <div className="tgwall" role="note">
-        <span className="tgwall__tag">Fan Stock</span>
-        <p>
-          This is <b>Fan Stock</b>: a read on which players fans are <b className="tgwall__up">buying&nbsp;▲</b> and
+      <FlowSteps active="context" />
+      <div className="subnavrow">
+        <ContextSubnav active="fan" />
+        <Tip label="What is Fan Stock?" text={<>This is <b>Fan Stock</b>: a read on which players fans are <b className="tgwall__up">buying&nbsp;▲</b> and
           which they&apos;re <b className="tgwall__down">selling&nbsp;▼</b> on their teams&apos; boards and blogs —
           sleepers heating up, and names the crowd is souring on. It&apos;s <b>ammo for your own research</b>, not
-          our model, not a StatSeer pick, and it is <b>never graded</b>. We&apos;re not crunching numbers here —
-          we&apos;re handing you the word around the league. Do your own homework.
-        </p>
+          our model, not a StatSeer pick, and it is <b>never graded</b>. We&apos;re handing you the word around the
+          league — do your own homework.</>} />
       </div>
-
-      <FlowSteps active="context" />
-      <ContextSubnav active="fan" />
       <WeekNav min={min} max={max} current={week} />
 
       {feed.sample && (
@@ -122,9 +126,16 @@ export default async function Page({ searchParams }: {
       {feed.buzz.length === 0 ? (
         <p className="foot">No fan buzz gathered for Week {week} yet — check back closer to kickoff.</p>
       ) : (
-        <section className="cxgrid" aria-label={`Week ${week} fan stock`}>
-          {feed.buzz.map((b) => <BuzzCard key={b.id} b={b} />)}
-        </section>
+        byTeam.map(([team, items]) => (
+          <section className="tgteam" key={team} aria-label={`${team} fan stock`}>
+            <h3 className="tgteam__h" style={{ color: TEAM_COLOR[team] ?? "var(--ink)" }}>
+              {team}<span className="tgteam__n">{items.length}</span>
+            </h3>
+            <div className="cxgrid">
+              {items.map((b) => <BuzzCard key={b.id} b={b} />)}
+            </div>
+          </section>
+        ))
       )}
 
       <footer className="foot">

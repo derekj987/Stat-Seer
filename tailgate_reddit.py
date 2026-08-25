@@ -166,6 +166,21 @@ SYSTEM = (
     "Rules:\n"
     "- Only report players and takes ACTUALLY present in the snippets. Never invent a "
     "player or a stat line.\n"
+    "- SIDELINED PLAYERS -> DROP entirely, emit NO row (not even an UNDER): anyone OUT for "
+    "the season or the extended future -- torn ACL/Achilles/patellar, placed on IR, "
+    "'out for the year/season', 'done for the season', long-term suspension -- or who has "
+    "no role (waived, cut, buried deep on the depth chart). A prop on a player who won't "
+    "play is useless. Do not build a bearish take around a season-ending injury.\n"
+    "- INSIGHT, not the obvious: surface CHANGE, not consensus everyone already prices. A "
+    "star doing his established thing is NOT buzz -- a league-leading receiver being "
+    "bullish on receptions, a franchise QB over passing yards, a workhorse RB over "
+    "carries. Everyone knows it and the book has it. Emit a row ONLY when the sentiment is "
+    "genuinely non-obvious: a NEW or expanded role, a shifted timeshare, a sleeper nobody's "
+    "discussing, a real and current souring. If every fan already assumes it, DROP it.\n"
+    "- Do NOT fade a healthy, productive player on a STALE or PAST injury. Only emit an "
+    "UNDER when the CURRENT sentiment is bearish for a real, present reason (an active "
+    "committee, a genuinely tough matchup, a role downgrade) -- never because a player was "
+    "hurt at some point but is now back and playing well.\n"
     "- direction: 'up' when the bet is an OVER / anytime-TD (fans bullish), 'down' when "
     "the bet is an UNDER (fans bearish/souring). Report BOTH -- an UNDER is as useful as "
     "an OVER. Read the actual tone; do not force one side.\n"
@@ -443,6 +458,14 @@ def extract(nickname, snippets, env):
         return []
 
 
+# Mirrors web/lib/tailgate.ts isSidelinedForSeason — a take that says the player is done
+# for the year means no bettable prop, so we never write a row for them.
+OUT_FOR_SEASON = re.compile(
+    r"\btorn\s+(acl|achilles|patellar)\b|\bout\s+for\s+the\s+(entire\s+|rest\s+of\s+the\s+)?(season|year)\b"
+    r"|\bseason[-\s]ending\b|\bplaced\s+on\s+(season[-\s]ending\s+)?ir\b|\bdone\s+for\s+the\s+(season|year)\b"
+    r"|\bmiss(ing|es)?\s+the\s+(entire\s+|rest\s+of\s+the\s+)?(season|year)\b", re.I)
+
+
 def build_rows(abbrev, nickname, buzz, snippets, season, week):
     # boards this team's snippets came from, for a generic fallback attribution
     boards = list(dict.fromkeys(s.get("board") for s in snippets if s.get("board")))
@@ -450,6 +473,10 @@ def build_rows(abbrev, nickname, buzz, snippets, season, week):
     for b in buzz:
         player = (b.get("player") or "").strip()
         if not player:
+            continue
+        # Belt-and-suspenders with the prompt: never emit a row for a player the take says
+        # is out for the season -- a prop you can't bet is useless (the web also filters this).
+        if OUT_FOR_SEASON.search((b.get("take") or "") + " " + (b.get("angle") or "")):
             continue
         srcs, seen = [], set()
         for q in b.get("quotes", []) or []:

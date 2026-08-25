@@ -1,11 +1,9 @@
 import { weekRange, fetchWeek, buildBoard } from "@/lib/board";
 import { fetchModelWeek, fetchCalibration, type ModelPrediction } from "@/lib/model";
-import { fetchHome, type CardRow } from "@/lib/home";
 import { MODEL_TOTALS } from "@/lib/modelTotals";
 import { weekRefs } from "@/lib/refAssignments";
 import { Brand, FlowSteps, ModelSubnav } from "../Nav";
 import AddToSlip from "../AddToSlip";
-import NflModelCard from "../NflModelCard";
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -212,8 +210,6 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
   try { preds = await fetchModelWeek(week, SEASON); } catch { preds = []; }
   let calibration: Awaited<ReturnType<typeof fetchCalibration>> = [];
   try { calibration = await fetchCalibration(SEASON); } catch { calibration = []; }
-  let cardRows: CardRow[] = [];
-  try { cardRows = (await fetchHome(SEASON)).card; } catch { cardRows = []; }
 
   // "Lines & the model's read" table data — market lines beside our locked read.
   let board: Awaited<ReturnType<typeof fetchWeek>> = [];
@@ -264,9 +260,6 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
       <FlowSteps active="analyze" />
       <ModelSubnav active="game" />
       <WeekNav min={min} max={max} current={week} />
-
-      {/* The Model Card — same model-vs-market snapshot as the home page, above the reads. */}
-      <NflModelCard rows={cardRows} />
 
       {preds.length === 0 ? (
         <p className="foot">No reads published for Week {week} yet.</p>

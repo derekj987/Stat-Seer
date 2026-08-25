@@ -213,14 +213,25 @@ export function isBettableAngle(angle: string): boolean {
   return hasDir && PROP_MARKET.test(s);
 }
 
+// A player whose take says they're DONE for the year has no prop relevance — drop the card
+// entirely rather than show a dead "under" on someone who won't play. (Belt-and-suspenders
+// with the generator's own injury exclusion; catches anything that slips through.)
+const OUT_FOR_SEASON =
+  /\btorn\s+(acl|achilles|patellar)\b|\bout\s+for\s+the\s+(entire\s+|rest\s+of\s+the\s+)?(season|year)\b|\bseason[-\s]ending\b|\bplaced\s+on\s+(season[-\s]ending\s+)?ir\b|\bdone\s+for\s+the\s+(season|year)\b|\bmiss(ing|es)?\s+the\s+(entire\s+|rest\s+of\s+the\s+)?(season|year)\b/i;
+
+export function isSidelinedForSeason(take: string): boolean {
+  return OUT_FOR_SEASON.test(take || "");
+}
+
 /** The week's fan feed — the live scan if it has anything, else the seed. Only
  *  bettable angles survive, so every card lines a fan take up with a real prop. */
 export async function weekTailgate(week: number, season: number): Promise<TailgateWeek> {
+  const keep = (b: Buzz) => isBettableAngle(b.angle) && !isSidelinedForSeason(b.take);
   try {
-    const buzz = (await fetchBuzz(week, season)).filter((b) => isBettableAngle(b.angle));
+    const buzz = (await fetchBuzz(week, season)).filter(keep);
     if (buzz.length) return { week, season, sample: false, buzz };
   } catch { /* fall through to the seed */ }
-  return { week, season, sample: true, buzz: SEED.filter((b) => isBettableAngle(b.angle)) };
+  return { week, season, sample: true, buzz: SEED.filter(keep) };
 }
 
 // Stock-ticker labels — a bullish/bearish word scaled by how strong the move is.
