@@ -698,9 +698,11 @@ a.fauthor:hover{text-decoration:underline}
 .replyprompt a{color:var(--accent);font-weight:600;text-decoration:none}
 
 /* --- guided flow stepper --- */
-.flow{display:flex;align-items:stretch;gap:5px;flex-wrap:nowrap;margin:12px 0 0}
-.flow__item{display:flex;align-items:center;gap:5px;flex:1 1 0;min-width:0}
-.flow__step{display:flex;align-items:center;gap:6px;padding:7px 8px;border-radius:10px;flex:1;min-width:0;
+/* Compact breadcrumb: content-width pills, left-aligned (not stretched full-width boxes),
+   so the three sections read as a slim stepper rather than three big cards. */
+.flow{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin:12px 0 0}
+.flow__item{display:flex;align-items:center;gap:4px;flex:0 0 auto;min-width:0}
+.flow__step{display:inline-flex;align-items:center;gap:7px;padding:4px 12px;border-radius:999px;flex:0 0 auto;
   text-decoration:none;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
 .flow__step.active{border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
 .flow__step:hover{border-color:var(--accent)}
