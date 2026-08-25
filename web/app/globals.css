@@ -147,13 +147,13 @@ body{background:var(--bg);color:var(--ink);
 .foot{margin-top:30px;padding-top:18px;border-top:1px solid var(--line)}
 .foot p{max-width:70ch;color:var(--muted);font-size:13px;margin:0}
 .foot b{color:var(--ink)}
-.weeknav{display:flex;align-items:center;gap:12px;margin:20px 0 4px;min-width:0}
-.weeknav__label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;
+.weeknav{display:flex;align-items:center;gap:10px;margin:10px 0 4px;min-width:0}
+.weeknav__label{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;
   color:var(--muted);font-weight:600;flex:0 0 auto}
-.weeknav__list{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;min-width:0}
-.weeknav__w{flex:0 0 auto;min-width:34px;text-align:center;padding:6px 10px;
-  border-radius:8px;border:1px solid var(--line);background:var(--surface);
-  color:var(--muted);font-family:var(--font-mono);font-size:13px;font-weight:600;
+.weeknav__list{display:flex;gap:4px;overflow-x:auto;padding-bottom:3px;min-width:0}
+.weeknav__w{flex:0 0 auto;min-width:28px;text-align:center;padding:3px 8px;
+  border-radius:7px;border:1px solid var(--line);background:var(--surface);
+  color:var(--muted);font-family:var(--font-mono);font-size:12px;font-weight:600;
   text-decoration:none}
 .weeknav__w:hover{border-color:var(--accent);color:var(--accent)}
 .weeknav__w.active{background:var(--accent);border-color:var(--accent);color:var(--surface)}
@@ -289,6 +289,10 @@ body{background:var(--bg);color:var(--ink);
    scroll's bubble so it drops full-width below the row. */
 .subnavrow{position:relative;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 4px}
 .subnavrow .subnav{margin:0}
+/* Fuse the two nav tiers: the section stepper (.flow) and the sub-tabs directly beneath it
+   read as one connected control — tight vertical rhythm, no gap between them. */
+.flow + .subnav,
+.flow + .subnavrow{margin-top:4px}
 .subnav{display:inline-flex;gap:3px;margin:8px 0 4px;padding:3px;border-radius:999px;
   background:var(--amber-soft);border:1px solid color-mix(in srgb,var(--amber) 35%,transparent);
   width:fit-content;max-width:100%;overflow-x:auto}
@@ -694,7 +698,7 @@ a.fauthor:hover{text-decoration:underline}
 .replyprompt a{color:var(--accent);font-weight:600;text-decoration:none}
 
 /* --- guided flow stepper --- */
-.flow{display:flex;align-items:stretch;gap:5px;flex-wrap:nowrap;margin:12px 0 4px}
+.flow{display:flex;align-items:stretch;gap:5px;flex-wrap:nowrap;margin:12px 0 0}
 .flow__item{display:flex;align-items:center;gap:5px;flex:1 1 0;min-width:0}
 .flow__step{display:flex;align-items:center;gap:6px;padding:7px 8px;border-radius:10px;flex:1;min-width:0;
   text-decoration:none;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
@@ -704,9 +708,10 @@ a.fauthor:hover{text-decoration:underline}
   background:var(--surface-2);font-size:10px;font-weight:800;color:var(--muted);flex:0 0 auto}
 .flow__step.active .flow__n{background:var(--accent);color:#fff}
 .flow__l{display:flex;flex-direction:column;line-height:1.15;min-width:0;
-  font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.flow__sub{font-size:9px;font-weight:500;color:var(--muted);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  font-size:11.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Slim flow: the one-line descriptions are onboarding — kept on the homepage, dropped from
+   the per-section stepper so it reads as a compact breadcrumb. */
+.flow__sub{display:none}
 .flow__arrow{color:var(--muted);font-size:12px;flex:0 0 auto}
 
 /* --- upset watch --- */
