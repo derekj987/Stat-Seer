@@ -18,12 +18,17 @@ const IMPROVE_PIP: { key: keyof ChaosEntry["subs"]; label: string } = { key: "im
 // A legend chip that explains its factor on hover (desktop) or tap (mobile) — pure CSS, no JS,
 // same mechanism as the Tip component (a hidden checkbox flipped by the <label> reveals the note).
 function FactorChip({ emoji, label, tip, cls }: { emoji: string; label: string; tip: string; cls?: string }) {
+  // The bubble is a SIBLING of the label (not inside it), exactly like the Tip component: the
+  // label stays a clean tap target that the bubble never covers, so a phone re-tap reliably
+  // toggles the checkbox off. Anchored to the .cb__chipwrap.
   return (
-    <label className={`cb__chip cb__chip--tip${cls ? " " + cls : ""}`}>
-      <input type="checkbox" className="cb__chiptchk" tabIndex={-1} aria-hidden="true" />
-      <span>{emoji} {label}</span>
+    <span className="cb__chipwrap">
+      <label className={`cb__chip cb__chip--tip${cls ? " " + cls : ""}`}>
+        <input type="checkbox" className="cb__chiptchk" tabIndex={-1} aria-hidden="true" />
+        <span>{emoji} {label}</span>
+      </label>
       <span className="cb__chiptip" role="tooltip">{tip}</span>
-    </label>
+    </span>
   );
 }
 

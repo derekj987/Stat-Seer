@@ -755,14 +755,19 @@ a.fauthor:hover{text-decoration:underline}
 .cb__chip{font-size:11.5px;font-weight:600;color:var(--ink);background:var(--surface);
   border:1px solid var(--line);border-radius:999px;padding:2px 8px}
 .cb__legttl-hint{font-weight:500;color:var(--muted);font-size:10px}
-.cb__chip--tip{position:relative;cursor:help}
+.cb__chipwrap{position:relative;display:inline-flex}
+.cb__chip--tip{cursor:help}
 .cb__chiptchk{position:absolute;opacity:0;width:0;height:0;margin:0;pointer-events:none}
 .cb__chiptip{position:absolute;left:0;top:calc(100% + 6px);z-index:30;width:max-content;max-width:250px;
   padding:8px 11px;font-size:11.5px;line-height:1.45;font-weight:500;color:var(--ink);text-align:left;
   background:var(--surface);border:1px solid var(--line);border-radius:9px;box-shadow:0 8px 22px rgba(0,0,0,.16);
   opacity:0;visibility:hidden;transition:opacity .12s ease}
-.cb__chip--tip:hover .cb__chiptip,
-.cb__chip--tip:has(.cb__chiptchk:checked) .cb__chiptip{opacity:1;visibility:visible}
+.cb__chipwrap:has(.cb__chiptchk:checked) .cb__chiptip{opacity:1;visibility:visible}
+/* hover reveal only on real pointer devices — on touch, iOS keeps a stuck :hover that would
+   stop the re-tap from collapsing the bubble, so phones use the checkbox toggle alone. */
+@media (hover:hover){
+  .cb__chipwrap:hover .cb__chiptip{opacity:1;visibility:visible}
+}
 .cb__win{margin-left:auto;font-size:11px;color:var(--muted);font-family:var(--font-mono)}
 .cb__board{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:9px}
 .cb__card{display:grid;grid-template-columns:50px 1fr 170px;gap:14px;align-items:center;
@@ -2503,6 +2508,29 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 /* ===== Landing flow (Model -> Context -> Value) + snapshot ===== */
 /* Pure-CSS sport toggle: two hidden radios show one sport's panel via ~ combinator. */
 .lp-hub{margin:2px 0 4px}
+/* Rotating "explore the site" highlight banner — full board width, under the snapshot label */
+.hlb{position:relative;margin:0 0 14px;border:1px solid color-mix(in srgb,var(--gold) 40%,var(--line));
+  background:var(--gold-soft);border-radius:14px;overflow:hidden}
+.hlb__slide{display:flex;align-items:center;gap:14px;padding:14px 18px 18px;text-decoration:none;
+  color:var(--ink);min-height:78px;animation:hlb-in .35s ease}
+@keyframes hlb-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.hlb__emoji{font-size:30px;flex:0 0 auto;line-height:1}
+.hlb__body{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 auto}
+.hlb__kicker{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+.hlb__title{font-size:15px;font-weight:800;letter-spacing:-.01em}
+.hlb__blurb{font-size:12.5px;color:var(--muted);line-height:1.4}
+.hlb__go{flex:0 0 auto;font-size:18px;color:var(--gold);font-weight:800;transition:transform .12s ease}
+.hlb__slide:hover .hlb__go{transform:translateX(3px)}
+.hlb__dots{position:absolute;right:16px;bottom:10px;display:flex;gap:5px}
+.hlb__dot{width:7px;height:7px;border-radius:50%;border:0;padding:0;cursor:pointer;
+  background:color-mix(in srgb,var(--gold) 35%,var(--line));transition:background .15s,transform .15s}
+.hlb__dot.active{background:var(--gold);transform:scale(1.25)}
+.hlb__dot:hover{background:var(--gold)}
+@media(max-width:560px){
+  .hlb__blurb{display:none}
+  .hlb__slide{min-height:60px;padding:12px 14px 16px}
+  .hlb__emoji{font-size:26px}
+}
 .lp-r{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .lp-sport{display:none}
 #lps-nfl:checked ~ .lp-sport--nfl{display:block}

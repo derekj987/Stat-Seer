@@ -12,6 +12,7 @@ import { INCENTIVE_WATCH } from "@/lib/incentiveWatch";
 import { COACH_TENDENCIES } from "@/lib/coachTendencies";
 import { CONTENTION } from "@/lib/contention";
 import { isRealistic, DEPTH } from "@/lib/depthChart";
+import { HighlightBanner } from "./HighlightBanner";
 import CoachTable from "./CoachTable";
 import Tip from "./Tip";
 import { ScrollHint, MoreTable } from "./Nav";
@@ -523,6 +524,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
       {/* NFL panel */}
       <div className="lp-sport lp-sport--nfl">
         <div className="lp-snaplabel">NFL WEEK {nfl.week} SNAPSHOT</div>
+        <HighlightBanner sport="nfl" />
         <Panel title="The Model — Snapshot View" count={`${nfl.card.length} games`} hint={TIPS.gameModel} open>
           <NflCardTable rows={nfl.card} />
           <p className="lp-cardfoot"><a href="/model">See the full model →</a></p>
@@ -570,6 +572,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
       {/* NCAAF panel */}
       <div className="lp-sport lp-sport--ncaaf">
         <div className="lp-snaplabel">COLLEGE FOOTBALL WEEK {ncaaf.week} SNAPSHOT</div>
+        <HighlightBanner sport="ncaaf" />
         <Panel title="The Model — Snapshot View" count={`${ncaaf.games.length} ranked`} hint={TIPS.gameModel} open>
           <NcaafCardTable games={ncaaf.games} />
           <p className="lp-cardfoot"><a href="/ncaaf/model">See the full model →</a></p>
