@@ -315,7 +315,7 @@ function PlrRows({ players, moreFrom }: { players: PlayerPick[]; moreFrom?: numb
   );
 }
 function PlayersTable({ players }: { players: PlayerPick[] }) {
-  if (!players.length) return <p className="hb-empty">Player reads post with the week&apos;s props — see <a href="/tailgate">Fan Analysis</a>.</p>;
+  if (!players.length) return <p className="hb-empty">Player reads post with the week&apos;s props — see <a href="/tailgate">Local Intelligence</a>.</p>;
   const capped = players.slice(0, 14);
   return (
     <MoreTable id="fanmore-nfl" head={<PlrHead />} extra={Math.max(0, capped.length - 3)} noun="players" plr>
@@ -540,7 +540,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
         <Panel title="Player Model snapshot — NFL" count="props" hint={TIPS.playerModel} open>
           <PlayerSnapshot base="nfl" />
         </Panel>
-        <Panel title="Check out our fan analysis." count={nfl.players.length || "—"} hint={TIPS.fan} open>
+        <Panel title="Check out our Local Intelligence." count={nfl.players.length || "—"} hint={TIPS.fan} open>
           <FanAnalysisNote />
           <PlayersTable players={nfl.players} />
         </Panel>
@@ -586,9 +586,9 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
         <Panel title="Player Model snapshot — NCAAF" count="props" hint={TIPS.playerModel} open>
           <PlayerSnapshot base="ncaaf" />
         </Panel>
-        <Panel title="Check out our fan analysis." count="—" hint={TIPS.fan} open>
+        <Panel title="Check out our Local Intelligence." count="—" hint={TIPS.fan} open>
           <FanAnalysisNote />
-          <p className="hb-empty">College player reads land here once the CFB fan scan is wired — the same read we run for the NFL on <a href="/ncaaf/tailgate">Fan Analysis</a>.</p>
+          <p className="hb-empty">College player reads land here once the CFB fan scan is wired — the same read we run for the NFL on <a href="/ncaaf/tailgate">Local Intelligence</a>.</p>
         </Panel>
         <Panel title="Check out our special considerations" count="context" hint={TIPS.considNcaaf} open>
           <NcaafConsiderations />

@@ -10,7 +10,7 @@ import { useSlip, encodeSlip, type SlipItem, type SlipKind } from "@/lib/slip";
 
 const fmtOdds = (p?: number) => (p === undefined ? "" : p > 0 ? `+${p}` : String(p));
 const KIND_LABEL: Record<SlipKind, string> = {
-  line: "Game Lines", prop: "Player Props", model: "The Model", fan: "Fan Analysis",
+  line: "Game Lines", prop: "Player Props", model: "The Model", fan: "Local Intelligence",
 };
 const ORDER: SlipKind[] = ["line", "prop", "model", "fan"];
 const BOOK_LABEL: Record<string, string> = {

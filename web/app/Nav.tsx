@@ -149,7 +149,6 @@ export function ValueFinderDrawer({ defaultOpen = false }: { defaultOpen?: boole
 export function SlipCallout({ kind }: { kind: "lines" | "props" }) {
   return (
     <div className="slipcta">
-      <span className="slipcta__icon" aria-hidden="true">🎟️</span>
       <div className="slipcta__text">
         <b className="slipcta__h">Build your own betslip</b>
         <span>
@@ -168,7 +167,6 @@ export function BetslipPromo() {
   return (
     <details className="hb-slipf">
       <summary className="hb-slipf__bar">
-        <span className="hb-slipf__ic" aria-hidden="true">🎟️</span>
         <span className="hb-slipf__h">Build your own bet slip — we tell you where to place it</span>
         <span className="hb-tav__right">
           <span className="hb-tav__ic hb-tav__ic--shut" aria-hidden="true">🍺</span>
@@ -254,7 +252,7 @@ export function ContextSubnav({ active, base = "nfl" }: {
       <a href={h.upset} className={active === "upset" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "upset" ? "page" : undefined}>Upset Watch</a>
       <a href={h.fan} className={active === "fan" ? "subnav__t active" : "subnav__t"}
-        aria-current={active === "fan" ? "page" : undefined}>Fan Analysis</a>
+        aria-current={active === "fan" ? "page" : undefined}>Local Intelligence</a>
     </nav>
   );
 }

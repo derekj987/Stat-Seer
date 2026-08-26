@@ -8,7 +8,7 @@ import { useSlip, decodeSlip, type SlipItem, type SlipKind } from "@/lib/slip";
 
 const fmtOdds = (p?: number) => (p === undefined ? "" : p > 0 ? `+${p}` : String(p));
 const KIND_LABEL: Record<SlipKind, string> = {
-  line: "Game Lines", prop: "Player Props", model: "The Model", fan: "Fan Analysis",
+  line: "Game Lines", prop: "Player Props", model: "The Model", fan: "Local Intelligence",
 };
 
 function isIOS() {

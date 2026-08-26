@@ -55,13 +55,12 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
         <aside className="lp-drawer__panel" aria-label="Why StatSeer">
           <label htmlFor="lp-pitch-toggle" className="lp-drawer__close" title="Close" aria-label="Close">✕</label>
           <section className="lp-pitch">
-            <h2 className="lp-pitch__h">Raise your <b>hit rate</b>.</h2>
+            <h2 className="lp-pitch__h">Make <b>sharper</b> decisions.</h2>
             <p className="lp-pitch__sub">
-              In a typical year, about <b>60% of bettors finish down</b>. The average wins just{" "}
-              <b>48% of their bets</b> — short of the <b>52.4%</b> you need just to <b>break even</b>. (Sportsbooks
-              take a cut on every bet, so the break-even line sits above 50%.) Only <b>~3% turn a lasting profit</b>.{" "}
-              <b className="lp-pitch__key">StatSeer is built to move you past that line:</b> <b>line-blind projections</b>, the <b>single best price</b>{" "}
-              on every pick, and the <b>context</b> that moves markets. Every call graded against the closing line.
+              Most tools hand you a pick and hope. StatSeer hands you the <b>evidence</b>:{" "}
+              <b>line-blind projections</b> you can compare to the market, the <b>context</b> the numbers miss, and
+              the <b>single best price</b> on every pick — so you evaluate a bet properly and never leave value on
+              the table. Every published read is graded against the closing line, in the open.
             </p>
             <div className="lp-pitch__bars">
               <div className="lp-pitch__row lp-pitch__row--a">
@@ -75,7 +74,7 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
                 <span className="lp-pitch__n">52.4<span className="lp-pitch__slash">%</span></span>
               </div>
             </div>
-            <p className="lp-pitch__cap">Only about 3% of bettors clear it. That&apos;s the line we&apos;re built to move you past.</p>
+            <p className="lp-pitch__cap">That break-even line is exactly why price matters — a few cents of value on every bet is the whole game. StatSeer makes sure you never overpay.</p>
             <label htmlFor="lp-pitch-toggle" className="btn btn--primary lp-pitch__cta">Got it — show me the board →</label>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/crest.png?v=4" alt="" className="lp-pitch__crest" width={120} height={128} />
@@ -87,7 +86,46 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
       <ValueFinderDrawer />
 
       <main className="lp">
+      {/* Value-prop lead — answers "why StatSeer" before the board, then the trust strip. */}
+      <section className="lp-lead">
+        <h2 className="lp-lead__h">See the edge. <em>Get the best price.</em></h2>
+        <p className="lp-lead__p">
+          One model reads every game <b>line-blind</b>, shows you exactly where it disagrees with the
+          market, then finds the sportsbook paying the most for your <b>exact slip</b>.
+        </p>
+        <div className="lp-lead__cta">
+          <a href="#lp-board" className="btn btn--primary lp-lead__go">Explore today&apos;s board</a>
+          <a href="/lines" className="lp-lead__alt">See how Value Finder works →</a>
+        </div>
+        <ul className="lp-trust" aria-label="What StatSeer stands for">
+          <li>Line-blind projections</li>
+          <li>Every published read graded</li>
+          <li>~10 sportsbooks compared</li>
+          <li>No guaranteed-win claims</li>
+        </ul>
+      </section>
+
       <LandingHub initialSport={initialSport} nfl={nfl} ncaaf={ncaaf} />
+
+      {/* Public track record — the trust engine. Honest preseason state until games grade. */}
+      <section className="lp-record" aria-label="Track record">
+        <h2 className="lp-record__h">Every read, graded in public.</h2>
+        <p className="lp-record__sub">
+          Nothing hidden. Every published call is timestamped and scored against the <b>closing line</b> —
+          the number the market settled on.
+        </p>
+        <div className="lp-record__grid">
+          <div className="lp-recstat"><span className="lp-recstat__n">—</span><span className="lp-recstat__l">Record</span></div>
+          <div className="lp-recstat"><span className="lp-recstat__n">—</span><span className="lp-recstat__l">Win rate</span></div>
+          <div className="lp-recstat"><span className="lp-recstat__n">—</span><span className="lp-recstat__l">ROI</span></div>
+          <div className="lp-recstat"><span className="lp-recstat__n">—</span><span className="lp-recstat__l">Closing-line value</span></div>
+        </div>
+        <p className="lp-record__soon">
+          <span className="lp-record__tag">Preseason validation underway</span>
+          Public grading begins with the Week&nbsp;1 opener. Once games are played we&apos;ll show real,
+          completed results — separately by sport and by market — never back-tested or projected numbers.
+        </p>
+      </section>
 
       <BetslipPromo />
       <HomePromo />
@@ -104,7 +142,7 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
       </section>
 
       <section className="hb-creed">
-        <div className="hb-creed__h">Bet smarter. <b>Win more often.</b></div>
+        <div className="hb-creed__h">Bet smarter. <b>Never overpay.</b></div>
         <p className="hb-creed__p">
           StatSeer finds real edges and proves them in the open — published probabilities, an honest
           track record, and the best price on every pick. <a href="/how">How our model works →</a>

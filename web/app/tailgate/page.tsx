@@ -85,8 +85,8 @@ export default async function Page({ searchParams }: {
       <div className="tg-main">
       <header className="masthead">
         <Brand
-          sub={<><span className="brand__sport">NFL</span> · Fan Analysis</>}
-          art={{ src: "/fans.png?v=1", alt: "Fan Analysis" }}
+          sub={<><span className="brand__sport">NFL</span> · Local Intelligence</>}
+          art={{ src: "/fans.png?v=1", alt: "Local Intelligence" }}
         />
       </header>
 
