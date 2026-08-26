@@ -38,8 +38,11 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
       <header className="lp-hero">
         <div className="lp-hero__banner">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/seereyes.jpg" alt="" className="lp-hero__img" width={1600} height={640} />
-          <h1 className="lp-hero__wm">StatSeer</h1>
+          <img src="/seereyes-band.jpg?v=1" alt="" className="lp-hero__img" width={1600} height={384} />
+          <div className="lp-hero__lockup">
+            <h1 className="lp-hero__wm">StatSeer</h1>
+            <span className="lp-hero__wmtag">Arm yourself with data-driven decisions.</span>
+          </div>
         </div>
       </header>
 

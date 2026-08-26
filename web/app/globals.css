@@ -1305,8 +1305,8 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 /* Visit-the-Forums button — same green as the CTA, outlined so two greens don't clash;
    sits between the crest and the signup button. Drawer's Community link covers phones. */
 .snav__forums{flex:0 0 auto;padding:6px 13px;border-radius:9px;border:1.5px solid var(--accent);
-  color:var(--accent);background:transparent;text-decoration:none;font-size:13px;font-weight:700;white-space:nowrap}
-.snav__forums:hover{background:var(--accent-soft)}
+  color:#fff;background:var(--accent);text-decoration:none;font-size:13px;font-weight:700;white-space:nowrap}
+.snav__forums:hover{filter:brightness(1.06)}
 @media (max-width:820px){.snav__forums{font-size:12px;padding:5px 10px}}
 @media (max-width:640px){.snav__forums{display:none}}
 .snav__links{display:flex;align-items:center;gap:2px}
@@ -2270,19 +2270,23 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .lp-hero{margin-bottom:6px;text-align:center}
 /* A thin band cropped to the seer's EYES — object-position keeps the eyes centered so the
    image's black letterbox never shows. Edge-to-edge of the viewport. */
-.lp-hero__banner{position:relative;height:clamp(96px,15.5vw,205px);overflow:hidden;
-  border-bottom:1px solid var(--line)}
-/* Center the crop on her eyes (~60% down the image). Mobile shows a taller slice of the
-   image, so keep it a touch higher there to avoid the letterboxed black edge. */
-.lp-hero__img{width:100%;height:100%;object-fit:cover;object-position:center 54%;display:block}
-@media (min-width:768px){.lp-hero__img{object-position:center 60%}}
-/* darken the bottom-left corner so the overlaid wordmark stays legible over the image */
+/* Thin eyes-band hero. The source (seereyes-band.jpg, 1600x384) is pre-cropped to the
+   hood+eyes content, so there's no black letterbox to reveal at any width. */
+.lp-hero__banner{position:relative;height:clamp(104px,13vw,178px);overflow:hidden}
+.lp-hero__img{width:100%;height:100%;object-fit:cover;object-position:center 62%;display:block}
+/* darken the bottom-left corner so the overlaid wordmark lockup stays legible over the image */
 .lp-hero__banner::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(105deg,rgba(0,0,0,.62) 0%,rgba(0,0,0,.28) 30%,transparent 58%)}
-.lp-hero__wm{position:absolute;left:clamp(14px,4vw,44px);bottom:clamp(6px,1.6vw,16px);margin:0;z-index:2;
+  background:linear-gradient(100deg,rgba(0,0,0,.66) 0%,rgba(0,0,0,.30) 34%,transparent 60%)}
+/* Brand lockup, bottom-left: the gold wordmark with the tagline beside it. */
+.lp-hero__lockup{position:absolute;left:clamp(14px,4vw,44px);bottom:clamp(6px,1.6vw,15px);z-index:2;
+  display:flex;align-items:baseline;gap:clamp(7px,1.4vw,13px);flex-wrap:wrap;max-width:92vw}
+.lp-hero__wm{position:static;margin:0;
   font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;font-weight:400;
   font-size:clamp(22px,4.6vw,40px);line-height:1;letter-spacing:.02em;color:var(--gold);
-  text-shadow:0 2px 10px rgba(0,0,0,.75),0 1px 2px rgba(0,0,0,.9)}
+  text-shadow:0 2px 10px rgba(0,0,0,.85),0 1px 2px rgba(0,0,0,.95)}
+.lp-hero__wmtag{font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;font-style:italic;
+  font-size:clamp(11px,1.7vw,16px);letter-spacing:.01em;color:#f1e9d6;
+  text-shadow:0 1px 7px rgba(0,0,0,.9),0 1px 2px rgba(0,0,0,.95)}
 
 /* ===== Homepage: transparent top bar blended over the seer-eyes hero =====
    On the landing page only (it carries .lp-hero) the global nav floats transparently
@@ -2290,22 +2294,25 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
    The bar is absolute here, so it scrolls away with the hero; the global sport strip is
    hidden because the in-page NFL | NCAAF toggle already covers it. Every other page keeps
    the solid, sticky nav untouched. */
-body:has(.lp-hero) .snav{position:absolute;top:0;left:0;right:0;z-index:60;
-  background:transparent;box-shadow:none;border-bottom:0}
+/* The bar stays PINNED to the top (fixed) the whole way down. Over the hero it's
+   transparent; once you scroll past the hero it fades to the solid surface (.snav--solid,
+   toggled from SiteNav) so links stay readable over page content. */
+body:has(.lp-hero) .snav{position:fixed;top:0;left:0;right:0;z-index:60;
+  background:transparent;box-shadow:none;border-bottom:0;transition:background .25s ease,box-shadow .25s ease,border-color .25s ease}
+body:has(.lp-hero) .snav.snav--solid{background:var(--surface);border-bottom:1px solid var(--line);box-shadow:0 2px 12px rgba(0,0,0,.14)}
 body:has(.lp-hero) .sportstrip{display:none}
-/* Taller hero so the floating bar clears the wordmark, + a dark scrim under the bar for
-   legibility over the brighter parts of the image. */
-body:has(.lp-hero) .lp-hero__banner{height:clamp(164px,25vw,330px);border-bottom:0}
-body:has(.lp-hero) .lp-hero__banner::before{content:"";position:absolute;left:0;right:0;top:0;height:118px;z-index:1;
-  pointer-events:none;background:linear-gradient(to bottom,rgba(6,20,14,.80) 0%,rgba(6,20,14,.30) 55%,transparent)}
-/* Light nav text/links so they sit legibly on the dark image. */
-body:has(.lp-hero) .snav__brand,
-body:has(.lp-hero) .snav__tagline,
-body:has(.lp-hero) .snav__link,
-body:has(.lp-hero) .snav__name{color:#f5efdf!important;text-shadow:0 1px 5px rgba(0,0,0,.65)}
-body:has(.lp-hero) .snav__burger span{background:#f5efdf}
-body:has(.lp-hero) .snav__link:hover{background:rgba(255,255,255,.14);color:#fff}
-body:has(.lp-hero) .snav__link.active{background:rgba(255,255,255,.20);color:#fff}
+/* The white nav wordmark + tagline are dropped on the landing page — the gold hero
+   lockup carries the brand there. */
+body:has(.lp-hero) .snav__brandlock{display:none}
+/* A dark scrim under the bar for legibility over the brighter parts of the image. */
+body:has(.lp-hero) .lp-hero__banner::before{content:"";position:absolute;left:0;right:0;top:0;height:96px;z-index:1;
+  pointer-events:none;background:linear-gradient(to bottom,rgba(6,20,14,.78) 0%,rgba(6,20,14,.26) 58%,transparent)}
+/* Light nav text/links ONLY while the bar is transparent over the image. */
+body:has(.lp-hero) .snav:not(.snav--solid) .snav__link,
+body:has(.lp-hero) .snav:not(.snav--solid) .snav__name{color:#f5efdf!important;text-shadow:0 1px 5px rgba(0,0,0,.65)}
+body:has(.lp-hero) .snav:not(.snav--solid) .snav__burger span{background:#f5efdf}
+body:has(.lp-hero) .snav:not(.snav--solid) .snav__link:hover{background:rgba(255,255,255,.14);color:#fff}
+body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(255,255,255,.20);color:#fff}
 
 /* ===== Value prop — PINNED to the left edge like the "Message Us" widget ===== */
 /* A slim always-visible tab; clicking slides the panel out OVER the page. Pure CSS

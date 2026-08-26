@@ -26,6 +26,7 @@ export default function SiteNav() {
   const [me, setMe] = useState<Me | undefined>(undefined);
   const [open, setOpen] = useState(false);       // mobile drawer
   const [userOpen, setUserOpen] = useState(false); // desktop user dropdown
+  const [solid, setSolid] = useState(false);       // homepage: opaque once scrolled past the hero
 
   useEffect(() => {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
@@ -56,13 +57,31 @@ export default function SiteNav() {
   // Close menus whenever the route changes.
   useEffect(() => { setOpen(false); setUserOpen(false); }, [pathname]);
 
+  // Homepage only: the bar floats transparent over the hero, then turns solid once the
+  // hero has scrolled up past it. Other pages keep their normal solid bar (solid stays false).
+  useEffect(() => {
+    if (pathname !== "/") { setSolid(false); return; }
+    const onScroll = () => {
+      const hero = document.querySelector<HTMLElement>(".lp-hero__banner");
+      const threshold = hero ? hero.getBoundingClientRect().height - 48 : 120;
+      setSolid(window.scrollY > Math.max(40, threshold));
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [pathname]);
+
   async function logout() {
     await createClient().auth.signOut();
     location.href = "/";
   }
 
   return (
-    <header className="snav">
+    <header className={solid ? "snav snav--solid" : "snav"}>
       <div className="snav__bar">
         <a href="/" className="snav__home" aria-label="StatSeer home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -92,7 +111,7 @@ export default function SiteNav() {
         <div className="snav__right">
           <span className="snav__crest" role="img" aria-label="StatSeer crest" />
           {/* Forums button (green, always visible) sits between the crest and the signup CTA. */}
-          <a href="/forum" className="snav__forums">Visit the Forums</a>
+          <a href="/forum" className="snav__forums">Join our community</a>
           {/* Create-an-Account stays in the top bar (pre-launch CTA), to the right of Forums.
               The community "Become a member" link is the one that hides for signed-in members. */}
           <a href="/signup" className="snav__signup">
