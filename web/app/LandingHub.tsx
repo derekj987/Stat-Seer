@@ -514,22 +514,17 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
       <input type="radio" name="lpsport" id="lps-nfl" className="lp-r" defaultChecked={initialSport === "nfl"} />
       <input type="radio" name="lpsport" id="lps-ncaaf" className="lp-r" defaultChecked={initialSport === "ncaaf"} />
 
-      {/* Rotating highlight banner, ABOVE the snapshot heading — one per sport, CSS-toggled. */}
-      <div className="lp-hbwrap lp-hbwrap--nfl"><HighlightBanner sport="nfl" /></div>
-      <div className="lp-hbwrap lp-hbwrap--ncaaf"><HighlightBanner sport="ncaaf" /></div>
-
-      {/* Snapshot heading (per-sport, CSS-toggled) on the left, sport toggle on the right. */}
-      <div className="lpf__head lpf__head--snap">
-        <div className="lp-snaplabel lp-snaplabel--nfl">NFL WEEK {nfl.week} SNAPSHOT</div>
-        <div className="lp-snaplabel lp-snaplabel--ncaaf">COLLEGE FOOTBALL WEEK {ncaaf.week} SNAPSHOT</div>
-        <div className="lpf__toggle" role="tablist" aria-label="Choose a sport">
-          <label htmlFor="lps-nfl" className="lpf__t">NFL</label>
-          <label htmlFor="lps-ncaaf" className="lpf__t">NCAAF</label>
-        </div>
-      </div>
 
       {/* NFL panel */}
       <div className="lp-sport lp-sport--nfl">
+        <HighlightBanner sport="nfl" />
+        <div className="lpf__head lpf__head--snap">
+          <div className="lp-snaplabel">NFL WEEK {nfl.week} SNAPSHOT</div>
+          <div className="lpf__toggle" role="tablist" aria-label="Choose a sport">
+            <label htmlFor="lps-nfl" className="lpf__t">NFL</label>
+            <label htmlFor="lps-ncaaf" className="lpf__t">NCAAF</label>
+          </div>
+        </div>
         <Panel title="The Model — Snapshot View" count={`${nfl.card.length} games`} hint={TIPS.gameModel} open>
           <NflCardTable rows={nfl.card} />
           <p className="lp-cardfoot"><a href="/model">See the full model →</a></p>
@@ -576,6 +571,14 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
 
       {/* NCAAF panel */}
       <div className="lp-sport lp-sport--ncaaf">
+        <HighlightBanner sport="ncaaf" />
+        <div className="lpf__head lpf__head--snap">
+          <div className="lp-snaplabel">COLLEGE FOOTBALL WEEK {ncaaf.week} SNAPSHOT</div>
+          <div className="lpf__toggle" role="tablist" aria-label="Choose a sport">
+            <label htmlFor="lps-nfl" className="lpf__t">NFL</label>
+            <label htmlFor="lps-ncaaf" className="lpf__t">NCAAF</label>
+          </div>
+        </div>
         <Panel title="The Model — Snapshot View" count={`${ncaaf.games.length} ranked`} hint={TIPS.gameModel} open>
           <NcaafCardTable games={ncaaf.games} />
           <p className="lp-cardfoot"><a href="/ncaaf/model">See the full model →</a></p>
