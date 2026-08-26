@@ -6,15 +6,15 @@ import type { CardRow, UpsetRow, PlayerPick } from "@/lib/home";
 import type { NcaafCardGame, NcaafUpset } from "./ncaaf/model-data";
 import { NCAAF_MODEL } from "./ncaaf/model-data";
 import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
-import { PLAYER_PROJECTIONS, PROJ_PRIOR, type PlayerProj } from "@/lib/playerProjections";
+import { PLAYER_PROJECTIONS, type PlayerProj } from "@/lib/playerProjections";
 import { INCENTIVE_WATCH } from "@/lib/incentiveWatch";
 import { COACH_TENDENCIES } from "@/lib/coachTendencies";
 import { CONTENTION } from "@/lib/contention";
-import { isRealistic, DEPTH } from "@/lib/depthChart";
+import { DEPTH } from "@/lib/depthChart";
 import { HighlightBanner } from "./HighlightBanner";
 import CoachTable from "./CoachTable";
 import Tip from "./Tip";
-import { ScrollHint, MoreTable } from "./Nav";
+import { MoreTable } from "./Nav";
 
 // Plain-English explanations shown behind each section's medieval "?" seal.
 const TIPS = {
@@ -88,11 +88,11 @@ function cxCardEl(w: GameWeather) {
 }
 
 /** NFL considerations snapshot: first 3 per-game cards, "see more" for the rest. */
-function NflConsiderations() {
+function NflConsiderations({ limit = 3 }: { limit?: number }) {
   const all = GAME_WEATHER;
   if (!all.length) return <p className="hb-empty">Considerations load with the week&apos;s board — see <a href="/considerations">Special Considerations</a>.</p>;
-  const lead = all.slice(0, 3);
-  const rest = all.slice(3);
+  const lead = all.slice(0, limit);
+  const rest = all.slice(limit);
   return (
     <>
       <div className="cxgrid cxgrid--snap">{lead.map(cxCardEl)}</div>
@@ -238,49 +238,6 @@ function NcaafCardTable({ games }: { games: NcaafCardGame[] }) {
   );
 }
 
-function playLine(p: PlayerPick): string {
-  if (p.side === "Yes") { const l = p.marketLabel ?? "anytime TD"; return l.charAt(0).toUpperCase() + l.slice(1); }
-  return [p.side, p.line != null ? String(p.line) : null, p.marketLabel].filter(Boolean).join(" ");
-}
-function PlrHead() {
-  return <thead><tr><th className="hb-l">Player</th><th>Team</th><th>Wk</th><th>The play</th><th>Best book</th><th>Trending on</th></tr></thead>;
-}
-function PlrRows({ players, moreFrom }: { players: PlayerPick[]; moreFrom?: number }) {
-  return (
-    <>
-      {players.map((p, i) => (
-        <tr key={p.id} className={moreFrom !== undefined && i >= moreFrom ? "hb-row--more" : undefined}>
-          <td className="hb-l"><a className="hb-plrlink" href="/tailgate">{p.player}</a></td>
-          <td className="hb-num">{p.team}</td>
-          <td className="hb-num">{p.week}</td>
-          <td><span className={p.dir === "down" ? "hb-plr__up hb-plr__down" : "hb-plr__up"} aria-hidden="true">{p.dir === "down" ? "▼" : "▲"}</span> {playLine(p)}</td>
-          <td>{p.book ?? "—"}</td>
-          <td className="hb-plr__srccell">{p.sources.length ? [...new Set(p.sources)].join(" · ") : "—"}</td>
-        </tr>
-      ))}
-    </>
-  );
-}
-function PlayersTable({ players }: { players: PlayerPick[] }) {
-  if (!players.length) return <p className="hb-empty">Player reads post with the week&apos;s props — see <a href="/tailgate">Local Intelligence</a>.</p>;
-  const capped = players.slice(0, 14);
-  return (
-    <MoreTable id="fanmore-nfl" head={<PlrHead />} extra={Math.max(0, capped.length - 3)} noun="players" plr>
-      <PlrRows players={capped} moreFrom={3} />
-    </MoreTable>
-  );
-}
-
-function FanAnalysisNote() {
-  return (
-    <p className="hb-note">
-      We scour the fan forums, RSS feeds, and beat writers to surface players you may not have heard about —
-      then apply a <b>hype rating</b> and give you the bottom line, like <b>take the over on their receptions</b>{" "}
-      or <b>the over on their rushing yards</b>.
-    </p>
-  );
-}
-
 // Player Model snapshot — a few of our line-blind prop reads with "Our Model Suggests"
 // (the prior-season hit rate over the posted line). NFL only; NCAAF has no projections yet.
 // A starter / primary contributor (depth rank <= 2); unknown players pass (don't over-filter).
@@ -348,112 +305,6 @@ function PlayerSnapshot({ base }: { base: Sport }) {
   );
 }
 
-// Quarterback Passing snapshot — the rich per-QB passing table from the Player Model,
-// surfaced on the homepage right under the game-line snapshot. Book line vs our
-// line-blind projection, plus career / prior-season / home / road over-rates. The
-// same markup + styling as /model/players?cat=passing so it reads identically.
-function pmPct(over: number, g: number): number | null { return g ? Math.round((100 * over) / g) : null; }
-function pmCls(v: number | null): string { return v === null ? "" : v >= 50 ? "pmread--over" : "pmread--under"; }
-
-function PassingSnapshot() {
-  const rows = PLAYER_PROJECTIONS.filter((r) => r.cat === "passing" && r.book > 0 && isRealistic(r.player));
-  if (!rows.length) {
-    return <p className="hb-empty">Passing projections publish here as the season&apos;s usage is captured — see the <a href="/model/players?cat=passing">Player Model →</a></p>;
-  }
-  const games: string[] = [];
-  const byGame: Record<string, PlayerProj[]> = {};
-  for (const r of rows) {
-    if (!byGame[r.game]) { byGame[r.game] = []; games.push(r.game); }
-    byGame[r.game].push(r);
-  }
-  const gameTable = (g: string) => (
-    <div className="pmgame" key={g}>
-      <div className="pmgame__h">{g}</div>
-      <ScrollHint />
-      <div className="pmscroll">
-        <div className="pmtable pmtable--data pmtable--ha" role="table" aria-label={`${g} passing projections`}>
-          <div className="pmrow pmrow--head pmrow--data" role="row">
-            <span className="pmcell pmcell--player">Player</span>
-            <span className="pmcell">Team</span>
-            <span className="pmcell pmcell--num">Book line</span>
-            <span className="pmcell pmcell--num">Our proj</span>
-            <span className="pmcell pmcell--career">Career % over</span>
-            <span className="pmcell pmcell--career">Prior szn % over</span>
-            <span className="pmcell pmcell--career">Home % over</span>
-            <span className="pmcell pmcell--career">Road % over</span>
-          </div>
-          {byGame[g].map((r) => {
-            const cpct = pmPct(r.cOver, r.cG), ppct = pmPct(r.pOver, r.pG);
-            const hpct = pmPct(r.hOver, r.hG), rpct = pmPct(r.rOver, r.rG);
-            return (
-              <div className="pmrow pmrow--data" role="row" key={`${r.player}-${r.market}`}>
-                <span className="pmcell pmcell--player">{r.player}</span>
-                <span className="pmcell pmcell--team">{r.team}</span>
-                <span className="pmcell pmcell--num">{r.book} yds</span>
-                <span className="pmcell pmcell--num pmcell--proj">
-                  {r.proj} yds{" "}
-                  <span className={`pmarrow ${r.proj >= r.book ? "pmarrow--up" : "pmarrow--down"}`} aria-hidden="true">{r.proj >= r.book ? "▲" : "▼"}</span>
-                </span>
-                <span className={`pmcell pmcell--career ${pmCls(cpct)}`}>
-                  {cpct === null ? "—" : <>{cpct}% <small className="pmcell__sub">{r.cOver}/{r.cG} gm</small></>}
-                </span>
-                <span className={`pmcell pmcell--career ${pmCls(ppct)}`}>
-                  {ppct === null ? <span className="pmcell__sub">no {PROJ_PRIOR}</span> : <>{ppct}% <small className="pmcell__sub">{r.pOver}/{r.pG} gm</small></>}
-                </span>
-                <span className={`pmcell pmcell--career ${pmCls(hpct)}`}>
-                  {hpct === null ? "—" : <>{hpct}% <small className="pmcell__sub">{r.hOver}/{r.hG} gm</small></>}
-                </span>
-                <span className={`pmcell pmcell--career ${pmCls(rpct)}`}>
-                  {rpct === null ? "—" : <>{rpct}% <small className="pmcell__sub">{r.rOver}/{r.rG} gm</small></>}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-  const lead = games.slice(0, 2);
-  const rest = games.slice(2);
-  return (
-    <>
-      {lead.map(gameTable)}
-      {rest.length > 0 && (
-        <details className="hb-more">
-          <summary className="hb-more__sum">
-            <span className="hb-more__chev" aria-hidden="true">▸</span>
-            See more ({rest.length} more {rest.length === 1 ? "game" : "games"})
-          </summary>
-          {rest.map(gameTable)}
-        </details>
-      )}
-      <p className="lp-cardfoot"><a href="/model/players?cat=passing">See the full Player Model →</a></p>
-    </>
-  );
-}
-
-function UpsetCards({ children }: { children: React.ReactNode }) { return <div className="hb-cols">{children}</div>; }
-
-// Show the first 2 upset cards, tuck the rest behind a "see more" dropdown like the tables.
-function UpsetSplit({ cards }: { cards: React.ReactNode[] }) {
-  const lead = cards.slice(0, 2);
-  const rest = cards.slice(2);
-  return (
-    <>
-      <UpsetCards>{lead}</UpsetCards>
-      {rest.length > 0 && (
-        <details className="hb-more">
-          <summary className="hb-more__sum">
-            <span className="hb-more__chev" aria-hidden="true">▸</span>
-            See more ({rest.length} more {rest.length === 1 ? "game" : "games"})
-          </summary>
-          <UpsetCards>{rest}</UpsetCards>
-        </details>
-      )}
-    </>
-  );
-}
-
 export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport: Sport; nfl: NflData; ncaaf: NcaafData }) {
   return (
     <section className="lp-hub" id="lp-board" aria-label="This week's board">
@@ -472,40 +323,19 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
             <label htmlFor="lps-ncaaf" className="lpf__t">NCAAF</label>
           </div>
         </div>
-        <Panel title="The Model — Snapshot View" count={`${nfl.card.length} games`} hint={TIPS.gameModel} open>
-          <NflCardTable rows={nfl.card} />
+        {/* Aggressive curation: 3 disagreements + 3 player reads + 1 context. Everything else
+            lives on its own section page (linked from each panel + the feature cards below). */}
+        <Panel title="Where the model disagrees most" count={`${nfl.card.filter((r) => r.off).length || "—"} off-consensus`} hint={TIPS.gameModel} open>
+          <NflCardTable rows={[...nfl.card].sort((a, b) => Number(b.off) - Number(a.off)).slice(0, 3)} />
           <p className="lp-cardfoot"><a href="/model">See the full model →</a></p>
         </Panel>
-        <Panel
-          title="Quarterback Passing Props — Snapshot"
-          count={`${PLAYER_PROJECTIONS.filter((r) => r.cat === "passing" && r.book > 0 && isRealistic(r.player)).length} QBs`}
-          hint={TIPS.passing}
-          open
-        >
-          <PassingSnapshot />
-        </Panel>
-        <Panel title="Player Model snapshot — NFL" count="props" hint={TIPS.playerModel} open>
+        <Panel title="This week&apos;s player reads" count="props" hint={TIPS.playerModel} open>
           <PlayerSnapshot base="nfl" />
         </Panel>
-        <Panel title="Local Intelligence — the word around the league" count={nfl.players.length || "—"} hint={TIPS.fan} open>
-          <FanAnalysisNote />
-          <PlayersTable players={nfl.players} />
+        <Panel title="The context a number misses" count="context" hint={TIPS.considNfl} open>
+          <NflConsiderations limit={1} />
         </Panel>
-        <Panel title="Check out our special considerations" count={`${GAME_WEATHER.length || 3} games`} hint={TIPS.considNfl} open>
-          <NflConsiderations />
-        </Panel>
-        <Panel title="Potential Upsets of the Week — NFL" count={nfl.upsets.length} hint={TIPS.upsets} open>
-          {nfl.upsets.length === 0 ? <p className="hb-empty">No upset alerts this week — our model and the market agree on every game&apos;s side.</p> : (
-            <UpsetSplit cards={nfl.upsets.map((u) => (
-              <div className="hb-up" key={u.eventId}>
-                <div className="hb-up__hd"><span className="hb-up__team">{u.dog}<small>{u.matchup}</small></span>{u.spread && <span className="hb-up__spread">{u.spread}</span>}</div>
-                <div className="hb-up__note">The market has the {u.dog} losing. Our model has them <b>winning</b> by {u.byPoints.toFixed(1)}.</div>
-                <div className="hb-up__ft"><span className="hb-up__edge">Model likes them +{u.modelPct - u.marketPct}%</span></div>
-              </div>
-            ))} />
-          )}
-        </Panel>
-        {/* Referee analysis lives on the Context page now — de-emphasised off the homepage. */}
+        {/* Referee, Local Intelligence, Upsets & QB passing now live on their section pages. */}
         {/* How to use it — moved below the board, so the value + data lead. */}
         <div className="lpf__flowhead">
           <h2 className="lpf__h">Three steps, in order.</h2>
@@ -524,30 +354,15 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
             <label htmlFor="lps-ncaaf" className="lpf__t">NCAAF</label>
           </div>
         </div>
-        <Panel title="The Model — Snapshot View" count={`${ncaaf.games.length} ranked`} hint={TIPS.gameModel} open>
-          <NcaafCardTable games={ncaaf.games} />
+        <Panel title="Where the model disagrees most" count={`${ncaaf.games.filter((g) => g.off).length || "—"} off-consensus`} hint={TIPS.gameModel} open>
+          <NcaafCardTable games={[...ncaaf.games].sort((a, b) => Number(b.off) - Number(a.off)).slice(0, 3)} />
           <p className="lp-cardfoot"><a href="/ncaaf/model">See the full model →</a></p>
         </Panel>
-        <Panel title="Player Model snapshot — NCAAF" count="props" hint={TIPS.playerModel} open>
+        <Panel title="This week&apos;s player reads" count="props" hint={TIPS.playerModel} open>
           <PlayerSnapshot base="ncaaf" />
         </Panel>
-        <Panel title="Local Intelligence — the word around the league" count="—" hint={TIPS.fan} open>
-          <FanAnalysisNote />
-          <p className="hb-empty">College player reads land here once the CFB fan scan is wired — the same read we run for the NFL on <a href="/ncaaf/tailgate">Local Intelligence</a>.</p>
-        </Panel>
-        <Panel title="Check out our special considerations" count="context" hint={TIPS.considNcaaf} open>
+        <Panel title="The context a number misses" count="context" hint={TIPS.considNcaaf} open>
           <NcaafConsiderations />
-        </Panel>
-        <Panel title="Potential Upsets of the Week — NCAAF" count={ncaaf.upsets.length} hint={TIPS.upsets} open>
-          {ncaaf.upsets.length === 0 ? <p className="hb-empty">No upset alerts this week — our rating agrees with the market&apos;s favorite on the board.</p> : (
-            <UpsetSplit cards={ncaaf.upsets.map((u) => (
-              <div className="hb-up" key={`${u.dog}-${u.matchup}`}>
-                <div className="hb-up__hd"><span className="hb-up__team">{u.dog}<small>{u.matchup}</small></span><span className="hb-up__spread">{u.spread}</span></div>
-                <div className="hb-up__note">The market has the {u.dog} losing. Our model has them <b>winning</b> by {u.byPoints.toFixed(1)}.</div>
-                <div className="hb-up__ft"><span className="hb-up__edge">Model likes them +{u.modelPct - u.marketPct}%</span></div>
-              </div>
-            ))} />
-          )}
         </Panel>
         <div className="lpf__flowhead">
           <h2 className="lpf__h">Three steps, in order.</h2>
