@@ -7,7 +7,6 @@ import type { NcaafCardGame, NcaafUpset } from "./ncaaf/model-data";
 import { NCAAF_MODEL } from "./ncaaf/model-data";
 import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
 import { PLAYER_PROJECTIONS, PROJ_PRIOR, type PlayerProj } from "@/lib/playerProjections";
-import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
 import { INCENTIVE_WATCH } from "@/lib/incentiveWatch";
 import { COACH_TENDENCIES } from "@/lib/coachTendencies";
 import { CONTENTION } from "@/lib/contention";
@@ -50,13 +49,6 @@ function cxWeather(w: GameWeather): string {
   return "Forecast arrives ~2 weeks out";
 }
 
-/** The one crew tendency that carries over year to year is the penalty rate. */
-function refFlag(pen: number): { label: string; tone: "hot" | "cool" } | null {
-  if (pen >= REF_LEAGUE.pen + 0.8) return { label: "Flag-heavy", tone: "hot" };
-  if (pen <= REF_LEAGUE.pen - 0.8) return { label: "Lets them play", tone: "cool" };
-  return null;
-}
-
 /** One team's playoff-picture line (CONTEXT; flags reduced-stakes games). */
 function cxStake(team: string) {
   const c = CONTENTION[team];
@@ -95,23 +87,6 @@ function cxCardEl(w: GameWeather) {
   );
 }
 
-/** One crew row in the referee snapshot table. */
-function refRowEl(r: (typeof REF_STATS)[number]) {
-  const flag = refFlag(r.pen);
-  const ou = r.over >= 50 ? { d: "Over", p: r.over } : { d: "Under", p: 100 - r.over };
-  const ats = r.atsFav >= 50 ? { d: "Fav", p: r.atsFav } : { d: "Dog", p: 100 - r.atsFav };
-  return (
-    <div className="refrow" key={r.name}>
-      <span className="refrow__name">{r.name} <span className="refrow__n">({r.games})</span></span>
-      <span className="refrow__v">{r.total}</span>
-      <span className="reflean"><b className="reflean__d">{ou.d}</b> <span className="reflean__p">({ou.p}%)</span></span>
-      <span className="reflean"><b className="reflean__d">{ats.d}</b> <span className="reflean__p">({ats.p}%)</span></span>
-      <span className={r.pen >= REF_LEAGUE.pen ? "refrow__v hot" : "refrow__v cool"}>{r.pen}</span>
-      <span className="refrow__read">{flag ? <b className={flag.tone}>{flag.label}</b> : <span className="muted">Average flags</span>}</span>
-    </div>
-  );
-}
-
 /** NFL considerations snapshot: first 3 per-game cards, "see more" for the rest. */
 function NflConsiderations() {
   const all = GAME_WEATHER;
@@ -131,34 +106,6 @@ function NflConsiderations() {
         </details>
       )}
       <p className="lp-cardfoot"><a href="/considerations">See our Context Model →</a></p>
-    </>
-  );
-}
-
-/** Referee Crew Analysis snapshot — first 3 crews, "see more" for the rest, link to the
- *  full breakdown. Its own panel on the landing page (under Potential Upsets). */
-function RefereeAnalysis() {
-  const lead = REF_STATS.slice(0, 3);
-  const rest = REF_STATS.slice(3);
-  return (
-    <>
-      <p className="lp-refsnap__sub">The one crew tendency that carries over year to year — <b>how many flags they throw</b>. Everything else is historical context, not a lean.</p>
-      <div className="reftable">
-        <div className="refrow refrow--head">
-          <span>crew</span><span>avg total</span><span>leans O/U</span><span>leans ATS</span><span>pen/g</span><span>read</span>
-        </div>
-        {lead.map(refRowEl)}
-      </div>
-      {rest.length > 0 && (
-        <details className="hb-more">
-          <summary className="hb-more__sum">
-            <span className="hb-more__chev" aria-hidden="true">▸</span>
-            See {rest.length} more crews
-          </summary>
-          <div className="reftable lp-moretbl">{rest.map(refRowEl)}</div>
-        </details>
-      )}
-      <p className="lp-cardfoot"><a href="/considerations">Review our Special Considerations →</a></p>
     </>
   );
 }
@@ -558,9 +505,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
             ))} />
           )}
         </Panel>
-        <Panel title="Referee Crew Analysis" count={`${REF_STATS.length} crews`} hint={TIPS.referee} open>
-          <RefereeAnalysis />
-        </Panel>
+        {/* Referee analysis lives on the Context page now — de-emphasised off the homepage. */}
         {/* How to use it — moved below the board, so the value + data lead. */}
         <div className="lpf__flowhead">
           <h2 className="lpf__h">Three steps, in order.</h2>
