@@ -1,6 +1,7 @@
 import { weekRange } from "@/lib/board";
 import { weekTailgate, stockLabel, stockArrows, type Buzz } from "@/lib/tailgate";
 import { Brand, FlowSteps, ContextSubnav } from "../Nav";
+import { WeekNav } from "../WeekNav";
 import Tip from "../Tip";
 import AddToSlip from "../AddToSlip";
 
@@ -60,22 +61,6 @@ function BuzzCard({ b }: { b: Buzz }) {
   );
 }
 
-function WeekNav({ min, max, current }: { min: number; max: number; current: number }) {
-  const weeks: number[] = [];
-  for (let w = min; w <= max; w++) weeks.push(w);
-  return (
-    <nav className="weeknav" aria-label="Select week">
-      <span className="weeknav__label">Week</span>
-      <div className="weeknav__list">
-        {weeks.map((w) => (
-          <a key={w} href={`/tailgate?week=${w}`}
-            className={w === current ? "weeknav__w active" : "weeknav__w"}
-            aria-current={w === current ? "page" : undefined}>{w}</a>
-        ))}
-      </div>
-    </nav>
-  );
-}
 
 export default async function Page({ searchParams }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -114,7 +99,7 @@ export default async function Page({ searchParams }: {
           our model, not a StatSeer pick, and it is <b>never graded</b>. We&apos;re handing you the word around the
           league — do your own homework.</>} />
       </div>
-      <WeekNav min={min} max={max} current={week} />
+      <WeekNav min={min} max={max} current={week} base="/tailgate" />
 
       {feed.sample && (
         <p className="tgsample">

@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import type { Game } from "@/lib/board";
 import { ShopSubnav, Brand, ValueFinderDrawer, FlowSteps, ValueFinderNote } from "./Nav";
+import { WeekNav } from "./WeekNav";
 import { useSlip } from "@/lib/slip";
 import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
 
@@ -73,22 +74,6 @@ function SavableChip({
   );
 }
 
-function WeekNav({ min, max, current }: { min: number; max: number; current: number }) {
-  const weeks: number[] = [];
-  for (let w = min; w <= max; w++) weeks.push(w);
-  return (
-    <nav className="weeknav" aria-label="Select week">
-      <span className="weeknav__label">Week</span>
-      <div className="weeknav__list">
-        {weeks.map((w) => (
-          <a key={w} href={`/lines?week=${w}`}
-            className={w === current ? "weeknav__w active" : "weeknav__w"}
-            aria-current={w === current ? "page" : undefined}>{w}</a>
-        ))}
-      </div>
-    </nav>
-  );
-}
 
 function GameCard({
   g, has, onToggle,
@@ -188,7 +173,7 @@ export default function BoardView({
         <FlowSteps active="value" />
         <ShopSubnav active="lines" />
 
-        <WeekNav min={min} max={max} current={week} />
+        <WeekNav min={min} max={max} current={week} base="/lines" />
 
         {board.length === 0 ? (
           <p className="foot">No odds captured for Week {week} yet.</p>

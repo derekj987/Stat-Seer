@@ -3,6 +3,7 @@ import { fetchModelWeek, fetchCalibration, type ModelPrediction } from "@/lib/mo
 import { MODEL_TOTALS } from "@/lib/modelTotals";
 import { weekRefs } from "@/lib/refAssignments";
 import { Brand, FlowSteps, ModelSubnav } from "../Nav";
+import { WeekNav } from "../WeekNav";
 import AddToSlip from "../AddToSlip";
 
 export const revalidate = 300;
@@ -105,22 +106,6 @@ const kickFmt = new Intl.DateTimeFormat("en-US", {
 });
 const et = (iso: string) => kickFmt.format(new Date(iso)) + " ET";
 
-function WeekNav({ min, max, current }: { min: number; max: number; current: number }) {
-  const weeks: number[] = [];
-  for (let w = min; w <= max; w++) weeks.push(w);
-  return (
-    <nav className="weeknav" aria-label="Select week">
-      <span className="weeknav__label">Week</span>
-      <div className="weeknav__list">
-        {weeks.map((w) => (
-          <a key={w} href={`/model?week=${w}`}
-            className={w === current ? "weeknav__w active" : "weeknav__w"}
-            aria-current={w === current ? "page" : undefined}>{w}</a>
-        ))}
-      </div>
-    </nav>
-  );
-}
 
 function PredictionCard({ p }: { p: ModelPrediction }) {
   const favProb = p.favored === p.home ? p.homeWinProb : 1 - p.homeWinProb;
@@ -259,7 +244,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
 
       <FlowSteps active="analyze" />
       <ModelSubnav active="game" />
-      <WeekNav min={min} max={max} current={week} />
+      <WeekNav min={min} max={max} current={week} base="/model" />
 
       {preds.length === 0 ? (
         <p className="foot">No reads published for Week {week} yet.</p>

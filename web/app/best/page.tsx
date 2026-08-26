@@ -1,6 +1,7 @@
 import { weekRange } from "@/lib/board";
 import { fetchBets, fetchBestProps, fmtOdds, type KeyPlay, type PropPlay } from "@/lib/bestbets";
 import { ShopSubnav, Brand, FlowSteps, ValueFinderNote } from "../Nav";
+import { WeekNav } from "../WeekNav";
 import SavableRow from "./SavableRow";
 
 export const revalidate = 120;
@@ -19,22 +20,6 @@ function BookTag({ books }: { books: string[] }) {
     : <span className="book tie" title={books.join(", ")}>×{books.length} books</span>;
 }
 
-function WeekNav({ min, max, current }: { min: number; max: number; current: number }) {
-  const weeks: number[] = [];
-  for (let w = min; w <= max; w++) weeks.push(w);
-  return (
-    <nav className="weeknav" aria-label="Select week">
-      <span className="weeknav__label">Week</span>
-      <div className="weeknav__list">
-        {weeks.map((w) => (
-          <a key={w} href={`/best?week=${w}`}
-            className={w === current ? "weeknav__w active" : "weeknav__w"}
-            aria-current={w === current ? "page" : undefined}>{w}</a>
-        ))}
-      </div>
-    </nav>
-  );
-}
 
 function KeyCard({ k }: { k: KeyPlay }) {
   const isSpread = k.market === "Spread";
@@ -97,7 +82,7 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
       <ValueFinderNote />
       <FlowSteps active="value" />
       <ShopSubnav active="best" />
-      <WeekNav min={min} max={max} current={week} />
+      <WeekNav min={min} max={max} current={week} base="/best" />
 
       <details className="readbox">
         <summary className="readbox__h">What am I seeing here?</summary>

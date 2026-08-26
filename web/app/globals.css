@@ -147,10 +147,18 @@ body{background:var(--bg);color:var(--ink);
 .foot{margin-top:30px;padding-top:18px;border-top:1px solid var(--line)}
 .foot p{max-width:70ch;color:var(--muted);font-size:13px;margin:0}
 .foot b{color:var(--ink)}
-.weeknav{display:flex;align-items:center;gap:10px;margin:10px 0 4px;min-width:0}
+.weeknav{display:flex;align-items:center;gap:8px;margin:10px 0 4px;min-width:0}
 .weeknav__label{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;
   color:var(--muted);font-weight:600;flex:0 0 auto}
-.weeknav__list{display:flex;gap:4px;overflow-x:auto;padding-bottom:3px;min-width:0}
+.weeknav__list{display:flex;gap:4px;overflow-x:auto;scroll-behavior:smooth;min-width:0;scrollbar-width:none}
+.weeknav__list::-webkit-scrollbar{display:none}
+/* sliding-toolbar arrows — only rendered when the strip overflows */
+.weeknav__arw{flex:0 0 auto;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:7px;cursor:pointer;
+  font-size:15px;line-height:1;padding:0;-webkit-tap-highlight-color:transparent;transition:border-color .12s,color .12s}
+.weeknav__arw:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.weeknav__arw:disabled{opacity:.3;cursor:default}
+.weeknav__arw:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .weeknav__w{flex:0 0 auto;min-width:28px;text-align:center;padding:3px 8px;
   border-radius:7px;border:1px solid var(--line);background:var(--surface);
   color:var(--muted);font-family:var(--font-mono);font-size:12px;font-weight:600;

@@ -7,26 +7,10 @@ import { buildChaosBoard, returnFromSpread, comfortInfo, type ChaosInput } from 
 import { NFL_CHAOS, NFL_ENV, NFL_IMPROVE, CHAOS_WINDOW } from "@/lib/chaosTraits";
 import { GAME_WEATHER } from "@/lib/weatherData";
 import Tip from "@/app/Tip";
+import { WeekNav } from "../WeekNav";
 
 export const revalidate = 300;
 const SEASON = 2026;
-
-function WeekNav({ min, max, current }: { min: number; max: number; current: number }) {
-  const weeks: number[] = [];
-  for (let w = min; w <= max; w++) weeks.push(w);
-  return (
-    <nav className="weeknav" aria-label="Select week">
-      <span className="weeknav__label">Week</span>
-      <div className="weeknav__list">
-        {weeks.map((w) => (
-          <a key={w} href={`/context?week=${w}`}
-            className={w === current ? "weeknav__w active" : "weeknav__w"}
-            aria-current={w === current ? "page" : undefined}>{w}</a>
-        ))}
-      </div>
-    </nav>
-  );
-}
 
 interface Env {
   eventId: string;
@@ -145,7 +129,7 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
 
       <FlowSteps active="context" />
       <ContextSubnav active="upset" />
-      <WeekNav min={min} max={max} current={week} />
+      <WeekNav min={min} max={max} current={week} base="/context" />
 
       {/* --- Upset Model: where our line-blind model likes the underdog --- */}
       <section className="ctxsec">

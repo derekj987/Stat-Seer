@@ -8,6 +8,7 @@ import { TEAM_RATINGS } from "@/lib/teamRatings";
 import { COACH_TENDENCIES } from "@/lib/coachTendencies";
 import { CONTENTION } from "@/lib/contention";
 import { Brand, FlowSteps, ContextSubnav } from "../Nav";
+import { WeekNav } from "../WeekNav";
 import Tip from "@/app/Tip";
 import CoachTable from "../CoachTable";
 
@@ -89,22 +90,6 @@ const kickFmt = new Intl.DateTimeFormat("en-US", {
 });
 const et = (iso: string) => kickFmt.format(new Date(iso)) + " ET";
 
-function WeekNav({ min, max, current }: { min: number; max: number; current: number }) {
-  const weeks: number[] = [];
-  for (let w = min; w <= max; w++) weeks.push(w);
-  return (
-    <nav className="weeknav" aria-label="Select week">
-      <span className="weeknav__label">Week</span>
-      <div className="weeknav__list">
-        {weeks.map((w) => (
-          <a key={w} href={`/considerations?week=${w}`}
-            className={w === current ? "weeknav__w active" : "weeknav__w"}
-            aria-current={w === current ? "page" : undefined}>{w}</a>
-        ))}
-      </div>
-    </nav>
-  );
-}
 
 export default async function Page({ searchParams }: PageProps<"/considerations">) {
   const sp = await searchParams;
@@ -242,7 +227,7 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
         <ContextSubnav active="special" />
         <Tip text={<>One card per game with the context around it: the <b>site &amp; roof</b>, the <b>weather</b> (⚑ marks notable wind), the <b>referee crew</b>, and each team&apos;s offense/defense ratings. These arm your judgment — they are <b>not</b> an adjusted line or a pick.</>} />
       </div>
-      <WeekNav min={min} max={max} current={week} />
+      <WeekNav min={min} max={max} current={week} base="/considerations" />
 
       {games.length === 0 ? (
         <p className="foot">No games captured for Week {week} yet.</p>

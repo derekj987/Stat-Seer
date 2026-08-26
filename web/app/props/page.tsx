@@ -1,6 +1,7 @@
 import { weekRange } from "@/lib/board";
 import { weekProps, CATEGORIES, categoryByKey } from "@/lib/props";
 import { ShopSubnav, Brand, FlowSteps, ValueFinderNote } from "../Nav";
+import { WeekNav } from "../WeekNav";
 import PropsView from "./PropsView";
 
 export const revalidate = 120;
@@ -20,23 +21,6 @@ function CatNav({ current, week }: { current: string; week: number }) {
           className={c.key === current ? "catnav__c active" : "catnav__c"}
           aria-current={c.key === current ? "page" : undefined}>{c.label}</a>
       ))}
-    </nav>
-  );
-}
-
-function WeekNav({ min, max, current, cat }: { min: number; max: number; current: number; cat: string }) {
-  const weeks: number[] = [];
-  for (let w = min; w <= max; w++) weeks.push(w);
-  return (
-    <nav className="weeknav" aria-label="Select week">
-      <span className="weeknav__label">Week</span>
-      <div className="weeknav__list">
-        {weeks.map((w) => (
-          <a key={w} href={`/props?cat=${cat}&week=${w}`}
-            className={w === current ? "weeknav__w active" : "weeknav__w"}
-            aria-current={w === current ? "page" : undefined}>{w}</a>
-        ))}
-      </div>
     </nav>
   );
 }
@@ -90,7 +74,7 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
       ) : (
         <>
           <CatNav current={cat.key} week={week} />
-          <WeekNav min={min} max={max} current={week} cat={cat.key} />
+          <WeekNav min={min} max={max} current={week} base="/props" params={`cat=${cat.key}`} />
           {games.length === 0 ? (
             <p className="foot">
               No <b>{cat.label.toLowerCase()}</b> props posted for Week {week} yet. Books post most player

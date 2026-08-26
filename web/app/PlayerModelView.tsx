@@ -4,6 +4,7 @@
 // weekly projection OUTPUT wires in here as the season's usage data flows, so each
 // category currently scaffolds an honest "arriving" state rather than inventing numbers.
 import { Brand, FlowSteps, ModelSubnav, ScrollHint } from "./Nav";
+import { WeekNav } from "./WeekNav";
 import { PLAYER_PROJECTIONS, PROJ_WEEK, PROJ_PRIOR, type PlayerProj } from "@/lib/playerProjections";
 import { isRealistic } from "@/lib/depthChart";
 
@@ -25,22 +26,6 @@ export const PLAYER_CATS: PlayerCat[] = [
 export const playerCatByKey = (k: string): PlayerCat =>
   PLAYER_CATS.find((c) => c.key === k) ?? PLAYER_CATS[0];
 
-function WeekNav({ base, cat, current }: { base: "nfl" | "ncaaf"; cat: string; current: number }) {
-  const home = base === "ncaaf" ? "/ncaaf/model/players" : "/model/players";
-  const weeks = Array.from({ length: 18 }, (_, i) => i + 1);
-  return (
-    <nav className="weeknav" aria-label="Select week">
-      <span className="weeknav__label">Week</span>
-      <div className="weeknav__list">
-        {weeks.map((w) => (
-          <a key={w} href={`${home}?cat=${cat}&week=${w}`}
-            className={w === current ? "weeknav__w active" : "weeknav__w"}
-            aria-current={w === current ? "page" : undefined}>{w}</a>
-        ))}
-      </div>
-    </nav>
-  );
-}
 
 export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "ncaaf"; cat: string; week: number }) {
   const active = playerCatByKey(cat);
@@ -107,7 +92,7 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
         ))}
       </nav>
 
-      <WeekNav base={base} cat={active.key} current={week} />
+      <WeekNav current={week} base={base === "ncaaf" ? "/ncaaf/model/players" : "/model/players"} params={`cat=${active.key}`} />
 
       <section className="pmcat">
         {rows.length === 0 ? (
