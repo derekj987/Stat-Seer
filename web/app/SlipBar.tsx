@@ -67,7 +67,7 @@ export default function SlipBar() {
 
   // Share a link that re-opens this slip in StatSeer (installed app or browser).
   async function shareSlip() {
-    const url = `${location.origin}/slip?d=${encodeSlip(items)}`;
+    const url = `${location.origin}/slip?d=${encodeSlip(items)}&t=${Date.now()}`;
     const title = `My StatSeer slip — ${items.length} pick${items.length === 1 ? "" : "s"}`;
     if (typeof navigator.share === "function") {
       try { await navigator.share({ title, text: title, url }); return; } catch { /* user cancelled */ }

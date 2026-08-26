@@ -50,16 +50,28 @@ export function bestParlayBook(legs: SlipItem[]) {
   return { full, partial };
 }
 
-/** Everything the UI needs to summarise a slip's pricing in one call. */
+export interface BookQuote { book: string; decimal: number; covers: number }
+
+/** Everything the UI needs to summarise a slip's pricing in one call — including the FULL
+ *  ranking of books that price the whole parlay (best combined first), for a top-3 list and
+ *  a "best vs next-best" dollar comparison. */
 export function priceSlip(items: SlipItem[]) {
   const legs = items.filter((i) => i.byBook && Object.keys(i.byBook).length > 0);
-  const parlay = legs.length ? bestParlayBook(legs) : { full: null, partial: null };
+  const books = new Set<string>();
+  for (const l of legs) for (const b of Object.keys(l.byBook ?? {})) books.add(b);
+  const all: BookQuote[] = [];
+  for (const b of books) {
+    const priced = legs.filter((l) => l.byBook?.[b] !== undefined);
+    if (!priced.length) continue;
+    const decimal = priced.reduce((acc, l) => acc * toDecimal(l.byBook![b]), 1);
+    all.push({ book: b, decimal, covers: priced.length });
+  }
+  // Books that price EVERY leg, best combined first — the fair whole-parlay ranking.
+  const ranked = all.filter((r) => r.covers === legs.length).sort((a, b) => b.decimal - a.decimal);
   // Placing each leg at its OWN best book — the theoretical max combined ("best-price equivalent").
   const bestEachDec = legs.length ? legs.reduce((acc, i) => acc * toDecimal(legBest(i).best!), 1) : 0;
-  const oneBook = parlay.full
-    ? { book: parlay.full.book, decimal: parlay.full.decimal, covers: legs.length }
-    : parlay.partial
-      ? { book: parlay.partial.book, decimal: parlay.partial.decimal, covers: parlay.partial.covers }
-      : null;
-  return { legs, parlay, bestEachDec, oneBook };
+  // Headline book: best full-coverage; else the book covering the most legs at the best price.
+  const partial = all.slice().sort((a, b) => b.covers - a.covers || b.decimal - a.decimal)[0] ?? null;
+  const oneBook = ranked[0] ?? partial;
+  return { legs, ranked, bestEachDec, oneBook };
 }
