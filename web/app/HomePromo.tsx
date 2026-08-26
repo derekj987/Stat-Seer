@@ -35,8 +35,12 @@ export default function HomePromo() {
       <div className="hb-tav__body">
         <h2 className="hb-promo__h">There&apos;s a lot more where this came from.</h2>
         <p className="hb-promo__p">
-          Line shopping across every book, player props, key-number sweet spots, the full model with
-          its public track record, and a community of sharp members — it&apos;s all a free account away.
+          Line shopping across every book, player props, key-number sweet spots, and the full model with
+          its public track record — all a free account away.
+        </p>
+        <p className="hb-promo__p hb-promo__p--social">
+          It&apos;s a community, too: build a slip and <b>share it with any member in a tap</b> — or{" "}
+          <b>post it to their profile</b> and talk the picks over on their wall.
         </p>
         <div className="hb-promo__cta">
           {member ? (

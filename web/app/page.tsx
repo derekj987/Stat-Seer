@@ -155,33 +155,40 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
         </p>
       </section>
 
-      {/* Feature depth — the modules as compact cards: one line, one action each. */}
+      {/* Feature depth — the modules as compact cards: an icon, a line, one action each. */}
       <section className="lp-feats">
         <h2 className="lp-feats__h">Everything under the hood.</h2>
+        <p className="lp-feats__sub">Five modules, one job — help you make a sharper bet and never overpay for it.</p>
         <div className="lp-feats__grid">
           <a href="/model" className="lp-feat">
+            <span className="lp-feat__ic" aria-hidden="true">📊</span>
             <span className="lp-feat__h">Game Model</span>
-            <span className="lp-feat__p">Independent spreads &amp; totals, compared to the market.</span>
+            <span className="lp-feat__p">Independent spreads &amp; totals, line-blind and compared to the market.</span>
             <span className="lp-feat__go">Open →</span>
           </a>
           <a href="/model/players" className="lp-feat">
+            <span className="lp-feat__ic" aria-hidden="true">🎯</span>
             <span className="lp-feat__h">Player Model</span>
-            <span className="lp-feat__p">Line-blind prop projections with historical hit rates.</span>
+            <span className="lp-feat__p">Line-blind prop projections with published historical hit rates.</span>
             <span className="lp-feat__go">Open →</span>
           </a>
           <a href="/considerations" className="lp-feat">
+            <span className="lp-feat__ic" aria-hidden="true">🧭</span>
             <span className="lp-feat__h">Context</span>
             <span className="lp-feat__p">Weather, venue, coaching, officiating — what the number misses.</span>
             <span className="lp-feat__go">Open →</span>
           </a>
           <a href="/tailgate" className="lp-feat">
+            <span className="lp-feat__ic" aria-hidden="true">📣</span>
             <span className="lp-feat__h">Local Intelligence</span>
-            <span className="lp-feat__p">Beat-writer reporting and fan chatter, organized by team.</span>
+            <span className="lp-feat__p">We scour fan forums, beat writers &amp; RSS feeds for players you haven&apos;t heard about — then hand you the bottom line on each.</span>
             <span className="lp-feat__go">Open →</span>
           </a>
           <a href="/lines" className="lp-feat lp-feat--vf">
+            <span className="lp-feat__badge">Where the money is</span>
+            <span className="lp-feat__ic" aria-hidden="true">🏷️</span>
             <span className="lp-feat__h">Value Finder</span>
-            <span className="lp-feat__p">The best price for each bet — and the best book for the whole slip.</span>
+            <span className="lp-feat__p">The best price for each bet — and the single best book for your whole slip.</span>
             <span className="lp-feat__go">Open →</span>
           </a>
         </div>

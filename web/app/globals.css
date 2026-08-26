@@ -2284,6 +2284,29 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   font-size:clamp(22px,4.6vw,40px);line-height:1;letter-spacing:.02em;color:var(--gold);
   text-shadow:0 2px 10px rgba(0,0,0,.75),0 1px 2px rgba(0,0,0,.9)}
 
+/* ===== Homepage: transparent top bar blended over the seer-eyes hero =====
+   On the landing page only (it carries .lp-hero) the global nav floats transparently
+   over the top of the hero image, so the toolbar and the seer's eyes read as one banner.
+   The bar is absolute here, so it scrolls away with the hero; the global sport strip is
+   hidden because the in-page NFL | NCAAF toggle already covers it. Every other page keeps
+   the solid, sticky nav untouched. */
+body:has(.lp-hero) .snav{position:absolute;top:0;left:0;right:0;z-index:60;
+  background:transparent;box-shadow:none;border-bottom:0}
+body:has(.lp-hero) .sportstrip{display:none}
+/* Taller hero so the floating bar clears the wordmark, + a dark scrim under the bar for
+   legibility over the brighter parts of the image. */
+body:has(.lp-hero) .lp-hero__banner{height:clamp(164px,25vw,330px);border-bottom:0}
+body:has(.lp-hero) .lp-hero__banner::before{content:"";position:absolute;left:0;right:0;top:0;height:118px;z-index:1;
+  pointer-events:none;background:linear-gradient(to bottom,rgba(6,20,14,.80) 0%,rgba(6,20,14,.30) 55%,transparent)}
+/* Light nav text/links so they sit legibly on the dark image. */
+body:has(.lp-hero) .snav__brand,
+body:has(.lp-hero) .snav__tagline,
+body:has(.lp-hero) .snav__link,
+body:has(.lp-hero) .snav__name{color:#f5efdf!important;text-shadow:0 1px 5px rgba(0,0,0,.65)}
+body:has(.lp-hero) .snav__burger span{background:#f5efdf}
+body:has(.lp-hero) .snav__link:hover{background:rgba(255,255,255,.14);color:#fff}
+body:has(.lp-hero) .snav__link.active{background:rgba(255,255,255,.20);color:#fff}
+
 /* ===== Value prop — PINNED to the left edge like the "Message Us" widget ===== */
 /* A slim always-visible tab; clicking slides the panel out OVER the page. Pure CSS
    (checkbox). Collapsed by default and OUT of the content flow, so it never pushes the
@@ -2484,15 +2507,27 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .lp-aha__note a:hover{text-decoration:underline}
 /* Feature-depth cards */
 .lp-feats{margin:30px 0 20px}
-.lp-feats__h{font-size:clamp(18px,3vw,23px);font-weight:800;text-align:center;margin:0 0 14px;color:var(--ink)}
-.lp-feats__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
-.lp-feat{display:flex;flex-direction:column;gap:5px;padding:15px 16px;border:1px solid var(--line);border-radius:14px;
-  background:var(--surface);text-decoration:none;transition:transform .12s ease,border-color .12s ease,box-shadow .12s ease}
+.lp-feats__h{font-size:clamp(18px,3vw,23px);font-weight:800;text-align:center;margin:0 0 4px;color:var(--ink)}
+.lp-feats__sub{text-align:center;color:var(--muted);font-size:13px;margin:0 auto 16px;max-width:52ch}
+.lp-feats__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(184px,1fr));gap:12px}
+.lp-feat{position:relative;display:flex;flex-direction:column;gap:5px;padding:16px 16px 15px;border:1px solid var(--line);border-radius:14px;
+  background:var(--surface);text-decoration:none;overflow:hidden;transition:transform .12s ease,border-color .12s ease,box-shadow .12s ease}
+/* a thin accent rail down the left edge, revealed on hover */
+.lp-feat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);
+  transform:scaleY(0);transform-origin:top;transition:transform .16s ease}
 .lp-feat:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 8px 20px rgba(0,0,0,.08)}
+.lp-feat:hover::before{transform:scaleY(1)}
+.lp-feat__ic{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;
+  background:color-mix(in srgb,var(--accent) 12%,var(--surface));font-size:19px;line-height:1;margin-bottom:3px}
 .lp-feat__h{font-size:15px;font-weight:800;color:var(--ink)}
 .lp-feat__p{font-size:12.5px;color:var(--muted);line-height:1.45;flex:1 1 auto}
-.lp-feat__go{font-size:12px;font-weight:700;color:var(--accent);margin-top:2px}
+.lp-feat__go{font-size:12px;font-weight:700;color:var(--accent);margin-top:4px}
+.lp-feat:hover .lp-feat__go{text-decoration:underline}
 .lp-feat--vf{border-color:color-mix(in srgb,var(--accent) 40%,var(--line));background:var(--accent-soft)}
+.lp-feat--vf .lp-feat__ic{background:color-mix(in srgb,var(--accent) 22%,var(--surface))}
+.lp-feat__badge{position:absolute;top:10px;right:10px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--accent);background:var(--surface);border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));
+  border-radius:999px;padding:2px 8px}
 .lp-tagline{margin:26px 0 20px;text-align:center}
 /* landing card footer link + a per-sport spacing */
 .lp-cardfoot{margin:10px 0 0;font-size:12px;color:var(--muted)}

@@ -300,7 +300,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
           <PlayerSnapshot base="nfl" />
         </Panel>
         <Panel title="The context a number misses" count="context" hint={TIPS.considNfl} open>
-          <NflConsiderations limit={3} />
+          <NflConsiderations limit={2} />
         </Panel>
         {/* Referee, Local Intelligence, Upsets & QB passing now live on their section pages. */}
       </div>
