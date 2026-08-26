@@ -5,9 +5,12 @@
 // book PER LEG (place each straight bet at its own best price) AND — crucially — the one
 // book with the best COMBINED price if you want to parlay all the legs on a single ticket
 // (which is NOT necessarily the book that's best on the most individual legs).
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSlip, encodeSlip, type SlipItem, type SlipKind } from "@/lib/slip";
 import { bookName, fmtOdds, toDecimal, decToAmerican, bestParlayBook } from "@/lib/slipPricing";
+import { createClient } from "@/lib/supabase/client";
+
+type Me = { id: string; username: string } | null;
 
 const KIND_LABEL: Record<SlipKind, string> = {
   line: "Game Lines", prop: "Player Props", model: "The Model", fan: "Local Intelligence",
@@ -19,6 +22,23 @@ export default function SlipBar() {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
+  // Post-to-a-wall state (hooks must run before the early return below).
+  const [me, setMe] = useState<Me | undefined>(undefined);
+  const [showPost, setShowPost] = useState(false);
+  const [target, setTarget] = useState("");
+  const [note, setNote] = useState("");
+  const [posting, setPosting] = useState(false);
+  const [postMsg, setPostMsg] = useState<{ ok: boolean; text: string; href?: string } | null>(null);
+
+  useEffect(() => {
+    const sb = createClient();
+    sb.auth.getUser().then(async ({ data }) => {
+      if (!data.user) { setMe(null); return; }
+      const { data: p } = await sb.from("profiles").select("username").eq("id", data.user.id).single();
+      setMe({ id: data.user.id, username: (p?.username as string) ?? "" });
+    });
+  }, []);
+
   if (!items.length) return null;
 
   // Legs we can actually shop: those carrying a per-book price map (lines + props).
@@ -77,6 +97,30 @@ export default function SlipBar() {
       setShared(true);
       setTimeout(() => setShared(false), 2000);
     } catch { /* clipboard blocked */ }
+  }
+
+  // Post this slip to a member's profile wall (blank target = your own wall).
+  async function postToWall() {
+    if (!me) return;
+    setPosting(true); setPostMsg(null);
+    const sb = createClient();
+    let targetId = me.id;
+    let uname = me.username;
+    const wanted = target.trim();
+    if (wanted) {
+      const { data, error } = await sb.from("profiles").select("id,username").ilike("username", wanted).limit(1).maybeSingle();
+      if (error || !data) { setPosting(false); setPostMsg({ ok: false, text: `No member named “${wanted}.”` }); return; }
+      targetId = data.id as string; uname = data.username as string;
+    }
+    const summary = parlay.full && legs.length > 1
+      ? `Shared a ${legs.length}-leg slip — best combined at ${bookName(parlay.full.book)} ${decToAmerican(parlay.full.decimal)}`
+      : `Shared a ${items.length}-pick slip`;
+    const body = note.trim() || summary;
+    const { error } = await sb.from("wall_posts").insert({ profile_id: targetId, author_id: me.id, body, slip: items });
+    setPosting(false);
+    if (error) { setPostMsg({ ok: false, text: error.message }); return; }
+    setNote(""); setTarget("");
+    setPostMsg({ ok: true, text: wanted ? `Posted to ${uname}’s wall` : "Posted to your wall", href: `/u/${uname}` });
   }
 
   return (
@@ -142,8 +186,36 @@ export default function SlipBar() {
             <div className="slipbar__actions">
               <button className="slipbar__share" onClick={shareSlip}>{shared ? "Link copied ✓" : "Share slip"}</button>
               <button className="slipbar__copy" onClick={copySlip}>{copied ? "Copied ✓" : "Copy slip"}</button>
+              <button className="slipbar__wall" onClick={() => { setShowPost((v) => !v); setPostMsg(null); }} aria-expanded={showPost}>
+                {showPost ? "Close" : "Post to a wall"}
+              </button>
               <button className="slipbar__clear" onClick={clear}>Clear slip</button>
             </div>
+            {showPost && (
+              <div className="slippost">
+                {me === null ? (
+                  <p className="slippost__login"><a href="/login">Log in</a> to post your slip to a wall.</p>
+                ) : (
+                  <>
+                    <p className="slippost__lead">Drop this slip on a member&apos;s profile wall — leave the name blank to post it to <b>your own</b>.</p>
+                    <input className="slippost__user" placeholder="member username (blank = your wall)" value={target}
+                      onChange={(e) => setTarget(e.target.value)} autoComplete="off" />
+                    <textarea className="slippost__note" rows={2} maxLength={280} placeholder="Add a note (optional)…"
+                      value={note} onChange={(e) => setNote(e.target.value)} />
+                    <div className="slippost__row">
+                      <button className="slippost__go" onClick={postToWall} disabled={posting || me === undefined}>
+                        {posting ? "Posting…" : "Post slip"}
+                      </button>
+                    </div>
+                  </>
+                )}
+                {postMsg && (
+                  <p className={postMsg.ok ? "slippost__ok" : "slippost__err"}>
+                    {postMsg.text}{postMsg.ok && postMsg.href && <> — <a href={postMsg.href}>view →</a></>}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

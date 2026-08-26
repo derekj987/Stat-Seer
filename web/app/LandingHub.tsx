@@ -218,24 +218,31 @@ function PlayerSnapshot({ base }: { base: Sport }) {
   // player or surface deep-backup noise. Sorted by that gap, top 6.
   let rows: PlayerProj[] = [];
   if (base === "nfl") {
-    // Only meaningful props — a real scoring threat / real yardage line, not a fullback's
-    // 3% anytime-TD. Floors are per market so the book value is comparable within it.
-    const MIN_BOOK: Record<string, number> = { anytime_td: 30, rush_yds: 40, rec_yds: 40, receptions: 3, pass_yds: 200, pass_tds: 1 };
+    // Only meaningful yardage/passing props — a real yardage line or a QB passing number.
+    // Anytime-TD is deliberately EXCLUDED here (not shown on the homepage). Floors are per
+    // market so the book value is comparable within it.
+    const MIN_BOOK: Record<string, number> = { rush_yds: 40, rec_yds: 40, receptions: 3, pass_yds: 200, pass_tds: 1 };
+    const PASS_MKTS = new Set(["pass_yds", "pass_tds"]);
     const gap = (r: PlayerProj) => Math.abs(r.proj / r.book - 1);
     const best = new Map<string, PlayerProj>();
     for (const r of PLAYER_PROJECTIONS) {
-      if (!isStarter(r.player) || r.book < (MIN_BOOK[r.market] ?? 0)) continue;
+      if (!(r.market in MIN_BOOK)) continue; // skips anytime_td + anything unlisted
+      if (!isStarter(r.player) || r.book < MIN_BOOK[r.market]) continue;
       const cur = best.get(r.player);
       if (!cur || gap(r) > gap(cur)) best.set(r.player, r);
     }
-    // Take the top 6, but at most 2 per market so it's a varied mix, not six anytime-TDs.
+    const pool = [...best.values()].sort((a, b) => gap(b) - gap(a));
+    // Reserve up to 2 slots for QB passing props so quarterbacks always appear, then fill
+    // the rest with the biggest non-passing gaps (at most 2 per market for a varied mix).
+    const passing = pool.filter((r) => PASS_MKTS.has(r.market)).slice(0, 2);
     const perMkt: Record<string, number> = {};
-    for (const r of [...best.values()].sort((a, b) => gap(b) - gap(a))) {
-      if (rows.length >= 6) break;
+    for (const r of pool.filter((r) => !PASS_MKTS.has(r.market))) {
+      if (passing.length + rows.length >= 6) break;
       if ((perMkt[r.market] ?? 0) >= 2) continue;
       perMkt[r.market] = (perMkt[r.market] ?? 0) + 1;
       rows.push(r);
     }
+    rows = [...passing, ...rows].sort((a, b) => gap(b) - gap(a));
   }
   if (!rows.length) {
     return (

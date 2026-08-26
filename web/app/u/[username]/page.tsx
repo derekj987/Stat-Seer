@@ -6,6 +6,7 @@ import EditBio from "./EditBio";
 import AvatarUpload from "./AvatarUpload";
 import WallForm from "./WallForm";
 import WallActions from "./WallActions";
+import WallSlipCard from "./WallSlipCard";
 
 export const dynamic = "force-dynamic";
 
@@ -80,7 +81,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                   <time className="wpost__time">{when(p.createdAt)}</time>
                   <WallActions postId={p.id} authorId={p.authorId} profileId={profile.id} me={me} />
                 </div>
-                <div className="wpost__body">{p.body}</div>
+                {p.body && <div className="wpost__body">{p.body}</div>}
+                {p.slip && p.slip.length > 0 && <WallSlipCard items={p.slip} />}
               </article>
             ))}
           </div>

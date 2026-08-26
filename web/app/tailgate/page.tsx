@@ -2,6 +2,7 @@ import { weekRange } from "@/lib/board";
 import { weekTailgate, stockLabel, stockArrows, type Buzz } from "@/lib/tailgate";
 import { Brand, FlowSteps, ContextSubnav } from "../Nav";
 import { WeekNav } from "../WeekNav";
+import { TeamNav } from "../TeamNav";
 import Tip from "../Tip";
 import AddToSlip from "../AddToSlip";
 
@@ -79,6 +80,11 @@ export default async function Page({ searchParams }: {
   const teamMap = new Map<string, Buzz[]>();
   for (const b of feed.buzz) (teamMap.get(b.team) ?? teamMap.set(b.team, []).get(b.team)!).push(b);
   const byTeam = [...teamMap.entries()].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]));
+  const teamId = (team: string) => `tgteam-${team.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+  // Team wheel is alphabetical so members can find their team fast (sections stay busiest-first).
+  const teamNav = byTeam
+    .map(([team, items]) => ({ team, color: TEAM_COLOR[team] ?? "var(--ink)", id: teamId(team), count: items.length }))
+    .sort((a, b) => a.team.localeCompare(b.team));
 
   return (
     <main className="tg">
@@ -111,8 +117,10 @@ export default async function Page({ searchParams }: {
       {feed.buzz.length === 0 ? (
         <p className="foot">No fan buzz gathered for Week {week} yet — check back closer to kickoff.</p>
       ) : (
-        byTeam.map(([team, items]) => (
-          <section className="tgteam" key={team} aria-label={`${team} fan stock`}>
+        <>
+        {teamNav.length > 1 && <TeamNav teams={teamNav} />}
+        {byTeam.map(([team, items]) => (
+          <section className="tgteam" id={teamId(team)} key={team} aria-label={`${team} fan stock`}>
             <h3 className="tgteam__h" style={{ color: TEAM_COLOR[team] ?? "var(--ink)" }}>
               {team}<span className="tgteam__n">{items.length}</span>
             </h3>
@@ -120,7 +128,8 @@ export default async function Page({ searchParams }: {
               {items.map((b) => <BuzzCard key={b.id} b={b} />)}
             </div>
           </section>
-        ))
+        ))}
+        </>
       )}
 
       <footer className="foot">

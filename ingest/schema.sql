@@ -569,8 +569,11 @@ create table if not exists wall_posts (
     profile_id uuid not null references profiles(id) on delete cascade,
     author_id  uuid not null references profiles(id) on delete cascade,
     body       text not null check (char_length(body) between 1 and 5000),
+    slip       jsonb,   -- optional: a shared bet slip (array of SlipItem) attached to the post
     created_at timestamptz not null default now()
 );
+-- Existing DBs: add the slip column (table-level grants already cover new columns).
+alter table wall_posts add column if not exists slip jsonb;
 create index if not exists wall_profile_idx on wall_posts (profile_id, created_at desc);
 
 alter table wall_posts enable row level security;
