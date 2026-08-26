@@ -1,6 +1,6 @@
 "use client";
 
-// Minimized member-to-member chat, mounted globally. A launcher bubble (bottom-left)
+// Minimized member-to-member chat, mounted globally. A launcher bubble (bottom-right)
 // with an unread badge; opening it shows your friends list (and any incoming friend
 // requests to accept) and, when you pick a friend, the conversation. You can send text
 // and your current Value Finder slip. New messages arrive live via Supabase Realtime;
@@ -41,6 +41,7 @@ export default function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [requests, setRequests] = useState<Req[]>([]);
+  const [suggested, setSuggested] = useState<{ id: string; username: string; role: string; mutual: number }[]>([]);
   const [unread, setUnread] = useState<Record<string, number>>({});
   const [active, setActive] = useState<Friend | null>(null);
   const [msgs, setMsgs] = useState<Msg[]>([]);
@@ -99,6 +100,7 @@ export default function ChatWidget() {
     if (!me) return;
     loadFriends(me.id);
     loadUnread(me.id);
+    fetch("/api/friends/suggest").then((r) => r.json()).then((d) => setSuggested(d.suggestions ?? [])).catch(() => {});
     const sb = createClient();
     const ch = sb.channel(`dm-${me.id}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "direct_messages", filter: `recipient_id=eq.${me.id}` },
@@ -149,6 +151,11 @@ export default function ChatWidget() {
     await createClient().from("friendships").update({ status: "accepted" }).eq("id", r.rowId);
     if (me) loadFriends(me.id);
   }
+  async function addSuggested(s: { id: string }) {
+    if (!me) return;
+    await createClient().from("friendships").insert({ requester_id: me.id, addressee_id: s.id });
+    setSuggested((prev) => prev.filter((x) => x.id !== s.id));
+  }
   async function declineReq(r: Req) {
     await createClient().from("friendships").delete().eq("id", r.rowId);
     setRequests((rs) => rs.filter((x) => x.rowId !== r.rowId));
@@ -194,7 +201,7 @@ export default function ChatWidget() {
                 </div>
               )}
               {friends.length === 0 ? (
-                <p className="cw__empty">No friends yet. Visit a member&apos;s profile and hit <b>+ Add friend</b>.</p>
+                <p className="cw__empty">No friends yet — add someone from <b>People you may know</b> below, or from a member&apos;s profile.</p>
               ) : (
                 friends.map((f) => (
                   <button className="cw__friend" key={f.id} onClick={() => openChat(f)}>
@@ -203,6 +210,22 @@ export default function ChatWidget() {
                     {unread[f.id] > 0 && <span className="cw__fdot">{unread[f.id]}</span>}
                   </button>
                 ))
+              )}
+
+              {suggested.length > 0 && (
+                <div className="cw__suggest">
+                  <div className="cw__reqh">People you may know</div>
+                  {suggested.map((s) => (
+                    <div className="cw__sug" key={s.id}>
+                      <span className="cw__avatar" aria-hidden="true">{s.username.charAt(0).toUpperCase()}</span>
+                      <span className="cw__suginfo">
+                        <a href={`/u/${s.username}`} className={s.role === "founder" ? "cw__fname founder" : "cw__fname"}>{s.username}</a>
+                        <span className="cw__sugmeta">{s.mutual > 0 ? `${s.mutual} mutual friend${s.mutual === 1 ? "" : "s"}` : "New member"}</span>
+                      </span>
+                      <button className="cw__sugadd" onClick={() => addSuggested(s)}>+ Add</button>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           ) : (
