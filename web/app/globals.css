@@ -2566,6 +2566,17 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .lp-snaplabel{margin:6px 0 10px;font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;
   font-size:clamp(23px,4.6vw,33px);font-weight:400;letter-spacing:.03em;color:var(--gold);line-height:1.1;
   text-shadow:0 1px 2px rgba(0,0,0,.25),0 0 10px color-mix(in srgb,var(--gold) 30%,transparent)}
+/* Snapshot heading sits in the toggle row: heading left, NFL/NCAAF toggle to its right.
+   Only the selected sport's heading shows (CSS-toggled off the radios). */
+.lp-snaplabel--nfl,.lp-snaplabel--ncaaf{display:none}
+#lps-nfl:checked ~ .lpf__head .lp-snaplabel--nfl{display:block}
+#lps-ncaaf:checked ~ .lpf__head .lp-snaplabel--ncaaf{display:block}
+.lpf__head--snap{margin:2px 0 10px}
+.lpf__head--snap .lp-snaplabel{margin:0;flex:0 1 auto;min-width:0}
+/* rotating banner sits above the heading — show the selected sport's */
+.lp-hbwrap--nfl,.lp-hbwrap--ncaaf{display:none}
+#lps-nfl:checked ~ .lp-hbwrap--nfl{display:block}
+#lps-ncaaf:checked ~ .lp-hbwrap--ncaaf{display:block}
 .hb-plrtable .hb-plr__up{font-size:11px;margin-right:2px}
 .hb-plrpos{font-size:9.5px;font-weight:700;color:var(--muted);letter-spacing:.03em;
   border:1px solid var(--line);border-radius:4px;padding:1px 4px;margin-left:3px;white-space:nowrap}
