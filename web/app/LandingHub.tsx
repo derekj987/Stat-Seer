@@ -87,24 +87,14 @@ function cxCardEl(w: GameWeather) {
   );
 }
 
-/** NFL considerations snapshot: first 3 per-game cards, "see more" for the rest. */
+/** NFL considerations snapshot: a few curated per-game context cards — the whole slate
+ *  lives on the Context page, so no in-panel "see more" dump. */
 function NflConsiderations({ limit = 3 }: { limit?: number }) {
-  const all = GAME_WEATHER;
-  if (!all.length) return <p className="hb-empty">Considerations load with the week&apos;s board — see <a href="/considerations">Special Considerations</a>.</p>;
-  const lead = all.slice(0, limit);
-  const rest = all.slice(limit);
+  const lead = GAME_WEATHER.slice(0, limit);
+  if (!lead.length) return <p className="hb-empty">Considerations load with the week&apos;s board — see <a href="/considerations">Special Considerations</a>.</p>;
   return (
     <>
       <div className="cxgrid cxgrid--snap">{lead.map(cxCardEl)}</div>
-      {rest.length > 0 && (
-        <details className="hb-more">
-          <summary className="hb-more__sum">
-            <span className="hb-more__chev" aria-hidden="true">▸</span>
-            See more ({rest.length} more games)
-          </summary>
-          <div className="cxgrid cxgrid--snap lp-moregrid">{rest.map(cxCardEl)}</div>
-        </details>
-      )}
       <p className="lp-cardfoot"><a href="/considerations">See our Context Model →</a></p>
     </>
   );
@@ -140,29 +130,6 @@ type NflData = { week: number; card: CardRow[]; upsets: UpsetRow[]; players: Pla
 type NcaafData = { week: number; games: NcaafCardGame[]; upsets: NcaafUpset[] };
 
 const numStr = (v: number | null) => (v === null ? "—" : String(v));
-
-const STEPS = [
-  { n: 1, key: "model", title: "The Model", lead: "What the data says.", href: { nfl: "/model", ncaaf: "/ncaaf/model" } },
-  { n: 2, key: "context", title: "Read the Room", lead: "The factors you may not have thought of.", href: { nfl: "/considerations", ncaaf: "/ncaaf/considerations" } },
-  { n: 3, key: "value", title: "Find the Value", lead: "Decide your picks — we tell you where to place them.", href: { nfl: "/lines", ncaaf: "/ncaaf/lines" } },
-] as const;
-
-function Flow({ sport, label }: { sport: Sport; label: string }) {
-  return (
-    <div className="lpf__steps">
-      {STEPS.map((s) => (
-        <a key={s.key} href={s.href[sport]} className={`lpf__step lpf__step--${s.key}`}>
-          <span className="lpf__toprow">
-            <span className="lpf__title">{s.title}</span>
-            <span className="lpf__n">{s.n}</span>
-          </span>
-          <span className="lpf__lead">{s.lead}</span>
-          <span className="lpf__go">Open {label} →</span>
-        </a>
-      ))}
-    </div>
-  );
-}
 
 function Panel({ title, count, hint, open, children }: { title: string; count: React.ReactNode; hint: React.ReactNode; open?: boolean; children: React.ReactNode }) {
   return (
@@ -333,15 +300,9 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
           <PlayerSnapshot base="nfl" />
         </Panel>
         <Panel title="The context a number misses" count="context" hint={TIPS.considNfl} open>
-          <NflConsiderations limit={1} />
+          <NflConsiderations limit={3} />
         </Panel>
         {/* Referee, Local Intelligence, Upsets & QB passing now live on their section pages. */}
-        {/* How to use it — moved below the board, so the value + data lead. */}
-        <div className="lpf__flowhead">
-          <h2 className="lpf__h">Three steps, in order.</h2>
-          <p className="lpf__sub">Read what the model sees, weigh what it can&apos;t, then find the best price. Each opens the full section.</p>
-        </div>
-        <Flow sport="nfl" label="NFL" />
       </div>
 
       {/* NCAAF panel */}
@@ -364,11 +325,6 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
         <Panel title="The context a number misses" count="context" hint={TIPS.considNcaaf} open>
           <NcaafConsiderations />
         </Panel>
-        <div className="lpf__flowhead">
-          <h2 className="lpf__h">Three steps, in order.</h2>
-          <p className="lpf__sub">Read what the model sees, weigh what it can&apos;t, then find the best price. Each opens the full section.</p>
-        </div>
-        <Flow sport="ncaaf" label="College Football" />
       </div>
     </section>
   );

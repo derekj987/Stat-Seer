@@ -6,7 +6,7 @@ import { fetchHome, type CardRow, type UpsetRow, type PlayerPick } from "@/lib/h
 import { NCAAF_MODEL, type NcaafCardGame, type NcaafUpset } from "./ncaaf/model-data";
 import LandingHub from "./LandingHub";
 import HomePromo from "./HomePromo";
-import { BetslipPromo, ValueFinderDrawer } from "./Nav";
+import { ValueFinderDrawer } from "./Nav";
 
 export const metadata = {
   title: "StatSeer — the model vs the market, every sport",
@@ -187,7 +187,6 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
         </div>
       </section>
 
-      <BetslipPromo />
       <HomePromo />
 
       <section className="lp-tagline">

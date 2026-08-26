@@ -993,7 +993,7 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .report__actions{display:flex;gap:8px;flex:0 0 auto}
 
 /* --- global responsible-gambling footer --- */
-.sitefoot{max-width:1080px;margin:26px auto 0;padding:16px 20px 30px;
+.sitefoot{max-width:1080px;margin:12px auto 0;padding:16px 20px 30px;
   border-top:1px solid var(--line);color:var(--muted);font-size:11.5px;
   line-height:1.6;text-align:center}
 .sitefoot p{margin:0;max-width:78ch;margin-left:auto;margin-right:auto}
@@ -2261,7 +2261,9 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 }
 
 /* ================= Multi-sport landing hub (/) ================= */
-.lp{max-width:1040px;margin:0 auto;padding:clamp(4px,1.4vw,10px) clamp(16px,4vw,24px) 64px}
+.lp{max-width:1040px;margin:0 auto;padding:clamp(4px,1.4vw,10px) clamp(16px,4vw,24px) 12px}
+/* Landing creed is the last block before the global footer — no extra bottom padding. */
+.lp > .hb-creed{padding-bottom:0}
 /* Hero — the seer's eyes as a full-bleed banner. It lives at the BODY level (a sibling
    of .lp, not inside it), so it spans the entire viewport width instead of stopping at
    the centered 1040px content column. The gold wordmark sits BENEATH it. */
