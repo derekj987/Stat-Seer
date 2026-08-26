@@ -116,6 +116,11 @@ function PredictionCard({ p, slipPick }: { p: ModelPrediction; slipPick?: string
   const pickem = Math.abs(p.predMargin) < 0.5 || rawPct <= 50;
   const pct = pickem ? 50 : rawPct;
   const mktPct = p.marketFavProb === null ? null : Math.round(p.marketFavProb * 100);
+  // Actionable read: the model's straight-up pick (moneyline) + its side of the MARKET
+  // spread (slipPick, e.g. "CAR +2.5"). A "+" cover side means the model has the favorite
+  // winning but NOT covering — so the value is the dog's points, not laying the number.
+  const ml = `${p.favored} ML`;
+  const coverIsDog = !!slipPick?.includes("+");
   return (
     <article className={p.disagree ? "game offc" : "game"}>
       <header className="game__head">
@@ -155,9 +160,19 @@ function PredictionCard({ p, slipPick }: { p: ModelPrediction; slipPick?: string
 
         {p.marketFavored && mktPct !== null && (
           <div className="pred__take">
-            {p.disagree
-              ? <>Our model likes <b>{p.favored}</b> — the market likes <b>{p.marketFavored}</b>.</>
-              : <>Model and market agree: <b>{p.favored}</b> is the side.</>}
+            {pickem ? (
+              <>Model sees a <b>coin flip</b> — no side worth laying.</>
+            ) : p.disagree ? (
+              <>Off consensus — our model likes <b>{p.favored}</b> where the market likes <b>{p.marketFavored}</b>: take <b>{ml}</b>{slipPick && <> or <b>{slipPick}</b></>}.</>
+            ) : slipPick ? (
+              coverIsDog ? (
+                <>Model has <b>{p.favored}</b> winning but <b>not covering</b> — take <b>{ml}</b>, or the points with <b>{slipPick}</b>.</>
+              ) : (
+                <>Model has <b>{p.favored}</b> covering — <b>{slipPick}</b>, or just <b>{ml}</b>.</>
+              )
+            ) : (
+              <>Model and market agree on <b>{p.favored}</b> — take <b>{ml}</b>.</>
+            )}
           </div>
         )}
 
