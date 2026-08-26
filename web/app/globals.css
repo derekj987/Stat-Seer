@@ -2273,6 +2273,9 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 /* Thin eyes-band hero. The source (seereyes-band.jpg, 1600x384) is pre-cropped to the
    hood+eyes content, so there's no black letterbox to reveal at any width. */
 .lp-hero__banner{position:relative;height:clamp(104px,13vw,178px);overflow:hidden}
+/* Phones: the pinned bar (~50px) floats over the top, so give the band a little more
+   height than the desktop-vw clamp would to keep the eyes + wordmark uncramped. */
+@media (max-width:640px){.lp-hero__banner{height:142px}}
 .lp-hero__img{width:100%;height:100%;object-fit:cover;object-position:center 62%;display:block}
 /* darken the bottom-left corner so the overlaid wordmark lockup stays legible over the image */
 .lp-hero__banner::after{content:"";position:absolute;inset:0;pointer-events:none;
