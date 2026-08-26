@@ -31,6 +31,7 @@ export default function SlipBar() {
   const [postMsg, setPostMsg] = useState<{ ok: boolean; text: string; href?: string } | null>(null);
 
   useEffect(() => {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) { setMe(null); return; }
     const sb = createClient();
     sb.auth.getUser().then(async ({ data }) => {
       if (!data.user) { setMe(null); return; }

@@ -7,6 +7,7 @@ import AvatarUpload from "./AvatarUpload";
 import WallForm from "./WallForm";
 import WallActions from "./WallActions";
 import WallSlipCard from "./WallSlipCard";
+import FriendButton from "./FriendButton";
 
 export const dynamic = "force-dynamic";
 
@@ -61,6 +62,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             Member since {since.format(new Date(profile.createdAt))}
           </p>
           <EditBio userId={profile.id} bio={profile.bio} canEdit={!!isOwner} />
+          <FriendButton profileId={profile.id} />
         </div>
       </header>
 

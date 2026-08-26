@@ -5,6 +5,7 @@ import SiteNav from "./SiteNav";
 import SportStrip from "./SportStrip";
 import SlipBar from "./SlipBar";
 import FeedbackWidget from "./FeedbackWidget";
+import ChatWidget from "./ChatWidget";
 import VisitBeacon from "./VisitBeacon";
 
 // Medieval display face for the STATSEER wordmark, exposed as a CSS var so any
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {children}
         <SlipBar />
         <FeedbackWidget />
+        <ChatWidget />
         <VisitBeacon />
         <footer className="sitefoot">
           <p>
