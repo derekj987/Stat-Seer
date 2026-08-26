@@ -4,6 +4,7 @@ import { MODEL_TOTALS } from "@/lib/modelTotals";
 import { weekRefs } from "@/lib/refAssignments";
 import { Brand, FlowSteps, ModelSubnav } from "../Nav";
 import { WeekNav } from "../WeekNav";
+import Tip from "../Tip";
 import AddToSlip from "../AddToSlip";
 
 export const revalidate = 300;
@@ -107,7 +108,7 @@ const kickFmt = new Intl.DateTimeFormat("en-US", {
 const et = (iso: string) => kickFmt.format(new Date(iso)) + " ET";
 
 
-function PredictionCard({ p }: { p: ModelPrediction }) {
+function PredictionCard({ p, slipPick }: { p: ModelPrediction; slipPick?: string }) {
   const favProb = p.favored === p.home ? p.homeWinProb : 1 - p.homeWinProb;
   const rawPct = Math.round(favProb * 100);
   // Near-even games: a ~0 margin can map just under 50% — show it honestly as a toss-up
@@ -167,7 +168,8 @@ function PredictionCard({ p }: { p: ModelPrediction }) {
             <AddToSlip
               item={{
                 id: `model-${p.eventId}`, kind: "model",
-                title: `${p.favored} by ${Math.abs(p.predMargin).toFixed(1)}`,
+                // A real bet: the model's side of the MARKET spread, else the moneyline pick.
+                title: slipPick ?? `${p.favored} ML`,
                 detail: `${p.away} @ ${p.home} · model read`,
               }}
             />
@@ -220,30 +222,30 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
   });
   const scored = envs.filter((e) => e.total !== null).sort((a, b) => (b.total! - a.total!));
 
+  // The bettable side for each game's "Add to slip" — the model's read against the MARKET
+  // spread (e.g. "CAR +3.5"), not the raw projected margin ("CHI by 1.9", which isn't a real
+  // bet). Falls back to the moneyline on the model's pick when there's no market line yet.
+  const slipPickByEvent = new Map<string, string>();
+  for (const e of envs) {
+    const bl = bottomLine(e);
+    if (bl && bl.spread !== "pick'em") slipPickByEvent.set(e.eventId, bl.spread);
+  }
+
   return (
     <main className="wrap">
       <header className="masthead">
         <Brand sub={<><span className="brand__sport">NFL</span> · The Model</>} art={{ src: "/nflpic.png?v=1", alt: "NFL" }} />
       </header>
 
-      <section className="explainer explainer--wide explainer--clamp">
-        <input type="checkbox" id="xclamp-gm" className="xclamp-toggle" aria-hidden="true" tabIndex={-1} />
-        <p className="xclamp-text">
-          Our model never sees the betting line — it reads each game from team strength alone,
-          then we show you <b>where it agrees with the market and where it doesn&apos;t.</b> An
-          <span className="chip offc">Off Consensus</span> game is one where the model likes a different
-          side than Vegas. Every read is <b>published and locked before kickoff</b>, and the
-          calibration below grades every one in public — so the track record is yours to check, not ours
-          to claim.
-        </p>
-        <label htmlFor="xclamp-gm" className="xclamp-btn">
-          <span className="xclamp-btn__more">See more ▾</span>
-          <span className="xclamp-btn__less">See less ▴</span>
-        </label>
-      </section>
-
       <FlowSteps active="analyze" />
-      <ModelSubnav active="game" />
+      <div className="subnavrow">
+        <ModelSubnav active="game" />
+        <Tip text={<>Our model never sees the betting line — it reads each game from team strength alone,
+          then we show you <b>where it agrees with the market and where it doesn&apos;t.</b> An{" "}
+          <span className="chip offc">Off Consensus</span> game is one where the model likes a different
+          side than Vegas. Every read is <b>published and locked before kickoff</b>, and the calibration
+          below grades every one in public — so the track record is yours to check, not ours to claim.</>} />
+      </div>
       <WeekNav min={min} max={max} current={week} base="/model" />
 
       {preds.length === 0 ? (
@@ -257,7 +259,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
           </summary>
           <div className="hb-body">
             <section className="grid">
-              {preds.slice(0, 6).map((p) => <PredictionCard key={p.eventId} p={p} />)}
+              {preds.slice(0, 6).map((p) => <PredictionCard key={p.eventId} p={p} slipPick={slipPickByEvent.get(p.eventId)} />)}
             </section>
             {preds.length > 6 && (
               <details className="hb-more">
@@ -266,7 +268,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
                   See more ({preds.length - 6} more games)
                 </summary>
                 <section className="grid">
-                  {preds.slice(6).map((p) => <PredictionCard key={p.eventId} p={p} />)}
+                  {preds.slice(6).map((p) => <PredictionCard key={p.eventId} p={p} slipPick={slipPickByEvent.get(p.eventId)} />)}
                 </section>
               </details>
             )}
