@@ -133,7 +133,7 @@ export default function SiteNav() {
           <button className="snav__dclose" onClick={() => setOpen(false)} aria-label="Close menu">✕</button>
           <a href="/" className="snav__dtop snav__dhome">Home
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/crest.png?v=3" alt="" className="snav__dcrest" width={22} height={22} />
+            <img src="/crest.png?v=4" alt="" className="snav__dcrest" width={22} height={22} />
           </a>
 
           <details className="snav__pgroup" open>

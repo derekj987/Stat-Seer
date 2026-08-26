@@ -78,7 +78,7 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
             <p className="lp-pitch__cap">Only about 3% of bettors clear it. That&apos;s the line we&apos;re built to move you past.</p>
             <label htmlFor="lp-pitch-toggle" className="btn btn--primary lp-pitch__cta">Got it — show me the board →</label>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/crest.png?v=3" alt="" className="lp-pitch__crest" width={120} height={128} />
+            <img src="/crest.png?v=4" alt="" className="lp-pitch__crest" width={120} height={128} />
           </section>
         </aside>
       </div>

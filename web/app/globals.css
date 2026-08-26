@@ -1244,7 +1244,7 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 /* Crest now lives in snav__right (far right, just left of the Create-an-Account button);
    the flex gap spaces it, so no side margin needed. */
 .snav__crest{flex:0 0 auto;width:38px;height:38px;
-  background:url(/crest.png?v=3) center/contain no-repeat}
+  background:url(/crest.png?v=4) center/contain no-repeat}
 /* Phones: stack the tagline beneath the wordmark (it was hidden before) and drop the
    crest entirely so the right cluster (just the Create-an-Account button) stays clear. */
 @media (max-width:640px){
@@ -1692,7 +1692,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-mast__tag{font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;
   font-size:clamp(13px,2.1vw,18px);font-style:italic;letter-spacing:.01em;color:var(--muted);line-height:1.25}
 .hb-mast__crest{justify-self:end;width:74px;height:74px;
-  background:url(/crest.png?v=3) center/contain no-repeat}
+  background:url(/crest.png?v=4) center/contain no-repeat}
 .hb-mast__side{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
 .hb-mast__side.hb-r{text-align:right}
 /* week label, now above The Card instead of in the masthead */
@@ -2224,11 +2224,11 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 }
 
 /* ================= Multi-sport landing hub (/) ================= */
-.lp{max-width:1040px;margin:0 auto;padding:clamp(10px,2.5vw,22px) clamp(16px,4vw,24px) 64px}
+.lp{max-width:1040px;margin:0 auto;padding:clamp(4px,1.4vw,10px) clamp(16px,4vw,24px) 64px}
 /* Hero — the seer's eyes as a full-bleed banner. It lives at the BODY level (a sibling
    of .lp, not inside it), so it spans the entire viewport width instead of stopping at
    the centered 1040px content column. The gold wordmark sits BENEATH it. */
-.lp-hero{margin-bottom:22px;text-align:center}
+.lp-hero{margin-bottom:6px;text-align:center}
 /* A thin band cropped to the seer's EYES — object-position keeps the eyes centered so the
    image's black letterbox never shows. Edge-to-edge of the viewport. */
 .lp-hero__banner{position:relative;height:clamp(96px,15.5vw,205px);overflow:hidden;
@@ -2502,7 +2502,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 
 /* ===== Landing flow (Model -> Context -> Value) + snapshot ===== */
 /* Pure-CSS sport toggle: two hidden radios show one sport's panel via ~ combinator. */
-.lp-hub{margin:6px 0 4px}
+.lp-hub{margin:2px 0 4px}
 .lp-r{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .lp-sport{display:none}
 #lps-nfl:checked ~ .lp-sport--nfl{display:block}
@@ -2535,7 +2535,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .lpf__steps{grid-template-columns:1fr}
   .lpf__step:not(:last-child)::after{content:"↓";right:auto;left:50%;top:auto;bottom:-13px;transform:translateX(-50%)}
 }
-.lp-snaplabel{margin:26px 0 12px;font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;
+.lp-snaplabel{margin:6px 0 10px;font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;
   font-size:clamp(23px,4.6vw,33px);font-weight:400;letter-spacing:.03em;color:var(--gold);line-height:1.1;
   text-shadow:0 1px 2px rgba(0,0,0,.25),0 0 10px color-mix(in srgb,var(--gold) 30%,transparent)}
 .hb-plrtable .hb-plr__up{font-size:11px;margin-right:2px}
