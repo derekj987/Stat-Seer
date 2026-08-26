@@ -2,10 +2,11 @@
 import { useEffect, useRef, useState } from "react";
 
 // A team selector that mirrors the week wheel (WeekNav): a horizontal sliding track
-// of team chips with ‹ › controls, ~4 visible before it scrolls. Unlike the week nav
-// this jumps WITHIN the page — each chip smooth-scrolls to that team's section — and a
-// scroll-spy highlights whichever team is currently in view. Alphabetical, so members
-// can find their favorite team fast instead of scrolling the whole wall.
+// of team chips with ‹ › controls, ~4 visible before it scrolls. Selecting a team
+// FILTERS the wall to just that team — only the selected team's section shows, the rest
+// are hidden. Alphabetical, so members can find their favorite team fast. The team
+// sections are plain server-rendered siblings (not inside this island), so we toggle
+// their display directly; if the JS never runs, every team stays visible (safe fallback).
 export type TeamNavItem = { team: string; color: string; id: string; count: number };
 
 export function TeamNav({ teams }: { teams: TeamNavItem[] }) {
@@ -30,21 +31,15 @@ export function TeamNav({ teams }: { teams: TeamNavItem[] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Scroll-spy: highlight the team section nearest the top of the viewport.
+  // Show only the selected team's section; hide the rest.
   useEffect(() => {
-    const secs = teams.map((t) => document.getElementById(t.id)).filter(Boolean) as HTMLElement[];
-    if (!secs.length) return;
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const vis = entries.filter((e) => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        if (vis[0]) setActive(vis[0].target.id);
-      },
-      { rootMargin: "-15% 0px -75% 0px", threshold: 0 },
-    );
-    secs.forEach((s) => obs.observe(s));
-    return () => obs.disconnect();
-  }, [teams]);
+    teams.forEach((t) => {
+      const el = document.getElementById(t.id);
+      if (el) el.style.display = t.id === active ? "" : "none";
+    });
+    // On unmount, restore every section so other views aren't left hidden.
+    return () => { teams.forEach((t) => { const el = document.getElementById(t.id); if (el) el.style.display = ""; }); };
+  }, [active, teams]);
 
   // Keep the active chip within view in the track.
   useEffect(() => {
@@ -55,10 +50,6 @@ export function TeamNav({ teams }: { teams: TeamNavItem[] }) {
   const slide = (dir: number) => {
     const el = ref.current;
     if (el) el.scrollBy({ left: dir * Math.max(180, el.clientWidth * 0.7), behavior: "smooth" });
-  };
-  const jump = (id: string) => {
-    setActive(id);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   if (!teams.length) return null;
@@ -74,7 +65,7 @@ export function TeamNav({ teams }: { teams: TeamNavItem[] }) {
           <button
             key={t.id}
             type="button"
-            onClick={() => jump(t.id)}
+            onClick={() => setActive(t.id)}
             className={t.id === active ? "teamnav__t active" : "teamnav__t"}
             aria-current={t.id === active ? "true" : undefined}
           >

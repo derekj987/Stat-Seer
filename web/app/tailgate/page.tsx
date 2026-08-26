@@ -125,7 +125,7 @@ export default async function Page({ searchParams }: {
               {team}<span className="tgteam__n">{items.length}</span>
             </h3>
             <div className="cxgrid">
-              {items.map((b) => <BuzzCard key={b.id} b={b} />)}
+              {[...items].sort((a, b) => a.player.localeCompare(b.player)).map((b) => <BuzzCard key={b.id} b={b} />)}
             </div>
           </section>
         ))}
