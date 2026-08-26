@@ -7,48 +7,12 @@
 // (which is NOT necessarily the book that's best on the most individual legs).
 import { useState } from "react";
 import { useSlip, encodeSlip, type SlipItem, type SlipKind } from "@/lib/slip";
+import { bookName, fmtOdds, toDecimal, decToAmerican, bestParlayBook } from "@/lib/slipPricing";
 
-const fmtOdds = (p?: number) => (p === undefined ? "" : p > 0 ? `+${p}` : String(p));
 const KIND_LABEL: Record<SlipKind, string> = {
   line: "Game Lines", prop: "Player Props", model: "The Model", fan: "Local Intelligence",
 };
 const ORDER: SlipKind[] = ["line", "prop", "model", "fan"];
-const BOOK_LABEL: Record<string, string> = {
-  draftkings: "DraftKings", fanduel: "FanDuel", betmgm: "BetMGM", caesars: "Caesars",
-  williamhill_us: "Caesars", betrivers: "BetRivers", pointsbetus: "PointsBet",
-  betonlineag: "BetOnline", bovada: "Bovada", mybookieag: "MyBookie", lowvig: "LowVig",
-  betus: "BetUS", espnbet: "ESPN BET", fanatics: "Fanatics", hardrockbet: "Hard Rock",
-};
-const bookName = (b: string) => BOOK_LABEL[b] ?? b;
-
-// American ↔ decimal, so we can multiply prices across legs and show the combined number.
-const toDecimal = (a: number) => (a > 0 ? 1 + a / 100 : 1 + 100 / -a);
-const decToAmerican = (d: number) => {
-  const a = d >= 2 ? Math.round((d - 1) * 100) : Math.round(-100 / (d - 1));
-  return a > 0 ? `+${a}` : String(a);
-};
-
-/** The best single book to place ALL these legs as one parlay ticket: for each book that
- *  prices every leg, multiply its prices; the winner is the highest combined payout. Falls
- *  back to the book covering the MOST legs when none covers them all. */
-function bestParlayBook(legs: SlipItem[]) {
-  const books = new Set<string>();
-  for (const l of legs) for (const b of Object.keys(l.byBook!)) books.add(b);
-  let full: { book: string; decimal: number } | null = null;
-  let partial: { book: string; decimal: number; covers: number } | null = null;
-  for (const b of books) {
-    const priced = legs.filter((l) => l.byBook![b] !== undefined);
-    if (!priced.length) continue;
-    const dec = priced.reduce((acc, l) => acc * toDecimal(l.byBook![b]), 1);
-    if (priced.length === legs.length) {
-      if (!full || dec > full.decimal) full = { book: b, decimal: dec };
-    }
-    if (!partial || priced.length > partial.covers || (priced.length === partial.covers && dec > partial.decimal)) {
-      partial = { book: b, decimal: dec, covers: priced.length };
-    }
-  }
-  return { full, partial };
-}
 
 export default function SlipBar() {
   const { items, remove, clear } = useSlip();
