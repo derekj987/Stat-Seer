@@ -105,6 +105,34 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
         </ul>
       </section>
 
+      {/* The "aha": the same picks pay differently — Value Finder's value prop, made tangible. */}
+      <section className="lp-aha">
+        <span className="lp-aha__tag">Example · the same 3 picks</span>
+        <h2 className="lp-aha__h">The same bet can pay <em>differently</em>.</h2>
+        <p className="lp-aha__sub">
+          One parlay, three sportsbooks — the payout isn&apos;t the same. StatSeer prices your <b>whole card</b>{" "}
+          at every book and hands you the one that pays the most.
+        </p>
+        <div className="lp-aha__books">
+          <div className="lp-ahabook lp-ahabook--best">
+            <span className="lp-ahabook__name">FanDuel</span>
+            <span className="lp-ahabook__odds">+625</span>
+            <span className="lp-ahabook__flag">Best price</span>
+          </div>
+          <div className="lp-ahabook">
+            <span className="lp-ahabook__name">DraftKings</span>
+            <span className="lp-ahabook__odds">+580</span>
+          </div>
+          <div className="lp-ahabook">
+            <span className="lp-ahabook__name">BetMGM</span>
+            <span className="lp-ahabook__odds">+545</span>
+          </div>
+        </div>
+        <p className="lp-aha__note">
+          On a $50 stake that&apos;s <b>$40 more</b> for the exact same bet. <a href="/lines">Build your slip →</a>
+        </p>
+      </section>
+
       <LandingHub initialSport={initialSport} nfl={nfl} ncaaf={ncaaf} />
 
       {/* Public track record — the trust engine. Honest preseason state until games grade. */}
@@ -125,6 +153,38 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
           Public grading begins with the Week&nbsp;1 opener. Once games are played we&apos;ll show real,
           completed results — separately by sport and by market — never back-tested or projected numbers.
         </p>
+      </section>
+
+      {/* Feature depth — the modules as compact cards: one line, one action each. */}
+      <section className="lp-feats">
+        <h2 className="lp-feats__h">Everything under the hood.</h2>
+        <div className="lp-feats__grid">
+          <a href="/model" className="lp-feat">
+            <span className="lp-feat__h">Game Model</span>
+            <span className="lp-feat__p">Independent spreads &amp; totals, compared to the market.</span>
+            <span className="lp-feat__go">Open →</span>
+          </a>
+          <a href="/model/players" className="lp-feat">
+            <span className="lp-feat__h">Player Model</span>
+            <span className="lp-feat__p">Line-blind prop projections with historical hit rates.</span>
+            <span className="lp-feat__go">Open →</span>
+          </a>
+          <a href="/considerations" className="lp-feat">
+            <span className="lp-feat__h">Context</span>
+            <span className="lp-feat__p">Weather, venue, coaching, officiating — what the number misses.</span>
+            <span className="lp-feat__go">Open →</span>
+          </a>
+          <a href="/tailgate" className="lp-feat">
+            <span className="lp-feat__h">Local Intelligence</span>
+            <span className="lp-feat__p">Beat-writer reporting and fan chatter, organized by team.</span>
+            <span className="lp-feat__go">Open →</span>
+          </a>
+          <a href="/lines" className="lp-feat lp-feat--vf">
+            <span className="lp-feat__h">Value Finder</span>
+            <span className="lp-feat__p">The best price for each bet — and the best book for the whole slip.</span>
+            <span className="lp-feat__go">Open →</span>
+          </a>
+        </div>
       </section>
 
       <BetslipPromo />

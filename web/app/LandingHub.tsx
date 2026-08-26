@@ -540,7 +540,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
         <Panel title="Player Model snapshot — NFL" count="props" hint={TIPS.playerModel} open>
           <PlayerSnapshot base="nfl" />
         </Panel>
-        <Panel title="Check out our Local Intelligence." count={nfl.players.length || "—"} hint={TIPS.fan} open>
+        <Panel title="Local Intelligence — the word around the league" count={nfl.players.length || "—"} hint={TIPS.fan} open>
           <FanAnalysisNote />
           <PlayersTable players={nfl.players} />
         </Panel>
@@ -586,7 +586,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
         <Panel title="Player Model snapshot — NCAAF" count="props" hint={TIPS.playerModel} open>
           <PlayerSnapshot base="ncaaf" />
         </Panel>
-        <Panel title="Check out our Local Intelligence." count="—" hint={TIPS.fan} open>
+        <Panel title="Local Intelligence — the word around the league" count="—" hint={TIPS.fan} open>
           <FanAnalysisNote />
           <p className="hb-empty">College player reads land here once the CFB fan scan is wired — the same read we run for the NFL on <a href="/ncaaf/tailgate">Local Intelligence</a>.</p>
         </Panel>

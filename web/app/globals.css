@@ -2425,6 +2425,40 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .lp-record__soon{font-size:12.5px;color:var(--muted);line-height:1.55;margin:0 auto;max-width:64ch}
 .lp-record__tag{display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
   color:var(--spot-ink);background:var(--spot-soft);border-radius:6px;padding:2px 8px;margin-right:8px}
+/* "Same picks pay differently" aha demo */
+.lp-aha{margin:26px auto;padding:22px;border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));
+  border-radius:16px;background:var(--accent-soft);max-width:760px;text-align:center}
+.lp-aha__tag{display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--accent);background:var(--surface);border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line));
+  border-radius:6px;padding:2px 8px;margin-bottom:10px}
+.lp-aha__h{font-size:clamp(20px,3.4vw,28px);font-weight:800;letter-spacing:-.02em;margin:0 0 8px;color:var(--ink)}
+.lp-aha__h em{font-style:normal;color:var(--accent)}
+.lp-aha__sub{font-size:13.5px;color:var(--muted);line-height:1.55;margin:0 auto 16px;max-width:56ch}
+.lp-aha__sub b{color:var(--ink)}
+.lp-aha__books{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:0 0 14px}
+.lp-ahabook{position:relative;flex:0 1 160px;background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  padding:12px 14px;display:flex;flex-direction:column;gap:3px;align-items:center}
+.lp-ahabook--best{border-color:var(--accent);box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 18%,transparent)}
+.lp-ahabook__name{font-size:13px;font-weight:700;color:var(--ink)}
+.lp-ahabook__odds{font-family:var(--font-mono);font-size:22px;font-weight:800;color:var(--muted)}
+.lp-ahabook--best .lp-ahabook__odds{color:var(--accent)}
+.lp-ahabook__flag{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;
+  background:var(--accent);border-radius:5px;padding:1px 6px}
+.lp-aha__note{font-size:13px;color:var(--muted);margin:0}
+.lp-aha__note b{color:var(--ink)}
+.lp-aha__note a{color:var(--accent);font-weight:700;text-decoration:none}
+.lp-aha__note a:hover{text-decoration:underline}
+/* Feature-depth cards */
+.lp-feats{margin:30px 0 20px}
+.lp-feats__h{font-size:clamp(18px,3vw,23px);font-weight:800;text-align:center;margin:0 0 14px;color:var(--ink)}
+.lp-feats__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.lp-feat{display:flex;flex-direction:column;gap:5px;padding:15px 16px;border:1px solid var(--line);border-radius:14px;
+  background:var(--surface);text-decoration:none;transition:transform .12s ease,border-color .12s ease,box-shadow .12s ease}
+.lp-feat:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 8px 20px rgba(0,0,0,.08)}
+.lp-feat__h{font-size:15px;font-weight:800;color:var(--ink)}
+.lp-feat__p{font-size:12.5px;color:var(--muted);line-height:1.45;flex:1 1 auto}
+.lp-feat__go{font-size:12px;font-weight:700;color:var(--accent);margin-top:2px}
+.lp-feat--vf{border-color:color-mix(in srgb,var(--accent) 40%,var(--line));background:var(--accent-soft)}
 .lp-tagline{margin:26px 0 20px;text-align:center}
 /* landing card footer link + a per-sport spacing */
 .lp-cardfoot{margin:10px 0 0;font-size:12px;color:var(--muted)}
