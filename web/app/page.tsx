@@ -49,9 +49,9 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
       {/* Value prop PINNED to the left edge like the "Message Us" widget — a slim tab that
           slides the panel out OVER the page when clicked. Out of the content flow entirely. */}
       <div className="lp-drawer">
-        <input type="checkbox" id="lp-pitch-toggle" className="lp-drawer__chk" defaultChecked aria-hidden="true" tabIndex={-1} />
+        <input type="checkbox" id="lp-pitch-toggle" className="lp-drawer__chk" aria-hidden="true" tabIndex={-1} />
         <label htmlFor="lp-pitch-toggle" className="lp-drawer__tab" title="Why StatSeer">
-          <span className="lp-drawer__tabtext">Raise your hit rate</span>
+          <span className="lp-drawer__tabtext">Why StatSeer</span>
           <span className="lp-drawer__chev" aria-hidden="true">›</span>
         </label>
         <label htmlFor="lp-pitch-toggle" className="lp-drawer__scrim" aria-hidden="true" />
