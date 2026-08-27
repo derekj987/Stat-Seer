@@ -267,6 +267,39 @@ a.cw__fname:hover{text-decoration:underline}
   font-size:13.5px;background:var(--surface);color:var(--ink)}
 .cw__send{flex:0 0 auto;width:36px;height:36px;border:none;background:var(--accent);color:#fff;border-radius:50%;cursor:pointer;font-size:13px}
 .cw__send:disabled{opacity:.5;cursor:default}
+/* group chat + composer extras */
+.cw__new{margin-left:auto;background:rgba(255,255,255,.16);border:0;color:#fff;width:26px;height:26px;border-radius:7px;
+  cursor:pointer;font-size:17px;line-height:1;display:grid;place-items:center}
+.cw__new:hover{background:rgba(255,255,255,.28)}
+.cw__cvinfo{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1 1 auto}
+.cw__cvsub{font-size:11px;color:var(--muted)}
+.cw__friend.on{background:var(--accent-soft)}
+.cw__pick{margin-left:auto;font-weight:800;color:var(--accent);font-size:15px}
+.cw__gname{width:calc(100% - 4px);margin:2px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit;
+  font-size:13px;background:var(--surface);color:var(--ink)}
+.cw__start{margin:8px 2px 2px;width:calc(100% - 4px)}
+.cw__grouphd{font-size:11.5px;color:var(--muted);padding:2px 4px 8px;border-bottom:1px dashed var(--line);margin-bottom:6px;
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cw__addsel{margin-left:auto;font:inherit;font-size:11.5px;border:1px solid var(--line);border-radius:6px;background:var(--surface);
+  color:var(--accent);padding:2px 4px;cursor:pointer}
+.cw__msgfrom{font-size:11px;color:var(--muted);font-weight:700;padding-left:4px}
+.cw__gif{max-width:180px;border-radius:10px;margin-top:2px}
+.cw-code{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:0 4px;font-size:12.5px;font-family:ui-monospace,monospace}
+.cw-link{color:var(--accent);text-decoration:underline;word-break:break-all}
+.cw__tools{display:flex;gap:4px;align-items:center}
+.cw__tool{background:var(--surface);border:1px solid var(--line);border-radius:7px;min-width:28px;height:26px;padding:0 6px;
+  cursor:pointer;font:inherit;font-size:12px;color:var(--ink);display:grid;place-items:center}
+.cw__tool:hover{border-color:var(--accent)}
+.cw__tool.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.cw__emoji{display:flex;flex-wrap:wrap;gap:2px;padding:6px 8px;border-top:1px solid var(--line);max-height:132px;overflow-y:auto}
+.cw__emojib{background:none;border:0;cursor:pointer;font-size:20px;line-height:1;padding:3px;border-radius:6px}
+.cw__emojib:hover{background:var(--surface)}
+.cw__gifp{border-top:1px solid var(--line);padding:6px 8px;display:flex;flex-direction:column;gap:6px}
+.cw__gifq{border:1px solid var(--line);border-radius:8px;padding:6px 10px;font:inherit;font-size:13px;background:var(--surface);color:var(--ink)}
+.cw__gifgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:180px;overflow-y:auto}
+.cw__gifthumb{width:100%;height:72px;object-fit:cover;border-radius:7px;cursor:pointer;background:var(--surface)}
+.cw__gifthumb:hover{outline:2px solid var(--accent)}
+.cw__gifempty{grid-column:1/-1;font-size:12px;color:var(--muted);padding:8px 2px}
 .cw-slip{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-top:2px;min-width:170px}
 .cw-slip__hd{font-size:12px;color:var(--ink)}
 .cw-slip__best{font-size:11.5px;color:var(--muted);margin-top:2px}
