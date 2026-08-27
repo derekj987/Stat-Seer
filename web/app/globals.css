@@ -300,6 +300,12 @@ a.cw__fname:hover{text-decoration:underline}
 .aiw__body .asst__field select{min-width:0;width:100%}
 .aiw__body .asst__field{flex:1 1 100%}
 .aiw__body .asst__result{margin-top:16px;padding:13px}
+/* Phones: the wide AI pill can't fit beside Friends without overrunning the bottom-left
+   pigeon, so drop it into the corner and STACK the Friends bubble above it instead. */
+@media (max-width:520px){
+  .aiw{right:18px;bottom:18px}
+  .cw{bottom:90px}
+}
 .game.skeleton{min-height:150px;animation:pulse 1.2s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 @media (prefers-reduced-motion:reduce){.game.skeleton{animation:none}}
