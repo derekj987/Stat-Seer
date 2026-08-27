@@ -9,19 +9,19 @@ import { createClient } from "@/lib/supabase/client";
 import { fmtOdds, bookName } from "@/lib/slipPricing";
 
 type Result = { legs: SlipItem[]; combined: { american: string; decimal: number } | null; note: string };
-type Opt = { v: string; label: string; markets: string[]; og: "Game lines" | "Player props"; rankByModel?: boolean };
+type Opt = { mkt: string; label: string; og: "Game lines" | "Player props" };
 
+// Every bet type is its own checkbox, so a slip can mix markets (e.g. rec yds + rush yds + TD).
 const OPTS: Opt[] = [
-  { v: "spread", label: "Spreads", markets: ["spread"], og: "Game lines" },
-  { v: "total", label: "Totals", markets: ["total"], og: "Game lines" },
-  { v: "st", label: "Spreads & totals", markets: ["spread", "total"], og: "Game lines" },
-  { v: "td", label: "Anytime-TD scorers (by model %)", markets: ["player_anytime_td"], rankByModel: true, og: "Player props" },
-  { v: "pass_yds", label: "QB passing yards", markets: ["player_pass_yds"], og: "Player props" },
-  { v: "pass_tds", label: "QB passing TDs", markets: ["player_pass_tds"], og: "Player props" },
-  { v: "rush_yds", label: "Rushing yards", markets: ["player_rush_yds"], og: "Player props" },
-  { v: "rush_att", label: "Rush attempts", markets: ["player_rush_attempts"], og: "Player props" },
-  { v: "rec_yds", label: "Receiving yards", markets: ["player_reception_yds"], og: "Player props" },
-  { v: "receptions", label: "Receptions", markets: ["player_receptions"], og: "Player props" },
+  { mkt: "spread", label: "Spreads", og: "Game lines" },
+  { mkt: "total", label: "Totals", og: "Game lines" },
+  { mkt: "player_anytime_td", label: "Anytime TD scorers", og: "Player props" },
+  { mkt: "player_pass_yds", label: "QB passing yards", og: "Player props" },
+  { mkt: "player_pass_tds", label: "QB passing TDs", og: "Player props" },
+  { mkt: "player_rush_yds", label: "Rushing yards", og: "Player props" },
+  { mkt: "player_rush_attempts", label: "Rush attempts", og: "Player props" },
+  { mkt: "player_reception_yds", label: "Receiving yards", og: "Player props" },
+  { mkt: "player_receptions", label: "Receptions", og: "Player props" },
 ];
 const OGROUPS: Array<"Game lines" | "Player props"> = ["Game lines", "Player props"];
 const TARGETS = [
@@ -38,7 +38,7 @@ export default function AssistantPanel() {
   const { addMany } = useSlip();
   const [me, setMe] = useState<boolean | null | undefined>(undefined);
   const [tab, setTab] = useState<"menu" | "text">("menu");
-  const [kind, setKind] = useState<string>("st");
+  const [selected, setSelected] = useState<string[]>(["spread", "total"]);
   const [legs, setLegs] = useState(4);
   const [target, setTarget] = useState(0);
   const [prompt, setPrompt] = useState("");
@@ -68,8 +68,9 @@ export default function AssistantPanel() {
     }
   }
 
-  const cur = OPTS.find((o) => o.v === kind) ?? OPTS[0];
-  const runMenu = () => build({ mode: "menu", markets: cur.markets, rankByModel: !!cur.rankByModel, legs, targetOdds: cur.rankByModel ? null : (target || null) });
+  const onlyTd = selected.length === 1 && selected[0] === "player_anytime_td";
+  const toggle = (m: string) => setSelected((s) => (s.includes(m) ? s.filter((x) => x !== m) : [...s, m]));
+  const runMenu = () => build({ mode: "menu", markets: selected, rankByModel: onlyTd, legs, targetOdds: onlyTd ? null : (target || null) });
   const runText = () => prompt.trim() && build({ mode: "text", prompt: prompt.trim() });
 
   if (me === null) {
@@ -85,28 +86,36 @@ export default function AssistantPanel() {
 
       {tab === "menu" ? (
         <div className="asst__panel">
-          <label className="asst__field">What kind?
-            <select value={kind} onChange={(e) => setKind(e.target.value)}>
+          <div className="asst__field asst__field--full">Bet types <span className="asst__hint">— pick any mix</span>
+            <div className="asst__checks">
               {OGROUPS.map((og) => (
-                <optgroup key={og} label={og}>
-                  {OPTS.filter((o) => o.og === og).map((o) => <option key={o.v} value={o.v}>{o.label}</option>)}
-                </optgroup>
+                <div className="asst__checkgrp" key={og}>
+                  <span className="asst__checkog">{og}</span>
+                  {OPTS.filter((o) => o.og === og).map((o) => (
+                    <label className={selected.includes(o.mkt) ? "asst__check on" : "asst__check"} key={o.mkt}>
+                      <input type="checkbox" checked={selected.includes(o.mkt)} onChange={() => toggle(o.mkt)} />
+                      <span>{o.label}</span>
+                    </label>
+                  ))}
+                </div>
               ))}
-            </select>
-          </label>
-          <label className="asst__field">Legs
-            <select value={legs} onChange={(e) => setLegs(Number(e.target.value))}>
-              {[2, 3, 4, 5, 6].map((n) => <option key={n} value={n}>{n}</option>)}
-            </select>
-          </label>
-          {!cur.rankByModel && (
-            <label className="asst__field">Target payout
-              <select value={target} onChange={(e) => setTarget(Number(e.target.value))}>
-                {TARGETS.map((t) => <option key={t.v} value={t.v}>{t.label}</option>)}
+            </div>
+          </div>
+          <div className="asst__row">
+            <label className="asst__field">Legs
+              <select value={legs} onChange={(e) => setLegs(Number(e.target.value))}>
+                {[2, 3, 4, 5, 6, 7, 8].map((n) => <option key={n} value={n}>{n}</option>)}
               </select>
             </label>
-          )}
-          <button className="btn btn--primary asst__go" onClick={runMenu} disabled={loading}>{loading ? "Building…" : "Build my slip"}</button>
+            {!onlyTd && (
+              <label className="asst__field">Target payout
+                <select value={target} onChange={(e) => setTarget(Number(e.target.value))}>
+                  {TARGETS.map((t) => <option key={t.v} value={t.v}>{t.label}</option>)}
+                </select>
+              </label>
+            )}
+          </div>
+          <button className="btn btn--primary asst__go" onClick={runMenu} disabled={loading || !selected.length}>{loading ? "Building…" : "Build my slip"}</button>
         </div>
       ) : (
         <div className="asst__panel asst__panel--text">

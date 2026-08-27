@@ -279,16 +279,17 @@ a.cw__fname:hover{text-decoration:underline}
    opens it re-anchors to the corner (.aiw--open) so it fits on narrow screens. */
 .aiw{position:fixed;right:132px;bottom:18px;z-index:70}
 .aiw--open{right:18px}
-.aiw__launch{display:inline-flex;align-items:center;gap:9px;max-width:min(300px,calc(100vw - 158px));cursor:pointer;
-  background:var(--gold);color:#1c1405;border:0;border-radius:16px;padding:9px 14px;font:inherit;font-size:12.5px;
-  font-weight:600;line-height:1.25;text-align:left;box-shadow:0 4px 16px rgba(0,0,0,.28)}
+.aiw__launch{display:inline-flex;align-items:center;gap:8px;width:max-content;max-width:min(210px,calc(100vw - 150px));
+  cursor:pointer;background:var(--gold);color:#1c1405;border:0;border-radius:16px;padding:8px 13px;font:inherit;
+  font-size:12px;font-weight:600;line-height:1.22;text-align:left;box-shadow:0 4px 16px rgba(0,0,0,.28)}
 .aiw__launch:hover{filter:brightness(1.05)}
-.aiw__ic{font-size:22px;line-height:1;flex:0 0 auto}
+.aiw__ic{width:34px;height:34px;border-radius:50%;object-fit:cover;flex:0 0 auto;
+  box-shadow:0 0 0 1.5px rgba(0,0,0,.18)}
 .aiw__lab b{font-weight:800}
 .aiw__panel{width:min(400px,92vw);height:min(560px,calc(100vh - 96px));display:flex;flex-direction:column;
   background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 14px 44px rgba(0,0,0,.34)}
 .aiw__hd{display:flex;align-items:center;gap:8px;padding:11px 13px;background:var(--gold);color:#1c1405}
-.aiw__hdic{font-size:17px}
+.aiw__hdic{width:26px;height:26px;border-radius:50%;object-fit:cover;flex:0 0 auto}
 .aiw__title{font-weight:800;font-size:14px;flex:1 1 auto}
 .aiw__min{background:rgba(0,0,0,.14);border:0;color:#1c1405;width:24px;height:24px;border-radius:6px;cursor:pointer;
   font-size:16px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
@@ -837,6 +838,16 @@ a.sportstrip__i:hover{color:var(--ink)}
   text-transform:uppercase;letter-spacing:.05em}
 .asst__field select{border:1px solid var(--line);border-radius:9px;padding:9px 11px;font:inherit;font-size:14px;
   font-weight:600;background:var(--surface);color:var(--ink);min-width:180px}
+.asst__field--full{align-items:stretch;width:100%}
+.asst__hint{font-size:11px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0}
+.asst__row{display:flex;gap:12px;flex-wrap:wrap;width:100%}
+.asst__checks{display:flex;flex-wrap:wrap;gap:14px 22px;margin-top:8px}
+.asst__checkgrp{display:flex;flex-direction:column;gap:6px;min-width:150px}
+.asst__checkog{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.asst__check{display:flex;align-items:center;gap:8px;font:inherit;font-size:13.5px;font-weight:600;color:var(--ink);
+  text-transform:none;letter-spacing:0;cursor:pointer;padding:1px 0}
+.asst__check input{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex:0 0 auto}
+.asst__check.on{color:var(--accent)}
 .asst__ta{border:1px solid var(--line);border-radius:11px;padding:12px 14px;font:inherit;font-size:15px;line-height:1.5;
   background:var(--surface);color:var(--ink);resize:vertical;width:100%;box-sizing:border-box}
 .asst__egs{display:flex;flex-direction:column;gap:6px;margin-top:4px}

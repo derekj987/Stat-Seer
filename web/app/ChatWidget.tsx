@@ -122,6 +122,14 @@ export default function ChatWidget() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [msgs, active]);
 
+  // Only one floating panel open at a time — close when another (the AI assistant) opens.
+  useEffect(() => {
+    const onOther = (e: Event) => { if ((e as CustomEvent).detail !== "friends") setOpen(false); };
+    window.addEventListener("ss:widget-open", onOther);
+    return () => window.removeEventListener("ss:widget-open", onOther);
+  }, []);
+  const openFriends = () => { setOpen(true); window.dispatchEvent(new CustomEvent("ss:widget-open", { detail: "friends" })); };
+
   async function openChat(f: Friend) {
     setActive(f);
     if (!me) return;
@@ -167,7 +175,7 @@ export default function ChatWidget() {
   return (
     <div className="cw">
       {!open && (
-        <button className="cw__launch" onClick={() => setOpen(true)} aria-label="Open chat">
+        <button className="cw__launch" onClick={openFriends} aria-label="Open chat">
           <span className="cw__launchic" aria-hidden="true">💬</span>
           <span className="cw__launchlab">Friends</span>
           {totalUnread > 0 && <span className="cw__badge">{totalUnread}</span>}
