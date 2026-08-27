@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useSlip, encodeSlip, type SlipItem } from "@/lib/slip";
 import { bookName, decToAmerican, priceSlip } from "@/lib/slipPricing";
 import { formatMessage, wrapSelection, EMOJIS } from "@/lib/chatFormat";
+import { enablePush } from "@/lib/push";
 
 type Me = { id: string; username: string };
 type Person = { id: string; username: string; role: string };
@@ -205,7 +206,13 @@ export default function ChatWidget({ open, onClose, onMeta }:
   }, []);
   async function enableNotifs() {
     if (typeof Notification === "undefined") return;
-    try { setNotifPerm(await Notification.requestPermission()); } catch { /* denied */ }
+    try {
+      const p = await Notification.requestPermission();
+      setNotifPerm(p);
+      // Also register the service worker + push subscription so notifications arrive even
+      // when the app is fully closed (best-effort; needs VAPID env + the SQL to fully work).
+      if (p === "granted" && me) enablePush(me.id);
+    } catch { /* denied */ }
   }
 
   async function markRead(convId: string) {
@@ -236,6 +243,10 @@ export default function ChatWidget({ open, onClose, onMeta }:
     if (!error && data) {
       setMsgs((prev) => [...prev, { id: data.id as string, conversation_id: active.id, sender_id: me.id, kind, body: row.body, gif_url: row.gif_url, slip: row.slip, created_at: data.created_at as string }]);
       sb.from("conversations").update({ last_message_at: new Date().toISOString() }).eq("id", active.id).then(() => {});
+      // Best-effort closed-app push to the other members.
+      const title = active.isGroup ? `${me.username} · ${convName(active, me.id)}` : me.username;
+      const preview = kind === "gif" ? "Sent a GIF" : kind === "slip" ? "Shared a slip" : (payload.body ?? "");
+      fetch("/api/push/send", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ conversationId: active.id, title, body: preview }) }).catch(() => {});
     }
     setSending(false);
   }
