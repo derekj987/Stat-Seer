@@ -837,6 +837,23 @@ a.sportstrip__i:hover{color:var(--ink)}
 .asst__sub b{color:var(--ink)}
 .asst__lock{color:var(--muted);font-size:15px;line-height:1.6}
 .asst__lock a{color:var(--accent);font-weight:700}
+/* Step 1 — sport picker */
+.asst__sportpick{padding:6px 0 4px}
+.asst__sporth{font-weight:800;font-size:15px;margin:0 0 12px}
+.asst__sports{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.asst__sport{display:flex;flex-direction:column;gap:3px;align-items:flex-start;background:var(--card,#fff);
+  border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;cursor:pointer;font:inherit;text-align:left;
+  transition:border-color .12s,background .12s}
+.asst__sport:hover{border-color:var(--accent);background:var(--gold-soft)}
+.asst__sportl{font-weight:800;font-size:17px;color:var(--fg,#111)}
+.asst__sports2{font-size:12px;color:var(--muted)}
+/* sport chip + change, shown above the tabs once a sport is chosen */
+.asst__sportbar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.asst__sportchip{font-weight:800;font-size:12px;letter-spacing:.03em;color:#1c1405;background:var(--gold);
+  border-radius:999px;padding:3px 10px}
+.asst__sportswap{background:none;border:0;color:var(--muted);font:inherit;font-size:12px;text-decoration:underline;
+  cursor:pointer;padding:0}
+.asst__sportswap:hover{color:var(--accent)}
 .asst__tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:16px}
 .asst__tab{background:none;border:0;border-bottom:2px solid transparent;padding:9px 14px;font:inherit;font-size:14px;
   font-weight:700;color:var(--muted);cursor:pointer;margin-bottom:-1px}
