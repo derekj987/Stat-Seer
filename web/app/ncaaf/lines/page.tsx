@@ -1,7 +1,8 @@
 import { Brand, FlowSteps, ShopSubnav, ValueFinderNote } from "../../Nav";
 import Tip from "@/app/Tip";
-import { NCAAF_MODEL, type NcaafCardGame } from "../model-data";
+import { NCAAF_MODEL } from "../model-data";
 import { StatCard } from "../StatCard";
+import NcaafLinesTable from "./NcaafLinesTable";
 
 // College Football — Value Finder · Game Lines. Mirrors the NFL board: every game with
 // the market's spread + total beside our line-blind read. NCAAF has a consensus snapshot
@@ -47,7 +48,8 @@ export default function Page() {
         </h2>
         <div className="hb-legend">
           <span className="hb-dia">◆</span> Off-consensus — our projected line is well off the market&apos;s.
-          <span className="hb-x"> · <b>Our Projection</b> is our line-blind spread &amp; total, shown to compare against
+          <span className="hb-x"> · <b>Tap any spread or total</b> to drop it on your Value Finder slip.
+            <b> Our Projection</b> is our line-blind spread &amp; total, shown to compare against
             the market — <b>not a pick</b> (the rating doesn&apos;t beat the spread; see <a href="/ncaaf/model">The Model</a>).</span>
           {c.preseasonSeeded && (
             <span className="hb-x"> · <b>Preseason note:</b> with no {c.season} games played yet, these projections are
@@ -55,34 +57,11 @@ export default function Page() {
               over as games are played.</span>
           )}
         </div>
-        <div className="hb-formwrap">
-          <table className="hb-form hb-form--mkt">
-            <thead>
-              <tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Model Spread</th><th>Model O/U</th></tr>
-            </thead>
-            <tbody>
-              {games.map((g) => {
-                const ms = g.marketSpread!;
-                return (
-                  <tr key={`${g.away}-${g.home}`} className={g.off ? "hb-off" : undefined}>
-                    <td className="hb-l">
-                      <span className="hb-game">{g.away}<span className="hb-at">at</span>{g.home}</span>
-                      {g.neutral ? <span className="ncf-site"> · N</span> : null}
-                      {g.off && <span className="hb-dia hb-dia--end" aria-label="off consensus">◆</span>}
-                    </td>
-                    <td className="hb-num">{ms.fav} {ms.num}</td>
-                    <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
-                    <td className="hb-num hb-model">{g.projSpread.fav} {g.projSpread.num}</td>
-                    <td className="hb-num hb-model">{g.projTotal}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <NcaafLinesTable games={games} />
         <p className="ncf-note">
-          A consensus snapshot of the openers. When the live odds capture is deployed, this becomes a full
-          tap-to-shop board with each book&apos;s number and the single best price per game — like <a href="/lines">the NFL board</a>.
+          Consensus lines at −110 — <b>tap a side to add it to your slip</b>. Per-book best-price shopping (each
+          book&apos;s number + the single best price per game, like <a href="/lines">the NFL board</a>) turns on when the
+          live NCAAF odds capture is deployed.
         </p>
       </section>
 
