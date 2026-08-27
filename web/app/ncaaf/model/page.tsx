@@ -13,6 +13,10 @@ export const metadata = {
 
 const M = NCAAF_MODEL;
 
+// Our model's current top-25 rank per team (what makes a game "ranked" here). Shown
+// beside the ranked team(s) in the Ranked Games table.
+const RANK = new Map<string, number>(M.top.map((t) => [t.team, t.rank]));
+
 // Full-model table is grouped by the HOME team's conference so 50+ games aren't one wall.
 const CONF_ORDER = ["SEC", "Big Ten", "Big 12", "ACC", "Pac-12", "American Athletic",
   "Mountain West", "Sun Belt", "Mid-American", "Conference USA", "FBS Independents", "Other"];
@@ -50,7 +54,7 @@ function CardRows({ games, moreFrom }: { games: readonly NcaafCardGame[]; moreFr
         return (
           <tr key={`${g.away}-${g.home}`} className={[g.off ? "hb-off" : "", moreFrom !== undefined && i >= moreFrom ? "hb-row--more" : ""].filter(Boolean).join(" ") || undefined}>
             <td className="hb-l">
-              <span className="hb-game">{g.away}<span className="hb-at">at</span>{g.home}</span>
+              <span className="hb-game">{RANK.has(g.away) && <span className="ncf-rk">#{RANK.get(g.away)}</span>}{g.away}<span className="hb-at">at</span>{RANK.has(g.home) && <span className="ncf-rk">#{RANK.get(g.home)}</span>}{g.home}</span>
               {g.neutral ? <span className="ncf-site"> · N</span> : null}
               {g.off && <span className="hb-dia hb-dia--end" aria-label="off consensus">◆</span>}
               {g.commence && <span className="hb-gkick">{nck(g.commence)}</span>}
@@ -71,8 +75,10 @@ export default function Page() {
   const a = M.ats;
   const beatsMarket = a.atsPct > a.breakeven;
   const c = M.card;
-  const ranked = c.games;                 // every game, ordered by kickoff (earliest first)
-  const snapshotRest = ranked.slice(5);   // games beyond the first 5 (see-more)
+  // Only games with a top-25 team ("featured"), kept in kickoff order (source sorts by
+  // commence). The complete slate lives in "Full Model — every game" below.
+  const ranked = c.games.filter((g) => g.featured);
+  const snapshotRest = ranked.slice(5);   // ranked games beyond the first 5 (see-more)
 
   return (
     <main className="wrap">
@@ -121,8 +127,8 @@ export default function Page() {
       <details className="hb-panel hb-panel--card" open>
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">The Model — Ranked Games</span>
-          <Tip text={<>Every game on the Week {c.week} board, in the order it kicks off, with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Projection</b> — our own line-blind spread &amp; total. A ◆ marks an <b>off-consensus</b> game (our number is well off the market&apos;s). Our CFB rating ties Elo but doesn&apos;t beat the spread, so this is context you can check, <b>not a pick</b>.</>} />
-          <span className="hb-bar__hint">every game, earliest kickoff first · Week {c.week}</span>
+          <Tip text={<>Every <b>ranked game</b> — one with a top-25 team (our current rank shown beside it) — on the Week {c.week} board, in kickoff order, with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Projection</b>, our own line-blind spread &amp; total. A ◆ marks an <b>off-consensus</b> game (our number is well off the market&apos;s). Our CFB rating ties Elo but doesn&apos;t beat the spread, so this is context you can check, <b>not a pick</b>. The complete slate is in <b>Full Model — every game</b> below.</>} />
+          <span className="hb-bar__hint">top-25 team games, earliest kickoff first · Week {c.week}</span>
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
@@ -138,7 +144,7 @@ export default function Page() {
                 over and the seed washes out by about week 5.</span>
             )}
           </div>
-          <MoreTable id="ncaaf-snap-more" head={<CardHead />} extra={snapshotRest.length} noun="games" cls="hb-form--mkt">
+          <MoreTable id="ncaaf-snap-more" head={<CardHead />} extra={snapshotRest.length} noun="ranked games" cls="hb-form--mkt">
             <CardRows games={ranked} moreFrom={5} />
           </MoreTable>
         </div>
