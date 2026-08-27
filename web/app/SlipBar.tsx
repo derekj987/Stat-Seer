@@ -7,7 +7,7 @@
 // (which is NOT necessarily the book that's best on the most individual legs).
 import { useEffect, useState } from "react";
 import { useSlip, encodeSlip, type SlipItem, type SlipKind } from "@/lib/slip";
-import { bookName, fmtOdds, toDecimal, decToAmerican, bestParlayBook } from "@/lib/slipPricing";
+import { bookName, fmtOdds, toDecimal, decToAmerican, bestParlayBook, priceSlip } from "@/lib/slipPricing";
 import { createClient } from "@/lib/supabase/client";
 
 type Me = { id: string; username: string } | null;
@@ -30,6 +30,7 @@ export default function SlipBar() {
   const [friends, setFriends] = useState<{ id: string; username: string }[] | null>(null);
   const [sendingTo, setSendingTo] = useState<string | null>(null);
   const [done, setDone] = useState<{ text: string; href?: string } | null>(null);
+  const [stake, setStake] = useState(25); // wager for the "to win" calculator
 
   useEffect(() => {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) { setMe(null); return; }
@@ -59,6 +60,12 @@ export default function SlipBar() {
     : legs.length === 1 ? bookName(legBest(legs[0]).books[0])
     : parlay.partial ? bookName(parlay.partial.book)
     : null;
+
+  // "To win" calculator: books that price the WHOLE slip, best combined first. Payout on
+  // the best book vs how many more dollars it wins than the next-best book.
+  const { ranked } = priceSlip(items);
+  const money = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const winMore = ranked.length >= 2 ? stake * (ranked[0].decimal - ranked[1].decimal) : 0;
 
   const groups = ORDER
     .map((k) => [k, items.filter((i) => i.kind === k)] as const)
@@ -171,6 +178,23 @@ export default function SlipBar() {
                 </ul>
               </div>
             ))}
+            {ranked.length > 0 && (
+              <div className="slipwin">
+                <label className="slipwin__wager">Wager
+                  <span className="slipwin__inwrap">$<input type="number" min={0} max={100000} value={stake} className="slipwin__in"
+                    onChange={(e) => setStake(Math.max(0, Math.min(100000, Number(e.target.value) || 0)))} /></span>
+                </label>
+                <div className="slipwin__out">
+                  <span className="slipwin__towin">To win <b>${money(stake * (ranked[0].decimal - 1))}</b></span>
+                  <span className="slipwin__at">at {bookName(ranked[0].book)} <span className="slipwin__odds">({decToAmerican(ranked[0].decimal)})</span></span>
+                </div>
+                {winMore > 0.005 && (
+                  <p className="slipwin__more">
+                    You could win <b>${money(winMore)}</b> more by placing it at <b>{bookName(ranked[0].book)}</b> than at {bookName(ranked[1].book)}.
+                  </p>
+                )}
+              </div>
+            )}
             {legs.length >= 1 && (
               <div className="slipbest">
                 <div className="slipbest__h">Best book to place this slip{bestBook && <span className="slipbest__hbook">: {bestBook}</span>}</div>
