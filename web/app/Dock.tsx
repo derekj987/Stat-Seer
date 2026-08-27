@@ -13,7 +13,7 @@ type Tool = "feedback" | "friends" | "assistant";
 export default function Dock() {
   const [active, setActive] = useState<Tool | null>(null);
   const [expanded, setExpanded] = useState(false);          // mobile slide-out
-  const [friends, setFriends] = useState<{ member: boolean; unread: number }>({ member: false, unread: 0 });
+  const [friends, setFriends] = useState<{ member: boolean; unread: number; username?: string }>({ member: false, unread: 0 });
 
   const open = (t: Tool) => { setActive(t); setExpanded(false); };
   const close = () => setActive(null);
@@ -45,6 +45,11 @@ export default function Dock() {
             {expanded ? "✕" : "⋯"}
           </button>
           <div className="dock__icons">
+            {friends.member && friends.username && (
+              <a className="dock__ic dock__ic--profile" data-label="View my profile" aria-label="View my profile" href={`/u/${friends.username}`}>
+                <span aria-hidden="true">👤</span>
+              </a>
+            )}
             <button className="dock__ic dock__ic--pigeon" data-label="Message Us" aria-label="Message Us" onClick={() => open("feedback")}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/pigeon.png" alt="" className="dock__icimg" width={52} height={52}

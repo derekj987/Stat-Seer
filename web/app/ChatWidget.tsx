@@ -48,7 +48,7 @@ function MsgSlip({ items }: { items: SlipItem[] }) {
 }
 
 export default function ChatWidget({ open, onClose, onMeta }:
-  { open: boolean; onClose: () => void; onMeta: (m: { member: boolean; unread: number }) => void }) {
+  { open: boolean; onClose: () => void; onMeta: (m: { member: boolean; unread: number; username?: string }) => void }) {
   const { items: mySlip } = useSlip();
   const [me, setMe] = useState<Me | null | undefined>(undefined);
   const [convs, setConvs] = useState<Conv[]>([]);
@@ -205,7 +205,7 @@ export default function ChatWidget({ open, onClose, onMeta }:
   // Report member + unread up to the Dock, and set the installed-PWA app-icon badge.
   useEffect(() => {
     const total = convs.reduce((a, c) => a + c.unread, 0) + requests.length;
-    onMeta({ member: !!me, unread: total });
+    onMeta({ member: !!me, unread: total, username: me?.username });
     try {
       const nav = navigator as Navigator & { setAppBadge?: (n?: number) => void; clearAppBadge?: () => void };
       if (total > 0) nav.setAppBadge?.(total); else nav.clearAppBadge?.();
