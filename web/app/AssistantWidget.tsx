@@ -10,7 +10,7 @@ export default function AssistantWidget() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="aiw">
+    <div className={open ? "aiw aiw--open" : "aiw"}>
       {!open ? (
         <button className="aiw__launch" onClick={() => setOpen(true)} aria-label="Open the AI Slip Assistant">
           <span className="aiw__ic" aria-hidden="true">🤖</span>
