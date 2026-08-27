@@ -59,6 +59,8 @@ export default function ChatWidget({ open, onClose, onMeta }:
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [chatErr, setChatErr] = useState("");
+  const [picked, setPicked] = useState<Set<string>>(new Set());   // group builder (＋)
+  const [groupName, setGroupName] = useState("");
   // pickers
   const [showEmoji, setShowEmoji] = useState(false);
   const [showGif, setShowGif] = useState(false);
@@ -228,6 +230,24 @@ export default function ChatWidget({ open, onClose, onMeta }:
     openConv({ id: cid, title: null, isGroup: false, members, lastAt: new Date().toISOString(), unread: 0 });
   }
 
+  // Create a group from the picked friends (＋ flow). One picked friend is just a 1:1.
+  async function createGroup() {
+    if (!me || picked.size === 0) return;
+    const ids = [...picked];
+    if (ids.length === 1) { const f = friends.find((x) => x.id === ids[0]); setPicked(new Set()); setGroupName(""); if (f) startWith(f); return; }
+    const sb = createClient();
+    const cid = crypto.randomUUID();
+    const { error } = await sb.from("conversations")
+      .insert({ id: cid, created_by: me.id, is_group: true, title: groupName.trim() ? groupName.trim().slice(0, 60) : null });
+    if (error) { setChatErr("Couldn't create that group. If it keeps failing, the chat tables may not be set up yet."); return; }
+    await sb.from("conversation_members").insert({ conversation_id: cid, user_id: me.id });
+    await sb.from("conversation_members").insert(ids.map((id) => ({ conversation_id: cid, user_id: id })));
+    setPicked(new Set()); setGroupName("");
+    await loadConvs(me.id);
+    const members: Person[] = [{ id: me.id, username: me.username, role: "member" }, ...friends.filter((f) => ids.includes(f.id))];
+    openConv({ id: cid, title: groupName.trim() || null, isGroup: true, members, lastAt: new Date().toISOString(), unread: 0 });
+  }
+
   // Add more friends to the active group.
   async function addToGroup(ids: string[]) {
     if (!me || !active || !ids.length) return;
@@ -264,6 +284,14 @@ export default function ChatWidget({ open, onClose, onMeta }:
 
   const memberIds = new Set(active?.members.map((m) => m.id) ?? []);
   const addable = friends.filter((f) => !memberIds.has(f.id));
+  const groups = convs.filter((c) => c.isGroup);
+  const friendUnread = new Map<string, number>();
+  for (const c of convs) {
+    if (!c.isGroup && c.unread > 0) {
+      const other = c.members.find((m) => m.id !== me.id);
+      if (other) friendUnread.set(other.id, (friendUnread.get(other.id) ?? 0) + c.unread);
+    }
+  }
 
   return (
     <div className="cw">
@@ -272,12 +300,12 @@ export default function ChatWidget({ open, onClose, onMeta }:
           {view !== "list" ? (
             <button className="cw__back" onClick={() => { setView("list"); setActive(null); setShowEmoji(false); setShowGif(false); }} aria-label="Back">‹</button>
           ) : <span className="cw__hdic" aria-hidden="true">💬</span>}
-          <span className="cw__title">{view === "chat" && active ? convName(active, me.id) : view === "new" ? "New chat" : "Chats"}</span>
-          {view === "list" && <button className="cw__new" onClick={() => { setView("new"); setChatErr(""); }} title="New chat">＋</button>}
+          <span className="cw__title">{view === "chat" && active ? convName(active, me.id) : view === "new" ? "New group" : "Friends"}</span>
+          {view === "list" && <button className="cw__new" onClick={() => { setView("new"); setChatErr(""); setPicked(new Set()); setGroupName(""); }} title="New group chat">＋</button>}
           <button className="cw__min" onClick={onClose} aria-label="Minimize">–</button>
         </div>
 
-        {/* ---- CONVERSATION LIST ---- */}
+        {/* ---- LANDING: friends (tap to chat) + any group chats on top ---- */}
         {view === "list" && (
           <div className="cw__list">
             {requests.length > 0 && (
@@ -294,39 +322,63 @@ export default function ChatWidget({ open, onClose, onMeta }:
                 ))}
               </div>
             )}
-            {convs.length === 0 ? (
-              <p className="cw__empty">No chats yet — tap <b>＋</b> to start one, solo or a group. Add any of your friends.</p>
+            {groups.length > 0 && (
+              <>
+                <div className="cw__section">Group chats</div>
+                {groups.map((c) => (
+                  <button className="cw__friend" key={c.id} onClick={() => openConv(c)}>
+                    <span className="cw__avatar" aria-hidden="true">👥</span>
+                    <span className="cw__cvinfo">
+                      <span className="cw__fname">{convName(c, me.id)}</span>
+                      <span className="cw__cvsub">{c.members.length} members</span>
+                    </span>
+                    {c.unread > 0 && <span className="cw__fdot">{c.unread}</span>}
+                  </button>
+                ))}
+              </>
+            )}
+            <div className="cw__section">Friends</div>
+            {friends.length === 0 ? (
+              <p className="cw__empty">Add friends from a member&apos;s profile — then tap one here to chat.</p>
             ) : (
-              convs.map((c) => (
-                <button className="cw__friend" key={c.id} onClick={() => openConv(c)}>
-                  <span className="cw__avatar" aria-hidden="true">{c.isGroup ? "👥" : convName(c, me.id).charAt(0).toUpperCase()}</span>
-                  <span className="cw__cvinfo">
-                    <span className="cw__fname">{convName(c, me.id)}</span>
-                    {c.isGroup && <span className="cw__cvsub">{c.members.length} members</span>}
-                  </span>
-                  {c.unread > 0 && <span className="cw__fdot">{c.unread}</span>}
+              friends.map((f) => (
+                <button className="cw__friend" key={f.id} onClick={() => startWith(f)}>
+                  <span className="cw__avatar" aria-hidden="true">{f.username.charAt(0).toUpperCase()}</span>
+                  <span className={f.role === "founder" ? "cw__fname founder" : "cw__fname"}>{f.username}</span>
+                  {friendUnread.get(f.id) ? <span className="cw__fdot">{friendUnread.get(f.id)}</span> : <span className="cw__pick" aria-hidden="true">›</span>}
                 </button>
               ))
             )}
           </div>
         )}
 
-        {/* ---- NEW CHAT — tap a friend to open the chat right away ---- */}
+        {/* ---- NEW GROUP — pick friends, then Create ---- */}
         {view === "new" && (
           <div className="cw__list">
             {chatErr && <p className="cw__err">{chatErr}</p>}
             {friends.length === 0 ? (
-              <p className="cw__empty">Add friends from a member&apos;s profile first, then tap one here to start chatting.</p>
+              <p className="cw__empty">Add friends from a member&apos;s profile first, then make a group here.</p>
             ) : (
               <>
-                <p className="cw__hint">Tap a friend to start chatting. Add more people once you&apos;re in — that makes it a group.</p>
-                {friends.map((f) => (
-                  <button className="cw__friend" key={f.id} onClick={() => startWith(f)}>
-                    <span className="cw__avatar" aria-hidden="true">{f.username.charAt(0).toUpperCase()}</span>
-                    <span className={f.role === "founder" ? "cw__fname founder" : "cw__fname"}>{f.username}</span>
-                    <span className="cw__pick" aria-hidden="true">›</span>
-                  </button>
-                ))}
+                <p className="cw__hint">Pick the friends for your group.</p>
+                {picked.size > 1 && (
+                  <input className="cw__gname" value={groupName} maxLength={60}
+                    onChange={(e) => setGroupName(e.target.value)} placeholder="Group name (optional)" />
+                )}
+                {friends.map((f) => {
+                  const on = picked.has(f.id);
+                  return (
+                    <button className={on ? "cw__friend on" : "cw__friend"} key={f.id}
+                      onClick={() => setPicked((p) => { const n = new Set(p); if (n.has(f.id)) n.delete(f.id); else n.add(f.id); return n; })}>
+                      <span className="cw__avatar" aria-hidden="true">{f.username.charAt(0).toUpperCase()}</span>
+                      <span className={f.role === "founder" ? "cw__fname founder" : "cw__fname"}>{f.username}</span>
+                      <span className="cw__pick" aria-hidden="true">{on ? "✓" : "+"}</span>
+                    </button>
+                  );
+                })}
+                <button className="btn btn--primary cw__start" disabled={picked.size === 0} onClick={createGroup}>
+                  {picked.size > 1 ? `Create group (${picked.size})` : "Start chat"}
+                </button>
               </>
             )}
           </div>
