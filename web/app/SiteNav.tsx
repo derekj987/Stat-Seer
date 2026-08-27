@@ -25,7 +25,6 @@ export default function SiteNav() {
   const pathname = usePathname() || "/";
   const [me, setMe] = useState<Me | undefined>(undefined);
   const [open, setOpen] = useState(false);       // mobile drawer
-  const [userOpen, setUserOpen] = useState(false); // desktop user dropdown
   const [solid, setSolid] = useState(false);       // homepage: opaque once scrolled past the hero
 
   useEffect(() => {
@@ -54,8 +53,8 @@ export default function SiteNav() {
     return () => { active = false; sub.subscription.unsubscribe(); };
   }, []);
 
-  // Close menus whenever the route changes.
-  useEffect(() => { setOpen(false); setUserOpen(false); }, [pathname]);
+  // Close the drawer whenever the route changes.
+  useEffect(() => { setOpen(false); }, [pathname]);
 
   // Homepage only: the bar floats transparent over the hero, then turns solid once the
   // hero has scrolled up past it. Other pages keep their normal solid bar (solid stays false).
@@ -112,35 +111,23 @@ export default function SiteNav() {
           <span className="snav__crest" role="img" aria-label="StatSeer crest" />
           {/* Forums button (green, always visible) sits between the crest and the signup CTA. */}
           <a href="/forum" className="snav__forums">Join our community</a>
-          {/* Create-an-Account stays in the top bar (pre-launch CTA), to the right of Forums.
-              The community "Become a member" link is the one that hides for signed-in members. */}
-          <a href="/signup" className="snav__signup">
-            <span className="snav__signup__full">Create an Account</span>
-            <span className="snav__signup__short">Sign Up</span>
-          </a>
+          {/* Signed OUT → Create-an-Account CTA. Signed IN → "Logged in as X" + a direct
+              "View my profile" button (logout/settings live in the hamburger drawer). */}
           {me === undefined ? (
             <span className="snav__slot" />
           ) : me ? (
-            <div className="snav__usr">
-              <button className="snav__usrbtn" onClick={() => setUserOpen((v) => !v)} aria-expanded={userOpen}>
-                <span className={me.role === "founder" ? "snav__name founder" : "snav__name"}>{me.username}</span>
-                <span className="snav__caret" aria-hidden="true">▾</span>
-              </button>
-              {userOpen && (
-                <div className="snav__menu">
-                  {me.role === "founder" && <a href="/creator" className="snav__mi snav__mi--founder">★ Creator dashboard</a>}
-                  <a href={`/u/${me.username}`} className="snav__mi">My profile</a>
-                  <a href="/settings" className="snav__mi">Account settings</a>
-                  {MOD.includes(me.role) && <a href="/forum/reports" className="snav__mi">Reports</a>}
-                  {MOD.includes(me.role) && <a href="/feedback" className="snav__mi">Feedback inbox</a>}
-                  <button type="button" className="snav__mi snav__mi--btn" onClick={logout}>Log out</button>
-                </div>
-              )}
-            </div>
+            <>
+              <span className="snav__loggedin">
+                <span className="snav__lilabel">Logged in as</span>{" "}
+                <a href={`/u/${me.username}`} className={me.role === "founder" ? "snav__loggedname founder" : "snav__loggedname"}>{me.username}</a>
+              </span>
+              <a href={`/u/${me.username}`} className="snav__profilebtn">View my profile</a>
+            </>
           ) : (
-            <div className="snav__auth">
-              <a href="/login" className="snav__cta">Log in</a>
-            </div>
+            <a href="/signup" className="snav__signup">
+              <span className="snav__signup__full">Create an Account</span>
+              <span className="snav__signup__short">Sign Up</span>
+            </a>
           )}
         </div>
       </div>
