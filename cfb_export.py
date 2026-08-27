@@ -297,8 +297,10 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
                     "modelPct": round(100 * p_dog), "marketPct": round(100 * p_dog_mkt),
                     "byPoints": round(dog_margin, 1),
                 })
-    # featured (top-25 team) games first, then the rest — each block by interest.
-    cards.sort(key=lambda g: (g["featured"], g["_interest"]), reverse=True)
+    # Order the board the way a bettor reads it: by KICKOFF, earliest first, so the games
+    # actually being played now lead. Within a single kickoff time, surface marquee (top-25)
+    # games, then by interest. (`featured` is still emitted for styling / the homepage lead.)
+    cards.sort(key=lambda g: (g["commence"] or "9999", not g["featured"], -g["_interest"]))
     for g in cards:
         del g["_interest"]
     upsets.sort(key=lambda u: u["modelPct"] - u["marketPct"], reverse=True)

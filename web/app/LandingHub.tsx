@@ -199,8 +199,9 @@ function NcaafRows({ games, moreFrom }: { games: readonly NcaafCardGame[]; moreF
   );
 }
 function NcaafCardTable({ games }: { games: NcaafCardGame[] }) {
-  const featured = games.filter((g) => g.featured);
-  const src = featured.length ? featured : games;
+  // Lead with the games being played soonest (the source orders by kickoff), so the
+  // opening-weekend slate shows first; the rest sit behind "see all".
+  const src = games;
   return (
     <MoreTable id="gm-more-ncaaf" head={<NcaafHead />} extra={Math.max(0, src.length - 3)} noun="games" cls="hb-form--mkt">
       <NcaafRows games={src} moreFrom={3} />

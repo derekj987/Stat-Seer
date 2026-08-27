@@ -686,3 +686,56 @@ create trigger no_update_cfb_props before update or delete on cfb_prop_snapshots
     for each row execute function block_mutation();
 grant select, insert on cfb_prop_snapshots to service_role;
 grant usage, select on all sequences in schema public to service_role;
+
+-- ============================================================================
+-- CFB PRESEASON PRIOR capture  (cfb_preseason_snapshot.py --supabase)
+-- ----------------------------------------------------------------------------
+-- Freezes this season's FORWARD-LOOKING preseason priors — CFBD SP+ ratings +
+-- returning production — with a timestamp, so a year from now they can be tested
+-- OUT OF SAMPLE as a preseason prior for the CFB card. CFBD's /ratings/sp?year=Y
+-- archives only each PAST season's FINAL SP+ and starts updating the moment games
+-- are played, so the *preseason* value lives ONLY if captured before Week 1 — it
+-- cannot be backfilled, exactly like practice trajectory and prop history. The SP+
+-- seed already ships on the forward card (cfb_export.fetch_preseason_sp) but was
+-- never frozen, so its preseason ordering could never be graded; this closes that.
+-- One row per (snapshot_date, season, team); daily capture through the early season
+-- also records the SP+ convergence trajectory. Append-only, service-key writer only.
+-- ============================================================================
+create table if not exists cfb_preseason_snapshots (
+    id                        bigserial   primary key,
+    snapshot_at               timestamptz not null,   -- exact capture instant
+    snapshot_date             date        not null,   -- capture day (dedupe key)
+    season                    smallint    not null,
+    team                      text        not null,
+    conference                text,
+    sp_rating                 numeric(7,2),           -- net points vs average (margin scale)
+    sp_ranking                smallint,
+    sp_offense                numeric(7,2),
+    sp_defense                numeric(7,2),
+    sp_special_teams          numeric(7,2),
+    sp_sos                    numeric(7,3),
+    sp_second_order_wins      numeric(7,3),
+    ret_total_ppa             numeric(9,3),           -- returning production (PPA + usage)
+    ret_percent_ppa           numeric(6,4),
+    ret_usage                 numeric(6,4),
+    ret_passing_usage         numeric(6,4),
+    ret_receiving_usage       numeric(6,4),
+    ret_rushing_usage         numeric(6,4),
+    ret_percent_passing_ppa   numeric(7,4),
+    ret_percent_receiving_ppa numeric(7,4),
+    ret_percent_rushing_ppa   numeric(7,4),
+    captured_at               timestamptz not null default now()
+);
+create index if not exists cfb_pre_season_idx on cfb_preseason_snapshots (season, team);
+create index if not exists cfb_pre_date_idx   on cfb_preseason_snapshots (snapshot_date);
+-- One snapshot per team per day. Re-running the same day is idempotent (ignore-dup);
+-- a new day appends a fresh row, so in-season runs capture the convergence trajectory.
+create unique index if not exists cfb_preseason_dedupe on cfb_preseason_snapshots
+    (snapshot_date, season, team);
+
+revoke update, delete on cfb_preseason_snapshots from public, anon, authenticated;
+drop trigger if exists no_update_cfb_pre on cfb_preseason_snapshots;
+create trigger no_update_cfb_pre before update or delete on cfb_preseason_snapshots
+    for each row execute function block_mutation();
+grant select, insert on cfb_preseason_snapshots to service_role;
+grant usage, select on all sequences in schema public to service_role;

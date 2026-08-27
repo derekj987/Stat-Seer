@@ -1,0 +1,46 @@
+name: Capture CFB preseason priors
+
+# Freezes this season's forward-looking preseason priors -- CFBD SP+ ratings +
+# returning production -- into Supabase cfb_preseason_snapshots, so a year from now they
+# can be tested OUT OF SAMPLE as a preseason prior for the CFB card.
+#
+# WHY it can't wait / can't be backfilled: CFBD's /ratings/sp?year=Y archives only each
+# PAST season's FINAL SP+, and the number starts updating the moment games are played. So
+# the *preseason* value -- the one that prices transfers / recruiting / returning starters
+# before any results exist -- lives ONLY if captured before Week 1, exactly like practice
+# trajectory and prop history. This runs DAILY through the preseason + early season: the
+# pre-opener runs freeze the true preseason prior, and the in-season runs additionally
+# record how fast SP+ converges to results (the empirical test of the "seed washes out by
+# ~week 5-6" claim in cfb_export). CFBD is free and this is 2 calls/run, so daily is cheap.
+#
+# Writes to SUPABASE (not the local data/cfb.db) because a GitHub runner's filesystem is
+# ephemeral. Idempotent: one row per (snapshot_date, season, team). All times UTC.
+#
+# PREREQUISITE: run the cfb_preseason_snapshots DDL (ingest/schema.sql) in Supabase once
+# before the first write, or the write 4xx-fails (missing table).
+
+on:
+  schedule:
+    - cron: "0 13 * 8-10 *"   # daily 13:00 UTC, Aug-Oct (preseason + convergence window)
+  workflow_dispatch: {}         # manual "Run workflow"
+
+concurrency:
+  group: capture-cfb-preseason
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi
+      - name: Capture CFB preseason priors -> Supabase
+        env:
+          CFBD_API_KEY:         ${{ secrets.CFBD_API_KEY }}
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python cfb_preseason_snapshot.py --supabase

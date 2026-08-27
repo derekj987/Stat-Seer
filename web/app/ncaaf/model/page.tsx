@@ -71,9 +71,8 @@ export default function Page() {
   const a = M.ats;
   const beatsMarket = a.atsPct > a.breakeven;
   const c = M.card;
-  const featured = c.games.filter((g) => g.featured);
-  const ranked = featured.length ? featured : c.games;   // marquee games for the snapshot
-  const snapshotRest = ranked.slice(5);                   // ranked games beyond the first 5 (see-more)
+  const ranked = c.games;                 // every game, ordered by kickoff (earliest first)
+  const snapshotRest = ranked.slice(5);   // games beyond the first 5 (see-more)
 
   return (
     <main className="wrap">
@@ -121,9 +120,9 @@ export default function Page() {
       {/* Snapshot — the first few ranked games, with a "see more" for the rest. */}
       <details className="hb-panel hb-panel--card" open>
         <summary className="hb-bar">
-          <span className="hb-bar__title hb-bar__title--gold">The Model — Snapshot View</span>
-          <Tip text={<>Every ranked game with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Projection</b> — our own line-blind spread &amp; total. A ◆ marks an <b>off-consensus</b> game (our number is well off the market&apos;s). Our CFB rating ties Elo but doesn&apos;t beat the spread, so this is context you can check, <b>not a pick</b>.</>} />
-          <span className="hb-bar__hint">our line-blind read beside the market&apos;s number · Week {c.week}</span>
+          <span className="hb-bar__title hb-bar__title--gold">The Model — Ranked Games</span>
+          <Tip text={<>Every game on the Week {c.week} board, in the order it kicks off, with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Projection</b> — our own line-blind spread &amp; total. A ◆ marks an <b>off-consensus</b> game (our number is well off the market&apos;s). Our CFB rating ties Elo but doesn&apos;t beat the spread, so this is context you can check, <b>not a pick</b>.</>} />
+          <span className="hb-bar__hint">every game, earliest kickoff first · Week {c.week}</span>
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
@@ -139,7 +138,7 @@ export default function Page() {
                 over and the seed washes out by about week 5.</span>
             )}
           </div>
-          <MoreTable id="ncaaf-snap-more" head={<CardHead />} extra={snapshotRest.length} noun="ranked games" cls="hb-form--mkt">
+          <MoreTable id="ncaaf-snap-more" head={<CardHead />} extra={snapshotRest.length} noun="games" cls="hb-form--mkt">
             <CardRows games={ranked} moreFrom={5} />
           </MoreTable>
         </div>
