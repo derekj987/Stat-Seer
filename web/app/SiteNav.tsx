@@ -110,7 +110,7 @@ export default function SiteNav() {
         <div className="snav__right">
           <span className="snav__crest" role="img" aria-label="StatSeer crest" />
           {/* Forums button (green, always visible) sits between the crest and the signup CTA. */}
-          <a href="/forum" className="snav__forums">Join our community</a>
+          <a href="/forum" className="snav__forums">{me ? "Visit the community" : "Join our community"}</a>
           {/* Signed OUT → Create-an-Account CTA. Signed IN → "Logged in as X" + a direct
               "View my profile" button (logout/settings live in the hamburger drawer). */}
           {me === undefined ? (
