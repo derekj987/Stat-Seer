@@ -283,13 +283,13 @@ a.cw__fname:hover{text-decoration:underline}
   cursor:pointer;background:var(--gold);color:#1c1405;border:0;border-radius:16px;padding:8px 14px 8px 10px;font:inherit;
   font-size:12px;font-weight:600;line-height:1.22;text-align:left;box-shadow:0 4px 16px rgba(0,0,0,.28)}
 .aiw__launch:hover{filter:brightness(1.05)}
-.aiw__ic{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:0 0 auto;
+.aiw__ic{width:44px;height:44px;border-radius:9px;object-fit:cover;flex:0 0 auto;
   box-shadow:0 0 0 1.5px rgba(0,0,0,.18)}
 .aiw__lab b{font-weight:800}
 .aiw__panel{width:min(400px,92vw);height:min(560px,calc(100vh - 96px));display:flex;flex-direction:column;
   background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 14px 44px rgba(0,0,0,.34)}
 .aiw__hd{display:flex;align-items:center;gap:8px;padding:11px 13px;background:var(--gold);color:#1c1405}
-.aiw__hdic{width:30px;height:30px;border-radius:50%;object-fit:cover;flex:0 0 auto}
+.aiw__hdic{width:30px;height:30px;border-radius:7px;object-fit:cover;flex:0 0 auto}
 .aiw__title{font-weight:800;font-size:14px;flex:1 1 auto}
 .aiw__min{background:rgba(0,0,0,.14);border:0;color:#1c1405;width:24px;height:24px;border-radius:6px;cursor:pointer;
   font-size:16px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
