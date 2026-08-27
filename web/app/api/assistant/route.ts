@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { weekRange } from "@/lib/board";
-import { buildCandidates, buildMenuSlip, combinedAmerican, combinedDecimal, type Candidate, type CandGroup } from "@/lib/assistant";
+import { buildCandidates, buildMenuSlip, combinedAmerican, combinedDecimal, type Candidate } from "@/lib/assistant";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -51,12 +51,11 @@ export async function POST(request: Request) {
 
   // ---- MENU: deterministic, no model, no cost ----
   if (mode === "menu") {
-    const groups = (Array.isArray(body?.groups) ? body.groups : []).filter((g: string): g is CandGroup =>
-      ["spread", "total", "td", "passing", "rushing", "receiving"].includes(g));
+    const markets = (Array.isArray(body?.markets) ? body.markets : []).filter((m: unknown): m is string => typeof m === "string");
     const legsN = Math.max(1, Math.min(Number(body?.legs) || 4, 8));
     const target = body?.targetOdds ? Number(body.targetOdds) : null;
     const rankByModel = !!body?.rankByModel;
-    const picked = buildMenuSlip(cands, { groups: groups.length ? groups : ["spread", "total"], legs: legsN, targetOdds: target, rankByModel });
+    const picked = buildMenuSlip(cands, { markets: markets.length ? markets : ["spread", "total"], legs: legsN, targetOdds: target, rankByModel });
     if (!picked.length) return NextResponse.json({ error: "Nothing matched those options — try different markets." }, { status: 200 });
     const note = rankByModel
       ? `Your ${picked.length} highest-model-% picks.`
@@ -70,15 +69,17 @@ export async function POST(request: Request) {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return NextResponse.json({ error: "The chat assistant isn't configured yet. Use the Quick menu for now." }, { status: 200 });
 
-  // Compact menu to keep tokens (and cost) down.
-  const menu = cands.map((c) => ({ id: c.id, g: c.group, bet: c.title, odds: c.price, ...(c.model !== undefined ? { modelPct: Math.round(c.model) } : {}) }));
+  // Compact menu to keep tokens (and cost) down. `mkt` = market: spread, total,
+  // player_anytime_td, player_pass_yds, player_pass_tds, player_rush_yds,
+  // player_rush_attempts, player_reception_yds, player_receptions.
+  const menu = cands.map((c) => ({ id: c.id, mkt: c.market, bet: c.title, odds: c.price, ...(c.model !== undefined ? { modelPct: Math.round(c.model) } : {}) }));
   const system =
     "You assemble sports bet slips for StatSeer from a fixed menu of real, currently-priced bets. " +
     "You are NOT giving betting advice or guaranteeing outcomes — you are assembling picks the member asked for from published numbers. " +
     "Rules: choose ONLY ids from the menu; never invent bets. Prefer at most one leg per game/player unless asked. " +
     "If the member gives a target parlay price (e.g. +1500), pick legs whose odds multiply to roughly that (a leg's decimal = 1 + odds/100 for +, or 1 + 100/|odds| for -). " +
-    "For 'highest % TD scorer' style asks, rank anytime-TD legs by modelPct (higher is better). " +
-    "Respect any requested number of legs and market types (spread/total/td/passing/rushing/receiving). " +
+    "For 'highest % TD scorer' style asks, rank player_anytime_td legs by modelPct (higher is better). " +
+    "Respect any requested number of legs and market types — filter by the `mkt` field (e.g. only spreads = mkt 'spread'; QB passing yards = 'player_pass_yds'; receptions = 'player_receptions'). " +
     "Return your picks via the submit_slip tool with the chosen ids and a short one-sentence note.\n\n" +
     "MENU (JSON):\n" + JSON.stringify(menu);
 

@@ -14,6 +14,7 @@ export interface Candidate {
   id: string;
   kind: "line" | "prop";
   group: CandGroup;
+  market: string;                // fine-grained: "spread","total","player_pass_yds",…
   title: string;                 // "BUF -2.5", "Over 48.5", "Josh Allen Anytime TD"
   detail: string;                // matchup / context
   price: number;                 // best american price across books
@@ -55,15 +56,15 @@ export async function buildCandidates(week: number, season = 2026): Promise<Cand
     const board = buildBoard(await fetchWeek(week, season));
     for (const g of board) {
       const mk = `${g.away} @ ${g.home}`;
-      const push = (id: string, group: CandGroup, title: string, l: { point: number | null; price: number; books: string[]; byBook: Record<string, number> } | null) => {
+      const push = (id: string, group: CandGroup, market: string, title: string, l: { point: number | null; price: number; books: string[]; byBook: Record<string, number> } | null) => {
         if (l && l.point !== null && Number.isFinite(l.price)) {
-          out.push({ id, kind: "line", group, title: title.replace("{pt}", fmtPt(l.point)), detail: mk, price: l.price, books: l.books, byBook: l.byBook });
+          out.push({ id, kind: "line", group, market, title: title.replace("{pt}", fmtPt(l.point)), detail: mk, price: l.price, books: l.books, byBook: l.byBook });
         }
       };
-      push(`sp-${g.eventId}-h`, "spread", `${g.home} {pt}`, g.spread.home);
-      push(`sp-${g.eventId}-a`, "spread", `${g.away} {pt}`, g.spread.away);
-      push(`tot-${g.eventId}-o`, "total", `${mk}: Over {pt}`, g.total.over ? { ...g.total.over, point: g.total.over.point } : null);
-      push(`tot-${g.eventId}-u`, "total", `${mk}: Under {pt}`, g.total.under ? { ...g.total.under, point: g.total.under.point } : null);
+      push(`sp-${g.eventId}-h`, "spread", "spread", `${g.home} {pt}`, g.spread.home);
+      push(`sp-${g.eventId}-a`, "spread", "spread", `${g.away} {pt}`, g.spread.away);
+      push(`tot-${g.eventId}-o`, "total", "total", `${mk}: Over {pt}`, g.total.over);
+      push(`tot-${g.eventId}-u`, "total", "total", `${mk}: Under {pt}`, g.total.under);
     }
   } catch { /* odds not up */ }
 
@@ -86,7 +87,7 @@ export async function buildCandidates(week: number, season = 2026): Promise<Cand
             : `${q.player} o${q.line} ${PROP_LABEL[mb.market] ?? mb.market}`;
           out.push({
             id: `pr-${slug(q.player)}-${mb.market}-${q.side}`,
-            kind: "prop", group, title, detail: mk,
+            kind: "prop", group, market: mb.market, title, detail: mk,
             price: q.price, books: q.books, byBook: q.byBook,
             ...(isTd && td.has(normName(q.player)) ? { model: td.get(normName(q.player)) } : {}),
           });
@@ -108,14 +109,14 @@ export function combinedAmerican(legs: Candidate[]): string {
 
 // ---- deterministic MENU builder ----
 export interface MenuOpts {
-  groups: CandGroup[];      // which bet types to draw from
+  markets: string[];        // which markets to draw from ("spread","total","player_pass_yds",…)
   legs: number;             // how many legs
   targetOdds?: number | null; // american target for the whole parlay (e.g. 1500), or null
   rankByModel?: boolean;    // TD: prefer highest model %
 }
 
 export function buildMenuSlip(cands: Candidate[], opts: MenuOpts): Candidate[] {
-  const pool = cands.filter((c) => opts.groups.includes(c.group));
+  const pool = cands.filter((c) => opts.markets.includes(c.market));
   const n = Math.max(1, Math.min(opts.legs, 8));
   // one leg per game/player so we don't stack correlated legs from the same matchup
   const seen = new Set<string>();
