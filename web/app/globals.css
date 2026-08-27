@@ -351,6 +351,17 @@ a.cw__fname:hover{text-decoration:underline}
 .ncline__chip.on .ncline__t{color:var(--save)}
 .ncline__plus{font-weight:800;color:var(--accent);font-size:13px;line-height:1}
 .ncline__chip.on .ncline__plus{color:var(--save)}
+/* NCAAF Sweet Spots play cards */
+.ncss-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:12px;margin:14px 0}
+.ncss{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface);display:flex;flex-direction:column;gap:8px}
+.ncss__hd{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ncss__g{font-weight:700;font-size:13.5px}
+.ncss__badge{font-size:10px;font-weight:800;letter-spacing:.04em;color:#1c1405;background:var(--spot);border-radius:999px;padding:2px 7px;white-space:nowrap}
+.ncss__val{display:flex;align-items:baseline;gap:6px}
+.ncss__val b{font-size:22px;color:var(--accent);line-height:1}
+.ncss__val span{font-size:12px;color:var(--muted)}
+.ncss__sides{display:flex;gap:6px;flex-wrap:wrap}
+.ncss__why{font-size:12px;color:var(--muted);line-height:1.45;margin:0}
 .game.skeleton{min-height:150px;animation:pulse 1.2s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 @media (prefers-reduced-motion:reduce){.game.skeleton{animation:none}}

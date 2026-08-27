@@ -1,6 +1,7 @@
 import { Brand, FlowSteps, ShopSubnav } from "../../Nav";
 import { NCAAF_MODEL, type NcaafKeyNum } from "../model-data";
 import { StatCard } from "../StatCard";
+import NcaafSweetSpots from "./NcaafSweetSpots";
 
 // College Football — Value Finder · Sweet Spots. Key numbers: which final margins
 // actually happen, so a half-point across one is worth buying. Real, from 5 seasons.
@@ -26,6 +27,8 @@ export default function Page() {
 
       <FlowSteps active="value" base="ncaaf" />
       <ShopSubnav active="best" base="ncaaf" />
+
+      <NcaafSweetSpots games={M.card.games} keyNums={v.keyNumbers} week={M.card.week} />
 
       <section className="explainer">
         <p>
