@@ -68,8 +68,11 @@ export default function ChatWidget({ open, onClose, onMeta }:
   const [gifs, setGifs] = useState<Gif[]>([]);
   const [gifOn, setGifOn] = useState(true);
 
+  const [notifPerm, setNotifPerm] = useState<NotificationPermission | "unsupported">("default");
   const activeRef = useRef<Conv | null>(null); activeRef.current = active;
   const convIdsRef = useRef<Set<string>>(new Set());
+  const openRef = useRef(open); openRef.current = open;
+  const convsRef = useRef<Conv[]>([]); convsRef.current = convs;
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -161,9 +164,22 @@ export default function ChatWidget({ open, onClose, onMeta }:
         const m = payload.new as Msg;
         if (!convIdsRef.current.has(m.conversation_id)) return;
         const cur = activeRef.current;
+        const viewingThis = !!cur && m.conversation_id === cur.id && openRef.current && !document.hidden;
         if (cur && m.conversation_id === cur.id) {
           setMsgs((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, { ...m, slip: Array.isArray(m.slip) ? m.slip : null }]));
           if (m.sender_id !== me.id) markRead(cur.id);
+        }
+        // System notification (banner at the top of the phone) when a message from someone
+        // else arrives and you're not already looking at that chat.
+        if (m.sender_id !== me.id && !viewingThis && typeof Notification !== "undefined" && Notification.permission === "granted") {
+          try {
+            const conv = convsRef.current.find((c) => c.id === m.conversation_id);
+            const sender = conv?.members.find((x) => x.id === m.sender_id)?.username ?? "New message";
+            const title = conv?.isGroup ? `${sender} · ${convName(conv, me.id)}` : sender;
+            const body = m.kind === "gif" ? "Sent a GIF" : m.kind === "slip" ? "Shared a slip" : (m.body ?? "");
+            const n = new Notification(title, { body, tag: m.conversation_id, icon: "/icon-192.png" });
+            n.onclick = () => { window.focus(); n.close(); };
+          } catch { /* notifications unavailable */ }
         }
         loadConvs(me.id);
       }).subscribe();
@@ -173,11 +189,24 @@ export default function ChatWidget({ open, onClose, onMeta }:
 
   useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight }); }, [msgs, active]);
 
-  // Report member + unread up to the Dock.
+  // Report member + unread up to the Dock, and set the installed-PWA app-icon badge.
   useEffect(() => {
     const total = convs.reduce((a, c) => a + c.unread, 0) + requests.length;
     onMeta({ member: !!me, unread: total });
+    try {
+      const nav = navigator as Navigator & { setAppBadge?: (n?: number) => void; clearAppBadge?: () => void };
+      if (total > 0) nav.setAppBadge?.(total); else nav.clearAppBadge?.();
+    } catch { /* Badging API unavailable */ }
   }, [me, convs, requests, onMeta]);
+
+  // Know whether we can prompt for notification permission (and re-read after granting).
+  useEffect(() => {
+    setNotifPerm(typeof Notification === "undefined" ? "unsupported" : Notification.permission);
+  }, []);
+  async function enableNotifs() {
+    if (typeof Notification === "undefined") return;
+    try { setNotifPerm(await Notification.requestPermission()); } catch { /* denied */ }
+  }
 
   async function markRead(convId: string) {
     if (!me) return;
@@ -313,6 +342,9 @@ export default function ChatWidget({ open, onClose, onMeta }:
         {view === "list" && (
           <div className="cw__list">
             {chatErr && <p className="cw__err">{chatErr}</p>}
+            {notifPerm === "default" && (
+              <button className="cw__notif" onClick={enableNotifs}>🔔 Turn on notifications for new messages</button>
+            )}
             {requests.length > 0 && (
               <div className="cw__reqs">
                 <div className="cw__reqh">Friend requests</div>
