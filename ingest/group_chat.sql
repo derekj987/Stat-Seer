@@ -50,7 +50,11 @@ alter table conversation_messages enable row level security;
 
 -- conversations
 drop policy if exists "see my conversations" on conversations;
-create policy "see my conversations" on conversations for select using (is_conv_member(id, auth.uid()));
+-- created_by is included so the `insert ... returning` on create works: at that instant the
+-- creator isn't a member yet (members are added the next step), so a membership-only policy
+-- would hide the just-created row and the client would think the insert failed.
+create policy "see my conversations" on conversations for select using (
+  is_conv_member(id, auth.uid()) or created_by = auth.uid());
 drop policy if exists "create conversation" on conversations;
 create policy "create conversation" on conversations for insert to authenticated with check (auth.uid() = created_by);
 drop policy if exists "update my conversation" on conversations;
