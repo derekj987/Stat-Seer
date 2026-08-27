@@ -22,14 +22,14 @@ export default function AssistantWidget() {
       {!open ? (
         <button className="aiw__launch" onClick={openPanel} aria-label="Open the AI Slip Assistant">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/chatbot-icon.png?v=1" alt="" className="aiw__ic" width={34} height={34} />
+          <img src="/chatbot-icon.png?v=2" alt="" className="aiw__ic" width={44} height={44} />
           <span className="aiw__lab">Don&apos;t feel like thinking? <b>Use our AI Slip Assistant</b></span>
         </button>
       ) : (
         <div className="aiw__panel" role="dialog" aria-label="AI Slip Assistant">
           <div className="aiw__hd">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/chatbot-icon.png?v=1" alt="" className="aiw__hdic" width={26} height={26} />
+            <img src="/chatbot-icon.png?v=2" alt="" className="aiw__hdic" width={30} height={30} />
             <span className="aiw__title">AI Slip Assistant</span>
             <button className="aiw__min" onClick={() => setOpen(false)} aria-label="Close">–</button>
           </div>
