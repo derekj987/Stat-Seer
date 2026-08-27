@@ -56,17 +56,28 @@ export async function POST(request: Request) {
     const legsN = Math.max(1, Math.min(Number(body?.legs) || 4, 8));
     const target = body?.targetOdds ? Number(body.targetOdds) : null;
     const rankByModel = !!body?.rankByModel;
-    const picked = buildMenuSlip(cands, { markets: markets.length ? markets : ["spread", "total"], legs: legsN, targetOdds: target, rankByModel });
+    let picked = buildMenuSlip(cands, { markets: markets.length ? markets : ["spread", "total"], legs: legsN, targetOdds: target, rankByModel });
     if (!picked.length) return NextResponse.json({ error: "Nothing matched those options — try different markets." }, { status: 200 });
+
+    // Hit the number. If a target is set and the chosen markets fall short (spreads alone
+    // can't reach +5000), draw from the WHOLE board (moneylines + props) to reach it —
+    // the point is quick-and-easy target odds, model opinion aside.
+    let expanded = false;
+    if (target && !rankByModel && combinedDecimal(picked) < toDecimal(target) * 0.85) {
+      const allMk = [...new Set(cands.map((c) => c.market))];
+      const wider = buildMenuSlip(cands, { markets: allMk, legs: legsN, targetOdds: target });
+      if (wider.length && combinedDecimal(wider) > combinedDecimal(picked)) { picked = wider; expanded = true; }
+    }
+
     const priced = combinedAmerican(picked);
     let note: string;
     if (rankByModel) {
       note = `Your ${picked.length} highest-model-% picks — parlays to ${priced}.`;
     } else if (target) {
       const off = Math.abs(combinedDecimal(picked) - toDecimal(target)) / toDecimal(target);
-      note = off < 0.18
-        ? `A ${picked.length}-leg parlay at ${priced} — right around your +${target} target.`
-        : `Closest we could get toward +${target} with these markets: ${priced} across ${picked.length} legs. Add moneylines or more legs to go longer.`;
+      note = off < 0.22
+        ? `A ${picked.length}-leg parlay at ${priced} — right around your +${target} target${expanded ? " (mixed in moneylines/props to get there)" : ""}.`
+        : `Closest the board can get toward +${target}: ${priced} across ${picked.length} legs — not enough long-odds bets available this week.`;
     } else {
       note = `A ${picked.length}-leg parlay at ${priced}.`;
     }
@@ -107,6 +118,7 @@ export async function POST(request: Request) {
         properties: {
           legIds: { type: "array", items: { type: "string" }, description: "ids from the menu, in order" },
           note: { type: "string", description: "one short sentence describing the slip" },
+          targetOdds: { type: "number", description: "the target american parlay odds the member asked for (e.g. 5000), or 0 if none" },
         },
         required: ["legIds", "note"],
         additionalProperties: false,
@@ -133,6 +145,17 @@ export async function POST(request: Request) {
     for (const id of ids) {
       const c = byId.get(id);
       if (c && !seen.has(c.id)) { seen.add(c.id); picked.push(c); }
+    }
+    // If the member asked for a target price and Claude undershot it, rebuild
+    // deterministically from the whole board so we actually land near the number.
+    const tgt = Number(tool?.input?.targetOdds) || 0;
+    if (tgt > 0 && picked.length >= 2 && combinedDecimal(picked) < toDecimal(tgt) * 0.85) {
+      const allMk = [...new Set(cands.map((c) => c.market))];
+      const fixed = buildMenuSlip(cands, { markets: allMk, legs: picked.length, targetOdds: tgt });
+      if (fixed.length && combinedDecimal(fixed) > combinedDecimal(picked)) {
+        picked = fixed;
+        note = `Built to land near +${tgt}: ${combinedAmerican(fixed)} across ${fixed.length} legs.`;
+      }
     }
   } catch {
     return NextResponse.json({ error: "The assistant is busy right now — try the Quick menu, or ask again." }, { status: 200 });
