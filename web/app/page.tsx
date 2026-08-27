@@ -208,6 +208,12 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
             <span className="lp-feat__p">The best price for each bet — and the single best book for your whole slip.</span>
             <span className="lp-feat__go">Open →</span>
           </a>
+          <a href="/assistant" className="lp-feat">
+            <span className="lp-feat__ic" aria-hidden="true">✨</span>
+            <span className="lp-feat__h">Slip Assistant</span>
+            <span className="lp-feat__p">Short on time? Tell it what you want and it builds a slip from the real board.</span>
+            <span className="lp-feat__go">Open →</span>
+          </a>
         </div>
       </section>
 

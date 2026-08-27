@@ -1,0 +1,130 @@
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { weekRange } from "@/lib/board";
+import { buildCandidates, buildMenuSlip, combinedAmerican, combinedDecimal, type Candidate, type CandGroup } from "@/lib/assistant";
+
+export const dynamic = "force-dynamic";
+export const maxDuration = 30;
+
+const SEASON = 2026;
+const MODEL = "claude-sonnet-5"; // text mode; menu mode calls no model
+
+// The assembled legs, shaped so the client can drop them straight onto the Value Finder slip.
+function toLegs(cands: Candidate[]) {
+  return cands.map((c) => ({
+    id: `ai-${c.id}`,
+    kind: (c.kind === "line" ? "line" : "prop") as "line" | "prop",
+    title: c.title,
+    detail: c.detail,
+    price: c.price,
+    books: c.books,
+    byBook: c.byBook,
+  }));
+}
+
+function respond(legs: Candidate[], note: string) {
+  return NextResponse.json({
+    legs: toLegs(legs),
+    combined: legs.length > 1 ? { american: combinedAmerican(legs), decimal: combinedDecimal(legs) } : null,
+    note,
+  });
+}
+
+export async function POST(request: Request) {
+  // Members only.
+  let userId: string | null = null;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+    userId = data.user?.id ?? null;
+  } catch { /* env not configured */ }
+  if (!userId) return NextResponse.json({ error: "Please log in to use the slip assistant." }, { status: 401 });
+
+  const body = await request.json().catch(() => ({}));
+  const mode: "menu" | "text" = body?.mode === "text" ? "text" : "menu";
+
+  const week = (await weekRange(SEASON).catch(() => null))?.min ?? 1;
+  const cands = await buildCandidates(week, SEASON);
+  if (!cands.length) {
+    return NextResponse.json({ error: "No live betting board yet — the week's odds haven't loaded. Try again closer to kickoff." }, { status: 200 });
+  }
+
+  // ---- MENU: deterministic, no model, no cost ----
+  if (mode === "menu") {
+    const groups = (Array.isArray(body?.groups) ? body.groups : []).filter((g: string): g is CandGroup =>
+      ["spread", "total", "td", "passing", "rushing", "receiving"].includes(g));
+    const legsN = Math.max(1, Math.min(Number(body?.legs) || 4, 8));
+    const target = body?.targetOdds ? Number(body.targetOdds) : null;
+    const rankByModel = !!body?.rankByModel;
+    const picked = buildMenuSlip(cands, { groups: groups.length ? groups : ["spread", "total"], legs: legsN, targetOdds: target, rankByModel });
+    if (!picked.length) return NextResponse.json({ error: "Nothing matched those options — try different markets." }, { status: 200 });
+    const note = rankByModel
+      ? `Your ${picked.length} highest-model-% picks.`
+      : target ? `A ${picked.length}-leg parlay aimed near ${target > 0 ? "+" : ""}${target}.` : `A ${picked.length}-leg parlay.`;
+    return respond(picked, note);
+  }
+
+  // ---- TEXT: Claude assembles from the candidate menu ----
+  const prompt = String(body?.prompt ?? "").slice(0, 600).trim();
+  if (!prompt) return NextResponse.json({ error: "Tell the assistant what you'd like." }, { status: 200 });
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) return NextResponse.json({ error: "The chat assistant isn't configured yet. Use the Quick menu for now." }, { status: 200 });
+
+  // Compact menu to keep tokens (and cost) down.
+  const menu = cands.map((c) => ({ id: c.id, g: c.group, bet: c.title, odds: c.price, ...(c.model !== undefined ? { modelPct: Math.round(c.model) } : {}) }));
+  const system =
+    "You assemble sports bet slips for StatSeer from a fixed menu of real, currently-priced bets. " +
+    "You are NOT giving betting advice or guaranteeing outcomes — you are assembling picks the member asked for from published numbers. " +
+    "Rules: choose ONLY ids from the menu; never invent bets. Prefer at most one leg per game/player unless asked. " +
+    "If the member gives a target parlay price (e.g. +1500), pick legs whose odds multiply to roughly that (a leg's decimal = 1 + odds/100 for +, or 1 + 100/|odds| for -). " +
+    "For 'highest % TD scorer' style asks, rank anytime-TD legs by modelPct (higher is better). " +
+    "Respect any requested number of legs and market types (spread/total/td/passing/rushing/receiving). " +
+    "Return your picks via the submit_slip tool with the chosen ids and a short one-sentence note.\n\n" +
+    "MENU (JSON):\n" + JSON.stringify(menu);
+
+  const req = {
+    model: MODEL,
+    max_tokens: 1024,
+    system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
+    messages: [{ role: "user", content: prompt }],
+    tools: [{
+      name: "submit_slip",
+      description: "Return the chosen bet slip.",
+      input_schema: {
+        type: "object",
+        properties: {
+          legIds: { type: "array", items: { type: "string" }, description: "ids from the menu, in order" },
+          note: { type: "string", description: "one short sentence describing the slip" },
+        },
+        required: ["legIds", "note"],
+        additionalProperties: false,
+      },
+    }],
+    tool_choice: { type: "tool", name: "submit_slip" },
+  };
+
+  let picked: Candidate[] = [];
+  let note = "";
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify(req),
+    });
+    if (!res.ok) throw new Error(`anthropic ${res.status}`);
+    const data = await res.json();
+    const tool = (data.content ?? []).find((b: { type: string }) => b.type === "tool_use");
+    const ids: string[] = Array.isArray(tool?.input?.legIds) ? tool.input.legIds : [];
+    note = typeof tool?.input?.note === "string" ? tool.input.note : "";
+    const byId = new Map(cands.map((c) => [c.id, c]));
+    const seen = new Set<string>();
+    for (const id of ids) {
+      const c = byId.get(id);
+      if (c && !seen.has(c.id)) { seen.add(c.id); picked.push(c); }
+    }
+  } catch {
+    return NextResponse.json({ error: "The assistant is busy right now — try the Quick menu, or ask again." }, { status: 200 });
+  }
+  if (!picked.length) return NextResponse.json({ error: "Couldn't build that from this week's board — try rephrasing, or use the Quick menu." }, { status: 200 });
+  return respond(picked, note || "Here's your slip.");
+}
