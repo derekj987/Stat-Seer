@@ -525,6 +525,9 @@ a.cw__fname:hover{text-decoration:underline}
 .slipbar__msg{border:1px solid var(--accent);background:var(--accent);color:#fff;
   border-radius:8px;padding:6px 12px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
 .slipbar__msg:hover{filter:brightness(1.06)}
+.slipbar__story{border:1px solid var(--gold);background:var(--surface-2);color:var(--gold);
+  border-radius:8px;padding:6px 12px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.slipbar__story:hover{background:color-mix(in srgb,var(--gold) 14%,transparent)}
 /* Friend picker for "Send through Messenger" */
 .slipfriends{display:flex;flex-direction:column;gap:6px}
 .slipfriend{display:flex;align-items:center;gap:10px;width:100%;text-align:left;cursor:pointer;

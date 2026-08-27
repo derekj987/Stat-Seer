@@ -31,6 +31,7 @@ export default function SlipBar() {
   const [convs, setConvs] = useState<{ id: string; name: string }[] | null>(null);
   const [sendingTo, setSendingTo] = useState<string | null>(null);
   const [done, setDone] = useState<{ text: string; href?: string } | null>(null);
+  const [storyMsg, setStoryMsg] = useState("");
   const [stake, setStake] = useState(25); // wager for the "to win" calculator
 
   useEffect(() => {
@@ -160,6 +161,15 @@ export default function SlipBar() {
     setConvs(list);
   }
 
+  // Share the current slip to your own "story" (shows as a circle on your profile + friends'
+  // for 24h). Your own story, so no picker — one tap.
+  async function postStory() {
+    if (!me) { setStoryMsg("Log in to post a story."); return; }
+    setStoryMsg("Posting…");
+    const { error } = await createClient().from("stories").insert({ user_id: me.id, slip: items });
+    setStoryMsg(error ? "Couldn't post — try again." : "On your story ✓ (24h)");
+  }
+
   // Send the current slip to a chosen chat, or post it to a friend's wall.
   async function sendSlip(mode: "wall" | "msg", to: { id: string; username: string }) {
     if (!me) return;
@@ -266,6 +276,9 @@ export default function SlipBar() {
               </button>
               <button className="slipbar__wall" onClick={() => openPicker("wall")} aria-expanded={picker === "wall"}>
                 {picker === "wall" ? "Close" : "Post to a wall"}
+              </button>
+              <button className="slipbar__story" onClick={postStory} title="Share this slip to your story for 24h">
+                {storyMsg || "Post to story"}
               </button>
               <button className="slipbar__clear" onClick={clear}>Clear slip</button>
             </div>
