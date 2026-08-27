@@ -1370,6 +1370,7 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
   gap:10px;flex-wrap:wrap;padding:10px 14px}
 .propgame__head::-webkit-details-marker{display:none}
 .propgame__head:hover{background:var(--surface-2)}
+.propgame__kick{color:var(--muted);font-size:11.5px;font-family:var(--font-mono);white-space:nowrap;margin-left:12px}
 .propgame__meta{margin-left:auto;color:var(--muted);font-size:12px;
   display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .propgame__chev{display:inline-block;transition:transform .15s;font-size:10px}
@@ -2173,6 +2174,8 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-form tbody tr:hover td{background:color-mix(in srgb,var(--ink) 4%,transparent)}
 .hb-game{font-weight:700;font-size:14px;border-bottom:1px dotted var(--muted);padding-bottom:1px;cursor:default}
 .hb-at{color:var(--muted);font-weight:400;margin:0 6px}
+.hb-gkick{display:block;font-size:10.5px;color:var(--muted);font-family:var(--font-mono);font-weight:400;
+  margin-top:3px;white-space:nowrap}
 .hb-num{font-variant-numeric:tabular-nums}
 .hb-model{color:var(--accent);font-weight:700}
 .hb-tot{color:var(--muted)}

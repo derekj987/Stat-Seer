@@ -268,6 +268,7 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
 
         cards.append({
             "away": away, "home": home, "neutral": 1 if neu else 0,
+            "commence": date,                              # kickoff (ISO, from games.start_date)
             "conf": (confs or {}).get(home) or "Other",   # HOME team's conference (for grouping)
             "marketSpread": market_spread, "marketTotal": mtot,
             "projSpread": proj_spread, "projTotal": round(float(ptot), 1),
@@ -407,7 +408,7 @@ def main():
             "export type NcaafTeam = { rank: number; team: string; conf: string; rating: number };\n"
             "export type NcaafConf = { conf: string; avgRating: number; teams: number };\n"
             "export type NcaafKeyNum = { margin: number; pct: number; nfl: number };\n"
-            "export type NcaafCardGame = { away: string; home: string; neutral: number; conf: string;"
+            "export type NcaafCardGame = { away: string; home: string; neutral: number; conf: string; commence?: string;"
             " marketSpread: { fav: string; num: number } | null; marketTotal: number | null;"
             " projSpread: { fav: string; num: number }; projTotal: number;"
             " homeRiser: number; awayRiser: number;"

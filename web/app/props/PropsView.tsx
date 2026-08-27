@@ -47,6 +47,11 @@ function PropChip({ q, market, marketLabel, game, saved, onToggle }: {
   );
 }
 
+const pkFmt = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+});
+const kickET = (iso: string) => pkFmt.format(new Date(iso)) + " ET";
+
 function PropGameCard({ g, open, has, toggle }: {
   g: PropGame; open?: boolean; has: (id: string) => boolean; toggle: (l: Leg) => void;
 }) {
@@ -55,6 +60,7 @@ function PropGameCard({ g, open, has, toggle }: {
     <details className="propgame" open={open}>
       <summary className="propgame__head">
         <span className="matchup">{g.away}<span className="at">@</span>{g.home}</span>
+        {g.commence && <time className="propgame__kick">{kickET(g.commence)}</time>}
         <span className="propgame__meta">{nPlayers} players<span className="propgame__chev">▸</span></span>
       </summary>
       <div className="propgame__body">

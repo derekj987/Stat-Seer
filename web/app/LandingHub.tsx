@@ -158,7 +158,7 @@ function NflRows({ rows, moreFrom }: { rows: CardRow[]; moreFrom?: number }) {
     <>
       {rows.map((r, i) => (
         <tr key={r.eventId} className={[r.off ? "hb-off" : "", moreFrom !== undefined && i >= moreFrom ? "hb-row--more" : ""].filter(Boolean).join(" ") || undefined}>
-          <td className="hb-l"><span className="hb-game">{r.away}<span className="hb-at">at</span>{r.home}</span>{r.off && <span className="hb-dia hb-dia--end">◆</span>}</td>
+          <td className="hb-l"><span className="hb-game">{r.away}<span className="hb-at">at</span>{r.home}</span>{r.off && <span className="hb-dia hb-dia--end">◆</span>}<span className="hb-gkick">{cxKick(r.commence)}</span></td>
           <td className="hb-num">{r.marketSpread ?? "—"}</td>
           <td className="hb-num hb-tot">{numStr(r.marketTotal)}</td>
           <td className="hb-num hb-model">{r.modelSpread ?? "—"}</td>
@@ -187,7 +187,7 @@ function NcaafRows({ games, moreFrom }: { games: readonly NcaafCardGame[]; moreF
         const ms = g.marketSpread;
         return (
           <tr key={`${g.away}-${g.home}`} className={[g.off ? "hb-off" : "", moreFrom !== undefined && i >= moreFrom ? "hb-row--more" : ""].filter(Boolean).join(" ") || undefined}>
-            <td className="hb-l"><span className="hb-game">{g.away}<span className="hb-at">at</span>{g.home}</span>{g.neutral ? <span className="ncf-site"> · N</span> : null}{g.off && <span className="hb-dia hb-dia--end">◆</span>}</td>
+            <td className="hb-l"><span className="hb-game">{g.away}<span className="hb-at">at</span>{g.home}</span>{g.neutral ? <span className="ncf-site"> · N</span> : null}{g.off && <span className="hb-dia hb-dia--end">◆</span>}{g.commence && <span className="hb-gkick">{cxKick(g.commence)}</span>}</td>
             <td className="hb-num">{ms ? `${ms.fav} ${ms.num}` : "—"}</td>
             <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
             <td className="hb-num hb-model">{g.projSpread.fav} {g.projSpread.num}</td>

@@ -3,7 +3,7 @@
 export type NcaafTeam = { rank: number; team: string; conf: string; rating: number };
 export type NcaafConf = { conf: string; avgRating: number; teams: number };
 export type NcaafKeyNum = { margin: number; pct: number; nfl: number };
-export type NcaafCardGame = { away: string; home: string; neutral: number; conf: string; marketSpread: { fav: string; num: number } | null; marketTotal: number | null; projSpread: { fav: string; num: number }; projTotal: number; homeRiser: number; awayRiser: number; pick: { side: string; num: number } | null; totalLean: { dir: string; num: number } | null; off: boolean; featured: boolean };
+export type NcaafCardGame = { away: string; home: string; neutral: number; conf: string; commence?: string; marketSpread: { fav: string; num: number } | null; marketTotal: number | null; projSpread: { fav: string; num: number }; projTotal: number; homeRiser: number; awayRiser: number; pick: { side: string; num: number } | null; totalLean: { dir: string; num: number } | null; off: boolean; featured: boolean };
 export type NcaafUpset = { dog: string; matchup: string; spread: string; modelPct: number; marketPct: number; byPoints: number };
 export const NCAAF_MODEL = {
   "season": 2025,

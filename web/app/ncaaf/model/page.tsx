@@ -17,6 +17,11 @@ const M = NCAAF_MODEL;
 const CONF_ORDER = ["SEC", "Big Ten", "Big 12", "ACC", "Pac-12", "American Athletic",
   "Mountain West", "Sun Belt", "Mid-American", "Conference USA", "FBS Independents", "Other"];
 
+const nckFmt = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+});
+const nck = (iso: string) => nckFmt.format(new Date(iso)) + " ET";
+
 function groupByConf(games: readonly NcaafCardGame[]): { conf: string; games: NcaafCardGame[] }[] {
   const by = new Map<string, NcaafCardGame[]>();
   for (const g of games) {
@@ -48,6 +53,7 @@ function CardRows({ games, moreFrom }: { games: readonly NcaafCardGame[]; moreFr
               <span className="hb-game">{g.away}<span className="hb-at">at</span>{g.home}</span>
               {g.neutral ? <span className="ncf-site"> · N</span> : null}
               {g.off && <span className="hb-dia hb-dia--end" aria-label="off consensus">◆</span>}
+              {g.commence && <span className="hb-gkick">{nck(g.commence)}</span>}
             </td>
             <td className="hb-num">{ms ? `${ms.fav} ${ms.num}` : "—"}</td>
             <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
