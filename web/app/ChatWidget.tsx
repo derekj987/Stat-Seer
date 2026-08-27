@@ -452,7 +452,6 @@ export default function ChatWidget({ open, onClose, onMeta }:
               <div className="cw__tools">
                 <button className="cw__tool" onClick={() => fmt("**")} title="Bold" type="button"><b>B</b></button>
                 <button className="cw__tool" onClick={() => fmt("*")} title="Italic" type="button"><i>i</i></button>
-                <button className="cw__tool" onClick={() => fmt("`")} title="Code" type="button">{"</>"}</button>
                 <button className={showEmoji ? "cw__tool on" : "cw__tool"} onClick={() => { setShowEmoji((v) => !v); setShowGif(false); }} title="Emoji" type="button">😊</button>
                 <button className={showGif ? "cw__tool on" : "cw__tool"} onClick={() => { const n = !showGif; setShowGif(n); setShowEmoji(false); if (n && !gifs.length) searchGifs(""); }} title="GIF" type="button">GIF</button>
               </div>
