@@ -331,9 +331,10 @@ a.cw__fname:hover{text-decoration:underline}
 /* Mobile (Option B): a slide-out handle; icons hidden until opened, then slide in from the edge. */
 @media (max-width:640px){
   .dock{right:14px;bottom:80px;gap:8px}
-  .dock__handle{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;border:1.5px solid var(--line);
-    background:var(--surface);box-shadow:0 3px 13px rgba(0,0,0,.22);cursor:pointer;font-size:22px;line-height:1;
-    color:inherit;opacity:.85;order:2}
+  /* Gold so it stands out from the green background instead of blending in. */
+  .dock__handle{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;border:1.5px solid var(--gold);
+    background:var(--gold);box-shadow:0 3px 13px rgba(0,0,0,.28);cursor:pointer;font-size:22px;line-height:1;
+    color:#1c1405;font-weight:800;opacity:.92;order:2}
   .dock__handle:active{opacity:1}
   .dock__icons{opacity:0;transform:translateX(24px);pointer-events:none;transition:opacity .16s,transform .16s;order:1}
   .dock--expanded .dock__icons{opacity:1;transform:none;pointer-events:auto}

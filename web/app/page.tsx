@@ -7,7 +7,6 @@ import { fetchWeek, buildBoard } from "@/lib/board";
 import { NCAAF_MODEL, type NcaafCardGame, type NcaafUpset } from "./ncaaf/model-data";
 import LandingHub, { type VfRow } from "./LandingHub";
 import HomePromo from "./HomePromo";
-import { ValueFinderDrawer } from "./Nav";
 
 export const metadata = {
   title: "StatSeer — the model vs the market, every sport",
@@ -98,9 +97,6 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
           </section>
         </aside>
       </div>
-
-      {/* Value Finder slide-out pinned to the right edge (shared with the Value Finder pages). */}
-      <ValueFinderDrawer />
 
       <main className="lp">
       {/* Value-prop lead — answers "why StatSeer" before the board, then the trust strip. */}
