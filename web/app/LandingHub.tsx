@@ -270,7 +270,7 @@ function PlayerSnapshot({ base }: { base: Sport }) {
         <td className="hb-l"><a className="hb-plrlink" href={href}>{r.player}</a> <span className="hb-plrpos">{depthTag(r.player, r.pos)}</span></td>
         <td className="hb-num">{r.team}</td>
         <td>{PROP_LABEL[r.market] ?? r.market} <span className="hb-num hb-tot">{r.book}{unit}</span></td>
-        <td className="hb-num"><span className={`hb-model pmarrow--${over ? "up" : "down"}`}>{r.proj}{unit} {over ? "▲" : "▼"}</span></td>
+        <td className="hb-num"><span className={`hb-model${over ? "" : " hb-model--down"}`}>{r.proj}{unit} {over ? "▲" : "▼"}</span></td>
       </tr>
     );
   };

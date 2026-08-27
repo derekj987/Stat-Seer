@@ -2045,6 +2045,7 @@ a.snav__dfeat{display:block}
 .pmrow--data .pmcell--player{overflow:hidden;text-overflow:ellipsis;font-weight:600}
 .pmcell--num{font-family:var(--font-mono);color:var(--muted);text-align:left}
 .pmcell--proj{color:var(--accent);font-weight:700}
+.pmcell--projdown{color:var(--mkt)}
 /* over/under-the-line arrow next to a projection / suggestion */
 .pmarrow{font-size:10px;font-weight:700}
 .pmarrow--up{color:var(--accent)}
@@ -2287,6 +2288,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-model{color:var(--accent);font-weight:700}
 .hb-tot{color:var(--muted)}
 .hb-model{color:var(--offc-ink);font-weight:700;font-variant-numeric:tabular-nums}
+.hb-model--down{color:var(--mkt)}
 /* Off-consensus (model disagrees with the market) — flag the disagreeing pick in
    blue so it jumps out: blue row wash, blue ◆, blue model-spread pick + lean chip. */
 .hb-off td{background:color-mix(in srgb,var(--offc) 13%,transparent)}

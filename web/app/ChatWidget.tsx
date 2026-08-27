@@ -215,19 +215,21 @@ export default function ChatWidget({ open, onClose, onMeta }:
   // is one). Groups are built by adding more friends from inside the thread.
   async function startWith(friend: Friend) {
     if (!me) return;
+    setChatErr("");
     const existing = convs.find((c) => !c.isGroup && c.members.length === 2 && c.members.some((m) => m.id === friend.id));
     if (existing) { openConv(existing); return; }
     const sb = createClient();
     // Generate the id client-side so creation never depends on an RLS-gated returning select.
     const cid = crypto.randomUUID();
     const { error } = await sb.from("conversations").insert({ id: cid, created_by: me.id, is_group: false, title: null });
-    if (error) { setChatErr("Couldn't start that chat. If it keeps failing, the chat tables may not be set up yet."); return; }
+    if (error) { setChatErr(`Couldn't start the chat — ${error.message || "the chat tables may not be set up yet (run ingest/group_chat.sql)."}`); return; }
     await sb.from("conversation_members").insert({ conversation_id: cid, user_id: me.id });
     const { error: e2 } = await sb.from("conversation_members").insert({ conversation_id: cid, user_id: friend.id });
-    if (e2) { setChatErr("Couldn't add your friend to the chat. Make sure you're still friends."); }
-    await loadConvs(me.id);
+    if (e2) { setChatErr(`Couldn't add ${friend.username} — ${e2.message || "make sure you're still friends."}`); return; }
+    // Open the chat immediately; refresh the list in the background (never block the open on it).
     const members: Person[] = [{ id: me.id, username: me.username, role: "member" }, { id: friend.id, username: friend.username, role: friend.role }];
     openConv({ id: cid, title: null, isGroup: false, members, lastAt: new Date().toISOString(), unread: 0 });
+    loadConvs(me.id);
   }
 
   // Create a group from the picked friends (＋ flow). One picked friend is just a 1:1.
@@ -239,13 +241,15 @@ export default function ChatWidget({ open, onClose, onMeta }:
     const cid = crypto.randomUUID();
     const { error } = await sb.from("conversations")
       .insert({ id: cid, created_by: me.id, is_group: true, title: groupName.trim() ? groupName.trim().slice(0, 60) : null });
-    if (error) { setChatErr("Couldn't create that group. If it keeps failing, the chat tables may not be set up yet."); return; }
+    if (error) { setChatErr(`Couldn't create the group — ${error.message || "the chat tables may not be set up yet (run ingest/group_chat.sql)."}`); return; }
     await sb.from("conversation_members").insert({ conversation_id: cid, user_id: me.id });
-    await sb.from("conversation_members").insert(ids.map((id) => ({ conversation_id: cid, user_id: id })));
+    const { error: e2 } = await sb.from("conversation_members").insert(ids.map((id) => ({ conversation_id: cid, user_id: id })));
+    if (e2) { setChatErr(`Couldn't add everyone — ${e2.message || "check you're friends with them."}`); return; }
+    const name = groupName.trim();
     setPicked(new Set()); setGroupName("");
-    await loadConvs(me.id);
     const members: Person[] = [{ id: me.id, username: me.username, role: "member" }, ...friends.filter((f) => ids.includes(f.id))];
-    openConv({ id: cid, title: groupName.trim() || null, isGroup: true, members, lastAt: new Date().toISOString(), unread: 0 });
+    openConv({ id: cid, title: name || null, isGroup: true, members, lastAt: new Date().toISOString(), unread: 0 });
+    loadConvs(me.id);
   }
 
   // Add more friends to the active group.
@@ -308,6 +312,7 @@ export default function ChatWidget({ open, onClose, onMeta }:
         {/* ---- LANDING: friends (tap to chat) + any group chats on top ---- */}
         {view === "list" && (
           <div className="cw__list">
+            {chatErr && <p className="cw__err">{chatErr}</p>}
             {requests.length > 0 && (
               <div className="cw__reqs">
                 <div className="cw__reqh">Friend requests</div>
