@@ -3,8 +3,9 @@
 // Model Card, Players We Like, Upsets) — the views that used to live on separate sport
 // homepages. Then the bet-slip + community invites. Sections live at /model, /ncaaf/model, …
 import { fetchHome, type CardRow, type UpsetRow, type PlayerPick } from "@/lib/home";
+import { fetchWeek, buildBoard } from "@/lib/board";
 import { NCAAF_MODEL, type NcaafCardGame, type NcaafUpset } from "./ncaaf/model-data";
-import LandingHub from "./LandingHub";
+import LandingHub, { type VfRow } from "./LandingHub";
 import HomePromo from "./HomePromo";
 import { ValueFinderDrawer } from "./Nav";
 
@@ -24,6 +25,19 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
     const home = await fetchHome(SEASON);
     nfl = { week: home.week, card: home.card, upsets: home.upsets, players: home.players };
   } catch { /* board not up yet */ }
+
+  // Value Finder teaser — the first 4 games' best spread price across books (line shopping).
+  let vf: VfRow[] = [];
+  try {
+    const board = buildBoard(await fetchWeek(nfl.week, SEASON));
+    vf = board.slice(0, 4).flatMap((g) => {
+      const homeFav = (g.spread.consensus ?? 0) < 0;
+      const line = homeFav ? g.spread.home : g.spread.away;
+      if (!line || line.point === null) return [];
+      const team = homeFav ? g.home : g.away;
+      return [{ eventId: g.eventId, away: g.away, home: g.home, line: `${team} ${line.point > 0 ? "+" : ""}${line.point}`, price: line.price, books: line.books }];
+    });
+  } catch { /* odds not up yet */ }
 
   const cfb = NCAAF_MODEL.card;
   const ncaaf = {
@@ -136,7 +150,7 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
         </p>
       </section>
 
-      <LandingHub initialSport={initialSport} nfl={nfl} ncaaf={ncaaf} />
+      <LandingHub initialSport={initialSport} nfl={nfl} ncaaf={ncaaf} vf={vf} />
 
       {/* Public track record — the trust engine. Honest preseason state until games grade. */}
       <section className="lp-record" aria-label="Track record">

@@ -15,6 +15,7 @@ import { HighlightBanner } from "./HighlightBanner";
 import CoachTable from "./CoachTable";
 import Tip from "./Tip";
 import { MoreTable } from "./Nav";
+import { bookName } from "@/lib/slipPricing";
 
 // Plain-English explanations shown behind each section's medieval "?" seal.
 const TIPS = {
@@ -24,6 +25,7 @@ const TIPS = {
   fan: <>Players surfaced from fan forums, beat writers and RSS feeds, then <b>hype-rated</b> with a plain bottom line (e.g. take the over on receptions). For discovery — not a graded pick.</>,
   considNfl: <>Per-game context that can move a number but isn&apos;t itself an edge: the <b>site &amp; roof</b>, the <b>weather</b> (⚑ marks notable wind), and the <b>referee crew</b>.</>,
   considNcaaf: <>Durable context for the slate: <b>home-field</b> value, <b>conference strength</b>, and game-week items (weather, injuries) as they firm up.</>,
+  valueFinder: <>Line shopping in action: the <b>best price</b> for each game&apos;s main spread across ~10 sportsbooks, and which book has it. That&apos;s <b>Value Finder</b> — the same bet, a better number, so you never leave value on the table.</>,
   upsets: <>Games where the market has a team losing but <b>our model has them winning outright</b>. The number shown is how much more likely our model thinks they are to win than the market implies.</>,
   referee: <>Each crew&apos;s tendencies. The one thing that carries over year to year is <b>penalties per game</b> — the O/U and ATS leans are historical context, not a lean.</>,
 } as const;
@@ -128,6 +130,7 @@ function NcaafConsiderations() {
 type Sport = "nfl" | "ncaaf";
 type NflData = { week: number; card: CardRow[]; upsets: UpsetRow[]; players: PlayerPick[] };
 type NcaafData = { week: number; games: NcaafCardGame[]; upsets: NcaafUpset[] };
+export type VfRow = { eventId: string; away: string; home: string; line: string; price: number; books: string[] };
 
 const numStr = (v: number | null) => (v === null ? "—" : String(v));
 
@@ -279,7 +282,30 @@ function PlayerSnapshot({ base }: { base: Sport }) {
   );
 }
 
-export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport: Sport; nfl: NflData; ncaaf: NcaafData }) {
+function NflValueTable({ rows }: { rows: VfRow[] }) {
+  if (!rows.length) {
+    return <p className="hb-empty">Live line shopping opens with the week&apos;s odds — see the <a href="/lines">Value Finder →</a></p>;
+  }
+  return (
+    <div className="hb-formwrap">
+      <table className="hb-form">
+        <thead><tr><th className="hb-l">Game</th><th>Best line</th><th>Best price</th><th>Book</th></tr></thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.eventId}>
+              <td className="hb-l">{r.away}<span className="at">@</span>{r.home}</td>
+              <td className="hb-num">{r.line}</td>
+              <td className="hb-num"><b className="hb-model">{r.price > 0 ? `+${r.price}` : r.price}</b></td>
+              <td>{r.books.map(bookName).join(" / ")}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default function LandingHub({ initialSport, nfl, ncaaf, vf }: { initialSport: Sport; nfl: NflData; ncaaf: NcaafData; vf: VfRow[] }) {
   return (
     <section className="lp-hub" id="lp-board" aria-label="This week's board">
       {/* pure-CSS sport toggle — no client JS needed */}
@@ -308,6 +334,10 @@ export default function LandingHub({ initialSport, nfl, ncaaf }: { initialSport:
         </Panel>
         <Panel title="The context a number misses" count="context" hint={TIPS.considNfl} open>
           <NflConsiderations limit={2} />
+        </Panel>
+        <Panel title="Where the value is" count="line shopping" hint={TIPS.valueFinder} open>
+          <NflValueTable rows={vf} />
+          <p className="lp-cardfoot"><a href="/lines">Shop every line in Value Finder →</a></p>
         </Panel>
         {/* Referee, Local Intelligence, Upsets & QB passing now live on their section pages. */}
       </div>
