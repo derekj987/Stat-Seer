@@ -116,13 +116,13 @@ export default function SiteNav() {
           {me === undefined ? (
             <span className="snav__slot" />
           ) : me ? (
-            <>
+            <div className="snav__me">
+              <a href={`/u/${me.username}`} className="snav__profilebtn">View my profile</a>
               <span className="snav__loggedin">
                 <span className="snav__lilabel">Logged in as</span>{" "}
                 <a href={`/u/${me.username}`} className={me.role === "founder" ? "snav__loggedname founder" : "snav__loggedname"}>{me.username}</a>
               </span>
-              <a href={`/u/${me.username}`} className="snav__profilebtn">View my profile</a>
-            </>
+            </div>
           ) : (
             <a href="/signup" className="snav__signup">
               <span className="snav__signup__full">Create an Account / Login</span>
