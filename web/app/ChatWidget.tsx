@@ -35,10 +35,13 @@ function MsgSlip({ items }: { items: SlipItem[] }) {
   );
 }
 
-export default function ChatWidget() {
+// The launcher lives in the shared Dock now; this renders just the chat panel, opened/
+// closed by the Dock. It reports member status + unread count up via onMeta so the Dock
+// can show the Friends icon and its badge even while the panel is closed.
+export default function ChatWidget({ open, onClose, onMeta }:
+  { open: boolean; onClose: () => void; onMeta: (m: { member: boolean; unread: number }) => void }) {
   const { items: mySlip } = useSlip();
   const [me, setMe] = useState<Me | null | undefined>(undefined);
-  const [open, setOpen] = useState(false);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [requests, setRequests] = useState<Req[]>([]);
   const [suggested, setSuggested] = useState<{ id: string; username: string; role: string; mutual: number }[]>([]);
@@ -122,13 +125,12 @@ export default function ChatWidget() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [msgs, active]);
 
-  // Only one floating panel open at a time — close when another (the AI assistant) opens.
+  // Report member status + unread up to the Dock so it can render the Friends icon + badge
+  // even while this panel is closed (the realtime subscription above keeps it current).
   useEffect(() => {
-    const onOther = (e: Event) => { if ((e as CustomEvent).detail !== "friends") setOpen(false); };
-    window.addEventListener("ss:widget-open", onOther);
-    return () => window.removeEventListener("ss:widget-open", onOther);
-  }, []);
-  const openFriends = () => { setOpen(true); window.dispatchEvent(new CustomEvent("ss:widget-open", { detail: "friends" })); };
+    const total = Object.values(unread).reduce((a, b) => a + b, 0) + requests.length;
+    onMeta({ member: !!me, unread: total });
+  }, [me, unread, requests, onMeta]);
 
   async function openChat(f: Friend) {
     setActive(f);
@@ -169,27 +171,18 @@ export default function ChatWidget() {
     setRequests((rs) => rs.filter((x) => x.rowId !== r.rowId));
   }
 
-  if (!me) return null;
-  const totalUnread = Object.values(unread).reduce((a, b) => a + b, 0) + requests.length;
+  if (!open || !me) return null;
 
   return (
     <div className="cw">
-      {!open && (
-        <button className="cw__launch" onClick={openFriends} aria-label="Open chat">
-          <span className="cw__launchic" aria-hidden="true">💬</span>
-          <span className="cw__launchlab">Friends</span>
-          {totalUnread > 0 && <span className="cw__badge">{totalUnread}</span>}
-        </button>
-      )}
-
-      {open && (
+      {(
         <div className="cw__panel" role="dialog" aria-label="Friends chat">
           <div className="cw__hd">
             {active ? (
               <button className="cw__back" onClick={() => setActive(null)} aria-label="Back to friends">‹</button>
             ) : <span className="cw__hdic" aria-hidden="true">💬</span>}
             <span className="cw__title">{active ? active.username : "Friends"}</span>
-            <button className="cw__min" onClick={() => setOpen(false)} aria-label="Minimize">–</button>
+            <button className="cw__min" onClick={onClose} aria-label="Minimize">–</button>
           </div>
 
           {!active ? (

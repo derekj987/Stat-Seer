@@ -5,19 +5,23 @@
 // Supabase `feedback` table (see ingest/feedback.sql), which founders review at /feedback.
 // Open to everyone — anonymous or signed-in; captures the page they were on and, if signed
 // in, their user id, plus an optional reply email.
-import { useState } from "react";
-import Image from "next/image";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 type Status = "idle" | "sending" | "done" | "error";
 
-export default function FeedbackWidget() {
-  const [open, setOpen] = useState(false);
+// The launcher lives in the shared Dock now; this renders just the feedback modal,
+// opened/closed by the Dock.
+export default function FeedbackWidget({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [msg, setMsg] = useState("");
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const path = usePathname() || "/";
+
+  // Fresh form each time the Dock opens it (after a successful send it would otherwise
+  // reopen on the "done" screen).
+  useEffect(() => { if (open) setStatus("idle"); }, [open]);
 
   const configured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -49,23 +53,10 @@ export default function FeedbackWidget() {
     }
   }
 
-  function close() { setOpen(false); }
+  function close() { onClose(); }
 
   return (
     <>
-      <button
-        className="fbw__launch"
-        aria-label="Send feedback — have an idea, fix, or suggestion?"
-        title="Have an idea, fix, or suggestion?"
-        onClick={() => { setOpen(true); setStatus("idle"); }}
-      >
-        <span className="fbw__btn">
-          <Image src="/pigeon.png" alt="" fill sizes="64px" aria-hidden="true"
-            className="fbw__pigeon" style={{ objectFit: "cover", objectPosition: "72% 40%" }} />
-        </span>
-        <span className="fbw__label">Message Us</span>
-      </button>
-
       {open && (
         <div className="fbw__scrim" onClick={close} role="presentation">
           <div className="fbw__card" role="dialog" aria-label="Send feedback" aria-modal="true"
