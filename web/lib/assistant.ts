@@ -8,7 +8,7 @@ import { weekProps } from "./props";
 import { PLAYER_PROJECTIONS } from "./playerProjections";
 import { toDecimal, decToAmerican } from "./slipPricing";
 
-export type CandGroup = "spread" | "total" | "td" | "passing" | "rushing" | "receiving";
+export type CandGroup = "spread" | "total" | "moneyline" | "td" | "passing" | "rushing" | "receiving";
 
 export interface Candidate {
   id: string;
@@ -65,6 +65,12 @@ export async function buildCandidates(week: number, season = 2026): Promise<Cand
       push(`sp-${g.eventId}-a`, "spread", "spread", `${g.away} {pt}`, g.spread.away);
       push(`tot-${g.eventId}-o`, "total", "total", `${mk}: Over {pt}`, g.total.over);
       push(`tot-${g.eventId}-u`, "total", "total", `${mk}: Under {pt}`, g.total.under);
+      // Moneylines — needed to reach long parlay targets (underdogs can be +150…+600).
+      for (const [team, ml] of Object.entries(g.ml)) {
+        if (ml && Number.isFinite(ml.price)) {
+          out.push({ id: `ml-${g.eventId}-${slug(team)}`, kind: "line", group: "moneyline", market: "moneyline", title: `${team} ML`, detail: mk, price: ml.price, books: ml.books, byBook: ml.byBook });
+        }
+      }
     }
   } catch { /* odds not up */ }
 
@@ -122,24 +128,33 @@ export function buildMenuSlip(cands: Candidate[], opts: MenuOpts): Candidate[] {
   const seen = new Set<string>();
   const key = (c: Candidate) => (c.kind === "line" ? c.detail : c.title.split(" ").slice(0, 2).join(" "));
 
-  let ranked: Candidate[];
-  if (opts.rankByModel) {
-    ranked = pool.filter((c) => c.model !== undefined).sort((a, b) => (b.model ?? 0) - (a.model ?? 0));
-  } else if (opts.targetOdds && opts.targetOdds > 0) {
-    // aim for a combined ≈ target: each leg should be ~ target^(1/n) in decimal
-    const perLeg = Math.pow(toDecimal(opts.targetOdds), 1 / n);
-    ranked = pool.slice().sort((a, b) => Math.abs(toDecimal(a.price) - perLeg) - Math.abs(toDecimal(b.price) - perLeg));
-  } else {
-    // no target: the shortest (most likely) prices first
-    ranked = pool.slice().sort((a, b) => toDecimal(a.price) - toDecimal(b.price));
+  // Target-odds: adaptive greedy. After each pick, recompute the per-leg decimal STILL
+  // needed to hit the target and take the closest available — so it reaches for longer
+  // legs when it's behind, instead of averaging toward the short middle.
+  if (!opts.rankByModel && opts.targetOdds && opts.targetOdds > 0) {
+    const targetDec = toDecimal(opts.targetOdds);
+    const picked: Candidate[] = [];
+    let running = 1;
+    for (let i = 0; i < n; i++) {
+      const need = Math.pow(Math.max(1.001, targetDec / running), 1 / (n - i));
+      const options = pool.filter((c) => !seen.has(key(c)));
+      if (!options.length) break;
+      options.sort((a, b) => Math.abs(toDecimal(a.price) - need) - Math.abs(toDecimal(b.price) - need));
+      const chosen = options[0];
+      picked.push(chosen); seen.add(key(chosen)); running *= toDecimal(chosen.price);
+    }
+    return picked;
   }
 
+  // rankByModel (highest TD %) or plain (shortest/most-likely prices), one per matchup/player.
+  const ranked = opts.rankByModel
+    ? pool.filter((c) => c.model !== undefined).sort((a, b) => (b.model ?? 0) - (a.model ?? 0))
+    : pool.slice().sort((a, b) => toDecimal(a.price) - toDecimal(b.price));
   const picked: Candidate[] = [];
   for (const c of ranked) {
     const k = key(c);
     if (seen.has(k)) continue;
-    seen.add(k);
-    picked.push(c);
+    seen.add(k); picked.push(c);
     if (picked.length >= n) break;
   }
   return picked;

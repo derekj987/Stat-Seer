@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { weekRange } from "@/lib/board";
 import { buildCandidates, buildMenuSlip, combinedAmerican, combinedDecimal, type Candidate } from "@/lib/assistant";
+import { toDecimal } from "@/lib/slipPricing";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -57,9 +58,18 @@ export async function POST(request: Request) {
     const rankByModel = !!body?.rankByModel;
     const picked = buildMenuSlip(cands, { markets: markets.length ? markets : ["spread", "total"], legs: legsN, targetOdds: target, rankByModel });
     if (!picked.length) return NextResponse.json({ error: "Nothing matched those options — try different markets." }, { status: 200 });
-    const note = rankByModel
-      ? `Your ${picked.length} highest-model-% picks.`
-      : target ? `A ${picked.length}-leg parlay aimed near ${target > 0 ? "+" : ""}${target}.` : `A ${picked.length}-leg parlay.`;
+    const priced = combinedAmerican(picked);
+    let note: string;
+    if (rankByModel) {
+      note = `Your ${picked.length} highest-model-% picks — parlays to ${priced}.`;
+    } else if (target) {
+      const off = Math.abs(combinedDecimal(picked) - toDecimal(target)) / toDecimal(target);
+      note = off < 0.18
+        ? `A ${picked.length}-leg parlay at ${priced} — right around your +${target} target.`
+        : `Closest we could get toward +${target} with these markets: ${priced} across ${picked.length} legs. Add moneylines or more legs to go longer.`;
+    } else {
+      note = `A ${picked.length}-leg parlay at ${priced}.`;
+    }
     return respond(picked, note);
   }
 
@@ -69,7 +79,7 @@ export async function POST(request: Request) {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return NextResponse.json({ error: "The chat assistant isn't configured yet. Use the Quick menu for now." }, { status: 200 });
 
-  // Compact menu to keep tokens (and cost) down. `mkt` = market: spread, total,
+  // Compact menu to keep tokens (and cost) down. `mkt` = market: spread, total, moneyline,
   // player_anytime_td, player_pass_yds, player_pass_tds, player_rush_yds,
   // player_rush_attempts, player_reception_yds, player_receptions.
   const menu = cands.map((c) => ({ id: c.id, mkt: c.market, bet: c.title, odds: c.price, ...(c.model !== undefined ? { modelPct: Math.round(c.model) } : {}) }));
@@ -77,10 +87,11 @@ export async function POST(request: Request) {
     "You assemble sports bet slips for StatSeer from a fixed menu of real, currently-priced bets. " +
     "You are NOT giving betting advice or guaranteeing outcomes — you are assembling picks the member asked for from published numbers. " +
     "Rules: choose ONLY ids from the menu; never invent bets. Prefer at most one leg per game/player unless asked. " +
-    "If the member gives a target parlay price (e.g. +1500), pick legs whose odds multiply to roughly that (a leg's decimal = 1 + odds/100 for +, or 1 + 100/|odds| for -). " +
+    "TARGET ODDS MATTER: if the member gives a target parlay price (e.g. +2500), pick legs whose decimal odds MULTIPLY to about that target (a leg's decimal = 1 + odds/100 for + odds, or 1 + 100/|odds| for - odds; the parlay decimal is the product of the legs; +2500 ≈ decimal 26). Do the math and get as close to the target as you can — don't just pick short favorites. " +
+    "Note that game spreads and totals are almost all priced near -110 (decimal ~1.9), so a 4-leg parlay of ONLY spreads/totals tops out around +1300-1500 — to reach longer targets (e.g. +2500, +5000, +10000) you MUST use underdog moneylines (mkt 'moneyline', which run +150 to +600) and/or more legs. If the member restricted markets so the target is unreachable, get as close as possible and say so in the note. " +
     "For 'highest % TD scorer' style asks, rank player_anytime_td legs by modelPct (higher is better). " +
-    "Respect any requested number of legs and market types — filter by the `mkt` field (e.g. only spreads = mkt 'spread'; QB passing yards = 'player_pass_yds'; receptions = 'player_receptions'). " +
-    "Return your picks via the submit_slip tool with the chosen ids and a short one-sentence note.\n\n" +
+    "Respect requested number of legs and market types — filter by the `mkt` field (e.g. only spreads = mkt 'spread'; moneylines = 'moneyline'; QB passing yards = 'player_pass_yds'; receptions = 'player_receptions'). " +
+    "Return your picks via the submit_slip tool with the chosen ids and a short one-sentence note that states the resulting parlay odds.\n\n" +
     "MENU (JSON):\n" + JSON.stringify(menu);
 
   const req = {

@@ -15,6 +15,7 @@ type Opt = { mkt: string; label: string; og: "Game lines" | "Player props" };
 const OPTS: Opt[] = [
   { mkt: "spread", label: "Spreads", og: "Game lines" },
   { mkt: "total", label: "Totals", og: "Game lines" },
+  { mkt: "moneyline", label: "Moneylines", og: "Game lines" },
   { mkt: "player_anytime_td", label: "Anytime TD scorers", og: "Player props" },
   { mkt: "player_pass_yds", label: "QB passing yards", og: "Player props" },
   { mkt: "player_pass_tds", label: "QB passing TDs", og: "Player props" },
@@ -27,6 +28,8 @@ const OGROUPS: Array<"Game lines" | "Player props"> = ["Game lines", "Player pro
 const TARGETS = [
   { v: 0, label: "Any odds" }, { v: 300, label: "≈ +300" }, { v: 500, label: "≈ +500" },
   { v: 1000, label: "≈ +1000" }, { v: 1500, label: "≈ +1500" }, { v: 2500, label: "≈ +2500" },
+  { v: 3500, label: "≈ +3500" }, { v: 5000, label: "≈ +5000" }, { v: 7500, label: "≈ +7500" },
+  { v: 10000, label: "≈ +10000" },
 ];
 const EXAMPLES = [
   "Make me a 4-leg anytime-TD parlay of the model's highest-% scorers this week.",
