@@ -87,6 +87,37 @@ def fetch_preseason_sp(season):
             if d.get("team") and d.get("team") != "nationalAverages" and d.get("rating") is not None}
 
 
+def fetch_ap_poll(season, week):
+    """AP Top 25 as {team: rank} for `week`. This is the RECOGNIZABLE media poll (matches
+    ESPN), distinct from our line-blind power rating — used to label which card games are
+    'ranked' and to show each ranked team's poll number. Falls back to the latest available
+    poll <= week, then the latest overall (early in the week the new poll may not be posted).
+    Empty on any failure, so the UI degrades to 'no AP badges' rather than breaking."""
+    key = oc.load_env().get("CFBD_API_KEY")
+    if not key:
+        return {}
+    try:
+        st, data = cc.cfbd_get("/rankings", {"year": season}, key)
+    except Exception as e:  # noqa: BLE001
+        print("  AP poll fetch failed: %s" % e, file=sys.stderr)
+        return {}
+    if st != 200 or not isinstance(data, list) or not data:
+        print("  AP poll fetch HTTP %s" % st, file=sys.stderr)
+        return {}
+    weeks = {d["week"]: d for d in data if isinstance(d.get("week"), int)}
+    pick = weeks.get(week)
+    if pick is None and weeks:
+        earlier = [w for w in weeks if w <= week]
+        pick = weeks[max(earlier)] if earlier else weeks[max(weeks)]
+    if not pick:
+        return {}
+    for poll in pick.get("polls", []):
+        if "AP" in (poll.get("poll") or ""):
+            return {r["school"]: r["rank"] for r in poll.get("ranks", [])
+                    if r.get("school") and r.get("rank") is not None}
+    return {}
+
+
 def compute_risers(final, sp):
     """Per-team 'riser' score (0-100): how far preseason SP+ ranks a team ABOVE where last
     season's results-based rating did. A high value = an improved/underrated team the market
@@ -218,7 +249,7 @@ def team_scoring(db, season, decay):
 WINK = 11.0  # margin -> win-prob logistic scale (a 7-pt edge ~ 65%)
 
 
-def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=None, risers=None):
+def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=None, risers=None, ap=None):
     """Model-vs-Market card + upsets for `week`, mirroring the NFL board. Each game gets
     the market spread + total and our model's projection; `featured` flags games with a
     top-25 team (the homepage leads with those, the rest go behind a 'see all' dropdown).
@@ -269,6 +300,9 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
         cards.append({
             "away": away, "home": home, "neutral": 1 if neu else 0,
             "commence": date,                              # kickoff (ISO, from games.start_date)
+            # AP Top 25 rank per side (the recognizable media poll, null if unranked) — this
+            # is what labels a game "ranked" on the board, NOT our power rating.
+            "apAway": (ap or {}).get(away), "apHome": (ap or {}).get(home),
             "conf": (confs or {}).get(home) or "Other",   # HOME team's conference (for grouping)
             "marketSpread": market_spread, "marketTotal": mtot,
             "projSpread": proj_spread, "projTotal": round(float(ptot), 1),
@@ -345,7 +379,8 @@ def main():
     odds = fetch_ncaaf_odds()
     confs = team_conferences(DB, last)
     risers = compute_risers(final, sp)
-    card_games, upsets = build_card(DB, cur_ratings, hfa, CARD_SEASON, card_week, top_set, scoring, odds, confs, risers)
+    ap_poll = fetch_ap_poll(CARD_SEASON, card_week)
+    card_games, upsets = build_card(DB, cur_ratings, hfa, CARD_SEASON, card_week, top_set, scoring, odds, confs, risers, ap_poll)
     ranked = sorted(final.items(), key=lambda kv: kv[1], reverse=True)
     top = [{"rank": i + 1, "team": t, "conf": confs.get(t, ""), "rating": round(r, 1)}
            for i, (t, r) in enumerate(ranked[:25])]
@@ -411,6 +446,7 @@ def main():
             "export type NcaafConf = { conf: string; avgRating: number; teams: number };\n"
             "export type NcaafKeyNum = { margin: number; pct: number; nfl: number };\n"
             "export type NcaafCardGame = { away: string; home: string; neutral: number; conf: string; commence?: string;"
+            " apAway?: number | null; apHome?: number | null;"
             " marketSpread: { fav: string; num: number } | null; marketTotal: number | null;"
             " projSpread: { fav: string; num: number }; projTotal: number;"
             " homeRiser: number; awayRiser: number;"
