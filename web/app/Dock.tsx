@@ -3,7 +3,7 @@
 // One home for the three floating tools (bottom-right). Desktop: an always-visible
 // vertical rail of icons (pigeon → friends → assistant). Mobile: a slide-out handle that
 // reveals the same icons. Picking one opens that tool's panel; only one is ever open.
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FeedbackWidget from "./FeedbackWidget";
 import ChatWidget from "./ChatWidget";
 import AssistantWidget from "./AssistantWidget";
@@ -17,6 +17,13 @@ export default function Dock() {
 
   const open = (t: Tool) => { setActive(t); setExpanded(false); };
   const close = () => setActive(null);
+
+  // A "Message" button anywhere (e.g. a profile) opens the chat panel.
+  useEffect(() => {
+    const onOpenChat = () => { setActive("friends"); setExpanded(false); };
+    window.addEventListener("ss:open-chat", onOpenChat);
+    return () => window.removeEventListener("ss:open-chat", onOpenChat);
+  }, []);
 
   return (
     <>

@@ -11,6 +11,7 @@ export interface Profile {
   bio: string | null;
   avatarUrl: string | null;
   coverUrl: string | null;
+  accentColor: string | null;
   createdAt: string;
 }
 
@@ -23,6 +24,7 @@ export interface Friend {
 }
 
 export interface Story {
+  id: string;
   userId: string;
   username: string;
   role: string;
@@ -44,10 +46,10 @@ export interface WallPost {
 }
 
 export async function getProfileByUsername(username: string): Promise<Profile | null> {
-  // cover_url is added by the profile_upgrade migration; fall back if it's not there yet.
+  // cover_url + accent_color are added by the profile_upgrade migration; fall back if not there yet.
   const base = `profiles?username=eq.${encodeURIComponent(username)}&limit=1&select=id,username,role,title,bio,avatar_url,created_at`;
   let rows: Record<string, unknown>[];
-  try { rows = await pg(base.replace("bio,", "bio,cover_url,")); }
+  try { rows = await pg(base.replace("bio,", "bio,cover_url,accent_color,")); }
   catch { rows = await pg(base); }
   const r = rows[0];
   if (!r) return null;
@@ -59,8 +61,28 @@ export async function getProfileByUsername(username: string): Promise<Profile | 
     bio: (r.bio as string) ?? null,
     avatarUrl: (r.avatar_url as string) ?? null,
     coverUrl: (r.cover_url as string) ?? null,
+    accentColor: (r.accent_color as string) ?? null,
     createdAt: r.created_at as string,
   };
+}
+
+/** Just the accepted-friend ids of a user (for mutual-friends math). */
+export async function getFriendIds(userId: string): Promise<string[]> {
+  const links = await pg(
+    `friendships?status=eq.accepted&or=(requester_id.eq.${userId},addressee_id.eq.${userId})&select=requester_id,addressee_id`,
+  );
+  return links.map((r) => (r.requester_id === userId ? r.addressee_id : r.requester_id) as string);
+}
+
+/** Lightweight counts for the profile stats strip. */
+export async function getProfileStats(profileId: string): Promise<{ friends: number; wallPosts: number; stories: number }> {
+  const [friends, wall] = await Promise.all([
+    getFriendIds(profileId),
+    pg(`wall_posts?profile_id=eq.${profileId}&select=id&limit=1000`).catch(() => []),
+  ]);
+  let stories = 0;
+  try { stories = (await pg(`stories?user_id=eq.${profileId}&select=id&limit=1000`)).length; } catch { stories = 0; }
+  return { friends: friends.length, wallPosts: wall.length, stories };
 }
 
 /** Accepted friends of a profile, with an "online" flag from last_seen. */
@@ -95,7 +117,7 @@ export async function getStoriesForCircle(profileId: string, friendIds: string[]
   try {
     rows = await pg(
       `stories?user_id=in.(${list})&created_at=gt.${cutoff}&order=created_at.desc&limit=200` +
-      `&select=user_id,slip,caption,created_at,user:profiles!stories_user_id_fkey(username,role,avatar_url)`,
+      `&select=id,user_id,slip,caption,created_at,user:profiles!stories_user_id_fkey(username,role,avatar_url)`,
     );
   } catch { return []; }
   const seen = new Set<string>();
@@ -106,6 +128,7 @@ export async function getStoriesForCircle(profileId: string, friendIds: string[]
     seen.add(uid);
     const u = r.user as { username?: string; role?: string; avatar_url?: string } | null;
     out.push({
+      id: r.id as string,
       userId: uid,
       username: u?.username ?? "member",
       role: u?.role ?? "member",

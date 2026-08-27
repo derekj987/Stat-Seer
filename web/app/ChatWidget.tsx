@@ -190,6 +190,18 @@ export default function ChatWidget({ open, onClose, onMeta }:
 
   useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight }); }, [msgs, active]);
 
+  // "Message" from a profile → open/start the chat with that member.
+  useEffect(() => {
+    if (!me) return;
+    const onOpen = (e: Event) => {
+      const d = (e as CustomEvent).detail as { userId?: string; username?: string } | undefined;
+      if (d?.userId && d.userId !== me.id) startWith({ id: d.userId, username: d.username ?? "member", role: "member", rowId: "" });
+    };
+    window.addEventListener("ss:open-chat", onOpen);
+    return () => window.removeEventListener("ss:open-chat", onOpen);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [me, convs]);
+
   // Report member + unread up to the Dock, and set the installed-PWA app-icon badge.
   useEffect(() => {
     const total = convs.reduce((a, c) => a + c.unread, 0) + requests.length;

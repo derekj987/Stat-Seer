@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getProfileByUsername, getWall, getFriends, getStoriesForCircle } from "@/lib/profile";
+import { getProfileByUsername, getWall, getFriends, getStoriesForCircle, getProfileStats, getFriendIds } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
 import { AuthorTag } from "../../forum/AuthorTag";
 import EditBio from "./EditBio";
@@ -11,6 +11,9 @@ import WallSlipCard from "./WallSlipCard";
 import FriendButton from "./FriendButton";
 import StoriesRail from "./StoriesRail";
 import SuggestedFriends from "./SuggestedFriends";
+import MessageButton from "./MessageButton";
+import AccentPicker from "./AccentPicker";
+import type { CSSProperties } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +26,9 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   const profile = await getProfileByUsername(username);
   if (!profile) notFound();
 
-  const [wall, friends] = await Promise.all([getWall(profile.id), getFriends(profile.id)]);
+  const [wall, friends, stats] = await Promise.all([
+    getWall(profile.id), getFriends(profile.id), getProfileStats(profile.id),
+  ]);
   const stories = await getStoriesForCircle(profile.id, friends.map((f) => f.id));
 
   let me: { id: string; role: string } | null = null;
@@ -38,8 +43,17 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   const isOwner = me?.id === profile.id;
   const initial = profile.username.charAt(0).toUpperCase();
 
+  // Mutual friends (only meaningful when a signed-in non-owner views the profile).
+  let mutual = 0;
+  if (me && !isOwner) {
+    const mine = new Set(await getFriendIds(me.id));
+    mutual = friends.filter((f) => mine.has(f.id)).length;
+  }
+
+  const accentStyle = profile.accentColor ? ({ "--paccent": profile.accentColor } as CSSProperties) : undefined;
+
   return (
-    <main className="pmain">
+    <main className="pmain" style={accentStyle}>
       {/* ---- Cover ---- */}
       <div className="pcover">
         {profile.coverUrl
@@ -66,12 +80,24 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             {profile.title && <span className="phead__title">{profile.title}</span>}
           </h1>
           <p className="phead__meta">
-            {friends.length > 0 && <span className="phead2__fc">{friends.length} friend{friends.length === 1 ? "" : "s"} · </span>}
             Member since {since.format(new Date(profile.createdAt))}
+            {mutual > 0 && <span className="phead2__mutual"> · {mutual} mutual friend{mutual === 1 ? "" : "s"}</span>}
           </p>
+          <div className="pstats">
+            <span className="pstat"><b>{stats.friends}</b> friends</span>
+            <span className="pstat"><b>{stats.wallPosts}</b> wall posts</span>
+            <span className="pstat"><b>{stats.stories}</b> stories</span>
+          </div>
         </div>
         <div className="phead2__actions">
-          <FriendButton profileId={profile.id} />
+          {isOwner ? (
+            <AccentPicker userId={profile.id} current={profile.accentColor} />
+          ) : (
+            <>
+              <FriendButton profileId={profile.id} />
+              {me && <MessageButton userId={profile.id} username={profile.username} />}
+            </>
+          )}
         </div>
       </header>
 

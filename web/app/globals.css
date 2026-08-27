@@ -1609,7 +1609,7 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
   background:var(--surface-2);box-shadow:0 3px 16px rgba(0,0,0,.18)}
 .pcover__img{width:100%;height:100%;object-fit:cover;display:block}
 .pcover__grad{width:100%;height:100%;
-  background:linear-gradient(120deg,var(--bg) 0%,color-mix(in srgb,var(--accent) 45%,var(--bg)) 55%,var(--gold) 130%)}
+  background:linear-gradient(120deg,var(--bg) 0%,color-mix(in srgb,var(--paccent,var(--accent)) 48%,var(--bg)) 55%,var(--paccent,var(--gold)) 130%)}
 .pcover__edit{position:absolute;right:12px;bottom:12px;background:rgba(0,0,0,.55);color:#fff;border:0;border-radius:9px;
   padding:7px 12px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;backdrop-filter:blur(3px)}
 .pcover__edit:hover{background:rgba(0,0,0,.7)}
@@ -1626,7 +1626,7 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .story{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:0;cursor:pointer;
   font:inherit;width:68px}
 .story__ring{width:64px;height:64px;border-radius:50%;padding:3px;display:grid;place-items:center;
-  background:conic-gradient(from 210deg,var(--gold),var(--accent),var(--gold))}
+  background:conic-gradient(from 210deg,var(--paccent,var(--gold)),var(--accent),var(--paccent,var(--gold)))}
 .story__ring--add{background:var(--line)}
 .story__av{width:100%;height:100%;border-radius:50%;background:var(--surface);border:2px solid var(--bg);overflow:hidden;
   display:grid;place-items:center;font-weight:800;color:var(--accent);font-size:22px}
@@ -1669,10 +1669,39 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .psug__add{background:var(--accent-soft);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));
   border-radius:999px;padding:4px 11px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;flex:0 0 auto}
 .psug__added{font-size:11.5px;color:var(--muted);flex:0 0 auto}
+.phead2__mutual{color:var(--muted)}
+/* Stats strip */
+.pstats{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap}
+.pstat{font-size:12.5px;color:var(--muted)}
+.pstat b{color:var(--ink);font-size:14px;font-weight:800;margin-right:3px}
+/* Header actions */
+.phead2__actions{display:flex;gap:8px;align-items:center}
+.phead2__msg{background:var(--surface-2);border:1px solid var(--accent);color:var(--accent);border-radius:9px;
+  padding:7px 13px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.phead2__msg:hover{background:var(--accent-soft)}
+/* Accent picker */
+.paccent{position:relative}
+.paccent__btn{background:var(--surface-2);border:1px solid var(--line);color:var(--ink);border-radius:9px;
+  padding:7px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.paccent__pop{position:absolute;right:0;top:calc(100% + 6px);z-index:20;background:var(--bg);border:1px solid var(--line);
+  border-radius:12px;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,.22);display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:172px}
+.paccent__sw{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer}
+.paccent__sw.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--bg) inset}
+.paccent__reset{grid-column:1/-1;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;
+  padding:6px;font:inherit;font-size:12px;cursor:pointer;color:var(--ink)}
+/* Story reactions */
+.storyreact{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.storyreact__b{display:inline-flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--line);
+  border-radius:999px;padding:4px 10px;font:inherit;font-size:15px;cursor:pointer}
+.storyreact__b:hover{border-color:var(--accent)}
+.storyreact__b.on{background:var(--accent-soft);border-color:var(--accent)}
+.storyreact__b:disabled{cursor:default;opacity:.6}
+.storyreact__n{font-size:12px;font-weight:700;color:var(--muted)}
 @media (max-width:720px){
   .pbody{grid-template-columns:1fr}
-  .phead2{margin-top:-40px}
+  .phead2{margin-top:-40px;align-items:flex-start}
   .pavatar--lg{width:104px;height:104px}
+  .phead2__actions{width:100%}
 }
 .phead__id{flex:1;min-width:min(100%,260px)}
 .phead__name{font-size:clamp(23px,4vw,32px);font-weight:800;margin:0;letter-spacing:.01em;
