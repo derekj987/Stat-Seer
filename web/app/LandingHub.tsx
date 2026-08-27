@@ -187,7 +187,7 @@ function NcaafRows({ games, moreFrom }: { games: readonly NcaafCardGame[]; moreF
         const ms = g.marketSpread;
         return (
           <tr key={`${g.away}-${g.home}`} className={[g.off ? "hb-off" : "", moreFrom !== undefined && i >= moreFrom ? "hb-row--more" : ""].filter(Boolean).join(" ") || undefined}>
-            <td className="hb-l"><span className="hb-game">{g.away}<span className="hb-at">at</span>{g.home}</span>{g.neutral ? <span className="ncf-site"> · N</span> : null}{g.off && <span className="hb-dia hb-dia--end">◆</span>}{g.commence && <span className="hb-gkick">{cxKick(g.commence)}</span>}</td>
+            <td className="hb-l"><span className="hb-game">{g.apAway ? <span className="ncf-rk">#{g.apAway}</span> : null}{g.away}<span className="hb-at">at</span>{g.apHome ? <span className="ncf-rk">#{g.apHome}</span> : null}{g.home}</span>{g.neutral ? <span className="ncf-site"> · N</span> : null}{g.off && <span className="hb-dia hb-dia--end">◆</span>}{g.commence && <span className="hb-gkick">{cxKick(g.commence)}</span>}</td>
             <td className="hb-num">{ms ? `${ms.fav} ${ms.num}` : "—"}</td>
             <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
             <td className="hb-num hb-model">{g.projSpread.fav} {g.projSpread.num}</td>
@@ -307,6 +307,9 @@ function NflValueTable({ rows }: { rows: VfRow[] }) {
 }
 
 export default function LandingHub({ initialSport, nfl, ncaaf, vf }: { initialSport: Sport; nfl: NflData; ncaaf: NcaafData; vf: VfRow[] }) {
+  // AP Top 25 matchups this week (either team ranked), kept in kickoff order — the
+  // homepage's ranked-games snapshot, mirroring the full table on /ncaaf/model.
+  const ncaafRanked = ncaaf.games.filter((g) => g.apAway || g.apHome);
   return (
     <section className="lp-hub" id="lp-board" aria-label="This week's board">
       {/* pure-CSS sport toggle — no client JS needed */}
@@ -353,6 +356,14 @@ export default function LandingHub({ initialSport, nfl, ncaaf, vf }: { initialSp
             <label htmlFor="lps-ncaaf" className="lpf__t">NCAAF</label>
           </div>
         </div>
+        {ncaafRanked.length > 0 && (
+          <Panel title="AP Top 25 matchups" count={`${ncaafRanked.length} ranked`} hint={<>This week&apos;s games with an <b>AP Top 25</b> team, in kickoff order, each ranked side showing its poll rank. The market&apos;s <b>Spread</b> and <b>O/U</b> sit beside <b>Our Projection</b> — our line-blind read, <b>not a pick</b>.</>} open>
+            <MoreTable id="gm-ranked-ncaaf" head={<NcaafHead />} extra={Math.max(0, ncaafRanked.length - 4)} noun="ranked games" cls="hb-form--mkt">
+              <NcaafRows games={ncaafRanked} moreFrom={4} />
+            </MoreTable>
+            <p className="lp-cardfoot"><a href="/ncaaf/model">See all ranked games →</a></p>
+          </Panel>
+        )}
         <Panel title="Where the model disagrees most" count={`${ncaaf.games.filter((g) => g.off).length || "—"} off-consensus`} hint={TIPS.gameModel} open>
           <NcaafCardTable games={[...ncaaf.games].sort((a, b) => Number(b.off) - Number(a.off)).slice(0, 3)} />
           <p className="lp-cardfoot"><a href="/ncaaf/model">See the full model →</a></p>
