@@ -125,8 +125,8 @@ export default function SiteNav() {
             </>
           ) : (
             <a href="/signup" className="snav__signup">
-              <span className="snav__signup__full">Create an Account</span>
-              <span className="snav__signup__short">Sign Up</span>
+              <span className="snav__signup__full">Create an Account / Login</span>
+              <span className="snav__signup__short">Sign in</span>
             </a>
           )}
         </div>

@@ -755,6 +755,10 @@ a.sportstrip__i:hover{color:var(--ink)}
 .authcard__ok{font-size:14px;line-height:1.6;color:var(--ink)}
 .authcard__ok a,.authcard__alt a{color:var(--accent);font-weight:600;text-decoration:none}
 .authcard__alt{margin:16px 0 0;font-size:13px;color:var(--muted)}
+.authcard__sub{margin:0 0 4px;font-size:13px;color:var(--muted);line-height:1.5}
+.authlink{background:none;border:0;padding:0;color:var(--accent);font:inherit;font-size:13px;font-weight:600;
+  cursor:pointer;text-decoration:none}
+.authlink:hover{text-decoration:underline}
 
 /* --- forum shell --- */
 /* Community: sticky side banner (the tavern) + content that scrolls past it. */
