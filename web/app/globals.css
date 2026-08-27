@@ -2486,6 +2486,10 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
      forcing auto widths, which is what made split tables disagree on phones. */
   .hb-form{min-width:0}
   .hb-form th,.hb-form td{font-size:11px;white-space:normal;vertical-align:top}
+  /* Column headers: the 11px uppercase + .08em tracking is too wide for the narrow
+     Market/Model columns on a phone and the labels run together — tighten them so they
+     fit (and wrap cleanly onto two lines when needed). */
+  .hb-form th{font-size:8.5px;letter-spacing:.01em;line-height:1.25}
   /* Fan Analysis (6 cols) can't wrap sensibly on a phone — let it scroll sideways as ONE
      table with nowrap cells (the "The play" text stays on one line), with the swipe hint. */
   .hb-plrtable{min-width:560px}
