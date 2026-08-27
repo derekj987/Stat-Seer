@@ -2,6 +2,7 @@ import { Brand, FlowSteps, ModelSubnav, MoreTable } from "../../Nav";
 import Tip from "@/app/Tip";
 import { NCAAF_MODEL, type NcaafCardGame } from "../model-data";
 import { StatCard } from "../StatCard";
+import { abbrevTeam } from "@/lib/ncaafAbbrev";
 
 // College Football — The Model. Mirrors the NFL Model page: the full model-vs-market
 // table leads, the honest track record (predicts as well as Elo, doesn't beat the spread)
@@ -50,14 +51,14 @@ function CardRows({ games, moreFrom }: { games: readonly NcaafCardGame[]; moreFr
         return (
           <tr key={`${g.away}-${g.home}`} className={[g.off ? "hb-off" : "", moreFrom !== undefined && i >= moreFrom ? "hb-row--more" : ""].filter(Boolean).join(" ") || undefined}>
             <td className="hb-l">
-              <span className="hb-game">{g.apAway ? <span className="ncf-rk">#{g.apAway}</span> : null}{g.away}<span className="hb-at">at</span>{g.apHome ? <span className="ncf-rk">#{g.apHome}</span> : null}{g.home}</span>
+              <span className="hb-game">{g.apAway ? <span className="ncf-rk">#{g.apAway}</span> : null}{abbrevTeam(g.away)}<span className="hb-at">at</span>{g.apHome ? <span className="ncf-rk">#{g.apHome}</span> : null}{abbrevTeam(g.home)}</span>
               {g.neutral ? <span className="ncf-site"> · N</span> : null}
               {g.off && <span className="hb-dia hb-dia--end" aria-label="off consensus">◆</span>}
               {g.commence && <span className="hb-gkick">{nck(g.commence)}</span>}
             </td>
-            <td className="hb-num">{ms ? `${ms.fav} ${ms.num}` : "—"}</td>
+            <td className="hb-num">{ms ? `${abbrevTeam(ms.fav)} ${ms.num}` : "—"}</td>
             <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
-            <td className="hb-num hb-model">{g.projSpread.fav} {g.projSpread.num}</td>
+            <td className="hb-num hb-model">{abbrevTeam(g.projSpread.fav)} {g.projSpread.num}</td>
             <td className="hb-num hb-model">{g.projTotal}</td>
           </tr>
         );
