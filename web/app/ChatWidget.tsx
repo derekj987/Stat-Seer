@@ -458,7 +458,7 @@ export default function ChatWidget({ open, onClose, onMeta }:
               </div>
               <form className="cw__form" onSubmit={(e) => { e.preventDefault(); if (text.trim()) { send({ body: text.trim() }); setText(""); } }}>
                 <input ref={inputRef} className="cw__input" value={text} onChange={(e) => setText(e.target.value)}
-                  placeholder="Message…  **bold** *italic*" maxLength={4000} />
+                  placeholder="Message…" maxLength={4000} />
                 <button className="cw__send" type="submit" disabled={sending || !text.trim()}>➤</button>
               </form>
             </div>
