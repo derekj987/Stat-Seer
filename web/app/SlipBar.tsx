@@ -22,13 +22,14 @@ export default function SlipBar() {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
-  // Post-to-a-wall state (hooks must run before the early return below).
+  // Share-to-a-friend state. Both "Send through Messenger" (a direct message) and
+  // "Post to a wall" (a wall post) use the SAME friend picker. Hooks must run before the
+  // early return below.
   const [me, setMe] = useState<Me | undefined>(undefined);
-  const [showPost, setShowPost] = useState(false);
-  const [target, setTarget] = useState("");
-  const [note, setNote] = useState("");
-  const [posting, setPosting] = useState(false);
-  const [postMsg, setPostMsg] = useState<{ ok: boolean; text: string; href?: string } | null>(null);
+  const [picker, setPicker] = useState<null | "wall" | "msg">(null);
+  const [friends, setFriends] = useState<{ id: string; username: string }[] | null>(null);
+  const [sendingTo, setSendingTo] = useState<string | null>(null);
+  const [done, setDone] = useState<{ text: string; href?: string } | null>(null);
 
   useEffect(() => {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) { setMe(null); return; }
@@ -100,28 +101,40 @@ export default function SlipBar() {
     } catch { /* clipboard blocked */ }
   }
 
-  // Post this slip to a member's profile wall (blank target = your own wall).
-  async function postToWall() {
-    if (!me) return;
-    setPosting(true); setPostMsg(null);
+  // Open a friend picker ("wall" = post to their wall, "msg" = direct message); lazily
+  // load the member's accepted friends the first time either picker opens.
+  async function openPicker(mode: "wall" | "msg") {
+    setPicker((cur) => (cur === mode ? null : mode));
+    setDone(null);
+    if (friends !== null || !me) return;
     const sb = createClient();
-    let targetId = me.id;
-    let uname = me.username;
-    const wanted = target.trim();
-    if (wanted) {
-      const { data, error } = await sb.from("profiles").select("id,username").ilike("username", wanted).limit(1).maybeSingle();
-      if (error || !data) { setPosting(false); setPostMsg({ ok: false, text: `No member named “${wanted}.”` }); return; }
-      targetId = data.id as string; uname = data.username as string;
+    const { data: rows } = await sb.from("friendships")
+      .select("requester_id,addressee_id").eq("status", "accepted")
+      .or(`requester_id.eq.${me.id},addressee_id.eq.${me.id}`);
+    const otherIds = (rows ?? []).map((r) => (r.requester_id === me.id ? r.addressee_id : r.requester_id) as string);
+    if (!otherIds.length) { setFriends([]); return; }
+    const { data: profs } = await sb.from("profiles").select("id,username").in("id", otherIds);
+    const nameById = new Map((profs ?? []).map((p) => [p.id as string, p.username as string]));
+    setFriends(otherIds.map((id) => ({ id, username: nameById.get(id) ?? "member" })));
+  }
+
+  // Send the current slip to a chosen member — either as a DM or a post on their wall.
+  async function sendSlip(mode: "wall" | "msg", to: { id: string; username: string }) {
+    if (!me) return;
+    setSendingTo(to.id);
+    const sb = createClient();
+    if (mode === "msg") {
+      const { error } = await sb.from("direct_messages").insert({ sender_id: me.id, recipient_id: to.id, slip: items });
+      setSendingTo(null);
+      if (!error) setDone({ text: `Sent to ${to.username} — open 💬 Friends to see it.` });
+    } else {
+      const summary = parlay.full && legs.length > 1
+        ? `Shared a ${legs.length}-leg slip — best at ${bookName(parlay.full.book)} ${decToAmerican(parlay.full.decimal)}`
+        : `Shared a ${items.length}-pick slip`;
+      const { error } = await sb.from("wall_posts").insert({ profile_id: to.id, author_id: me.id, body: summary, slip: items });
+      setSendingTo(null);
+      if (!error) setDone({ text: `Posted to ${to.username === me.username ? "your" : `${to.username}’s`} wall`, href: `/u/${to.username}` });
     }
-    const summary = parlay.full && legs.length > 1
-      ? `Shared a ${legs.length}-leg slip — best combined at ${bookName(parlay.full.book)} ${decToAmerican(parlay.full.decimal)}`
-      : `Shared a ${items.length}-pick slip`;
-    const body = note.trim() || summary;
-    const { error } = await sb.from("wall_posts").insert({ profile_id: targetId, author_id: me.id, body, slip: items });
-    setPosting(false);
-    if (error) { setPostMsg({ ok: false, text: error.message }); return; }
-    setNote(""); setTarget("");
-    setPostMsg({ ok: true, text: wanted ? `Posted to ${uname}’s wall` : "Posted to your wall", href: `/u/${uname}` });
   }
 
   return (
@@ -187,33 +200,53 @@ export default function SlipBar() {
             <div className="slipbar__actions">
               <button className="slipbar__share" onClick={shareSlip}>{shared ? "Link copied ✓" : "Share slip"}</button>
               <button className="slipbar__copy" onClick={copySlip}>{copied ? "Copied ✓" : "Copy slip"}</button>
-              <button className="slipbar__wall" onClick={() => { setShowPost((v) => !v); setPostMsg(null); }} aria-expanded={showPost}>
-                {showPost ? "Close" : "Post to a wall"}
+              <button className="slipbar__msg" onClick={() => openPicker("msg")} aria-expanded={picker === "msg"}>
+                {picker === "msg" ? "Close" : "Send through Messenger"}
+              </button>
+              <button className="slipbar__wall" onClick={() => openPicker("wall")} aria-expanded={picker === "wall"}>
+                {picker === "wall" ? "Close" : "Post to a wall"}
               </button>
               <button className="slipbar__clear" onClick={clear}>Clear slip</button>
             </div>
-            {showPost && (
+            {picker && (
               <div className="slippost">
-                {me === null ? (
-                  <p className="slippost__login"><a href="/login">Log in</a> to post your slip to a wall.</p>
+                {!me ? (
+                  <p className="slippost__login"><a href="/login">Log in</a> to {picker === "msg" ? "send this slip to a friend" : "post this slip to a friend’s wall"}.</p>
+                ) : done ? (
+                  <p className="slippost__ok">{done.text}{done.href && <> — <a href={done.href}>view →</a></>}</p>
+                ) : friends === null ? (
+                  <p className="slippost__lead">Loading your friends…</p>
                 ) : (
                   <>
-                    <p className="slippost__lead">Drop this slip on a member&apos;s profile wall — leave the name blank to post it to <b>your own</b>.</p>
-                    <input className="slippost__user" placeholder="member username (blank = your wall)" value={target}
-                      onChange={(e) => setTarget(e.target.value)} autoComplete="off" />
-                    <textarea className="slippost__note" rows={2} maxLength={280} placeholder="Add a note (optional)…"
-                      value={note} onChange={(e) => setNote(e.target.value)} />
-                    <div className="slippost__row">
-                      <button className="slippost__go" onClick={postToWall} disabled={posting || me === undefined}>
-                        {posting ? "Posting…" : "Post slip"}
-                      </button>
+                    <p className="slippost__lead">
+                      {picker === "msg"
+                        ? `Send this ${items.length}-pick slip to a friend’s chat — pick who:`
+                        : `Post this ${items.length}-pick slip to a wall — pick who:`}
+                    </p>
+                    <div className="slipfriends">
+                      {picker === "wall" && (
+                        <button className="slipfriend" onClick={() => sendSlip("wall", { id: me.id, username: me.username })} disabled={sendingTo === me.id}>
+                          <span className="slipfriend__av" aria-hidden="true">★</span>
+                          <span className="slipfriend__name">Your wall</span>
+                          <span className="slipfriend__send">{sendingTo === me.id ? "Posting…" : "Post →"}</span>
+                        </button>
+                      )}
+                      {friends.map((f) => (
+                        <button key={f.id} className="slipfriend" onClick={() => picker && sendSlip(picker, f)} disabled={sendingTo === f.id}>
+                          <span className="slipfriend__av" aria-hidden="true">{f.username.charAt(0).toUpperCase()}</span>
+                          <span className="slipfriend__name">{f.username}</span>
+                          <span className="slipfriend__send">{sendingTo === f.id ? (picker === "msg" ? "Sending…" : "Posting…") : (picker === "msg" ? "Send →" : "Post →")}</span>
+                        </button>
+                      ))}
                     </div>
+                    {friends.length === 0 && (
+                      <p className="slippost__lead">
+                        {picker === "msg"
+                          ? <>No friends yet — add some from the <b>💬 Friends</b> panel (bottom-right).</>
+                          : <>No friends yet — post to <b>Your wall</b> above, or add friends from the <b>💬 Friends</b> panel.</>}
+                      </p>
+                    )}
                   </>
-                )}
-                {postMsg && (
-                  <p className={postMsg.ok ? "slippost__ok" : "slippost__err"}>
-                    {postMsg.text}{postMsg.ok && postMsg.href && <> — <a href={postMsg.href}>view →</a></>}
-                  </p>
                 )}
               </div>
             )}
