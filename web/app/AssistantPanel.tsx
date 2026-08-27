@@ -34,14 +34,14 @@ const SPORTS: { id: SportId; label: string; sub: string }[] = [
 const MKT_UNAVAILABLE: Record<SportId, Set<string>> = { nfl: new Set(), ncaaf: new Set(["moneyline"]) };
 const EXAMPLES_BY_SPORT: Record<SportId, string[]> = {
   nfl: [
+    "What are the off-consensus picks this week? Add those to my slip.",
     "Make me a 4-leg anytime-TD parlay of the model's highest-% scorers this week.",
     "Build a 4-leg parlay around +1500 using only game spreads and totals.",
-    "Give me a 3-leg slip of spreads the model likes most.",
   ],
   ncaaf: [
+    "What are the off-consensus picks this week? Add those to my slip.",
     "Make me a 4-leg anytime-TD parlay of this weekend's likeliest scorers.",
     "Build a 4-leg parlay around +2500 using props and game lines.",
-    "Give me a 3-leg slip of spreads from Saturday's games.",
   ],
 };
 const TARGETS = [
@@ -116,36 +116,42 @@ export default function AssistantPanel() {
     );
   }
 
-  // Once a slip is built, show ONLY the slip (hide the inputs) + a Start over button.
+  // Once the assistant responds, show ONLY the response (hide the inputs) + a Start over
+  // button. A response with legs is a slip; a response with none is a conversational reply.
   if (result) {
+    const hasSlip = result.legs.length > 0;
     return (
       <div className="asst__result asst__result--solo">
         <div className="asst__resulthd">
-          <span className="asst__resh">Your slip</span>
+          <span className="asst__resh">{hasSlip ? "Your slip" : "Assistant"}</span>
           <button className="asst__startover" onClick={reset}>↺ Start over</button>
         </div>
         {result.note && <p className="asst__note">{result.note}</p>}
-        <ul className="asst__legs">
-          {result.legs.map((l) => (
-            <li key={l.id} className="asst__leg">
-              <span className="asst__legt">{l.title}</span>
-              {l.detail && <span className="asst__legd">{l.detail}</span>}
-              {l.price !== undefined && <span className="asst__odds">{fmtOdds(l.price)}</span>}
-              {l.books?.length ? <span className="asst__book">{l.books.map(bookName).join(" / ")}</span> : null}
-            </li>
-          ))}
-        </ul>
-        {result.combined && (
-          <p className="asst__combined">Parlay price: <b>{result.combined.american}</b> across {result.legs.length} legs.</p>
+        {hasSlip && (
+          <>
+            <ul className="asst__legs">
+              {result.legs.map((l) => (
+                <li key={l.id} className="asst__leg">
+                  <span className="asst__legt">{l.title}</span>
+                  {l.detail && <span className="asst__legd">{l.detail}</span>}
+                  {l.price !== undefined && <span className="asst__odds">{fmtOdds(l.price)}</span>}
+                  {l.books?.length ? <span className="asst__book">{l.books.map(bookName).join(" / ")}</span> : null}
+                </li>
+              ))}
+            </ul>
+            {result.combined && (
+              <p className="asst__combined">Parlay price: <b>{result.combined.american}</b> across {result.legs.length} legs.</p>
+            )}
+            <div className="asst__act">
+              {added ? (
+                <a href="/lines" className="btn btn--primary">Added ✓ — open Value Finder →</a>
+              ) : (
+                <button className="btn btn--primary" onClick={() => { addMany(result.legs); setAdded(true); }}>Add all to my slip</button>
+              )}
+            </div>
+            <p className="asst__disc">Assembled from published numbers — <b>not a StatSeer pick and not betting advice</b>. Confirm every price in Value Finder and do your own research.</p>
+          </>
         )}
-        <div className="asst__act">
-          {added ? (
-            <a href="/lines" className="btn btn--primary">Added ✓ — open Value Finder →</a>
-          ) : (
-            <button className="btn btn--primary" onClick={() => { addMany(result.legs); setAdded(true); }}>Add all to my slip</button>
-          )}
-        </div>
-        <p className="asst__disc">Assembled from published numbers — <b>not a StatSeer pick and not betting advice</b>. Confirm every price in Value Finder and do your own research.</p>
       </div>
     );
   }

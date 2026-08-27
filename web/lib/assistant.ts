@@ -24,6 +24,7 @@ export interface Candidate {
   books: string[];
   byBook: Record<string, number>;
   model?: number;                // model signal for ranking (TD legs: model TD %)
+  off?: boolean;                 // game line the model reads as OFF-CONSENSUS (◆ on the board)
 }
 
 const fmtPt = (n: number) => (n > 0 ? `+${n}` : `${n}`);
@@ -148,8 +149,8 @@ export async function buildCandidatesNcaaf(): Promise<Candidate[]> {
     if (g.marketSpread) {
       const { fav, num } = g.marketSpread;                 // num is the favorite's line (negative)
       const dog = fav === g.home ? g.away : g.home;
-      out.push({ id: `ncsp-${gk}-f`, kind: "line", group: "spread", market: "spread", title: `${fav} ${fmtPt(num)}`, detail: mk, price: -110, books: [], byBook: {} });
-      out.push({ id: `ncsp-${gk}-d`, kind: "line", group: "spread", market: "spread", title: `${dog} ${fmtPt(-num)}`, detail: mk, price: -110, books: [], byBook: {} });
+      out.push({ id: `ncsp-${gk}-f`, kind: "line", group: "spread", market: "spread", title: `${fav} ${fmtPt(num)}`, detail: mk, price: -110, books: [], byBook: {}, off: g.off });
+      out.push({ id: `ncsp-${gk}-d`, kind: "line", group: "spread", market: "spread", title: `${dog} ${fmtPt(-num)}`, detail: mk, price: -110, books: [], byBook: {}, off: g.off });
     }
     if (g.marketTotal != null) {
       out.push({ id: `nctot-${gk}-o`, kind: "line", group: "total", market: "total", title: `${mk}: Over ${g.marketTotal}`, detail: mk, price: -110, books: [], byBook: {} });
