@@ -305,6 +305,9 @@ a.cw__fname:hover{text-decoration:underline}
 @media (max-width:520px){
   .aiw{right:18px;bottom:18px}
   .cw{bottom:90px}
+  /* lighter, more see-through on mobile (like the pigeon); full opacity on tap */
+  .aiw__launch,.cw__launch{opacity:.8}
+  .aiw__launch:active,.cw__launch:active{opacity:1}
 }
 .game.skeleton{min-height:150px;animation:pulse 1.2s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
