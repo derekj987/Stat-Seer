@@ -60,7 +60,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--start", type=int, default=2020)
-    ap.add_argument("--end", type=int, default=2024)
+    ap.add_argument("--end", type=int, default=2025)
     ap.add_argument("--db", default="data/cfb.db")
     args = ap.parse_args(argv)
 

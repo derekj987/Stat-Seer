@@ -43,7 +43,7 @@ jobs:
           CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
         run: |
           python cfb_backfill.py --start 2020 --end "$SEASON"
-          python cfb_lines.py --start 2020 --end 2024
+          python cfb_lines.py --start 2020 --end "$SEASON"
 
       - name: Export /ncaaf model-data.ts
         env:

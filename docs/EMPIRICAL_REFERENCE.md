@@ -598,6 +598,36 @@ letdown/lookahead) is true and worth showing, but it is **not** a pick driver.
 
 ---
 
+## 9d. CFB game line & totals — does the rating beat the closing number? (`cfb_ats.py`, `cfb_totals.py`, `cfb_ats_slices.py`)
+
+The CFB power rating's only bar, refreshed after pulling **2025 lines** (they had been
+capped at 2024, leaving the published ATS a season stale). Walk-forward: fit weeks < w,
+predict week w, seed each season from the prior (λ=5, cap 28, decay 0.6, from week 6),
+2020–2025, consensus closing number. Break-even at −110 = 52.38%.
+
+**Spread ATS (`cfb_ats.py --end 2025`), n=2,822 bets:** 49.79% at all bets (−2.59 pts),
+49.26% at edge ≥2 (−3.12), 51.89% at edge ≥6 (−0.49, n=779). **Does not beat the spread at
+any threshold** — the added 2025 season confirmed the loss, it didn't reveal an edge.
+(Straight-up the rating still ~ties Elo; margin RMSE a hair worse. Competent, not an edge.)
+
+**Totals O/U (`cfb_totals.py`), first-ever backtest — n=2,852; projection MAE 13.0 / RMSE 16.4:**
+50.81% at all leans (−1.57), **52.22% at the shipped ≥2-pt lean (−0.17, dead on break-even =
+no edge)**, a non-monotonic blip to 53.14% at ≥4 (n=991, +0.76) that falls back to 50.33% at
+≥6. **The totals lean does not reliably beat the O/U — it is context, not a pick.**
+
+**ATS by slice (`cfb_ats_slices.py`) — is any subset beatable? No.** By tier: P5-vs-P5 50.28%,
+G5-vs-G5 **48.55%** (the "softer G5 lines" prior is *contradicted* — G5 is the worst),
+P5-vs-G5 mixed 56.78% but only **n=118** (noise, below the 300-bet bar). Every week bucket
+(early/mid/late) and spread-size bucket (close/mid/big) sits below break-even. No durable
+beatable slice exists.
+
+**Reading.** Same result as §4/§5/§9b/§9c, now nailed for the CFB game line *and* totals: the
+closing number already contains the rating's information. The CFB model is honest Context and
+a calibration exhibit — **not** an ATS pick driver. CFB value, if anywhere, is line-shopping
+(Value Finder), not the projection.
+
+---
+
 ## 10. Errors caught during this work
 
 Recorded because these are the failure modes that produce confident, wrong betting
