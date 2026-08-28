@@ -39,6 +39,11 @@ import tailgate_reddit as tr   # reuse the low-level RSS + extraction plumbing
 NATIONAL_FEEDS = [
     ("r/CFB", "https://www.reddit.com/r/CFB/top/.rss?t=week"),
     ("SB Nation CFB", "https://www.sbnation.com/rss/college-football/index.xml"),
+    # Conference-wide SB Nation blogs (Atom) — pooled + roster-filtered per team, so they
+    # cover the G5/mid-major schools that have no team blog of their own.
+    ("Mountain West Connection", "https://www.mwcconnection.com/rss/index.xml"),  # MWC
+    ("Hustle Belt", "https://www.hustlebelt.com/rss/index.xml"),                  # MAC
+    ("Underdog Dynasty", "https://www.underdogdynasty.com/rss/index.xml"),        # AAC/CUSA/G5
 ]
 
 # PRIMARY per-team source: each program's SB Nation team blog (Atom /rss/index.xml — the same
@@ -103,10 +108,11 @@ CFB_BLOGS = {
     "Baylor": ("Our Daily Bears", "ourdailybears.com"),
 }
 
-# Secondary: a few high-confidence team subreddits (Reddit works from sharded runners).
-# Most teams rely on their SB Nation blog above + r/CFB national.
+# Secondary: team subreddits (Reddit works from sharded runners; throttles a single local IP).
+# The workhorse for schools without a team blog is their conference blog in NATIONAL_FEEDS.
 CFB_SUBS = {
-    "USC": "uscfootball", "TCU": "CFB", "North Carolina": "tarheels", "NC State": "NCSU",
+    "USC": "uscfootball", "Stanford": "gostanford", "North Carolina": "tarheels",
+    "NC State": "NCSU", "Virginia": "UVA", "UNLV": "UNLV", "Memphis": "memphistigers",
     "Alabama": "rolltide", "Georgia": "georgiabulldogs", "Ohio State": "OhioStateFootball",
     "Michigan": "MichiganWolverines", "Texas": "LonghornNation", "Notre Dame": "notredamefootball",
     "Oregon": "ducks", "Tennessee": "Volunteers", "Penn State": "PennStateFootball",
@@ -153,9 +159,28 @@ def sb_get(path):
         return json.loads(r.read())
 
 
+def _alpha(s):
+    return "".join(c for c in tr.norm(s) if c.isalnum())
+
+
+def _snap_to_depth(name, depth_keys):
+    """Snap a team name to the canonical CFBD school key (the roster/depth key), for the few
+    Odds names the prefix map misses, e.g. 'Hawaii Rainbow Warriors' -> 'Hawai\\'i'."""
+    if name in depth_keys:
+        return name
+    a = _alpha(name)
+    best, bl = None, 0
+    for k in depth_keys:
+        ka = _alpha(k)
+        if ka and (a.startswith(ka) or ka.startswith(a) or ka in a) and len(ka) > bl:
+            best, bl = k, len(ka)
+    return best or name
+
+
 def prop_slate_teams(key):
     """CFBD school names for every team with a posted prop in the latest snapshot — the games
-    the app shows buzz for. Maps Odds full names ('USC Trojans') -> CFBD ('USC')."""
+    the app shows buzz for. Maps Odds full names ('USC Trojans') -> CFBD ('USC'), then snaps
+    any leftover to the canonical depth-chart key so the roster filter + display line up."""
     import cfb_player_proj as cpp
     latest = sb_get("cfb_prop_snapshots?select=snapshot_at&order=snapshot_at.desc&limit=1")
     if not latest:
@@ -164,7 +189,9 @@ def prop_slate_teams(key):
     rows = sb_get(f"cfb_prop_snapshots?snapshot_at=eq.{snap}&select=home_team,away_team")
     odds_names = sorted({t for r in rows for t in (r.get("home_team"), r.get("away_team")) if t})
     cmap = cpp.cfbd_team_map(odds_names, key)
-    return sorted({cmap.get(n, n) for n in odds_names})
+    depth = load_roster_from_depth() or {}
+    keys = list(depth.keys())
+    return sorted({_snap_to_depth(cmap.get(n, n), keys) for n in odds_names})
 
 
 def fetch_team_feeds(school):
