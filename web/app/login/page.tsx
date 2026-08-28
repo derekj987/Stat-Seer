@@ -21,7 +21,9 @@ export default function Login() {
     setStatus("loading"); setMsg("");
     const { error } = await createClient().auth.signInWithPassword({ email, password });
     if (error) { setStatus("error"); setMsg(error.message); return; }
-    router.push("/forum");
+    // Return the member to the page they were gated from (?next=/...), else the community.
+    const next = new URLSearchParams(window.location.search).get("next");
+    router.push(next && next.startsWith("/") && !next.startsWith("//") ? next : "/forum");
     router.refresh();
   }
 

@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getProfileByUsername, getWall, getFriends, getStoriesForCircle, getProfileStats, getFriendIds } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
 import { AuthorTag } from "../../forum/AuthorTag";
@@ -40,6 +40,9 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
       me = { id: user.id, role: (prof?.role as string) ?? "member" };
     }
   } catch { /* auth env not configured (local dev) — render as a signed-out visitor */ }
+  // Profiles are members-only (the proxy gate also enforces this); never expose to a visitor.
+  // Gate only where auth is actually configured (prod) — local dev has no client auth env.
+  if (!me && process.env.NEXT_PUBLIC_SUPABASE_URL) redirect("/login");
   const isOwner = me?.id === profile.id;
   const initial = profile.username.charAt(0).toUpperCase();
 
