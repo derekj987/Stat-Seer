@@ -39,9 +39,11 @@ function BuzzCard({ b }: { b: Buzz }) {
       </header>
       <p className="tgpost__body">{b.take}{b.matchup ? ` (${b.matchup})` : ""}</p>
       <div className={`tgverdict tgverdict--${b.direction}`}>
-        <span className="tgverdict__k">Verdict</span>
-        <b className="tgprop">{b.angle}</b>
-        <span className="tgverdict__side">{b.direction === "up" ? "▲ over" : "▼ under"}</span>
+        <span className="tgverdict__call">
+          <span className="tgverdict__k">Verdict</span>
+          <b className="tgprop">{b.angle}</b>
+          <span className="tgverdict__side">{b.direction === "up" ? "▲ over" : "▼ under"}</span>
+        </span>
         <AddToSlip item={{ id: `fan-${b.id}`, kind: "fan", title: b.player, detail: `${b.team} — ${b.angle}` }} />
       </div>
       <div className="tgpost__foot">
