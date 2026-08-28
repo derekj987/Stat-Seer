@@ -7,6 +7,7 @@
 // that piece arrives when the live NCAAF odds capture is deployed.
 import { useSlip, type SlipItem } from "@/lib/slip";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
+import { NcaafCardHead, NcaafGameCell } from "../CardCells";
 import type { NcaafCardGame } from "../model-data";
 
 function Chip({ item }: { item: SlipItem }) {
@@ -32,9 +33,7 @@ export default function NcaafLinesTable({ games }: { games: NcaafCardGame[] }) {
   return (
     <div className="hb-formwrap">
       <table className="hb-form hb-form--mkt ncline">
-        <thead>
-          <tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Model Spread</th><th>Model O/U</th></tr>
-        </thead>
+        <NcaafCardHead />
         <tbody>
           {games.map((g) => {
             const ms = g.marketSpread!;
@@ -43,16 +42,7 @@ export default function NcaafLinesTable({ games }: { games: NcaafCardGame[] }) {
             const dog = ms.fav === g.home ? g.away : g.home;
             return (
               <tr key={k} className={g.off ? "hb-off" : undefined}>
-                <td className="hb-l">
-                  <span className="hb-game">
-                    {g.apAway ? <span className="ncf-rk">#{g.apAway}</span> : null}{abbrevTeam(g.away)}
-                    <span className="hb-at">at</span>
-                    {g.apHome ? <span className="ncf-rk">#{g.apHome}</span> : null}{abbrevTeam(g.home)}
-                  </span>
-                  {g.neutral ? <span className="ncf-site"> · N</span> : null}
-                  {g.off && <span className="hb-dia hb-dia--end" aria-label="off consensus">◆</span>}
-                  {g.commence && <span className="hb-gkick">{kick(g.commence)}</span>}
-                </td>
+                <NcaafGameCell g={g} />
                 <td className="hb-num">
                   <div className="ncline__chips">
                     <Chip item={{ id: `ncsp-${k}-f`, kind: "line", title: `${abbrevTeam(ms.fav)} ${ms.num}`, detail: mk, price: -110 }} />
@@ -77,8 +67,3 @@ export default function NcaafLinesTable({ games }: { games: NcaafCardGame[] }) {
     </div>
   );
 }
-
-const kfmt = new Intl.DateTimeFormat("en-US", {
-  timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
-});
-const kick = (iso: string) => kfmt.format(new Date(iso)) + " ET";

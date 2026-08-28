@@ -6,6 +6,7 @@ import type { CardRow, UpsetRow, PlayerPick } from "@/lib/home";
 import type { NcaafCardGame, NcaafUpset } from "./ncaaf/model-data";
 import { NCAAF_MODEL } from "./ncaaf/model-data";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
+import { NcaafCardHead, NcaafGameCell } from "./ncaaf/CardCells";
 import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
 import { PLAYER_PROJECTIONS, type PlayerProj } from "@/lib/playerProjections";
 import { INCENTIVE_WATCH } from "@/lib/incentiveWatch";
@@ -179,7 +180,7 @@ function NflCardTable({ rows }: { rows: CardRow[] }) {
 }
 
 function NcaafHead() {
-  return <thead><tr><th className="hb-l">Game</th><th>Market Spread</th><th>Market O/U</th><th>Model Spread</th><th>Model O/U</th></tr></thead>;
+  return <NcaafCardHead />;
 }
 function NcaafRows({ games, moreFrom }: { games: readonly NcaafCardGame[]; moreFrom?: number }) {
   return (
@@ -188,7 +189,7 @@ function NcaafRows({ games, moreFrom }: { games: readonly NcaafCardGame[]; moreF
         const ms = g.marketSpread;
         return (
           <tr key={`${g.away}-${g.home}`} className={[g.off ? "hb-off" : "", moreFrom !== undefined && i >= moreFrom ? "hb-row--more" : ""].filter(Boolean).join(" ") || undefined}>
-            <td className="hb-l"><span className="hb-game">{g.apAway ? <span className="ncf-rk">#{g.apAway}</span> : null}{abbrevTeam(g.away)}<span className="hb-at">at</span>{g.apHome ? <span className="ncf-rk">#{g.apHome}</span> : null}{abbrevTeam(g.home)}</span>{g.neutral ? <span className="ncf-site"> · N</span> : null}{g.off && <span className="hb-dia hb-dia--end">◆</span>}{g.commence && <span className="hb-gkick">{cxKick(g.commence)}</span>}</td>
+            <NcaafGameCell g={g} />
             <td className="hb-num">{ms ? `${abbrevTeam(ms.fav)} ${ms.num}` : "—"}</td>
             <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
             <td className="hb-num hb-model">{abbrevTeam(g.projSpread.fav)} {g.projSpread.num}</td>
