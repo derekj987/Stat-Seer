@@ -3333,11 +3333,13 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 /* Pure-CSS sport toggle: two hidden radios show one sport's panel via ~ combinator. */
 .lp-hub{margin:2px 0 4px}
 /* Rotating "explore the site" highlight banner — full board width, under the snapshot label */
-.hlb{position:relative;max-width:760px;margin:0 auto 14px;border:1px solid color-mix(in srgb,var(--gold) 40%,var(--line));
-  background:var(--gold-soft);border-radius:14px;overflow:hidden}
+/* Full-bleed to the card edges: pull out to counteract the .lp-sport padding (16px sides/top,
+   14px bottom) so the artwork stretches to the white card's edge. Round only the top corners to
+   match the card; the section content continues flush below. */
+.hlb{position:relative;margin:-16px -16px 14px;border:0;
+  background:var(--gold-soft);border-radius:13px 13px 0 0;overflow:hidden}
 /* The banner takes the artwork's own 2.4:1 shape at EVERY width, so a full-bleed image is
-   shown whole — never cover-cropped into a zoomed strip. Height follows width (see .hlb
-   max-width, which keeps it from getting too tall on a wide screen). */
+   shown whole — never cover-cropped into a zoomed strip. Height follows the card width. */
 .hlb__slide{display:flex;align-items:center;gap:14px;padding:14px 18px 18px;text-decoration:none;
   color:var(--ink);aspect-ratio:12/5;min-height:0;animation:hlb-in .35s ease}
 @keyframes hlb-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
