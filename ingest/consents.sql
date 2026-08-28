@@ -18,14 +18,17 @@ create index if not exists consents_user_idx on consents (user_id);
 create index if not exists consents_version_idx on consents (legal_version);
 
 alter table consents enable row level security;
--- A member can read their own consent history; nobody edits/deletes it (append-only audit).
+-- A member can read their own consent history and INSERT their own consent (needed for the
+-- re-accept prompt when the docs change); nobody edits/deletes it (append-only audit).
 drop policy if exists "see own consent" on consents;
 create policy "see own consent" on consents for select using (auth.uid() = user_id);
+drop policy if exists "record own consent" on consents;
+create policy "record own consent" on consents for insert to authenticated with check (auth.uid() = user_id);
 revoke update, delete on consents from public, anon, authenticated;
 drop trigger if exists no_update_consents on consents;
 create trigger no_update_consents before update or delete on consents
   for each row execute function block_mutation();   -- block_mutation() defined in schema.sql
-grant select on consents to authenticated;
+grant select, insert on consents to authenticated;
 grant select, insert on consents to service_role;
 
 -- Extend the signup trigger to also record consent from the signup metadata. This REPLACES
