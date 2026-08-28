@@ -19,6 +19,8 @@ export default function Page() {
   const bs = M.value.bookShop;
   const c = M.card;
   const games = c.games.filter((g) => g.marketSpread); // only games with a market line
+  const total = c.games.length;                        // full slate (incl. games w/o odds yet)
+  const noLine = total - games.length;                 // games still waiting on a posted line
 
   return (
     <main className="wrap">
@@ -43,7 +45,7 @@ export default function Page() {
 
       <section className="ncf-sec">
         <h2 className="ncf-h">Game lines — Week {c.week}
-          <span className="ncf-h__note">{games.length} games with a market line</span>
+          <span className="ncf-h__note">{games.length} of {total} games have a market line{noLine > 0 ? ` · ${noLine} awaiting odds` : ""}</span>
           <Tip text={<>Every game with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Projection</b> — our own line-blind spread &amp; total. A ◆ marks an <b>off-consensus</b> game (our number is well off the market&apos;s). Our CFB rating ties Elo but doesn&apos;t beat the spread, so treat this as informative context, <b>not a pick</b>.</>} />
         </h2>
         <div className="hb-legend">

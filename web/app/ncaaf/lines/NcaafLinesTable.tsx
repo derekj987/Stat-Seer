@@ -29,19 +29,24 @@ function Chip({ item }: { item: SlipItem }) {
 
 const gkey = (g: NcaafCardGame) => `${g.away}-${g.home}`.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
 
+const LEAD = 6; // games shown before the "see more" dropdown
+
 export default function NcaafLinesTable({ games }: { games: NcaafCardGame[] }) {
+  const extra = Math.max(0, games.length - LEAD);
   return (
-    <div className="hb-formwrap">
+    <div className="hb-moretbl">
+      <input type="checkbox" id="ncline-more" className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
+      <div className="hb-formwrap">
       <table className="hb-form hb-form--mkt ncline">
         <NcaafCardHead />
         <tbody>
-          {games.map((g) => {
+          {games.map((g, i) => {
             const ms = g.marketSpread!;
             const mk = `${abbrevTeam(g.away)} @ ${abbrevTeam(g.home)}`;
             const k = gkey(g);
             const dog = ms.fav === g.home ? g.away : g.home;
             return (
-              <tr key={k} className={g.off ? "hb-off" : undefined}>
+              <tr key={k} className={[g.off ? "hb-off" : "", i >= LEAD ? "hb-row--more" : ""].filter(Boolean).join(" ") || undefined}>
                 <NcaafGameCell g={g} />
                 <td className="hb-num">
                   <div className="ncline__chips">
@@ -64,6 +69,14 @@ export default function NcaafLinesTable({ games }: { games: NcaafCardGame[] }) {
           })}
         </tbody>
       </table>
+      </div>
+      {extra > 0 && (
+        <label htmlFor="ncline-more" className="hb-moretbl__sum">
+          <span className="hb-more__chev" aria-hidden="true">▸</span>
+          <span className="hb-moretbl__more">See more ({extra} more game{extra === 1 ? "" : "s"})</span>
+          <span className="hb-moretbl__less">See less</span>
+        </label>
+      )}
     </div>
   );
 }
