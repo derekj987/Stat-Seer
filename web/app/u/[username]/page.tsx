@@ -82,6 +82,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             {profile.username}
             {profile.title && <span className="phead__title">{profile.title}</span>}
           </h1>
+          <div className="phead2__tags"><span className="beta-tag">Beta Tester</span></div>
           <p className="phead__meta">
             Member since {since.format(new Date(profile.createdAt))}
             {mutual > 0 && <span className="phead2__mutual"> · {mutual} mutual friend{mutual === 1 ? "" : "s"}</span>}
