@@ -1,0 +1,55 @@
+name: Capture CFB tailgate
+
+# CFB Fan-Stock scan: SB Nation team blogs + r/CFB -> Claude (Sonnet) -> Supabase
+# cfb_tailgate_buzz. NOT a pick and NOT model output -- never graded, never feeds The Model.
+# The team universe is the schools with posted props (the games the app shows), so it scales
+# with the board. SB Nation blogs (Atom) are the reliable primary source; r/CFB is fetched
+# per shard from separate runner IPs to dodge Reddit's single-IP throttle.
+#
+# Use the "test" dispatch mode first (shard 1, no write) to confirm reachability.
+
+on:
+  schedule:
+    - cron: "30 14 * 8-12,1 *"   # daily 14:30 UTC (~9-10am ET), Aug-Jan
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "test = reachability (shard 1, no write); full = all shards + write"
+        type: choice
+        options: [test, full]
+        default: test
+
+concurrency:
+  group: capture-cfb-tailgate
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi anthropic
+      - name: "Scan shard ${{ matrix.shard }}/3 -> Supabase"
+        env:
+          ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          CFBD_API_KEY:         ${{ secrets.CFBD_API_KEY }}
+        run: |
+          if [ "${{ github.event.inputs.mode }}" = "test" ]; then
+            if [ "${{ matrix.shard }}" = "1" ]; then
+              python cfb_tailgate_reddit.py --current --no-extract --shard 1/3
+            else
+              echo "test mode: shard ${{ matrix.shard }} skipped"
+            fi
+          else
+            python cfb_tailgate_reddit.py --current --write --shard ${{ matrix.shard }}/3
+          fi
