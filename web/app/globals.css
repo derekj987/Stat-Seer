@@ -147,13 +147,13 @@ body{background:var(--bg);color:var(--ink);
 .foot{margin-top:30px;padding-top:18px;border-top:1px solid var(--line)}
 .foot p{max-width:70ch;color:var(--muted);font-size:13px;margin:0}
 .foot b{color:var(--ink)}
-/* Prominent "Week N" label at the top of a section page. */
-.pageweek{display:inline-flex;align-items:baseline;gap:7px;margin:2px 0 12px;
-  padding:5px 12px;border-radius:9px;background:var(--surface-2);border:1px solid var(--line)}
-.pageweek__k{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
-.pageweek__n{font-size:17px;font-weight:800;color:var(--ink);line-height:1}
-.pageweek__note{font-size:11px;color:var(--muted);font-weight:600}
-.weeknav{display:flex;align-items:center;gap:8px;margin:10px 0 4px;min-width:0}
+/* Prominent, CENTERED "Week N" label — the anchor the flow + subsections sit under. */
+.pageweek{display:flex;width:fit-content;align-items:baseline;gap:10px;margin:10px auto 6px;
+  padding:9px 22px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line)}
+.pageweek__k{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.pageweek__n{font-size:22px;font-weight:800;color:var(--ink);line-height:1}
+.pageweek__note{font-size:12px;color:var(--muted);font-weight:600}
+.weeknav{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 14px;min-width:0}
 .weeknav__label{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;
   color:var(--muted);font-weight:600;flex:0 0 auto}
 /* Cap the window to ~4 boxes (4×34 + 3×4 gap); the rest slides via the arrows/scroll. */
@@ -594,23 +594,20 @@ a.cw__fname:hover{text-decoration:underline}
    a fully-rounded amber segmented switch matching the homepage toggle style */
 /* subnav pill bar + an inline help scroll beside it; position:relative anchors the
    scroll's bubble so it drops full-width below the row. */
-.subnavrow{position:relative;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 4px}
+/* Subsection tabs — CENTERED under the flow, enlarged with even spacing. */
+.subnavrow{position:relative;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:6px 0 6px}
 .subnavrow .subnav{margin:0}
-/* Fuse the two nav tiers: the section stepper (.flow) and the sub-tabs directly beneath it
-   read as one connected control — tight vertical rhythm, no gap between them. */
 .flow + .subnav,
-.flow + .subnavrow{margin-top:4px}
-.subnav{display:inline-flex;gap:3px;margin:8px 0 4px;padding:3px;border-radius:999px;
+.flow + .subnavrow{margin-top:6px}
+.subnav{display:flex;gap:4px;margin:6px auto;padding:4px;border-radius:999px;
   background:var(--amber-soft);border:1px solid color-mix(in srgb,var(--amber) 35%,transparent);
   width:fit-content;max-width:100%;overflow-x:auto}
-.subnav__t{padding:6px 16px;border-radius:999px;text-decoration:none;font-size:12.5px;
+.subnav__t{padding:9px 22px;border-radius:999px;text-decoration:none;font-size:14px;
   font-weight:700;white-space:nowrap;color:color-mix(in srgb,var(--amber) 78%,var(--muted))}
 .subnav__t:hover{color:var(--amber)}
 .subnav__t.active{background:var(--amber);color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .subnav__t:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
-/* Value Finder tabs slide right to sit under the "Value Finder" flow step (rightmost). */
-/* Value Finder + Context orange tabs are left-justified (like the flow above them). */
-.subnav--context .subnav__t{padding:6px 11px;font-size:12px}
+.subnav--context .subnav__t{padding:9px 18px;font-size:13.5px}
 /* second-level season toggle (Regular / Preseason) — staggered in to the right under
    the area tabs, in darkish-yellow pills to set them apart from the amber area tabs. */
 .subnav--season{background:transparent;border:0;padding:0;gap:8px;margin:2px 0 12px 32px}
@@ -1086,17 +1083,18 @@ a.fauthor:hover{text-decoration:underline}
 /* --- guided flow stepper --- */
 /* Compact breadcrumb: content-width pills, left-aligned (not stretched full-width boxes),
    so the three sections read as a slim stepper rather than three big cards. */
-.flow{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin:12px 0 0}
-.flow__item{display:flex;align-items:center;gap:4px;flex:0 0 auto;min-width:0}
-.flow__step{display:inline-flex;align-items:center;gap:7px;padding:4px 12px;border-radius:999px;flex:0 0 auto;
+/* The section stepper — CENTERED and enlarged so it reads as the page's spine. */
+.flow{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;margin:6px 0 4px}
+.flow__item{display:flex;align-items:center;gap:7px;flex:0 0 auto;min-width:0}
+.flow__step{display:inline-flex;align-items:center;gap:9px;padding:8px 18px;border-radius:999px;flex:0 0 auto;
   text-decoration:none;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
 .flow__step.active{border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
 .flow__step:hover{border-color:var(--accent)}
-.flow__n{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;
-  background:var(--surface-2);font-size:10px;font-weight:800;color:var(--muted);flex:0 0 auto}
+.flow__n{display:inline-flex;align-items:center;justify-content:center;width:23px;height:23px;border-radius:50%;
+  background:var(--surface-2);font-size:12px;font-weight:800;color:var(--muted);flex:0 0 auto}
 .flow__step.active .flow__n{background:var(--accent);color:#fff}
 .flow__l{display:flex;flex-direction:column;line-height:1.15;min-width:0;
-  font-size:11.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* Slim flow: the one-line descriptions are onboarding — kept on the homepage, dropped from
    the per-section stepper so it reads as a compact breadcrumb. */
 .flow__sub{display:none}

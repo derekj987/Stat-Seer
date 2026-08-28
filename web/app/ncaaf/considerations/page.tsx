@@ -38,33 +38,23 @@ export default async function Page({ searchParams }: {
         />
       </header>
 
-      <section className="explainer explainer--wide">
-        <p>
-          <b>The stuff that doesn&apos;t fit in a number.</b> One card per game with the context around it — the
-          <b> site</b>, the <b>poll stakes</b>, our <b>power read</b>, and the <b>scoring environment</b>. These
-          <b> arm your judgment</b>; they are <b>not</b> an adjusted line or a pick. The durable measured backdrop —
-          home field and league strength — sits below.
-        </p>
-      </section>
-
       <WeekBadge week={c.week} />
       <FlowSteps active="context" base="ncaaf" />
 
       <div className="subnavrow">
         <ContextSubnav active="special" base="ncaaf" />
-        <Tip text={<>One card per game with the context around it: the <b>site</b> (neutral sites drop the home edge), the <b>AP poll</b> stakes, each side&apos;s <b>power rating</b> and national rank, and the <b>scoring environment</b> (our total vs the market&apos;s). Context to arm your read — <b>not</b> a pick.</>} />
+        <Tip label="Special Considerations" text={<>
+          <b>The stuff that doesn&apos;t fit in a number.</b> One card per game with the context around it: the
+          <b> site</b> &amp; <b>weather</b> (⚑ marks notable wind), the <b>AP poll</b> stakes, each side&apos;s
+          <b> power rating</b> + national rank, and the <b>scoring environment</b> (our total vs the market&apos;s).
+          These <b>arm your judgment</b> — not a pick. Referee crews and coaching tendencies aren&apos;t published
+          for college, so those rows stay NFL-only. The durable backdrop — home field &amp; league strength — is below.
+        </>} />
       </div>
       <NcaafWeekNav base="/ncaaf/considerations" week={week} />
       <NcaafOffWeek current={c.week} week={week} />
 
       <section className="ncf-sec">
-        <h2 className="ncf-h">Game considerations — Week {c.week}
-          <span className="ncf-h__note">{games.length} games · filter by conference or team</span>
-        </h2>
-        <p className="ncf-note" style={{ marginTop: 0 }}>
-          <b>Note:</b> weather (with a wind flag) is live per game site; referee crews and coaching tendencies
-          aren&apos;t published for college, so those rows are NFL-only for now.
-        </p>
         <NcaafConsiderationsView games={games} ratings={ratings} hfa={cx.hfa} slate={slate} />
       </section>
 
