@@ -124,27 +124,42 @@ def parse_depth(page):
     return out
 
 
-# Ourlads display name -> CFBD school where the prefix rule can't bridge the naming.
+# Ourlads display name (tnorm) -> CFBD school, where neither an exact nor a prefix match
+# bridges the naming convention.
 ALIAS = {
     "central florida": "UCF", "connecticut": "UConn", "hawaii": "Hawai'i",
-    "southern miss": "Southern Mississippi", "louisiana monroe": "Louisiana Monroe",
     "miami florida": "Miami", "miami ohio": "Miami (OH)",
+    "appalachian state": "App State", "north carolina state": "NC State",
+    "louisiana monroe": "UL Monroe", "louisiana lafayette": "Louisiana",
+    "mississippi": "Ole Miss", "southern mississippi": "Southern Miss",
+    "texas san antonio": "UT San Antonio", "texas el paso": "UTEP",
+    "nevada las vegas": "UNLV", "middle tennessee state": "Middle Tennessee",
+    "florida international": "Florida International", "san jose state": "San José State",
 }
 
 
 def map_to_cfbd(index, cfbd_schools):
-    """display-name -> CFBD school, by the same prefix rule cfb_export uses."""
+    """display-name -> CFBD school. Exact match wins; then prefer a CFBD name that is a prefix
+    of the Ourlads name ('Miami Florida' -> 'Miami'); only fall back to the reverse ('Arizona'
+    -> 'Arizona State') when nothing better exists — so 'Arizona' never steals 'Arizona State'."""
+    by_tnorm = {tnorm(s): s for s in cfbd_schools}
     out = {}
     for name, slug, tid in index:
         on = tnorm(name)
         if on in ALIAS:
             out[(name, slug, tid)] = ALIAS[on]; continue
-        best = None
-        for sc in cfbd_schools:
-            cn = tnorm(sc)
-            if cn == on or on.startswith(cn + " ") or cn.startswith(on + " "):
-                if best is None or len(tnorm(best)) < len(cn):
-                    best = sc
+        if on in by_tnorm:                                   # exact
+            out[(name, slug, tid)] = by_tnorm[on]; continue
+        best, best_kind, best_len = None, 9, 0
+        for cn, sc in by_tnorm.items():
+            if on.startswith(cn + " "):                      # Ourlads is more specific
+                kind, ln = 0, len(cn)
+            elif cn.startswith(on + " "):                    # Ourlads is less specific (risky)
+                kind, ln = 1, -len(cn)
+            else:
+                continue
+            if kind < best_kind or (kind == best_kind and ln > best_len):
+                best, best_kind, best_len = sc, kind, ln
         out[(name, slug, tid)] = best
     return out
 

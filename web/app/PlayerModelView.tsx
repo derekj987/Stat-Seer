@@ -173,7 +173,9 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                         // under his yards line) blanks the name/team so the block reads as one.
                         const cont = ri > 0 && sec.rows[ri - 1].player === r.player;
                         const isMore = grpIndex[r.player] >= LEAD;
-                        const slot = playerSlot(r.player, base);
+                        // Depth-chart slot (RB1/WR2) when we have it, else the player's plain
+                        // position (RB/WR/QB) — so every player carries a position tag.
+                        const slot = playerSlot(r.player, base) ?? r.pos;
                         return (
                           <div className={`pmrow pmrow--data${isMore ? " hb-row--more" : ""}${cont ? " pmrow--cont" : ""}`} role="row" key={`${r.player}-${r.market}`}>
                             <span className="pmcell pmcell--player">{cont ? "" : <>{r.player}{slot && <span className="pmslot"> ({slot})</span>}</>}</span>
