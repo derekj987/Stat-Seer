@@ -22,7 +22,7 @@ export default function SignUp() {
       setStatus("error"); setMsg("Password must be at least 8 characters."); return;
     }
     if (!over21) {
-      setStatus("error"); setMsg("You must confirm you are 18+ and agree to the Terms and Privacy Policy."); return;
+      setStatus("error"); setMsg("You must confirm you are 21+ and agree to the Terms and Privacy Policy."); return;
     }
     setStatus("loading");
     const supabase = createClient();
@@ -72,7 +72,7 @@ export default function SignUp() {
             </label>
             <label className="authcheck">
               <input type="checkbox" checked={over21} onChange={(e) => setOver21(e.target.checked)} />
-              <span>I am 18 or older and agree to the{" "}
+              <span>I am 21 or older and agree to the{" "}
                 <a href="/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a> and{" "}
                 <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.</span>
             </label>

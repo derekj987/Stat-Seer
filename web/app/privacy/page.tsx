@@ -5,7 +5,7 @@ export const metadata = {
   description: "How StatSeer collects, uses, and protects your information.",
 };
 
-const UPDATED = "August 23, 2026";
+const UPDATED = "August 27, 2026";
 
 export default function Privacy() {
   return (
@@ -81,7 +81,7 @@ export default function Privacy() {
         <section className="legal__sec">
           <h2>7. Children</h2>
           <p>
-            StatSeer is intended only for adults of legal age (18+). It is not directed to, and we do not knowingly
+            StatSeer is intended only for adults of legal age (21+). It is not directed to, and we do not knowingly
             collect information from, anyone under 18. If you believe a minor has provided us information, contact us and
             we will remove it.
           </p>
@@ -105,7 +105,7 @@ export default function Privacy() {
         </section>
 
         <p className="legal__foot">
-          See also our <a href="/terms">Terms of Service</a>. StatSeer is for adults of legal age only (18+).
+          See also our <a href="/terms">Terms of Service</a>. StatSeer is for adults of legal age only (21+).
         </p>
       </article>
     </main>

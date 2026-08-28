@@ -5,7 +5,7 @@ export const metadata = {
   description: "The terms that govern your use of StatSeer.",
 };
 
-const UPDATED = "August 23, 2026";
+const UPDATED = "August 27, 2026";
 
 export default function Terms() {
   return (
@@ -25,7 +25,7 @@ export default function Terms() {
         <section className="legal__sec">
           <h2>1. Eligibility &amp; age</h2>
           <p>
-            You must be at least <b>18 years old</b> (or the minimum age required for online gambling activity in your
+            You must be at least <b>21 years old</b> (or the minimum age required for online gambling activity in your
             jurisdiction, whichever is higher) to use the Service. By using StatSeer you represent that you meet this
             requirement and that your use is legal where you live. Sports-betting laws vary by state and country and are
             your responsibility to know and follow.
@@ -146,7 +146,7 @@ export default function Terms() {
         </section>
 
         <p className="legal__foot">
-          StatSeer is statistical analysis, <b>not betting or financial advice</b>. For adults of legal age only (18+).
+          StatSeer is statistical analysis, <b>not betting or financial advice</b>. For adults of legal age only (21+).
           Please gamble responsibly. See our <a href="/privacy">Privacy Policy</a>.
         </p>
       </article>
