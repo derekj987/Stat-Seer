@@ -3,8 +3,9 @@
 // Value Finder's price-shopping props. The Python pipeline is built + validated; the
 // weekly projection OUTPUT wires in here as the season's usage data flows, so each
 // category currently scaffolds an honest "arriving" state rather than inventing numbers.
-import { Brand, FlowSteps, ModelSubnav, ScrollHint } from "./Nav";
+import { Brand, FlowSteps, ModelSubnav, ScrollHint, WeekBadge } from "./Nav";
 import { WeekNav } from "./WeekNav";
+import Tip from "./Tip";
 import { PLAYER_PROJECTIONS, PROJ_WEEK, PROJ_PRIOR, type PlayerProj } from "@/lib/playerProjections";
 import { NCAAF_PLAYER_PROJECTIONS } from "@/lib/ncaafPlayerProjections";
 import { isRealistic } from "@/lib/depthChart";
@@ -94,21 +95,13 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
         />
       </header>
 
-      <section className="explainer explainer--wide explainer--clamp">
-        <input type="checkbox" id="xclamp-pm" className="xclamp-toggle" aria-hidden="true" tabIndex={-1} />
-        <p className="xclamp-text">
-          Our <b>line-blind player-prop projections</b> — our own number for each prop, set without looking
-          at the book&apos;s line, shown beside it with an over/under lean. Like the game model, these are
-          <b> published and graded in public</b> — not sold as locks.
-        </p>
-        <label htmlFor="xclamp-pm" className="xclamp-btn">
-          <span className="xclamp-btn__more">See more ▾</span>
-          <span className="xclamp-btn__less">See less ▴</span>
-        </label>
-      </section>
-
+      <WeekBadge week={week} tip={
+        <Tip label="Player Prop Model" text={<>Our <b>line-blind player-prop projections</b> — our own number
+          for each prop, set without looking at the book&apos;s line, shown beside it with an over/under lean.
+          Like the game model, these are <b>published and graded in public</b> — not sold as locks.</>} />
+      } />
       <FlowSteps active="analyze" base={base} />
-      <ModelSubnav active="player" base={base} />
+      <div className="subnavrow"><ModelSubnav active="player" base={base} /></div>
 
       <nav className="catnav" aria-label="Player prop category">
         {PLAYER_CATS.map((c) => (
