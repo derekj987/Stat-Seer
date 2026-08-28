@@ -80,9 +80,10 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
         <div className="phead2__id">
           <h1 className={profile.role === "founder" ? "phead__name founder" : "phead__name"}>
             {profile.username}
-            {profile.title && <span className="phead__title">{profile.title}</span>}
           </h1>
-          <div className="phead2__tags"><span className="beta-tag">Beta Tester</span></div>
+          {/* Title tag under the name: "The Creator" (or any custom title) replaces the
+              universal "Beta Tester" badge for members who have one. */}
+          <div className="phead2__tags"><span className="beta-tag">{profile.title ?? "Beta Tester"}</span></div>
           <p className="phead__meta">
             Member since {since.format(new Date(profile.createdAt))}
             {mutual > 0 && <span className="phead2__mutual"> · {mutual} mutual friend{mutual === 1 ? "" : "s"}</span>}
