@@ -205,6 +205,17 @@ def over_split(games, market, line, pred):
     return sum(1 for v in vals if v > line), len(vals)
 
 
+def infer_td_pos(games):
+    """Position for an anytime-TD scorer from their usage: a clear passer is a QB, otherwise
+    RB vs WR by whether they gain more rushing or receiving yards over their game log."""
+    passing = sum(g["pass_yds"] or 0 for g in games)
+    rush = sum(g["rush_yds"] or 0 for g in games)
+    rec = sum(g["rec_yds"] or 0 for g in games)
+    if passing >= 300 and passing > rush + rec:
+        return "QB"
+    return "RB" if rush >= rec else "WR"
+
+
 def project(games, market):
     """Line-blind baseline: prior-season per-game average (per-game TD rate for anytime TD)."""
     prior = [g for g in games if g["season"] == PRIOR_SEASON]
@@ -237,6 +248,8 @@ def build(props, key):
             missed += 1
             continue
         matched += 1
+        if mk == "anytime_td":
+            pos = infer_td_pos(games)   # RB / WR / QB from actual usage, not a fixed default
         line = p["line"]
         cO, cG = over_split(games, mk, line, lambda g: True)
         pO, pG = over_split(games, mk, line, lambda g: g["season"] == PRIOR_SEASON)
