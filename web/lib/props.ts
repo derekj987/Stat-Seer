@@ -62,6 +62,7 @@ export interface Quote {
   books: string[]; // books at that price
   byBook: Record<string, number>; // every book's price — needed for single-book parlays
   eventId: string;
+  slot?: string; // position + depth rank, e.g. "RB1" — attached by the page for display
 }
 export interface MarketBlock {
   market: string;

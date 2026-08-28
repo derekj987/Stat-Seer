@@ -26,9 +26,10 @@ function PropChip({ q, market, marketLabel, game, saved, onToggle }: {
   q: Quote; market: string; marketLabel: string; game: string; saved: boolean; onToggle: (l: Leg) => void;
 }) {
   const bet = marketLabel === "ATTD" ? "ATTD" : sideLabel(q.side, q.line) || q.side;
+  const name = q.slot ? `${q.player} (${q.slot})` : q.player;
   const leg: Leg = {
     id: `${q.eventId}:${market}:${q.player}:${q.side}:${q.line}`,
-    game, player: q.player, bet, best: q.price, books: q.books, byBook: q.byBook,
+    game, player: name, bet, best: q.price, books: q.books, byBook: q.byBook,
   };
   return (
     <button
@@ -38,7 +39,7 @@ function PropChip({ q, market, marketLabel, game, saved, onToggle }: {
       aria-pressed={saved}
       title={saved ? "Remove from slip" : "Add to slip"}
     >
-      <span className="propq__player">{q.player}</span>
+      <span className="propq__player">{q.player}{q.slot && <span className="propq__slot"> ({q.slot})</span>}</span>
       <span className="propq__side">{sideLabel(q.side, q.line)}</span>
       <span className="propq__price">{fmtOdds(q.price)}</span>
       <span className="propq__book">{q.books.join(" / ")}</span>

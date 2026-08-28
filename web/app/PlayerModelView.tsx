@@ -8,7 +8,10 @@ import { WeekNav } from "./WeekNav";
 import { PLAYER_PROJECTIONS, PROJ_WEEK, PROJ_PRIOR, type PlayerProj } from "@/lib/playerProjections";
 import { NCAAF_PLAYER_PROJECTIONS } from "@/lib/ncaafPlayerProjections";
 import { isRealistic } from "@/lib/depthChart";
-import PropAdd from "./PropAdd";
+import PropAdd, { type PricedSide } from "./PropAdd";
+import { playerSlot, normName } from "@/lib/playerSlot";
+import { weekProps } from "@/lib/props";
+import { cfbWeekProps } from "@/lib/cfbProps";
 
 export interface PlayerCat {
   key: string;
@@ -29,8 +32,19 @@ export const playerCatByKey = (k: string): PlayerCat =>
   PLAYER_CATS.find((c) => c.key === k) ?? PLAYER_CATS[0];
 
 
-export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "ncaaf"; cat: string; week: number }) {
+export default async function PlayerModelView({ base, cat, week }: { base: "nfl" | "ncaaf"; cat: string; week: number }) {
   const active = playerCatByKey(cat);
+  // Live book market per (player, market, side) — so the ＋ chips add the real best price +
+  // every book (byBook), exactly like Value Finder. Missing → PropAdd uses consensus.
+  const priceIx = new Map<string, PricedSide>();
+  try {
+    const priced = base === "ncaaf" ? await cfbWeekProps() : await weekProps(week);
+    for (const pg of priced) for (const m of pg.markets) for (const q of m.quotes) {
+      priceIx.set(`${normName(q.player)}|${m.market}|${q.side}`, { line: q.line, price: q.price, books: q.books, byBook: q.byBook });
+    }
+  } catch { /* no market yet — chips fall back to consensus pricing */ }
+  const priceFor = (player: string, mkt: string, side: string): PricedSide | null =>
+    priceIx.get(`${normName(player)}|player_${mkt}|${side}`) ?? null;
   const home = base === "ncaaf" ? "/ncaaf/model/players" : "/model/players";
   const catHref = (c: string) => `${home}?cat=${c}&week=${week}`;
 
@@ -159,9 +173,10 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
                         // under his yards line) blanks the name/team so the block reads as one.
                         const cont = ri > 0 && sec.rows[ri - 1].player === r.player;
                         const isMore = grpIndex[r.player] >= LEAD;
+                        const slot = playerSlot(r.player, base);
                         return (
                           <div className={`pmrow pmrow--data${isMore ? " hb-row--more" : ""}${cont ? " pmrow--cont" : ""}`} role="row" key={`${r.player}-${r.market}`}>
-                            <span className="pmcell pmcell--player">{cont ? "" : r.player}</span>
+                            <span className="pmcell pmcell--player">{cont ? "" : <>{r.player}{slot && <span className="pmslot"> ({slot})</span>}</>}</span>
                             <span className="pmcell pmcell--team">{cont ? "" : r.team}</span>
                             <span className="pmcell pmcell--num">{r.book}{unitFor(r.market)}</span>
                             <span className={`pmcell pmcell--num pmcell--proj${r.proj >= r.book ? "" : " pmcell--projdown"}`}>
@@ -183,7 +198,10 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
                               </span>
                             </>}
                             <span className="pmcell pmcell--add">
-                              <PropAdd player={r.player} market={r.market} line={r.book} game={g} />
+                              <PropAdd player={r.player} market={r.market} line={r.book} game={g} slot={slot}
+                                over={priceFor(r.player, r.market, "Over")}
+                                under={priceFor(r.player, r.market, "Under")}
+                                attd={r.market === "anytime_td" ? priceFor(r.player, "anytime_td", "Yes") : null} />
                             </span>
                           </div>
                         );

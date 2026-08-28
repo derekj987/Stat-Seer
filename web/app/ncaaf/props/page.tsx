@@ -3,6 +3,7 @@ import { NcaafSoon } from "../Soon";
 import PropsView from "../../props/PropsView";
 import { cfbWeekProps } from "@/lib/cfbProps";
 import { CATEGORIES, categoryByKey } from "@/lib/props";
+import { playerSlot } from "@/lib/playerSlot";
 
 function CatNav({ current }: { current: string }) {
   return (
@@ -35,7 +36,12 @@ export default async function Page({ searchParams }: PageProps<"/ncaaf/props">) 
   // Filter each game to the active category's markets — same tabbed layout as the NFL board
   // and The Model, so every prop type is represented (not a single ATTD wall).
   const games = all
-    .map((g) => ({ ...g, markets: g.markets.filter((m) => catSet.has(`player_${m.market}`) || catSet.has(m.market)) }))
+    .map((g) => ({
+      ...g,
+      markets: g.markets.filter((m) => catSet.has(`player_${m.market}`) || catSet.has(m.market)).map((m) => ({
+        ...m, quotes: m.quotes.map((q) => ({ ...q, slot: playerSlot(q.player, "ncaaf") ?? undefined })),
+      })),
+    }))
     .filter((g) => g.markets.length > 0);
 
   return (

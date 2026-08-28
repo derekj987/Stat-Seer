@@ -20,7 +20,6 @@ const ORDER: SlipKind[] = ["line", "prop", "model", "fan"];
 export default function SlipBar() {
   const { items, remove, clear } = useSlip();
   const [open, setOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
   // Share-to-a-friend state. Both "Send through Messenger" (a direct message) and
   // "Post to a wall" (a wall post) use the SAME friend picker. Hooks must run before the
@@ -72,29 +71,6 @@ export default function SlipBar() {
   const groups = ORDER
     .map((k) => [k, items.filter((i) => i.kind === k)] as const)
     .filter(([, list]) => list.length);
-
-  async function copySlip() {
-    const lines = items.map((i) => {
-      const lb = i.byBook && Object.keys(i.byBook).length ? legBest(i) : null;
-      const price = lb ? lb.best : i.price;
-      const books = lb ? lb.books : i.books;
-      return `• [${KIND_LABEL[i.kind]}] ${i.title}` +
-        (i.detail ? ` — ${i.detail}` : "") +
-        (price !== undefined ? `  ${fmtOdds(price)}` : "") +
-        (books?.length ? `  (best: ${books.map(bookName).join(" / ")})` : "");
-    });
-    const footer = parlay.full && legs.length > 1
-      ? `\nOne-book parlay: ${bookName(parlay.full.book)} ${decToAmerican(parlay.full.decimal)} on all ${legs.length} legs.`
-      : "";
-    const text =
-      `My StatSeer slip — ${items.length} pick${items.length === 1 ? "" : "s"}\n` +
-      `${lines.join("\n")}${footer}\n\nBuild your own at statseer.vercel.app`;
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch { /* clipboard blocked */ }
-  }
 
   // Share a link that re-opens this slip in StatSeer (installed app or browser).
   async function shareSlip() {
@@ -270,7 +246,6 @@ export default function SlipBar() {
             </p>
             <div className="slipbar__actions">
               <button className="slipbar__share" onClick={shareSlip}>{shared ? "Link copied ✓" : "Share slip"}</button>
-              <button className="slipbar__copy" onClick={copySlip}>{copied ? "Copied ✓" : "Copy slip"}</button>
               <button className="slipbar__msg" onClick={() => openPicker("msg")} aria-expanded={picker === "msg"}>
                 {picker === "msg" ? "Close" : "Send to a chat"}
               </button>
