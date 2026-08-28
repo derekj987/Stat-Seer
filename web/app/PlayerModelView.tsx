@@ -6,6 +6,7 @@
 import { Brand, FlowSteps, ModelSubnav, ScrollHint } from "./Nav";
 import { WeekNav } from "./WeekNav";
 import { PLAYER_PROJECTIONS, PROJ_WEEK, PROJ_PRIOR, type PlayerProj } from "@/lib/playerProjections";
+import { NCAAF_PLAYER_PROJECTIONS } from "@/lib/ncaafPlayerProjections";
 import { isRealistic } from "@/lib/depthChart";
 
 export interface PlayerCat {
@@ -32,11 +33,13 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
   const home = base === "ncaaf" ? "/ncaaf/model/players" : "/model/players";
   const catHref = (c: string) => `${home}?cat=${c}&week=${week}`;
 
-  // Real projections exist for NFL only, for the current projection week. Group the active
-  // category's rows by game.
-  const onProjWeek = base === "nfl" && week === PROJ_WEEK;
+  // Projections: NFL from PLAYER_PROJECTIONS (Week PROJ_WEEK), NCAAF from the CFB export.
+  // Group the active category's rows by game. (isRealistic is an NFL depth-chart filter, so
+  // it's applied to NFL only — CFB rows are already limited to players with posted props.)
+  const projections = base === "ncaaf" ? NCAAF_PLAYER_PROJECTIONS : PLAYER_PROJECTIONS;
+  const onProjWeek = base === "ncaaf" ? projections.length > 0 : week === PROJ_WEEK;
   const rows: PlayerProj[] = onProjWeek
-    ? PLAYER_PROJECTIONS.filter((p) => p.cat === active.key && isRealistic(p.player))
+    ? projections.filter((p) => p.cat === active.key && (base === "nfl" ? isRealistic(p.player) : true))
     : [];
   const games: string[] = [];
   const byGame: Record<string, PlayerProj[]> = {};
