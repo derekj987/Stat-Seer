@@ -23,41 +23,35 @@ const TEAM_COLOR: Record<string, string> = {
 };
 const teamColor = (t: string) => TEAM_COLOR[t] ?? "var(--gold)";
 
+// A feed post: player + "{team} fans buying/selling", the fan take as the body, then a bold
+// VERDICT (the bettable angle) with add-to-slip. Reads like a tweet with a call attached.
 function BuzzCard({ b }: { b: Buzz }) {
   const label = stockLabel(b.direction, b.heat);
+  const srcs = [...new Map(b.sources.map((s) => [s.board, s])).values()];
   return (
-    <article className={`cxcard cxcard--fan cxcard--${b.direction}`}>
-      <header className="cxcard__head">
-        <span className="matchup" style={{ color: teamColor(b.team) }}>{b.player}</span>
+    <article className={`tgpost tgpost--${b.direction}`}>
+      <header className="tgpost__head">
+        <span className="tgpost__player" style={{ color: teamColor(b.team) }}>{b.player}</span>
+        <span className="tgpost__who">{b.team} fans {b.direction === "up" ? "buying" : "selling"}</span>
         <span className={`tgstock tgstock--${b.direction}`} title={`Fan stock: ${label}`}>
           <span className="tgstock__arw" aria-hidden="true">{stockArrows(b.direction, b.heat)}</span>
           <span className="tgstock__l">{label}</span>
         </span>
       </header>
-      <dl className="cxcard__rows">
-        <div className="cxrow">
-          <dt className="cxrow__k">Prop</dt>
-          <dd className="cxrow__v">
-            <b className="tgprop">{b.angle}</b>
-            <span className={`tgside tgside--${b.direction}`}>{b.direction === "up" ? "fans buying ▲" : "fans selling ▼"}</span>
-          </dd>
-        </div>
-        <div className="cxrow">
-          <dt className="cxrow__k">Why</dt>
-          <dd className="cxrow__v">{b.take}{b.matchup ? ` (${b.matchup})` : ""}</dd>
-        </div>
-        <div className="cxrow">
-          <dt className="cxrow__k">Heard on</dt>
-          <dd className="cxrow__v cxfan__src">
-            {[...new Map(b.sources.map((s) => [s.board, s])).values()].map((s, i) => (
-              <span key={`${b.id}-${i}`} className="tgsrc">
-                {s.url ? <a href={s.url} target="_blank" rel="noopener noreferrer">{s.board}</a> : s.board}
-              </span>
-            ))}
-            <AddToSlip item={{ id: `fan-${b.id}`, kind: "fan", title: b.player, detail: `${b.team} — ${b.angle}` }} />
-          </dd>
-        </div>
-      </dl>
+      <p className="tgpost__body">{b.take}{b.matchup ? ` (${b.matchup})` : ""}</p>
+      <div className={`tgverdict tgverdict--${b.direction}`}>
+        <span className="tgverdict__k">Verdict</span>
+        <b className="tgprop">{b.angle}</b>
+        <span className="tgverdict__side">{b.direction === "up" ? "▲ over" : "▼ under"}</span>
+        <AddToSlip item={{ id: `fan-${b.id}`, kind: "fan", title: b.player, detail: `${b.team} — ${b.angle}` }} />
+      </div>
+      <div className="tgpost__foot">
+        Heard on {srcs.map((s, i) => (
+          <span key={`${b.id}-${i}`} className="tgsrc">
+            {s.url ? <a href={s.url} target="_blank" rel="noopener noreferrer">{s.board}</a> : s.board}
+          </span>
+        ))}
+      </div>
     </article>
   );
 }
@@ -111,8 +105,8 @@ export default async function Page() {
             <h3 className="tgteam__h" style={{ color: teamColor(team) }}>
               {team}<span className="tgteam__n">{items.length}</span>
             </h3>
-            <div className="cxgrid">
-              {[...items].sort((a, b) => a.player.localeCompare(b.player)).map((b) => <BuzzCard key={b.id} b={b} />)}
+            <div className="tgfeed">
+              {[...items].sort((a, b) => b.heat - a.heat || a.player.localeCompare(b.player)).map((b) => <BuzzCard key={b.id} b={b} />)}
             </div>
           </section>
         ))}
