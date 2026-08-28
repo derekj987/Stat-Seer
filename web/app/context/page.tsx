@@ -132,6 +132,9 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
       <div className="subnavrow"><ContextSubnav active="upset" /></div>
       <WeekNav min={min} max={max} current={week} base="/context" />
 
+      {/* --- Chaos Board leads the page: the speculative upset lab, first thing members see --- */}
+      <ChaosBoard sport="NFL" entries={chaos} windowLabel={winLabel} />
+
       {/* --- Upset Model: where our line-blind model likes the underdog --- */}
       <section className="ctxsec">
         <div className="ctxsec__head">
@@ -157,9 +160,6 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
         Looking for the market&apos;s line beside our read on every game? That full model view now
         lives on <a href="/model">The Model</a>.
       </p>
-
-      {/* --- The Upset Lab: a speculative chaos board, under our model's honest read --- */}
-      <ChaosBoard sport="NFL" entries={chaos} windowLabel={winLabel} />
 
       {/* --- Honest roadmap: data-dependent panels not yet live --- */}
       <section className="ctxsec">

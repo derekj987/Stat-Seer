@@ -47,7 +47,8 @@ export function ChaosBoard({
   const improveOn = entries.some((e) => e.improveActive);
   return (
     <section className="ctxsec cb">
-      <h2 className="ncf-h">The Upset Lab <span className="cb__tag">chaos board</span></h2>
+      <h2 className="ncf-h">Chaos Board</h2>
+      <p className="cb__caption">See what we&apos;re brewing in the <b>Upset Lab</b>.</p>
       <details className="cb__intro">
         <summary className="cb__introsum">What is this? — the aggressive bettor&apos;s chaos board · just for fun, not a pick</summary>
         <div className="cb__introbody">

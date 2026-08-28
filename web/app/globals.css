@@ -1126,6 +1126,10 @@ a.fauthor:hover{text-decoration:underline}
 
 /* --- The Upset Lab / Chaos Board (speculative panel) --- */
 .cb{margin-top:22px}
+.cb__caption{margin:2px 0 12px;font-size:13.5px;color:var(--muted);font-weight:600}
+.cb__caption b{color:var(--gold)}
+/* When the Chaos Board leads the page, no top margin. */
+.cb--top{margin-top:0}
 .cb__tag{font-family:var(--font-mono);font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
   color:var(--key);background:var(--key-soft);border-radius:5px;padding:2px 6px;vertical-align:middle;margin-left:6px}
 .cb__intro{margin:0 0 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);overflow:hidden}

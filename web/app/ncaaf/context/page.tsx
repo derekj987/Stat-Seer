@@ -57,6 +57,9 @@ export default async function Page({ searchParams }: {
       <NcaafWeekNav base="/ncaaf/context" week={week} />
       <NcaafOffWeek current={c.week} week={week} />
 
+      {/* --- Chaos Board leads the page: the speculative upset lab, first thing members see --- */}
+      <ChaosBoard sport="NCAAF" entries={chaos} windowLabel={winLabel} />
+
       {/* --- Upset Model: where our rating backs the market's underdog --- */}
       <section className="ctxsec">
         <h2 className="ncf-h">Upset Model</h2>
@@ -81,9 +84,6 @@ export default async function Page({ searchParams }: {
         Looking for the market&apos;s line beside our read on every game? That full model view lives on{" "}
         <a href="/ncaaf/model">The Model</a>.
       </p>
-
-      {/* --- The Upset Lab: a speculative chaos board, under our model's honest read --- */}
-      <ChaosBoard sport="NCAAF" entries={chaos} windowLabel={winLabel} />
 
       {/* --- Honest roadmap: data-dependent panels not yet live for CFB --- */}
       <section className="ctxsec">
