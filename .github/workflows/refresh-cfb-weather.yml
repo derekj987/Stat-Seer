@@ -1,0 +1,50 @@
+name: Refresh CFB weather
+
+# Regenerates web/lib/cfbWeatherData.ts — game-site weather (Open-Meteo) for the current CFB
+# week, mapped via CFBD venues so neutral sites resolve correctly. Forecasts shift daily, so
+# this runs daily in-season and commits the file (Vercel auto-deploys). CONTEXT, not a pick.
+
+on:
+  schedule:
+    - cron: "0 11 * 8-12,1 *"   # daily 11:00 UTC (~6-7am ET), Aug-Jan
+  workflow_dispatch: {}
+
+concurrency:
+  group: refresh-cfb-weather
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi
+
+      - name: Build CFB weather
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+        run: python cfb_weather.py
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- web/lib/cfbWeatherData.ts; then
+            echo "No weather change — nothing to commit."; exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/lib/cfbWeatherData.ts
+          git commit -m "chore: refresh CFB game-site weather (auto)"
+          for i in 1 2 3 4 5; do
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || git rebase --abort || true
+            if git push; then echo "pushed on attempt $i"; exit 0; fi
+            echo "push attempt $i lost the race; retrying..."; sleep $((RANDOM % 5 + 2))
+          done
+          echo "push still rejected after 5 attempts"; exit 1
