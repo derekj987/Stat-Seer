@@ -1126,6 +1126,9 @@ a.fauthor:hover{text-decoration:underline}
 
 /* --- The Upset Lab / Chaos Board (speculative panel) --- */
 .cb{margin-top:22px}
+/* Chaos Board banner image — full card width, cropped to a horizontal strip. */
+.cb__banner{display:block;width:100%;height:clamp(150px,20vw,230px);object-fit:cover;object-position:center;
+  border-radius:14px;border:1px solid var(--line);margin:0 0 4px}
 .cb__caption{margin:2px 0 12px;font-size:13.5px;color:var(--muted);font-weight:600}
 .cb__caption b{color:var(--gold)}
 /* When the Chaos Board leads the page, no top margin. */
@@ -3316,6 +3319,10 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
   color:var(--ink);min-height:78px;animation:hlb-in .35s ease}
 @keyframes hlb-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 .hlb__emoji{font-size:30px;flex:0 0 auto;line-height:1}
+/* Section artwork inside a slide — a wide thumbnail that grows on desktop, compact on phone. */
+.hlb__img{flex:0 0 auto;width:clamp(96px,22vw,240px);height:clamp(64px,9vw,104px);object-fit:cover;
+  border-radius:10px;border:1px solid var(--line);display:block}
+@media (max-width:640px){.hlb__img{width:88px;height:60px}}
 .hlb__body{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 auto}
 .hlb__kicker{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
 .hlb__title{font-size:15px;font-weight:800;letter-spacing:-.01em}

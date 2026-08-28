@@ -47,7 +47,8 @@ export function ChaosBoard({
   const improveOn = entries.some((e) => e.improveActive);
   return (
     <section className="ctxsec cb">
-      <h2 className="ncf-h">Chaos Board</h2>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/chaosboard.png" alt="Chaos Board" className="cb__banner" />
       <p className="cb__caption">See what we&apos;re brewing in the <b>Upset Lab</b>.</p>
       <details className="cb__intro">
         <summary className="cb__introsum">What is this? — the aggressive bettor&apos;s chaos board · just for fun, not a pick</summary>

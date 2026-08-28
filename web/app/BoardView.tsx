@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import type { Game } from "@/lib/board";
-import { ShopSubnav, Brand, ValueFinderDrawer, FlowSteps, ValueFinderNote } from "./Nav";
+import { ShopSubnav, Brand, ValueFinderDrawer, FlowSteps, ValueFinderNote, WeekBadge } from "./Nav";
 import { WeekNav } from "./WeekNav";
 import { useSlip } from "@/lib/slip";
 import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
@@ -169,9 +169,10 @@ export default function BoardView({
 
         <ValueFinderDrawer />
 
+        <WeekBadge week={week} />
         <ValueFinderNote />
         <FlowSteps active="value" />
-        <ShopSubnav active="lines" />
+        <div className="subnavrow"><ShopSubnav active="lines" /></div>
 
         <WeekNav min={min} max={max} current={week} base="/lines" />
 

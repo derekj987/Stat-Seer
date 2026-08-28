@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 // snapshot on the homepage. Chaos Board leads, then each player-prop analysis. Auto-advances,
 // pauses on hover, dots to jump. Client-only; links are plain <a> so navigation is normal.
 type Sport = "nfl" | "ncaaf";
-interface Slide { emoji: string; kicker: string; title: string; blurb: string; path: string; }
+interface Slide { emoji: string; kicker: string; title: string; blurb: string; path: string; img?: string; }
 
 function slides(sport: Sport): Slide[] {
   const ctx = sport === "ncaaf" ? "/ncaaf/context" : "/context";
@@ -13,7 +13,8 @@ function slides(sport: Sport): Slide[] {
   const best = sport === "ncaaf" ? "/ncaaf/best" : "/best";
   return [
     { emoji: "🌪", kicker: "New · just for fun", title: "The Upset Lab — Chaos Board",
-      blurb: "Which underdogs could win outright, ranked by pure chaos potential — for the aggressive bettor.", path: ctx },
+      blurb: "Which underdogs could win outright, ranked by pure chaos potential — for the aggressive bettor.",
+      path: ctx, img: "/chaosboard.png" },
     { emoji: "🎯", kicker: "Player Model", title: "Passing yards & TDs",
       blurb: "Every QB's book line beside our line-blind projection, with the prior-season hit rate.", path: `${players}?cat=passing` },
     { emoji: "🏈", kicker: "Player Model", title: "Rushing yards",
@@ -48,8 +49,11 @@ export function HighlightBanner({ sport }: { sport: Sport }) {
       onMouseLeave={() => setPaused(false)}
       aria-label="Explore the site"
     >
-      <a className="hlb__slide" href={s.path} key={i}>
-        <span className="hlb__emoji" aria-hidden="true">{s.emoji}</span>
+      <a className={s.img ? "hlb__slide hlb__slide--img" : "hlb__slide"} href={s.path} key={i}>
+        {s.img
+          // eslint-disable-next-line @next/next/no-img-element
+          ? <img className="hlb__img" src={s.img} alt="" />
+          : <span className="hlb__emoji" aria-hidden="true">{s.emoji}</span>}
         <span className="hlb__body">
           <span className="hlb__kicker">{s.kicker}</span>
           <span className="hlb__title">{s.title}</span>
