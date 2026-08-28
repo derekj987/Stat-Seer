@@ -147,11 +147,13 @@ body{background:var(--bg);color:var(--ink);
 .foot{margin-top:30px;padding-top:18px;border-top:1px solid var(--line)}
 .foot p{max-width:70ch;color:var(--muted);font-size:13px;margin:0}
 .foot b{color:var(--ink)}
-/* Prominent, CENTERED "Week N" label — the anchor the flow + subsections sit under. */
-.pageweek{display:flex;width:fit-content;align-items:baseline;gap:10px;margin:10px auto 6px;
-  padding:9px 22px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line)}
+/* Prominent, CENTERED "Week N" label — the anchor the flow + subsections sit under. The
+   number pops in bold gold. */
+.pageweek{display:flex;width:fit-content;align-items:baseline;gap:11px;margin:10px auto 8px;
+  padding:10px 26px;border-radius:13px;background:var(--surface-2);
+  border:1px solid color-mix(in srgb,var(--gold) 35%,var(--line))}
 .pageweek__k{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
-.pageweek__n{font-size:22px;font-weight:800;color:var(--ink);line-height:1}
+.pageweek__n{font-size:26px;font-weight:900;color:var(--gold);line-height:1}
 .pageweek__note{font-size:12px;color:var(--muted);font-weight:600}
 .weeknav{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 14px;min-width:0}
 .weeknav__label{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;
@@ -599,15 +601,15 @@ a.cw__fname:hover{text-decoration:underline}
 .subnavrow .subnav{margin:0}
 .flow + .subnav,
 .flow + .subnavrow{margin-top:6px}
-.subnav{display:flex;gap:4px;margin:6px auto;padding:4px;border-radius:999px;
+.subnav{display:flex;gap:5px;margin:6px auto;padding:5px;border-radius:999px;
   background:var(--amber-soft);border:1px solid color-mix(in srgb,var(--amber) 35%,transparent);
   width:fit-content;max-width:100%;overflow-x:auto}
-.subnav__t{padding:9px 22px;border-radius:999px;text-decoration:none;font-size:14px;
+.subnav__t{padding:12px 28px;border-radius:999px;text-decoration:none;font-size:15.5px;
   font-weight:700;white-space:nowrap;color:color-mix(in srgb,var(--amber) 78%,var(--muted))}
 .subnav__t:hover{color:var(--amber)}
 .subnav__t.active{background:var(--amber);color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .subnav__t:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
-.subnav--context .subnav__t{padding:9px 18px;font-size:13.5px}
+.subnav--context .subnav__t{padding:12px 22px;font-size:15px}
 /* second-level season toggle (Regular / Preseason) — staggered in to the right under
    the area tabs, in darkish-yellow pills to set them apart from the amber area tabs. */
 .subnav--season{background:transparent;border:0;padding:0;gap:8px;margin:2px 0 12px 32px}
@@ -1086,15 +1088,15 @@ a.fauthor:hover{text-decoration:underline}
 /* The section stepper — CENTERED and enlarged so it reads as the page's spine. */
 .flow{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;margin:6px 0 4px}
 .flow__item{display:flex;align-items:center;gap:7px;flex:0 0 auto;min-width:0}
-.flow__step{display:inline-flex;align-items:center;gap:9px;padding:8px 18px;border-radius:999px;flex:0 0 auto;
+.flow__step{display:inline-flex;align-items:center;gap:10px;padding:11px 22px;border-radius:999px;flex:0 0 auto;
   text-decoration:none;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
 .flow__step.active{border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
 .flow__step:hover{border-color:var(--accent)}
-.flow__n{display:inline-flex;align-items:center;justify-content:center;width:23px;height:23px;border-radius:50%;
-  background:var(--surface-2);font-size:12px;font-weight:800;color:var(--muted);flex:0 0 auto}
+.flow__n{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;
+  background:var(--surface-2);font-size:13px;font-weight:800;color:var(--muted);flex:0 0 auto}
 .flow__step.active .flow__n{background:var(--accent);color:#fff}
 .flow__l{display:flex;flex-direction:column;line-height:1.15;min-width:0;
-  font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  font-size:15.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* Slim flow: the one-line descriptions are onboarding — kept on the homepage, dropped from
    the per-section stepper so it reads as a compact breadcrumb. */
 .flow__sub{display:none}
@@ -2027,8 +2029,8 @@ a.snav__dfeat{display:block}
   border-radius:99px;padding:1px 8px;letter-spacing:0}
 .tgteam__conf{margin-left:auto;font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.02em;text-transform:none}
 /* Local Intelligence navigator: conference -> team dropdowns + this-week's-slate toggle */
-.lictl{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin:0 0 20px;
-  padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.lictl{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:center;gap:14px;margin:0 0 20px;
+  padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
 .lictl__f{display:flex;flex-direction:column;gap:4px}
 .lictl__k{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .lictl__sel{font-size:13px;font-weight:600;color:var(--ink);background:var(--surface-2);
@@ -2037,7 +2039,7 @@ a.snav__dfeat{display:block}
 .lictl__slate{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;
   color:var(--ink);cursor:pointer;padding-bottom:7px}
 .lictl__slate input{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
-.lictl__clear{margin-left:auto;align-self:center;font-size:12px;font-weight:700;color:var(--muted);
+.lictl__clear{align-self:center;font-size:12px;font-weight:700;color:var(--muted);
   background:none;border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
 .lictl__clear:hover{color:var(--ink);border-color:var(--muted)}
 .tgprop{font-family:var(--font-mono);font-weight:700;color:var(--ink);font-size:13px}
