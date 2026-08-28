@@ -1,9 +1,10 @@
-import { Brand, FlowSteps, ModelSubnav, MoreTable } from "../../Nav";
+import { Brand, FlowSteps, ModelSubnav, MoreTable, WeekBadge } from "../../Nav";
 import Tip from "@/app/Tip";
 import { NCAAF_MODEL, type NcaafCardGame } from "../model-data";
 import { StatCard } from "../StatCard";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
 import { NcaafCardHead, NcaafGameCell } from "../CardCells";
+import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
 
 // College Football — The Model. Mirrors the NFL Model page: the full model-vs-market
 // table leads, the honest track record (predicts as well as Elo, doesn't beat the spread)
@@ -50,11 +51,14 @@ function CardRows({ games, moreFrom }: { games: readonly NcaafCardGame[]; moreFr
   );
 }
 
-export default function Page() {
+export default async function Page({ searchParams }: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const v = M.validation;
   const a = M.ats;
   const beatsMarket = a.atsPct > a.breakeven;
   const c = M.card;
+  const week = readNcaafWeek((await searchParams).week, c.week);
   // Only games with an AP Top 25 team (the recognizable media poll), kept in kickoff order
   // (source sorts by commence). The complete slate lives in "Full Model — every game" below.
   const ranked = c.games.filter((g) => g.apAway || g.apHome);
@@ -66,8 +70,11 @@ export default function Page() {
         <Brand sub={<><span className="brand__sport">NCAAF</span> · The Model</>} art={{ src: "/heisman.png?v=1", alt: "Heisman Trophy" }} />
       </header>
 
+      <WeekBadge week={c.week} />
       <FlowSteps active="analyze" base="ncaaf" />
       <ModelSubnav active="game" base="ncaaf" />
+      <NcaafWeekNav base="/ncaaf/model" week={week} />
+      <NcaafOffWeek current={c.week} week={week} />
 
       {/* The honest record — what it is, how well it does, and why we show it — folded away. */}
       <details className="ncf-method ncf-about">

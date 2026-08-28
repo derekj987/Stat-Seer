@@ -1,4 +1,5 @@
-import { Brand, FlowSteps, ShopSubnav } from "../../Nav";
+import { Brand, FlowSteps, ShopSubnav, WeekBadge } from "../../Nav";
+import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
 import { NCAAF_MODEL, type NcaafKeyNum } from "../model-data";
 import { StatCard } from "../StatCard";
 import NcaafSweetSpots from "./NcaafSweetSpots";
@@ -12,9 +13,12 @@ export const metadata = {
 
 const M = NCAAF_MODEL;
 
-export default function Page() {
+export default async function Page({ searchParams }: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const v = M.value;
   const three = v.keyNumbers[0];
+  const week = readNcaafWeek((await searchParams).week, M.card.week);
 
   return (
     <main className="wrap">
@@ -25,8 +29,11 @@ export default function Page() {
         />
       </header>
 
+      <WeekBadge week={M.card.week} />
       <FlowSteps active="value" base="ncaaf" />
       <ShopSubnav active="best" base="ncaaf" />
+      <NcaafWeekNav base="/ncaaf/best" week={week} />
+      <NcaafOffWeek current={M.card.week} week={week} />
 
       <NcaafSweetSpots games={M.card.games} keyNums={v.keyNumbers} week={M.card.week} />
 

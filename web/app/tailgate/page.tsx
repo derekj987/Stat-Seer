@@ -1,23 +1,18 @@
 import { weekRange } from "@/lib/board";
 import { weekTailgate } from "@/lib/tailgate";
-import { Brand, FlowSteps, ContextSubnav } from "../Nav";
-import { WeekNav } from "../WeekNav";
+import { Brand, FlowSteps, ContextSubnav, WeekBadge } from "../Nav";
 import Tip from "../Tip";
 import NflIntelFeed from "./NflIntelFeed";
 
 export const revalidate = 300;
 const SEASON = 2026;
 
-export default async function Page({ searchParams }: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const sp = await searchParams;
+// Fan Stock is CURRENT-WEEK ONLY — boards are about the game in front of them, so no week
+// wheel: we show the latest posted week and label it at the top.
+export default async function Page() {
   let range: { min: number; max: number } | null = null;
   try { range = await weekRange(SEASON); } catch { range = null; }
-  const min = range?.min ?? 1;
-  const max = range?.max ?? 1;
-  const requested = typeof sp.week === "string" ? parseInt(sp.week, 10) : NaN;
-  const week = Number.isFinite(requested) ? Math.min(max, Math.max(min, requested)) : min;
+  const week = range?.max ?? 1;   // the current (latest) week
 
   const feed = await weekTailgate(week, SEASON);
 
@@ -31,6 +26,7 @@ export default async function Page({ searchParams }: {
         />
       </header>
 
+      <WeekBadge week={week} note="current week · fan boards this week" />
       <FlowSteps active="context" />
       <div className="subnavrow">
         <ContextSubnav active="fan" />
@@ -40,7 +36,6 @@ export default async function Page({ searchParams }: {
           our model, not a StatSeer pick, and it is <b>never graded</b>. We&apos;re handing you the word around the
           league — do your own homework.</>} />
       </div>
-      <WeekNav min={min} max={max} current={week} base="/tailgate" />
 
       {feed.sample && (
         <p className="tgsample">

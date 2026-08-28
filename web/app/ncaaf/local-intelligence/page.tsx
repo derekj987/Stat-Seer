@@ -1,5 +1,5 @@
 import { cfbWeekTailgate } from "@/lib/cfbTailgate";
-import { Brand, FlowSteps, ContextSubnav } from "../../Nav";
+import { Brand, FlowSteps, ContextSubnav, WeekBadge } from "../../Nav";
 import Tip from "../../Tip";
 import { NCAAF_MODEL } from "../model-data";
 import LocalIntelFeed from "./LocalIntelFeed";
@@ -31,6 +31,7 @@ export default async function Page() {
         />
       </header>
 
+      <WeekBadge week={week} note="current week · fan boards this week" />
       <FlowSteps active="context" base="ncaaf" />
       <div className="subnavrow">
         <ContextSubnav active="fan" base="ncaaf" />

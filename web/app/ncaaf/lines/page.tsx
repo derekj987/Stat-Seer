@@ -1,4 +1,5 @@
-import { Brand, FlowSteps, ShopSubnav, ValueFinderNote } from "../../Nav";
+import { Brand, FlowSteps, ShopSubnav, ValueFinderNote, WeekBadge } from "../../Nav";
+import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
 import Tip from "@/app/Tip";
 import { NCAAF_MODEL } from "../model-data";
 import { StatCard } from "../StatCard";
@@ -15,9 +16,12 @@ export const metadata = {
 
 const M = NCAAF_MODEL;
 
-export default function Page() {
+export default async function Page({ searchParams }: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const bs = M.value.bookShop;
   const c = M.card;
+  const week = readNcaafWeek((await searchParams).week, c.week);
   const games = c.games.filter((g) => g.marketSpread); // only games with a market line
   const total = c.games.length;                        // full slate (incl. games w/o odds yet)
   const noLine = total - games.length;                 // games still waiting on a posted line
@@ -39,8 +43,11 @@ export default function Page() {
         </p>
       </section>
 
+      <WeekBadge week={c.week} />
       <FlowSteps active="value" base="ncaaf" />
       <ShopSubnav active="lines" base="ncaaf" />
+      <NcaafWeekNav base="/ncaaf/lines" week={week} />
+      <NcaafOffWeek current={c.week} week={week} />
       <ValueFinderNote />
 
       <section className="ncf-sec">

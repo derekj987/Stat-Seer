@@ -1,4 +1,5 @@
-import { Brand, FlowSteps, ContextSubnav } from "../../Nav";
+import { Brand, FlowSteps, ContextSubnav, WeekBadge } from "../../Nav";
+import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
 import { NCAAF_MODEL, type NcaafUpset } from "../model-data";
 import { ChaosBoard } from "../../ChaosBoard";
 import { buildChaosBoard, returnFromSpread, type ChaosInput } from "@/lib/chaos";
@@ -16,8 +17,11 @@ export const metadata = {
 
 const M = NCAAF_MODEL;
 
-export default function Page() {
+export default async function Page({ searchParams }: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const c = M.card;
+  const week = readNcaafWeek((await searchParams).week, c.week);
   const upsets: readonly NcaafUpset[] = c.upsets;
 
   // Speculative Chaos Board — every game with a real underdog, scored on chaos potential
@@ -47,8 +51,11 @@ export default function Page() {
         />
       </header>
 
+      <WeekBadge week={c.week} />
       <FlowSteps active="context" base="ncaaf" />
       <ContextSubnav active="upset" base="ncaaf" />
+      <NcaafWeekNav base="/ncaaf/context" week={week} />
+      <NcaafOffWeek current={c.week} week={week} />
 
       {/* --- Upset Model: where our rating backs the market's underdog --- */}
       <section className="ctxsec">

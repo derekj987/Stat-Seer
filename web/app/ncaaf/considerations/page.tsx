@@ -1,5 +1,6 @@
-import { Brand, FlowSteps, ContextSubnav } from "../../Nav";
+import { Brand, FlowSteps, ContextSubnav, WeekBadge } from "../../Nav";
 import Tip from "@/app/Tip";
+import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
 import { NCAAF_MODEL, type NcaafConf, type NcaafCardGame } from "../model-data";
 import { StatCard } from "../StatCard";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
@@ -75,9 +76,12 @@ function ConsiderationCard({ g, hfa }: { g: NcaafCardGame; hfa: number }) {
   );
 }
 
-export default function Page() {
+export default async function Page({ searchParams }: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const cx = M.context;
   const c = M.card;
+  const week = readNcaafWeek((await searchParams).week, c.week);
   const top = cx.conferences[0];
   const games: readonly NcaafCardGame[] = c.games;
   const lead = games.slice(0, 6);
@@ -101,12 +105,15 @@ export default function Page() {
         </p>
       </section>
 
+      <WeekBadge week={c.week} />
       <FlowSteps active="context" base="ncaaf" />
 
       <div className="subnavrow">
         <ContextSubnav active="special" base="ncaaf" />
         <Tip text={<>One card per game with the context around it: the <b>site</b> (neutral sites drop the home edge), the <b>AP poll</b> stakes, each side&apos;s <b>power rating</b> and national rank, and the <b>scoring environment</b> (our total vs the market&apos;s). Context to arm your read — <b>not</b> a pick.</>} />
       </div>
+      <NcaafWeekNav base="/ncaaf/considerations" week={week} />
+      <NcaafOffWeek current={c.week} week={week} />
 
       <section className="ncf-sec">
         <h2 className="ncf-h">Game considerations — Week {c.week}

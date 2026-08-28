@@ -1,4 +1,6 @@
-import { Brand, FlowSteps, ShopSubnav, ValueFinderNote } from "../../Nav";
+import { Brand, FlowSteps, ShopSubnav, ValueFinderNote, WeekBadge } from "../../Nav";
+import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
+import { NCAAF_MODEL } from "../model-data";
 import { NcaafSoon } from "../Soon";
 import PropsView from "../../props/PropsView";
 import { cfbWeekProps } from "@/lib/cfbProps";
@@ -31,6 +33,8 @@ export const revalidate = 120;
 export default async function Page({ searchParams }: PageProps<"/ncaaf/props">) {
   const sp = await searchParams;
   const cat = categoryByKey(typeof sp.cat === "string" ? sp.cat : "td");
+  const cur = NCAAF_MODEL.card.week;
+  const week = readNcaafWeek(sp.week, cur);
   const catSet = new Set(cat.markets);
   const all = await cfbWeekProps();
   // Filter each game to the active category's markets — same tabbed layout as the NFL board
@@ -54,8 +58,11 @@ export default async function Page({ searchParams }: PageProps<"/ncaaf/props">) 
       </header>
 
       <ValueFinderNote />
+      <WeekBadge week={cur} />
       <FlowSteps active="value" base="ncaaf" />
       <ShopSubnav active="props" base="ncaaf" />
+      <NcaafWeekNav base="/ncaaf/props" week={week} params={`cat=${cat.key}`} />
+      <NcaafOffWeek current={cur} week={week} />
 
       {all.length ? (
         <section className="ncf-sec">
