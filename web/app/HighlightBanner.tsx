@@ -14,7 +14,7 @@ function slides(sport: Sport): Slide[] {
   return [
     { emoji: "🌪", kicker: "New · just for fun", title: "The Upset Lab — Chaos Board",
       blurb: "Which underdogs could win outright, ranked by pure chaos potential — for the aggressive bettor.",
-      path: ctx, img: "/chaosboard.jpg" },
+      path: ctx, img: "/chaosboard.jpg?v=2" },
     { emoji: "🎯", kicker: "Player Model", title: "Passing yards & TDs",
       blurb: "Every QB's book line beside our line-blind projection, with the prior-season hit rate.", path: `${players}?cat=passing` },
     { emoji: "🏈", kicker: "Player Model", title: "Rushing yards",
