@@ -22,28 +22,40 @@ Secrets (env or .env): ANTHROPIC_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_KEY, CF
 Reuses the NFL pipeline's Reddit/RSS + extraction plumbing (tailgate_reddit.py).
 """
 import argparse
+import html
 import json
 import os
+import re
 import sys
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 
+import cfbd_client as cc
 import odds_client as oc
 import tailgate_reddit as tr   # reuse the low-level RSS + extraction plumbing
 
-# National feeds — fetched once, pooled across every team, roster-filtered per team. Both are
-# Atom (the shared fetch_feed parses Atom); WordPress/RSS-2.0 news feeds return nothing here.
+ATOM = "{http://www.w3.org/2005/Atom}"
+
+# National feeds — fetched once, pooled across every team, roster-filtered per team. fetch()
+# below parses BOTH Atom and RSS 2.0, so mainstream news feeds (RSS 2.0) count now too.
 # r/CFB is the backbone (works from sharded runner IPs, throttles a single local IP).
 NATIONAL_FEEDS = [
     ("r/CFB", "https://www.reddit.com/r/CFB/top/.rss?t=week"),
     ("SB Nation CFB", "https://www.sbnation.com/rss/college-football/index.xml"),
-    # Conference-wide SB Nation blogs (Atom) — pooled + roster-filtered per team, so they
-    # cover the G5/mid-major schools that have no team blog of their own.
+    # Conference-wide SB Nation blogs (Atom) — cover the G5/mid-major schools with no blog.
     ("Mountain West Connection", "https://www.mwcconnection.com/rss/index.xml"),  # MWC
     ("Hustle Belt", "https://www.hustlebelt.com/rss/index.xml"),                  # MAC
     ("Underdog Dynasty", "https://www.underdogdynasty.com/rss/index.xml"),        # AAC/CUSA/G5
+    # National CFB news (RSS 2.0) — beat writers + insiders, a wider net than boards alone.
+    ("ESPN CFB", "https://www.espn.com/espn/rss/ncf/news"),
+    ("CBS Sports CFB", "https://www.cbssports.com/rss/headlines/college-football/"),
+    ("Yahoo CFB", "https://sports.yahoo.com/college-football/rss/"),
+    ("Saturday Down South", "https://www.saturdaydownsouth.com/feed/"),
+    ("College Football News", "https://collegefootballnews.com/feed/"),
 ]
 
 # PRIMARY per-team source: each program's SB Nation team blog (Atom /rss/index.xml — the same
@@ -119,9 +131,69 @@ CFB_SUBS = {
 }
 
 
-# ---- CFB Claude system prompt: identical prop-market job, college framing ------------------
-SYSTEM = tr.SYSTEM.replace("NFL fan message-board", "college-football fan message-board").replace(
-    "You read NFL", "You read college-football")
+# ---- CFB Claude system prompt: same prop-market job, but surface EVERY player ---------------
+# College prop markets are thin and fan-driven, so — unlike the NFL prompt — we do NOT skip
+# "obvious" buzz. A star doing his thing is still buzz worth a card. The override below wins.
+SYSTEM = (
+    tr.SYSTEM.replace("NFL fan message-board", "college-football fan message-board").replace(
+        "You read NFL", "You read college-football")
+    + "\n\nCOLLEGE OVERRIDE (supersedes any earlier 'insight/non-obvious/consensus' rule): "
+      "College prop markets are thin and fan boards drive real signal, so SURFACE EVERY player "
+      "fans are discussing who maps to a bettable prop — superstars AND role players, expected "
+      "AND surprising. Do NOT drop a take for being 'obvious', 'consensus', or 'what everyone "
+      "already assumes'. Aim for BROAD coverage: if fans mention a player and a real market "
+      "fits, emit a row. The ONLY reasons to drop a player: (1) no real sportsbook market fits "
+      "the take (pure narrative like 'looked good in camp'), or (2) the player is out/sidelined. "
+      "Report both OVER (up) and UNDER (down) takes. Heat still scales with how loud the chatter is."
+)
+
+
+def _strip(raw):
+    t = html.unescape(html.unescape(raw or ""))
+    t = re.sub(r"<[^>]+>", " ", t)
+    t = re.sub(r"submitted by\s*/u/\S+.*", " ", t, flags=re.I | re.S)   # reddit footer
+    t = re.sub(r"\[link\]|\[comments\]", " ", t)
+    return re.sub(r"\s+", " ", t).strip()
+
+
+def fetch(board, url):
+    """Parse ONE feed — Atom (<entry>) OR RSS 2.0 (<item>) — into [{text, permalink, score,
+    board}]. RSS 2.0 support is what unlocks mainstream news feeds the NFL parser skipped."""
+    try:
+        raw = tr._http_get(url)
+    except urllib.error.HTTPError as e:
+        if e.code in (403, 429):
+            tr._rate_limited[0] = True
+        print(f"  {board} -> HTTP {e.code}", file=sys.stderr)
+        return []
+    except Exception as e:                                    # noqa: BLE001
+        print(f"  {board} -> error: {e}", file=sys.stderr)
+        return []
+    try:
+        root = ET.fromstring(raw)
+    except ET.ParseError:
+        return []
+    out = []
+    entries = root.findall(f"{ATOM}entry")
+    if entries:                                               # Atom (Reddit, SB Nation)
+        for i, e in enumerate(entries):
+            title = (e.findtext(f"{ATOM}title") or "").strip()
+            if not title:
+                continue
+            le = e.find(f"{ATOM}link")
+            link = le.get("href") if le is not None else url
+            text = (title + (" -- " + _strip(e.findtext(f"{ATOM}content") or "") if e.findtext(f"{ATOM}content") else ""))[:tr.SNIPPET_CAP]
+            out.append({"text": text, "permalink": link, "score": len(entries) - i, "board": board})
+        return out
+    items = root.findall(".//item")                           # RSS 2.0 (news sites)
+    for i, it in enumerate(items):
+        title = (it.findtext("title") or "").strip()
+        if not title:
+            continue
+        link = (it.findtext("link") or url).strip()
+        text = (title + (" -- " + _strip(it.findtext("description") or "") if it.findtext("description") else ""))[:tr.SNIPPET_CAP]
+        out.append({"text": text, "permalink": link, "score": len(items) - i, "board": board})
+    return out
 
 
 def load_roster_from_depth():
@@ -200,11 +272,40 @@ def fetch_team_feeds(school):
     out = []
     if school in CFB_BLOGS:
         name, dom = CFB_BLOGS[school]
-        out += tr.fetch_feed(name, f"https://www.{dom}/rss/index.xml")
+        out += fetch(name, f"https://www.{dom}/rss/index.xml")
     sub = CFB_SUBS.get(school)
     if sub:
-        out += tr.fetch_feed(f"r/{sub}", f"https://www.reddit.com/r/{sub}/top/.rss?t=week")
+        out += fetch(f"r/{sub}", f"https://www.reddit.com/r/{sub}/top/.rss?t=week")
     return out
+
+
+def ap_top25(key):
+    """CFBD school names in the current AP Top 25 (marquee programs whose boards are active)."""
+    try:
+        st, data = cc.cfbd_get("/rankings", {"year": tr.current_season(), "seasonType": "regular"}, key)
+    except Exception:                                          # noqa: BLE001
+        return []
+    if not isinstance(data, list):
+        return []
+    teams = set()
+    for wk in data:
+        for poll in wk.get("polls", []):
+            if "ap" in (poll.get("poll") or "").lower():
+                for r in poll.get("ranks", []):
+                    if r.get("school"):
+                        teams.add(r["school"])
+    return sorted(teams)
+
+
+def scan_universe(key):
+    """Who to scan: teams with posted props + the AP Top 25 + every blog-covered program.
+    Broad, since college prop markets are thin and fan boards drive the signal."""
+    depth = load_roster_from_depth() or {}
+    keys = list(depth.keys())
+    teams = set(prop_slate_teams(key))
+    teams |= {_snap_to_depth(t, keys) for t in ap_top25(key)}
+    teams |= {_snap_to_depth(t, keys) for t in CFB_BLOGS}
+    return sorted(teams)
 
 
 def extract(school, snippets, env):
@@ -277,9 +378,9 @@ def main(argv=None):
     if args.teams:
         which = [t.strip() for t in args.teams.split(",") if t.strip()]
     else:
-        which = prop_slate_teams(key)
+        which = scan_universe(key)   # props + AP Top 25 + every blog-covered program
         if not which:
-            print("No posted CFB props yet — nothing to scan.", file=sys.stderr); return 0
+            print("No teams to scan.", file=sys.stderr); return 0
     if args.shard:
         i, n = (int(x) for x in args.shard.split("/"))
         size = -(-len(which) // n)
@@ -287,10 +388,10 @@ def main(argv=None):
 
     roster = load_roster_from_depth()
     print(f"CFB tailgate scan — season {season}, week {week}, {len(which)} team(s)"
-          f"{' [WRITE]' if args.write else ' [dry run]'} — r/CFB + team subs + national feeds")
+          f"{' [WRITE]' if args.write else ' [dry run]'} — team blogs + subs + national feeds")
     national = []
-    for name, url in NATIONAL_FEEDS:                      # r/CFB + news, fetched once
-        national += tr.fetch_feed(name, url)
+    for name, url in NATIONAL_FEEDS:                      # r/CFB + SB Nation + news, fetched once
+        national += fetch(name, url)
     print(f"  national feeds -> {len(national)} snippets pooled across all teams")
 
     start = time.monotonic()

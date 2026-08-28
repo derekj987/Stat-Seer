@@ -243,7 +243,7 @@ export function ContextSubnav({ active, base = "nfl" }: {
   active: "upset" | "fan" | "special"; base?: "nfl" | "ncaaf";
 }) {
   const h = base === "ncaaf"
-    ? { upset: "/ncaaf/context", special: "/ncaaf/considerations", fan: "/ncaaf/tailgate" }
+    ? { upset: "/ncaaf/context", special: "/ncaaf/considerations", fan: "/ncaaf/local-intelligence" }
     : { upset: "/context", special: "/considerations", fan: "/tailgate" };
   return (
     <nav className="subnav subnav--context" aria-label="Context view">

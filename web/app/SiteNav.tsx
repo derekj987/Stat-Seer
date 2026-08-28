@@ -188,7 +188,7 @@ export default function SiteNav() {
                   <summary className="snav__dfeat snav__psum">Context</summary>
                   <a href="/ncaaf/considerations" className="snav__dsub">Special Considerations</a>
                   <a href="/ncaaf/context" className="snav__dsub">Upset Watch</a>
-                  <a href="/ncaaf/tailgate" className="snav__dsub">Local Intelligence</a>
+                  <a href="/ncaaf/local-intelligence" className="snav__dsub">Local Intelligence</a>
                 </details>
 
                 <details className="snav__pgroup snav__pgroup--feat">
