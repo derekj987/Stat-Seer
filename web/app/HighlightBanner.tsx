@@ -14,7 +14,7 @@ function slides(sport: Sport): Slide[] {
   return [
     { emoji: "🌪", kicker: "New · just for fun", title: "The Upset Lab — Chaos Board",
       blurb: "Which underdogs could win outright, ranked by pure chaos potential — for the aggressive bettor.",
-      path: ctx, img: "/chaosboard.png" },
+      path: ctx, img: "/chaosboard.jpg" },
     { emoji: "🎯", kicker: "Player Model", title: "Passing yards & TDs",
       blurb: "Every QB's book line beside our line-blind projection, with the prior-season hit rate.", path: `${players}?cat=passing` },
     { emoji: "🏈", kicker: "Player Model", title: "Rushing yards",
@@ -42,6 +42,7 @@ export function HighlightBanner({ sport }: { sport: Sport }) {
   }, [paused, list.length]);
 
   const s = list[i];
+  const go = (delta: number) => setI((x) => (x + delta + list.length) % list.length);
   return (
     <div
       className="hlb"
@@ -62,6 +63,7 @@ export function HighlightBanner({ sport }: { sport: Sport }) {
         <span className="hlb__go" aria-hidden="true">→</span>
       </a>
       <div className="hlb__dots" role="tablist" aria-label="Highlights">
+        <button type="button" className="hlb__nav" aria-label="Previous highlight" onClick={() => go(-1)}>‹</button>
         {list.map((_, k) => (
           <button
             key={k}
@@ -72,6 +74,7 @@ export function HighlightBanner({ sport }: { sport: Sport }) {
             onClick={() => setI(k)}
           />
         ))}
+        <button type="button" className="hlb__nav" aria-label="Next highlight" onClick={() => go(1)}>›</button>
       </div>
     </div>
   );

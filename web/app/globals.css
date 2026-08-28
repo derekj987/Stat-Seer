@@ -3329,7 +3329,13 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 .hlb__blurb{font-size:12.5px;color:var(--muted);line-height:1.4}
 .hlb__go{flex:0 0 auto;font-size:18px;color:var(--gold);font-weight:800;transition:transform .12s ease}
 .hlb__slide:hover .hlb__go{transform:translateX(3px)}
-.hlb__dots{position:absolute;right:16px;bottom:10px;display:flex;gap:5px}
+.hlb__dots{position:absolute;right:16px;bottom:10px;display:flex;align-items:center;gap:6px}
+/* Prev/next arrows flanking the dots — jump straight to a slide instead of waiting for the loop. */
+.hlb__nav{display:flex;align-items:center;justify-content:center;width:22px;height:22px;padding:0;
+  border-radius:50%;border:1px solid color-mix(in srgb,var(--gold) 45%,var(--line));
+  background:color-mix(in srgb,var(--bg) 70%,transparent);color:var(--gold);
+  font-size:16px;line-height:1;cursor:pointer;transition:background .15s,transform .15s}
+.hlb__nav:hover{background:var(--gold);color:var(--bg);transform:scale(1.08)}
 .hlb__dot{width:7px;height:7px;border-radius:50%;border:0;padding:0;cursor:pointer;
   background:color-mix(in srgb,var(--gold) 35%,var(--line));transition:background .15s,transform .15s}
 .hlb__dot.active{background:var(--gold);transform:scale(1.25)}
