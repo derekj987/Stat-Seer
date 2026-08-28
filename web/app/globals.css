@@ -2196,10 +2196,14 @@ a.snav__dfeat{display:block}
   .pmtable--data{min-width:540px}
   .pmtable--ha{min-width:720px}
   .pmrow{padding:8px 10px}
-  .pmrow--data{gap:9px;grid-template-columns:minmax(84px,1.3fr) 36px repeat(4,minmax(0,1fr));font-size:12px}
+  .pmrow--data{gap:9px;grid-template-columns:minmax(84px,1.3fr) 36px repeat(4,minmax(0,1fr));font-size:12px;align-items:start}
   .pmtable--ha .pmrow--data{grid-template-columns:minmax(84px,1.3fr) 36px repeat(6,minmax(0,1fr))}
   .pmcell--career{font-size:12px}
-  .pmcell__sub{font-size:9px}
+  /* Stack the "N/N gm" sample under the % so each stat cell stays narrow and columns don't
+     run into each other on a phone. Every cell can then also wrap instead of overflowing. */
+  .pmcell__sub{display:block;font-size:9px;line-height:1.05;margin-top:0}
+  .pmcell{white-space:normal;overflow-wrap:anywhere}
+  .pmrow--data .pmcell--player{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 }
 .pmdisc{background:var(--gold-soft);border:1px solid color-mix(in srgb,var(--gold) 35%,var(--line));
   border-radius:12px;padding:12px 16px;margin:0 0 14px}
