@@ -2162,11 +2162,15 @@ a.snav__dfeat{display:block}
 .pmtable--data{max-width:880px;min-width:760px}
 /* player flexes, team is compact, the four stat cols are equal width with an even gap —
    identical on every row incl. the header, so columns line up on phone and desktop alike. */
-.pmrow--data{display:grid;grid-template-columns:minmax(110px,1.4fr) 52px repeat(4,minmax(0,1fr));gap:14px;
+.pmrow--data{display:grid;grid-template-columns:minmax(110px,1.3fr) 78px repeat(4,minmax(0,1fr));gap:16px;
   align-items:baseline;border-top:1px solid var(--line);font-size:13px}
 /* passing table adds Home % / Road % → six stat columns instead of four */
 .pmtable--ha{min-width:940px;max-width:1120px}
-.pmtable--ha .pmrow--data{grid-template-columns:minmax(110px,1.4fr) 52px repeat(6,minmax(0,1fr))}
+.pmtable--ha .pmrow--data{grid-template-columns:minmax(110px,1.3fr) 78px repeat(6,minmax(0,1fr))}
+/* continuation row: a second market for the same player (e.g. a QB's passing-TD line under
+   his passing-yards line). No top rule + tighter top padding so the two read as one block. */
+.pmrow--cont{border-top:0}
+.pmrow--cont.pmrow--data{padding-top:1px}
 .pmempty--solo{border:1px solid var(--line);border-radius:12px;background:var(--surface)}
 .pmrow--head.pmrow--data{border-bottom:0;font-size:11px}
 /* header labels are longer than the data — let them wrap inside the equal columns so the
@@ -2181,7 +2185,8 @@ a.snav__dfeat{display:block}
 .pmarrow{font-size:10px;font-weight:700}
 .pmarrow--up{color:var(--accent)}
 .pmarrow--down{color:var(--mkt)}
-.pmcell--team{color:var(--muted);font-size:11.5px;font-family:var(--font-mono)}
+.pmcell--team{color:var(--muted);font-size:11.5px;font-family:var(--font-mono);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pmcell--career{font-weight:800;font-family:var(--font-mono);font-size:13px}
 .pmrow--head .pmcell--career{font-family:inherit;font-weight:700;font-size:11px}
 .pmcell__sub{font-weight:500;color:var(--muted);font-size:10.5px;font-family:var(--font-mono)}
@@ -2193,17 +2198,19 @@ a.snav__dfeat{display:block}
   .scrollnudge{display:flex;align-items:center;justify-content:flex-end;gap:6px;margin:0 0 5px;
     font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--accent)}
   .scrollnudge__a{font-size:15px;animation:impswipe 1.3s ease-in-out infinite}
-  .pmtable--data{min-width:540px}
-  .pmtable--ha{min-width:720px}
+  .pmtable--data{min-width:580px}
+  .pmtable--ha{min-width:760px}
   .pmrow{padding:8px 10px}
-  .pmrow--data{gap:9px;grid-template-columns:minmax(84px,1.3fr) 36px repeat(4,minmax(0,1fr));font-size:12px;align-items:start}
-  .pmtable--ha .pmrow--data{grid-template-columns:minmax(84px,1.3fr) 36px repeat(6,minmax(0,1fr))}
+  .pmrow--data{gap:11px;grid-template-columns:minmax(84px,1.2fr) 64px repeat(4,minmax(0,1fr));font-size:12px;align-items:start}
+  .pmtable--ha .pmrow--data{grid-template-columns:minmax(84px,1.2fr) 64px repeat(6,minmax(0,1fr))}
   .pmcell--career{font-size:12px}
   /* Stack the "N/N gm" sample under the % so each stat cell stays narrow and columns don't
-     run into each other on a phone. Every cell can then also wrap instead of overflowing. */
+     run into each other on a phone. Cells wrap instead of overflowing — but the player and
+     team stay on ONE line (ellipsis), so "Virginia" never breaks across two lines. */
   .pmcell__sub{display:block;font-size:9px;line-height:1.05;margin-top:0}
   .pmcell{white-space:normal;overflow-wrap:anywhere}
-  .pmrow--data .pmcell--player{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pmrow--data .pmcell--player,
+  .pmrow--data .pmcell--team{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 }
 .pmdisc{background:var(--gold-soft);border:1px solid color-mix(in srgb,var(--gold) 35%,var(--line));
   border-radius:12px;padding:12px 16px;margin:0 0 14px}
@@ -2633,6 +2640,12 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
     line-height:1.16;border-bottom:0;padding-bottom:0}
   .hb-at{margin:0;font-size:8px;letter-spacing:.04em;line-height:1.1;text-transform:lowercase}
   .hb-l{vertical-align:top}
+  /* NCAAF model/market board: scroll sideways so each spread sits on ONE line right next to
+     the school (no more "-41.5" wrapping under "Oklahoma"). The wrapper must scroll on touch
+     too — the desktop overflow rule lives in a hover-only block. */
+  .hb-formwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .hb-form--mkt{min-width:560px}
+  .hb-form--mkt td,.hb-form--mkt th{white-space:nowrap}
   /* stack the two suggested picks so the column stays narrow on a phone */
   .hb-sugwrap{flex-direction:column;align-items:flex-start;gap:5px}
   .hb-sug__t{font-size:11px}

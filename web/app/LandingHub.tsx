@@ -360,8 +360,8 @@ export default function LandingHub({ initialSport, nfl, ncaaf, vf }: { initialSp
         </div>
         {ncaafRanked.length > 0 && (
           <Panel title="AP Top 25 matchups" count={`${ncaafRanked.length} ranked`} hint={<>This week&apos;s games with an <b>AP Top 25</b> team, in kickoff order, each ranked side showing its poll rank. The market&apos;s <b>Spread</b> and <b>O/U</b> sit beside <b>Our Projection</b> — our line-blind read, <b>not a pick</b>.</>} open>
-            <MoreTable id="gm-ranked-ncaaf" head={<NcaafHead />} extra={Math.max(0, ncaafRanked.length - 4)} noun="ranked games" cls="hb-form--mkt">
-              <NcaafRows games={ncaafRanked} moreFrom={4} />
+            <MoreTable id="gm-ranked-ncaaf" head={<NcaafHead />} extra={Math.max(0, ncaafRanked.length - 3)} noun="ranked games" cls="hb-form--mkt">
+              <NcaafRows games={ncaafRanked} moreFrom={3} />
             </MoreTable>
             <p className="lp-cardfoot"><a href="/ncaaf/model">See all ranked games →</a></p>
           </Panel>

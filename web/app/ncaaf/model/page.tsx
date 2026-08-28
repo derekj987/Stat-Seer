@@ -58,7 +58,7 @@ export default function Page() {
   // Only games with an AP Top 25 team (the recognizable media poll), kept in kickoff order
   // (source sorts by commence). The complete slate lives in "Full Model — every game" below.
   const ranked = c.games.filter((g) => g.apAway || g.apHome);
-  const snapshotRest = ranked.slice(5);   // ranked games beyond the first 5 (see-more)
+  const snapshotRest = ranked.slice(3);   // ranked games beyond the first 3 (see-more)
 
   return (
     <main className="wrap">
@@ -125,7 +125,7 @@ export default function Page() {
             )}
           </div>
           <MoreTable id="ncaaf-snap-more" head={<NcaafCardHead />} extra={snapshotRest.length} noun="ranked games" cls="hb-form--mkt">
-            <CardRows games={ranked} moreFrom={5} />
+            <CardRows games={ranked} moreFrom={3} />
           </MoreTable>
         </div>
       </details>

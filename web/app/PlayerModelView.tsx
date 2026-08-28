@@ -53,14 +53,22 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
     market === "receptions" ? "" : market === "pass_tds" ? " TD" : market === "anytime_td" ? "%" : " yds";
   // The Touchdowns tab is a Yes/No prop: relabel the numeric + hit-rate headers.
   const isTd = active.key === "td";
-  // Passing splits into a Yards table and a Passing-TDs table (all QBs, still per game).
-  const sectionsFor = (g: string): { label: string | null; rows: PlayerProj[] }[] =>
-    active.key === "passing"
-      ? [
-          { label: "Passing Yards", rows: byGame[g].filter((r) => r.market === "pass_yds") },
-          { label: "Passing TDs", rows: byGame[g].filter((r) => r.market === "pass_tds") },
-        ].filter((s) => s.rows.length > 0)
-      : [{ label: null, rows: byGame[g] }];
+  // Group each game's rows by player so a player who appears in two markets (e.g. a QB's
+  // passing yards + passing TDs) reads as ONE grouped block — adjacent rows under a single
+  // name — instead of two separate charts. Single-market categories are unaffected (each
+  // player already appears once, so grouping preserves the original order).
+  const mktRank = (m: string) => (m === "pass_yds" ? 0 : m === "pass_tds" ? 1 : 0);
+  const sectionsFor = (g: string): { label: string | null; rows: PlayerProj[] }[] => {
+    const order: string[] = [];
+    const byPlayer: Record<string, PlayerProj[]> = {};
+    for (const r of byGame[g]) {
+      if (!byPlayer[r.player]) { byPlayer[r.player] = []; order.push(r.player); }
+      byPlayer[r.player].push(r);
+    }
+    const rows = order.flatMap((p) =>
+      byPlayer[p].slice().sort((a, b) => mktRank(a.market) - mktRank(b.market)));
+    return [{ label: active.key === "passing" ? "Passing" : null, rows }];
+  };
 
   return (
     <main className="wrap">
@@ -109,13 +117,18 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
         ) : (
           <>
             {games.map((g, gi) => (
-              <details className="pmgame" key={g} open>
+              <details className="pmgame" key={g}>
                 <summary className="pmgame__h">{g}<span className="pmgame__chev" aria-hidden="true">▾</span></summary>
                 <div className="pmgame__body">
                 <ScrollHint />
                 {sectionsFor(g).map((sec, si) => {
                   const moreId = `pm-${base}-${active.key}-${gi}-${si}`;
-                  const extra = Math.max(0, sec.rows.length - LEAD);
+                  // "See more" hides by whole player: a player's grouped rows fold together, so
+                  // a QB's yards + TD lines never split across the fold. LEAD counts players.
+                  const grpIndex: Record<string, number> = {};
+                  let gn = 0;
+                  for (const r of sec.rows) if (!(r.player in grpIndex)) grpIndex[r.player] = gn++;
+                  const extra = Math.max(0, gn - LEAD);
                   return (
                   <div className="hb-moretbl" key={sec.label ?? "all"}>
                     <input type="checkbox" id={moreId} className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
@@ -140,10 +153,14 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
                         const hpct = r.hG ? Math.round((100 * r.hOver) / r.hG) : null;
                         const rpct = r.rG ? Math.round((100 * r.rOver) / r.rG) : null;
                         const cls = (v: number | null) => v === null ? "" : v >= 50 ? "pmread--over" : "pmread--under";
+                        // A continuation row (same player as the row above, e.g. a QB's TD line
+                        // under his yards line) blanks the name/team so the block reads as one.
+                        const cont = ri > 0 && sec.rows[ri - 1].player === r.player;
+                        const isMore = grpIndex[r.player] >= LEAD;
                         return (
-                          <div className={`pmrow pmrow--data${ri >= LEAD ? " hb-row--more" : ""}`} role="row" key={`${r.player}-${r.market}`}>
-                            <span className="pmcell pmcell--player">{r.player}</span>
-                            <span className="pmcell pmcell--team">{r.team}</span>
+                          <div className={`pmrow pmrow--data${isMore ? " hb-row--more" : ""}${cont ? " pmrow--cont" : ""}`} role="row" key={`${r.player}-${r.market}`}>
+                            <span className="pmcell pmcell--player">{cont ? "" : r.player}</span>
+                            <span className="pmcell pmcell--team">{cont ? "" : r.team}</span>
                             <span className="pmcell pmcell--num">{r.book}{unitFor(r.market)}</span>
                             <span className={`pmcell pmcell--num pmcell--proj${r.proj >= r.book ? "" : " pmcell--projdown"}`}>
                               {r.proj}{unitFor(r.market)}{" "}

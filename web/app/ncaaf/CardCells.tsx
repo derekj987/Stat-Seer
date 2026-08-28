@@ -4,10 +4,18 @@
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
 import type { NcaafCardGame } from "./model-data";
 
-const kfmt = new Intl.DateTimeFormat("en-US", {
-  timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+// Compact kickoff, e.g. "8/29 @3pm ET" / "8/29 @3:30pm ET" — no weekday, numeric date, and
+// minutes only when non-zero, so it fits the Game cell on a phone.
+const kparts = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/New_York", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit", hour12: true,
 });
-export const kickET = (iso?: string | null): string => (iso ? kfmt.format(new Date(iso)) + " ET" : "");
+export const kickET = (iso?: string | null): string => {
+  if (!iso) return "";
+  const p = Object.fromEntries(kparts.formatToParts(new Date(iso)).map((x) => [x.type, x.value]));
+  const ap = (p.dayPeriod || "").toLowerCase();
+  const time = p.minute === "00" ? `${p.hour}${ap}` : `${p.hour}:${p.minute}${ap}`;
+  return `${p.month}/${p.day} @${time} ET`;
+};
 
 // The five-column header used by every NCAAF model/market table.
 export function NcaafCardHead() {
