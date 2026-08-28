@@ -1,7 +1,7 @@
 import { weekRange, fetchWeek, buildBoard } from "@/lib/board";
 import { fetchModelWeek, type ModelPrediction } from "@/lib/model";
 import { MODEL_TOTALS } from "@/lib/modelTotals";
-import { Brand, FlowSteps, ContextSubnav } from "../Nav";
+import { Brand, FlowSteps, ContextSubnav, WeekBadge } from "../Nav";
 import { ChaosBoard } from "../ChaosBoard";
 import { buildChaosBoard, returnFromSpread, comfortInfo, type ChaosInput } from "@/lib/chaos";
 import { NFL_CHAOS, NFL_ENV, NFL_IMPROVE, CHAOS_WINDOW } from "@/lib/chaosTraits";
@@ -127,8 +127,9 @@ export default async function Page({ searchParams }: PageProps<"/context">) {
         />
       </header>
 
+      <WeekBadge week={week} />
       <FlowSteps active="context" />
-      <ContextSubnav active="upset" />
+      <div className="subnavrow"><ContextSubnav active="upset" /></div>
       <WeekNav min={min} max={max} current={week} base="/context" />
 
       {/* --- Upset Model: where our line-blind model likes the underdog --- */}

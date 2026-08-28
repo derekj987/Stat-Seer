@@ -2,7 +2,7 @@ import { weekRange, fetchWeek, buildBoard } from "@/lib/board";
 import { fetchModelWeek, fetchCalibration, type ModelPrediction } from "@/lib/model";
 import { MODEL_TOTALS } from "@/lib/modelTotals";
 import { weekRefs } from "@/lib/refAssignments";
-import { Brand, FlowSteps, ModelSubnav } from "../Nav";
+import { Brand, FlowSteps, ModelSubnav, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
 import Tip from "../Tip";
 import AddToSlip from "../AddToSlip";
@@ -252,14 +252,16 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         <Brand sub={<><span className="brand__sport">NFL</span> · The Model</>} art={{ src: "/nflpic.png?v=1", alt: "NFL" }} />
       </header>
 
-      <FlowSteps active="analyze" />
-      <div className="subnavrow">
-        <ModelSubnav active="game" />
-        <Tip text={<>Our model never sees the betting line — it reads each game from team strength alone,
+      <WeekBadge week={week} tip={
+        <Tip label="The Model" text={<>Our model never sees the betting line — it reads each game from team strength alone,
           then we show you <b>where it agrees with the market and where it doesn&apos;t.</b> An{" "}
           <span className="chip offc">Off Consensus</span> game is one where the model likes a different
           side than Vegas. Every read is <b>published and locked before kickoff</b>, and the calibration
           below grades every one in public — so the track record is yours to check, not ours to claim.</>} />
+      } />
+      <FlowSteps active="analyze" />
+      <div className="subnavrow">
+        <ModelSubnav active="game" />
       </div>
       <WeekNav min={min} max={max} current={week} base="/model" />
 

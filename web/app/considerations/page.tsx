@@ -7,7 +7,7 @@ import { INCENTIVE_WATCH } from "@/lib/incentiveWatch";
 import { TEAM_RATINGS } from "@/lib/teamRatings";
 import { COACH_TENDENCIES } from "@/lib/coachTendencies";
 import { CONTENTION } from "@/lib/contention";
-import { Brand, FlowSteps, ContextSubnav } from "../Nav";
+import { Brand, FlowSteps, ContextSubnav, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
 import Tip from "@/app/Tip";
 import CoachTable from "../CoachTable";
@@ -213,19 +213,17 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
         />
       </header>
 
-      <section className="explainer explainer--wide">
-        <p>
-          <b>The stuff that doesn&apos;t fit in a number.</b> One card per game with the situational factors
-          around it — site &amp; weather, referee crew, and what&apos;s at stake. These <b>arm your judgment</b>;
-          they are <b>not</b> an adjusted line. (How we read each factor is in the reference below.)
-        </p>
-      </section>
-
+      <WeekBadge week={week} tip={
+        <Tip label="Special Considerations" text={<>
+          <b>The stuff that doesn&apos;t fit in a number.</b> One card per game with the situational factors around
+          it: the <b>site &amp; roof</b>, the <b>weather</b> (⚑ marks notable wind), the <b>referee crew</b>, and
+          each team&apos;s offense/defense ratings. These <b>arm your judgment</b> — not an adjusted line or a pick.
+          (How we read each factor is in the reference below.)
+        </>} />
+      } />
       <FlowSteps active="context" />
-
       <div className="subnavrow">
         <ContextSubnav active="special" />
-        <Tip text={<>One card per game with the context around it: the <b>site &amp; roof</b>, the <b>weather</b> (⚑ marks notable wind), the <b>referee crew</b>, and each team&apos;s offense/defense ratings. These arm your judgment — they are <b>not</b> an adjusted line or a pick.</>} />
       </div>
       <WeekNav min={min} max={max} current={week} base="/considerations" />
 

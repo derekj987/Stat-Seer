@@ -35,17 +35,15 @@ export default async function Page({ searchParams }: {
         />
       </header>
 
-      <section className="explainer explainer--wide">
-        <p>
+      <WeekBadge week={c.week} tip={
+        <Tip label="Line Shopping" text={<>
           <b>The board.</b> Every game with the market&apos;s <b>spread</b> and <b>total</b>, beside our
           line-blind read of which side it covers. The market number is a consensus snapshot; the per-book
           best-price shopping turns on as the live NCAAF odds capture feeds the site.
-        </p>
-      </section>
-
-      <WeekBadge week={c.week} />
+        </>} />
+      } />
       <FlowSteps active="value" base="ncaaf" />
-      <ShopSubnav active="lines" base="ncaaf" />
+      <div className="subnavrow"><ShopSubnav active="lines" base="ncaaf" /></div>
       <NcaafWeekNav base="/ncaaf/lines" week={week} />
       <NcaafOffWeek current={c.week} week={week} />
       <ValueFinderNote />

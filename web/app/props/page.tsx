@@ -1,7 +1,7 @@
 import { weekRange } from "@/lib/board";
 import { weekProps, CATEGORIES, categoryByKey } from "@/lib/props";
 import { playerSlot } from "@/lib/playerSlot";
-import { ShopSubnav, Brand, FlowSteps, ValueFinderNote } from "../Nav";
+import { ShopSubnav, Brand, FlowSteps, ValueFinderNote, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
 import PropsView from "./PropsView";
 
@@ -63,9 +63,10 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
         {!isPre && snap && <div className="asof">props as of<br /><b>{et(snap)}</b></div>}
       </header>
 
+      <WeekBadge week={week} />
       <ValueFinderNote />
       <FlowSteps active="value" />
-      <ShopSubnav active="props" />
+      <div className="subnavrow"><ShopSubnav active="props" /></div>
 
       {isPre ? (
         <div className="tgwall" role="note">
