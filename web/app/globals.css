@@ -160,10 +160,10 @@ body{background:var(--bg);color:var(--ink);
 .pageweek{display:flex;width:fit-content;align-items:baseline;gap:14px;
   padding:14px 34px;border-radius:15px;background:var(--surface-2);
   border:1px solid color-mix(in srgb,var(--gold) 40%,var(--line))}
-.pageweek__k{font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
-.pageweek__n{font-size:40px;font-weight:900;color:var(--gold);line-height:1}
-.pageweek__note{font-size:13px;color:var(--muted);font-weight:600}
-@media (max-width:640px){.pageweek{padding:11px 24px}.pageweek__n{font-size:32px}.pageweek__k{font-size:13px}}
+.pageweek__k{font-size:44px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);line-height:1}
+.pageweek__n{font-size:44px;font-weight:900;color:var(--gold);line-height:1}
+.pageweek__note{font-size:13px;color:var(--muted);font-weight:600;align-self:end}
+@media (max-width:640px){.pageweek{padding:11px 22px}.pageweek__n,.pageweek__k{font-size:32px}}
 .weeknav{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 14px;min-width:0}
 .weeknav__label{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;
   color:var(--muted);font-weight:600;flex:0 0 auto}

@@ -11,6 +11,7 @@ import { Brand, FlowSteps, ContextSubnav, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
 import Tip from "@/app/Tip";
 import CoachTable from "../CoachTable";
+import ConsiderationsFilter, { NFL_DIV } from "./ConsiderationsFilter";
 
 const ord = (n: number) => {
   const s = ["th", "st", "nd", "rd"], v = n % 100;
@@ -117,8 +118,6 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
     wx: showWeather ? wxByEvent.get(g.eventId) : undefined,
   }));
   // Lead with the first 6; the rest live behind a centered "see more".
-  const lead = games.slice(0, 6);
-  const rest = games.slice(6);
 
   const renderCard = ({ g, mp, crew, wx }: (typeof games)[number]) => {
     const neutral = mp?.neutral;
@@ -128,7 +127,9 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
     const ra = TEAM_RATINGS[g.away], rh = TEAM_RATINGS[g.home];
     const hasRatings = Boolean(ra && rh);
     return (
-      <article className={`cxcard${wx?.windFlag ? " cxcard--wind" : ""}`} key={g.eventId}>
+      <article className={`cxcard${wx?.windFlag ? " cxcard--wind" : ""}`} key={g.eventId}
+        data-teams={`${g.away} ${g.home}`}
+        data-confs={[NFL_DIV[g.away]?.conf, NFL_DIV[g.home]?.conf].filter(Boolean).join(" ")}>
         <header className="cxcard__head">
           <span className="matchup">{g.away}<span className="at">@</span>{g.home}</span>
           <time className="kick">{et(g.commence)}</time>
@@ -231,20 +232,10 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
         <p className="foot">No games captured for Week {week} yet.</p>
       ) : (
         <>
-          <section className="cxgrid" aria-label={`Week ${week} considerations`}>
-            {lead.map(renderCard)}
+          <ConsiderationsFilter gameTeams={[...new Set(games.flatMap((x) => [x.g.home, x.g.away]))]} />
+          <section className="cxgrid" id="cxgames" aria-label={`Week ${week} considerations`}>
+            {games.map(renderCard)}
           </section>
-          {rest.length > 0 && (
-            <details className="hb-more cxmore">
-              <summary className="hb-more__sum">
-                <span className="hb-more__chev" aria-hidden="true">▸</span>
-                See {rest.length} more {rest.length === 1 ? "game" : "games"}
-              </summary>
-              <section className="cxgrid" aria-label={`Week ${week} considerations — more games`}>
-                {rest.map(renderCard)}
-              </section>
-            </details>
-          )}
         </>
       )}
 
