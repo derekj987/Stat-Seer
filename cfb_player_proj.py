@@ -154,6 +154,7 @@ def team_logs(teams, key):
             if st != 200 or not isinstance(data, list):
                 continue
             for g in data:
+                gid = g.get("id") or 0
                 for tm in g.get("teams", []):
                     if tm.get("team") != team:
                         continue
@@ -169,19 +170,30 @@ def team_logs(teams, key):
                                 if not nm:
                                     continue
                                 slot = per.setdefault(nm, {"display": a.get("name")})
-                                slot[(cname, tname)] = _num(a.get("stat"))
+                                if cname == "passing" and tname == "C/ATT":
+                                    m = re.match(r"\s*\d+\s*/\s*(\d+)", str(a.get("stat") or ""))
+                                    slot[("passing", "ATT")] = float(m.group(1)) if m else None
+                                else:
+                                    slot[(cname, tname)] = _num(a.get("stat"))
                     for nm, slot in per.items():
+                        td = (slot.get(("rushing", "TD")) or 0) + (slot.get(("receiving", "TD")) or 0)
                         rec = {
-                            "season": season, "homeAway": ha,
+                            "season": season, "homeAway": ha, "gid": gid,
                             "pass_yds": slot.get(("passing", "YDS")),
+                            "pass_att": slot.get(("passing", "ATT")),   # parsed from C/ATT below
                             "pass_tds": slot.get(("passing", "TD")),
                             "rush_yds": slot.get(("rushing", "YDS")),
+                            "carries": slot.get(("rushing", "CAR")),
                             "rec_yds": slot.get(("receiving", "YDS")),
                             "receptions": slot.get(("receiving", "REC")),
-                            "td": (slot.get(("rushing", "TD")) or 0) + (slot.get(("receiving", "TD")) or 0),
+                            "td": td, "scored": (1 if td > 0 else 0),
                         }
                         e = logs.setdefault(nm, {"team": team, "display": slot["display"], "games": []})
                         e["games"].append(rec)
+    # chronological order (season, then ESPN game id) so recency weighting sees the true
+    # end-of-season role — a late-season promotion is the most recent games.
+    for e in logs.values():
+        e["games"].sort(key=lambda g: (g["season"], g["gid"]))
     return logs
 
 
@@ -216,26 +228,195 @@ def infer_td_pos(games):
     return "RB" if rush >= rec else "WR"
 
 
-def project(games, market):
-    """Line-blind baseline: prior-season per-game average (per-game TD rate for anytime TD)."""
-    prior = [g for g in games if g["season"] == PRIOR_SEASON]
-    use = prior or games
-    vals = series(use, market)
-    if not vals:
+DECAY = 0.82           # default recency weight (each game back counts DECAY x)
+DECAY_MOVED = 0.78     # promoted / new starter: the recent role dominates
+DECAY_RETURN = 0.94    # returning starter: mostly their full body of work
+LEAGUE_EFF = {"ypc": 4.7, "ypr": 12.0, "ypa": 7.6, "tdpt": 0.05, "passtd": 0.045}
+REG = {"ypc": 40.0, "ypr": 24.0, "ypa": 80.0, "tdpt": 22.0, "passtd": 25.0}
+
+
+def _recent_avg(games, field, decay=DECAY):
+    """Recency-weighted per-game average (games are chronological; recent ones weigh more)."""
+    gs = [g for g in games if g.get(field) is not None]
+    n = len(gs)
+    if not n:
         return None
-    avg = sum(vals) / len(vals)
+    ws = [decay ** (n - 1 - i) for i in range(n)]
+    return sum(w * (gs[i][field] or 0) for i, w in enumerate(ws)) / sum(ws)
+
+
+def _flat_avg(games, field):
+    gs = [g for g in games if g.get(field) is not None]
+    return (sum(g[field] or 0 for g in gs) / len(gs)) if gs else 0.0
+
+
+def _recent_rate(games, num_f, den_f, prior, k, decay=DECAY):
+    """Recency-weighted efficiency num/den, regressed toward a league prior (k 'prior touches')."""
+    gs = [g for g in games if g.get(den_f) is not None]
+    n = len(gs)
+    if not n:
+        return prior
+    ws = [decay ** (n - 1 - i) for i in range(n)]
+    num = sum(w * (gs[i].get(num_f) or 0) for i, w in enumerate(ws))
+    den = sum(w * (gs[i].get(den_f) or 0) for i, w in enumerate(ws))
+    return (num + k * prior) / (den + k) if (den + k) > 0 else prior
+
+
+def _decay_for(games, field, role_vol):
+    """How hard to weight recency for THIS player+stat. A new/promoted starter — whose role
+    (baseline) or recent workload sits well above their season-long average — leans on recent
+    games; a returning starter, already at that workload, leans on their fuller history."""
+    flat = _flat_avg(games, field)
+    if flat <= 0:
+        return DECAY_MOVED
+    recent = _recent_avg(games, field, DECAY_MOVED) or 0.0
+    if role_vol > 1.30 * flat or recent > 1.35 * flat:
+        return DECAY_MOVED
+    return DECAY_RETURN
+
+
+def project(games, market):
+    """Line-blind baseline, recency-weighted so a player's recent form and end-of-season role
+    lead over a flat season average (per-game TD rate for anytime TD)."""
     if market == "anytime_td":
-        return round(100.0 * avg, 1)                          # per-game TD rate as a percent
-    return round(avg, 1)
+        r = _recent_avg(games, "scored")
+        return None if r is None else round(100.0 * r, 1)
+    r = _recent_avg(games, market)
+    return None if r is None else round(r, 1)
 
 
-def build(props, key):
+# ---- Role-adjusted volume ----------------------------------------------------------------
+# "Volume persists, efficiency doesn't." A player's per-game average bakes in the role they
+# HELD (e.g. an RB2's carries). Given their CURRENT depth-chart rank we re-scale volume to the
+# role they now HOLD, keeping their own efficiency: proj = own_per_game x (role_vol / own_vol).
+# So a back-up promoted to starter is projected on a starter's workload, not last year's.
+POOL = {"QB": "QB", "RB": "RB", "WR": "WR", "TE": "WR", "FB": "RB"}
+VOL_FIELD = {"QB": "pass_att", "RB": "carries", "WR": "receptions"}  # stat that RANKS a pool
+FIELDS = ["carries", "receptions", "pass_att"]                       # volumes we baseline
+TE_VOL_FACTOR = 0.72          # a TE1 sees fewer targets than a WR1 at the same "rank"
+DEFAULT_VOL = {"carries": 10.0, "receptions": 3.6, "pass_att": 28.0}   # per-game fallback
+
+
+def _sum(games, f):
+    return sum(g[f] or 0 for g in games if g.get(f) is not None)
+
+
+def _gp(games, f):
+    return len([g for g in games if g.get(f) is not None])
+
+
+def _pos_from_usage(games):
+    p, ru, re_ = _sum(games, "pass_yds"), _sum(games, "rush_yds"), _sum(games, "rec_yds")
+    if p >= 300 and p > ru + re_:
+        return "QB"
+    return "RB" if ru >= re_ else "WR"
+
+
+def rank_baselines(logs):
+    """From game logs, the per-game VOLUME the holder of each (pool, rank) averaged — per team
+    and a league fallback. Rank each team's players (by most-recent-season volume) within their
+    pool; the top gets rank 1, etc. This is the workload a role implies, independent of who filled it."""
+    by_team = {}
+    for e in logs.values():
+        by_team.setdefault(e["team"], []).append(e)
+    per_team, league = {}, {}
+    for team, entries in by_team.items():
+        by_pool = {}
+        for e in entries:
+            recent = [g for g in e["games"] if g["season"] == PRIOR_SEASON] or e["games"]
+            pool = POOL.get(_pos_from_usage(recent), "WR")
+            gp = _gp(recent, VOL_FIELD[pool])          # rank by the pool's primary volume
+            if not gp:
+                continue
+            prim = _sum(recent, VOL_FIELD[pool]) / gp
+            if prim <= 0:
+                continue
+            # record EVERY field's per-game volume for this ranked player (an RB1 has both a
+            # carries baseline and a receptions baseline)
+            fields = {f: (_sum(recent, f) / _gp(recent, f) if _gp(recent, f) else 0.0) for f in FIELDS}
+            by_pool.setdefault(pool, []).append((prim, fields))
+        tb = {}
+        for pool, lst in by_pool.items():
+            for i, (_, fields) in enumerate(sorted(lst, key=lambda x: -x[0])):
+                tb[(pool, i + 1)] = fields
+                league.setdefault((pool, i + 1), []).append(fields)
+        per_team[team] = tb
+    lg = {k: {f: sum(d[f] for d in lst) / len(lst) for f in FIELDS} for k, lst in league.items()}
+    return per_team, lg
+
+
+def expected_volume(team, pool, rank, field, per_team, league):
+    """Per-game volume of `field` for the holder of (pool, rank): team baseline, else league,
+    else a flat default."""
+    d = per_team.get(team, {}).get((pool, rank))
+    if d is None:
+        for rr in (rank, rank - 1, rank + 1, 1, 2):
+            if (pool, rr) in league:
+                d = league[(pool, rr)]; break
+    return (d or {}).get(field, DEFAULT_VOL.get(field, 3.5)) or DEFAULT_VOL.get(field, 3.5)
+
+
+def project_role(games, market, pos, rank, team, per_team, league):
+    """Volume x efficiency. Volume = the GREATER of the depth role's baseline workload and the
+    player's recent workload (so a depth-chart promotion OR a late-season surge lifts it);
+    efficiency is recency-weighted. Recency is weighted harder for a promoted/new starter than
+    for a returning one. A promoted back is projected on a starter's carries at his own YPC,
+    not last year's back-up average."""
+    pool = POOL.get(pos, "WR")
+
+    def rolevol(field):
+        # QB volumes are ranked among QBs; a receiver's/back's field baseline is at their rank.
+        use_rank = 1 if pool == "QB" and field == "pass_att" else rank
+        use_pool = "QB" if field == "pass_att" else pool
+        base = expected_volume(team, use_pool, use_rank, field, per_team, league)
+        if pos == "TE" and field == "receptions":
+            base *= TE_VOL_FACTOR
+        decay = _decay_for(games, field, base)
+        return max(base, _recent_avg(games, field, decay) or 0.0), decay
+
+    if market == "pass_yds":
+        v, dec = rolevol("pass_att")
+        return round(v * _recent_rate(games, "pass_yds", "pass_att", LEAGUE_EFF["ypa"], REG["ypa"], dec), 1)
+    if market == "pass_tds":
+        v, dec = rolevol("pass_att")
+        return round(v * _recent_rate(games, "pass_tds", "pass_att", LEAGUE_EFF["passtd"], REG["passtd"], dec), 1)
+    if market == "rush_yds":
+        v, dec = rolevol("carries")
+        return round(v * _recent_rate(games, "rush_yds", "carries", LEAGUE_EFF["ypc"], REG["ypc"], dec), 1)
+    if market == "rec_yds":
+        v, dec = rolevol("receptions")
+        return round(v * _recent_rate(games, "rec_yds", "receptions", LEAGUE_EFF["ypr"], REG["ypr"], dec), 1)
+    if market == "receptions":
+        v, _ = rolevol("receptions")
+        return round(v, 1)
+    if market == "anytime_td":
+        field = "carries" if pool == "RB" else "receptions"
+        touches, dec = rolevol(field)
+        tpt = min(0.45, _recent_rate(games, "td", field, LEAGUE_EFF["tdpt"], REG["tdpt"], dec))
+        rate = 1 - (1 - tpt) ** max(0.1, touches)          # P(≥1 TD) at the projected workload
+        return round(100.0 * min(0.99, rate), 1)
+    return project(games, market)
+
+
+def depth_lookup(depth):
+    """{(cfbd_team, norm_name): (pos, rank)} from the scraped depth charts."""
+    out = {}
+    for team, groups in (depth or {}).items():
+        for pos, names in groups.items():
+            for i, n in enumerate(names):
+                out[(team, norm(n))] = (pos, i + 1)
+    return out
+
+
+def build(props, key, depth):
     teams = set()
     for p in props:
         teams.add(p["home"]); teams.add(p["away"])
     logs = team_logs(teams, key)
+    per_team, league = rank_baselines(logs)
+    dlook = depth_lookup(depth)
 
-    out, matched, missed = [], 0, 0
+    out, matched, missed, roled = [], 0, 0, 0
     for p in props:
         mk, cat, unit, pos = MARKETS[p["market"]]
         # match the prop player within the two teams in this game
@@ -248,14 +429,25 @@ def build(props, key):
             missed += 1
             continue
         matched += 1
+        team = e["team"]
+        # current role from the depth chart (accurate), falling back to usage inference
+        dpos, drank = dlook.get((team, norm(p["player"])), (None, None))
         if mk == "anytime_td":
-            pos = infer_td_pos(games)   # RB / WR / QB from actual usage, not a fixed default
+            pos = dpos or infer_td_pos(games)
+        else:
+            pos = dpos or pos
         line = p["line"]
         cO, cG = over_split(games, mk, line, lambda g: True)
         pO, pG = over_split(games, mk, line, lambda g: g["season"] == PRIOR_SEASON)
         hO, hG = over_split(games, mk, line, lambda g: g["homeAway"] == "home")
         rO, rG = over_split(games, mk, line, lambda g: g["homeAway"] == "away")
-        proj = project(games, mk)
+        # Role-adjust the projection when we know the player's current depth rank; otherwise
+        # fall back to their raw per-game baseline.
+        if drank:
+            proj = project_role(games, mk, pos, drank, team, per_team, league)
+            roled += 1
+        else:
+            proj = project(games, mk)
         if proj is None:
             continue
         out.append({
@@ -265,6 +457,7 @@ def build(props, key):
             "proj": proj, "g": len([g for g in games if g.get(mk) is not None]) if mk != "anytime_td" else len(games),
             "cOver": cO, "cG": cG, "pOver": pO, "pG": pG, "hOver": hO, "hG": hG, "rOver": rO, "rG": rG,
         })
+    print(f"  role-adjusted {roled} of {matched} matched rows from the depth chart")
     return out, matched, missed
 
 
@@ -290,7 +483,25 @@ def main(argv=None):
     print(f"{len(props)} posted props across "
           f"{len({(p['home'], p['away']) for p in props})} games.")
 
-    rows, matched, missed = build(props, key)
+    # Current depth charts (scraped by cfb_depth) drive role-adjusted volume. Prefer the
+    # committed cfb_depth.json; scrape live if it's missing.
+    depth = {}
+    dj = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cfb_depth.json")
+    if os.path.exists(dj):
+        with open(dj, encoding="utf-8") as f:
+            depth = json.load(f)
+        print(f"  loaded depth charts for {len(depth)} teams from cfb_depth.json")
+    else:
+        try:
+            import cfb_depth as cd
+            st, teams = cc.cfbd_get("/teams/fbs", {"year": CUR_SEASON}, key)
+            schools = [t.get("school") for t in teams if t.get("school")] if isinstance(teams, list) else []
+            depth = cd.scrape_all(schools, log=lambda *a: None)
+            print(f"  scraped depth charts for {len(depth)} teams (no cfb_depth.json found)")
+        except Exception as e:                                   # noqa: BLE001
+            print(f"  depth-chart unavailable ({e}); projections fall back to raw per-game averages")
+
+    rows, matched, missed = build(props, key, depth)
     print(f"  matched {matched} to a CFBD game log, missed {missed}. {len(rows)} projection rows.")
 
     if args.probe:

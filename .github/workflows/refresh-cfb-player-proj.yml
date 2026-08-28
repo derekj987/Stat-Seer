@@ -19,9 +19,9 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     permissions:
-      contents: write   # commit the regenerated ncaafPlayerProjections.ts
+      contents: write   # commit the regenerated projection + depth-chart files
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,6 +30,13 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install --quiet certifi
+
+      # Current depth charts drive role-adjusted volume (a promoted RB is projected on a
+      # starter's carries). Scrape first so the projector reads a fresh cfb_depth.json.
+      - name: Scrape NCAAF depth charts
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+        run: python cfb_depth.py
 
       - name: Build NCAAF player projections
         env:
@@ -40,14 +47,14 @@ jobs:
 
       - name: Commit if changed
         run: |
-          if git diff --quiet -- web/lib/ncaafPlayerProjections.ts; then
-            echo "No player-projection change — nothing to commit."
+          if git diff --quiet -- web/lib/ncaafPlayerProjections.ts web/lib/ncaafDepth.ts cfb_depth.json; then
+            echo "No projection/depth change — nothing to commit."
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add web/lib/ncaafPlayerProjections.ts
-          git commit -m "chore: refresh CFB player projections (auto)"
+          git add web/lib/ncaafPlayerProjections.ts web/lib/ncaafDepth.ts cfb_depth.json
+          git commit -m "chore: refresh CFB depth charts + player projections (auto)"
           # Several bots push this branch; retry rebase+push a few times before failing.
           for i in 1 2 3 4 5; do
             git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || git rebase --abort || true
