@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -8,7 +8,6 @@ const MAX_BYTES = 4 * 1024 * 1024; // 4 MB (covers are wide)
 
 export default function CoverUpload({ userId }: { userId: string }) {
   const router = useRouter();
-  const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
 
@@ -31,12 +30,13 @@ export default function CoverUpload({ userId }: { userId: string }) {
     router.refresh();
   }
 
+  // Native <label> so the picker opens on tap without a JS input.click() (mobile-safe).
   return (
     <>
-      <input ref={inputRef} type="file" accept="image/*" hidden onChange={onPick} />
-      <button type="button" className="pcover__edit" disabled={busy} onClick={() => inputRef.current?.click()}>
+      <label className="pcover__edit">
         {busy ? "Uploading…" : "📷 Edit cover"}
-      </button>
+        <input type="file" accept="image/*" hidden disabled={busy} onChange={onPick} />
+      </label>
       {msg && <span className="pcover__msg">{msg}</span>}
     </>
   );
