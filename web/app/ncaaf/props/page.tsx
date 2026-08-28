@@ -2,6 +2,19 @@ import { Brand, FlowSteps, ShopSubnav, ValueFinderNote } from "../../Nav";
 import { NcaafSoon } from "../Soon";
 import PropsView from "../../props/PropsView";
 import { cfbWeekProps } from "@/lib/cfbProps";
+import { CATEGORIES, categoryByKey } from "@/lib/props";
+
+function CatNav({ current }: { current: string }) {
+  return (
+    <nav className="catnav" aria-label="Prop category">
+      {CATEGORIES.map((c) => (
+        <a key={c.key} href={`/ncaaf/props?cat=${c.key}`}
+          className={c.key === current ? "catnav__c active" : "catnav__c"}
+          aria-current={c.key === current ? "page" : undefined}>{c.label}</a>
+      ))}
+    </nav>
+  );
+}
 
 // College Football — Value Finder · Player Props. Props are the likeliest place a real
 // edge remains (hundreds of semi-independent markets). Reuses the NFL PropsView board
@@ -14,8 +27,16 @@ export const metadata = {
 
 export const revalidate = 120;
 
-export default async function Page() {
-  const games = await cfbWeekProps();
+export default async function Page({ searchParams }: PageProps<"/ncaaf/props">) {
+  const sp = await searchParams;
+  const cat = categoryByKey(typeof sp.cat === "string" ? sp.cat : "td");
+  const catSet = new Set(cat.markets);
+  const all = await cfbWeekProps();
+  // Filter each game to the active category's markets — same tabbed layout as the NFL board
+  // and The Model, so every prop type is represented (not a single ATTD wall).
+  const games = all
+    .map((g) => ({ ...g, markets: g.markets.filter((m) => catSet.has(`player_${m.market}`) || catSet.has(m.market)) }))
+    .filter((g) => g.markets.length > 0);
 
   return (
     <main className="wrap">
@@ -30,7 +51,7 @@ export default async function Page() {
       <FlowSteps active="value" base="ncaaf" />
       <ShopSubnav active="props" base="ncaaf" />
 
-      {games.length ? (
+      {all.length ? (
         <section className="ncf-sec">
           <div className="hb-legend">
             <b>Player props, best price across ~10 books.</b> Each row is a player&apos;s number with the
@@ -38,7 +59,15 @@ export default async function Page() {
             one place a real college edge might survive (books price hundreds of them semi-independently); once we have
             enough captured history we grade them, same as everything else.
           </div>
-          <PropsView games={games} embedded />
+          <CatNav current={cat.key} />
+          {games.length ? (
+            <PropsView games={games} embedded />
+          ) : (
+            <p className="ncf-note">
+              No <b>{cat.label.toLowerCase()}</b> props posted for this slate yet — books post them closer to
+              kickoff. Try another category above, or check back as the slate fills in.
+            </p>
+          )}
           <p className="ncf-note">
             Best price shown per player across the books we track. For the line-blind read, see <a href="/ncaaf/model">The Model</a>;
             for key numbers, <a href="/ncaaf/best">Sweet Spots</a>.

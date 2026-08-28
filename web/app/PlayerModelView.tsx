@@ -8,6 +8,7 @@ import { WeekNav } from "./WeekNav";
 import { PLAYER_PROJECTIONS, PROJ_WEEK, PROJ_PRIOR, type PlayerProj } from "@/lib/playerProjections";
 import { NCAAF_PLAYER_PROJECTIONS } from "@/lib/ncaafPlayerProjections";
 import { isRealistic } from "@/lib/depthChart";
+import PropAdd from "./PropAdd";
 
 export interface PlayerCat {
   key: string;
@@ -146,6 +147,7 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
                           <span className="pmcell pmcell--career">Home % over</span>
                           <span className="pmcell pmcell--career">Road % over</span>
                         </>}
+                        <span className="pmcell pmcell--add">Add to slip</span>
                       </div>
                       {sec.rows.map((r, ri) => {
                         const cpct = r.cG ? Math.round((100 * r.cOver) / r.cG) : null;
@@ -180,6 +182,9 @@ export default function PlayerModelView({ base, cat, week }: { base: "nfl" | "nc
                                 {rpct === null ? "—" : <>{rpct}% <small className="pmcell__sub">{r.rOver}/{r.rG} gm</small></>}
                               </span>
                             </>}
+                            <span className="pmcell pmcell--add">
+                              <PropAdd player={r.player} market={r.market} line={r.book} game={g} />
+                            </span>
                           </div>
                         );
                       })}
