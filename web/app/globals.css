@@ -2021,6 +2021,21 @@ a.snav__dfeat{display:block}
   letter-spacing:.02em;border-bottom:2px solid color-mix(in srgb,currentColor 30%,var(--line));padding-bottom:5px}
 .tgteam__n{font-size:11px;font-weight:700;color:var(--muted);background:var(--surface-2);
   border-radius:99px;padding:1px 8px;letter-spacing:0}
+.tgteam__conf{margin-left:auto;font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.02em;text-transform:none}
+/* Local Intelligence navigator: conference -> team dropdowns + this-week's-slate toggle */
+.lictl{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin:0 0 20px;
+  padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.lictl__f{display:flex;flex-direction:column;gap:4px}
+.lictl__k{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.lictl__sel{font-size:13px;font-weight:600;color:var(--ink);background:var(--surface-2);
+  border:1px solid var(--line);border-radius:8px;padding:7px 10px;min-width:170px;cursor:pointer}
+.lictl__sel:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.lictl__slate{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;
+  color:var(--ink);cursor:pointer;padding-bottom:7px}
+.lictl__slate input{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
+.lictl__clear{margin-left:auto;align-self:center;font-size:12px;font-weight:700;color:var(--muted);
+  background:none;border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
+.lictl__clear:hover{color:var(--ink);border-color:var(--muted)}
 .tgprop{font-family:var(--font-mono);font-weight:700;color:var(--ink);font-size:13px}
 .tgside{margin-left:8px;font-size:11px;font-weight:700;letter-spacing:.02em}
 .tgside--up{color:var(--accent)}
