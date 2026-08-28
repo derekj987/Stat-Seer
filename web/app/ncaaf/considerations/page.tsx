@@ -38,11 +38,7 @@ export default async function Page({ searchParams }: {
         />
       </header>
 
-      <WeekBadge week={c.week} />
-      <FlowSteps active="context" base="ncaaf" />
-
-      <div className="subnavrow">
-        <ContextSubnav active="special" base="ncaaf" />
+      <WeekBadge week={c.week} tip={
         <Tip label="Special Considerations" text={<>
           <b>The stuff that doesn&apos;t fit in a number.</b> One card per game with the context around it: the
           <b> site</b> &amp; <b>weather</b> (⚑ marks notable wind), the <b>AP poll</b> stakes, each side&apos;s
@@ -50,6 +46,10 @@ export default async function Page({ searchParams }: {
           These <b>arm your judgment</b> — not a pick. Referee crews and coaching tendencies aren&apos;t published
           for college, so those rows stay NFL-only. The durable backdrop — home field &amp; league strength — is below.
         </>} />
+      } />
+      <FlowSteps active="context" base="ncaaf" />
+      <div className="subnavrow">
+        <ContextSubnav active="special" base="ncaaf" />
       </div>
       <NcaafWeekNav base="/ncaaf/considerations" week={week} />
       <NcaafOffWeek current={c.week} week={week} />

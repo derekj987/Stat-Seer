@@ -8,13 +8,17 @@ import MastheadSport from "./MastheadSport";
 //   The Model    — line-blind predictions
 //   Context      — what to understand (informs, doesn't vote)
 
-/** Prominent "Week N" label for the top of a section page. */
-export function WeekBadge({ week, note }: { week: number; note?: string }) {
+/** Prominent "Week N" label for the top of a section page. An optional `tip` (the info "?"
+ *  popover) sits just to its right — the page's informational scroll. */
+export function WeekBadge({ week, note, tip }: { week: number; note?: string; tip?: import("react").ReactNode }) {
   return (
-    <div className="pageweek">
-      <span className="pageweek__k">Week</span>
-      <span className="pageweek__n">{week}</span>
-      {note && <span className="pageweek__note">{note}</span>}
+    <div className="pageweekrow">
+      <div className="pageweek">
+        <span className="pageweek__k">Week</span>
+        <span className="pageweek__n">{week}</span>
+        {note && <span className="pageweek__note">{note}</span>}
+      </div>
+      {tip}
     </div>
   );
 }
