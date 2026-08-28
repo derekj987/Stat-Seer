@@ -164,6 +164,13 @@ body{background:var(--bg);color:var(--ink);
 .pageweek__n{font-size:44px;font-weight:900;color:var(--gold);line-height:1}
 .pageweek__note{font-size:13px;color:var(--muted);font-weight:600;align-self:end}
 @media (max-width:640px){.pageweek{padding:11px 22px}.pageweek__n,.pageweek__k{font-size:32px}}
+/* Phone-only: shrink the big Week label so it fits a phone. The flow-stepper and subnav
+   overrides live further down, AFTER their base rules, so source order lets them win. */
+@media (max-width:560px){
+  .pageweek{padding:7px 14px;gap:9px}
+  .pageweek__n,.pageweek__k{font-size:23px}
+  .pageweek__note{font-size:11px}
+}
 .weeknav{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 14px;min-width:0}
 .weeknav__label{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;
   color:var(--muted);font-weight:600;flex:0 0 auto}
@@ -1113,6 +1120,19 @@ a.fauthor:hover{text-decoration:underline}
    the per-section stepper so it reads as a compact breadcrumb. */
 .flow__sub{display:none}
 .flow__arrow{color:var(--muted);font-size:12px;flex:0 0 auto}
+/* Phone-only: shrink the flow stepper + subnav pills (placed after their base rules so
+   equal-specificity source order wins). Paired with the .pageweek phone shrink up top. */
+@media (max-width:560px){
+  .flow{gap:5px}
+  .flow__item{gap:5px}
+  .flow__step{padding:6px 12px;gap:6px}
+  .flow__l{font-size:12px}
+  .flow__n{width:19px;height:19px;font-size:11px}
+  .flow__arrow{font-size:10px}
+  .subnav{padding:4px;gap:4px}
+  .subnav__t{padding:7px 14px;font-size:12.5px}
+  .subnav--context .subnav__t{padding:7px 12px;font-size:12px}
+}
 
 /* --- upset watch --- */
 .upsets{display:flex;flex-direction:column;gap:6px}
