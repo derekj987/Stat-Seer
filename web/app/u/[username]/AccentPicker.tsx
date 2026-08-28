@@ -1,7 +1,7 @@
 "use client";
 
-// Owner-only: pick a personal accent color for your profile (drives the cover gradient +
-// story rings). Stored on profiles.accent_color. A fixed palette keeps it on-brand.
+// Owner-only: pick a personal accent color for your profile (drives the name tag, cover
+// gradient + story rings). Stored on profiles.accent_color. A fixed palette keeps it on-brand.
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -12,11 +12,18 @@ export default function AccentPicker({ userId, current }: { userId: string; curr
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
 
   async function pick(c: string | null) {
-    setBusy(true);
-    await createClient().from("profiles").update({ accent_color: c }).eq("id", userId);
-    setBusy(false); setOpen(false); router.refresh();
+    setBusy(true); setErr("");
+    const { error } = await createClient().from("profiles").update({ accent_color: c }).eq("id", userId);
+    setBusy(false);
+    if (error) {
+      setErr(/accent_color/.test(error.message) ? "Run the latest profile_upgrade.sql to enable themes." : error.message);
+      return;
+    }
+    setOpen(false);
+    router.refresh();
   }
 
   return (
@@ -29,6 +36,7 @@ export default function AccentPicker({ userId, current }: { userId: string; curr
               onClick={() => pick(c)} disabled={busy} aria-label={`Accent ${c}`} />
           ))}
           <button className="paccent__reset" onClick={() => pick(null)} disabled={busy}>Default</button>
+          {err && <p className="paccent__err">{err}</p>}
         </div>
       )}
     </div>

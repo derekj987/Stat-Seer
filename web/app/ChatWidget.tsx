@@ -12,7 +12,7 @@ import { bookName, decToAmerican, priceSlip } from "@/lib/slipPricing";
 import { formatMessage, wrapSelection, EMOJIS } from "@/lib/chatFormat";
 import { enablePush } from "@/lib/push";
 
-type Me = { id: string; username: string };
+type Me = { id: string; username: string; avatarUrl?: string | null };
 type Person = { id: string; username: string; role: string };
 type Friend = Person & { rowId: string };
 type Req = { rowId: string; id: string; username: string };
@@ -48,7 +48,7 @@ function MsgSlip({ items }: { items: SlipItem[] }) {
 }
 
 export default function ChatWidget({ open, onClose, onMeta }:
-  { open: boolean; onClose: () => void; onMeta: (m: { member: boolean; unread: number; username?: string }) => void }) {
+  { open: boolean; onClose: () => void; onMeta: (m: { member: boolean; unread: number; username?: string; avatarUrl?: string | null }) => void }) {
   const { items: mySlip } = useSlip();
   const [me, setMe] = useState<Me | null | undefined>(undefined);
   const [convs, setConvs] = useState<Conv[]>([]);
@@ -84,8 +84,8 @@ export default function ChatWidget({ open, onClose, onMeta }:
     const sb = createClient();
     sb.auth.getUser().then(async ({ data }) => {
       if (!data.user) { setMe(null); return; }
-      const { data: p } = await sb.from("profiles").select("username").eq("id", data.user.id).single();
-      setMe({ id: data.user.id, username: (p?.username as string) ?? "member" });
+      const { data: p } = await sb.from("profiles").select("username,avatar_url").eq("id", data.user.id).single();
+      setMe({ id: data.user.id, username: (p?.username as string) ?? "member", avatarUrl: (p?.avatar_url as string) ?? null });
     });
   }, [configured]);
 
@@ -205,7 +205,7 @@ export default function ChatWidget({ open, onClose, onMeta }:
   // Report member + unread up to the Dock, and set the installed-PWA app-icon badge.
   useEffect(() => {
     const total = convs.reduce((a, c) => a + c.unread, 0) + requests.length;
-    onMeta({ member: !!me, unread: total, username: me?.username });
+    onMeta({ member: !!me, unread: total, username: me?.username, avatarUrl: me?.avatarUrl });
     try {
       const nav = navigator as Navigator & { setAppBadge?: (n?: number) => void; clearAppBadge?: () => void };
       if (total > 0) nav.setAppBadge?.(total); else nav.clearAppBadge?.();
