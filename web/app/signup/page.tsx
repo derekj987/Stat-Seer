@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { LEGAL_VERSION } from "@/lib/legal";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -29,7 +30,14 @@ export default function SignUp() {
       email,
       password,
       options: {
-        data: { username },
+        // Consent details recorded with the account (a trigger writes the `consents` audit
+        // row from this metadata): which legal version, when they agreed, and the device.
+        data: {
+          username,
+          legal_version: LEGAL_VERSION,
+          consent_at: new Date().toISOString(),
+          user_agent: (navigator.userAgent || "").slice(0, 300),
+        },
         emailRedirectTo: `${location.origin}/auth/callback`,
       },
     });
