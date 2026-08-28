@@ -259,7 +259,7 @@ export function ContextSubnav({ active, base = "nfl" }: {
 }) {
   const h = base === "ncaaf"
     ? { upset: "/ncaaf/context", special: "/ncaaf/considerations", fan: "/ncaaf/local-intelligence" }
-    : { upset: "/context", special: "/considerations", fan: "/tailgate" };
+    : { upset: "/context", special: "/considerations", fan: "/local-intelligence" };
   return (
     <nav className="subnav subnav--context" aria-label="Context view">
       <a href={h.special} className={active === "special" ? "subnav__t active" : "subnav__t"}

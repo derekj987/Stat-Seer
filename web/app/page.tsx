@@ -191,7 +191,7 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
             <span className="lp-feat__p">Weather, venue, coaching, officiating — what the number misses.</span>
             <span className="lp-feat__go">Open →</span>
           </a>
-          <a href="/tailgate" className="lp-feat">
+          <a href="/local-intelligence" className="lp-feat">
             <span className="lp-feat__ic" aria-hidden="true">📣</span>
             <span className="lp-feat__h">Local Intelligence</span>
             <span className="lp-feat__p">We scour fan forums, beat writers &amp; RSS feeds for players you haven&apos;t heard about — then hand you the bottom line on each.</span>

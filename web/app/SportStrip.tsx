@@ -8,7 +8,7 @@ import { SPORTS } from "./Nav";
 
 // NFL owns the root and the un-prefixed section routes; NCAAF lives under /ncaaf.
 const NFL_PREFIXES = [
-  "/model", "/context", "/considerations", "/tailgate", "/lines", "/props", "/best", "/preseason",
+  "/model", "/context", "/considerations", "/local-intelligence", "/tailgate", "/lines", "/props", "/best", "/preseason",
 ];
 
 function activeSport(path: string): string | null {

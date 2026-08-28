@@ -5,28 +5,26 @@ import { useEffect, useState } from "react";
 // snapshot on the homepage. Chaos Board leads, then each player-prop analysis. Auto-advances,
 // pauses on hover, dots to jump. Client-only; links are plain <a> so navigation is normal.
 type Sport = "nfl" | "ncaaf";
-interface Slide { emoji: string; kicker: string; title: string; blurb: string; path: string; img?: string; }
+interface Slide { emoji: string; kicker: string; title: string; blurb: string; path: string; img?: string; focus?: string; }
 
 function slides(sport: Sport): Slide[] {
   const ctx = sport === "ncaaf" ? "/ncaaf/context" : "/context";
   const players = sport === "ncaaf" ? "/ncaaf/model/players" : "/model/players";
-  const best = sport === "ncaaf" ? "/ncaaf/best" : "/best";
+  const value = sport === "ncaaf" ? "/ncaaf/lines" : "/lines";
+  const fan = sport === "ncaaf" ? "/ncaaf/local-intelligence" : "/local-intelligence";
   return [
     { emoji: "🌪", kicker: "New · just for fun", title: "The Upset Lab — Chaos Board",
       blurb: "Which underdogs could win outright, ranked by pure chaos potential — for the aggressive bettor.",
       path: ctx, img: "/chaosboard.jpg?v=2" },
-    { emoji: "🎯", kicker: "Player Model", title: "Passing yards & TDs",
-      blurb: "Every QB's book line beside our line-blind projection, with the prior-season hit rate.", path: `${players}?cat=passing` },
-    { emoji: "🏈", kicker: "Player Model", title: "Rushing yards",
-      blurb: "Volume-first RB reads — projected carries × a regressed efficiency baseline.", path: `${players}?cat=rushing` },
-    { emoji: "🙌", kicker: "Player Model", title: "Receiving yards",
-      blurb: "Target share → catches → yards, projected line-blind for every pass-catcher.", path: `${players}?cat=receiving` },
-    { emoji: "🧤", kicker: "Player Model", title: "Receptions",
-      blurb: "How many balls each player hauls in vs the book's number — the market's most-bet prop.", path: `${players}?cat=receptions` },
-    { emoji: "💥", kicker: "Player Model", title: "Anytime touchdowns",
-      blurb: "A Poisson TD probability from projected touches, next to the book's price.", path: `${players}?cat=td` },
-    { emoji: "💰", kicker: "Value Finder", title: "The single best price",
-      blurb: "We shop every book so you never leave value on the table on a pick you already like.", path: best },
+    { emoji: "📣", kicker: "Local Intelligence", title: "What the fan boards are buzzing",
+      blurb: "We scour team forums, beat writers & RSS for players you haven't heard about — then hand you the bottom line.",
+      path: fan, img: "/localintel.jpg", focus: "center 76%" },
+    { emoji: "🎯", kicker: "Player Props", title: "Every prop, our line vs the book",
+      blurb: "Passing, rushing, receiving, receptions & anytime TD — each player's book number beside our line-blind projection.",
+      path: players, img: "/playerprops.jpg", focus: "center 70%" },
+    { emoji: "💰", kicker: "Value Finder", title: "Find the best price",
+      blurb: "We shop every book so you never leave value on the table — line shopping, sweet spots & the single best number.",
+      path: value, img: "/valuefinder.jpg", focus: "center 72%" },
   ];
 }
 
@@ -53,7 +51,7 @@ export function HighlightBanner({ sport }: { sport: Sport }) {
       <a className={s.img ? "hlb__slide hlb__slide--img" : "hlb__slide"} href={s.path} key={i}>
         {s.img
           // eslint-disable-next-line @next/next/no-img-element
-          ? <img className="hlb__img" src={s.img} alt="" />
+          ? <img className="hlb__img" src={s.img} alt="" style={s.focus ? { objectPosition: s.focus } : undefined} />
           : <span className="hlb__emoji" aria-hidden="true">{s.emoji}</span>}
         <span className="hlb__body">
           <span className="hlb__kicker">{s.kicker}</span>
