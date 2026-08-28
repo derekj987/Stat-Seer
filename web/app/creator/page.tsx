@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCreatorStats } from "@/lib/creator";
 import { Brand } from "../Nav";
@@ -34,14 +34,9 @@ export default async function CreatorPage() {
   const { data: prof } = await supabase.from("profiles").select("role,username").eq("id", user.id).single();
   const role = (prof?.role as string) ?? "member";
 
-  if (role !== "founder") {
-    return (
-      <main className="wrap">
-        <header className="masthead"><Brand sub={<><span className="brand__sport">Creator</span></>} /></header>
-        <p className="foot">This page is private to the site creator.</p>
-      </main>
-    );
-  }
+  // Anyone but the founder gets a plain 404 — the dashboard leaves no trace for members
+  // (no "Creator" masthead, no "this is private" hint that it exists).
+  if (role !== "founder") notFound();
 
   const s = await getCreatorStats();
 
