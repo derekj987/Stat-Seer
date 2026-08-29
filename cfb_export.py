@@ -343,15 +343,19 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
 
 CARD_SEASON, CARD_WEEK = 2026, 1
 
-# Card-projection calibration. The rating is fit on CAPPED margins and (for a preseason
-# card) carried from last season, so the raw rating-diff badly UNDER-projects real
-# margins. Calibrated on history — realized early-season margin ~= CARD_SCALE * prior
-# final rating-diff — this de-compresses the projection onto a realistic scale and, as a
-# bonus, lowers preseason error (RMSE 18.1 vs 19.1 for the old 0.6x shrink). DISPLAY_CAP
-# guards the tail (no team is projected to win by > this). NEWCOMER_R is the floor for a
-# team with no FBS rating history (an FCS/independent call-up); such games are shown but
-# NEVER flagged as an upset — we have no data to back one.
-CARD_SCALE, NEWCOMER_R, DISPLAY_CAP = 1.209, -9.0, 50.0
+# Card-projection calibration. The rating is fit on CAPPED margins (blowouts truncated at
+# CAP=28 to kill noise), so the raw rating-diff UNDER-projects real margins — worst at the
+# TAIL, where the cap bit hardest. A single linear de-compression can't fully undo that,
+# but the previous 1.209 was well below the walk-forward optimum and left BIG favorites
+# badly short: on 2020-2025 walk-forward (fit on prior weeks, scored vs REALIZED margins),
+# the |pred|>=21 bucket came in +5.5 pts under reality at 1.209. Re-fit by OLS (raw ->
+# realized) the optimum is ~1.33, which cuts that tail miss to +1.4 pts with flat MAE
+# (13.08) — the middle stays within ~1.6 pts. Calibrated to REALIZED results, not to the
+# market (the model is line-blind and doesn't beat the closing spread, so matching Vegas
+# isn't the goal). DISPLAY_CAP guards the tail (no team projected to win by > this).
+# NEWCOMER_R is the floor for a team with no FBS rating history (an FCS/independent
+# call-up); such games are shown but NEVER flagged as an upset — no data to back one.
+CARD_SCALE, NEWCOMER_R, DISPLAY_CAP = 1.33, -9.0, 50.0
 
 
 def main():
