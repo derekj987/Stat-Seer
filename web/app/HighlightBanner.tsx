@@ -12,19 +12,23 @@ function slides(sport: Sport): Slide[] {
   const players = sport === "ncaaf" ? "/ncaaf/model/players" : "/model/players";
   const value = sport === "ncaaf" ? "/ncaaf/lines" : "/lines";
   const fan = sport === "ncaaf" ? "/ncaaf/local-intelligence" : "/local-intelligence";
+  const model = sport === "ncaaf" ? "/ncaaf/model" : "/model";
   return [
     { emoji: "🌪", kicker: "New · just for fun", title: "The Upset Lab — Chaos Board",
       blurb: "Which underdogs could win outright, ranked by pure chaos potential — for the aggressive bettor.",
-      path: ctx, img: "/chaosboard.jpg?v=2" },
-    { emoji: "📣", kicker: "Local Intelligence", title: "What the fan boards are buzzing",
-      blurb: "We scour team forums, beat writers & RSS for players you haven't heard about — then hand you the bottom line.",
-      path: fan, img: "/localintel.jpg", focus: "center 76%" },
+      path: ctx, img: "/chaosboard.jpg?v=3" },
+    { emoji: "👑", kicker: "The Model", title: "Our line vs the market, graded",
+      blurb: "Line-blind predictions, published and locked pre-kickoff, with a calibration record anyone can check.",
+      path: model, img: "/model.jpg" },
     { emoji: "🎯", kicker: "Player Props", title: "Every prop, our line vs the book",
       blurb: "Passing, rushing, receiving, receptions & anytime TD — each player's book number beside our line-blind projection.",
-      path: players, img: "/playerprops.jpg", focus: "center 70%" },
+      path: players, img: "/playerprops.jpg" },
+    { emoji: "📣", kicker: "Local Intelligence", title: "What the fan boards are buzzing",
+      blurb: "We scour team forums, beat writers & RSS for players you haven't heard about — then hand you the bottom line.",
+      path: fan, img: "/localintel.jpg" },
     { emoji: "💰", kicker: "Value Finder", title: "Find the best price",
       blurb: "We shop every book so you never leave value on the table — line shopping, sweet spots & the single best number.",
-      path: value, img: "/valuefinder.jpg", focus: "center 72%" },
+      path: value, img: "/valuefinder.jpg" },
   ];
 }
 
