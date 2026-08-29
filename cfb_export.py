@@ -267,26 +267,51 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
         (season, week)).fetchall()
     conn.close()
     cards, upsets = [], []
-    for away, home, neu, date in rows:
-        rated = home in ratings and away in ratings          # both have FBS rating history
-        rh, ra = ratings.get(home, NEWCOMER_R), ratings.get(away, NEWCOMER_R)
-        raw = rh - ra + (0.0 if neu else hfa)
-        # de-compress onto a realistic margin scale (see CARD_SCALE), guard the tail
-        margin = max(-DISPLAY_CAP, min(DISPLAY_CAP, CARD_SCALE * raw))   # home perspective
-        ptot = 2 * L + off.get(home, 0) + deff.get(away, 0) + off.get(away, 0) + deff.get(home, 0)
-        od = match_odds(away, home, odds)
-        hsp = od["home_spread"] if od else None                  # home line (neg = home fav)
-        mtot = od["total"] if od else None
 
-        # Spread-aware market anchor: on big blowouts (where the market is efficient and our rating
-        # has no edge) defer toward the market, so the board doesn't show a systematic dog-lean on
-        # every big favorite. Zero effect at/below ANCHOR_LO — close/mid games stay fully ours.
+    def anchored_margin(home, away, neu, hsp):
+        """Home-perspective projected margin, de-compressed (CARD_SCALE) and spread-anchored: on big
+        blowouts (where the market is efficient and our rating has no edge) it defers toward the
+        market, so the board doesn't show a systematic dog-lean on every big favorite. Zero anchor
+        at/below ANCHOR_LO — close/mid games stay fully ours."""
+        rh, ra = ratings.get(home, NEWCOMER_R), ratings.get(away, NEWCOMER_R)
+        m = max(-DISPLAY_CAP, min(DISPLAY_CAP, CARD_SCALE * (rh - ra + (0.0 if neu else hfa))))
         if hsp is not None:
             line = abs(float(hsp))
             w = 0.0 if line <= ANCHOR_LO else min(
                 ANCHOR_MAX, ANCHOR_MAX * (line - ANCHOR_LO) / (ANCHOR_HI - ANCHOR_LO))
             if w > 0.0:
-                margin = max(-DISPLAY_CAP, min(DISPLAY_CAP, (1.0 - w) * margin + w * (-float(hsp))))
+                m = max(-DISPLAY_CAP, min(DISPLAY_CAP, (1.0 - w) * m + w * (-float(hsp))))
+        return m
+
+    # De-bias pass. Our line-blind rating sits systematically a HAIR below the market on big
+    # favorites, so even after the anchor ~70% of them read "dog covers" — vs the ~50% they cover in
+    # reality (CFB 2020-25: 20+ favorites cover 49% ATS). Center the big-spread divergences on the
+    # market (mean gap -> 0): this keeps the RELATIVE read (which teams we rate above/below Vegas)
+    # but removes the one-directional level bias, so the model's cover rate matches how often big
+    # favorites actually cover. Only over anchored (>ANCHOR_LO) games; close/mid games are untouched.
+    # Center on the MEDIAN (not the mean): a few teams we rate well above the market skew the mean,
+    # which would leave the majority still slightly under. The median puts exactly half the anchored
+    # favorites above the market and half below -> ~50% projected cover, matching reality.
+    _resid = []
+    for away, home, neu, date in rows:
+        _od = match_odds(away, home, odds)
+        _hsp = _od["home_spread"] if _od else None
+        if _hsp is not None and abs(float(_hsp)) > ANCHOR_LO:
+            _resid.append(anchored_margin(home, away, neu, _hsp) - (-float(_hsp)))
+    debias = statistics.median(_resid) if _resid else 0.0
+
+    for away, home, neu, date in rows:
+        rated = home in ratings and away in ratings          # both have FBS rating history
+        rh, ra = ratings.get(home, NEWCOMER_R), ratings.get(away, NEWCOMER_R)
+        ptot = 2 * L + off.get(home, 0) + deff.get(away, 0) + off.get(away, 0) + deff.get(home, 0)
+        od = match_odds(away, home, odds)
+        hsp = od["home_spread"] if od else None                  # home line (neg = home fav)
+        mtot = od["total"] if od else None
+        margin = anchored_margin(home, away, neu, hsp)           # home perspective, market-anchored
+        # De-bias big-spread games so their divergences straddle the market (~50% cover), not a
+        # systematic dog-lean. Close/mid games (<=ANCHOR_LO) keep their full independent read.
+        if hsp is not None and abs(float(hsp)) > ANCHOR_LO:
+            margin = max(-DISPLAY_CAP, min(DISPLAY_CAP, margin - debias))
 
         # Our read beside the market: our projected favorite + margin, an ATS pick (which
         # side of the MARKET spread our projection covers), and an over/under lean.
