@@ -11,7 +11,8 @@ import { Brand, FlowSteps, ContextSubnav, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
 import Tip from "@/app/Tip";
 import CoachTable from "../CoachTable";
-import ConsiderationsFilter, { NFL_DIV } from "./ConsiderationsFilter";
+import ConsiderationsFilter from "./ConsiderationsFilter";
+import { NFL_DIV } from "./nflDiv";
 
 const ord = (n: number) => {
   const s = ["th", "st", "nd", "rd"], v = n % 100;
