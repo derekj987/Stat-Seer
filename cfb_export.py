@@ -278,6 +278,16 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
         hsp = od["home_spread"] if od else None                  # home line (neg = home fav)
         mtot = od["total"] if od else None
 
+        # Spread-aware market anchor: on big blowouts (where the market is efficient and our rating
+        # has no edge) defer toward the market, so the board doesn't show a systematic dog-lean on
+        # every big favorite. Zero effect at/below ANCHOR_LO — close/mid games stay fully ours.
+        if hsp is not None:
+            line = abs(float(hsp))
+            w = 0.0 if line <= ANCHOR_LO else min(
+                ANCHOR_MAX, ANCHOR_MAX * (line - ANCHOR_LO) / (ANCHOR_HI - ANCHOR_LO))
+            if w > 0.0:
+                margin = max(-DISPLAY_CAP, min(DISPLAY_CAP, (1.0 - w) * margin + w * (-float(hsp))))
+
         # Our read beside the market: our projected favorite + margin, an ATS pick (which
         # side of the MARKET spread our projection covers), and an over/under lean.
         our_fav = home if margin >= 0 else away
@@ -361,6 +371,15 @@ CARD_SEASON, CARD_WEEK = 2026, 1
 # NEWCOMER_R is the floor for a team with no FBS rating history (an FCS/independent
 # call-up); such games are shown but NEVER flagged as an upset — no data to back one.
 CARD_SCALE, NEWCOMER_R, DISPLAY_CAP = 1.33, -9.0, 50.0
+
+# Spread-aware market anchor (applied in build_card). Empirically the market is EFFICIENT on big
+# favorites — CFB 2020-25: 20+ favorites cover 49% ATS, 28+ actually cover 51.6% (realized margin
+# within ~1 pt of the line) — and our rating doesn't beat the spread. So a systematic under-market
+# lean on blowouts is noise, not signal, and reads like "take the points on every big game". The
+# number stays FULLY ours at/below ANCHOR_LO (close/mid games + every Upset Watch game untouched),
+# then ramps toward the market from LO->HI, capped at ANCHOR_MAX. Games without a market line keep
+# the pure model number.
+ANCHOR_LO, ANCHOR_HI, ANCHOR_MAX = 18.0, 30.0, 0.90
 
 
 def main():
