@@ -342,17 +342,6 @@ export function ShopSubnav({ active, base = "nfl" }: {
   );
 }
 
-/** The Value Finder is line-shopping only — it points members to the picks pages. */
-export function ValueFinderNote() {
-  return (
-    <p className="vfnote">
-      <b>Value Finder is about price, not picks.</b> It finds the single best sportsbook for a bet you&apos;ve
-      already chosen. For our data-driven picks and analysis, head to <a href="/model">The Model</a> and{" "}
-      <a href="/context">Context</a>.
-    </p>
-  );
-}
-
 /** Regular-season vs preseason toggle within a Shop area. */
 export function SeasonSubnav({ area, active }: { area: "lines" | "props"; active: "reg" | "pre" }) {
   const reg = area === "lines" ? "/lines" : "/props";

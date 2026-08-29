@@ -1,4 +1,4 @@
-import { Brand, FlowSteps, ShopSubnav, ValueFinderNote, WeekBadge } from "../../Nav";
+import { Brand, FlowSteps, ShopSubnav, WeekBadge } from "../../Nav";
 import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
 import Tip from "@/app/Tip";
 import { NCAAF_MODEL } from "../model-data";
@@ -46,7 +46,6 @@ export default async function Page({ searchParams }: {
       <div className="subnavrow"><ShopSubnav active="lines" base="ncaaf" /></div>
       <NcaafWeekNav base="/ncaaf/lines" week={week} />
       <NcaafOffWeek current={c.week} week={week} />
-      <ValueFinderNote />
 
       <section className="ncf-sec">
         <h2 className="ncf-h">Game lines — Week {c.week}

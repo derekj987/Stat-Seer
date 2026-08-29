@@ -1,4 +1,4 @@
-import { Brand, FlowSteps, ShopSubnav, ValueFinderNote, WeekBadge } from "../../Nav";
+import { Brand, FlowSteps, ShopSubnav, WeekBadge } from "../../Nav";
 import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
 import { NCAAF_MODEL } from "../model-data";
 import { NcaafSoon } from "../Soon";
@@ -57,7 +57,6 @@ export default async function Page({ searchParams }: PageProps<"/ncaaf/props">) 
         />
       </header>
 
-      <ValueFinderNote />
       <WeekBadge week={cur} />
       <FlowSteps active="value" base="ncaaf" />
       <ShopSubnav active="props" base="ncaaf" />
