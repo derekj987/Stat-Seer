@@ -16,6 +16,7 @@ import AccentPicker from "./AccentPicker";
 import ProfileTabs from "./ProfileTabs";
 import ShareButton from "./ShareButton";
 import RichText from "./RichText";
+import FavoriteTeams from "./FavoriteTeams";
 import type { CSSProperties } from "react";
 
 export const dynamic = "force-dynamic";
@@ -149,8 +150,12 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                     <li><span className="pintro__i" aria-hidden="true">📅</span> Joined {since.format(new Date(profile.createdAt))}</li>
                     <li><span className="pintro__i" aria-hidden="true">👥</span> {stats.friends} friend{stats.friends === 1 ? "" : "s"} · {stats.wallPosts} post{stats.wallPosts === 1 ? "" : "s"}</li>
                     {mutual > 0 && <li><span className="pintro__i" aria-hidden="true">🤝</span> {mutual} mutual friend{mutual === 1 ? "" : "s"}</li>}
-                    <li className="pintro__soon"><span className="pintro__i" aria-hidden="true">🏈</span> Favorite teams &amp; track record — coming with the season</li>
+                    <li className="pintro__soon"><span className="pintro__i" aria-hidden="true">📊</span> Public track record — coming with the season</li>
                   </ul>
+                </section>
+                <section className="pcard">
+                  <h2 className="pcard__h">🏈 Favorite teams</h2>
+                  <FavoriteTeams userId={profile.id} teams={profile.favoriteTeams} canEdit={!!isOwner} />
                 </section>
                 <section className="pcard">
                   <h2 className="pcard__h">About</h2>

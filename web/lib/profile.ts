@@ -12,6 +12,7 @@ export interface Profile {
   avatarUrl: string | null;
   coverUrl: string | null;
   accentColor: string | null;
+  favoriteTeams: string[];
   createdAt: string;
 }
 
@@ -49,7 +50,7 @@ export async function getProfileByUsername(username: string): Promise<Profile | 
   // cover_url + accent_color are added by the profile_upgrade migration; fall back if not there yet.
   const base = `profiles?username=eq.${encodeURIComponent(username)}&limit=1&select=id,username,role,title,bio,avatar_url,created_at`;
   let rows: Record<string, unknown>[];
-  try { rows = await pg(base.replace("bio,", "bio,cover_url,accent_color,")); }
+  try { rows = await pg(base.replace("bio,", "bio,cover_url,accent_color,favorite_teams,")); }
   catch { rows = await pg(base); }
   const r = rows[0];
   if (!r) return null;
@@ -62,6 +63,7 @@ export async function getProfileByUsername(username: string): Promise<Profile | 
     avatarUrl: (r.avatar_url as string) ?? null,
     coverUrl: (r.cover_url as string) ?? null,
     accentColor: (r.accent_color as string) ?? null,
+    favoriteTeams: (r.favorite_teams as string[] | null) ?? [],
     createdAt: r.created_at as string,
   };
 }
