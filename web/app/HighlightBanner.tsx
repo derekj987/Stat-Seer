@@ -19,7 +19,7 @@ function slides(sport: Sport): Slide[] {
       path: ctx, img: "/chaosboard.jpg?v=3" },
     { emoji: "👑", kicker: "The Model", title: "Our line vs the market, graded",
       blurb: "Line-blind predictions, published and locked pre-kickoff, with a calibration record anyone can check.",
-      path: model, img: "/model.jpg" },
+      path: model, img: "/model.jpg?v=2" },
     { emoji: "🎯", kicker: "Player Props", title: "Every prop, our line vs the book",
       blurb: "Passing, rushing, receiving, receptions & anytime TD — each player's book number beside our line-blind projection.",
       path: players, img: "/playerprops.jpg" },

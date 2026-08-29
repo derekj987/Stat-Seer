@@ -3331,11 +3331,16 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 /* Pure-CSS sport toggle: two hidden radios show one sport's panel via ~ combinator. */
 .lp-hub{margin:2px 0 4px}
 /* Rotating "explore the site" highlight banner — full board width, under the snapshot label */
-/* Full-bleed to the card edges: pull out to counteract the .lp-sport padding (16px sides/top,
-   14px bottom) so the artwork stretches to the white card's edge. Round only the top corners to
-   match the card; the section content continues flush below. */
+/* Phone: full-bleed to the card edges (pull out to counteract the .lp-sport 16px padding); at
+   phone widths the 16:9 banner is already short, so edge-to-edge looks right. Top corners rounded
+   to match the card; content continues flush below. */
 .hlb{position:relative;margin:-16px -16px 14px;border:0;
   background:var(--gold-soft);border-radius:13px 13px 0 0;overflow:hidden}
+/* Desktop: cap the width so the 16:9 hero stays ~2/3 height instead of a tall full-width block;
+   center it as a rounded card inside the section's padding. */
+@media (min-width:760px){
+  .hlb{max-width:660px;margin:0 auto 14px;border-radius:13px}
+}
 /* The banner takes the artwork's own 16:9 shape at EVERY width, so a full-bleed image is
    shown whole — heads AND the title fit, never cropped into a zoomed strip. Height follows
    the card width. */
