@@ -3424,9 +3424,8 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 .hlb__slide--img .hlb__img{position:static;width:100%;height:auto;display:block;
   border:0;border-radius:0;object-fit:unset}
 .hlb__slide--img .hlb__body,.hlb__slide--img .hlb__go{display:none}
-/* Soft bottom scrim so the dots/arrows stay legible over a bright image. */
-.hlb__slide--img::after{content:"";position:absolute;left:0;right:0;bottom:0;height:56px;
-  background:linear-gradient(transparent,rgba(0,0,0,.42));pointer-events:none}
+/* No bottom scrim — it darkened the gold title/flourish that sits at the bottom of the art.
+   The dots and arrows carry their own backgrounds, so they stay legible without it. */
 .hlb__body{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 auto}
 .hlb__kicker{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
 .hlb__title{font-size:15px;font-weight:800;letter-spacing:-.01em}
