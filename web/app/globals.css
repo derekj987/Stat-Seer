@@ -3371,14 +3371,11 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
   background:var(--gold-soft);border-radius:13px 13px 0 0;overflow:hidden}
 /* Desktop: cap the width so the 16:9 hero stays ~2/3 height instead of a tall full-width block;
    center it as a rounded card inside the section's padding. */
-@media (min-width:760px){
-  .hlb{max-width:660px;margin:0 auto 14px;border-radius:13px}
-}
 /* The banner takes the artwork's own 16:9 shape at EVERY width, so a full-bleed image is
    shown whole — heads AND the title fit, never cropped into a zoomed strip. Height follows
    the card width. */
 .hlb__slide{display:flex;align-items:center;gap:14px;padding:14px 18px 18px;text-decoration:none;
-  color:var(--ink);aspect-ratio:16/9;min-height:0;animation:hlb-in .35s ease}
+  color:var(--ink);aspect-ratio:2/1;min-height:0;animation:hlb-in .35s ease}
 @keyframes hlb-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 .hlb__emoji{font-size:30px;flex:0 0 auto;line-height:1}
 /* Section artwork inside a slide — a wide thumbnail that grows on desktop, compact on phone. */
