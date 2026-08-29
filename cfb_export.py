@@ -38,7 +38,12 @@ OUT = "web/app/ncaaf/model-data.ts"
 # NOTE: the /ratings/sp endpoint archives only each PAST season's FINAL SP+, so this can't
 # be cleanly back-tested as a preseason prior; the justification is SP+'s published
 # preseason record plus the ordering/compression fixes visible on the live board.
-SP_BLEND = 0.65
+# Raised 0.65 -> 0.80: at 0.65 the preseason card still under-projected big favorites vs the
+# market by ~2.3 pts on average (our compressed carryover dragged the well-ordered SP+ number
+# down). 0.80 leans harder on SP+ (still line-blind — it's Connelly's efficiency projection, not
+# the betting line) and closes that average gap to ~0.8, while 20% carryover keeps the number
+# partly ours so genuine divergences persist (SP+ itself has Alabama well under the market).
+SP_BLEND = 0.80
 
 
 def team_conferences(db, season):

@@ -272,23 +272,23 @@ export const NCAAF_MODEL = {
         "conf": "Big 12",
         "marketSpread": {
           "fav": "TCU",
-          "num": -9.0
+          "num": -8.5
         },
-        "marketTotal": 47.0,
+        "marketTotal": 46.0,
         "projSpread": {
           "fav": "TCU",
-          "num": -9.0
+          "num": -8.0
         },
         "projTotal": 49.8,
         "homeRiser": 0,
         "awayRiser": 38,
         "pick": {
           "side": "North Carolina",
-          "num": 9.0
+          "num": 8.5
         },
         "totalLean": {
           "dir": "OVER",
-          "num": 47.0
+          "num": 46.0
         },
         "off": false,
         "featured": false
@@ -305,7 +305,7 @@ export const NCAAF_MODEL = {
         "marketTotal": null,
         "projSpread": {
           "fav": "USC",
-          "num": -33.8
+          "num": -36.1
         },
         "projTotal": 55.8,
         "homeRiser": 2,
@@ -327,10 +327,10 @@ export const NCAAF_MODEL = {
           "fav": "Virginia",
           "num": -4.0
         },
-        "marketTotal": 53.0,
+        "marketTotal": 51.0,
         "projSpread": {
           "fav": "Virginia",
-          "num": -6.5
+          "num": -6.8
         },
         "projTotal": 52.6,
         "homeRiser": 0,
@@ -353,7 +353,7 @@ export const NCAAF_MODEL = {
         "conf": "Other",
         "marketSpread": {
           "fav": "North Dakota State",
-          "num": -7.0
+          "num": -6.5
         },
         "marketTotal": 46.5,
         "projSpread": {
@@ -365,7 +365,7 @@ export const NCAAF_MODEL = {
         "awayRiser": 0,
         "pick": {
           "side": "Jacksonville State",
-          "num": 7.0
+          "num": 6.5
         },
         "totalLean": {
           "dir": "OVER",
@@ -384,19 +384,19 @@ export const NCAAF_MODEL = {
         "conf": "Mid-American",
         "marketSpread": {
           "fav": "Eastern Michigan",
-          "num": -9.5
+          "num": -9.0
         },
         "marketTotal": 54.0,
         "projSpread": {
           "fav": "Eastern Michigan",
-          "num": -0.8
+          "num": -1.2
         },
         "projTotal": 53.1,
         "homeRiser": 0,
         "awayRiser": 0,
         "pick": {
           "side": "Sacramento State",
-          "num": 9.5
+          "num": 9.0
         },
         "totalLean": null,
         "off": false,
@@ -414,7 +414,7 @@ export const NCAAF_MODEL = {
         "marketTotal": null,
         "projSpread": {
           "fav": "Stanford",
-          "num": -2.4
+          "num": -3.4
         },
         "projTotal": 51.7,
         "homeRiser": 17,
@@ -434,19 +434,19 @@ export const NCAAF_MODEL = {
         "conf": "ACC",
         "marketSpread": {
           "fav": "Florida State",
-          "num": -32.0
+          "num": -31.5
         },
-        "marketTotal": 53.5,
+        "marketTotal": 54.0,
         "projSpread": {
           "fav": "Florida State",
-          "num": -26.9
+          "num": -29.5
         },
         "projTotal": 52.2,
         "homeRiser": 14,
         "awayRiser": 0,
         "pick": {
           "side": "New Mexico State",
-          "num": 32.0
+          "num": 31.5
         },
         "totalLean": null,
         "off": false,
@@ -462,19 +462,19 @@ export const NCAAF_MODEL = {
         "conf": "Mountain West",
         "marketSpread": {
           "fav": "UNLV",
-          "num": -4.5
+          "num": -4.0
         },
         "marketTotal": 56.5,
         "projSpread": {
           "fav": "UNLV",
-          "num": -5.8
+          "num": -6.7
         },
         "projTotal": 58.1,
         "homeRiser": 0,
         "awayRiser": 0,
         "pick": {
           "side": "UNLV",
-          "num": -4.5
+          "num": -4.0
         },
         "totalLean": null,
         "off": false,
@@ -492,7 +492,7 @@ export const NCAAF_MODEL = {
         "marketTotal": null,
         "projSpread": {
           "fav": "Rutgers",
-          "num": -36.2
+          "num": -38.5
         },
         "projTotal": 54.2,
         "homeRiser": 4,
@@ -512,19 +512,19 @@ export const NCAAF_MODEL = {
         "conf": "ACC",
         "marketSpread": {
           "fav": "Wake Forest",
-          "num": -24.0
+          "num": -24.5
         },
         "marketTotal": 48.5,
         "projSpread": {
           "fav": "Wake Forest",
-          "num": -25.8
+          "num": -28.3
         },
         "projTotal": 49.8,
         "homeRiser": 5,
         "awayRiser": 0,
         "pick": {
           "side": "Wake Forest",
-          "num": -24.0
+          "num": -24.5
         },
         "totalLean": null,
         "off": false,
@@ -545,7 +545,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 50.5,
         "projSpread": {
           "fav": "Georgia Tech",
-          "num": -9.8
+          "num": -10.0
         },
         "projTotal": 53.6,
         "homeRiser": 1,
@@ -576,7 +576,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 56.5,
         "projSpread": {
           "fav": "Illinois",
-          "num": -29.7
+          "num": -31.4
         },
         "projTotal": 56.8,
         "homeRiser": 0,
@@ -601,7 +601,7 @@ export const NCAAF_MODEL = {
         "marketTotal": null,
         "projSpread": {
           "fav": "Eastern Michigan",
-          "num": -4.1
+          "num": -4.2
         },
         "projTotal": 53.6,
         "homeRiser": 0,
@@ -626,7 +626,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 50.5,
         "projSpread": {
           "fav": "Oklahoma",
-          "num": -37.1
+          "num": -40.0
         },
         "projTotal": 48.1,
         "homeRiser": 8,
@@ -657,14 +657,14 @@ export const NCAAF_MODEL = {
         "marketTotal": 49.5,
         "projSpread": {
           "fav": "Michigan State",
-          "num": -7.6
+          "num": -11.0
         },
         "projTotal": 48.6,
         "homeRiser": 20,
         "awayRiser": 0,
         "pick": {
-          "side": "Toledo",
-          "num": 10.0
+          "side": "Michigan State",
+          "num": -10.0
         },
         "totalLean": null,
         "off": false,
@@ -680,19 +680,19 @@ export const NCAAF_MODEL = {
         "conf": "Big Ten",
         "marketSpread": {
           "fav": "USC",
-          "num": -23.0
+          "num": -23.5
         },
         "marketTotal": 51.5,
         "projSpread": {
           "fav": "USC",
-          "num": -20.9
+          "num": -22.4
         },
         "projTotal": 51.1,
         "homeRiser": 2,
         "awayRiser": 0,
         "pick": {
           "side": "Fresno State",
-          "num": 23.0
+          "num": 23.5
         },
         "totalLean": null,
         "off": false,
@@ -710,10 +710,10 @@ export const NCAAF_MODEL = {
           "fav": "Miami",
           "num": -24.0
         },
-        "marketTotal": 48.5,
+        "marketTotal": 47.5,
         "projSpread": {
           "fav": "Miami",
-          "num": -21.1
+          "num": -21.0
         },
         "projTotal": 47.2,
         "homeRiser": 17,
@@ -741,7 +741,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 54.0,
         "projSpread": {
           "fav": "Alabama",
-          "num": -19.3
+          "num": -21.8
         },
         "projTotal": 50.4,
         "homeRiser": 4,
@@ -753,37 +753,6 @@ export const NCAAF_MODEL = {
         "totalLean": {
           "dir": "UNDER",
           "num": 54.0
-        },
-        "off": false,
-        "featured": true
-      },
-      {
-        "away": "North Texas",
-        "home": "Indiana",
-        "neutral": 0,
-        "commence": "2026-09-05T16:00:00.000Z",
-        "apAway": null,
-        "apHome": 6,
-        "conf": "Big Ten",
-        "marketSpread": {
-          "fav": "Indiana",
-          "num": -40.5
-        },
-        "marketTotal": 55.5,
-        "projSpread": {
-          "fav": "Indiana",
-          "num": -33.7
-        },
-        "projTotal": 61.7,
-        "homeRiser": 0,
-        "awayRiser": 0,
-        "pick": {
-          "side": "North Texas",
-          "num": 40.5
-        },
-        "totalLean": {
-          "dir": "OVER",
-          "num": 55.5
         },
         "off": false,
         "featured": true
@@ -803,7 +772,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 52.5,
         "projSpread": {
           "fav": "James Madison",
-          "num": -12.8
+          "num": -11.6
         },
         "projTotal": 54.3,
         "homeRiser": 0,
@@ -817,35 +786,35 @@ export const NCAAF_MODEL = {
         "featured": true
       },
       {
-        "away": "Ohio",
-        "home": "Nebraska",
+        "away": "North Texas",
+        "home": "Indiana",
         "neutral": 0,
         "commence": "2026-09-05T16:00:00.000Z",
         "apAway": null,
-        "apHome": null,
+        "apHome": 6,
         "conf": "Big Ten",
         "marketSpread": {
-          "fav": "Nebraska",
-          "num": -23.5
+          "fav": "Indiana",
+          "num": -40.5
         },
-        "marketTotal": 47.5,
+        "marketTotal": 55.5,
         "projSpread": {
-          "fav": "Nebraska",
-          "num": -16.9
+          "fav": "Indiana",
+          "num": -37.6
         },
-        "projTotal": 49.7,
-        "homeRiser": 26,
+        "projTotal": 61.7,
+        "homeRiser": 0,
         "awayRiser": 0,
         "pick": {
-          "side": "Ohio",
-          "num": 23.5
+          "side": "North Texas",
+          "num": 40.5
         },
         "totalLean": {
           "dir": "OVER",
-          "num": 47.5
+          "num": 55.5
         },
         "off": false,
-        "featured": false
+        "featured": true
       },
       {
         "away": "Oregon State",
@@ -862,7 +831,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 51.0,
         "projSpread": {
           "fav": "Houston",
-          "num": -17.6
+          "num": -17.9
         },
         "projTotal": 50.6,
         "homeRiser": 11,
@@ -872,6 +841,37 @@ export const NCAAF_MODEL = {
           "num": 20.5
         },
         "totalLean": null,
+        "off": false,
+        "featured": false
+      },
+      {
+        "away": "Ohio",
+        "home": "Nebraska",
+        "neutral": 0,
+        "commence": "2026-09-05T16:00:00.000Z",
+        "apAway": null,
+        "apHome": null,
+        "conf": "Big Ten",
+        "marketSpread": {
+          "fav": "Nebraska",
+          "num": -23.5
+        },
+        "marketTotal": 47.5,
+        "projSpread": {
+          "fav": "Nebraska",
+          "num": -20.7
+        },
+        "projTotal": 49.7,
+        "homeRiser": 26,
+        "awayRiser": 0,
+        "pick": {
+          "side": "Ohio",
+          "num": 23.5
+        },
+        "totalLean": {
+          "dir": "OVER",
+          "num": 47.5
+        },
         "off": false,
         "featured": false
       },
@@ -890,7 +890,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 56.5,
         "projSpread": {
           "fav": "West Virginia",
-          "num": -13.6
+          "num": -15.6
         },
         "projTotal": 55.5,
         "homeRiser": 15,
@@ -949,7 +949,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 49.5,
         "projSpread": {
           "fav": "Pittsburgh",
-          "num": -13.3
+          "num": -14.2
         },
         "projTotal": 51.6,
         "homeRiser": 0,
@@ -980,7 +980,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 53.5,
         "projSpread": {
           "fav": "South Carolina",
-          "num": -32.4
+          "num": -35.9
         },
         "projTotal": 50.6,
         "homeRiser": 20,
@@ -1011,7 +1011,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 52.0,
         "projSpread": {
           "fav": "Oregon",
-          "num": -24.7
+          "num": -26.8
         },
         "projTotal": 53.3,
         "homeRiser": 1,
@@ -1036,10 +1036,10 @@ export const NCAAF_MODEL = {
           "fav": "Texas",
           "num": -30.5
         },
-        "marketTotal": 60.2,
+        "marketTotal": 60.0,
         "projSpread": {
           "fav": "Texas",
-          "num": -23.4
+          "num": -26.3
         },
         "projTotal": 58.6,
         "homeRiser": 8,
@@ -1067,7 +1067,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 54.5,
         "projSpread": {
           "fav": "Penn State",
-          "num": -24.6
+          "num": -26.8
         },
         "projTotal": 56.2,
         "homeRiser": 0,
@@ -1095,14 +1095,14 @@ export const NCAAF_MODEL = {
         "marketTotal": 59.5,
         "projSpread": {
           "fav": "Auburn",
-          "num": -6.7
+          "num": -7.3
         },
         "projTotal": 54.5,
         "homeRiser": 14,
         "awayRiser": 13,
         "pick": {
-          "side": "Baylor",
-          "num": 7.0
+          "side": "Auburn",
+          "num": -7.0
         },
         "totalLean": {
           "dir": "UNDER",
@@ -1126,7 +1126,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 51.0,
         "projSpread": {
           "fav": "Duke",
-          "num": -10.2
+          "num": -12.1
         },
         "projTotal": 57.4,
         "homeRiser": 1,
@@ -1157,7 +1157,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 51.5,
         "projSpread": {
           "fav": "Cincinnati",
-          "num": -10.2
+          "num": -10.4
         },
         "projTotal": 55.3,
         "homeRiser": 4,
@@ -1188,7 +1188,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 60.5,
         "projSpread": {
           "fav": "Oklahoma State",
-          "num": -4.8
+          "num": -6.3
         },
         "projTotal": 51.0,
         "homeRiser": 26,
@@ -1214,19 +1214,19 @@ export const NCAAF_MODEL = {
         "conf": "Big Ten",
         "marketSpread": {
           "fav": "Iowa",
-          "num": -31.8
+          "num": -31.5
         },
-        "marketTotal": 45.5,
+        "marketTotal": 45.8,
         "projSpread": {
           "fav": "Iowa",
-          "num": -32.7
+          "num": -34.8
         },
         "projTotal": 44.8,
         "homeRiser": 0,
         "awayRiser": 0,
         "pick": {
           "side": "Iowa",
-          "num": -31.8
+          "num": -31.5
         },
         "totalLean": null,
         "off": false,
@@ -1244,10 +1244,10 @@ export const NCAAF_MODEL = {
           "fav": "Colorado State",
           "num": -3.5
         },
-        "marketTotal": 48.0,
+        "marketTotal": 47.5,
         "projSpread": {
           "fav": "Colorado State",
-          "num": -2.5
+          "num": -3.1
         },
         "projTotal": 44.4,
         "homeRiser": 11,
@@ -1258,7 +1258,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "UNDER",
-          "num": 48.0
+          "num": 47.5
         },
         "off": false,
         "featured": false
@@ -1275,10 +1275,10 @@ export const NCAAF_MODEL = {
           "fav": "South Florida",
           "num": -13.5
         },
-        "marketTotal": 54.5,
+        "marketTotal": 54.2,
         "projSpread": {
           "fav": "South Florida",
-          "num": -17.9
+          "num": -18.0
         },
         "projTotal": 60.1,
         "homeRiser": 0,
@@ -1289,7 +1289,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "OVER",
-          "num": 54.5
+          "num": 54.2
         },
         "off": false,
         "featured": true
@@ -1309,7 +1309,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 52.5,
         "projSpread": {
           "fav": "Texas A&M",
-          "num": -36.5
+          "num": -40.4
         },
         "projTotal": 54.7,
         "homeRiser": 1,
@@ -1340,7 +1340,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 55.5,
         "projSpread": {
           "fav": "Memphis",
-          "num": -15.2
+          "num": -16.0
         },
         "projTotal": 53.4,
         "homeRiser": 0,
@@ -1371,7 +1371,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 53.5,
         "projSpread": {
           "fav": "Troy",
-          "num": -19.8
+          "num": -21.3
         },
         "projTotal": 51.2,
         "homeRiser": 0,
@@ -1399,10 +1399,10 @@ export const NCAAF_MODEL = {
           "fav": "LSU",
           "num": -10.5
         },
-        "marketTotal": 51.2,
+        "marketTotal": 51.0,
         "projSpread": {
           "fav": "LSU",
-          "num": -8.2
+          "num": -9.9
         },
         "projTotal": 44.8,
         "homeRiser": 20,
@@ -1413,7 +1413,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "UNDER",
-          "num": 51.2
+          "num": 51.0
         },
         "off": false,
         "featured": false
@@ -1433,7 +1433,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 47.5,
         "projSpread": {
           "fav": "Michigan",
-          "num": -21.6
+          "num": -24.4
         },
         "projTotal": 45.0,
         "homeRiser": 8,
@@ -1464,7 +1464,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 55.5,
         "projSpread": {
           "fav": "Mississippi State",
-          "num": -30.3
+          "num": -34.1
         },
         "projTotal": 55.1,
         "homeRiser": 18,
@@ -1492,7 +1492,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 59.5,
         "projSpread": {
           "fav": "Florida",
-          "num": -22.2
+          "num": -24.1
         },
         "projTotal": 54.8,
         "homeRiser": 31,
@@ -1520,7 +1520,7 @@ export const NCAAF_MODEL = {
         "marketTotal": null,
         "projSpread": {
           "fav": "UNLV",
-          "num": -2.1
+          "num": -1.9
         },
         "projTotal": 57.9,
         "homeRiser": 0,
@@ -1540,19 +1540,19 @@ export const NCAAF_MODEL = {
         "conf": "Mountain West",
         "marketSpread": {
           "fav": "New Mexico",
-          "num": -11.5
+          "num": -10.5
         },
         "marketTotal": 47.5,
         "projSpread": {
           "fav": "New Mexico",
-          "num": -16.1
+          "num": -17.8
         },
         "projTotal": 47.5,
         "homeRiser": 2,
         "awayRiser": 0,
         "pick": {
           "side": "New Mexico",
-          "num": -11.5
+          "num": -10.5
         },
         "totalLean": null,
         "off": false,
@@ -1573,7 +1573,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 53.5,
         "projSpread": {
           "fav": "California",
-          "num": -2.5
+          "num": -2.4
         },
         "projTotal": 52.6,
         "homeRiser": 21,
@@ -1601,14 +1601,14 @@ export const NCAAF_MODEL = {
         "marketTotal": 52.5,
         "projSpread": {
           "fav": "Western Kentucky",
-          "num": -2.5
+          "num": -1.5
         },
         "projTotal": 49.2,
         "homeRiser": 9,
         "awayRiser": 0,
         "pick": {
-          "side": "Western Kentucky",
-          "num": -2.5
+          "side": "Nevada",
+          "num": 2.5
         },
         "totalLean": {
           "dir": "UNDER",
@@ -1632,7 +1632,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 50.5,
         "projSpread": {
           "fav": "Washington",
-          "num": -19.0
+          "num": -21.6
         },
         "projTotal": 47.9,
         "homeRiser": 2,
@@ -1663,7 +1663,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 55.5,
         "projSpread": {
           "fav": "Ole Miss",
-          "num": -5.8
+          "num": -5.7
         },
         "projTotal": 54.1,
         "homeRiser": 0,
@@ -1691,7 +1691,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 47.5,
         "projSpread": {
           "fav": "Notre Dame",
-          "num": -22.5
+          "num": -23.1
         },
         "projTotal": 47.5,
         "homeRiser": 0,
@@ -1714,19 +1714,19 @@ export const NCAAF_MODEL = {
         "conf": "ACC",
         "marketSpread": {
           "fav": "SMU",
-          "num": -2.2
+          "num": -2.5
         },
         "marketTotal": 53.0,
         "projSpread": {
           "fav": "SMU",
-          "num": -1.4
+          "num": -0.2
         },
         "projTotal": 52.6,
         "homeRiser": 14,
         "awayRiser": 0,
         "pick": {
           "side": "Florida State",
-          "num": 2.2
+          "num": 2.5
         },
         "totalLean": null,
         "off": false,
@@ -1738,9 +1738,9 @@ export const NCAAF_MODEL = {
         "dog": "California",
         "matchup": "vs UCLA",
         "spread": "+1.5",
-        "modelPct": 56,
+        "modelPct": 55,
         "marketPct": 47,
-        "byPoints": 2.5
+        "byPoints": 2.4
       }
     ]
   }
