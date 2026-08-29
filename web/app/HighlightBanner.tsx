@@ -22,7 +22,7 @@ function slides(sport: Sport): Slide[] {
       path: model, img: "/model.jpg?v=7" },
     { emoji: "🎯", kicker: "Player Props", title: "Every prop, our line vs the book",
       blurb: "Passing, rushing, receiving, receptions & anytime TD — each player's book number beside our line-blind projection.",
-      path: players, img: "/playerprops.jpg?v=9" },
+      path: players, img: "/playerprops.jpg?v=10" },
     { emoji: "📣", kicker: "Local Intelligence", title: "What the fan boards are buzzing",
       blurb: "We scour team forums, beat writers & RSS for players you haven't heard about — then hand you the bottom line.",
       path: fan, img: "/localintel.jpg?v=10" },
