@@ -171,7 +171,13 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                         const slot = playerSlot(r.player, base) ?? r.pos;
                         return (
                           <div className={`pmrow pmrow--data${isMore ? " hb-row--more" : ""}${cont ? " pmrow--cont" : ""}`} role="row" key={`${r.player}-${r.market}`}>
-                            <span className="pmcell pmcell--player">{cont ? "" : <>{r.player}{slot && <span className="pmslot"> ({slot})</span>}</>}</span>
+                            <span className="pmcell pmcell--player">{cont ? "" : <>{r.player}{slot && <span className="pmslot"> ({slot})</span>}
+                              {r.envDelta != null && Math.abs(r.envDelta) >= 2 && (
+                                <span className={`pmenv pmenv--${r.envDelta > 0 ? "up" : "down"}`}
+                                  title={`Scoring-environment context (not built into our number): ${r.team}'s implied team total this week (${r.env}) is ${Math.abs(r.envDelta).toFixed(1)} pts ${r.envDelta > 0 ? "higher" : "lower"} than ${r.player}'s ${PROJ_PRIOR} norm. Our projection is anchored to last season, so on a ${r.envDelta > 0 ? "much improved" : "tougher"} spot it may run ${r.envDelta > 0 ? "low" : "high"}. Most measurable for QB passing.`}>
+                                  {r.envDelta > 0 ? "▲ better spot" : "▼ tougher spot"}
+                                </span>
+                              )}</>}</span>
                             <span className="pmcell pmcell--team">{cont ? "" : r.team}</span>
                             <span className="pmcell pmcell--num">{r.book}{unitFor(r.market)}</span>
                             <span className={`pmcell pmcell--num pmcell--proj${r.proj >= r.book ? "" : " pmcell--projdown"}`}>

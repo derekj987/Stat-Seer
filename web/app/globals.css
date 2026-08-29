@@ -2281,6 +2281,11 @@ a.snav__dfeat{display:block}
 .pmadd__b.on{background:var(--gold);border-color:var(--gold);color:#1a1204}
 /* Position + depth-chart slot next to a player's name (RB1, WR2…) — muted, mono. */
 .pmslot,.propq__slot{color:var(--muted);font-size:.85em;font-family:var(--font-mono);font-weight:400}
+/* Scoring-environment context flag (a much better/worse projected spot vs the player's prior norm) */
+.pmenv{display:inline-block;margin-left:6px;font-size:10px;font-weight:800;letter-spacing:.02em;
+  padding:1px 6px;border-radius:6px;vertical-align:middle;cursor:help;white-space:nowrap}
+.pmenv--up{color:#0a7d3c;background:color-mix(in srgb,#0a7d3c 13%,transparent)}
+.pmenv--down{color:var(--mkt);background:color-mix(in srgb,var(--mkt) 13%,transparent)}
 .pmempty--solo{border:1px solid var(--line);border-radius:12px;background:var(--surface)}
 .pmrow--head.pmrow--data{border-bottom:0;font-size:11px}
 /* header labels are longer than the data — let them wrap inside the equal columns so the

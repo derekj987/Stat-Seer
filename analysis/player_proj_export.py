@@ -23,6 +23,7 @@ import urllib.error
 import urllib.request
 from collections import defaultdict
 
+import numpy as np
 import pandas as pd
 
 GAMES_LOCAL = "data/games.csv"
@@ -296,6 +297,60 @@ def project(rate, base):
     }
 
 
+# ---- Forward-looking scoring environment (Context, not a projection driver) ----
+# A team's implied total (the Vegas game total split by the spread) is how much scoring the
+# market expects from its offense. We deliberately DON'T fold it into the projection: tested on
+# 2021-24, adding the raw implied total barely beats the backward baseline out of sample (0.7%),
+# and it isn't graded against the closing PROP line yet. But the CHANGE vs a player's own prior
+# environment is a real, directional signal (residual corr +0.15; a "much better" spot beat the
+# backward projection by ~+6 yds, "much worse" by ~-22) — it flags where our backward number is
+# most likely stale (a new/improved, or worsened, spot). Emitted as Context only.
+_ENV_ALIAS = {"LAR": "LA", "WSH": "WAS", "OAK": "LV", "SD": "LAC", "STL": "LA"}
+def _env_team(t): return _ENV_ALIAS.get(str(t), str(t))
+
+
+def spread_sign(g):
+    """nflverse spread_line sign: +1 if a positive spread_line means the HOME team is favored."""
+    d = g[g.season >= 2020].dropna(subset=["spread_line", "home_score", "away_score"])
+    if len(d) < 50:
+        return 1.0
+    return 1.0 if np.polyfit(d.spread_line, d.home_score - d.away_score, 1)[0] > 0 else -1.0
+
+
+def season_implied(g, season, sign):
+    """{(week, team): implied team total} for a season, from the Vegas game total + spread."""
+    s = g[g.season == season].dropna(subset=["spread_line", "total_line"]).copy()
+    s["ehm"] = sign * s["spread_line"]
+    m = {}
+    for _, r in s.iterrows():
+        wk = pd.to_numeric(r["week"], errors="coerce")
+        if pd.isna(wk):
+            continue
+        wk = int(wk)
+        m[(wk, _env_team(r["home_team"]))] = float(r["total_line"]) / 2 + float(r["ehm"]) / 2
+        m[(wk, _env_team(r["away_team"]))] = float(r["total_line"]) / 2 - float(r["ehm"]) / 2
+    return m
+
+
+def player_env_baseline(prior_season, prev_implied):
+    """{player_id: mean prior-season implied team total} over the games the player appeared in —
+    the scoring environment the backward projection is anchored to."""
+    s = pd.read_csv(f"data/stats_{prior_season}.csv", low_memory=False)
+    s = s[s.season_type == "REG"].copy()
+    if "team" not in s.columns:
+        s["team"] = s.get("recent_team", "")
+    elif "recent_team" in s.columns:
+        s["team"] = s["team"].fillna(s["recent_team"])
+    base = {}
+    for pid, grp in s.groupby("player_id"):
+        vals = [prev_implied.get((int(w), _env_team(t)))
+                for w, t in zip(pd.to_numeric(grp.week, errors="coerce"), grp.team) if not pd.isna(w)]
+        vals = [v for v in vals if v is not None]
+        if vals:
+            base[pid] = float(np.mean(vals))
+    return base
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--probe", action="store_true")
@@ -327,6 +382,17 @@ def main():
     base = build_baselines(range(args.season - 3, args.season))   # e.g. 2023-2025
     rates = prior_year_rates(prior)
     career = load_career(range(2016, args.season), *load_venue_sets())   # all game logs, venue-tagged
+
+    # Forward scoring-environment context (Context flag, NOT a projection input). Degrades to
+    # empty if the schedule/lines aren't available, so it can never block a projection.
+    cur_env, env_base = {}, {}
+    try:
+        _g = pd.read_csv(GAMES_LOCAL, low_memory=False)
+        _sign = spread_sign(_g)
+        cur_env = season_implied(_g, args.season, _sign)              # this season's slate
+        env_base = player_env_baseline(prior, season_implied(_g, prior, _sign))
+    except Exception as e:  # noqa: BLE001 — env is optional context
+        print(f"  env context unavailable ({e}); envDelta skipped", file=sys.stderr)
 
     # median book line per (player, market) across books, for the yardage/reception markets
     ALIAS = {"LAR": "LA", "LAC": "LAC", "WSH": "WAS", "OAK": "LV", "SD": "LAC"}
@@ -366,12 +432,17 @@ def main():
         cover, cgames = career_over(career, rate["pid"], key, book)
         pover, pgames = prior_over(career, rate["pid"], key, book, prior)
         hOver, hG, rOver, rG = home_road_over(career, rate["pid"], key, book)
+        # Forward scoring-environment change vs the player's prior-season norm (Context flag).
+        _ce = cur_env.get((week, team_norm(rate["team"])))
+        _eb = env_base.get(rate["pid"])
+        env_delta = round(_ce - _eb, 1) if (_ce is not None and _eb is not None) else None
         matched += 1
         out.append({
             "game": game, "commence": commence, "player": rate["name"], "team": rate["team"],
             "pos": rate["pos"], "cat": cat, "market": key, "book": book, "proj": proj,
             "g": rate["games"], "cOver": cover, "cG": cgames, "pOver": pover, "pG": pgames,
             "hOver": hOver, "hG": hG, "rOver": rOver, "rG": rG,
+            "env": round(_ce, 1) if _ce is not None else None, "envDelta": env_delta,
         })
 
     out.sort(key=lambda r: (r["commence"], r["game"], r["cat"], -(r["proj"] or 0)))
@@ -386,7 +457,8 @@ def main():
     ts += "export interface PlayerProj { game: string; commence: string; player: string; team: string;\n"
     ts += "  pos: string; cat: string; market: string; book: number; proj: number; g: number;\n"
     ts += "  cOver: number; cG: number; pOver: number; pG: number;\n"
-    ts += "  hOver: number; hG: number; rOver: number; rG: number }\n"
+    ts += "  hOver: number; hG: number; rOver: number; rG: number;\n"
+    ts += "  env?: number | null; envDelta?: number | null }\n"
     ts += f"export const PROJ_SEASON = {args.season};\nexport const PROJ_WEEK = {week};\nexport const PROJ_PRIOR = {prior};\n"
     ts += "export const PLAYER_PROJECTIONS: PlayerProj[] = [\n"
     for r in out:
