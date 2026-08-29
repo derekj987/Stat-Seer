@@ -1147,8 +1147,6 @@ a.fauthor:hover{text-decoration:underline}
 /* --- The Upset Lab / Chaos Board (speculative panel) --- */
 .cb{margin-top:22px}
 /* Chaos Board banner image — full card width, cropped to a horizontal strip. */
-.cb__banner{display:block;width:100%;height:clamp(150px,20vw,230px);object-fit:cover;object-position:center;
-  border-radius:14px;border:1px solid var(--line);margin:0 0 4px}
 .cb__caption{margin:2px 0 12px;font-size:13.5px;color:var(--muted);font-weight:600}
 .cb__caption b{color:var(--gold)}
 /* When the Chaos Board leads the page, no top margin. */
