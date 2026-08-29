@@ -13,6 +13,8 @@ import StoriesRail from "./StoriesRail";
 import SuggestedFriends from "./SuggestedFriends";
 import MessageButton from "./MessageButton";
 import AccentPicker from "./AccentPicker";
+import ProfileTabs from "./ProfileTabs";
+import ShareButton from "./ShareButton";
 import type { CSSProperties } from "react";
 
 export const dynamic = "force-dynamic";
@@ -81,6 +83,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
           <h1 className={profile.role === "founder" ? "phead__name founder" : "phead__name"}>
             {profile.username}
           </h1>
+          <span className="phead2__handle">@{profile.username}</span>
           {/* Title tag under the name: "The Creator" (or any custom title) replaces the
               universal "Beta Tester" badge for members who have one. */}
           <div className="phead2__tags"><span className="beta-tag">{profile.title ?? "Beta Tester"}</span></div>
@@ -90,92 +93,121 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
           </p>
           <div className="pstats">
             <span className="pstat"><b>{stats.friends}</b> friends</span>
-            <span className="pstat"><b>{stats.wallPosts}</b> wall posts</span>
+            <span className="pstat"><b>{stats.wallPosts}</b> posts</span>
             <span className="pstat"><b>{stats.stories}</b> stories</span>
           </div>
         </div>
         <div className="phead2__actions">
-          {isOwner ? (
-            <AccentPicker userId={profile.id} current={profile.accentColor} />
-          ) : (
-            <>
-              <FriendButton profileId={profile.id} />
-              {me && <MessageButton userId={profile.id} username={profile.username} />}
-            </>
-          )}
+          {!isOwner && me && <FriendButton profileId={profile.id} />}
+          {!isOwner && me && <MessageButton userId={profile.id} username={profile.username} />}
+          <ShareButton username={profile.username} />
+          {isOwner && <AccentPicker userId={profile.id} current={profile.accentColor} />}
         </div>
       </header>
 
       <StoriesRail stories={stories} isOwner={isOwner} />
 
-      {/* ---- Two-column body ---- */}
-      <div className="pbody">
-        <aside className="pcol pcol--side">
-          <section className="pcard">
-            <h2 className="pcard__h">About</h2>
-            <EditBio userId={profile.id} bio={profile.bio} canEdit={!!isOwner} />
-          </section>
-
-          <section className="pcard">
-            <h2 className="pcard__h">Friends {friends.length > 0 && <span className="pcard__count">{friends.length}</span>}</h2>
-            {friends.length === 0 ? (
-              <p className="pcard__empty">No friends yet.</p>
-            ) : (
-              <ul className="pfriends">
-                {friends.map((f) => (
-                  <li key={f.id}>
-                    <a className="pfriend" href={`/u/${f.username}`}>
-                      <span className="pfriend__avwrap">
-                        <span className="pfriend__av">
-                          {f.avatarUrl
-                            ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={f.avatarUrl} alt="" />
-                            : f.username.charAt(0).toUpperCase()}
-                        </span>
-                        {f.online && <span className="pfriend__dot" title="Online" />}
-                      </span>
-                      <span className={f.role === "founder" ? "pfriend__name founder" : "pfriend__name"}>{f.username}</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          {isOwner && (
-            <section className="pcard">
-              <h2 className="pcard__h">People you may know</h2>
-              <SuggestedFriends />
-            </section>
-          )}
-        </aside>
-
-        <div className="pcol pcol--main">
-          <section className="pcard">
-            <h2 className="pcard__h">Wall</h2>
-            <WallForm profileId={profile.id} ownName={isOwner ? profile.username : null} />
-            {wall.length === 0 ? (
-              <p className="pcard__empty">
-                No posts yet.{" "}
-                {isOwner ? "Your wall is public — anyone can leave a note here." : `Be the first to write on ${profile.username}'s wall.`}
-              </p>
-            ) : (
-              <div className="wall__list">
-                {wall.map((p) => (
-                  <article key={p.id} className="wpost">
-                    <div className="wpost__head">
-                      <AuthorTag author={p.author} />
-                      <time className="wpost__time">{when(p.createdAt)}</time>
-                      <WallActions postId={p.id} authorId={p.authorId} profileId={profile.id} me={me} />
-                    </div>
-                    {p.body && <div className="wpost__body">{p.body}</div>}
-                    {p.slip && p.slip.length > 0 && <WallSlipCard items={p.slip} />}
-                  </article>
-                ))}
+      {/* ---- Tabs: modern content organization instead of one long wall ---- */}
+      <ProfileTabs
+        tabs={[
+          {
+            key: "feed", label: "Feed", count: stats.wallPosts,
+            node: (
+              <section className="pcard">
+                <WallForm profileId={profile.id} ownName={isOwner ? profile.username : null} />
+                {wall.length === 0 ? (
+                  <p className="pcard__empty">
+                    No posts yet.{" "}
+                    {isOwner ? "Share a pick or a thought — your feed is public." : `Be the first to write on ${profile.username}'s feed.`}
+                  </p>
+                ) : (
+                  <div className="wall__list">
+                    {wall.map((p) => (
+                      <article key={p.id} className="wpost">
+                        <div className="wpost__head">
+                          <AuthorTag author={p.author} />
+                          <time className="wpost__time">{when(p.createdAt)}</time>
+                          <WallActions postId={p.id} authorId={p.authorId} profileId={profile.id} me={me} />
+                        </div>
+                        {p.body && <div className="wpost__body">{p.body}</div>}
+                        {p.slip && p.slip.length > 0 && <WallSlipCard items={p.slip} />}
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </section>
+            ),
+          },
+          {
+            key: "about", label: "About",
+            node: (
+              <div className="pabout">
+                <section className="pcard">
+                  <h2 className="pcard__h">Intro</h2>
+                  <ul className="pintro">
+                    <li><span className="pintro__i" aria-hidden="true">📅</span> Joined {since.format(new Date(profile.createdAt))}</li>
+                    <li><span className="pintro__i" aria-hidden="true">👥</span> {stats.friends} friend{stats.friends === 1 ? "" : "s"} · {stats.wallPosts} post{stats.wallPosts === 1 ? "" : "s"}</li>
+                    {mutual > 0 && <li><span className="pintro__i" aria-hidden="true">🤝</span> {mutual} mutual friend{mutual === 1 ? "" : "s"}</li>}
+                    <li className="pintro__soon"><span className="pintro__i" aria-hidden="true">🏈</span> Favorite teams &amp; track record — coming with the season</li>
+                  </ul>
+                </section>
+                <section className="pcard">
+                  <h2 className="pcard__h">About</h2>
+                  <EditBio userId={profile.id} bio={profile.bio} canEdit={!!isOwner} />
+                </section>
               </div>
-            )}
-          </section>
-        </div>
-      </div>
+            ),
+          },
+          {
+            key: "friends", label: "Friends", count: stats.friends,
+            node: (
+              <>
+                <section className="pcard">
+                  <h2 className="pcard__h">Friends {friends.length > 0 && <span className="pcard__count">{friends.length}</span>}</h2>
+                  {friends.length === 0 ? (
+                    <p className="pcard__empty">No friends yet.</p>
+                  ) : (
+                    <ul className="pfriends pfriends--grid">
+                      {friends.map((f) => (
+                        <li key={f.id}>
+                          <a className="pfriend" href={`/u/${f.username}`}>
+                            <span className="pfriend__avwrap">
+                              <span className="pfriend__av">
+                                {f.avatarUrl
+                                  ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={f.avatarUrl} alt="" />
+                                  : f.username.charAt(0).toUpperCase()}
+                              </span>
+                              {f.online && <span className="pfriend__dot" title="Online" />}
+                            </span>
+                            <span className={f.role === "founder" ? "pfriend__name founder" : "pfriend__name"}>{f.username}</span>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+                {isOwner && (
+                  <section className="pcard">
+                    <h2 className="pcard__h">People you may know</h2>
+                    <SuggestedFriends />
+                  </section>
+                )}
+              </>
+            ),
+          },
+          {
+            key: "media", label: "Media",
+            node: (
+              <section className="pcard">
+                <h2 className="pcard__h">Media</h2>
+                <p className="pcard__empty">
+                  No media yet.{isOwner ? " Photos and images you post will show up here." : ""}
+                </p>
+              </section>
+            ),
+          },
+        ]}
+      />
     </main>
   );
 }

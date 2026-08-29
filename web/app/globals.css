@@ -1718,8 +1718,33 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .pcard__h{font-size:15px;font-weight:800;margin:0 0 12px;display:flex;align-items:center;gap:8px}
 .pcard__count{font-size:12px;font-weight:700;color:#fff;background:var(--paccent,var(--gold));border-radius:999px;padding:1px 8px}
 .pcard__empty{color:var(--muted);font-size:13px;margin:0}
+/* @handle + share/action buttons */
+.phead2__handle{display:block;color:var(--muted);font-size:13px;font-weight:600;margin:-2px 0 6px}
+.pbtn{font-size:13px;font-weight:700;border-radius:10px;padding:8px 14px;cursor:pointer;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);transition:background .12s,border-color .12s}
+.pbtn:hover{background:var(--surface-2)}
+.pbtn--ghost{background:transparent}
+/* Profile tabs */
+.ptabs{margin-top:14px}
+.ptabs__bar{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px;overflow-x:auto}
+.ptab{appearance:none;background:none;border:0;border-bottom:2.5px solid transparent;margin-bottom:-1px;
+  padding:10px 16px;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:7px;transition:color .12s,border-color .12s}
+.ptab:hover{color:var(--ink)}
+.ptab.active{color:var(--paccent,var(--gold));border-bottom-color:var(--paccent,var(--gold))}
+.ptab__count{font-size:11px;font-weight:800;color:var(--muted);background:var(--surface-2);border-radius:999px;padding:0 7px}
+.ptab.active .ptab__count{color:#fff;background:var(--paccent,var(--gold))}
+.ptabs__panel[hidden]{display:none}
+.ptabs__panel{display:flex;flex-direction:column;gap:16px}
+/* Intro card + About tab */
+.pabout{display:grid;grid-template-columns:1fr;gap:16px}
+.pintro{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.pintro li{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--ink)}
+.pintro__i{width:18px;text-align:center;flex:0 0 auto}
+.pintro__soon{color:var(--muted);font-style:italic}
 /* Friends grid */
 .pfriends{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.pfriends--grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
 .pfriend{display:flex;align-items:center;gap:9px;text-decoration:none;color:inherit;border-radius:10px;padding:4px}
 .pfriend:hover{background:var(--surface-2)}
 .pfriend__avwrap{position:relative;flex:0 0 auto}
