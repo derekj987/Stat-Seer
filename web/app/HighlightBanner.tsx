@@ -25,10 +25,10 @@ function slides(sport: Sport): Slide[] {
       path: players, img: "/playerprops.jpg?v=9" },
     { emoji: "📣", kicker: "Local Intelligence", title: "What the fan boards are buzzing",
       blurb: "We scour team forums, beat writers & RSS for players you haven't heard about — then hand you the bottom line.",
-      path: fan, img: "/localintel.jpg?v=8" },
+      path: fan, img: "/localintel.jpg?v=9" },
     { emoji: "💰", kicker: "Value Finder", title: "Find the best price",
       blurb: "We shop every book so you never leave value on the table — line shopping, sweet spots & the single best number.",
-      path: value, img: "/valuefinder.jpg?v=8" },
+      path: value, img: "/valuefinder.jpg?v=9" },
   ];
 }
 
