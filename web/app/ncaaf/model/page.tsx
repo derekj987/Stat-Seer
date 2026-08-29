@@ -88,6 +88,9 @@ export default async function Page({ searchParams }: {
     .map((x) => x.g);
   const lead = diverged.slice(0, 12);        // the 12 biggest divergences lead the board
   const leadRest = lead.slice(6);            // beyond the first 6 (see-more)
+  // The marquee AP Top 25 board — ranked games in kickoff order (the recognizable poll view).
+  const ranked = c.games.filter((g) => g.apAway || g.apHome);
+  const rankedRest = ranked.slice(3);        // ranked games beyond the first 3 (see-more)
 
   return (
     <main className="wrap">
@@ -135,7 +138,22 @@ export default async function Page({ searchParams }: {
         </div>
       </details>
 
-      {/* Lead with the biggest market divergences — where the model has an independent opinion. */}
+      {/* Marquee AP Top 25 board — the ranked matchups, in kickoff order. */}
+      <details className="hb-panel hb-panel--card" open>
+        <summary className="hb-bar">
+          <span className="hb-bar__title hb-bar__title--gold">The Model — AP Top 25 Matchups</span>
+          <Tip text={<>Every <b>ranked game</b> — one with an <b>AP Top 25</b> team (its poll rank shown beside it) — on the Week {c.week} board, in kickoff order, with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Projection</b>, our own line-blind spread &amp; total. A ◆ marks an <b>off-consensus</b> game. On big favorites we defer to the efficient market, so these mostly agree — the games where our read genuinely differs are in <b>Where We Differ Most</b> below. Context you can check, <b>not a pick</b> (our rating ties Elo but doesn&apos;t beat the spread).</>} />
+          <span className="hb-bar__hint">AP Top 25 games, earliest kickoff first · Week {c.week}</span>
+          <span className="hb-bar__chev" aria-hidden="true">▾</span>
+        </summary>
+        <div className="hb-body">
+          <MoreTable id="ncaaf-ranked-more" head={<NcaafCardHead />} extra={rankedRest.length} noun="ranked games" cls="hb-form--mkt">
+            <CardRows games={ranked} moreFrom={3} />
+          </MoreTable>
+        </div>
+      </details>
+
+      {/* Then the biggest market divergences — where the model has an independent opinion. */}
       <details className="hb-panel hb-panel--card" open>
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">The Model — Where We Differ Most</span>
