@@ -1735,6 +1735,10 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
   background:var(--surface);color:var(--ink);transition:background .12s,border-color .12s}
 .pbtn:hover{background:var(--surface-2)}
 .pbtn--ghost{background:transparent}
+.pbtn--following{background:var(--surface-2);border-color:var(--line);color:var(--ink)}
+.pbtn--following:hover{border-color:var(--mkt);color:var(--mkt)}
+.followwrap{display:inline-flex;align-items:center;gap:8px}
+.followwrap__err{font-size:11px;color:var(--mkt)}
 /* Profile tabs */
 .ptabs{margin-top:14px}
 .ptabs__bar{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px;overflow-x:auto}

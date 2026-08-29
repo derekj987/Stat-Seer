@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
-import { getProfileByUsername, getWall, getFriends, getStoriesForCircle, getProfileStats, getFriendIds } from "@/lib/profile";
+import { getProfileByUsername, getWall, getFriends, getStoriesForCircle, getProfileStats, getFriendIds, getFollowStats } from "@/lib/profile";
+import FollowButton from "./FollowButton";
 import { createClient } from "@/lib/supabase/server";
 import { AuthorTag } from "../../forum/AuthorTag";
 import EditBio from "./EditBio";
@@ -57,6 +58,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     mutual = friends.filter((f) => mine.has(f.id)).length;
   }
 
+  const follow = await getFollowStats(profile.id, me?.id);
   const accentStyle = profile.accentColor ? ({ "--paccent": profile.accentColor } as CSSProperties) : undefined;
 
   return (
@@ -94,12 +96,14 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             {mutual > 0 && <span className="phead2__mutual"> · {mutual} mutual friend{mutual === 1 ? "" : "s"}</span>}
           </p>
           <div className="pstats">
+            <span className="pstat"><b>{follow.followers}</b> followers</span>
+            <span className="pstat"><b>{follow.following}</b> following</span>
             <span className="pstat"><b>{stats.friends}</b> friends</span>
             <span className="pstat"><b>{stats.wallPosts}</b> posts</span>
-            <span className="pstat"><b>{stats.stories}</b> stories</span>
           </div>
         </div>
         <div className="phead2__actions">
+          {!isOwner && me && <FollowButton profileId={profile.id} viewerId={me.id} initialFollowing={follow.viewerFollows} />}
           {!isOwner && me && <FriendButton profileId={profile.id} />}
           {!isOwner && me && <MessageButton userId={profile.id} username={profile.username} />}
           <ShareButton username={profile.username} />

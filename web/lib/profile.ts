@@ -87,6 +87,24 @@ export async function getProfileStats(profileId: string): Promise<{ friends: num
   return { friends: friends.length, wallPosts: wall.length, stories };
 }
 
+/** Follower/following counts + whether the viewer follows this profile. Degrades to zeros/false if
+ *  the follows table isn't migrated yet, so the header renders fine pre-migration. */
+export async function getFollowStats(profileId: string, viewerId?: string | null):
+  Promise<{ followers: number; following: number; viewerFollows: boolean }> {
+  try {
+    const [followers, following, mine] = await Promise.all([
+      pg(`follows?following_id=eq.${profileId}&select=follower_id&limit=5000`),
+      pg(`follows?follower_id=eq.${profileId}&select=following_id&limit=5000`),
+      viewerId && viewerId !== profileId
+        ? pg(`follows?follower_id=eq.${viewerId}&following_id=eq.${profileId}&select=follower_id&limit=1`)
+        : Promise.resolve([] as Record<string, unknown>[]),
+    ]);
+    return { followers: followers.length, following: following.length, viewerFollows: mine.length > 0 };
+  } catch {
+    return { followers: 0, following: 0, viewerFollows: false };
+  }
+}
+
 /** Accepted friends of a profile, with an "online" flag from last_seen. */
 export async function getFriends(profileId: string): Promise<Friend[]> {
   const links = await pg(
