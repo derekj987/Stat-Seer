@@ -314,7 +314,8 @@ function NflValueTable({ rows }: { rows: VfRow[] }) {
 export default function LandingHub({ initialSport, nfl, ncaaf, vf }: { initialSport: Sport; nfl: NflData; ncaaf: NcaafData; vf: VfRow[] }) {
   // AP Top 25 matchups this week (either team ranked), kept in kickoff order — the
   // homepage's ranked-games snapshot, mirroring the full table on /ncaaf/model.
-  const ncaafRanked = ncaaf.games.filter((g) => g.apAway || g.apHome);
+  const ncaafRanked = ncaaf.games.filter((g) => g.apAway || g.apHome)
+    .slice().sort((a, b) => (a.commence || "9999").localeCompare(b.commence || "9999")); // soonest first
   return (
     <section className="lp-hub" id="lp-board" aria-label="This week's board">
       {/* pure-CSS sport toggle — no client JS needed */}

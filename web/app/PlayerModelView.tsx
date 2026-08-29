@@ -59,10 +59,14 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
     : [];
   const games: string[] = [];
   const byGame: Record<string, PlayerProj[]> = {};
+  const gameKick: Record<string, string> = {};   // earliest kickoff per game, for date ordering
   for (const r of rows) {
     if (!byGame[r.game]) { byGame[r.game] = []; games.push(r.game); }
     byGame[r.game].push(r);
+    if (r.commence && (!gameKick[r.game] || r.commence < gameKick[r.game])) gameKick[r.game] = r.commence;
   }
+  // Lead with the soonest game so today's matchups are up top (games with no kickoff sort last).
+  games.sort((a, b) => (gameKick[a] ?? "9999").localeCompare(gameKick[b] ?? "9999"));
   const LEAD = 4;   // rows shown before "see more"
   // Per-row unit — the passing category mixes markets (yards + TDs); anytime-TD is a %.
   const unitFor = (market: string) =>

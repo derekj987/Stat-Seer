@@ -22,7 +22,8 @@ export default async function Page({ searchParams }: {
   const c = M.card;
   const week = readNcaafWeek((await searchParams).week, c.week);
   const top = cx.conferences[0];
-  const games: NcaafCardGame[] = [...c.games];
+  const games: NcaafCardGame[] = [...c.games]
+    .sort((a, b) => (a.commence || "9999").localeCompare(b.commence || "9999")); // soonest kickoff first
   // Power ratings + national rank exist for the top 25; hand them to the client view.
   const ratings: Record<string, { rank: number; rating: number }> = {};
   for (const t of M.top) ratings[t.team] = { rank: t.rank, rating: t.rating };

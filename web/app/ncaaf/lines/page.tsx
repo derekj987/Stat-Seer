@@ -22,7 +22,8 @@ export default async function Page({ searchParams }: {
   const bs = M.value.bookShop;
   const c = M.card;
   const week = readNcaafWeek((await searchParams).week, c.week);
-  const games = c.games.filter((g) => g.marketSpread); // only games with a market line
+  const games = c.games.filter((g) => g.marketSpread)  // only games with a market line
+    .sort((a, b) => (a.commence || "9999").localeCompare(b.commence || "9999")); // soonest kickoff first
   const total = c.games.length;                        // full slate (incl. games w/o odds yet)
   const noLine = total - games.length;                 // games still waiting on a posted line
 

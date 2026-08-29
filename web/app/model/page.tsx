@@ -15,6 +15,7 @@ const SEASON = 2026;
 // model detail lives on The Model page. ---
 interface Env {
   eventId: string; home: string; away: string;
+  commence: string;               // kickoff ISO — for date ordering
   spread: number | null;          // home perspective; negative = home favored
   favLabel: string;               // "PIT -3"
   spreadKey: { num: number; cost: number } | null;
@@ -224,7 +225,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
     const mp = modelById.get(g.eventId);
     const spread = g.spread.consensus;
     return {
-      eventId: g.eventId, home: g.home, away: g.away, spread,
+      eventId: g.eventId, home: g.home, away: g.away, commence: g.commence, spread,
       favLabel: favLabel(g.home, g.away, spread),
       spreadKey: g.spread.key,
       total: g.total.consensus, totalKey: g.total.key,
@@ -235,7 +236,8 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
       modelDisagree: mp?.disagree ?? false,
     };
   });
-  const scored = envs.filter((e) => e.total !== null).sort((a, b) => (b.total! - a.total!));
+  const scored = envs.filter((e) => e.total !== null)
+    .sort((a, b) => (a.commence || "9999").localeCompare(b.commence || "9999")); // soonest kickoff first
 
   // The bettable side for each game's "Add to slip" — the model's read against the MARKET
   // spread (e.g. "CAR +3.5"), not the raw projected margin ("CHI by 1.9", which isn't a real
