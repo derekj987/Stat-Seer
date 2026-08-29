@@ -1861,6 +1861,54 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .wpost__time{color:var(--muted);font-size:11.5px;font-family:var(--font-mono);margin-left:auto}
 .wpost__body{font-size:14px;line-height:1.6;white-space:pre-wrap}
 
+/* Reactions + comments footer under a wall post. */
+.wpost__foot{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);
+  display:flex;flex-direction:column;gap:8px}
+
+/* Emoji reaction pills. */
+.rxbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.rxpill{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:999px;
+  border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;
+  font-size:12.5px;line-height:1.6;transition:background .12s,border-color .12s,transform .08s}
+.rxpill:hover{border-color:color-mix(in srgb,var(--accent) 45%,var(--line));transform:translateY(-1px)}
+.rxpill:disabled{cursor:default;opacity:.75;transform:none}
+.rxpill--mine{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 55%,var(--line))}
+.rxpill__e{font-size:13px}
+.rxpill__n{font-weight:700;color:var(--muted)}
+.rxpill--mine .rxpill__n{color:var(--accent)}
+.rxadd{position:relative;display:inline-flex}
+.rxadd__btn{display:inline-flex;align-items:center;justify-content:center;height:24px;padding:0 8px;
+  border-radius:999px;border:1px dashed color-mix(in srgb,var(--muted) 45%,var(--line));
+  background:transparent;color:var(--muted);cursor:pointer;font-size:12px;transition:color .12s,border-color .12s}
+.rxadd__btn:hover{color:var(--accent);border-color:var(--accent)}
+.rxadd__pop{position:absolute;bottom:calc(100% + 6px);left:0;z-index:20;display:flex;gap:2px;padding:5px;
+  background:var(--surface);border:1px solid var(--line);border-radius:11px;
+  box-shadow:0 8px 24px rgba(0,0,0,.22)}
+.rxadd__opt{width:30px;height:30px;display:flex;align-items:center;justify-content:center;padding:0;
+  border:0;border-radius:8px;background:transparent;cursor:pointer;font-size:17px;transition:background .1s,transform .08s}
+.rxadd__opt:hover{background:var(--surface-2);transform:scale(1.15)}
+
+/* Comments. */
+.cmts__toggle{padding:2px 4px;border:0;background:transparent;color:var(--muted);cursor:pointer;
+  font-size:12.5px;font-weight:600;transition:color .12s}
+.cmts__toggle:hover{color:var(--accent)}
+.cmts__body{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.cmt{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 11px}
+.cmt__head{display:flex;align-items:center;gap:8px}
+.cmt__time{color:var(--muted);font-size:11px;font-family:var(--font-mono);margin-left:auto}
+.cmt__del{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;
+  padding:0 2px;transition:color .12s}
+.cmt__del:hover{color:#c0392b}
+.cmt__text{font-size:13px;line-height:1.55;margin-top:3px;white-space:pre-wrap}
+.cmtform{display:flex;flex-direction:column;gap:6px}
+.cmtform__ta{width:100%;resize:vertical;min-height:38px;padding:8px 10px;border-radius:9px;
+  border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:13px;line-height:1.5}
+.cmtform__ta:focus{outline:none;border-color:var(--accent)}
+.cmtform__foot{display:flex;align-items:center;justify-content:flex-end;gap:10px}
+.cmtform__err{color:#c0392b;font-size:12px;margin-right:auto}
+.cmtform__send{padding:5px 14px;font-size:12.5px}
+.cmts__login{color:var(--muted);font-size:12.5px;margin:2px 0 0}
+
 /* A bet slip embedded in a wall post. */
 .wslip{margin-top:10px;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:var(--surface-2)}
 .wslip__hd{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--accent-soft);

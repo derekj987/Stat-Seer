@@ -18,6 +18,8 @@ import ProfileTabs from "./ProfileTabs";
 import ShareButton from "./ShareButton";
 import RichText from "./RichText";
 import FavoriteTeams from "./FavoriteTeams";
+import PostReactions from "./PostReactions";
+import PostComments from "./PostComments";
 import type { CSSProperties } from "react";
 
 export const dynamic = "force-dynamic";
@@ -31,11 +33,6 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   const profile = await getProfileByUsername(username);
   if (!profile) notFound();
 
-  const [wall, friends, stats] = await Promise.all([
-    getWall(profile.id), getFriends(profile.id), getProfileStats(profile.id),
-  ]);
-  const stories = await getStoriesForCircle(profile.id, friends.map((f) => f.id));
-
   let me: { id: string; role: string } | null = null;
   try {
     const supabase = await createClient();
@@ -48,6 +45,11 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   // Profiles are members-only (the proxy gate also enforces this); never expose to a visitor.
   // Gate only where auth is actually configured (prod) — local dev has no client auth env.
   if (!me && process.env.NEXT_PUBLIC_SUPABASE_URL) redirect("/login");
+
+  const [wall, friends, stats] = await Promise.all([
+    getWall(profile.id, me?.id), getFriends(profile.id), getProfileStats(profile.id),
+  ]);
+  const stories = await getStoriesForCircle(profile.id, friends.map((f) => f.id));
   const isOwner = me?.id === profile.id;
   const initial = profile.username.charAt(0).toUpperCase();
 
@@ -137,6 +139,10 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                         </div>
                         {p.body && <div className="wpost__body"><RichText text={p.body} /></div>}
                         {p.slip && p.slip.length > 0 && <WallSlipCard items={p.slip} />}
+                        <footer className="wpost__foot">
+                          <PostReactions postId={p.id} viewerId={me?.id ?? null} initial={p.reactions} />
+                          <PostComments postId={p.id} profileId={profile.id} me={me} initial={p.comments} />
+                        </footer>
                       </article>
                     ))}
                   </div>
