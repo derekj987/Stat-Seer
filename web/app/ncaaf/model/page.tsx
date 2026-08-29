@@ -5,6 +5,7 @@ import { StatCard } from "../StatCard";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
 import { NcaafCardHead, NcaafGameCell } from "../CardCells";
 import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
+import { marketGap, LeanTag } from "../lean";
 
 // College Football — The Model. Mirrors the NFL Model page: the full model-vs-market
 // table leads, the honest track record (predicts as well as Elo, doesn't beat the spread)
@@ -32,34 +33,18 @@ function groupByConf(games: readonly NcaafCardGame[]): { conf: string; games: Nc
     .map(([conf, gs]) => ({ conf, games: gs }));
 }
 
-// Home-perspective margin from a favorite-line spread ({fav, num}; num is the favorite's negative
-// line). Used to measure how far our line-blind number sits from the market's on a game.
-function marginHome(sp: { fav: string; num: number } | null | undefined, home: string): number | null {
-  if (!sp) return null;
-  return sp.fav === home ? -sp.num : sp.num;
-}
-function marketGap(g: NcaafCardGame): number | null {
-  const m = marginHome(g.marketSpread, g.home), p = marginHome(g.projSpread, g.home);
-  return m === null || p === null ? null : p - m;   // + = we're higher on the home team than the market
-}
-
-function CardRows({ games, moreFrom, withGap }: { games: readonly NcaafCardGame[]; moreFrom?: number; withGap?: boolean }) {
+function CardRows({ games, moreFrom }: { games: readonly NcaafCardGame[]; moreFrom?: number }) {
   return (
     <>
       {games.map((g, i) => {
         const ms = g.marketSpread;
-        const gap = withGap ? marketGap(g) : null;
         return (
           <tr key={`${g.away}-${g.home}`} className={[g.off ? "hb-off" : "", moreFrom !== undefined && i >= moreFrom ? "hb-row--more" : ""].filter(Boolean).join(" ") || undefined}>
             <NcaafGameCell g={g} />
             <td className="hb-num">{ms ? `${abbrevTeam(ms.fav)} ${ms.num}` : "—"}</td>
             <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
             <td className="hb-num hb-model">{abbrevTeam(g.projSpread.fav)} {g.projSpread.num}
-              {gap !== null && Math.abs(gap) >= 1 && (
-                <span className="hb-gap" title={`Our line is ${Math.abs(gap).toFixed(1)} pts off the market — the further apart, the stronger our independent read differs.`}>
-                  Δ{Math.abs(gap).toFixed(1)}
-                </span>
-              )}
+              <LeanTag g={g} />
             </td>
             <td className="hb-num hb-model">{g.projTotal}</td>
           </tr>
@@ -147,6 +132,10 @@ export default async function Page({ searchParams }: {
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
+          <div className="hb-legend">
+            <span className="hb-lean hb-lean--defer">≈ market</span> on a big favorite we defer to the efficient line (it&apos;s not an underdog pick) ·{" "}
+            <span className="hb-lean hb-lean--fav">fav</span> / <span className="hb-lean hb-lean--dog">dog</span> our line-blind lean on a closer game, with the margin — <b>context, not a pick</b> (our rating doesn&apos;t beat the spread). Hover any tag for detail.
+          </div>
           <MoreTable id="ncaaf-ranked-more" head={<NcaafCardHead />} extra={rankedRest.length} noun="ranked games" cls="hb-form--mkt">
             <CardRows games={ranked} moreFrom={3} />
           </MoreTable>
@@ -176,7 +165,7 @@ export default async function Page({ searchParams }: {
             )}
           </div>
           <MoreTable id="ncaaf-snap-more" head={<NcaafCardHead />} extra={leadRest.length} noun="more divergences" cls="hb-form--mkt">
-            <CardRows games={lead} moreFrom={6} withGap />
+            <CardRows games={lead} moreFrom={6} />
           </MoreTable>
         </div>
       </details>

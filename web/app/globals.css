@@ -2550,10 +2550,13 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-num{font-variant-numeric:tabular-nums}
 .hb-model{color:var(--accent);font-weight:700}
 .hb-tot{color:var(--muted)}
-/* Divergence chip: how far our line-blind number is from the market on a game (lead board). */
-.hb-gap{display:inline-block;margin-left:6px;font-size:10.5px;font-weight:800;padding:0 5px;
-  border-radius:5px;background:color-mix(in srgb,var(--gold) 16%,transparent);color:var(--gold);
-  vertical-align:middle;cursor:help;letter-spacing:.01em}
+/* "Our lean" tag: which side our line-blind read has covering vs the market (or ≈ market when we
+   defer to an efficient big-favorite line). Hover for the explanation. */
+.hb-lean{display:inline-block;margin-left:7px;font-size:10px;font-weight:800;padding:0 6px;
+  border-radius:5px;vertical-align:middle;cursor:help;letter-spacing:.02em;white-space:nowrap}
+.hb-lean--fav{color:#0a7d3c;background:color-mix(in srgb,#0a7d3c 13%,transparent)}
+.hb-lean--dog{color:var(--amber);background:color-mix(in srgb,var(--amber) 16%,transparent)}
+.hb-lean--even,.hb-lean--defer{color:var(--muted);background:color-mix(in srgb,var(--muted) 15%,transparent)}
 .hb-model{color:var(--offc-ink);font-weight:700;font-variant-numeric:tabular-nums}
 .hb-model--down{color:var(--mkt)}
 /* Off-consensus (model disagrees with the market) — flag the disagreeing pick in
