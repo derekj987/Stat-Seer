@@ -32,17 +32,35 @@ function groupByConf(games: readonly NcaafCardGame[]): { conf: string; games: Nc
     .map(([conf, gs]) => ({ conf, games: gs }));
 }
 
-function CardRows({ games, moreFrom }: { games: readonly NcaafCardGame[]; moreFrom?: number }) {
+// Home-perspective margin from a favorite-line spread ({fav, num}; num is the favorite's negative
+// line). Used to measure how far our line-blind number sits from the market's on a game.
+function marginHome(sp: { fav: string; num: number } | null | undefined, home: string): number | null {
+  if (!sp) return null;
+  return sp.fav === home ? -sp.num : sp.num;
+}
+function marketGap(g: NcaafCardGame): number | null {
+  const m = marginHome(g.marketSpread, g.home), p = marginHome(g.projSpread, g.home);
+  return m === null || p === null ? null : p - m;   // + = we're higher on the home team than the market
+}
+
+function CardRows({ games, moreFrom, withGap }: { games: readonly NcaafCardGame[]; moreFrom?: number; withGap?: boolean }) {
   return (
     <>
       {games.map((g, i) => {
         const ms = g.marketSpread;
+        const gap = withGap ? marketGap(g) : null;
         return (
           <tr key={`${g.away}-${g.home}`} className={[g.off ? "hb-off" : "", moreFrom !== undefined && i >= moreFrom ? "hb-row--more" : ""].filter(Boolean).join(" ") || undefined}>
             <NcaafGameCell g={g} />
             <td className="hb-num">{ms ? `${abbrevTeam(ms.fav)} ${ms.num}` : "—"}</td>
             <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
-            <td className="hb-num hb-model">{abbrevTeam(g.projSpread.fav)} {g.projSpread.num}</td>
+            <td className="hb-num hb-model">{abbrevTeam(g.projSpread.fav)} {g.projSpread.num}
+              {gap !== null && Math.abs(gap) >= 1 && (
+                <span className="hb-gap" title={`Our line is ${Math.abs(gap).toFixed(1)} pts off the market — the further apart, the stronger our independent read differs.`}>
+                  Δ{Math.abs(gap).toFixed(1)}
+                </span>
+              )}
+            </td>
             <td className="hb-num hb-model">{g.projTotal}</td>
           </tr>
         );
@@ -59,10 +77,17 @@ export default async function Page({ searchParams }: {
   const beatsMarket = a.atsPct > a.breakeven;
   const c = M.card;
   const week = readNcaafWeek((await searchParams).week, c.week);
-  // Only games with an AP Top 25 team (the recognizable media poll), kept in kickoff order
-  // (source sorts by commence). The complete slate lives in "Full Model — every game" below.
-  const ranked = c.games.filter((g) => g.apAway || g.apHome);
-  const snapshotRest = ranked.slice(3);   // ranked games beyond the first 3 (see-more)
+  // Lead with the games where our line-blind read DIVERGES MOST from the market — that's where the
+  // model actually has an independent opinion. On big favorites we defer to the efficient market
+  // (proven: they cover ~50%, we don't beat the spread), so those agree by design; the interesting
+  // reads are the disagreements. Sorted by |our margin − market margin|, biggest first.
+  const diverged = c.games
+    .filter((g) => g.marketSpread)
+    .map((g) => ({ g, gap: Math.abs(marketGap(g) ?? 0) }))
+    .sort((a, b) => b.gap - a.gap)
+    .map((x) => x.g);
+  const lead = diverged.slice(0, 12);        // the 12 biggest divergences lead the board
+  const leadRest = lead.slice(6);            // beyond the first 6 (see-more)
 
   return (
     <main className="wrap">
@@ -110,20 +135,21 @@ export default async function Page({ searchParams }: {
         </div>
       </details>
 
-      {/* Snapshot — the first few ranked games, with a "see more" for the rest. */}
+      {/* Lead with the biggest market divergences — where the model has an independent opinion. */}
       <details className="hb-panel hb-panel--card" open>
         <summary className="hb-bar">
-          <span className="hb-bar__title hb-bar__title--gold">The Model — Ranked Games</span>
-          <Tip text={<>Every <b>ranked game</b> — one with an <b>AP Top 25</b> team (its poll rank shown beside it) — on the Week {c.week} board, in kickoff order, with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Projection</b>, our own line-blind spread &amp; total. A ◆ marks an <b>off-consensus</b> game (our number is well off the market&apos;s). Our CFB rating ties Elo but doesn&apos;t beat the spread, so this is context you can check, <b>not a pick</b>. The complete slate is in <b>Full Model — every game</b> below.</>} />
-          <span className="hb-bar__hint">AP Top 25 games, earliest kickoff first · Week {c.week}</span>
+          <span className="hb-bar__title hb-bar__title--gold">The Model — Where We Differ Most</span>
+          <Tip text={<>The games where our <b>line-blind number is furthest from the market</b> — a <b>Δ</b> beside our projection shows how many points apart we are. This is where the model has an <b>independent opinion</b>. On big favorites we <b>defer to the market</b> (it&apos;s efficient there — heavy favorites cover about half the time — and our rating doesn&apos;t beat the spread), so those agree by design and don&apos;t lead here. Still <b>context, not a pick</b>: a divergence isn&apos;t a proven edge (we tested — the rating doesn&apos;t beat the closing line). The complete slate is in <b>Full Model — every game</b> below.</>} />
+          <span className="hb-bar__hint">our line-blind read vs the market, biggest gaps first · Week {c.week}</span>
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
           <div className="hb-legend">
-            <span className="hb-dia">◆</span> Off-consensus — our projected line is well off the market&apos;s.
-            <span className="hb-x"> · <b>Our Projection</b> is our line-blind spread &amp; total, shown so you can compare
-              it to the market — <b>not a pick</b> (our rating predicts about as well as Elo but doesn&apos;t beat the
-              spread; see the record above).</span>
+            <span className="hb-dia">Δ</span> How far our line-blind number sits from the market on this game.
+            <span className="hb-x"> · Big favorites don&apos;t appear here — on blowouts the market is efficient and we
+              defer to it. The games that lead are where <b>our read genuinely differs</b>. It&apos;s <b>context you can
+              check, not a pick</b> — our rating predicts about as well as Elo but doesn&apos;t beat the spread (see the
+              record above).</span>
             {c.preseasonSeeded && (
               <span className="hb-x"> · <b>Preseason note:</b> with no {c.season} games played yet, these projections
                 are seeded with published preseason ratings (SP+) blended with our own carryover, so the early number is
@@ -131,8 +157,8 @@ export default async function Page({ searchParams }: {
                 over and the seed washes out by about week 5.</span>
             )}
           </div>
-          <MoreTable id="ncaaf-snap-more" head={<NcaafCardHead />} extra={snapshotRest.length} noun="ranked games" cls="hb-form--mkt">
-            <CardRows games={ranked} moreFrom={3} />
+          <MoreTable id="ncaaf-snap-more" head={<NcaafCardHead />} extra={leadRest.length} noun="more divergences" cls="hb-form--mkt">
+            <CardRows games={lead} moreFrom={6} withGap />
           </MoreTable>
         </div>
       </details>
