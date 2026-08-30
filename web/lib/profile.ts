@@ -14,6 +14,7 @@ export interface Profile {
   coverUrl: string | null;
   accentColor: string | null;
   favoriteTeams: string[];
+  pinnedPostId: string | null;   // owner-pinned wall post (null until pinned_post migration)
   createdAt: string;
 }
 
@@ -71,9 +72,15 @@ export { REACTION_EMOJI };
 export async function getProfileByUsername(username: string): Promise<Profile | null> {
   // cover_url + accent_color are added by the profile_upgrade migration; fall back if not there yet.
   const base = `profiles?username=eq.${encodeURIComponent(username)}&limit=1&select=id,username,role,title,bio,avatar_url,created_at`;
+  const sel = (extra: string) => base.replace("bio,", `bio,${extra}`);
+  // Optional columns arrive across separate migrations; degrade one level at a time so a newer
+  // column being absent doesn't drop the older ones (cover/accent/teams).
   let rows: Record<string, unknown>[];
-  try { rows = await pg(base.replace("bio,", "bio,cover_url,accent_color,favorite_teams,")); }
-  catch { rows = await pg(base); }
+  try { rows = await pg(sel("cover_url,accent_color,favorite_teams,pinned_post_id,")); }
+  catch {
+    try { rows = await pg(sel("cover_url,accent_color,favorite_teams,")); }
+    catch { rows = await pg(base); }
+  }
   const r = rows[0];
   if (!r) return null;
   return {
@@ -86,6 +93,7 @@ export async function getProfileByUsername(username: string): Promise<Profile | 
     coverUrl: (r.cover_url as string) ?? null,
     accentColor: (r.accent_color as string) ?? null,
     favoriteTeams: (r.favorite_teams as string[] | null) ?? [],
+    pinnedPostId: (r.pinned_post_id as string | null) ?? null,
     createdAt: r.created_at as string,
   };
 }

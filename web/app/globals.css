@@ -1880,6 +1880,12 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .wpost__time{color:var(--muted);font-size:11.5px;font-family:var(--font-mono);margin-left:auto}
 .wpost__body{font-size:14px;line-height:1.6;white-space:pre-wrap}
 
+/* Pinned post — highlighted and shown first in the feed. */
+.wpost--pinned{border-color:color-mix(in srgb,var(--paccent,var(--accent)) 45%,var(--line));
+  background:color-mix(in srgb,var(--paccent,var(--accent)) 5%,var(--surface))}
+.wpost__pin{display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.05em;color:var(--accent);margin-bottom:8px}
+
 /* Reactions + comments footer under a wall post. */
 .wpost__foot{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);
   display:flex;flex-direction:column;gap:8px}

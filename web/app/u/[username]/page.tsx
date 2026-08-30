@@ -62,6 +62,27 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   const follow = await getFollowStats(profile.id, me?.id);
   const accentStyle = profile.accentColor ? ({ "--paccent": profile.accentColor } as CSSProperties) : undefined;
 
+  // Pinned post shows first (and is dropped from the chronological list so it isn't duplicated).
+  const pinnedPost = profile.pinnedPostId ? wall.find((p) => p.id === profile.pinnedPostId) ?? null : null;
+  const feed = pinnedPost ? wall.filter((p) => p.id !== pinnedPost.id) : wall;
+  const renderPost = (p: (typeof wall)[number], isPinned: boolean) => (
+    <article key={p.id} className={isPinned ? "wpost wpost--pinned" : "wpost"}>
+      {isPinned && <div className="wpost__pin"><span aria-hidden="true">📌</span> Pinned post</div>}
+      <div className="wpost__head">
+        <AuthorTag author={p.author} />
+        <time className="wpost__time">{when(p.createdAt)}</time>
+        <WallActions postId={p.id} authorId={p.authorId} profileId={profile.id} me={me} pinned={isPinned} />
+      </div>
+      {p.body && <div className="wpost__body"><RichText text={p.body} /></div>}
+      {p.media.length > 0 && <PhotoGrid urls={p.media} variant="post" />}
+      {p.slip && p.slip.length > 0 && <WallSlipCard items={p.slip} />}
+      <footer className="wpost__foot">
+        <PostReactions postId={p.id} viewerId={me?.id ?? null} initial={p.reactions} />
+        <PostComments postId={p.id} profileId={profile.id} me={me} initial={p.comments} />
+      </footer>
+    </article>
+  );
+
   return (
     <main className="pmain" style={accentStyle}>
       {/* ---- Cover ---- */}
@@ -161,22 +182,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                   </p>
                 ) : (
                   <div className="wall__list">
-                    {wall.map((p) => (
-                      <article key={p.id} className="wpost">
-                        <div className="wpost__head">
-                          <AuthorTag author={p.author} />
-                          <time className="wpost__time">{when(p.createdAt)}</time>
-                          <WallActions postId={p.id} authorId={p.authorId} profileId={profile.id} me={me} />
-                        </div>
-                        {p.body && <div className="wpost__body"><RichText text={p.body} /></div>}
-                        {p.media.length > 0 && <PhotoGrid urls={p.media} variant="post" />}
-                        {p.slip && p.slip.length > 0 && <WallSlipCard items={p.slip} />}
-                        <footer className="wpost__foot">
-                          <PostReactions postId={p.id} viewerId={me?.id ?? null} initial={p.reactions} />
-                          <PostComments postId={p.id} profileId={profile.id} me={me} initial={p.comments} />
-                        </footer>
-                      </article>
-                    ))}
+                    {pinnedPost && renderPost(pinnedPost, true)}
+                    {feed.map((p) => renderPost(p, false))}
                   </div>
                 )}
               </section>
