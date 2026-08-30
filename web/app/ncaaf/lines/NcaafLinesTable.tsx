@@ -9,6 +9,8 @@ import { useSlip, type SlipItem } from "@/lib/slip";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
 import { NcaafCardHead, NcaafGameCell } from "../CardCells";
 import type { NcaafCardGame } from "../model-data";
+import { groupByGameDay } from "@/lib/gameDays";
+import { DayHeader } from "../../DayHeader";
 
 function Chip({ item }: { item: SlipItem }) {
   const { has, toggle } = useSlip();
@@ -29,25 +31,24 @@ function Chip({ item }: { item: SlipItem }) {
 
 const gkey = (g: NcaafCardGame) => `${g.away}-${g.home}`.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
 
-const LEAD = 6; // games shown before the "see more" dropdown
-
-export default function NcaafLinesTable({ games }: { games: NcaafCardGame[] }) {
-  const extra = Math.max(0, games.length - LEAD);
+export default function NcaafLinesTable({ games, today, tomorrow }: { games: NcaafCardGame[]; today: string; tomorrow: string }) {
   return (
-    <div className="hb-moretbl">
-      <input type="checkbox" id="ncline-more" className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
-      <div className="hb-formwrap">
-      <table className="hb-form hb-form--mkt ncline">
-        <NcaafCardHead />
-        <tbody>
-          {games.map((g, i) => {
-            const ms = g.marketSpread!;
-            const mk = `${abbrevTeam(g.away)} @ ${abbrevTeam(g.home)}`;
-            const k = gkey(g);
-            const dog = ms.fav === g.home ? g.away : g.home;
-            return (
-              <tr key={k} className={[g.off ? "hb-off" : "", i >= LEAD ? "hb-row--more" : ""].filter(Boolean).join(" ") || undefined}>
-                <NcaafGameCell g={g} />
+    <div>
+      {groupByGameDay(games, (g) => g.commence, today, tomorrow).map((grp) => (
+        <div key={grp.key}>
+          <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
+          <div className="hb-formwrap">
+          <table className="hb-form hb-form--mkt ncline">
+            <NcaafCardHead />
+            <tbody>
+              {grp.items.map((g) => {
+                const ms = g.marketSpread!;
+                const mk = `${abbrevTeam(g.away)} @ ${abbrevTeam(g.home)}`;
+                const k = gkey(g);
+                const dog = ms.fav === g.home ? g.away : g.home;
+                return (
+                  <tr key={k} className={g.off ? "hb-off" : undefined}>
+                    <NcaafGameCell g={g} />
                 <td className="hb-num">
                   <div className="ncline__chips">
                     <Chip item={{ id: `ncsp-${k}-f`, kind: "line", title: `${abbrevTeam(ms.fav)} ${ms.num}`, detail: mk, price: -110 }} />
@@ -67,16 +68,11 @@ export default function NcaafLinesTable({ games }: { games: NcaafCardGame[] }) {
               </tr>
             );
           })}
-        </tbody>
-      </table>
-      </div>
-      {extra > 0 && (
-        <label htmlFor="ncline-more" className="hb-moretbl__sum">
-          <span className="hb-more__chev" aria-hidden="true">▸</span>
-          <span className="hb-moretbl__more">See more ({extra} more game{extra === 1 ? "" : "s"})</span>
-          <span className="hb-moretbl__less">See less</span>
-        </label>
-      )}
+            </tbody>
+          </table>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import Tip from "@/app/Tip";
 import { NCAAF_MODEL } from "../model-data";
 import { StatCard } from "../StatCard";
 import NcaafLinesTable from "./NcaafLinesTable";
+import { etToday } from "@/lib/gameDays";
 
 // College Football — Value Finder · Game Lines. Mirrors the NFL board: every game with
 // the market's spread + total beside our line-blind read. NCAAF has a consensus snapshot
@@ -64,7 +65,7 @@ export default async function Page({ searchParams }: {
               over as games are played.</span>
           )}
         </div>
-        <NcaafLinesTable games={games} />
+        <NcaafLinesTable games={games} {...etToday()} />
         <p className="ncf-note">
           Consensus lines at −110 — <b>tap a side to add it to your slip</b>. Per-book best-price shopping (each
           book&apos;s number + the single best price per game, like <a href="/lines">the NFL board</a>) turns on when the

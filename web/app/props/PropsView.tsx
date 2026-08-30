@@ -4,6 +4,8 @@ import { useCallback } from "react";
 import type { PropGame, Quote } from "@/lib/props";
 import { BetslipPromo } from "../Nav";
 import { useSlip } from "@/lib/slip";
+import { groupByGameDay } from "@/lib/gameDays";
+import { DayHeader } from "../DayHeader";
 
 const fmtOdds = (p: number) => (p > 0 ? `+${p}` : String(p));
 function sideLabel(side: string, line: number | null): string {
@@ -86,7 +88,7 @@ function PropGameCard({ g, open, has, toggle }: {
   );
 }
 
-export default function PropsView({ games, embedded }: { games: PropGame[]; embedded?: boolean }) {
+export default function PropsView({ games, embedded, today, tomorrow }: { games: PropGame[]; embedded?: boolean; today: string; tomorrow: string }) {
   const { has, toggle: slipToggle } = useSlip();
   const toggle = useCallback((l: Leg) => slipToggle({
     id: l.id, kind: "prop",
@@ -103,8 +105,11 @@ export default function PropsView({ games, embedded }: { games: PropGame[]; embe
       {!embedded && <BetslipPromo />}
       <p className="hint">{games.length} games · {players} players · best price on each, shopped across books.</p>
       <section className="propstack">
-        {games.map((g) => (
-          <PropGameCard key={g.eventId} g={g} has={has} toggle={toggle} />
+        {groupByGameDay(games, (g) => g.commence, today, tomorrow).map((grp) => (
+          <div key={grp.key}>
+            <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
+            {grp.items.map((g) => <PropGameCard key={g.eventId} g={g} has={has} toggle={toggle} />)}
+          </div>
         ))}
       </section>
       {!embedded && (

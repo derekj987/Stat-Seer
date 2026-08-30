@@ -3,6 +3,7 @@ import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
 import { NCAAF_MODEL } from "../model-data";
 import { NcaafSoon } from "../Soon";
 import PropsView from "../../props/PropsView";
+import { etToday } from "@/lib/gameDays";
 import { cfbWeekProps } from "@/lib/cfbProps";
 import { CATEGORIES, categoryByKey } from "@/lib/props";
 import { playerSlot } from "@/lib/playerSlot";
@@ -73,7 +74,7 @@ export default async function Page({ searchParams }: PageProps<"/ncaaf/props">) 
           </div>
           <CatNav current={cat.key} />
           {games.length ? (
-            <PropsView games={games} embedded />
+            <PropsView games={games} embedded {...etToday()} />
           ) : (
             <p className="ncf-note">
               No <b>{cat.label.toLowerCase()}</b> props posted for this slate yet — books post them closer to

@@ -6,6 +6,8 @@ import { Brand, FlowSteps, ModelSubnav, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
 import Tip from "../Tip";
 import AddToSlip from "../AddToSlip";
+import { etToday, groupByGameDay } from "@/lib/gameDays";
+import { DayHeader } from "../DayHeader";
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -236,6 +238,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
       modelDisagree: mp?.disagree ?? false,
     };
   });
+  const { today: todayEt, tomorrow: tomorrowEt } = etToday();
   const scored = envs.filter((e) => e.total !== null)
     .sort((a, b) => (a.commence || "9999").localeCompare(b.commence || "9999")); // soonest kickoff first
 
@@ -277,20 +280,14 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
             <span className="hb-bar__chev" aria-hidden="true">▾</span>
           </summary>
           <div className="hb-body">
-            <section className="grid">
-              {preds.slice(0, 6).map((p) => <PredictionCard key={p.eventId} p={p} slipPick={slipPickByEvent.get(p.eventId)} />)}
-            </section>
-            {preds.length > 6 && (
-              <details className="hb-more">
-                <summary className="hb-more__sum">
-                  <span className="hb-more__chev" aria-hidden="true">▸</span>
-                  See more ({preds.length - 6} more games)
-                </summary>
+            {groupByGameDay(preds, (p) => p.commence, todayEt, tomorrowEt).map((grp) => (
+              <div key={grp.key}>
+                <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
                 <section className="grid">
-                  {preds.slice(6).map((p) => <PredictionCard key={p.eventId} p={p} slipPick={slipPickByEvent.get(p.eventId)} />)}
+                  {grp.items.map((p) => <PredictionCard key={p.eventId} p={p} slipPick={slipPickByEvent.get(p.eventId)} />)}
                 </section>
-              </details>
-            )}
+              </div>
+            ))}
           </div>
         </details>
       )}

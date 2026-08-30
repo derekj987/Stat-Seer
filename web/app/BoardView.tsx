@@ -6,6 +6,8 @@ import { ShopSubnav, Brand, ValueFinderDrawer, FlowSteps, WeekBadge } from "./Na
 import { WeekNav } from "./WeekNav";
 import { useSlip } from "@/lib/slip";
 import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
+import { groupByGameDay } from "@/lib/gameDays";
+import { DayHeader } from "./DayHeader";
 
 const WX_BY_EVENT = new Map(GAME_WEATHER.map((w) => [w.eventId, w]));
 
@@ -142,8 +144,8 @@ function GameCard({
 }
 
 export default function BoardView({
-  board, min, max, week, season, snapshot,
-}: { board: Game[]; min: number; max: number; week: number; season: number; snapshot: string }) {
+  board, min, max, week, season, snapshot, today, tomorrow,
+}: { board: Game[]; min: number; max: number; week: number; season: number; snapshot: string; today: string; tomorrow: string }) {
   const { has, toggle: slipToggle } = useSlip();
   const toggle = useCallback((p: Pick) => slipToggle({
     id: p.id, kind: "line",
@@ -194,20 +196,14 @@ export default function BoardView({
               </div>
             </details>
 
-            <section className="grid">
-              {board.slice(0, 6).map((g) => <GameCard key={g.eventId} g={g} has={has} onToggle={toggle} />)}
-            </section>
-            {board.length > 6 && (
-              <details className="hb-more">
-                <summary className="hb-more__sum">
-                  <span className="hb-more__chev" aria-hidden="true">▸</span>
-                  See more ({board.length - 6} more games)
-                </summary>
+            {groupByGameDay(board, (g) => g.commence, today, tomorrow).map((grp) => (
+              <div key={grp.key}>
+                <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
                 <section className="grid">
-                  {board.slice(6).map((g) => <GameCard key={g.eventId} g={g} has={has} onToggle={toggle} />)}
+                  {grp.items.map((g) => <GameCard key={g.eventId} g={g} has={has} onToggle={toggle} />)}
                 </section>
-              </details>
-            )}
+              </div>
+            ))}
 
             <footer className="foot">
               <p>

@@ -13,6 +13,8 @@ import PropAdd, { type PricedSide } from "./PropAdd";
 import { playerSlot, normName } from "@/lib/playerSlot";
 import { weekProps } from "@/lib/props";
 import { cfbWeekProps } from "@/lib/cfbProps";
+import { etToday, groupByGameDay } from "@/lib/gameDays";
+import { DayHeader } from "./DayHeader";
 
 export interface PlayerCat {
   key: string;
@@ -67,6 +69,7 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
   }
   // Lead with the soonest game so today's matchups are up top (games with no kickoff sort last).
   games.sort((a, b) => (gameKick[a] ?? "9999").localeCompare(gameKick[b] ?? "9999"));
+  const { today: todayEt, tomorrow: tomorrowEt } = etToday();
   const LEAD = 4;   // rows shown before "see more"
   // Per-row unit — the passing category mixes markets (yards + TDs); anytime-TD is a %.
   const unitFor = (market: string) =>
@@ -128,13 +131,16 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
           </div>
         ) : (
           <>
-            {games.map((g, gi) => (
+            {groupByGameDay(games, (g) => gameKick[g] ?? null, todayEt, tomorrowEt).map((grp) => (
+              <div key={grp.key}>
+                <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
+                {grp.items.map((g) => (
               <details className="pmgame" key={g}>
                 <summary className="pmgame__h">{g}<span className="pmgame__chev" aria-hidden="true">▾</span></summary>
                 <div className="pmgame__body">
                 <ScrollHint />
                 {sectionsFor(g).map((sec, si) => {
-                  const moreId = `pm-${base}-${active.key}-${gi}-${si}`;
+                  const moreId = `pm-${base}-${active.key}-${g.replace(/[^a-z0-9]/gi, "")}-${si}`;
                   // "See more" hides by whole player: a player's grouped rows fold together, so
                   // a QB's yards + TD lines never split across the fold. LEAD counts players.
                   const grpIndex: Record<string, number> = {};
@@ -225,6 +231,8 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                 })}
                 </div>
               </details>
+                ))}
+              </div>
             ))}
           </>
         )}

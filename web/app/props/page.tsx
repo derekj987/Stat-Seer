@@ -4,6 +4,7 @@ import { playerSlot } from "@/lib/playerSlot";
 import { ShopSubnav, Brand, FlowSteps, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
 import PropsView from "./PropsView";
+import { etToday } from "@/lib/gameDays";
 
 export const revalidate = 120;
 const SEASON = 2026;
@@ -87,7 +88,7 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
               props closer to kickoff — this fills in on its own during game week.
             </p>
           ) : (
-            <PropsView games={games} />
+            <PropsView games={games} {...etToday()} />
           )}
         </>
       )}

@@ -1,6 +1,7 @@
 import { fetchWeek, weekRange, buildBoard } from "@/lib/board";
 import { Brand, ShopSubnav } from "../Nav";
 import BoardView from "../BoardView";
+import { etToday } from "@/lib/gameDays";
 
 export const revalidate = 120; // ISR: refresh Supabase reads every 2 min
 
@@ -45,6 +46,7 @@ export default async function Page({ searchParams }: PageProps<"/lines">) {
     : range.min;
 
   const board = buildBoard(await fetchWeek(week, SEASON));
+  const { today, tomorrow } = etToday();
   return (
     <BoardView
       board={board}
@@ -53,6 +55,8 @@ export default async function Page({ searchParams }: PageProps<"/lines">) {
       week={week}
       season={SEASON}
       snapshot={board[0]?.snapshot ?? ""}
+      today={today}
+      tomorrow={tomorrow}
     />
   );
 }
