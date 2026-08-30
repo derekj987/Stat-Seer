@@ -1,4 +1,4 @@
-import { Brand, FlowSteps, ModelSubnav, MoreTable, WeekBadge } from "../../Nav";
+import { Brand, FlowSteps, ModelSubnav, WeekBadge } from "../../Nav";
 import Tip from "@/app/Tip";
 import { NCAAF_MODEL, type NcaafCardGame } from "../model-data";
 import { StatCard } from "../StatCard";
@@ -7,6 +7,8 @@ import { NcaafCardHead, NcaafGameCell } from "../CardCells";
 import { fetchCfbScores, scoreFor, type CfbScores } from "@/lib/cfbScores";
 import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
 import { marketGap } from "../lean";
+import { etToday, groupByGameDay } from "@/lib/gameDays";
+import { DayHeader } from "../../DayHeader";
 
 // College Football — The Model. Mirrors the NFL Model page: the full model-vs-market
 // table leads, the honest track record (predicts as well as Elo, doesn't beat the spread)
@@ -18,43 +20,13 @@ export const metadata = {
 
 const M = NCAAF_MODEL;
 
-// Full-model table is grouped by GAME DAY (Eastern) and labeled Today / Tomorrow / Upcoming /
-// Completed, ordered so TODAY leads, then upcoming days, then finished games — the slate reads the
-// way you'd scan it, not buried under a conference wall.
-const ET_DAY = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" });
-const ET_LABEL = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric" });
-const kickKey = (iso?: string) => iso || "9999";   // games with no kickoff sort last
-
-type DayTone = "today" | "upcoming" | "done" | "tbd";
-interface DayGroup { key: string; tone: DayTone; label: string; games: NcaafCardGame[] }
-
-function groupByDay(games: readonly NcaafCardGame[], todayEt: string, tomorrowEt: string): DayGroup[] {
-  const by = new Map<string, NcaafCardGame[]>();
-  for (const g of games) {
-    const k = g.commence ? ET_DAY.format(new Date(g.commence)) : "TBD";
-    (by.get(k) ?? by.set(k, []).get(k)!).push(g);
-  }
-  for (const gs of by.values()) gs.sort((a, b) => kickKey(a.commence).localeCompare(kickKey(b.commence)));
-  const toneOf = (k: string): DayTone => k === "TBD" ? "tbd" : k === todayEt ? "today" : k > todayEt ? "upcoming" : "done";
-  const labelOf = (k: string, gs: NcaafCardGame[]) =>
-    k === "TBD" ? "Date TBD"
-      : k === todayEt ? "Today"
-        : k === tomorrowEt ? "Tomorrow"
-          : ET_LABEL.format(new Date(gs[0].commence!));
-  const rank: Record<DayTone, number> = { today: 0, upcoming: 1, done: 2, tbd: 3 };
-  return [...by.entries()]
-    .map(([key, gs]): DayGroup => ({ key, tone: toneOf(key), label: labelOf(key, gs), games: gs }))
-    // Today first, then upcoming (soonest first), then completed (most-recent first), then TBD.
-    .sort((a, b) => rank[a.tone] - rank[b.tone] || (a.tone === "done" ? b.key.localeCompare(a.key) : a.key.localeCompare(b.key)));
-}
-
-function CardRows({ games, moreFrom, scores }: { games: readonly NcaafCardGame[]; moreFrom?: number; scores?: CfbScores }) {
+function CardRows({ games, scores }: { games: readonly NcaafCardGame[]; scores?: CfbScores }) {
   return (
     <>
-      {games.map((g, i) => {
+      {games.map((g) => {
         const ms = g.marketSpread;
         return (
-          <tr key={`${g.away}-${g.home}`} className={[g.off ? "hb-off" : "", moreFrom !== undefined && i >= moreFrom ? "hb-row--more" : ""].filter(Boolean).join(" ") || undefined}>
+          <tr key={`${g.away}-${g.home}`} className={g.off ? "hb-off" : undefined}>
             <NcaafGameCell g={g} score={scores ? scoreFor(scores, g.away, g.home) : null} />
             <td className="hb-num">{ms ? `${abbrevTeam(ms.fav)} ${ms.num}` : "—"}</td>
             <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
@@ -77,25 +49,26 @@ export default async function Page({ searchParams }: {
   const week = readNcaafWeek((await searchParams).week, c.week);
   // Live/final scores for this week (server-fetched, ~30s ISR) — rendered right in the game cells.
   const scores = await fetchCfbScores(week);
-  // "Today"/"Tomorrow" in Eastern, for the game-day section labels.
-  const nowMs = Date.now();
-  const todayEt = ET_DAY.format(new Date(nowMs));
-  const tomorrowEt = ET_DAY.format(new Date(nowMs + 86_400_000));
-  // Lead with the games where our line-blind read DIVERGES MOST from the market — that's where the
-  // model actually has an independent opinion. On big favorites we defer to the efficient market
-  // (proven: they cover ~50%, we don't beat the spread), so those agree by design; the interesting
-  // reads are the disagreements. Sorted by |our margin − market margin|, biggest first.
+  const { today: todayEt, tomorrow: tomorrowEt } = etToday();
+  // Every panel on this page renders the same day-grouped card tables (Today / Upcoming / Completed).
+  const dayTables = (games: readonly NcaafCardGame[]) =>
+    groupByGameDay(games, (g) => g.commence, todayEt, tomorrowEt).map((grp) => (
+      <div key={grp.key}>
+        <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
+        <div className="hb-formwrap">
+          <table className="hb-form hb-form--mkt"><NcaafCardHead /><tbody><CardRows games={grp.items} scores={scores} /></tbody></table>
+        </div>
+      </div>
+    ));
+  // Where We Differ leads with the games our line-blind read is furthest from the market on, but
+  // (like every panel) they're presented grouped by game day. Top 12 divergences.
   const diverged = c.games
     .filter((g) => g.marketSpread)
     .map((g) => ({ g, gap: Math.abs(marketGap(g) ?? 0) }))
     .sort((a, b) => b.gap - a.gap)
     .map((x) => x.g);
-  const lead = diverged.slice(0, 12);        // the 12 biggest divergences lead the board
-  const leadRest = lead.slice(6);            // beyond the first 6 (see-more)
-  // The marquee AP Top 25 board — ranked games in kickoff order (the recognizable poll view).
-  const ranked = c.games.filter((g) => g.apAway || g.apHome)
-    .sort((a, b) => kickKey(a.commence).localeCompare(kickKey(b.commence)));
-  const rankedRest = ranked.slice(3);        // ranked games beyond the first 3 (see-more)
+  const lead = diverged.slice(0, 12);
+  const ranked = c.games.filter((g) => g.apAway || g.apHome);   // AP Top 25 matchups
 
   return (
     <main className="wrap">
@@ -148,13 +121,11 @@ export default async function Page({ searchParams }: {
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">The Model — AP Top 25 Matchups</span>
           <Tip text={<>Every <b>ranked game</b> — one with an <b>AP Top 25</b> team (its poll rank shown beside it) — on the Week {c.week} board, in kickoff order, with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Projection</b>, our own line-blind spread &amp; total. A ◆ marks an <b>off-consensus</b> game. On big favorites we defer to the efficient market, so these mostly agree — the games where our read genuinely differs are in <b>Where We Differ Most</b> below. Context you can check, <b>not a pick</b> (our rating ties Elo but doesn&apos;t beat the spread).</>} />
-          <span className="hb-bar__hint">AP Top 25 games, earliest kickoff first · Week {c.week}</span>
+          <span className="hb-bar__hint">AP Top 25 games, by game day · Week {c.week}</span>
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
-          <MoreTable id="ncaaf-ranked-more" head={<NcaafCardHead />} extra={rankedRest.length} noun="ranked games" cls="hb-form--mkt">
-            <CardRows games={ranked} moreFrom={3} scores={scores} />
-          </MoreTable>
+          {dayTables(ranked)}
         </div>
       </details>
 
@@ -163,7 +134,7 @@ export default async function Page({ searchParams }: {
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">The Model — Where We Differ Most</span>
           <Tip text={<>The games where our <b>line-blind number is furthest from the market</b> — a <b>Δ</b> beside our projection shows how many points apart we are. This is where the model has an <b>independent opinion</b>. On big favorites we <b>defer to the market</b> (it&apos;s efficient there — heavy favorites cover about half the time — and our rating doesn&apos;t beat the spread), so those agree by design and don&apos;t lead here. Still <b>context, not a pick</b>: a divergence isn&apos;t a proven edge (we tested — the rating doesn&apos;t beat the closing line). The complete slate is in <b>Full Model — every game</b> below.</>} />
-          <span className="hb-bar__hint">our line-blind read vs the market, biggest gaps first · Week {c.week}</span>
+          <span className="hb-bar__hint">where we differ most, by game day · Week {c.week}</span>
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
@@ -180,9 +151,7 @@ export default async function Page({ searchParams }: {
                 over and the seed washes out by about week 5.</span>
             )}
           </div>
-          <MoreTable id="ncaaf-snap-more" head={<NcaafCardHead />} extra={leadRest.length} noun="more divergences" cls="hb-form--mkt">
-            <CardRows games={lead} moreFrom={6} scores={scores} />
-          </MoreTable>
+          {dayTables(lead)}
         </div>
       </details>
 
@@ -195,17 +164,7 @@ export default async function Page({ searchParams }: {
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
-          {groupByDay(c.games, todayEt, tomorrowEt).map((grp) => (
-            <section className={`ncf-confgrp ncf-confgrp--${grp.tone}`} key={grp.key}>
-              <h3 className="ncf-confgrp__h">
-                {grp.label}
-                {grp.tone === "done" && <span className="ncf-daytag ncf-daytag--done">Completed</span>}
-                <span className="ncf-confgrp__n">{grp.games.length} game{grp.games.length === 1 ? "" : "s"}</span></h3>
-              <div className="hb-formwrap">
-                <table className="hb-form hb-form--mkt"><NcaafCardHead /><tbody><CardRows games={grp.games} scores={scores} /></tbody></table>
-              </div>
-            </section>
-          ))}
+          {dayTables(c.games)}
         </div>
       </details>
 

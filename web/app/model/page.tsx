@@ -54,19 +54,22 @@ function bottomLine(e: Env): { spread: string; total: string | null } | null {
   return { spread, total };
 }
 
-function ImpTable({ rows, refs, moreFrom }: { rows: Env[]; refs: Awaited<ReturnType<typeof weekRefs>>; moreFrom?: number }) {
+function ImpTable({ rows, refs, today, tomorrow }: { rows: Env[]; refs: Awaited<ReturnType<typeof weekRefs>>; today: string; tomorrow: string }) {
   return (
     <div className="imptable" role="table" aria-label="Lines and the model's read">
-      <div className="improw improw--head" role="row">
-        <span>game</span><span>spread</span>
-        <span className="improw__modh">model spread</span><span>total</span>
-        <span className="improw__modh">model total</span>
-      </div>
-      {rows.map((e, i) => {
+      {groupByGameDay(rows, (e) => e.commence, today, tomorrow).map((grp) => (
+        <div key={grp.key}>
+          <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
+          <div className="improw improw--head" role="row">
+            <span>game</span><span>spread</span>
+            <span className="improw__modh">model spread</span><span>total</span>
+            <span className="improw__modh">model total</span>
+          </div>
+          {grp.items.map((e) => {
         const bl = bottomLine(e);
         const crew = refs.get(e.home);
         return (
-          <div className={moreFrom !== undefined && i >= moreFrom ? "impgame hb-row--more" : "impgame"} key={e.eventId}>
+          <div className="impgame" key={e.eventId}>
             <div className="improw" role="row">
               <span className="improw__g">
                 {e.away}<span className="at">@</span>{e.home}
@@ -100,6 +103,8 @@ function ImpTable({ rows, refs, moreFrom }: { rows: Env[]; refs: Awaited<ReturnT
           </div>
         );
       })}
+        </div>
+      ))}
     </div>
   );
 }
@@ -313,7 +318,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
             <p className="imp-scrollhint" aria-hidden="true">
               Swipe for totals <span className="imp-scrollhint__a">→</span>
             </p>
-            <ImpTable rows={scored} refs={refs} moreFrom={6} />
+            <ImpTable rows={scored} refs={refs} today={todayEt} tomorrow={tomorrowEt} />
             {scored.length > 6 && (
               <label htmlFor="imp-more" className="hb-moretbl__sum">
                 <span className="hb-more__chev" aria-hidden="true">▸</span>
