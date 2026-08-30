@@ -4,6 +4,7 @@ import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
 import { NCAAF_MODEL, type NcaafConf, type NcaafCardGame } from "../model-data";
 import { StatCard } from "../StatCard";
 import NcaafConsiderationsView from "./NcaafConsiderationsView";
+import { etToday } from "@/lib/gameDays";
 
 // College Football — Context · Special Considerations. Mirrors the NFL page: one card per
 // game with the situational context around it, plus the durable measured backdrop (home
@@ -56,7 +57,7 @@ export default async function Page({ searchParams }: {
       <NcaafOffWeek current={c.week} week={week} />
 
       <section className="ncf-sec">
-        <NcaafConsiderationsView games={games} ratings={ratings} hfa={cx.hfa} slate={slate} />
+        <NcaafConsiderationsView games={games} ratings={ratings} hfa={cx.hfa} slate={slate} {...etToday()} />
       </section>
 
       <div className="ncf-cards">

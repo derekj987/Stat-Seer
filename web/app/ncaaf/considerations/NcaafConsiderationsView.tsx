@@ -10,6 +10,8 @@ import { CFB_GAME_WEATHER, type CfbGameWeather } from "@/lib/cfbWeatherData";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
 import { kickET } from "../CardCells";
 import type { NcaafCardGame } from "../model-data";
+import { groupByGameDay } from "@/lib/gameDays";
+import { DayHeader } from "../../DayHeader";
 
 type Rating = { rank: number; rating: number };
 const WX = new Map(CFB_GAME_WEATHER.map((w) => [w.game, w]));
@@ -83,8 +85,8 @@ function ConsiderationCard({ g, hfa, ratings }: { g: NcaafCardGame; hfa: number;
 
 const inConf = (g: NcaafCardGame, conf: string) => NCAAF_CONF[g.home] === conf || NCAAF_CONF[g.away] === conf;
 
-export default function NcaafConsiderationsView({ games, ratings, hfa, slate }: {
-  games: NcaafCardGame[]; ratings: Record<string, Rating>; hfa: number; slate: string[];
+export default function NcaafConsiderationsView({ games, ratings, hfa, slate, today, tomorrow }: {
+  games: NcaafCardGame[]; ratings: Record<string, Rating>; hfa: number; slate: string[]; today: string; tomorrow: string;
 }) {
   const [conf, setConf] = useState("");
   const [team, setTeam] = useState("");
@@ -137,9 +139,16 @@ export default function NcaafConsiderationsView({ games, ratings, hfa, slate }: 
       {shown.length === 0 ? (
         <p className="foot">No games match this filter — try another conference, or clear it.</p>
       ) : (
-        <section className="cxgrid" aria-label="Game considerations">
-          {shown.map((g) => <ConsiderationCard key={`${g.away}-${g.home}`} g={g} hfa={hfa} ratings={ratings} />)}
-        </section>
+        <div aria-label="Game considerations">
+          {groupByGameDay(shown, (g) => g.commence, today, tomorrow).map((grp) => (
+            <div key={grp.key}>
+              <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
+              <section className="cxgrid">
+                {grp.items.map((g) => <ConsiderationCard key={`${g.away}-${g.home}`} g={g} hfa={hfa} ratings={ratings} />)}
+              </section>
+            </div>
+          ))}
+        </div>
       )}
     </>
   );

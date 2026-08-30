@@ -21,12 +21,15 @@ export default function ConsiderationsFilter({ gameTeams, gridId = "cxgames" }: 
     })));
   }, [conf]);
 
-  // Hide the cards that don't match. data-confs/data-teams are space-separated (a game has two
-  // teams, possibly two conferences), so match with the ~= word selector.
+  // Hide the cards that don't match, and any day-section that ends up with no matching card.
+  // Cards live under per-day wrappers (#cxgames > div > section.cxgrid > article), so use a
+  // descendant selector for the cards + :has() to drop an empty day group. data-confs/data-teams
+  // are space-separated (a game has two teams, possibly two conferences) — match with ~=.
   const rule = useMemo(() => {
-    if (team) return `#${gridId} > article:not([data-teams~="${team}"]){display:none!important}`;
-    if (conf) return `#${gridId} > article:not([data-confs~="${conf}"]){display:none!important}`;
-    return "";
+    const attr = team ? `data-teams~="${team}"` : conf ? `data-confs~="${conf}"` : "";
+    if (!attr) return "";
+    return `#${gridId} article:not([${attr}]){display:none!important}`
+      + `#${gridId} > div:not(:has(article[${attr}])){display:none!important}`;
   }, [conf, team, gridId]);
 
   return (
