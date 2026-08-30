@@ -18,26 +18,34 @@ export const metadata = {
 
 const M = NCAAF_MODEL;
 
-// Full-model table is grouped by GAME DAY (Eastern) in chronological order, so today's games lead
-// and the slate reads the way it's played out rather than burying today under a conference wall.
+// Full-model table is grouped by GAME DAY (Eastern) and labeled Today / Tomorrow / Upcoming /
+// Completed, ordered so TODAY leads, then upcoming days, then finished games — the slate reads the
+// way you'd scan it, not buried under a conference wall.
 const ET_DAY = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" });
 const ET_LABEL = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric" });
 const kickKey = (iso?: string) => iso || "9999";   // games with no kickoff sort last
 
-function groupByDay(games: readonly NcaafCardGame[]): { key: string; label: string; games: NcaafCardGame[] }[] {
+type DayTone = "today" | "upcoming" | "done" | "tbd";
+interface DayGroup { key: string; tone: DayTone; label: string; games: NcaafCardGame[] }
+
+function groupByDay(games: readonly NcaafCardGame[], todayEt: string, tomorrowEt: string): DayGroup[] {
   const by = new Map<string, NcaafCardGame[]>();
   for (const g of games) {
     const k = g.commence ? ET_DAY.format(new Date(g.commence)) : "TBD";
     (by.get(k) ?? by.set(k, []).get(k)!).push(g);
   }
   for (const gs of by.values()) gs.sort((a, b) => kickKey(a.commence).localeCompare(kickKey(b.commence)));
+  const toneOf = (k: string): DayTone => k === "TBD" ? "tbd" : k === todayEt ? "today" : k > todayEt ? "upcoming" : "done";
+  const labelOf = (k: string, gs: NcaafCardGame[]) =>
+    k === "TBD" ? "Date TBD"
+      : k === todayEt ? "Today"
+        : k === tomorrowEt ? "Tomorrow"
+          : ET_LABEL.format(new Date(gs[0].commence!));
+  const rank: Record<DayTone, number> = { today: 0, upcoming: 1, done: 2, tbd: 3 };
   return [...by.entries()]
-    .sort((a, b) => a[0].localeCompare(b[0]))   // ISO day keys sort chronologically; "TBD" sorts last
-    .map(([key, gs]) => ({
-      key,
-      label: key === "TBD" ? "Date TBD" : ET_LABEL.format(new Date(gs[0].commence!)),
-      games: gs,
-    }));
+    .map(([key, gs]): DayGroup => ({ key, tone: toneOf(key), label: labelOf(key, gs), games: gs }))
+    // Today first, then upcoming (soonest first), then completed (most-recent first), then TBD.
+    .sort((a, b) => rank[a.tone] - rank[b.tone] || (a.tone === "done" ? b.key.localeCompare(a.key) : a.key.localeCompare(b.key)));
 }
 
 function CardRows({ games, moreFrom, scores }: { games: readonly NcaafCardGame[]; moreFrom?: number; scores?: CfbScores }) {
@@ -69,6 +77,10 @@ export default async function Page({ searchParams }: {
   const week = readNcaafWeek((await searchParams).week, c.week);
   // Live/final scores for this week (server-fetched, ~30s ISR) — rendered right in the game cells.
   const scores = await fetchCfbScores(week);
+  // "Today"/"Tomorrow" in Eastern, for the game-day section labels.
+  const nowMs = Date.now();
+  const todayEt = ET_DAY.format(new Date(nowMs));
+  const tomorrowEt = ET_DAY.format(new Date(nowMs + 86_400_000));
   // Lead with the games where our line-blind read DIVERGES MOST from the market — that's where the
   // model actually has an independent opinion. On big favorites we defer to the efficient market
   // (proven: they cover ~50%, we don't beat the spread), so those agree by design; the interesting
@@ -179,13 +191,16 @@ export default async function Page({ searchParams }: {
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">Full Model — every game</span>
           <span className="hb-bar__count">{c.games.length} games</span>
-          <span className="hb-bar__hint">the complete slate, by game day — today first</span>
+          <span className="hb-bar__hint">today&apos;s games first, then upcoming, then completed</span>
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
-          {groupByDay(c.games).map((grp) => (
-            <section className="ncf-confgrp" key={grp.key}>
-              <h3 className="ncf-confgrp__h">{grp.label}<span className="ncf-confgrp__n">{grp.games.length} game{grp.games.length === 1 ? "" : "s"}</span></h3>
+          {groupByDay(c.games, todayEt, tomorrowEt).map((grp) => (
+            <section className={`ncf-confgrp ncf-confgrp--${grp.tone}`} key={grp.key}>
+              <h3 className="ncf-confgrp__h">
+                {grp.label}
+                {grp.tone === "done" && <span className="ncf-daytag ncf-daytag--done">Completed</span>}
+                <span className="ncf-confgrp__n">{grp.games.length} game{grp.games.length === 1 ? "" : "s"}</span></h3>
               <div className="hb-formwrap">
                 <table className="hb-form hb-form--mkt"><NcaafCardHead /><tbody><CardRows games={grp.games} scores={scores} /></tbody></table>
               </div>
