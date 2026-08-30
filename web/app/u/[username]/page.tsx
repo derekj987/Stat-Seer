@@ -13,9 +13,7 @@ import FriendButton from "./FriendButton";
 import StoriesRail from "./StoriesRail";
 import SuggestedFriends from "./SuggestedFriends";
 import MessageButton from "./MessageButton";
-import AccentPicker from "./AccentPicker";
 import ProfileTabs from "./ProfileTabs";
-import ShareButton from "./ShareButton";
 import RichText from "./RichText";
 import FavoriteTeams from "./FavoriteTeams";
 import PostReactions from "./PostReactions";
@@ -90,7 +88,6 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
           <h1 className={profile.role === "founder" ? "phead__name founder" : "phead__name"}>
             {profile.username}
           </h1>
-          <span className="phead2__handle">@{profile.username}</span>
           {/* Title tag under the name: "The Creator" (or any custom title) replaces the
               universal "Beta Tester" badge for members who have one. */}
           <div className="phead2__tags"><span className="beta-tag">{profile.title ?? "Beta Tester"}</span></div>
@@ -105,16 +102,49 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             <span className="pstat"><b>{stats.wallPosts}</b> posts</span>
           </div>
         </div>
-        <div className="phead2__actions">
-          {!isOwner && me && <FollowButton profileId={profile.id} viewerId={me.id} initialFollowing={follow.viewerFollows} />}
-          {!isOwner && me && <FriendButton profileId={profile.id} />}
-          {!isOwner && me && <MessageButton userId={profile.id} username={profile.username} />}
-          <ShareButton username={profile.username} />
-          {isOwner && <AccentPicker userId={profile.id} current={profile.accentColor} />}
-        </div>
+        {!isOwner && me && (
+          <div className="phead2__actions">
+            <FollowButton profileId={profile.id} viewerId={me.id} initialFollowing={follow.viewerFollows} />
+            <FriendButton profileId={profile.id} />
+            <MessageButton userId={profile.id} username={profile.username} />
+          </div>
+        )}
       </header>
 
       <StoriesRail stories={stories} isOwner={isOwner} />
+
+      {/* ---- Friends circle: a quick avatar strip right under the stories ---- */}
+      {friends.length > 0 && (
+        <section className="pfrail" aria-label="Friends">
+          <div className="pfrail__hd">
+            <h2 className="pfrail__h">Friends</h2>
+            <span className="pfrail__n">{stats.friends}</span>
+          </div>
+          <ul className="pfrail__list">
+            {friends.map((f) => (
+              <li key={f.id}>
+                <a className="pfrail__item" href={`/u/${encodeURIComponent(f.username)}`}>
+                  <span className="pfrail__avwrap">
+                    <span className="pfrail__av">
+                      {f.avatarUrl
+                        ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={f.avatarUrl} alt="" />
+                        : f.username.charAt(0).toUpperCase()}
+                    </span>
+                    {f.online && <span className="pfrail__dot" title="Online" />}
+                  </span>
+                  <span className={f.role === "founder" ? "pfrail__name founder" : "pfrail__name"}>{f.username}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {isOwner && (
+        <section className="pcard pfrail__suggest">
+          <h2 className="pcard__h">People you may know</h2>
+          <SuggestedFriends />
+        </section>
+      )}
 
       {/* ---- Tabs: modern content organization instead of one long wall ---- */}
       <ProfileTabs
@@ -174,43 +204,6 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                   <EditBio userId={profile.id} bio={profile.bio} canEdit={!!isOwner} />
                 </section>
               </div>
-            ),
-          },
-          {
-            key: "friends", label: "Friends", count: stats.friends,
-            node: (
-              <>
-                <section className="pcard">
-                  <h2 className="pcard__h">Friends {friends.length > 0 && <span className="pcard__count">{friends.length}</span>}</h2>
-                  {friends.length === 0 ? (
-                    <p className="pcard__empty">No friends yet.</p>
-                  ) : (
-                    <ul className="pfriends pfriends--grid">
-                      {friends.map((f) => (
-                        <li key={f.id}>
-                          <a className="pfriend" href={`/u/${f.username}`}>
-                            <span className="pfriend__avwrap">
-                              <span className="pfriend__av">
-                                {f.avatarUrl
-                                  ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={f.avatarUrl} alt="" />
-                                  : f.username.charAt(0).toUpperCase()}
-                              </span>
-                              {f.online && <span className="pfriend__dot" title="Online" />}
-                            </span>
-                            <span className={f.role === "founder" ? "pfriend__name founder" : "pfriend__name"}>{f.username}</span>
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </section>
-                {isOwner && (
-                  <section className="pcard">
-                    <h2 className="pcard__h">People you may know</h2>
-                    <SuggestedFriends />
-                  </section>
-                )}
-              </>
             ),
           },
           {

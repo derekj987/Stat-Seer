@@ -1784,6 +1784,25 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .pfriend__av img{width:100%;height:100%;object-fit:cover}
 .pfriend__dot{position:absolute;right:-1px;bottom:-1px;width:12px;height:12px;border-radius:50%;background:#22c55e;border:2px solid var(--surface)}
 .pfriend__name{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Friends circle strip — a horizontal avatar rail sitting right under the stories section. */
+.pfrail{margin:0 0 14px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.pfrail__hd{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+.pfrail__h{font-size:14px;font-weight:800;margin:0}
+.pfrail__n{font-size:12px;color:var(--muted);font-weight:700}
+.pfrail__list{list-style:none;margin:0;padding:0 0 2px;display:flex;gap:14px;overflow-x:auto}
+.pfrail__item{display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;width:64px}
+.pfrail__avwrap{position:relative}
+.pfrail__av{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;overflow:hidden;
+  background:var(--surface-2);border:2px solid color-mix(in srgb,var(--paccent,var(--accent)) 60%,var(--line));
+  font-weight:800;color:var(--accent);font-size:20px}
+.pfrail__av img{width:100%;height:100%;object-fit:cover}
+.pfrail__dot{position:absolute;right:2px;bottom:2px;width:11px;height:11px;border-radius:50%;
+  background:#22c55e;border:2px solid var(--surface)}
+.pfrail__name{font-size:11.5px;color:var(--ink);max-width:64px;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;text-align:center}
+.pfrail__name.founder{color:var(--gold)}
+.pfrail__suggest{margin-bottom:14px}
 /* Suggested */
 .psug{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
 .psug__row{display:flex;align-items:center;gap:9px}
