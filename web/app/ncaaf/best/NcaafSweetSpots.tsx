@@ -7,6 +7,8 @@
 import { useSlip, type SlipItem } from "@/lib/slip";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
 import type { NcaafCardGame, NcaafKeyNum } from "../model-data";
+import { groupByGameDay } from "@/lib/gameDays";
+import { DayHeader } from "../../DayHeader";
 
 const KEYS = [3, 7, 10, 14];
 const nearKey = (n: number): number | null => {
@@ -27,8 +29,8 @@ function Chip({ item, has, toggle }: { item: SlipItem; has: (id: string) => bool
   );
 }
 
-export default function NcaafSweetSpots({ games, keyNums, week }:
-  { games: readonly NcaafCardGame[]; keyNums: readonly NcaafKeyNum[]; week: number }) {
+export default function NcaafSweetSpots({ games, keyNums, week, today, tomorrow }:
+  { games: readonly NcaafCardGame[]; keyNums: readonly NcaafKeyNum[]; week: number; today: string; tomorrow: string }) {
   const { has, toggle } = useSlip();
   const pctOf = (k: number) => keyNums.find((x) => x.margin === k)?.pct ?? 0;
   const plays = games
@@ -43,8 +45,11 @@ export default function NcaafSweetSpots({ games, keyNums, week }:
       <h2 className="ncf-h">Sitting on a key number — Week {week}
         <span className="ncf-h__note">{plays.length} line{plays.length === 1 ? "" : "s"} on 3, 7, 10 or 14</span>
       </h2>
-      <div className="ncss-grid">
-        {plays.map(({ g, key }) => {
+      {groupByGameDay(plays, (pl) => pl.g.commence, today, tomorrow).map((grp) => (
+        <div key={grp.key}>
+          <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} noun="line" />
+          <div className="ncss-grid">
+        {grp.items.map(({ g, key }) => {
           const ms = g.marketSpread!;
           const dog = ms.fav === g.home ? g.away : g.home;
           const mk = `${abbrevTeam(g.away)} @ ${abbrevTeam(g.home)}`;
@@ -69,7 +74,9 @@ export default function NcaafSweetSpots({ games, keyNums, week }:
             </article>
           );
         })}
-      </div>
+          </div>
+        </div>
+      ))}
       <p className="ncf-note">Consensus lines at −110 — tap a side to add it. Key-number value from {" "}
         {keyNums.length} measured margins below.</p>
     </section>

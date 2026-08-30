@@ -3,6 +3,7 @@ import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
 import { NCAAF_MODEL, type NcaafKeyNum } from "../model-data";
 import { StatCard } from "../StatCard";
 import NcaafSweetSpots from "./NcaafSweetSpots";
+import { etToday } from "@/lib/gameDays";
 
 // College Football — Value Finder · Sweet Spots. Key numbers: which final margins
 // actually happen, so a half-point across one is worth buying. Real, from 5 seasons.
@@ -35,7 +36,7 @@ export default async function Page({ searchParams }: {
       <NcaafWeekNav base="/ncaaf/best" week={week} />
       <NcaafOffWeek current={M.card.week} week={week} />
 
-      <NcaafSweetSpots games={M.card.games} keyNums={v.keyNumbers} week={M.card.week} />
+      <NcaafSweetSpots games={M.card.games} keyNums={v.keyNumbers} week={M.card.week} {...etToday()} />
 
       <section className="explainer">
         <p>

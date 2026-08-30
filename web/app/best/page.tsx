@@ -3,6 +3,8 @@ import { fetchBets, fetchBestProps, fmtOdds, type KeyPlay, type PropPlay } from 
 import { ShopSubnav, Brand, FlowSteps, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
 import SavableRow from "./SavableRow";
+import { etToday, groupByGameDay } from "@/lib/gameDays";
+import { DayHeader } from "../DayHeader";
 
 export const revalidate = 120;
 const SEASON = 2026;
@@ -69,6 +71,7 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
     fetchBestProps(week, SEASON, TOP_N).catch(() => [] as PropPlay[]),
   ]);
   const topPrices = plays.filter((p) => p.edge > 0.5).slice(0, TOP_N);
+  const { today, tomorrow } = etToday();
 
   return (
     <main className="wrap">
@@ -110,9 +113,12 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
                 on a line — the biggest, cheapest edge in the app. Each card shows the number and exactly what
                 the half-point is worth.
               </p>
-              <div className="playgrid">
-                {keys.map((k) => <KeyCard key={k.eventId} k={k} />)}
-              </div>
+              {groupByGameDay(keys, (k) => k.commence, today, tomorrow).map((grp) => (
+                <div key={grp.key}>
+                  <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} noun="play" />
+                  <div className="playgrid">{grp.items.map((k) => <KeyCard key={k.eventId} k={k} />)}</div>
+                </div>
+              ))}
             </section>
           )}
 
@@ -129,16 +135,21 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
               wager everyone else makes at a worse number.
             </p>
             <div className="pricetable" role="table" aria-label="Best prices">
-              <div className="pricerow pricerow--head" role="row">
-                <span>bet</span><span>price</span><span>book</span><span>edge</span><span aria-hidden="true"></span>
-              </div>
-              {topPrices.map((p) => (
-                <SavableRow
-                  key={`${p.eventId}:${p.market}:${p.label}`}
-                  item={{ id: `best-${p.eventId}:${p.market}:${p.label}`, kind: "line",
-                    title: `${p.market} ${p.label}`, detail: p.game, price: p.price, books: p.books }}
-                  bet={p.label} sub={`${p.market} · ${p.game}`} price={fmtOdds(p.price)} books={p.books} edge={p.edge}
-                />
+              {groupByGameDay(topPrices, (p) => p.commence, today, tomorrow).map((grp) => (
+                <div key={grp.key}>
+                  <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} noun="play" />
+                  <div className="pricerow pricerow--head" role="row">
+                    <span>bet</span><span>price</span><span>book</span><span>edge</span><span aria-hidden="true"></span>
+                  </div>
+                  {grp.items.map((p) => (
+                    <SavableRow
+                      key={`${p.eventId}:${p.market}:${p.label}`}
+                      item={{ id: `best-${p.eventId}:${p.market}:${p.label}`, kind: "line",
+                        title: `${p.market} ${p.label}`, detail: p.game, price: p.price, books: p.books }}
+                      bet={p.label} sub={`${p.market} · ${p.game}`} price={fmtOdds(p.price)} books={p.books} edge={p.edge}
+                    />
+                  ))}
+                </div>
               ))}
             </div>
           </section>
@@ -151,16 +162,21 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
                 number. Shopping edge is the de-vigged gap vs. the other books.
               </p>
               <div className="pricetable" role="table" aria-label="Best props">
-                <div className="pricerow pricerow--head" role="row">
-                  <span>prop</span><span>price</span><span>book</span><span>edge</span><span aria-hidden="true"></span>
-                </div>
-                {propPlays.map((p) => (
-                  <SavableRow
-                    key={`${p.eventId}:${p.market}:${p.player}:${p.label}`}
-                    item={{ id: `bestprop-${p.eventId}:${p.market}:${p.player}:${p.label}`, kind: "prop",
-                      title: `${p.player} ${p.label}`, detail: `${p.market} · ${p.game}`, price: p.price, books: p.books }}
-                    bet={`${p.player} · ${p.label}`} sub={`${p.market} · ${p.game}`} price={fmtOdds(p.price)} books={p.books} edge={p.edge}
-                  />
+                {groupByGameDay(propPlays, (p) => p.commence, today, tomorrow).map((grp) => (
+                  <div key={grp.key}>
+                    <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} noun="prop" />
+                    <div className="pricerow pricerow--head" role="row">
+                      <span>prop</span><span>price</span><span>book</span><span>edge</span><span aria-hidden="true"></span>
+                    </div>
+                    {grp.items.map((p) => (
+                      <SavableRow
+                        key={`${p.eventId}:${p.market}:${p.player}:${p.label}`}
+                        item={{ id: `bestprop-${p.eventId}:${p.market}:${p.player}:${p.label}`, kind: "prop",
+                          title: `${p.player} ${p.label}`, detail: `${p.market} · ${p.game}`, price: p.price, books: p.books }}
+                        bet={`${p.player} · ${p.label}`} sub={`${p.market} · ${p.game}`} price={fmtOdds(p.price)} books={p.books} edge={p.edge}
+                      />
+                    ))}
+                  </div>
                 ))}
               </div>
             </section>
