@@ -1803,6 +1803,33 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
   white-space:nowrap;text-align:center}
 .pfrail__name.founder{color:var(--gold)}
 .pfrail__suggest{margin-bottom:14px}
+
+/* Edit-profile button + modal (consolidates avatar/cover/bio/teams editing). */
+.pbtn--edit{font-weight:700}
+.epm{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.55);display:flex;
+  align-items:flex-start;justify-content:center;padding:5vh 16px;overflow-y:auto;animation:hlb-in .18s ease}
+.epm__panel{width:100%;max-width:560px;background:var(--surface);border:1px solid var(--line);
+  border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.35);display:flex;flex-direction:column;max-height:90vh}
+.epm__hd{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+.epm__title{font-size:17px;font-weight:800;margin:0}
+.epm__x{width:32px;height:32px;border:0;border-radius:50%;background:var(--surface-2);color:var(--ink);
+  font-size:20px;line-height:1;cursor:pointer}
+.epm__x:hover{background:color-mix(in srgb,var(--accent) 20%,var(--surface-2))}
+.epm__body{padding:16px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:18px}
+.epm__sec{display:flex;flex-direction:column;gap:8px}
+.epm__sec--row{flex-direction:row;align-items:center;gap:14px}
+.epm__label{font-size:12.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.epm__sub{color:var(--muted);font-weight:700;text-transform:none;letter-spacing:0}
+.epm__count{align-self:flex-end;font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+.epm__cover{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:3/1;background:var(--surface-2)}
+.epm__cover img{width:100%;height:100%;object-fit:cover;display:block}
+.epm__cover-grad{width:100%;height:100%;background:linear-gradient(120deg,var(--paccent,var(--accent)),var(--gold))}
+.epm__cover-btn{position:absolute;right:10px;bottom:10px}
+.epm__avatar{flex:0 0 auto;width:66px;height:66px;border-radius:50%;overflow:hidden;background:var(--surface-2);
+  border:2px solid var(--line);display:grid;place-items:center;font-size:26px;font-weight:800;color:var(--accent)}
+.epm__avatar img{width:100%;height:100%;object-fit:cover}
+.epm__rowmain{display:flex;flex-direction:column;gap:6px}
+.epm__foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 18px;border-top:1px solid var(--line)}
 /* Suggested */
 .psug{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
 .psug__row{display:flex;align-items:center;gap:9px}

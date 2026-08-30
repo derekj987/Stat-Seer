@@ -4,8 +4,7 @@ import FollowButton from "./FollowButton";
 import { createClient } from "@/lib/supabase/server";
 import { AuthorTag } from "../../forum/AuthorTag";
 import EditBio from "./EditBio";
-import AvatarUpload from "./AvatarUpload";
-import CoverUpload from "./CoverUpload";
+import EditProfileModal from "./EditProfileModal";
 import WallForm from "./WallForm";
 import WallActions from "./WallActions";
 import WallSlipCard from "./WallSlipCard";
@@ -91,7 +90,6 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
           ? /* eslint-disable-next-line @next/next/no-img-element */
             <img src={profile.coverUrl} alt="" className="pcover__img" />
           : <div className="pcover__grad" aria-hidden="true" />}
-        {isOwner && <CoverUpload userId={profile.id} />}
       </div>
 
       {/* ---- Identity header ---- */}
@@ -103,7 +101,6 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                 <img src={profile.avatarUrl} alt={profile.username} className="pavatar__img" />
               : <span className="pavatar__ini" aria-hidden="true">{initial}</span>}
           </div>
-          {isOwner && <AvatarUpload userId={profile.id} />}
         </div>
         <div className="phead2__id">
           <h1 className={profile.role === "founder" ? "phead__name founder" : "phead__name"}>
@@ -123,13 +120,18 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             <span className="pstat"><b>{stats.wallPosts}</b> posts</span>
           </div>
         </div>
-        {!isOwner && me && (
+        {isOwner ? (
+          <div className="phead2__actions">
+            <EditProfileModal userId={profile.id} username={profile.username} avatarUrl={profile.avatarUrl}
+              coverUrl={profile.coverUrl} bio={profile.bio} teams={profile.favoriteTeams} />
+          </div>
+        ) : me ? (
           <div className="phead2__actions">
             <FollowButton profileId={profile.id} viewerId={me.id} initialFollowing={follow.viewerFollows} />
             <FriendButton profileId={profile.id} />
             <MessageButton userId={profile.id} username={profile.username} />
           </div>
-        )}
+        ) : null}
       </header>
 
       <StoriesRail stories={stories} isOwner={isOwner} />
@@ -204,11 +206,11 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                 </section>
                 <section className="pcard">
                   <h2 className="pcard__h">🏈 Favorite teams</h2>
-                  <FavoriteTeams userId={profile.id} teams={profile.favoriteTeams} canEdit={!!isOwner} />
+                  <FavoriteTeams userId={profile.id} teams={profile.favoriteTeams} canEdit={false} />
                 </section>
                 <section className="pcard">
                   <h2 className="pcard__h">About</h2>
-                  <EditBio userId={profile.id} bio={profile.bio} canEdit={!!isOwner} />
+                  <EditBio userId={profile.id} bio={profile.bio} canEdit={false} />
                 </section>
               </div>
             ),
