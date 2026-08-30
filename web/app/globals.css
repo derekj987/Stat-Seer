@@ -936,6 +936,15 @@ a.sportstrip__i:hover{color:var(--ink)}
 .authcheck{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:var(--ink);line-height:1.4}
 .authcheck input{margin-top:2px}
 .authbtn{width:100%;margin-top:4px;cursor:pointer}
+/* Google sign-in button + "or" divider. */
+.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:10px 14px;
+  border:1px solid var(--line);border-radius:10px;background:#fff;color:#3c4043;font-size:14px;
+  font-weight:600;cursor:pointer;transition:box-shadow .15s,border-color .15s}
+.gbtn:hover{box-shadow:0 1px 6px rgba(0,0,0,.15);border-color:color-mix(in srgb,var(--muted) 40%,var(--line))}
+.gbtn:disabled{opacity:.7;cursor:default}
+.authdiv{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--muted);
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.authdiv::before,.authdiv::after{content:"";flex:1 1 auto;height:1px;background:var(--line)}
 .authcard__err{color:var(--key);font-size:12.5px;margin:0;font-weight:600}
 .authcard__ok{font-size:14px;line-height:1.6;color:var(--ink)}
 .authcard__ok a,.authcard__alt a{color:var(--accent);font-weight:600;text-decoration:none}

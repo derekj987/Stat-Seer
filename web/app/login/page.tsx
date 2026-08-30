@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { GoogleButton } from "../GoogleAuth";
 
 export default function Login() {
   const router = useRouter();
@@ -48,6 +49,7 @@ export default function Login() {
         {mode === "login" ? (
           <>
             <h1 className="authcard__h">Log in</h1>
+            <GoogleButton />
             <form onSubmit={login} className="authform">
               <label className="authfield">Email
                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
