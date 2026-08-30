@@ -8,6 +8,7 @@
 import { useEffect, useState } from "react";
 import { useSlip, encodeSlip, type SlipItem, type SlipKind } from "@/lib/slip";
 import { bookName, fmtOdds, toDecimal, decToAmerican, bestParlayBook, priceSlip } from "@/lib/slipPricing";
+import { audit, VERDICT_LABEL } from "@/lib/fairValue";
 import { createClient } from "@/lib/supabase/client";
 
 type Me = { id: string; username: string } | null;
@@ -186,9 +187,18 @@ export default function SlipBar() {
                 <ul className="slipbar__list">
                   {list.map((i) => {
                     const lb = i.byBook && Object.keys(i.byBook).length ? legBest(i) : null;
+                    const shown = lb ? lb.best : i.price;
+                    const av = i.fairProb != null && shown !== undefined ? audit(shown, i.fairProb) : null;
                     return (
                       <li key={i.id}>
-                        <span className="slipbar__g">{i.title}</span>
+                        <span className="slipbar__g">{i.title}
+                          {av && av.verdict !== "fair" && (
+                            <span className={`slipbar__audit slipbar__audit--${av.verdict}`}
+                              title={`Pick Auditor: fair ≈ ${fmtOdds(av.fair)} — ${VERDICT_LABEL[av.verdict]}`}>
+                              {av.verdict === "value" ? "✓" : "⚠"}
+                            </span>
+                          )}
+                        </span>
                         {i.detail && <span className="slipbar__p">{i.detail}</span>}
                         {lb ? <span className="odds">{fmtOdds(lb.best)}</span>
                             : i.price !== undefined ? <span className="odds">{fmtOdds(i.price)}</span> : null}

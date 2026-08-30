@@ -6,6 +6,7 @@ import { BetslipPromo } from "../Nav";
 import { useSlip } from "@/lib/slip";
 import { groupByGameDay } from "@/lib/gameDays";
 import { DayHeader } from "../DayHeader";
+import { audit, VERDICT_LABEL } from "@/lib/fairValue";
 
 const fmtOdds = (p: number) => (p > 0 ? `+${p}` : String(p));
 function sideLabel(side: string, line: number | null): string {
@@ -22,6 +23,7 @@ interface Leg {
   best: number;
   books: string[];
   byBook?: Record<string, number>;
+  fairProb?: number | null;
 }
 
 function PropChip({ q, market, marketLabel, game, saved, onToggle }: {
@@ -29,9 +31,11 @@ function PropChip({ q, market, marketLabel, game, saved, onToggle }: {
 }) {
   const bet = marketLabel === "ATTD" ? "ATTD" : sideLabel(q.side, q.line) || q.side;
   const name = q.slot ? `${q.player} (${q.slot})` : q.player;
+  const a = q.fairProb != null ? audit(q.price, q.fairProb) : null;   // Pick Auditor
   const leg: Leg = {
     id: `${q.eventId}:${market}:${q.player}:${q.side}:${q.line}`,
     game, player: name, bet, best: q.price, books: q.books, byBook: q.byBook,
+    fairProb: q.fairProb ?? null,
   };
   return (
     <button
@@ -44,6 +48,12 @@ function PropChip({ q, market, marketLabel, game, saved, onToggle }: {
       <span className="propq__player">{q.player}{q.slot && <span className="propq__slot"> ({q.slot})</span>}</span>
       <span className="propq__side">{sideLabel(q.side, q.line)}</span>
       <span className="propq__price">{fmtOdds(q.price)}</span>
+      {a && a.verdict !== "fair" ? (
+        <span className={`propq__audit propq__audit--${a.verdict}`}
+          title={`Pick Auditor: fair price ≈ ${fmtOdds(a.fair)} (de-vigged market) — ${VERDICT_LABEL[a.verdict]}`}>
+          {a.verdict === "value" ? "✓" : "⚠"}
+        </span>
+      ) : <span className="propq__audit" aria-hidden="true" />}
       <span className="propq__book">{q.books.join(" / ")}</span>
       <span className="propq__add" aria-hidden="true">{saved ? "✓" : "+"}</span>
     </button>
@@ -93,7 +103,7 @@ export default function PropsView({ games, embedded, today, tomorrow }: { games:
   const toggle = useCallback((l: Leg) => slipToggle({
     id: l.id, kind: "prop",
     title: `${l.player} ${l.bet}`, detail: l.game,
-    price: l.best, books: l.books, byBook: l.byBook,
+    price: l.best, books: l.books, byBook: l.byBook, fairProb: l.fairProb,
   }), [slipToggle]);
 
   const players = games.reduce(

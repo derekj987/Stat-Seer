@@ -325,7 +325,7 @@ export function ModelSubnav({ active = "game", base = "nfl" }: {
 
 /** Sub-tabs inside Value Finder (Game Lines · Player Props · Sweet Spots). */
 export function ShopSubnav({ active, base = "nfl" }: {
-  active: "lines" | "props" | "best"; base?: "nfl" | "ncaaf";
+  active: "lines" | "props" | "best" | "auditor"; base?: "nfl" | "ncaaf";
 }) {
   const h = base === "ncaaf"
     ? { lines: "/ncaaf/lines", props: "/ncaaf/props", best: "/ncaaf/best" }
@@ -338,6 +338,8 @@ export function ShopSubnav({ active, base = "nfl" }: {
         aria-current={active === "props" ? "page" : undefined}>Player Props</a>
       <a href={h.best} className={active === "best" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "best" ? "page" : undefined}>Sweet Spots</a>
+      <a href="/audit" className={active === "auditor" ? "subnav__t active" : "subnav__t"}
+        aria-current={active === "auditor" ? "page" : undefined}>Pick Auditor</a>
     </nav>
   );
 }

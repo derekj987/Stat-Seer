@@ -18,6 +18,7 @@ export interface SlipItem {
   books?: string[];    // best-price sportsbook(s), when known
   byBook?: Record<string, number>;  // EVERY book's american price for this leg — the raw
                                      // material for "best book per leg" + best combined parlay
+  fairProb?: number | null;          // Pick Auditor: de-vigged fair probability, for the slip's value flag
 }
 
 const KEY = "statseer.slip.v2";
@@ -25,7 +26,7 @@ const EVT = "statseer:slip";
 
 // --- Share links: encode the slip into a compact URL-safe string and back. Lets a
 // member send their slip; the recipient opens it in StatSeer (installed or browser).
-type Packed = { k: SlipKind; t: string; d?: string; p?: number; b?: string[]; bb?: Record<string, number> };
+type Packed = { k: SlipKind; t: string; d?: string; p?: number; b?: string[]; bb?: Record<string, number>; fp?: number };
 
 function slug(s: string): string {
   return (s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 24);
@@ -38,6 +39,7 @@ export function encodeSlip(items: SlipItem[]): string {
     ...(i.price !== undefined ? { p: i.price } : {}),
     ...(i.books?.length ? { b: i.books } : {}),
     ...(i.byBook && Object.keys(i.byBook).length ? { bb: i.byBook } : {}),
+    ...(i.fairProb != null ? { fp: i.fairProb } : {}),
   }));
   const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(packed))));
   return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
@@ -49,7 +51,7 @@ export function decodeSlip(s: string): SlipItem[] {
     const arr = JSON.parse(decodeURIComponent(escape(atob(b64)))) as Packed[];
     return arr.map((e, i) => ({
       id: `shared-${i}-${slug(e.t)}`, kind: e.k, title: e.t,
-      detail: e.d, price: e.p, books: e.b, byBook: e.bb,
+      detail: e.d, price: e.p, books: e.b, byBook: e.bb, fairProb: e.fp ?? null,
     }));
   } catch {
     return [];

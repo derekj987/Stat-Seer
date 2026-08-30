@@ -1,3 +1,4 @@
+import { deVig } from "@/lib/fairValue";
 // Player-props line shopping — reads prop_snapshots, best price per player across books.
 // Server-side only (Supabase service key).
 
@@ -63,6 +64,7 @@ export interface Quote {
   byBook: Record<string, number>; // every book's price — needed for single-book parlays
   eventId: string;
   slot?: string; // position + depth rank, e.g. "RB1" — attached by the page for display
+  fairProb?: number | null; // Pick Auditor: de-vigged fair probability of THIS side (null if one-sided)
 }
 export interface MarketBlock {
   market: string;
@@ -153,6 +155,29 @@ export async function weekProps(week: number, season = 2026): Promise<PropGame[]
     a.byBook[r.book] = r.price_american;
   }
 
+  // Pick Auditor: de-vig each two-sided market (same line, per book) into a fair probability.
+  // Key: event|market|player|side|line -> fair probability of that side.
+  const OPP: Record<string, string> = { Over: "Under", Under: "Over", Yes: "No", No: "Yes" };
+  const byLine = new Map<string, Record<string, Record<string, number>>>(); // event|market|player|line -> side -> byBook
+  for (const [k, a] of agg) {
+    const parts = k.split("|"); // event|market|player|side|line
+    const side = parts[3], line = parts[4];
+    const lk = `${parts[0]}|${parts[1]}|${parts[2]}|${line}`;
+    (byLine.get(lk) ?? byLine.set(lk, {}).get(lk)!)[side] = a.byBook;
+  }
+  const fairProb = new Map<string, number>();
+  for (const [lk, sides] of byLine) {
+    const [ev, mk, pl, line] = lk.split("|");
+    for (const side of Object.keys(sides)) {
+      const opp = OPP[side];
+      if (!opp || !sides[opp]) continue;
+      const mine = sides[side], theirs = sides[opp];
+      const ps: number[] = [];
+      for (const book of Object.keys(mine)) if (theirs[book] != null) ps.push(deVig(mine[book], theirs[book]));
+      if (ps.length) fairProb.set(`${ev}|${mk}|${pl}|${side}|${line}`, ps.reduce((x, y) => x + y, 0) / ps.length);
+    }
+  }
+
   // Group into games -> markets -> quotes (best price derived from byBook).
   const games = new Map<string, PropGame>();
   const marketMap = new Map<string, Map<string, Quote[]>>(); // eventId -> market -> quotes
@@ -174,6 +199,7 @@ export async function weekProps(week: number, season = 2026): Promise<PropGame[]
     mm.get(r.market)!.push({
       player: r.player_name, market: r.market, side: r.side, line: r.line,
       price: best, books, byBook: a.byBook, eventId: r.event_id,
+      fairProb: fairProb.get(`${r.event_id}|${r.market}|${r.player_name}|${r.side}|${r.line}`) ?? null,
     });
   }
 
