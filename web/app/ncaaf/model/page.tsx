@@ -6,7 +6,7 @@ import { abbrevTeam } from "@/lib/ncaafAbbrev";
 import { NcaafCardHead, NcaafGameCell } from "../CardCells";
 import { fetchCfbScores, scoreFor, type CfbScores } from "@/lib/cfbScores";
 import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
-import { marketGap, LeanTag } from "../lean";
+import { marketGap } from "../lean";
 
 // College Football — The Model. Mirrors the NFL Model page: the full model-vs-market
 // table leads, the honest track record (predicts as well as Elo, doesn't beat the spread)
@@ -50,9 +50,7 @@ function CardRows({ games, moreFrom, scores }: { games: readonly NcaafCardGame[]
             <NcaafGameCell g={g} score={scores ? scoreFor(scores, g.away, g.home) : null} />
             <td className="hb-num">{ms ? `${abbrevTeam(ms.fav)} ${ms.num}` : "—"}</td>
             <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
-            <td className="hb-num hb-model">{abbrevTeam(g.projSpread.fav)} {g.projSpread.num}
-              <LeanTag g={g} />
-            </td>
+            <td className="hb-num hb-model">{abbrevTeam(g.projSpread.fav)} {g.projSpread.num}</td>
             <td className="hb-num hb-model">{g.projTotal}</td>
           </tr>
         );
@@ -142,10 +140,6 @@ export default async function Page({ searchParams }: {
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
-          <div className="hb-legend">
-            <span className="hb-lean hb-lean--defer">≈ market</span> on a big favorite we defer to the efficient line (it&apos;s not an underdog pick) ·{" "}
-            <span className="hb-lean hb-lean--fav">fav</span> / <span className="hb-lean hb-lean--dog">dog</span> our line-blind lean on a closer game, with the margin — <b>context, not a pick</b> (our rating doesn&apos;t beat the spread). Hover any tag for detail.
-          </div>
           <MoreTable id="ncaaf-ranked-more" head={<NcaafCardHead />} extra={rankedRest.length} noun="ranked games" cls="hb-form--mkt">
             <CardRows games={ranked} moreFrom={3} scores={scores} />
           </MoreTable>

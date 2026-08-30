@@ -7,7 +7,6 @@ import type { NcaafCardGame, NcaafUpset } from "./ncaaf/model-data";
 import { NCAAF_MODEL } from "./ncaaf/model-data";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
 import { NcaafCardHead, NcaafGameCell } from "./ncaaf/CardCells";
-import { LeanTag } from "./ncaaf/lean";
 import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
 import { PLAYER_PROJECTIONS, type PlayerProj } from "@/lib/playerProjections";
 import { INCENTIVE_WATCH } from "@/lib/incentiveWatch";
@@ -193,9 +192,7 @@ function NcaafRows({ games, moreFrom }: { games: readonly NcaafCardGame[]; moreF
             <NcaafGameCell g={g} />
             <td className="hb-num">{ms ? `${abbrevTeam(ms.fav)} ${ms.num}` : "—"}</td>
             <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
-            <td className="hb-num hb-model">{abbrevTeam(g.projSpread.fav)} {g.projSpread.num}
-              <LeanTag g={g} />
-            </td>
+            <td className="hb-num hb-model">{abbrevTeam(g.projSpread.fav)} {g.projSpread.num}</td>
             <td className="hb-num hb-model">{g.projTotal}</td>
           </tr>
         );
