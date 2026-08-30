@@ -45,7 +45,7 @@ export async function POST(req: Request) {
           `${message}\n\n` +
           `— page: ${path}\n` +
           (email ? `— reply-to: ${email}\n` : `— no reply email given\n`) +
-          `\nReview all feedback: https://statseer.vercel.app/feedback`,
+          `\nReview all feedback: https://statseeredge.com/feedback`,
       }),
     });
     if (res.ok) return NextResponse.json({ ok: true, emailed: true });

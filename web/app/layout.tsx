@@ -14,7 +14,7 @@ import ConsentGate from "./ConsentGate";
 const medieval = MedievalSharp({ subsets: ["latin"], weight: "400", display: "swap", variable: "--font-medieval" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://statseer.vercel.app"),
+  metadataBase: new URL("https://statseeredge.com"),
   title: "StatSeer — See the edge. Trust the data.",
   description: "NFL betting analysis you can actually check: line shopping, sweet spots, honest calibrated probabilities, and game context — from live odds.",
   applicationName: "StatSeer",
