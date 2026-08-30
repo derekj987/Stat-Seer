@@ -5,12 +5,16 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 const MAX = 5000;
+const MAX_IMAGES = 4;
+const MAX_IMG_BYTES = 5 * 1024 * 1024; // 5 MB each
 
 export default function WallForm({ profileId, ownName }: { profileId: string; ownName: string | null }) {
   const router = useRouter();
   const taRef = useRef<HTMLTextAreaElement>(null);
   const [userId, setUserId] = useState<string | null | undefined>(undefined);
   const [body, setBody] = useState("");
+  const [media, setMedia] = useState<string[]>([]);   // uploaded public URLs
+  const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [msg, setMsg] = useState("");
 
@@ -40,14 +44,55 @@ export default function WallForm({ profileId, ownName }: { profileId: string; ow
     });
   }
 
+  async function onPickImages(e: React.ChangeEvent<HTMLInputElement>) {
+    const picked = Array.from(e.target.files ?? []);
+    e.target.value = ""; // allow re-picking the same file later
+    if (!picked.length || !userId) return;
+    setMsg("");
+    const room = MAX_IMAGES - media.length;
+    if (room <= 0) { setMsg(`Up to ${MAX_IMAGES} photos per post.`); return; }
+
+    setUploading(true);
+    const supabase = createClient();
+    const added: string[] = [];
+    for (const file of picked.slice(0, room)) {
+      if (!file.type.startsWith("image/")) { setMsg("Only image files."); continue; }
+      if (file.size > MAX_IMG_BYTES) { setMsg("Each image must be under 5 MB."); continue; }
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+      const path = `${userId}/${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`;
+      const up = await supabase.storage.from("wall-media").upload(path, file, { contentType: file.type });
+      if (up.error) {
+        setMsg(/bucket|not found|does not exist/i.test(up.error.message)
+          ? "Run ingest/wall_media.sql in Supabase to enable photos." : up.error.message);
+        continue;
+      }
+      added.push(supabase.storage.from("wall-media").getPublicUrl(path).data.publicUrl);
+    }
+    setMedia((m) => [...m, ...added]);
+    setUploading(false);
+  }
+
+  async function removeImage(url: string) {
+    setMedia((m) => m.filter((u) => u !== url));
+    // best-effort delete from storage (path is everything after the bucket segment)
+    const marker = "/wall-media/";
+    const idx = url.indexOf(marker);
+    if (idx !== -1) {
+      const path = url.slice(idx + marker.length).split("?")[0];
+      try { await createClient().storage.from("wall-media").remove([path]); } catch { /* leave orphan */ }
+    }
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!userId || body.trim().length < 1) return;
+    if (!userId || uploading) return;
+    if (body.trim().length < 1 && media.length === 0) return;
     setStatus("loading"); setMsg("");
-    const { error } = await createClient().from("wall_posts")
-      .insert({ profile_id: profileId, author_id: userId, body: body.trim() });
+    const row: Record<string, unknown> = { profile_id: profileId, author_id: userId, body: body.trim() };
+    if (media.length) row.media = media;
+    const { error } = await createClient().from("wall_posts").insert(row);
     if (error) { setStatus("error"); setMsg(error.message); return; }
-    setBody(""); setStatus("idle");
+    setBody(""); setMedia([]); setStatus("idle");
     router.refresh();
   }
 
@@ -66,6 +111,7 @@ export default function WallForm({ profileId, ownName }: { profileId: string; ow
     ["Bulleted list", "• List", () => apply("- ", "", true)],
     ["Link", "🔗 Link", () => apply("[", "](https://)")],
   ];
+  const canPost = status !== "loading" && !uploading && (body.trim().length > 0 || media.length > 0);
 
   return (
     <form onSubmit={submit} className="composer">
@@ -74,14 +120,36 @@ export default function WallForm({ profileId, ownName }: { profileId: string; ow
           <button key={label} type="button" className="composer__tbtn" title={label} aria-label={label}
             onMouseDown={(e) => e.preventDefault()} onClick={fn}>{node}</button>
         ))}
+        <label className="composer__tbtn composer__tbtn--photo" title="Add photos"
+          aria-label="Add photos" aria-disabled={media.length >= MAX_IMAGES}>
+          🖼 Photo
+          <input type="file" accept="image/*" multiple hidden
+            disabled={uploading || media.length >= MAX_IMAGES} onChange={onPickImages} />
+        </label>
         <span className="composer__hint">Markdown supported</span>
       </div>
+
       <textarea ref={taRef} className="composer__body" value={body} onChange={(e) => setBody(e.target.value)}
-        placeholder={ownName ? "Share a pick or write something…" : "Write something…"} maxLength={MAX} />
+        placeholder={ownName ? "Share a pick, a photo, or a thought…" : "Write something…"} maxLength={MAX} />
+
+      {(media.length > 0 || uploading) && (
+        <div className="composer__media">
+          {media.map((u) => (
+            <div className="composer__thumb" key={u}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={u} alt="" />
+              <button type="button" className="composer__thumbx" onClick={() => removeImage(u)}
+                aria-label="Remove photo">×</button>
+            </div>
+          ))}
+          {uploading && <div className="composer__thumb composer__thumb--load">…</div>}
+        </div>
+      )}
+
       <div className="composer__foot">
-        <span className="composer__count">{body.length}/{MAX}</span>
-        <button type="submit" className="btn btn--primary" disabled={status === "loading" || !body.trim()}>
-          {status === "loading" ? "Posting…" : "Post"}
+        <span className="composer__count">{body.length}/{MAX}{media.length ? ` · ${media.length} photo${media.length === 1 ? "" : "s"}` : ""}</span>
+        <button type="submit" className="btn btn--primary" disabled={!canPost}>
+          {status === "loading" ? "Posting…" : uploading ? "Uploading…" : "Post"}
         </button>
       </div>
       {msg && <p className="authcard__err">{msg}</p>}

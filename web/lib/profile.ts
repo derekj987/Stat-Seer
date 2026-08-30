@@ -59,6 +59,7 @@ export interface WallPost {
   authorId: string;
   author: Author | null;
   slip: SlipItem[] | null;   // optional attached bet slip
+  media: string[];           // attached image URLs (empty until wall_media migration)
   reactions: Reaction[];     // emoji reactions with counts (empty until wall_social migration)
   comments: WallComment[];   // threaded comments (empty until wall_social migration)
 }
@@ -189,11 +190,17 @@ export async function getWall(profileId: string, viewerId?: string | null): Prom
   const base = `wall_posts?profile_id=eq.${profileId}` +
     `&order=created_at.desc&limit=500` +
     `&select=id,body,SLIPcreated_at,author_id,author:profiles!wall_posts_author_id_fkey(username,role,title)`;
+  // `slip` and `media` are optional columns added by later migrations; degrade one level at a time
+  // so a post never fails to load on a DB that has some but not all of them.
   let rows: Record<string, unknown>[];
   try {
-    rows = await pg(base.replace("SLIP", "slip,"));
+    rows = await pg(base.replace("SLIP", "slip,media,"));
   } catch {
-    rows = await pg(base.replace("SLIP", ""));
+    try {
+      rows = await pg(base.replace("SLIP", "slip,"));
+    } catch {
+      rows = await pg(base.replace("SLIP", ""));
+    }
   }
   const ids = rows.map((r) => r.id as string);
   const [commentsByPost, reactionsByPost] = await Promise.all([
@@ -209,6 +216,7 @@ export async function getWall(profileId: string, viewerId?: string | null): Prom
       authorId: r.author_id as string,
       author: author(r.author),
       slip: Array.isArray(r.slip) ? (r.slip as SlipItem[]) : null,
+      media: Array.isArray(r.media) ? (r.media as string[]) : [],
       reactions: reactionsByPost.get(id) ?? [],
       comments: commentsByPost.get(id) ?? [],
     };

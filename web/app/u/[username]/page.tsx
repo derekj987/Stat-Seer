@@ -20,6 +20,7 @@ import RichText from "./RichText";
 import FavoriteTeams from "./FavoriteTeams";
 import PostReactions from "./PostReactions";
 import PostComments from "./PostComments";
+import PhotoGrid from "./PhotoGrid";
 import type { CSSProperties } from "react";
 
 export const dynamic = "force-dynamic";
@@ -138,6 +139,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                           <WallActions postId={p.id} authorId={p.authorId} profileId={profile.id} me={me} />
                         </div>
                         {p.body && <div className="wpost__body"><RichText text={p.body} /></div>}
+                        {p.media.length > 0 && <PhotoGrid urls={p.media} variant="post" />}
                         {p.slip && p.slip.length > 0 && <WallSlipCard items={p.slip} />}
                         <footer className="wpost__foot">
                           <PostReactions postId={p.id} viewerId={me?.id ?? null} initial={p.reactions} />
@@ -212,15 +214,22 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             ),
           },
           {
-            key: "media", label: "Media",
-            node: (
-              <section className="pcard">
-                <h2 className="pcard__h">Media</h2>
-                <p className="pcard__empty">
-                  No media yet.{isOwner ? " Photos and images you post will show up here." : ""}
-                </p>
-              </section>
-            ),
+            key: "media", label: "Media", count: wall.reduce((n, p) => n + p.media.length, 0) || undefined,
+            node: (() => {
+              const photos = wall.flatMap((p) => p.media);
+              return (
+                <section className="pcard">
+                  <h2 className="pcard__h">Media {photos.length > 0 && <span className="pcard__count">{photos.length}</span>}</h2>
+                  {photos.length === 0 ? (
+                    <p className="pcard__empty">
+                      No photos yet.{isOwner ? " Photos you add to a post show up here." : ""}
+                    </p>
+                  ) : (
+                    <PhotoGrid urls={photos} variant="gallery" />
+                  )}
+                </section>
+              );
+            })(),
           },
         ]}
       />

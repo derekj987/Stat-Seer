@@ -1909,6 +1909,53 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .cmtform__send{padding:5px 14px;font-size:12.5px}
 .cmts__login{color:var(--muted);font-size:12.5px;margin:2px 0 0}
 
+/* Composer photo attach + thumbnails. */
+.composer__tbtn--photo{cursor:pointer;position:relative}
+.composer__tbtn--photo[aria-disabled="true"]{opacity:.5;cursor:default}
+.composer__media{display:flex;flex-wrap:wrap;gap:8px;padding:8px 0 0}
+.composer__thumb{position:relative;width:74px;height:74px;border-radius:9px;overflow:hidden;
+  border:1px solid var(--line);background:var(--surface-2)}
+.composer__thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.composer__thumb--load{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:20px}
+.composer__thumbx{position:absolute;top:2px;right:2px;width:20px;height:20px;border:0;border-radius:50%;
+  background:rgba(0,0,0,.6);color:#fff;font-size:14px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center}
+.composer__thumbx:hover{background:rgba(0,0,0,.85)}
+
+/* Photo grid in a post (mosaic) + the Media tab (gallery), with a shared lightbox. */
+.pgrid{margin-top:8px}
+.pgrid__cell{padding:0;border:0;background:var(--surface-2);cursor:pointer;overflow:hidden;
+  position:relative;display:block}
+.pgrid__cell img{display:block;width:100%;height:100%;object-fit:cover}
+.pgrid__more{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.5);color:#fff;font-size:22px;font-weight:800}
+.pgrid--post{display:grid;gap:3px;border-radius:12px;overflow:hidden}
+.pgrid--post.pgrid--n1 .pgrid__cell{aspect-ratio:16/10}
+.pgrid--post.pgrid--n2{grid-template-columns:1fr 1fr}
+.pgrid--post.pgrid--n2 .pgrid__cell{aspect-ratio:1}
+.pgrid--post.pgrid--n3{grid-template-columns:1fr 1fr}
+.pgrid--post.pgrid--n3 .pgrid__cell{aspect-ratio:1}
+.pgrid--post.pgrid--n3 .pgrid__cell:first-child{grid-column:1 / -1;aspect-ratio:2/1}
+.pgrid--post.pgrid--n4{grid-template-columns:1fr 1fr}
+.pgrid--post.pgrid--n4 .pgrid__cell{aspect-ratio:1}
+.pgrid--gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(116px,1fr));gap:6px}
+.pgrid--gallery .pgrid__cell{aspect-ratio:1;border-radius:8px}
+
+.lbox{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.9);display:flex;
+  align-items:center;justify-content:center;padding:24px;animation:hlb-in .18s ease}
+.lbox__img{max-width:94vw;max-height:90vh;object-fit:contain;border-radius:6px}
+.lbox__x{position:absolute;top:14px;right:18px;width:40px;height:40px;border:0;border-radius:50%;
+  background:rgba(255,255,255,.12);color:#fff;font-size:26px;line-height:1;cursor:pointer}
+.lbox__x:hover{background:rgba(255,255,255,.25)}
+.lbox__nav{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border:0;
+  border-radius:50%;background:rgba(255,255,255,.12);color:#fff;font-size:30px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center}
+.lbox__nav:hover{background:rgba(255,255,255,.25)}
+.lbox__nav--prev{left:16px}
+.lbox__nav--next{right:16px}
+.lbox__count{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);color:#fff;
+  font-size:13px;font-family:var(--font-mono);background:rgba(0,0,0,.5);padding:3px 10px;border-radius:999px}
+
 /* A bet slip embedded in a wall post. */
 .wslip{margin-top:10px;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:var(--surface-2)}
 .wslip__hd{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--accent-soft);
