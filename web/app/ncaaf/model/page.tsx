@@ -4,6 +4,7 @@ import { NCAAF_MODEL, type NcaafCardGame } from "../model-data";
 import { StatCard } from "../StatCard";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
 import { NcaafCardHead, NcaafGameCell } from "../CardCells";
+import { fetchCfbScores, scoreFor, type CfbScores } from "@/lib/cfbScores";
 import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
 import { marketGap, LeanTag } from "../lean";
 
@@ -39,14 +40,14 @@ function groupByDay(games: readonly NcaafCardGame[]): { key: string; label: stri
     }));
 }
 
-function CardRows({ games, moreFrom }: { games: readonly NcaafCardGame[]; moreFrom?: number }) {
+function CardRows({ games, moreFrom, scores }: { games: readonly NcaafCardGame[]; moreFrom?: number; scores?: CfbScores }) {
   return (
     <>
       {games.map((g, i) => {
         const ms = g.marketSpread;
         return (
           <tr key={`${g.away}-${g.home}`} className={[g.off ? "hb-off" : "", moreFrom !== undefined && i >= moreFrom ? "hb-row--more" : ""].filter(Boolean).join(" ") || undefined}>
-            <NcaafGameCell g={g} />
+            <NcaafGameCell g={g} score={scores ? scoreFor(scores, g.away, g.home) : null} />
             <td className="hb-num">{ms ? `${abbrevTeam(ms.fav)} ${ms.num}` : "—"}</td>
             <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
             <td className="hb-num hb-model">{abbrevTeam(g.projSpread.fav)} {g.projSpread.num}
@@ -68,6 +69,8 @@ export default async function Page({ searchParams }: {
   const beatsMarket = a.atsPct > a.breakeven;
   const c = M.card;
   const week = readNcaafWeek((await searchParams).week, c.week);
+  // Live/final scores for this week (server-fetched, ~30s ISR) — rendered right in the game cells.
+  const scores = await fetchCfbScores(week);
   // Lead with the games where our line-blind read DIVERGES MOST from the market — that's where the
   // model actually has an independent opinion. On big favorites we defer to the efficient market
   // (proven: they cover ~50%, we don't beat the spread), so those agree by design; the interesting
@@ -144,7 +147,7 @@ export default async function Page({ searchParams }: {
             <span className="hb-lean hb-lean--fav">fav</span> / <span className="hb-lean hb-lean--dog">dog</span> our line-blind lean on a closer game, with the margin — <b>context, not a pick</b> (our rating doesn&apos;t beat the spread). Hover any tag for detail.
           </div>
           <MoreTable id="ncaaf-ranked-more" head={<NcaafCardHead />} extra={rankedRest.length} noun="ranked games" cls="hb-form--mkt">
-            <CardRows games={ranked} moreFrom={3} />
+            <CardRows games={ranked} moreFrom={3} scores={scores} />
           </MoreTable>
         </div>
       </details>
@@ -172,7 +175,7 @@ export default async function Page({ searchParams }: {
             )}
           </div>
           <MoreTable id="ncaaf-snap-more" head={<NcaafCardHead />} extra={leadRest.length} noun="more divergences" cls="hb-form--mkt">
-            <CardRows games={lead} moreFrom={6} />
+            <CardRows games={lead} moreFrom={6} scores={scores} />
           </MoreTable>
         </div>
       </details>
@@ -190,7 +193,7 @@ export default async function Page({ searchParams }: {
             <section className="ncf-confgrp" key={grp.key}>
               <h3 className="ncf-confgrp__h">{grp.label}<span className="ncf-confgrp__n">{grp.games.length} game{grp.games.length === 1 ? "" : "s"}</span></h3>
               <div className="hb-formwrap">
-                <table className="hb-form hb-form--mkt"><NcaafCardHead /><tbody><CardRows games={grp.games} /></tbody></table>
+                <table className="hb-form hb-form--mkt"><NcaafCardHead /><tbody><CardRows games={grp.games} scores={scores} /></tbody></table>
               </div>
             </section>
           ))}

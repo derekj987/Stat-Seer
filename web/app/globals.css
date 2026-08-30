@@ -2760,6 +2760,16 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-gkick{display:block;font-size:10.5px;color:var(--muted);font-family:var(--font-mono);font-weight:400;
   margin-top:3px;white-space:nowrap}
 .hb-num{font-variant-numeric:tabular-nums}
+
+/* Live / final score badge on NCAAF game cards. */
+.lsc{display:inline-flex;align-items:center;gap:5px;margin-left:8px;padding:1px 7px;border-radius:999px;
+  font-size:11px;font-weight:800;vertical-align:middle;font-variant-numeric:tabular-nums;white-space:nowrap}
+.lsc--final{background:var(--surface-2);color:var(--muted)}
+.lsc--live{background:color-mix(in srgb,#e5484d 16%,transparent);color:#e5484d}
+.lsc__dash{opacity:.55;margin:0 1px}
+.lsc__st{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;opacity:.85}
+.lsc__dot{width:6px;height:6px;border-radius:50%;background:#e5484d;animation:lscpulse 1.4s ease-in-out infinite}
+@keyframes lscpulse{0%,100%{opacity:1}50%{opacity:.25}}
 .hb-model{color:var(--accent);font-weight:700}
 .hb-tot{color:var(--muted)}
 /* "Our lean" tag: which side our line-blind read has covering vs the market (or ≈ market when we
