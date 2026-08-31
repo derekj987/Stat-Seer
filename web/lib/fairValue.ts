@@ -53,7 +53,7 @@ export const VERDICT_LABEL: Record<AuditVerdict, string> = {
 // vig range, "value" (green) is a price that actually beats fair, and "cheat" (red) is a price
 // worse than even a typical hold explains.
 export const AUDIT_VALUE_BPS = 0.01;
-export const AUDIT_CHEAT_BPS = 0.045;
+export const AUDIT_CHEAT_BPS = 0.03;
 
 /** 3-state verdict for the Pick Auditor board (null when the market can't be de-vigged). */
 export function auditVerdict(offered: number, fairProb: number | null | undefined): Audit | null {
