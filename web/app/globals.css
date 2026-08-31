@@ -1735,8 +1735,15 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 [data-embed] .catnav,[data-embed] .pinrow,[data-embed] .foot,[data-embed] .aiw,
 [data-embed] .lp-drawer,[data-embed] .vf-drawer,[data-embed] .pdtogglerow,
 [data-embed] .betslippromo{display:none!important}
+[data-embed] .pinbtn{display:none!important}
 [data-embed] body{background:transparent}
 [data-embed] .wrap,[data-embed] main.wrap{padding:6px 10px 10px!important;max-width:none!important;margin:0!important}
+/* Preview cap: a fade over the clipped chart + a "Show all" dropdown (injected by EmbedMode). */
+.embed-fade{position:absolute;left:0;right:0;bottom:0;height:64px;pointer-events:none;
+  background:linear-gradient(to bottom,transparent,var(--bg))}
+.embed-showall{display:block;width:100%;border:0;border-top:1px solid var(--line);background:var(--surface);
+  color:var(--accent);font:inherit;font-weight:700;font-size:13px;padding:9px;cursor:pointer}
+.embed-showall:hover{background:var(--surface-2)}
 
 /* --- Custom Dashboard --- */
 .dash{margin-top:8px}
@@ -2051,7 +2058,10 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .epm__cover{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:3/1;background:var(--surface-2)}
 .epm__cover img{width:100%;height:100%;object-fit:cover;display:block}
 .epm__cover-grad{width:100%;height:100%;background:linear-gradient(120deg,var(--paccent,var(--accent)),var(--gold))}
-.epm__cover-btn{position:absolute;right:10px;bottom:10px}
+.epm__cover-btn{position:absolute;right:10px;bottom:10px;z-index:3}
+/* Inside the modal the "Edit cover" control must flow normally (its profile-page style is
+   absolute top-right, which lands outside this clipped box and disappears). */
+.epm__cover-btn .pcover__edit{position:static;right:auto;top:auto}
 .epm__avatar{flex:0 0 auto;width:66px;height:66px;border-radius:50%;overflow:hidden;background:var(--surface-2);
   border:2px solid var(--line);display:grid;place-items:center;font-size:26px;font-weight:800;color:var(--accent)}
 .epm__avatar img{width:100%;height:100%;object-fit:cover}

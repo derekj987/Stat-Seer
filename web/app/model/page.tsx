@@ -279,11 +279,11 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
       {preds.length === 0 ? (
         <p className="foot">No reads published for Week {week} yet.</p>
       ) : (
-        <details className="hb-panel hb-panel--card" open>
+        <details className="hb-panel hb-panel--card" data-embedchart="full-model" open>
           <summary className="hb-bar">
             <span className="hb-bar__title hb-bar__title--gold">Week {week} Full Model</span>
             <span className="hb-bar__count">{preds.length} games</span>
-            <PinButton size="sm" pin={{ id: "/model", kind: "model", label: "The Model · Game Model", detail: `NFL · Week ${week}`, href: `/model?week=${week}` }} />
+            <PinButton size="sm" pin={{ id: "/model?only=full-model", kind: "model", label: "The Model · Full Model", detail: `NFL · Week ${week}`, href: `/model?week=${week}&only=full-model` }} />
             <span className="hb-bar__chev" aria-hidden="true">▾</span>
           </summary>
           <div className="hb-body">
@@ -302,10 +302,11 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
       )}
 
       {/* Week's numbers crunched — market spread/total beside our line-blind projection. */}
-      <details className="hb-panel hb-panel--card" open>
+      <details className="hb-panel hb-panel--card" data-embedchart="numbers-crunched" open>
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">Week {week} numbers crunched</span>
           <span className="hb-bar__count">{scored.length} games</span>
+          <PinButton size="sm" pin={{ id: "/model?only=numbers-crunched", kind: "model", label: "The Model · Numbers Crunched", detail: `NFL · Week ${week}`, href: `/model?week=${week}&only=numbers-crunched` }} />
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
