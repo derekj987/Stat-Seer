@@ -19,7 +19,7 @@ export async function POST() {
       }
       const username = (prof.username as string) || "a new member";
       const sig = signApprove(user.id);
-      const approveLink = sig ? `${SITE_URL}/api/beta/approve?m=${user.id}&exp=${sig.exp}&t=${sig.token}` : "";
+      const approveLink = sig ? `${SITE_URL}/admin/approve?m=${user.id}&exp=${sig.exp}&t=${sig.token}` : "";
       const email = user.email || "(no email on file)";
       await sendMail(
         ALERT_TO,
@@ -27,7 +27,7 @@ export async function POST() {
         `<div style="font-family:system-ui,Arial,sans-serif;font-size:15px;line-height:1.6;color:#12261b">
            <h2 style="color:#b8860b">New beta access request</h2>
            <p><b>${username}</b> just requested access.<br>Email: ${email}</p>
-           ${approveLink ? `<p><a href="${approveLink}" style="display:inline-block;background:#17794a;color:#fff;text-decoration:none;padding:10px 18px;border-radius:9px;font-weight:700">Approve ${username}</a></p>` : ""}
+           ${approveLink ? `<p><a href="${approveLink}" style="display:inline-block;background:#17794a;color:#fff;text-decoration:none;padding:10px 18px;border-radius:9px;font-weight:700">Approve ${username}</a></p><p style="color:#576a5e;font-size:12px">(You'll be asked to sign in first — only you can approve.)</p>` : ""}
            <p style="color:#576a5e;font-size:13px">Or review everyone in <a href="${SITE_URL}/admin/members">Beta approvals</a>.</p>
          </div>`,
         `New StatSeer beta request from ${username} (${email}).` +
