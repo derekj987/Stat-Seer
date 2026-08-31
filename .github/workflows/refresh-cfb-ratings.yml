@@ -8,12 +8,15 @@ name: Refresh CFB ratings
 # The model reads data/cfb.db (SQLite, gitignored) which does NOT exist on a fresh runner,
 # so we rebuild it from source each run: cfb_backfill (games) -> cfb_lines (betting lines,
 # needed by the ATS backtest + book-shop numbers) -> cfb_export (writes model-data.ts).
-# CFBD is cheap (a few calls/season) and ratings only move on game days, so weekly
-# (post-weekend) is the useful cadence. All times UTC.
+# CFBD is cheap (a few calls/season), so we run DAILY in-season: college games land on
+# Thu/Fri/Sat plus the odd Sun/Mon, so a weekly cadence left a weekend's finals + ratings
+# stale for up to 6 days and delayed the newly-posted odds/props on upcoming-week boards.
+# Daily at 14:00 UTC (~9-10am ET) catches the prior day's finals after overnight west-coast
+# games settle. All times UTC.
 
 on:
   schedule:
-    - cron: "0 8 * 8-12,1 2"   # weekly, Tuesday 08:00 UTC, Aug-Jan (through the playoff)
+    - cron: "0 14 * 8-12,1 *"   # daily 14:00 UTC, Aug-Jan (through the playoff)
   workflow_dispatch: {}         # manual "Run workflow"
 
 concurrency:
