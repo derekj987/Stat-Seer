@@ -146,6 +146,47 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
         </p>
       </section>
 
+      {/* How we suggest using StatSeer — the intended flow, member-empowerment framing. */}
+      <section className="lp-howto" aria-label="How to use StatSeer">
+        <span className="lp-howto__tag">How we suggest using StatSeer</span>
+        <h2 className="lp-howto__h">Your data, <em>your way.</em></h2>
+        <p className="lp-howto__sub">
+          StatSeer puts the numbers in your hands — you decide what matters. Here&apos;s the flow we&apos;d run.
+        </p>
+        <ol className="lp-howto__steps">
+          <li className="lp-howstep">
+            <span className="lp-howstep__n">1</span>
+            <div className="lp-howstep__body">
+              <b>Review each page and its subsections.</b> The Model, the Context, the Value Finder —
+              see what every number is saying.
+            </div>
+          </li>
+          <li className="lp-howstep">
+            <span className="lp-howstep__n">2</span>
+            <div className="lp-howstep__body">
+              <b>Find picks you&apos;re jiving with.</b> The reads that click for you, on the games you care about.
+            </div>
+          </li>
+          <li className="lp-howstep">
+            <span className="lp-howstep__n">3</span>
+            <div className="lp-howstep__body">
+              <b>Save them to your betslip.</b> Parlay them and let StatSeer shop the <b>best price</b> across books.
+            </div>
+          </li>
+          <li className="lp-howstep">
+            <span className="lp-howstep__n">4</span>
+            <div className="lp-howstep__body">
+              <b>Add any chart or data point to your Custom Dashboard.</b> Your favorites, in one place —
+              quick and easy access, no hunting.
+            </div>
+          </li>
+          <li className="lp-howstep lp-howstep--fun">
+            <span className="lp-howstep__n">5</span>
+            <div className="lp-howstep__body"><b>Go have fun.</b></div>
+          </li>
+        </ol>
+      </section>
+
       <LandingHub initialSport={initialSport} nfl={nfl} ncaaf={ncaaf} vf={vf} />
 
       {/* Public track record — the trust engine. Honest preseason state until games grade. */}

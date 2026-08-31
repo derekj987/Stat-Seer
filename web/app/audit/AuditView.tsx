@@ -62,12 +62,12 @@ function AuditRow({ q, marketLabel, game, saved, cont, onToggle }: {
   return (
     <div className={`aurow${cont ? " aurow--cont" : ""}`} role="row">
       <span className="aucell aucell--player">{cont ? "" : <>{q.player}{q.slot && <span className="auslot"> ({q.slot})</span>}</>}</span>
-      <span className="aucell aucell--bet">{bet}</span>
+      <span className="aucell aucell--bet">{bet}<small className="aucell__sub">{marketLabel}</small></span>
       <span className="aucell aucell--num aucell--book">{fmtOdds(q.price)}
         <small className="aucell__sub">{q.books[0]}{q.books.length > 1 ? ` +${q.books.length - 1}` : ""}</small>
       </span>
-      <span className="aucell aucell--num">
-        {fair !== null ? <>{fmtOdds(fair)} <small className="aucell__sub">{pct(q.fairProb!)}</small></> : <span className="aucell__sub">one-sided</span>}
+      <span className="aucell aucell--num aucell--fair">
+        {fair !== null ? <>{fmtOdds(fair)} <small className="aucell__sub aucell__sub--model">{pct(q.fairProb!)}</small></> : <span className="aucell__sub">one-sided</span>}
       </span>
       <span className="aucell aucell--deal">
         {a ? (

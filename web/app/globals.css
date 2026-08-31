@@ -8,6 +8,8 @@
   --save:#2f6fed; --save-soft:#e9f1fe;
   --offc:#2f6fd0; --offc-soft:#e6eefb; --offc-ink:#1e5bc4;
   --mkt:#8a2846;
+  /* Our analysis / model output is uniformly this blue everywhere (resolves per theme). */
+  --model:var(--offc-ink); --model-soft:var(--offc-soft);
   --gold:#b8860b; --gold-soft:#faf0d0;
   --font-sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --font-mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
@@ -1686,6 +1688,9 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .aucell--bet{color:var(--muted);font-size:12px;font-family:var(--font-mono)}
 .aucell--num{font-family:var(--font-mono);font-weight:600;font-size:13px}
 .aucell--book{color:var(--accent)}
+/* Fair price is OUR analysis → the uniform model blue. */
+.aucell--fair{color:var(--model)}
+.aucell__sub--model{color:var(--model)}
 .aucell__sub{display:block;font-weight:500;color:var(--muted);font-size:10px;font-family:var(--font-mono);margin-top:1px}
 .aucell--deal{justify-self:center;text-align:center}
 .aucell--add{justify-self:center}
@@ -1750,19 +1755,19 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .cmp__track{flex:1;height:12px;border-radius:7px;background:var(--surface-2);
   border:1px solid var(--line);overflow:hidden}
 .cmp__fill{display:block;height:100%;border-radius:7px 0 0 7px;forced-color-adjust:none}
-.cmp__fill--model{background:#17794a}
+.cmp__fill--model{background:#1e5bc4}
 .cmp__fill--mkt{background:#8a2846}
 .cmp__pct{font-family:var(--font-mono);font-weight:700;font-size:13px;
   min-width:40px;text-align:right;forced-color-adjust:none}
-.cmp__pct--model{color:#17794a}
+.cmp__pct--model{color:#1e5bc4}
 .cmp__pct--mkt{color:#8a2846}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cmp__fill--model{background:#41c07a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cmp__fill--model{background:#8fbcf8}
   :root:not([data-theme="light"]) .cmp__fill--mkt{background:#c56d84}
-  :root:not([data-theme="light"]) .cmp__pct--model{color:#41c07a}
+  :root:not([data-theme="light"]) .cmp__pct--model{color:#8fbcf8}
   :root:not([data-theme="light"]) .cmp__pct--mkt{color:#c56d84}}
-:root[data-theme="dark"] .cmp__fill--model{background:#41c07a}
+:root[data-theme="dark"] .cmp__fill--model{background:#8fbcf8}
 :root[data-theme="dark"] .cmp__fill--mkt{background:#c56d84}
-:root[data-theme="dark"] .cmp__pct--model{color:#41c07a}
+:root[data-theme="dark"] .cmp__pct--model{color:#8fbcf8}
 :root[data-theme="dark"] .cmp__pct--mkt{color:#c56d84}
 .pred__note{margin-top:8px;font-size:11.5px;color:var(--muted);font-family:var(--font-mono)}
 /* market comparison row + off-consensus flag */
@@ -2631,12 +2636,12 @@ a.snav__dfeat{display:block}
 .pmrow--data:first-child{border-top:0}
 .pmrow--data .pmcell--player{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;font-weight:600}
 .pmcell--num{font-family:var(--font-mono);color:var(--muted);text-align:left}
-.pmcell--proj{color:var(--accent);font-weight:700}
-.pmcell--projdown{color:var(--mkt)}
+.pmcell--proj{color:var(--model);font-weight:700}
+.pmcell--projdown{color:var(--model)}
 /* over/under-the-line arrow next to a projection / suggestion */
 .pmarrow{font-size:10px;font-weight:700}
-.pmarrow--up{color:var(--accent)}
-.pmarrow--down{color:var(--mkt)}
+.pmarrow--up{color:var(--model)}
+.pmarrow--down{color:var(--model)}
 .pmcell--team{color:var(--muted);font-size:11.5px;font-family:var(--font-mono);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pmcell--career{font-weight:800;font-family:var(--font-mono);font-size:13px}
@@ -3546,6 +3551,24 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 .lp-record__tag{display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
   color:var(--spot-ink);background:var(--spot-soft);border-radius:6px;padding:2px 8px;margin-right:8px}
 /* "Same picks pay differently" aha demo */
+.lp-howto{margin:26px auto;padding:24px 22px;border:1px solid var(--line);border-radius:16px;
+  background:var(--surface);max-width:760px;text-align:center}
+.lp-howto__tag{display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--accent);background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line));
+  border-radius:6px;padding:2px 8px;margin-bottom:10px}
+.lp-howto__h{font-size:clamp(20px,3.4vw,28px);font-weight:800;letter-spacing:-.02em;margin:0 0 8px;color:var(--ink)}
+.lp-howto__h em{font-style:normal;color:var(--accent)}
+.lp-howto__sub{font-size:13.5px;color:var(--muted);line-height:1.55;margin:0 auto 18px;max-width:52ch}
+.lp-howto__sub b{color:var(--ink)}
+.lp-howto__steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;text-align:left;max-width:560px;margin-inline:auto}
+.lp-howstep{display:flex;gap:14px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);
+  border-radius:12px;background:var(--bg)}
+.lp-howstep__n{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;
+  font-weight:800;font-size:14px;display:grid;place-items:center;forced-color-adjust:none}
+.lp-howstep__body{font-size:13.5px;line-height:1.5;color:var(--muted)}
+.lp-howstep__body b{color:var(--ink)}
+.lp-howstep--fun{align-items:center;background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 35%,var(--line))}
+.lp-howstep--fun .lp-howstep__body{color:var(--accent);font-size:15px}
 .lp-aha{margin:26px auto;padding:22px;border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));
   border-radius:16px;background:var(--accent-soft);max-width:760px;text-align:center}
 .lp-aha__tag{display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
