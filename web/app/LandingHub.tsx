@@ -14,6 +14,8 @@ import { COACH_TENDENCIES } from "@/lib/coachTendencies";
 import { CONTENTION } from "@/lib/contention";
 import { DEPTH } from "@/lib/depthChart";
 import { HighlightBanner } from "./HighlightBanner";
+import PinButton from "./PinButton";
+import type { Pin } from "@/lib/dashboard";
 import CoachTable from "./CoachTable";
 import Tip from "./Tip";
 import { MoreTable } from "./Nav";
@@ -136,13 +138,14 @@ export type VfRow = { eventId: string; away: string; home: string; line: string;
 
 const numStr = (v: number | null) => (v === null ? "—" : String(v));
 
-function Panel({ title, count, hint, open, children }: { title: string; count: React.ReactNode; hint: React.ReactNode; open?: boolean; children: React.ReactNode }) {
+function Panel({ title, count, hint, open, pin, children }: { title: string; count: React.ReactNode; hint: React.ReactNode; open?: boolean; pin?: Pin; children: React.ReactNode }) {
   return (
     <details className="hb-panel" open={open}>
       <summary className="hb-bar">
         <span className="hb-bar__title hb-bar__title--gold">{title}</span>
         <Tip text={hint} />
         <span className="hb-bar__count hb-bar__count--gold">{count}</span>
+        {pin && <PinButton size="sm" pin={pin} />}
         <span className="hb-bar__chev" aria-hidden="true">▾</span>
       </summary>
       <div className="hb-body">
@@ -308,11 +311,14 @@ function NflValueTable({ rows }: { rows: VfRow[] }) {
   );
 }
 
-export default function LandingHub({ initialSport, nfl, ncaaf, vf }: { initialSport: Sport; nfl: NflData; ncaaf: NcaafData; vf: VfRow[] }) {
+export default function LandingHub({ initialSport, nfl, ncaaf, vf, isMember }: { initialSport: Sport; nfl: NflData; ncaaf: NcaafData; vf: VfRow[]; isMember?: boolean }) {
   // AP Top 25 matchups this week (either team ranked), kept in kickoff order — the
   // homepage's ranked-games snapshot, mirroring the full table on /ncaaf/model.
   const ncaafRanked = ncaaf.games.filter((g) => g.apAway || g.apHome)
     .slice().sort((a, b) => (a.commence || "9999").localeCompare(b.commence || "9999")); // soonest first
+  // Members can pin any homepage panel to their Custom Dashboard (signed-out visitors don't see ＋).
+  const pin = (kind: Pin["kind"], label: string, href: string): Pin | undefined =>
+    isMember ? { id: href, kind, label, href } : undefined;
   return (
     <section className="lp-hub" id="lp-board" aria-label="This week's board">
       {/* pure-CSS sport toggle — no client JS needed */}
@@ -332,17 +338,21 @@ export default function LandingHub({ initialSport, nfl, ncaaf, vf }: { initialSp
         </div>
         {/* Aggressive curation: 3 disagreements + 3 player reads + 1 context. Everything else
             lives on its own section page (linked from each panel + the feature cards below). */}
-        <Panel title="Where the model disagrees most" count={`${nfl.card.filter((r) => r.off).length || "—"} off-consensus`} hint={TIPS.gameModel} open>
+        <Panel title="Where the model disagrees most" count={`${nfl.card.filter((r) => r.off).length || "—"} off-consensus`} hint={TIPS.gameModel} open
+          pin={pin("model", "The Model · Game Model", "/model")}>
           <NflCardTable rows={[...nfl.card].sort((a, b) => Number(b.off) - Number(a.off)).slice(0, 3)} />
           <p className="lp-cardfoot"><a href="/model">See the full model →</a></p>
         </Panel>
-        <Panel title="This week&apos;s player reads" count="props" hint={TIPS.playerModel} open>
+        <Panel title="This week&apos;s player reads" count="props" hint={TIPS.playerModel} open
+          pin={pin("model", "Player Prop Model", "/model/players")}>
           <PlayerSnapshot base="nfl" />
         </Panel>
-        <Panel title="The context a number misses" count="context" hint={TIPS.considNfl} open>
+        <Panel title="The context a number misses" count="context" hint={TIPS.considNfl} open
+          pin={pin("considerations", "Special Considerations", "/considerations")}>
           <NflConsiderations limit={2} />
         </Panel>
-        <Panel title="Where the value is" count="line shopping" hint={TIPS.valueFinder} open>
+        <Panel title="Where the value is" count="line shopping" hint={TIPS.valueFinder} open
+          pin={pin("lines", "Value Finder · Line Shopping", "/lines")}>
           <NflValueTable rows={vf} />
           <p className="lp-cardfoot"><a href="/lines">Shop every line in Value Finder →</a></p>
         </Panel>
@@ -360,21 +370,25 @@ export default function LandingHub({ initialSport, nfl, ncaaf, vf }: { initialSp
           </div>
         </div>
         {ncaafRanked.length > 0 && (
-          <Panel title="AP Top 25 matchups" count={`${ncaafRanked.length} ranked`} hint={<>This week&apos;s games with an <b>AP Top 25</b> team, in kickoff order, each ranked side showing its poll rank. The market&apos;s <b>Spread</b> and <b>O/U</b> sit beside <b>Our Projection</b> — our <b>line-blind</b> read, published for context.</>} open>
+          <Panel title="AP Top 25 matchups" count={`${ncaafRanked.length} ranked`} hint={<>This week&apos;s games with an <b>AP Top 25</b> team, in kickoff order, each ranked side showing its poll rank. The market&apos;s <b>Spread</b> and <b>O/U</b> sit beside <b>Our Projection</b> — our <b>line-blind</b> read, published for context.</>} open
+            pin={pin("model", "NCAAF · AP Top 25 Matchups", "/ncaaf/model")}>
             <MoreTable id="gm-ranked-ncaaf" head={<NcaafHead />} extra={Math.max(0, ncaafRanked.length - 3)} noun="ranked games" cls="hb-form--mkt">
               <NcaafRows games={ncaafRanked} moreFrom={3} />
             </MoreTable>
             <p className="lp-cardfoot"><a href="/ncaaf/model">See all ranked games →</a></p>
           </Panel>
         )}
-        <Panel title="Where the model disagrees most" count={`${ncaaf.games.filter((g) => g.off).length || "—"} off-consensus`} hint={TIPS.gameModel} open>
+        <Panel title="Where the model disagrees most" count={`${ncaaf.games.filter((g) => g.off).length || "—"} off-consensus`} hint={TIPS.gameModel} open
+          pin={pin("model", "NCAAF Model · Game Model", "/ncaaf/model")}>
           <NcaafCardTable games={[...ncaaf.games].sort((a, b) => Number(b.off) - Number(a.off)).slice(0, 3)} />
           <p className="lp-cardfoot"><a href="/ncaaf/model">See the full model →</a></p>
         </Panel>
-        <Panel title="This week&apos;s player reads" count="props" hint={TIPS.playerModel} open>
+        <Panel title="This week&apos;s player reads" count="props" hint={TIPS.playerModel} open
+          pin={pin("model", "NCAAF Player Prop Model", "/ncaaf/model/players")}>
           <PlayerSnapshot base="ncaaf" />
         </Panel>
-        <Panel title="The context a number misses" count="context" hint={TIPS.considNcaaf} open>
+        <Panel title="The context a number misses" count="context" hint={TIPS.considNcaaf} open
+          pin={pin("considerations", "NCAAF · Special Considerations", "/ncaaf/considerations")}>
           <NcaafConsiderations />
         </Panel>
       </div>

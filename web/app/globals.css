@@ -1721,6 +1721,11 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .pinbtn:hover{border-color:var(--accent);color:var(--accent)}
 .pinbtn.pinned{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 40%,var(--line));color:var(--accent)}
 .pinbtn--sm{font-size:11.5px;padding:4px 10px}
+.pinbtn__ic{font-weight:800}
+/* Pin sitting inside a panel header/summary bar — pushed to the right, before the chevron. */
+.hb-bar .pinbtn,.ncf-h .pinbtn{margin-left:auto}
+.hb-bar .pinbtn+.hb-bar__chev{margin-left:11px}
+@media(max-width:560px){.pinbtn--sm .pinbtn__lbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}}
 
 /* --- Custom Dashboard --- */
 .dash{margin-top:8px}
@@ -3795,11 +3800,12 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 @media (max-width:640px){.hlb__img{width:88px;height:60px}}
 /* Image slides go full-bleed: the artwork spans the entire banner, edge to edge. The
    side-by-side text/emoji is dropped for these — the art carries the promo itself. */
-.hlb__slide--img{padding:0;background:var(--gold-soft)}
-/* One consistent shape for every slide so the strip never jumps height as it rotates. Crop to a
-   fixed banner aspect, biased to the bottom where each artwork's title sits, so titles stay whole. */
-.hlb__slide--img .hlb__img{position:static;width:100%;height:auto;aspect-ratio:1600/620;
-  object-fit:cover;object-position:center bottom;display:block;border:0;border-radius:0}
+/* One consistent, not-tall shape for every slide (so the strip never jumps height), showing the
+   ENTIRE artwork — contained, never cropped, so each image's title stays whole wherever it sits.
+   A dark plate fills any letterbox gap and blends with the medieval art. */
+.hlb__slide--img{padding:0;background:#140d06;aspect-ratio:1600/620;overflow:hidden}
+.hlb__slide--img .hlb__img{position:static;width:100%;height:100%;object-fit:contain;
+  display:block;border:0;border-radius:0}
 .hlb__slide--img .hlb__body,.hlb__slide--img .hlb__go{display:none}
 /* No bottom scrim — it darkened the gold title/flourish that sits at the bottom of the art.
    The dots and arrows carry their own backgrounds, so they stay legible without it. */

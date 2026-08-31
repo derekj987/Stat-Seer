@@ -1,6 +1,7 @@
 import { Brand, FlowSteps, ContextSubnav, WeekBadge } from "../../Nav";
 import Tip from "@/app/Tip";
 import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
+import PinButton from "../../PinButton";
 import { NCAAF_MODEL, type NcaafConf, type NcaafCardGame } from "../model-data";
 import { StatCard } from "../StatCard";
 import NcaafConsiderationsView from "./NcaafConsiderationsView";
@@ -54,6 +55,7 @@ export default async function Page({ searchParams }: {
         <ContextSubnav active="special" base="ncaaf" />
       </div>
       <NcaafWeekNav base="/ncaaf/considerations" week={week} />
+      <div className="pinrow"><PinButton pin={{ id: "/ncaaf/considerations", kind: "considerations", label: "NCAAF · Considerations", detail: `Week ${week}`, href: `/ncaaf/considerations?week=${week}` }} /></div>
       <NcaafOffWeek current={c.week} week={week} />
 
       <section className="ncf-sec">

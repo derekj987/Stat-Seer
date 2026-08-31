@@ -9,7 +9,18 @@ import type { PropGame, Quote } from "@/lib/props";
 import { useSlip } from "@/lib/slip";
 import { groupByGameDay } from "@/lib/gameDays";
 import { DayHeader } from "../DayHeader";
-import { auditVerdict, probToAmerican, type AuditVerdict } from "@/lib/fairValue";
+import { auditVerdict, probToAmerican, impliedProb, type AuditVerdict } from "@/lib/fairValue";
+
+// Line-shopping win: how much better the BEST posted price is than the field average, in
+// probability terms. A meaningful gap means you're getting a materially better number than the
+// typical book — a real deal even when it doesn't beat the theoretical no-vig fair.
+const SHOP_WIN = 0.02;
+function shoppingEdge(price: number, byBook?: Record<string, number>): number {
+  const others = byBook ? Object.values(byBook) : [];
+  if (others.length < 2) return 0;
+  const avg = others.reduce((s, p) => s + impliedProb(p), 0) / others.length;
+  return avg - impliedProb(price); // + = best price implies a lower (better-for-you) number than the field
+}
 
 const fmtOdds = (p: number) => (p > 0 ? `+${p}` : String(p));
 const pct = (p: number) => `${Math.round(p * 100)}%`;
@@ -52,6 +63,20 @@ function AuditRow({ q, marketLabel, game, saved, cont, onToggle }: {
   q: Quote; marketLabel: string; game: string; saved: boolean; cont: boolean; onToggle: (l: Leg) => void;
 }) {
   const a = auditVerdict(q.price, q.fairProb);
+  const shopEdge = shoppingEdge(q.price, q.byBook);
+  const shopWin = shopEdge >= SHOP_WIN;
+  // Green if it beats the de-vigged fair OR it's a clear line-shopping win over the field.
+  const verdict: AuditVerdict | null =
+    (a && a.verdict === "value") || shopWin ? "value"
+      : a ? a.verdict
+        : shopWin ? "value" : null;
+  const shopWhy = shopWin && !(a && a.verdict === "value");
+  const title =
+    verdict === "value"
+      ? (shopWhy
+        ? `Value — this book pays about ${Math.round(shopEdge * 100)}% better than the field (line-shopping win)`
+        : CIRCLE_TITLE.value)
+      : verdict ? CIRCLE_TITLE[verdict] : "";
   const bet = betLabel(marketLabel, q.side, q.line);
   const name = q.slot ? `${q.player} (${q.slot})` : q.player;
   const leg: Leg = {
@@ -70,8 +95,8 @@ function AuditRow({ q, marketLabel, game, saved, cont, onToggle }: {
         {fair !== null ? <>{fmtOdds(fair)} <small className="aucell__sub aucell__sub--model">{pct(q.fairProb!)}</small></> : <span className="aucell__sub">one-sided</span>}
       </span>
       <span className="aucell aucell--deal">
-        {a ? (
-          <span className={`aucircle aucircle--${a.verdict}`} role="img" aria-label={CIRCLE_TITLE[a.verdict]} title={CIRCLE_TITLE[a.verdict]} />
+        {verdict ? (
+          <span className={`aucircle aucircle--${verdict}${shopWhy ? " aucircle--shop" : ""}`} role="img" aria-label={title} title={title} />
         ) : (
           <span className="aucircle aucircle--na" role="img" aria-label="No fair price — this market has no posted other side to de-vig" title="No posted other side to de-vig — shop the best price on Player Props" />
         )}
@@ -139,7 +164,7 @@ export default function AuditView({ games, today, tomorrow }: { games: PropGame[
   return (
     <>
       <div className="aulegend" aria-hidden="true">
-        <span className="aulegend__i"><span className="aucircle aucircle--value" /> Value — beats fair</span>
+        <span className="aulegend__i"><span className="aucircle aucircle--value" /> Value — beats fair or the field</span>
         <span className="aulegend__i"><span className="aucircle aucircle--fair" /> Fair — normal price</span>
         <span className="aulegend__i"><span className="aucircle aucircle--cheat" /> Overpriced</span>
       </div>

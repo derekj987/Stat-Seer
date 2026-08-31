@@ -276,10 +276,6 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
       </div>
       <WeekNav min={min} max={max} current={week} base="/model" />
 
-      <div className="pinrow">
-        <PinButton pin={{ id: "/model", kind: "model", label: "The Model · Game Model", detail: `NFL · Week ${week}`, href: `/model?week=${week}` }} />
-      </div>
-
       {preds.length === 0 ? (
         <p className="foot">No reads published for Week {week} yet.</p>
       ) : (
@@ -287,6 +283,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
           <summary className="hb-bar">
             <span className="hb-bar__title hb-bar__title--gold">Week {week} Full Model</span>
             <span className="hb-bar__count">{preds.length} games</span>
+            <PinButton size="sm" pin={{ id: "/model", kind: "model", label: "The Model · Game Model", detail: `NFL · Week ${week}`, href: `/model?week=${week}` }} />
             <span className="hb-bar__chev" aria-hidden="true">▾</span>
           </summary>
           <div className="hb-body">

@@ -6,6 +6,7 @@ import { abbrevTeam } from "@/lib/ncaafAbbrev";
 import { NcaafCardHead, NcaafGameCell } from "../CardCells";
 import { fetchCfbScores, scoreFor, type CfbScores } from "@/lib/cfbScores";
 import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
+import PinButton from "../../PinButton";
 import { marketGap } from "../lean";
 import { etToday, groupByGameDay } from "@/lib/gameDays";
 import { DayHeader } from "../../DayHeader";
@@ -80,6 +81,7 @@ export default async function Page({ searchParams }: {
       <FlowSteps active="analyze" base="ncaaf" />
       <ModelSubnav active="game" base="ncaaf" />
       <NcaafWeekNav base="/ncaaf/model" week={week} />
+      <div className="pinrow"><PinButton pin={{ id: "/ncaaf/model", kind: "model", label: "NCAAF · The Model", detail: `Week ${week}`, href: `/ncaaf/model?week=${week}` }} /></div>
       <NcaafOffWeek current={c.week} week={week} />
 
       {/* The honest record — what it is, how well it does, and why we show it — folded away. */}

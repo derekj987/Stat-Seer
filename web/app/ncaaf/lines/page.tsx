@@ -1,5 +1,6 @@
 import { Brand, FlowSteps, ShopSubnav, WeekBadge } from "../../Nav";
 import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
+import PinButton from "../../PinButton";
 import Tip from "@/app/Tip";
 import { NCAAF_MODEL } from "../model-data";
 import { StatCard } from "../StatCard";
@@ -47,6 +48,7 @@ export default async function Page({ searchParams }: {
       <FlowSteps active="value" base="ncaaf" />
       <div className="subnavrow"><ShopSubnav active="lines" base="ncaaf" /></div>
       <NcaafWeekNav base="/ncaaf/lines" week={week} />
+      <div className="pinrow"><PinButton pin={{ id: "/ncaaf/lines", kind: "lines", label: "NCAAF · Line Shopping", detail: `Week ${week}`, href: `/ncaaf/lines?week=${week}` }} /></div>
       <NcaafOffWeek current={c.week} week={week} />
 
       <section className="ncf-sec">

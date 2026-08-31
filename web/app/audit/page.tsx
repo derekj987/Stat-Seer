@@ -97,11 +97,12 @@ export default async function Page({ searchParams }: PageProps<"/audit">) {
               check for yourself.
             </p>
             <p>
-              <b>Green is rare — and that&apos;s the point.</b> Every price a book posts already sits a little worse
-              than the true no-vig number (that gap is how the book makes money), so a green means a book is
-              actually paying <em>better</em> than fair — a real edge. In an efficient market those don&apos;t come
-              along often, which is exactly why we don&apos;t light one up unless it&apos;s earned. Most prices land
-              fair (white); the juiciest ones are red. When a green does appear, it&apos;s worth a look.
+              <b>A green is a real deal, earned two ways.</b> Either the price <b>beats the true no-vig fair</b>
+              (a genuine edge — rare, because every posted price normally sits a little worse than fair, and that
+              gap is how the book makes money), <b>or</b> it&apos;s a <b>line-shopping win</b>: the best book is
+              paying materially more than the rest of the field on that exact bet, so you pocket the difference by
+              placing it there. Most prices land fair (white); the juiciest are red. When a green shows up, it&apos;s
+              worth a look.
             </p>
             <p>
               A one-sided market with no posted opposite side can&apos;t be de-vigged — for those, compare the

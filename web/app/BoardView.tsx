@@ -9,6 +9,7 @@ import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
 import { groupByGameDay, dayBasis } from "@/lib/gameDays";
 import { DayHeader } from "./DayHeader";
 import { audit, VERDICT_LABEL } from "@/lib/fairValue";
+import PinButton from "./PinButton";
 
 const WX_BY_EVENT = new Map(GAME_WEATHER.map((w) => [w.eventId, w]));
 
@@ -187,6 +188,10 @@ export default function BoardView({
         <div className="subnavrow"><ShopSubnav active="lines" /></div>
 
         <WeekNav min={min} max={max} current={week} base="/lines" />
+
+        <div className="pinrow">
+          <PinButton pin={{ id: "/lines", kind: "lines", label: "Value Finder · Line Shopping", detail: `NFL · Week ${week}`, href: `/lines?week=${week}` }} />
+        </div>
 
         {board.length === 0 ? (
           <p className="foot">No odds captured for Week {week} yet.</p>

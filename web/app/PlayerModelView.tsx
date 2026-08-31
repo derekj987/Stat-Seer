@@ -10,6 +10,7 @@ import { PLAYER_PROJECTIONS, PROJ_WEEK, PROJ_PRIOR, type PlayerProj } from "@/li
 import { NCAAF_PLAYER_PROJECTIONS } from "@/lib/ncaafPlayerProjections";
 import { isRealistic } from "@/lib/depthChart";
 import PropAdd, { type PricedSide } from "./PropAdd";
+import PinButton from "./PinButton";
 import { playerSlot, normName } from "@/lib/playerSlot";
 import { weekProps } from "@/lib/props";
 import { cfbWeekProps } from "@/lib/cfbProps";
@@ -119,6 +120,10 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
       </nav>
 
       <WeekNav current={week} base={base === "ncaaf" ? "/ncaaf/model/players" : "/model/players"} params={`cat=${active.key}`} />
+
+      <div className="pinrow">
+        <PinButton pin={{ id: `${home}?cat=${active.key}`, kind: "model", label: `Player Prop Model · ${active.label}`, detail: `${base === "ncaaf" ? "NCAAF" : "NFL"} · Week ${week}`, href: `${catHref(active.key)}` }} />
+      </div>
 
       <section className="pmcat">
         {rows.length === 0 ? (

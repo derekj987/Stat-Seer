@@ -6,6 +6,7 @@ import { fetchHome, type CardRow, type UpsetRow, type PlayerPick } from "@/lib/h
 import { fetchWeek, buildBoard } from "@/lib/board";
 import { NCAAF_MODEL, type NcaafCardGame, type NcaafUpset } from "./ncaaf/model-data";
 import LandingHub, { type VfRow } from "./LandingHub";
+import { createClient } from "@/lib/supabase/server";
 import HomePromo from "./HomePromo";
 
 export const metadata = {
@@ -37,6 +38,14 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
       return [{ eventId: g.eventId, away: g.away, home: g.home, line: `${team} ${line.point > 0 ? "+" : ""}${line.point}`, price: line.price, books: line.books }];
     });
   } catch { /* odds not up yet */ }
+
+  // Members see ＋ Add-to-dashboard on the homepage panels; signed-out visitors don't.
+  let isMember = false;
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    isMember = !!user;
+  } catch { /* auth env not configured */ }
 
   const cfb = NCAAF_MODEL.card;
   const ncaaf = {
@@ -187,7 +196,7 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
         </ol>
       </section>
 
-      <LandingHub initialSport={initialSport} nfl={nfl} ncaaf={ncaaf} vf={vf} />
+      <LandingHub initialSport={initialSport} nfl={nfl} ncaaf={ncaaf} vf={vf} isMember={isMember} />
 
       {/* Public track record — the trust engine. Honest preseason state until games grade. */}
       <section className="lp-record" aria-label="Track record">

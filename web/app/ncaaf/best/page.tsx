@@ -1,5 +1,6 @@
 import { Brand, FlowSteps, ShopSubnav, WeekBadge } from "../../Nav";
 import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
+import PinButton from "../../PinButton";
 import { NCAAF_MODEL, type NcaafKeyNum } from "../model-data";
 import { StatCard } from "../StatCard";
 import NcaafSweetSpots from "./NcaafSweetSpots";
@@ -34,6 +35,7 @@ export default async function Page({ searchParams }: {
       <FlowSteps active="value" base="ncaaf" />
       <ShopSubnav active="best" base="ncaaf" />
       <NcaafWeekNav base="/ncaaf/best" week={week} />
+      <div className="pinrow"><PinButton pin={{ id: "/ncaaf/best", kind: "sweetspots", label: "NCAAF · Sweet Spots", detail: `Week ${week}`, href: `/ncaaf/best?week=${week}` }} /></div>
       <NcaafOffWeek current={M.card.week} week={week} />
 
       <NcaafSweetSpots games={M.card.games} keyNums={v.keyNumbers} week={M.card.week} {...etToday()} />
