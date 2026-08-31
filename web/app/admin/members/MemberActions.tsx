@@ -13,6 +13,19 @@ export default function MemberActions({ id, username, status }: { id: string; us
 
   async function set(next: "approved" | "rejected" | "pending") {
     setBusy(next); setErr("");
+    // Approving goes through the API so the member is emailed a welcome; reject/revoke use the RPC.
+    if (next === "approved") {
+      try {
+        const res = await fetch("/api/beta/approve", {
+          method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ memberId: id }),
+        });
+        const j = await res.json().catch(() => ({}));
+        setBusy(null);
+        if (!res.ok || j.error) { setErr(j.error || "Couldn't approve — try again."); return; }
+        router.refresh();
+      } catch { setBusy(null); setErr("Couldn't approve — try again."); }
+      return;
+    }
     const { error } = await createClient().rpc("set_member_status", { target: id, new_status: next });
     setBusy(null);
     if (error) { setErr(error.message || "Couldn't update — try again."); return; }

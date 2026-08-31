@@ -43,6 +43,7 @@ export interface CreatorStats {
   membersThisWeek: number | null;
   feedbackTotal: number | null;
   reportsOpen: number | null;
+  pendingBeta: number | null;
   threads: number | null;
   replies: number | null;
   visitsTotal: number | null;   // null => site_visits table not set up yet
@@ -55,7 +56,7 @@ export async function getCreatorStats(): Promise<CreatorStats> {
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
   const [
-    members, membersThisWeek, feedbackTotal, reportsOpen, threads, replies,
+    members, membersThisWeek, feedbackTotal, reportsOpen, threads, replies, pendingBeta,
     recentMembers, recentFeedback, visitRows,
   ] = await Promise.all([
     count("profiles?select=id"),
@@ -64,6 +65,7 @@ export async function getCreatorStats(): Promise<CreatorStats> {
     count("reports?select=id&resolved=eq.false"),
     count("threads?select=id"),
     count("replies?select=id"),
+    count("profiles?select=id&status=eq.pending"),
     rows<{ username: string; created_at: string }>("profiles?select=username,created_at&order=created_at.desc&limit=6"),
     rows<{ message: string; created_at: string; email: string | null }>("feedback?select=message,created_at,email&order=created_at.desc&limit=5"),
     rows<{ day: string; hits: number }>("site_visits?select=day,hits"),
@@ -78,7 +80,7 @@ export async function getCreatorStats(): Promise<CreatorStats> {
     : null;
 
   return {
-    members, membersThisWeek, feedbackTotal, reportsOpen, threads, replies,
+    members, membersThisWeek, feedbackTotal, reportsOpen, threads, replies, pendingBeta,
     visitsTotal, visits7d, recentMembers, recentFeedback,
   };
 }

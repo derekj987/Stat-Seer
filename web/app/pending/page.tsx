@@ -17,6 +17,8 @@ export default function Pending() {
       setEmail(data.user.email ?? null);
       const { data: prof } = await sb.from("profiles").select("status").eq("id", data.user.id).maybeSingle();
       if (prof?.status === "approved") { location.href = "/nfl"; return; }
+      // Let the ops inbox know a request is waiting (server sends once, then flags it).
+      fetch("/api/beta/notify", { method: "POST" }).catch(() => {});
       setChecking(false);
     });
   }, []);

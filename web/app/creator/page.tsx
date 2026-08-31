@@ -58,6 +58,9 @@ export default async function CreatorPage() {
           sub={s.visitsTotal === null ? "run ingest/creator.sql to enable" : <><b>{n(s.visits7d)}</b> in the last 7 days</>} />
         <Stat label="Feedback received" value={n(s.feedbackTotal)} href="/feedback"
           sub="acted-on tracking coming · open inbox →" />
+        <Stat label="Beta requests" value={n(s.pendingBeta)} href="/admin/members"
+          tone={s.pendingBeta ? "flag" : undefined}
+          sub={s.pendingBeta ? "awaiting approval — review →" : "none waiting ✓"} />
         <Stat label="Flagged posts" value={n(s.reportsOpen)} href="/forum/reports"
           tone={s.reportsOpen ? "flag" : undefined}
           sub={s.reportsOpen ? "open reports to review →" : "all clear ✓"} />

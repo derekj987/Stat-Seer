@@ -19,7 +19,6 @@ const LINKS = [
   { href: "/lines", label: "Value Finder", on: (p: string) => ["/lines", "/props", "/preseason", "/best"].some((x) => p.startsWith(x)) },
   { href: "/forum", label: "Community", on: (p: string) => p.startsWith("/forum") },
 ];
-const MOD = ["founder", "admin"];
 
 export default function SiteNav() {
   const pathname = usePathname() || "/";
@@ -218,9 +217,7 @@ export default function SiteNav() {
                 {me.role === "founder" && <a href="/creator" className="snav__dusr snav__mi--founder">★ Creator dashboard</a>}
                 <a href={`/u/${me.username}`} className="snav__dusr">My profile</a>
                 <a href="/settings" className="snav__dusr">Account settings</a>
-                {MOD.includes(me.role) && <a href="/admin/members" className="snav__dusr">Beta approvals</a>}
-                {MOD.includes(me.role) && <a href="/forum/reports" className="snav__dusr">Reports</a>}
-                {MOD.includes(me.role) && <a href="/feedback" className="snav__dusr">Feedback inbox</a>}
+                {/* Beta approvals, Reports & Feedback live in the Creator dashboard now. */}
                 <button type="button" className="snav__dusr" onClick={logout}>Log out</button>
               </>
             ) : (
