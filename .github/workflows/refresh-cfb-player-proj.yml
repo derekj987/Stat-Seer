@@ -1,9 +1,9 @@
 name: Refresh CFB player projections
 
-# Rebuilds web/lib/ncaafPlayerProjections.ts (the /ncaaf/model/players data) from CFBD game
-# logs + the current book props in Supabase (cfb_prop_snapshots), then commits it — Vercel
-# auto-deploys. Daily in-season: the projections' historical over-rates are computed vs the
-# CURRENTLY posted line, so they should track the book as lines move and new games play.
+# Rebuilds web/lib/ncaafPlayerProjections.ts (the /ncaaf/model/players data), then commits it —
+# Vercel auto-deploys. The board is driven by the UPCOMING slate x depth charts (every game gets
+# our line-blind projections), with a book line attached where cfb_prop_snapshots has one.
+# Daily in-season so new games/props flow in and hit-rates track the posted line as it moves.
 # Runs after the noon props capture (capture-cfb-props at 12:00 UTC) so it sees fresh lines.
 # All times UTC.
 
@@ -30,6 +30,14 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install --quiet certifi
+
+      # The projector reads data/cfb.db for the UPCOMING slate (which games to project) — that
+      # file is gitignored and absent on a fresh runner, so rebuild the current-season schedule
+      # + scores from CFBD first. Without it upcoming_games() is empty and nothing regenerates.
+      - name: Rebuild cfb.db — current-season schedule + scores
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+        run: python cfb_backfill.py --start 2026 --end 2026
 
       # Current depth charts drive role-adjusted volume (a promoted RB is projected on a
       # starter's carries). Scrape first so the projector reads a fresh cfb_depth.json.
