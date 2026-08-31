@@ -1753,6 +1753,43 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .dash__p b{color:var(--ink)}
 .dash__pinex{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:6px;
   padding:1px 7px;font-size:12px;font-weight:700}
+/* AI chart builder */
+.cbuild{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:14px 16px;margin:0 0 20px}
+.cbuild__head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:14px}
+.cbuild__x{border:0;background:none;color:var(--muted);cursor:pointer;font-size:14px}
+.cbuild__form{display:flex;gap:8px}
+.cbuild__in{flex:1;min-width:0;border:1px solid var(--line);border-radius:9px;padding:9px 12px;font:inherit;font-size:13.5px;background:var(--bg);color:var(--ink)}
+.cbuild__in:focus{outline:2px solid var(--accent);outline-offset:1px}
+.cbuild__go{flex:0 0 auto;padding:9px 16px;font-size:13.5px}
+.cbuild__ex{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.cbuild__exbtn{border:1px solid var(--line);background:var(--bg);color:var(--muted);border-radius:999px;
+  font:inherit;font-size:12px;padding:4px 11px;cursor:pointer}
+.cbuild__exbtn:hover{border-color:var(--accent);color:var(--accent)}
+.cbuild__msg{font-size:13px;color:var(--muted);margin:10px 0 0;line-height:1.5}
+.cbuild__preview{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.cbuild__pvhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.cbuild__pvtitle{font-weight:800;font-size:14px}
+.btn--sm{padding:6px 12px;font-size:12.5px;border-radius:9px}
+.cbuild__warn{font-size:11.5px;color:var(--muted);margin:10px 0 0;font-style:italic}
+
+/* Rendered chart (table / bars), used in the builder preview + pinned chart cards */
+.dashchart{padding:12px 14px 14px}
+.chartscroll{overflow-x:auto}
+.charttbl{width:100%;border-collapse:collapse;font-size:13px;min-width:420px}
+.charttbl th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);
+  font-weight:700;padding:6px 12px 6px 0;border-bottom:1px solid var(--line);white-space:nowrap}
+.charttbl td{padding:8px 12px 8px 0;border-bottom:1px solid var(--surface-2);white-space:nowrap}
+.charttbl tr:last-child td{border-bottom:0}
+.charttbl__num{font-family:var(--font-mono);font-weight:600;color:var(--model)}
+.chartrender__empty{color:var(--muted);font-size:13px;padding:6px 0}
+.chartrender__note{color:var(--muted);font-size:12px;margin:8px 0 0}
+.chartbars{display:flex;flex-direction:column;gap:7px}
+.chartbar{display:grid;grid-template-columns:minmax(90px,1.3fr) 3fr auto;gap:10px;align-items:center;font-size:12.5px}
+.chartbar__lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chartbar__track{height:12px;border-radius:6px;background:var(--surface-2);overflow:hidden}
+.chartbar__fill{display:block;height:100%;background:#1e5bc4;forced-color-adjust:none}
+.chartbar__val{font-family:var(--font-mono);font-weight:700;color:var(--model);text-align:right}
+
 /* Live embeds: each pinned view is the actual chart in an auto-sized iframe, stacked full-width. */
 .dash__embeds{display:flex;flex-direction:column;gap:16px}
 .dashembed{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}

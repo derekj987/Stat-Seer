@@ -7,7 +7,13 @@ import { useState } from "react";
 
 export default function DashboardAssistant() {
   const [open, setOpen] = useState(false);
-  const openAssistant = () => { try { window.dispatchEvent(new CustomEvent("ss:open-assistant")); } catch { /* SSR */ } };
+  const startBuilding = () => {
+    try {
+      const el = document.getElementById("cbuild");
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+      el?.querySelector<HTMLInputElement>(".cbuild__in")?.focus();
+    } catch { /* SSR */ }
+  };
 
   return (
     <div className="dashai">
@@ -40,7 +46,7 @@ export default function DashboardAssistant() {
               correct it.
             </p>
             <div className="dashai__actions">
-              <button type="button" className="btn btn--primary dashai__cta" onClick={openAssistant}>Chat with the assistant</button>
+              <button type="button" className="btn btn--primary dashai__cta" onClick={startBuilding}>Build a chart →</button>
               <button type="button" className="dashai__less" onClick={() => setOpen(false)}>Maybe later</button>
             </div>
           </div>

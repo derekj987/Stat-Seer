@@ -6,14 +6,17 @@
 // across tabs. Per-device for now (like the slip); a Supabase-backed sync is a later upgrade.
 import { useCallback, useEffect, useState } from "react";
 
+import type { ChartSpec } from "@/lib/chartSources"; // type-only: no server code pulled in
+
 export type PinKind = "auditor" | "model" | "props" | "lines" | "sweetspots" | "considerations" | "chart" | "view";
 
 export interface Pin {
-  id: string;        // stable + unique (usually the href)
+  id: string;        // stable + unique (usually the href, or a chart id)
   kind: PinKind;
   label: string;     // what the member sees, e.g. "Pick Auditor · Passing"
   detail?: string;   // secondary line, e.g. "NFL · Week 1"
-  href: string;      // where tapping the pin takes them
+  href: string;      // where tapping the pin takes them (empty for AI charts)
+  spec?: ChartSpec;  // kind:"chart" — the AI-built chart's data-source spec (re-fetched live)
 }
 
 const KEY = "statseer.dashboard.v1";

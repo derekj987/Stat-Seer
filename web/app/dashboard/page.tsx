@@ -4,6 +4,7 @@ import { Brand } from "../Nav";
 import ProfileDashToggle from "../ProfileDashToggle";
 import DashboardView from "./DashboardView";
 import DashboardAssistant from "./DashboardAssistant";
+import ChartBuilder from "./ChartBuilder";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,7 @@ export default async function DashboardPage() {
 
       <section className="dash">
         <DashboardAssistant />
+        <div id="cbuild"><ChartBuilder /></div>
         <DashboardView />
       </section>
     </main>

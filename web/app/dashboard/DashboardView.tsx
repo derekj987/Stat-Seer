@@ -4,6 +4,8 @@
 // chrome-less embed mode (?embed=1), auto-sized to the whole chart via postMessage. Not a link.
 import { useEffect, useRef, useState } from "react";
 import { useDashboard, type Pin, type PinKind } from "@/lib/dashboard";
+import type { ChartData } from "@/lib/chartSources";
+import ChartRender from "./ChartRender";
 
 const KIND_ICON: Record<PinKind, string> = {
   auditor: "🎯", model: "📊", props: "🎲", lines: "💰", sweetspots: "🍬",
@@ -47,6 +49,41 @@ function EmbedCard({ pin, onRemove }: { pin: Pin; onRemove: (id: string) => void
   );
 }
 
+function ChartCard({ pin, onRemove }: { pin: Pin; onRemove: (id: string) => void }) {
+  const [data, setData] = useState<ChartData | null>(null);
+  const [err, setErr] = useState("");
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/dashboard-chart", {
+          method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ spec: pin.spec }),
+        });
+        const j = await res.json();
+        if (!alive) return;
+        if (j.chart) setData(j.chart); else setErr(j.error || "Couldn't load this chart.");
+      } catch { if (alive) setErr("Couldn't load this chart."); }
+    })();
+    return () => { alive = false; };
+  }, [pin.spec]);
+
+  return (
+    <div className="dashembed">
+      <div className="dashembed__bar">
+        <span className="dashembed__icon" aria-hidden="true">📈</span>
+        <span className="dashembed__label">{pin.label}</span>
+        {pin.detail && <span className="dashembed__detail">{pin.detail}</span>}
+        <button type="button" className="dashembed__x" title="Remove from dashboard"
+          aria-label={`Remove ${pin.label}`} onClick={() => onRemove(pin.id)}>✕</button>
+      </div>
+      <div className="dashchart">
+        {data ? <ChartRender data={data} /> : err ? <p className="chartrender__empty">{err}</p> : <p className="chartrender__empty">Loading…</p>}
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardView() {
   const { pins, remove } = useDashboard();
 
@@ -69,7 +106,9 @@ export default function DashboardView() {
 
   return (
     <div className="dash__embeds">
-      {pins.map((p) => <EmbedCard key={p.id} pin={p} onRemove={remove} />)}
+      {pins.map((p) => p.kind === "chart" && p.spec
+        ? <ChartCard key={p.id} pin={p} onRemove={remove} />
+        : <EmbedCard key={p.id} pin={p} onRemove={remove} />)}
     </div>
   );
 }
