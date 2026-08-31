@@ -1778,9 +1778,22 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .pinbtn.pinned{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 40%,var(--line));color:var(--accent)}
 .pinbtn--sm{font-size:11.5px;padding:4px 10px}
 .pinbtn__ic{font-weight:800}
+/* Board picker popover — shown when adding a pin and the member has more than one board. */
+.pinbtn-wrap{position:relative;display:inline-flex}
+.pinmenu{position:absolute;top:calc(100% + 6px);right:0;z-index:70;min-width:184px;padding:6px;
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.16);
+  display:flex;flex-direction:column;gap:2px;text-align:left}
+.pinmenu__hd{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:4px 8px 6px}
+.pinmenu__item{display:flex;align-items:center;gap:8px;border:0;background:none;cursor:pointer;font:inherit;
+  font-size:13px;font-weight:700;color:var(--ink);text-align:left;padding:7px 9px;border-radius:8px;width:100%}
+.pinmenu__item:hover{background:var(--accent-soft)}
+.pinmenu__name{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pinmenu__n{font-size:10.5px;font-weight:800;color:var(--muted);background:var(--surface-2);border-radius:20px;padding:1px 6px}
+.pinmenu__on{color:var(--accent);font-weight:800}
+.pinmenu__item--new{color:var(--accent);border-top:1px solid var(--line);border-radius:0 0 8px 8px;margin-top:3px;padding-top:9px}
 /* Pin sitting inside a panel header/summary bar — pushed to the right, before the chevron. */
-.hb-bar .pinbtn,.ncf-h .pinbtn{margin-left:auto}
-.hb-bar .pinbtn+.hb-bar__chev{margin-left:11px}
+.hb-bar .pinbtn-wrap,.ncf-h .pinbtn-wrap{margin-left:auto}
+.hb-bar .pinbtn-wrap+.hb-bar__chev{margin-left:11px}
 @media(max-width:560px){.pinbtn--sm .pinbtn__lbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}}
 
 /* --- Embed mode (a page shown inside a Custom Dashboard card's iframe): hide all site chrome
@@ -1791,7 +1804,7 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 [data-embed] .catnav,[data-embed] .pinrow,[data-embed] .foot,[data-embed] .aiw,
 [data-embed] .lp-drawer,[data-embed] .vf-drawer,[data-embed] .pdtogglerow,
 [data-embed] .betslippromo{display:none!important}
-[data-embed] .pinbtn{display:none!important}
+[data-embed] .pinbtn,[data-embed] .pinbtn-wrap{display:none!important}
 [data-embed] body{background:transparent}
 [data-embed] .wrap,[data-embed] main.wrap{padding:6px 10px 10px!important;max-width:none!important;margin:0!important}
 /* Preview cap: a fade over the clipped chart + a "Show all" dropdown (injected by EmbedMode). */

@@ -133,6 +133,24 @@ export function useDashboard() {
     return { ...s, boards: stripped.map((b) => b.id === boardId ? { ...b, pins: [...b.pins, moved as Pin] } : b) };
   }), [mutate]);
 
+  // Add a NEW pin to a specific board (no-op if it's already pinned anywhere — use moveToBoard
+  // to relocate an existing pin). Powers the board-picker on the ＋ Add-to-dashboard button.
+  const addToBoard = useCallback((pin: Pin, boardId: string) => mutate((s) => {
+    if (s.boards.some((b) => b.pins.some((p) => p.id === pin.id))) return s;
+    return { ...s, boards: s.boards.map((b) => b.id === boardId ? { ...b, pins: [...b.pins, pin] } : b) };
+  }), [mutate]);
+
+  // Create a fresh board holding just this pin, and make it active.
+  const addToNewBoard = useCallback((pin: Pin, name?: string) => mutate((s) => {
+    const id = newId();
+    const nm = (name || `Board ${s.boards.length + 1}`).slice(0, 40);
+    const boards = s.boards.map((b) => ({ ...b, pins: b.pins.filter((p) => p.id !== pin.id) }));
+    return { boards: [...boards, { id, name: nm, pins: [pin] }], activeId: id };
+  }), [mutate]);
+
+  /** The board id currently holding a pin (or null) — for showing where a pin already lives. */
+  const boardOf = useCallback((id: string) => boards.find((b) => b.pins.some((p) => p.id === id))?.id ?? null, [boards]);
+
   const setActive = useCallback((id: string) => mutate((s) => ({ ...s, activeId: id })), [mutate]);
 
   const addBoard = useCallback((name?: string) => mutate((s) => {
@@ -154,7 +172,7 @@ export function useDashboard() {
 
   return {
     boards, activeId, active, pins,
-    has, toggle, remove, setSize, reorder, moveToBoard,
+    has, boardOf, toggle, remove, setSize, reorder, moveToBoard, addToBoard, addToNewBoard,
     setActive, addBoard, renameBoard, deleteBoard,
   };
 }

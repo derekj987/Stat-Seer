@@ -14,6 +14,26 @@ export default function Dock() {
   const [active, setActive] = useState<Tool | null>(null);
   const [expanded, setExpanded] = useState(false);          // mobile slide-out
   const [friends, setFriends] = useState<{ member: boolean; unread: number; requests: number; username?: string; avatarUrl?: string | null }>({ member: false, unread: 0, requests: 0 });
+  // "What's awaiting me" — friend requests for everyone, plus beta approvals + flagged posts for
+  // founders/admins. Polled from /api/awaiting; drives the master badge on the profile avatar.
+  const [awaiting, setAwaiting] = useState<{ friendRequests: number; betaRequests: number; reports: number }>({ friendRequests: 0, betaRequests: 0, reports: 0 });
+
+  useEffect(() => {
+    if (!friends.member) return;
+    let alive = true;
+    const load = async () => {
+      try {
+        const r = await fetch("/api/awaiting", { cache: "no-store" });
+        const j = await r.json();
+        if (alive) setAwaiting({ friendRequests: j.friendRequests ?? 0, betaRequests: j.betaRequests ?? 0, reports: j.reports ?? 0 });
+      } catch { /* offline — keep last counts */ }
+    };
+    load();
+    const iv = setInterval(load, 60000);
+    const onFocus = () => load();
+    window.addEventListener("focus", onFocus);
+    return () => { alive = false; clearInterval(iv); window.removeEventListener("focus", onFocus); };
+  }, [friends.member]);
 
   const open = (t: Tool) => { setActive(t); setExpanded(false); };
   const close = () => setActive(null);
@@ -51,17 +71,29 @@ export default function Dock() {
             {expanded ? "✕" : "⋯"}
           </button>
           <div className="dock__icons">
-            {friends.member && friends.username && (
-              <a className="dock__ic dock__ic--profile"
-                data-label={friends.requests > 0 ? `${friends.requests} friend request${friends.requests === 1 ? "" : "s"}` : "View my profile"}
-                aria-label={friends.requests > 0 ? `View my profile — ${friends.requests} pending friend request${friends.requests === 1 ? "" : "s"}` : "View my profile"}
-                href={`/u/${friends.username}`}>
-                {friends.avatarUrl
-                  ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={friends.avatarUrl} alt="" className="dock__icimg" />
-                  : <span aria-hidden="true">👤</span>}
-                {friends.requests > 0 && <span className="dock__badge dock__badge--profile">{friends.requests > 9 ? "9+" : friends.requests}</span>}
-              </a>
-            )}
+            {friends.member && friends.username && (() => {
+                // Master "awaiting me" total on the profile avatar: unread messages + friend
+                // requests + (founder) beta approvals + flagged posts. The tooltip spells out
+                // exactly what's waiting so it's clear at a glance.
+                const bits: string[] = [];
+                const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
+                if (friends.unread > 0) bits.push(plural(friends.unread, "unread message"));
+                if (awaiting.friendRequests > 0) bits.push(plural(awaiting.friendRequests, "friend request"));
+                if (awaiting.betaRequests > 0) bits.push(plural(awaiting.betaRequests, "beta request"));
+                if (awaiting.reports > 0) bits.push(plural(awaiting.reports, "flagged post"));
+                const total = friends.unread + awaiting.friendRequests + awaiting.betaRequests + awaiting.reports;
+                const label = bits.length ? bits.join(" · ") : "View my profile";
+                return (
+                  <a className="dock__ic dock__ic--profile" data-label={label}
+                    aria-label={total > 0 ? `View my profile — awaiting: ${bits.join(", ")}` : "View my profile"}
+                    href={`/u/${friends.username}`}>
+                    {friends.avatarUrl
+                      ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={friends.avatarUrl} alt="" className="dock__icimg" />
+                      : <span aria-hidden="true">👤</span>}
+                    {total > 0 && <span className="dock__badge dock__badge--profile">{total > 9 ? "9+" : total}</span>}
+                  </a>
+                );
+              })()}
             <button className="dock__ic dock__ic--pigeon" data-label="Message Us" aria-label="Message Us" onClick={() => open("feedback")}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/pigeon.png" alt="" className="dock__icimg" width={52} height={52}
