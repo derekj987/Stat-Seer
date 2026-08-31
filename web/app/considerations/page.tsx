@@ -14,6 +14,7 @@ import { etToday, groupByGameDay, dayBasis } from "@/lib/gameDays";
 import { DayHeader } from "../DayHeader";
 import CoachTable from "../CoachTable";
 import ConsiderationsFilter from "./ConsiderationsFilter";
+import PinButton from "../PinButton";
 import { NFL_DIV } from "./nflDiv";
 
 const ord = (n: number) => {
@@ -231,6 +232,9 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
         <ContextSubnav active="special" />
       </div>
       <WeekNav min={min} max={max} current={week} base="/considerations" />
+      <div className="pinrow">
+        <PinButton pin={{ id: "/considerations", kind: "considerations", label: "Special Considerations", detail: `NFL · Week ${week}`, href: `/considerations?week=${week}` }} />
+      </div>
 
       {games.length === 0 ? (
         <p className="foot">No games captured for Week {week} yet.</p>

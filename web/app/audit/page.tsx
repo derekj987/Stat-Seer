@@ -5,6 +5,7 @@ import { Brand, FlowSteps, ShopSubnav, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
 import { etToday } from "@/lib/gameDays";
 import AuditView from "./AuditView";
+import PinButton from "../PinButton";
 
 export const revalidate = 120;
 const SEASON = 2026;
@@ -72,6 +73,10 @@ export default async function Page({ searchParams }: PageProps<"/audit">) {
           <span className="ncf-h__note">every prop, checked against the de-vigged market — value · fair · overpriced</span>
         </h2>
 
+        <div className="pinrow">
+          <PinButton pin={{ id: `/audit?cat=${cat.key}`, kind: "auditor", label: `Pick Auditor · ${cat.label}`, detail: `NFL · Week ${week}`, href: `/audit?cat=${cat.key}&week=${week}` }} />
+        </div>
+
         <CatNav current={cat.key} week={week} />
         <WeekNav min={min} max={max} current={week} base="/audit" params={`cat=${cat.key}`} />
         <AuditView games={games} {...etToday()} />
@@ -90,6 +95,13 @@ export default async function Page({ searchParams }: PageProps<"/audit">) {
               price, and <span className="aucircle aucircle--cheat" /> <b>red</b> means it&apos;s worse than a typical
               hold explains. It&apos;s pure arithmetic on the book&apos;s own numbers — transparent and easy to
               check for yourself.
+            </p>
+            <p>
+              <b>Green is rare — and that&apos;s the point.</b> Every price a book posts already sits a little worse
+              than the true no-vig number (that gap is how the book makes money), so a green means a book is
+              actually paying <em>better</em> than fair — a real edge. In an efficient market those don&apos;t come
+              along often, which is exactly why we don&apos;t light one up unless it&apos;s earned. Most prices land
+              fair (white); the juiciest ones are red. When a green does appear, it&apos;s worth a look.
             </p>
             <p>
               A one-sided market with no posted opposite side can&apos;t be de-vigged — for those, compare the

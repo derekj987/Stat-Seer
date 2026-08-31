@@ -4,6 +4,7 @@ import { playerSlot } from "@/lib/playerSlot";
 import { ShopSubnav, Brand, FlowSteps, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
 import PropsView from "./PropsView";
+import PinButton from "../PinButton";
 import { etToday } from "@/lib/gameDays";
 
 export const revalidate = 120;
@@ -81,6 +82,9 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
       ) : (
         <>
           <CatNav current={cat.key} week={week} />
+          <div className="pinrow">
+            <PinButton pin={{ id: `/props?cat=${cat.key}`, kind: "props", label: `Player Props · ${cat.label}`, detail: `NFL · Week ${week}`, href: `/props?cat=${cat.key}&week=${week}` }} />
+          </div>
           <WeekNav min={min} max={max} current={week} base="/props" params={`cat=${cat.key}`} />
           {games.length === 0 ? (
             <p className="foot">

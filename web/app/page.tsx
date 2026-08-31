@@ -182,7 +182,7 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
           </li>
           <li className="lp-howstep lp-howstep--fun">
             <span className="lp-howstep__n">5</span>
-            <div className="lp-howstep__body"><b>Go have fun.</b></div>
+            <div className="lp-howstep__body"><b>Go have fun.</b> <span className="lp-howstep__resp">Bet responsibly.</span></div>
           </li>
         </ol>
       </section>

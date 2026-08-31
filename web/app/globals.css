@@ -1705,6 +1705,50 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
   .aucell--num{font-size:12px}
 }
 
+/* --- Profile ⇄ Dashboard toggle (green pill, like the sport toggle) --- */
+.pdtogglerow{display:flex;justify-content:center;margin:6px 0 4px}
+.pdtogglerow--profile{position:relative;z-index:3;margin-bottom:10px}
+.pdtoggle{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--surface)}
+.pdtoggle__t{display:inline-flex;align-items:center;text-decoration:none;font-weight:800;font-size:13px;
+  letter-spacing:.03em;padding:6px 18px;border-radius:999px;color:var(--muted)}
+.pdtoggle__t.active{background:var(--accent);color:#fff}
+.pdtoggle__t:not(.active):hover{color:var(--ink)}
+
+/* --- Pin-to-dashboard button --- */
+.pinrow{display:flex;justify-content:flex-end;margin:2px 0 8px}
+.pinbtn{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:12.5px;font-weight:700;
+  cursor:pointer;padding:6px 13px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
+.pinbtn:hover{border-color:var(--accent);color:var(--accent)}
+.pinbtn.pinned{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 40%,var(--line));color:var(--accent)}
+.pinbtn--sm{font-size:11.5px;padding:4px 10px}
+
+/* --- Custom Dashboard --- */
+.dash{margin-top:8px}
+.dash__lead{text-align:center;max-width:620px;margin:2px auto 20px}
+.dash__h{font-size:clamp(19px,3vw,26px);font-weight:800;letter-spacing:-.02em;margin:0 0 6px}
+.dash__p{font-size:14px;line-height:1.6;color:var(--muted)}
+.dash__p b{color:var(--ink)}
+.dash__pinex{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:6px;
+  padding:1px 7px;font-size:12px;font-weight:700}
+.dash__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.dashcard{position:relative;display:flex;background:var(--surface);border:1px solid var(--line);border-radius:13px;overflow:hidden}
+.dashcard:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.dashcard__main{flex:1;display:flex;align-items:center;gap:12px;padding:14px 16px;text-decoration:none;color:inherit;min-width:0}
+.dashcard__icon{font-size:22px;flex:0 0 auto}
+.dashcard__text{display:flex;flex-direction:column;gap:2px;min-width:0}
+.dashcard__label{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dashcard__detail{font-size:12px;color:var(--muted)}
+.dashcard__go{margin-left:auto;color:var(--accent);font-weight:800;flex:0 0 auto}
+.dashcard__x{position:absolute;top:6px;right:8px;border:0;background:none;color:var(--muted);cursor:pointer;
+  font-size:12px;line-height:1;padding:3px;border-radius:6px}
+.dashcard__x:hover{color:var(--key);background:var(--surface-2)}
+.dash__empty{text-align:center;max-width:520px;margin:20px auto;padding:34px 24px;border:1px dashed var(--line);
+  border-radius:16px;background:var(--surface)}
+.dash__emptyicon{font-size:34px;display:block;margin-bottom:8px}
+.dash__emptyh{font-size:18px;font-weight:800;margin:0 0 8px}
+.dash__emptyp{font-size:13.5px;line-height:1.6;color:var(--muted);margin:0 0 18px}
+.dash__emptycta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
 .pa__how{margin:18px 0 0;padding-top:14px;border-top:1px solid var(--line)}
 .pa__howsum{cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);list-style:none;display:flex;align-items:center;gap:7px}
 .pa__howsum::-webkit-details-marker{display:none}
@@ -3569,6 +3613,7 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 .lp-howstep__body b{color:var(--ink)}
 .lp-howstep--fun{align-items:center;background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 35%,var(--line))}
 .lp-howstep--fun .lp-howstep__body{color:var(--accent);font-size:15px}
+.lp-howstep__resp{color:var(--muted);font-weight:700;font-size:13px}
 .lp-aha{margin:26px auto;padding:22px;border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));
   border-radius:16px;background:var(--accent-soft);max-width:760px;text-align:center}
 .lp-aha__tag{display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
@@ -3751,10 +3796,10 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 /* Image slides go full-bleed: the artwork spans the entire banner, edge to edge. The
    side-by-side text/emoji is dropped for these — the art carries the promo itself. */
 .hlb__slide--img{padding:0;background:var(--gold-soft)}
-/* Show the ENTIRE artwork at its natural shape — full width, height follows the image, nothing
-   cropped and no side fill. The strip's height simply tracks whatever image is showing. */
-.hlb__slide--img .hlb__img{position:static;width:100%;height:auto;display:block;
-  border:0;border-radius:0;object-fit:unset}
+/* One consistent shape for every slide so the strip never jumps height as it rotates. Crop to a
+   fixed banner aspect, biased to the bottom where each artwork's title sits, so titles stay whole. */
+.hlb__slide--img .hlb__img{position:static;width:100%;height:auto;aspect-ratio:1600/620;
+  object-fit:cover;object-position:center bottom;display:block;border:0;border-radius:0}
 .hlb__slide--img .hlb__body,.hlb__slide--img .hlb__go{display:none}
 /* No bottom scrim — it darkened the gold title/flourish that sits at the bottom of the art.
    The dots and arrows carry their own backgrounds, so they stay legible without it. */

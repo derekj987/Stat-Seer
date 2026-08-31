@@ -8,6 +8,7 @@ import Tip from "../Tip";
 import AddToSlip from "../AddToSlip";
 import { etToday, groupByGameDay, dayBasis } from "@/lib/gameDays";
 import { DayHeader } from "../DayHeader";
+import PinButton from "../PinButton";
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -274,6 +275,10 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         <ModelSubnav active="game" />
       </div>
       <WeekNav min={min} max={max} current={week} base="/model" />
+
+      <div className="pinrow">
+        <PinButton pin={{ id: "/model", kind: "model", label: "The Model · Game Model", detail: `NFL · Week ${week}`, href: `/model?week=${week}` }} />
+      </div>
 
       {preds.length === 0 ? (
         <p className="foot">No reads published for Week {week} yet.</p>

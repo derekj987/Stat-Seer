@@ -3,6 +3,7 @@ import { fetchBets, fetchBestProps, fmtOdds, type KeyPlay, type PropPlay } from 
 import { ShopSubnav, Brand, FlowSteps, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
 import SavableRow from "./SavableRow";
+import PinButton from "../PinButton";
 import { etToday, groupByGameDay, dayBasis } from "@/lib/gameDays";
 import { DayHeader } from "../DayHeader";
 
@@ -85,6 +86,9 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
       <WeekBadge week={week} />
       <FlowSteps active="value" />
       <div className="subnavrow"><ShopSubnav active="best" /></div>
+      <div className="pinrow">
+        <PinButton pin={{ id: "/best", kind: "sweetspots", label: "Sweet Spots · Best Prices", detail: `NFL · Week ${week}`, href: `/best?week=${week}` }} />
+      </div>
       <WeekNav min={min} max={max} current={week} base="/best" />
 
       <details className="readbox">
