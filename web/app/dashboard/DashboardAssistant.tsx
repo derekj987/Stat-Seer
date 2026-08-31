@@ -1,8 +1,8 @@
 "use client";
 
-// The dashboard's AI Robot Knight — greets the member with a speech bubble, and on click
-// expands to explain how it can build charts/tables for them (and the honest caveat that AI
-// makes mistakes). "Chat with the assistant" opens the shared AI Slip Assistant panel.
+// The "Dashboard Creation Center" hero — the headline attraction at the top of the dashboard.
+// The AI Robot Knight sits in a clean framed mascot spot beside the title; "How it works" expands
+// the examples + the honest AI-makes-mistakes caveat. "Build a chart" jumps to the AI builder.
 import { useState } from "react";
 
 export default function DashboardAssistant() {
@@ -16,42 +16,44 @@ export default function DashboardAssistant() {
   };
 
   return (
-    <div className="dashai">
-      <button className="dashai__robot" onClick={() => setOpen((v) => !v)} aria-expanded={open}
-        aria-label={open ? "Hide assistant help" : "What can the assistant do?"}>
+    <section className="dashhero">
+      <div className="dashhero__mascot">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/chatbot-knight.png?v=1" alt="StatSeer AI assistant" className="dashai__img" width={132} height={132} />
-      </button>
+        <img src="/chatbot-knight.png?v=1" alt="StatSeer AI assistant" className="dashhero__img" width={120} height={120} />
+      </div>
 
-      <div className="dashai__bubble">
+      <div className="dashhero__body">
+        <span className="dashhero__kicker">Your space</span>
+        <h1 className="dashhero__title">Dashboard Creation Center</h1>
+        <p className="dashhero__sub">
+          Build your own view of StatSeer — pin any chart into a board, or tell the AI knight what you
+          want to see and he&apos;ll lay it out for you, your way.
+        </p>
+
         {!open ? (
-          <>
-            <p className="dashai__say">
-              Want to create your own dashboard to analyze the data <em>you</em> want to see?
-            </p>
-            <button type="button" className="dashai__more" onClick={() => setOpen(true)}>Tell me more →</button>
-          </>
+          <div className="dashhero__row">
+            <button type="button" className="btn btn--primary dashhero__cta" onClick={startBuilding}>Build a chart with AI →</button>
+            <button type="button" className="dashhero__more" onClick={() => setOpen(true)}>How does this work?</button>
+          </div>
         ) : (
-          <div className="dashai__detail">
-            <p className="dashai__say"><b>I can build your dashboard with you.</b> Just tell me what you want to see — for example:</p>
-            <ul className="dashai__ex">
+          <div className="dashhero__detail">
+            <p className="dashhero__say"><b>I can build your dashboard with you.</b> Just tell me what you want to see — for example:</p>
+            <ul className="dashhero__ex">
               <li>&ldquo;Build a table of the best deals on the Pick Auditor.&rdquo;</li>
               <li>&ldquo;Chart this week&apos;s biggest line-shopping edges.&rdquo;</li>
               <li>&ldquo;Show Josh Allen&apos;s passing-yards line vs our projection.&rdquo;</li>
             </ul>
-            <p className="dashai__say">I&apos;ll pull the numbers from across StatSeer and lay them out right here, your way.</p>
-            <p className="dashai__warn">
+            <p className="dashhero__warn">
               <b>Heads up — AI can make mistakes.</b> Always review the data. If something&apos;s off — a table
-              that doesn&apos;t line up, a cosmetic tweak, or a data issue — just ask me to fix it and I&apos;ll
-              correct it.
+              that doesn&apos;t line up, a cosmetic tweak, or a data issue — just ask me to fix it and I&apos;ll correct it.
             </p>
-            <div className="dashai__actions">
-              <button type="button" className="btn btn--primary dashai__cta" onClick={startBuilding}>Build a chart →</button>
-              <button type="button" className="dashai__less" onClick={() => setOpen(false)}>Maybe later</button>
+            <div className="dashhero__row">
+              <button type="button" className="btn btn--primary dashhero__cta" onClick={startBuilding}>Build a chart →</button>
+              <button type="button" className="dashhero__more" onClick={() => setOpen(false)}>Got it</button>
             </div>
           </div>
         )}
       </div>
-    </div>
+    </section>
   );
 }
