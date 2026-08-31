@@ -47,7 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteNav />
         <SportStrip />
         <LeftRail />
-        {children}
+        <div className="siteshift">{children}</div>
         <SlipBar />
         <Dock />
         <VisitBeacon />

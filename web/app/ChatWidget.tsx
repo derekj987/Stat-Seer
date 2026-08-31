@@ -208,7 +208,10 @@ export default function ChatWidget({ open, onClose, onMeta }:
   useEffect(() => {
     const unread = convs.reduce((a, c) => a + c.unread, 0);
     const reqs = requests.length;
-    onMeta({ member: !!me, unread, requests: reqs, username: me?.username, avatarUrl: me?.avatarUrl });
+    const meta = { member: !!me, unread, requests: reqs, username: me?.username, avatarUrl: me?.avatarUrl };
+    onMeta(meta);
+    // Broadcast so the left rail (which isn't the Dock's child) can show the same unread/avatar.
+    try { window.dispatchEvent(new CustomEvent("ss:chat-meta", { detail: meta })); } catch { /* SSR */ }
     try {
       const nav = navigator as Navigator & { setAppBadge?: (n?: number) => void; clearAppBadge?: () => void };
       const total = unread + reqs;

@@ -398,23 +398,35 @@ a.cw__fname:hover{text-decoration:underline}
 
 /* ===== Unified tool dock (pigeon + friends + assistant) ===== */
 /* Desktop (Option A): an always-visible vertical rail of icon buttons, bottom-right. */
-/* Facebook-style quick-access rail down the left margin (desktop only; the mobile Dock mirrors it).
-   Shown only where the centered 1120px content leaves room in the left margin. */
-.leftrail{position:fixed;left:16px;top:50%;transform:translateY(-50%);z-index:40;display:flex;flex-direction:column;gap:11px;
-  padding:12px 10px;background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:0 8px 26px rgba(0,0,0,.09)}
-.leftrail__it{position:relative;width:46px;height:46px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface-2);
-  display:grid;place-items:center;cursor:pointer;text-decoration:none;font-size:20px;color:var(--ink);padding:0;transition:border-color .12s,transform .12s}
-.leftrail__it:hover{border-color:var(--accent);transform:translateY(-1px)}
-.leftrail__it--profile{border-color:var(--accent);overflow:hidden}
-.leftrail__av{width:100%;height:100%;object-fit:cover}
-.leftrail__ini{font-weight:800;color:var(--accent);font-size:19px}
-.leftrail__icimg{width:30px;height:30px;object-fit:contain}
-.leftrail__it::after{content:attr(data-label);position:absolute;left:56px;top:50%;transform:translateY(-50%);
-  background:#14110a;color:#fff;font-size:12px;font-weight:600;padding:4px 9px;border-radius:6px;white-space:nowrap;
-  opacity:0;pointer-events:none;transition:opacity .12s;z-index:2}
-.leftrail__it:hover::after{opacity:1}
-@media(max-width:1299px){.leftrail{display:none}}
-[data-embed] .leftrail{display:none}
+/* Facebook-style quick-access sidebar down the left margin — on desktop it REPLACES the bottom-right
+   Dock (≥1100px, where the centered content leaves room); phones keep the Dock. Labeled icon+text
+   rows for the member's space. */
+.leftrail{display:none}
+.leftrail__it{position:relative;display:flex;align-items:center;gap:11px;width:100%;padding:8px 10px;border:0;background:none;
+  border-radius:11px;cursor:pointer;text-decoration:none;text-align:left;font:inherit;font-size:13.5px;font-weight:700;color:var(--ink)}
+.leftrail__it:hover{background:var(--accent-soft)}
+.leftrail__ic{width:36px;height:36px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;font-size:18px;
+  background:var(--surface-2);border:1px solid var(--line)}
+.leftrail__it--profile .leftrail__ic{padding:0;overflow:hidden}
+.leftrail__av{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.leftrail__ini{font-weight:800;color:var(--accent);font-size:17px}
+.leftrail__ic--asst{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.leftrail__icimg{width:26px;height:26px;object-fit:contain}
+.leftrail__lbl{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1 1 auto}
+.leftrail__badge{flex:0 0 auto;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#c0392b;color:#fff;
+  font-size:11px;font-weight:800;display:grid;place-items:center}
+.leftrail__notifwrap{position:relative}
+.docknotif--rail{position:absolute;left:calc(100% + 10px);top:0;right:auto;bottom:auto}
+[data-embed] .leftrail{display:none!important}
+[data-embed] .siteshift{padding-left:0!important}
+/* Only reserve the column / hide the Dock when a member is signed in (LeftRail sets data-rail). */
+@media(min-width:1100px){
+  html[data-rail] .leftrail{display:flex;position:fixed;left:16px;top:104px;width:214px;z-index:45;flex-direction:column;gap:2px;
+    padding:8px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 26px rgba(0,0,0,.09);
+    max-height:calc(100vh - 124px);overflow-y:auto}
+  html[data-rail] .dock{display:none}            /* the left rail is the desktop launcher */
+  html[data-rail] .siteshift{padding-left:246px} /* reserve the sidebar column so content doesn't overlap */
+}
 
 .dock{position:fixed;right:18px;bottom:18px;z-index:70;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 .dock__handle{display:none}

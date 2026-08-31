@@ -55,11 +55,14 @@ export default function Dock() {
   useEffect(() => {
     const onOpenChat = () => { setActive("friends"); setExpanded(false); };
     const onOpenAsst = () => { setActive("assistant"); setExpanded(false); };
+    const onOpenFb = () => { setActive("feedback"); setExpanded(false); };
     window.addEventListener("ss:open-chat", onOpenChat);
     window.addEventListener("ss:open-assistant", onOpenAsst);
+    window.addEventListener("ss:open-feedback", onOpenFb);
     return () => {
       window.removeEventListener("ss:open-chat", onOpenChat);
       window.removeEventListener("ss:open-assistant", onOpenAsst);
+      window.removeEventListener("ss:open-feedback", onOpenFb);
     };
   }, []);
 
