@@ -455,7 +455,7 @@ def main():
     ts += "// Prior-season (%d) baseline projections: volume x position efficiency. PRESEASON —\n" % prior
     ts += "// not graded against closing lines yet.\n"
     ts += "export interface PlayerProj { game: string; commence: string; player: string; team: string;\n"
-    ts += "  pos: string; cat: string; market: string; book: number; proj: number; g: number;\n"
+    ts += "  pos: string; cat: string; market: string; book: number | null; proj: number; g: number;\n"
     ts += "  cOver: number; cG: number; pOver: number; pG: number;\n"
     ts += "  hOver: number; hG: number; rOver: number; rG: number;\n"
     ts += "  env?: number | null; envDelta?: number | null }\n"

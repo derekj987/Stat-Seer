@@ -22,7 +22,7 @@ function pctToAmerican(pct: number): number {
 }
 
 export default function PropAdd({ player, market, line, game, slot, over, under, attd }: {
-  player: string; market: string; line: number; game: string; slot?: string | null;
+  player: string; market: string; line: number | null; game: string; slot?: string | null;
   over?: PricedSide | null; under?: PricedSide | null; attd?: PricedSide | null;
 }) {
   const { has, toggle } = useSlip();
@@ -30,9 +30,13 @@ export default function PropAdd({ player, market, line, game, slot, over, under,
   const leg = (side: string, lineKey: number | null, label: string, priced?: PricedSide | null): SlipItem => ({
     id: `pm:${game}:${market}:${player}:${side}:${side === "Yes" ? "" : lineKey}`,
     kind: "prop", title: `${name} ${label}`, detail: game,
-    price: priced?.price ?? (side === "Yes" ? pctToAmerican(line) : -110),
+    price: priced?.price ?? (side === "Yes" ? pctToAmerican(line ?? 0) : -110),
     books: priced?.books, byBook: priced?.byBook,
   });
+
+  // No book line/market yet (a line-blind projection ahead of the market) → nothing to add to a
+  // slip; leave the cell empty until a book posts a number.
+  if (line === null && !over && !under && !attd) return <span className="pmadd pmadd--empty">—</span>;
 
   if (market === "anytime_td") {
     const it = leg("Yes", null, "ATTD", attd);

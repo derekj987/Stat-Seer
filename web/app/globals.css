@@ -2812,6 +2812,7 @@ a.snav__dfeat{display:block}
 .pmcell--add{align-self:center}
 .pmrow--head .pmcell--add{align-self:end}
 .pmadd{display:flex;flex-wrap:wrap;gap:5px}
+.pmadd--empty{color:var(--muted);opacity:.6;font-size:13px;justify-content:center}
 .pmadd__b{appearance:none;cursor:pointer;font:600 11px/1 var(--font-mono,inherit);
   padding:5px 8px;border-radius:7px;border:1px solid var(--line);
   background:var(--surface);color:var(--ink);white-space:nowrap;transition:background .12s,border-color .12s}

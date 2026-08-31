@@ -2,7 +2,7 @@
 // Prior-season (2025) baseline projections: volume x position efficiency. PRESEASON —
 // not graded against closing lines yet.
 export interface PlayerProj { game: string; commence: string; player: string; team: string;
-  pos: string; cat: string; market: string; book: number; proj: number; g: number;
+  pos: string; cat: string; market: string; book: number | null; proj: number; g: number;
   cOver: number; cG: number; pOver: number; pG: number;
   hOver: number; hG: number; rOver: number; rG: number;
   env?: number | null; envDelta?: number | null }

@@ -177,6 +177,10 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                         const hpct = r.hG ? Math.round((100 * r.hOver) / r.hG) : null;
                         const rpct = r.rG ? Math.round((100 * r.rOver) / r.rG) : null;
                         const cls = (v: number | null) => v === null ? "" : v >= 50 ? "pmread--over" : "pmread--under";
+                        // No book line yet (line-blind projection ahead of the market) → show "—"
+                        // for the book number and drop the over/under arrow (nothing to compare to).
+                        const hasBook = r.book !== null;
+                        const projUp = hasBook && r.proj >= (r.book as number);
                         // A continuation row (same player as the row above, e.g. a QB's TD line
                         // under his yards line) blanks the name/team so the block reads as one.
                         const cont = ri > 0 && sec.rows[ri - 1].player === r.player;
@@ -194,10 +198,10 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                                 </span>
                               )}</>}</span>
                             <span className="pmcell pmcell--team">{cont ? "" : r.team}</span>
-                            <span className="pmcell pmcell--num">{r.book}{unitFor(r.market)}</span>
-                            <span className={`pmcell pmcell--num pmcell--proj${r.proj >= r.book ? "" : " pmcell--projdown"}`}>
-                              {r.proj}{unitFor(r.market)}{" "}
-                              <span className={`pmarrow ${r.proj >= r.book ? "pmarrow--up" : "pmarrow--down"}`} aria-hidden="true">{r.proj >= r.book ? "▲" : "▼"}</span>
+                            <span className="pmcell pmcell--num">{hasBook ? <>{r.book}{unitFor(r.market)}</> : "—"}</span>
+                            <span className={`pmcell pmcell--num pmcell--proj${!hasBook || projUp ? "" : " pmcell--projdown"}`}>
+                              {r.proj}{unitFor(r.market)}
+                              {hasBook && <>{" "}<span className={`pmarrow ${projUp ? "pmarrow--up" : "pmarrow--down"}`} aria-hidden="true">{projUp ? "▲" : "▼"}</span></>}
                             </span>
                             <span className={`pmcell pmcell--career ${cls(cpct)}`}>
                               {cpct === null ? "—" : <>{cpct}% <small className="pmcell__sub">{r.cOver}/{r.cG} gm</small></>}

@@ -22,6 +22,7 @@ import argparse
 import json
 import os
 import re
+import sqlite3
 import sys
 import unicodedata
 import urllib.parse
@@ -33,6 +34,24 @@ import odds_client as oc
 CUR_SEASON = 2026
 PRIOR_SEASON = 2025
 HIST_SEASONS = [2024, 2025]        # career = these; prior = PRIOR_SEASON only
+DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "cfb.db")
+
+# Which markets to project for each depth-chart position, and how deep down the chart to go.
+# Kept to the realistic starters/rotation so the board isn't padded with third-stringers.
+POS_MARKETS = {
+    "QB": ["pass_yds", "pass_tds", "anytime_td"],
+    "RB": ["rush_yds", "receptions", "anytime_td"],
+    "WR": ["rec_yds", "receptions", "anytime_td"],
+    "TE": ["rec_yds", "receptions", "anytime_td"],
+    "FB": ["rush_yds", "anytime_td"],
+}
+DEPTH_LIMIT = {"QB": 1, "RB": 2, "WR": 3, "TE": 1, "FB": 1}
+# our market -> (page category, unit label)
+MARKET_CAT = {
+    "pass_yds": ("passing", "yds"), "pass_tds": ("passing", "TD"),
+    "rush_yds": ("rushing", "yds"), "rec_yds": ("receiving", "yds"),
+    "receptions": ("receptions", ""), "anytime_td": ("td", ""),
+}
 
 # CFB prop market -> (our market key, category, projection unit label, position)
 MARKETS = {
@@ -461,6 +480,88 @@ def build(props, key, depth):
     return out, matched, missed
 
 
+def upcoming_games(db, season):
+    """The soonest not-yet-played week's FBS-vs-FBS games (away, home, start_date). Already-played
+    games are excluded — the player model is forward-looking."""
+    if not os.path.exists(db):
+        return None, []
+    conn = sqlite3.connect(db)
+    row = conn.execute(
+        "SELECT MIN(week) FROM games WHERE season=? AND home_class='fbs' AND away_class='fbs' "
+        "AND home_points IS NULL", (season,)).fetchone()
+    wk = row[0] if row else None
+    if wk is None:
+        conn.close()
+        return None, []
+    games = conn.execute(
+        "SELECT away_team, home_team, start_date FROM games WHERE season=? AND week=? "
+        "AND home_class='fbs' AND away_class='fbs' AND home_points IS NULL ORDER BY start_date",
+        (season, wk)).fetchall()
+    conn.close()
+    return wk, games
+
+
+def build_slate(slate, depth, prop_index, key):
+    """Depth-chart-driven projections for an upcoming slate. For every game we project the realistic
+    starters/rotation on each side (DEPTH_LIMIT), whether or not a book has posted a prop yet — so
+    the board is full of our line-blind numbers ahead of the market. A posted prop attaches its line
+    (`book`); otherwise `book` is None and the over-rates use our own projection as the reference."""
+    teams = set()
+    for away, home, _ in slate:
+        teams.add(away)
+        teams.add(home)
+    logs = team_logs(teams, key)
+    per_team, league = rank_baselines(logs)
+
+    out, seen = [], set()
+    for away, home, commence in slate:
+        gk = f"{away} @ {home}"
+        for team in (away, home):
+            for pos, names in (depth.get(team) or {}).items():
+                lim = DEPTH_LIMIT.get(pos, 0)
+                for rank, name in enumerate(names[:lim], start=1):
+                    e = logs.get(norm(name))
+                    if not e or e["team"] != team:
+                        continue                      # no CFBD game log (e.g. true freshman) -> skip
+                    games = e["games"]
+                    for mk in POS_MARKETS.get(pos, []):
+                        if mk != "anytime_td" and not series(games, mk):
+                            continue                  # no history for this stat
+                        sig = (gk, norm(name), mk)
+                        if sig in seen:
+                            continue
+                        proj = project_role(games, mk, pos, rank, team, per_team, league)
+                        if proj is None:
+                            continue
+                        book = prop_index.get(sig)    # posted line/% if a book has it, else None
+                        # Hit-rates are "% over the LINE", so they only mean something when a book
+                        # has posted one. TD rate needs no line (it counts scoring games), so it
+                        # always shows. Yardage/receptions rates stay blank until the line posts.
+                        if mk == "anytime_td":
+                            cO, cG = over_split(games, mk, None, lambda g: True)
+                            pO, pG = over_split(games, mk, None, lambda g: g["season"] == PRIOR_SEASON)
+                            hO, hG = over_split(games, mk, None, lambda g: g["homeAway"] == "home")
+                            rO, rG = over_split(games, mk, None, lambda g: g["homeAway"] == "away")
+                        elif book is not None:
+                            cO, cG = over_split(games, mk, book, lambda g: True)
+                            pO, pG = over_split(games, mk, book, lambda g: g["season"] == PRIOR_SEASON)
+                            hO, hG = over_split(games, mk, book, lambda g: g["homeAway"] == "home")
+                            rO, rG = over_split(games, mk, book, lambda g: g["homeAway"] == "away")
+                        else:
+                            cO = cG = pO = pG = hO = hG = rO = rG = 0   # no line yet -> "—"
+                        cat, _unit = MARKET_CAT[mk]
+                        out.append({
+                            "game": gk, "commence": commence, "player": e["display"],
+                            "team": team, "pos": pos, "cat": cat, "market": mk, "book": book,
+                            "proj": proj,
+                            "g": len([g for g in games if g.get(mk) is not None]) if mk != "anytime_td" else len(games),
+                            "cOver": cO, "cG": cG, "pOver": pO, "pG": pG,
+                            "hOver": hO, "hG": hG, "rOver": rO, "rG": rG,
+                        })
+                        seen.add(sig)
+    return out
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--probe", action="store_true", help="list props + match status, write nothing")
@@ -472,16 +573,23 @@ def main(argv=None):
     if not key:
         print("ERROR: CFBD_API_KEY missing in .env", file=sys.stderr); return 1
 
+    # Posted props are OPTIONAL now: they attach a book line where a book has one, but the board is
+    # driven by the upcoming schedule + depth charts, so it fills in even before any prop posts.
     props = fetch_props()
-    if not props:
-        print("No NCAAF props posted yet (cfb_prop_snapshots empty) — nothing to project.", file=sys.stderr)
-        return 0
-    # Convert Odds API team names to CFBD school names so the game-log pull + match line up.
-    cmap = cfbd_team_map([t for p in props for t in (p["home"], p["away"])], key)
+    if props:
+        # Convert Odds API team names to CFBD school names so the game-log pull + match line up.
+        cmap = cfbd_team_map([t for p in props for t in (p["home"], p["away"])], key)
+        for p in props:
+            p["home"], p["away"] = cmap.get(p["home"], p["home"]), cmap.get(p["away"], p["away"])
+        print(f"{len(props)} posted props across "
+              f"{len({(p['home'], p['away']) for p in props})} games.")
+    else:
+        print("No NCAAF props posted yet — projecting the upcoming slate line-blind (book = —).")
+    # Index posted props by (game, player, our-market) so build_slate can attach the book line.
+    prop_index = {}
     for p in props:
-        p["home"], p["away"] = cmap.get(p["home"], p["home"]), cmap.get(p["away"], p["away"])
-    print(f"{len(props)} posted props across "
-          f"{len({(p['home'], p['away']) for p in props})} games.")
+        mk = MARKETS[p["market"]][0]
+        prop_index[(f"{p['away']} @ {p['home']}", norm(p["player"]), mk)] = p["book"]
 
     # Current depth charts (scraped by cfb_depth) drive role-adjusted volume. Prefer the
     # committed cfb_depth.json; scrape live if it's missing.
@@ -501,12 +609,19 @@ def main(argv=None):
         except Exception as e:                                   # noqa: BLE001
             print(f"  depth-chart unavailable ({e}); projections fall back to raw per-game averages")
 
-    rows, matched, missed = build(props, key, depth)
-    print(f"  matched {matched} to a CFBD game log, missed {missed}. {len(rows)} projection rows.")
+    wk, slate = upcoming_games(DB, CUR_SEASON)
+    if not slate:
+        print(f"No upcoming FBS games found in {DB} (run cfb_backfill.py first).", file=sys.stderr)
+        return 0
+    print(f"  upcoming week {wk}: {len(slate)} games to project.")
+    rows = build_slate(slate, depth, prop_index, key)
+    lined = sum(1 for r in rows if r["book"] is not None)
+    print(f"  {len(rows)} projection rows ({lined} with a posted book line, {len(rows) - lined} line-blind).")
 
     if args.probe:
         for r in rows[:25]:
-            print(f"  {r['player']:22} {r['market']:11} book {r['book']:>5} proj {r['proj']:>6} "
+            bk = "—" if r["book"] is None else r["book"]
+            print(f"  {r['player']:22} {r['market']:11} book {bk:>5} proj {r['proj']:>6} "
                   f"| career {r['cOver']}/{r['cG']} prior {r['pOver']}/{r['pG']}")
         return 0
 
