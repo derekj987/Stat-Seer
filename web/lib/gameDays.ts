@@ -17,6 +17,14 @@ export function etToday(now: number = Date.now()): { today: string; tomorrow: st
 /** The ET day-key for one kickoff ISO (for callers that need to match a single game to a day). */
 export const etDayKey = (iso?: string | null): string => (iso ? ET_DAY.format(new Date(iso)) : "TBD");
 
+/** Inline flex-basis for a packed day-block (used with the `.daygrid` CSS): a small day
+ *  sits beside its neighbours, a big day gets enough width for up to `cols` cards across.
+ *  So consecutive light days (Thu, Fri) pack side-by-side instead of each taking a full row. */
+export function dayBasis(count: number, cols = 3, card = 340, gap = 14): { flexBasis: string } {
+  const n = Math.min(Math.max(count, 1), cols);
+  return { flexBasis: `${n * card + (n - 1) * gap}px` };
+}
+
 export function groupByGameDay<T>(
   items: readonly T[],
   getCommence: (it: T) => string | null | undefined,

@@ -100,6 +100,13 @@ body{background:var(--bg);color:var(--ink);
 .stat__l{font-size:11.5px;color:var(--muted);text-transform:uppercase;
   letter-spacing:.07em}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+/* Packed day layout: each day (gold header + its card grid) is a flex block sized to its
+   game count, so light days pack side-by-side and heavy days keep room for a multi-column
+   grid. Erases the dead space of one full-width day-section per row. */
+.daygrid{display:flex;flex-wrap:wrap;gap:16px 18px;align-items:flex-start}
+.daygrid__day{flex:0 1 auto;min-width:0;max-width:100%}
+.daygrid__day>.grid,.daygrid__day>.propstack{margin-top:0}
+@media(max-width:700px){.daygrid__day{flex-basis:100%!important}}
 .game{background:var(--surface);border:1px solid var(--line);border-radius:12px;
   padding:16px 18px;position:relative;overflow:hidden;
   background-image:repeating-linear-gradient(90deg,transparent 0 45px,
@@ -1642,6 +1649,52 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .pa__cellk{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
 .pa__cellsub{font-size:11px;color:var(--muted)}
 .pa__note{font-size:12.5px;line-height:1.6;color:var(--muted);margin:18px 0 0;padding-top:14px;border-top:1px solid var(--line)}
+/* --- Pick Auditor board (no inputs) --- */
+.aucircle{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;
+  border:1.5px solid transparent;forced-color-adjust:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.aucircle--value{background:#22c55e;border-color:#16a34a}
+.aucircle--fair{background:#ffffff;border-color:#9aa6a0}
+.aucircle--cheat{background:#e5484d;border-color:#c93b40}
+.aucircle--na{background:transparent;border-color:var(--surface-2);border-style:dashed}
+:root[data-theme="dark"] .aucircle--fair,:root:not([data-theme="light"]) .aucircle--fair{background:#e8eef0;border-color:#aeb8b3}
+.aulegend{display:flex;flex-wrap:wrap;gap:16px;margin:6px 0 2px;font-size:12px;color:var(--muted)}
+.aulegend__i{display:inline-flex;align-items:center;gap:6px}
+.audays{display:flex;flex-direction:column;gap:4px}
+.auday{margin-top:2px}
+.augame{background:var(--surface);border:1px solid var(--line);border-radius:11px;overflow:hidden;margin-bottom:8px}
+.augame__h{list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:11px 15px}
+.augame__h::-webkit-details-marker{display:none}
+.augame__h:hover{background:var(--surface-2)}
+.augame__kick{color:var(--muted);font-size:11.5px;font-family:var(--font-mono);white-space:nowrap;margin-left:10px}
+.augame__meta{margin-left:auto;color:var(--muted);font-size:12px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.augame__chev{display:inline-block;transition:transform .15s;font-size:10px}
+.augame[open] .augame__chev{transform:rotate(90deg)}
+.augame__body{border-top:1px solid var(--line);padding:8px 12px 12px}
+.auscroll{overflow-x:auto}
+.autbl{min-width:560px}
+.aurow{display:grid;grid-template-columns:minmax(120px,1.5fr) minmax(96px,1.1fr) 92px 100px 46px 40px;
+  gap:14px;align-items:baseline;padding:8px 6px;border-top:1px solid var(--surface-2)}
+.aurow:first-child{border-top:0}
+.aurow--head{border-top:0;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.aurow--head .aucell{align-self:end}
+.aucell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aucell--player{font-weight:600}
+.auslot{color:var(--muted);font-weight:500;font-size:11px}
+.aucell--bet{color:var(--muted);font-size:12px;font-family:var(--font-mono)}
+.aucell--num{font-family:var(--font-mono);font-weight:600;font-size:13px}
+.aucell--book{color:var(--accent)}
+.aucell__sub{display:block;font-weight:500;color:var(--muted);font-size:10px;font-family:var(--font-mono);margin-top:1px}
+.aucell--deal{text-align:center}
+.aucell--add{text-align:right}
+.auadd{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);background:none;color:var(--accent);
+  font-size:15px;font-weight:800;line-height:1;cursor:pointer}
+.auadd:hover{border-color:var(--accent)}
+.auadd.saved{background:var(--save-soft);border-color:var(--save);color:var(--save)}
+@media(max-width:600px){
+  .aurow{grid-template-columns:minmax(96px,1.4fr) minmax(78px,1fr) 74px 80px 40px 34px;gap:9px;font-size:12px}
+  .aucell--num{font-size:12px}
+}
+
 .pa__how{margin:18px 0 0;padding-top:14px;border-top:1px solid var(--line)}
 .pa__howsum{cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);list-style:none;display:flex;align-items:center;gap:7px}
 .pa__howsum::-webkit-details-marker{display:none}

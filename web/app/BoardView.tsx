@@ -6,7 +6,7 @@ import { ShopSubnav, Brand, ValueFinderDrawer, FlowSteps, WeekBadge } from "./Na
 import { WeekNav } from "./WeekNav";
 import { useSlip } from "@/lib/slip";
 import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
-import { groupByGameDay } from "@/lib/gameDays";
+import { groupByGameDay, dayBasis } from "@/lib/gameDays";
 import { DayHeader } from "./DayHeader";
 import { audit, VERDICT_LABEL } from "@/lib/fairValue";
 
@@ -207,14 +207,16 @@ export default function BoardView({
               </div>
             </details>
 
-            {groupByGameDay(board, (g) => g.commence, today, tomorrow).map((grp) => (
-              <div key={grp.key}>
-                <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
-                <section className="grid">
-                  {grp.items.map((g) => <GameCard key={g.eventId} g={g} has={has} onToggle={toggle} />)}
-                </section>
-              </div>
-            ))}
+            <div className="daygrid">
+              {groupByGameDay(board, (g) => g.commence, today, tomorrow).map((grp) => (
+                <div className="daygrid__day" key={grp.key} style={dayBasis(grp.items.length)}>
+                  <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
+                  <section className="grid">
+                    {grp.items.map((g) => <GameCard key={g.eventId} g={g} has={has} onToggle={toggle} />)}
+                  </section>
+                </div>
+              ))}
+            </div>
 
             <footer className="foot">
               <p>

@@ -1,0 +1,148 @@
+"use client";
+
+// Pick Auditor — no inputs. It lists the live book price on every player prop and, using the
+// market's OWN de-vigged fair price (strip the vig off both sides), flags each one with a
+// coloured circle: green = value (the price beats fair), white = fair (a normal number), red =
+// overpriced (worse than a typical hold explains). Same table shape as The Model's prop page.
+import { useCallback } from "react";
+import type { PropGame, Quote } from "@/lib/props";
+import { useSlip } from "@/lib/slip";
+import { groupByGameDay } from "@/lib/gameDays";
+import { DayHeader } from "../DayHeader";
+import { auditVerdict, probToAmerican, type AuditVerdict } from "@/lib/fairValue";
+
+const fmtOdds = (p: number) => (p > 0 ? `+${p}` : String(p));
+const pct = (p: number) => `${Math.round(p * 100)}%`;
+
+function betLabel(marketLabel: string, side: string, line: number | null): string {
+  if (side === "Yes") return marketLabel;
+  if (side === "No") return `No — ${marketLabel}`;
+  if (side === "Over") return `Over ${line ?? ""}`.trim();
+  if (side === "Under") return `Under ${line ?? ""}`.trim();
+  return line !== null ? `${side} ${line}` : side;
+}
+
+const CIRCLE_TITLE: Record<AuditVerdict, string> = {
+  value: "Value — this price beats the de-vigged fair number",
+  fair: "Fair — a normal price, in line with the de-vigged market",
+  cheat: "Overpriced — worse than the de-vigged fair number",
+};
+
+interface Leg {
+  id: string; game: string; player: string; bet: string;
+  best: number; books: string[]; byBook?: Record<string, number>; fairProb?: number | null;
+}
+
+function AuditRow({ q, marketLabel, game, saved, onToggle }: {
+  q: Quote; marketLabel: string; game: string; saved: boolean; onToggle: (l: Leg) => void;
+}) {
+  const a = auditVerdict(q.price, q.fairProb);
+  const bet = betLabel(marketLabel, q.side, q.line);
+  const name = q.slot ? `${q.player} (${q.slot})` : q.player;
+  const leg: Leg = {
+    id: `${q.eventId}:${marketLabel}:${q.player}:${q.side}:${q.line}`,
+    game, player: name, bet, best: q.price, books: q.books, byBook: q.byBook, fairProb: q.fairProb ?? null,
+  };
+  const fair = q.fairProb != null ? probToAmerican(q.fairProb) : null;
+  return (
+    <div className="aurow" role="row">
+      <span className="aucell aucell--player">{q.player}{q.slot && <span className="auslot"> ({q.slot})</span>}</span>
+      <span className="aucell aucell--bet">{bet}</span>
+      <span className="aucell aucell--num aucell--book">{fmtOdds(q.price)}
+        <small className="aucell__sub">{q.books[0]}{q.books.length > 1 ? ` +${q.books.length - 1}` : ""}</small>
+      </span>
+      <span className="aucell aucell--num">
+        {fair !== null ? <>{fmtOdds(fair)} <small className="aucell__sub">{pct(q.fairProb!)}</small></> : <span className="aucell__sub">one-sided</span>}
+      </span>
+      <span className="aucell aucell--deal">
+        {a ? (
+          <span className={`aucircle aucircle--${a.verdict}`} role="img" aria-label={CIRCLE_TITLE[a.verdict]} title={CIRCLE_TITLE[a.verdict]} />
+        ) : (
+          <span className="aucircle aucircle--na" role="img" aria-label="No fair price — this market has no posted other side to de-vig" title="No posted other side to de-vig — shop the best price on Player Props" />
+        )}
+      </span>
+      <span className="aucell aucell--add">
+        <button type="button" className={`auadd${saved ? " saved" : ""}`} aria-pressed={saved}
+          title={saved ? "Remove from slip" : "Add to slip"} onClick={() => onToggle(leg)}>{saved ? "✓" : "+"}</button>
+      </span>
+    </div>
+  );
+}
+
+const pkFmt = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+});
+const kickET = (iso: string) => pkFmt.format(new Date(iso)) + " ET";
+
+function AuditGame({ g, open, has, toggle }: {
+  g: PropGame; open?: boolean; has: (id: string) => boolean; toggle: (l: Leg) => void;
+}) {
+  // Count how many priced sides in this game we could actually audit (two-sided → have a fair number).
+  const audited = g.markets.reduce((n, m) => n + m.quotes.filter((q) => q.fairProb != null).length, 0);
+  return (
+    <details className="augame" open={open}>
+      <summary className="augame__h">
+        <span className="matchup">{g.away}<span className="at">@</span>{g.home}</span>
+        {g.commence && <time className="augame__kick">{kickET(g.commence)}</time>}
+        <span className="augame__meta">{audited} audited<span className="augame__chev" aria-hidden="true">▸</span></span>
+      </summary>
+      <div className="augame__body">
+        <div className="auscroll">
+          <div className="autbl" role="table">
+            <div className="aurow aurow--head" role="row">
+              <span className="aucell aucell--player">Player</span>
+              <span className="aucell aucell--bet">Bet</span>
+              <span className="aucell aucell--num">Book price</span>
+              <span className="aucell aucell--num">Fair price</span>
+              <span className="aucell aucell--deal">Deal</span>
+              <span className="aucell aucell--add">Slip</span>
+            </div>
+            {g.markets.map((m) =>
+              m.quotes.map((q, i) => {
+                const id = `${q.eventId}:${m.label}:${q.player}:${q.side}:${q.line}`;
+                return <AuditRow key={`${id}:${i}`} q={q} marketLabel={m.label} game={g.matchup} saved={has(id)} onToggle={toggle} />;
+              })
+            )}
+          </div>
+        </div>
+      </div>
+    </details>
+  );
+}
+
+export default function AuditView({ games, today, tomorrow }: { games: PropGame[]; today: string; tomorrow: string }) {
+  const { has, toggle: slipToggle } = useSlip();
+  const toggle = useCallback((l: Leg) => slipToggle({
+    id: l.id, kind: "prop", title: `${l.player} ${l.bet}`, detail: l.game,
+    price: l.best, books: l.books, byBook: l.byBook, fairProb: l.fairProb,
+  }), [slipToggle]);
+
+  const audited = games.reduce((n, g) => n + g.markets.reduce((k, m) => k + m.quotes.filter((q) => q.fairProb != null).length, 0), 0);
+  const days = groupByGameDay(games, (g) => g.commence, today, tomorrow);
+
+  return (
+    <>
+      <div className="aulegend" aria-hidden="true">
+        <span className="aulegend__i"><span className="aucircle aucircle--value" /> Value — beats fair</span>
+        <span className="aulegend__i"><span className="aucircle aucircle--fair" /> Fair — normal price</span>
+        <span className="aulegend__i"><span className="aucircle aucircle--cheat" /> Overpriced</span>
+      </div>
+      <p className="hint">{games.length} games · {audited} prices audited against the de-vigged market.</p>
+
+      {games.length === 0 ? (
+        <p className="foot">No prices to audit yet — once this week&apos;s odds are captured, they&apos;ll appear here.</p>
+      ) : (
+        <section className="audays">
+          {days.map((grp, gi) => (
+            <div className="auday" key={grp.key}>
+              <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
+              {grp.items.map((g, i) => (
+                <AuditGame key={g.eventId} g={g} open={gi === 0 && i === 0} has={has} toggle={toggle} />
+              ))}
+            </div>
+          ))}
+        </section>
+      )}
+    </>
+  );
+}

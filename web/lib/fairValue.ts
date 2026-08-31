@@ -47,3 +47,16 @@ export const VERDICT_LABEL: Record<AuditVerdict, string> = {
   fair: "Fair",
   cheat: "Overpriced",
 };
+
+// Auditor board calibration. A single book price always carries some vig, so it sits a little
+// worse than its own de-vigged fair even at a fair book — so "fair" (white) spans the normal
+// vig range, "value" (green) is a price that actually beats fair, and "cheat" (red) is a price
+// worse than even a typical hold explains.
+export const AUDIT_VALUE_BPS = 0.01;
+export const AUDIT_CHEAT_BPS = 0.045;
+
+/** 3-state verdict for the Pick Auditor board (null when the market can't be de-vigged). */
+export function auditVerdict(offered: number, fairProb: number | null | undefined): Audit | null {
+  if (fairProb == null) return null;
+  return audit(offered, fairProb, AUDIT_CHEAT_BPS, AUDIT_VALUE_BPS);
+}
