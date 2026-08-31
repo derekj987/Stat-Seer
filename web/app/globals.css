@@ -1766,6 +1766,11 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
   font:inherit;font-size:12px;padding:4px 11px;cursor:pointer}
 .cbuild__exbtn:hover{border-color:var(--accent);color:var(--accent)}
 .cbuild__msg{font-size:13px;color:var(--muted);margin:10px 0 0;line-height:1.5}
+.cbuild__thread{display:flex;flex-direction:column;gap:7px;max-height:260px;overflow-y:auto;margin:10px 0;padding:2px}
+.cbmsg{max-width:82%;padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.5;white-space:pre-wrap}
+.cbmsg--user{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:4px}
+.cbmsg--assistant{align-self:flex-start;background:var(--surface-2);color:var(--ink);border-bottom-left-radius:4px}
+.cbmsg--typing{color:var(--muted);letter-spacing:2px}
 .cbuild__preview{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
 .cbuild__pvhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
 .cbuild__pvtitle{font-weight:800;font-size:14px}
