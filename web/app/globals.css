@@ -1727,6 +1727,17 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .hb-bar .pinbtn+.hb-bar__chev{margin-left:11px}
 @media(max-width:560px){.pinbtn--sm .pinbtn__lbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}}
 
+/* --- Embed mode (a page shown inside a Custom Dashboard card's iframe): hide all site chrome
+   so only the chart itself renders, full-width and flush. --- */
+[data-embed] .snav,[data-embed] .snav__bar,[data-embed] .sportstrip,[data-embed] .slipbar,
+[data-embed] .dock,[data-embed] .sitefoot,[data-embed] .masthead,[data-embed] .flow,
+[data-embed] .subnavrow,[data-embed] .pageweek,[data-embed] .pageweekrow,[data-embed] .weeknav,
+[data-embed] .catnav,[data-embed] .pinrow,[data-embed] .foot,[data-embed] .aiw,
+[data-embed] .lp-drawer,[data-embed] .vf-drawer,[data-embed] .pdtogglerow,
+[data-embed] .betslippromo{display:none!important}
+[data-embed] body{background:transparent}
+[data-embed] .wrap,[data-embed] main.wrap{padding:6px 10px 10px!important;max-width:none!important;margin:0!important}
+
 /* --- Custom Dashboard --- */
 .dash{margin-top:8px}
 .dash__lead{text-align:center;max-width:620px;margin:2px auto 20px}
@@ -1735,18 +1746,46 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .dash__p b{color:var(--ink)}
 .dash__pinex{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:6px;
   padding:1px 7px;font-size:12px;font-weight:700}
-.dash__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
-.dashcard{position:relative;display:flex;background:var(--surface);border:1px solid var(--line);border-radius:13px;overflow:hidden}
-.dashcard:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
-.dashcard__main{flex:1;display:flex;align-items:center;gap:12px;padding:14px 16px;text-decoration:none;color:inherit;min-width:0}
-.dashcard__icon{font-size:22px;flex:0 0 auto}
-.dashcard__text{display:flex;flex-direction:column;gap:2px;min-width:0}
-.dashcard__label{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dashcard__detail{font-size:12px;color:var(--muted)}
-.dashcard__go{margin-left:auto;color:var(--accent);font-weight:800;flex:0 0 auto}
-.dashcard__x{position:absolute;top:6px;right:8px;border:0;background:none;color:var(--muted);cursor:pointer;
-  font-size:12px;line-height:1;padding:3px;border-radius:6px}
-.dashcard__x:hover{color:var(--key);background:var(--surface-2)}
+/* Live embeds: each pinned view is the actual chart in an auto-sized iframe, stacked full-width. */
+.dash__embeds{display:flex;flex-direction:column;gap:16px}
+.dashembed{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
+.dashembed__bar{display:flex;align-items:center;gap:9px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.dashembed__icon{font-size:17px;flex:0 0 auto}
+.dashembed__label{font-weight:800;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dashembed__detail{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.dashembed__open{margin-left:auto;font-size:12px;font-weight:700;color:var(--accent);text-decoration:none;flex:0 0 auto}
+.dashembed__open:hover{text-decoration:underline}
+.dashembed__x{border:0;background:none;color:var(--muted);cursor:pointer;font-size:13px;line-height:1;padding:4px 6px;border-radius:6px;flex:0 0 auto}
+.dashembed__x:hover{color:var(--key);background:var(--surface)}
+.dashembed__frame{background:var(--bg)}
+.dashembed__frame iframe{display:block;width:100%;border:0;transition:height .2s}
+
+/* Dashboard AI Robot Knight + speech bubble */
+.dashai{display:flex;align-items:flex-start;gap:6px;margin:2px 0 22px}
+.dashai__robot{flex:0 0 auto;border:0;background:none;cursor:pointer;padding:0;line-height:0}
+.dashai__img{width:clamp(96px,14vw,132px);height:auto;filter:drop-shadow(0 3px 8px rgba(0,0,0,.18))}
+.dashai__bubble{position:relative;background:var(--surface);border:1.5px solid var(--accent);border-radius:16px;
+  padding:14px 18px;max-width:520px;margin-top:16px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.dashai__bubble::before{content:"";position:absolute;left:-11px;top:22px;border:6px solid transparent;
+  border-right-color:var(--accent);border-left:0}
+.dashai__bubble::after{content:"";position:absolute;left:-8px;top:23px;border:5px solid transparent;
+  border-right-color:var(--surface);border-left:0}
+.dashai__say{font-size:14.5px;line-height:1.55;color:var(--ink);margin:0}
+.dashai__say b{color:var(--ink)}
+.dashai__more{margin-top:8px;border:0;background:none;color:var(--accent);font-weight:700;font-size:13.5px;cursor:pointer;padding:0}
+.dashai__more:hover{text-decoration:underline}
+.dashai__detail .dashai__say{margin-bottom:8px}
+.dashai__ex{margin:0 0 8px;padding-left:18px;font-size:13px;color:var(--muted);line-height:1.6}
+.dashai__ex li{margin:2px 0}
+.dashai__warn{font-size:12.5px;line-height:1.55;color:var(--muted);background:var(--spot-soft);
+  border:1px solid color-mix(in srgb,var(--spot) 40%,var(--line));border-radius:10px;padding:9px 12px;margin:10px 0}
+.dashai__warn b{color:var(--ink)}
+.dashai__actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:4px}
+.dashai__cta{padding:9px 16px;font-size:13.5px}
+.dashai__less{border:0;background:none;color:var(--muted);font-size:13px;cursor:pointer}
+.dashai__less:hover{color:var(--ink)}
+@media(max-width:560px){.dashai{flex-direction:column;align-items:center;text-align:left}.dashai__bubble::before,.dashai__bubble::after{display:none}.dashai__bubble{margin-top:0}}
+
 .dash__empty{text-align:center;max-width:520px;margin:20px auto;padding:34px 24px;border:1px dashed var(--line);
   border-radius:16px;background:var(--surface)}
 .dash__emptyicon{font-size:34px;display:block;margin-bottom:8px}

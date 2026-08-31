@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Brand } from "../Nav";
 import ProfileDashToggle from "../ProfileDashToggle";
 import DashboardView from "./DashboardView";
+import DashboardAssistant from "./DashboardAssistant";
 
 export const dynamic = "force-dynamic";
 
@@ -32,13 +33,7 @@ export default async function DashboardPage() {
       {username && <div className="pdtogglerow"><ProfileDashToggle active="dashboard" username={username} /></div>}
 
       <section className="dash">
-        <div className="dash__lead">
-          <h2 className="dash__h">Your data, your way.</h2>
-          <p className="dash__p">
-            This is <b>your space</b>. Anywhere you see a <span className="dash__pinex">📌 Pin</span> button across
-            StatSeer, add that chart or data view here — so your favorites are one tap away, no hunting.
-          </p>
-        </div>
+        <DashboardAssistant />
         <DashboardView />
       </section>
     </main>

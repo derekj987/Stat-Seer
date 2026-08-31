@@ -8,6 +8,7 @@ import Dock from "./Dock";
 import VisitBeacon from "./VisitBeacon";
 import Presence from "./Presence";
 import ConsentGate from "./ConsentGate";
+import EmbedMode from "./EmbedMode";
 
 // Medieval display face for the STATSEER wordmark, exposed as a CSS var so any
 // masthead can use it (matches the tavern / seer tone).
@@ -39,6 +40,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={medieval.variable}>
       <body>
+        {/* Set the embed flag synchronously (before chrome paints) when loaded in a dashboard frame. */}
+        <script dangerouslySetInnerHTML={{ __html: "try{if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.setAttribute('data-embed','1')}catch(e){}" }} />
+        <EmbedMode />
         <SiteNav />
         <SportStrip />
         {children}

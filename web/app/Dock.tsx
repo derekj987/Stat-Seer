@@ -18,11 +18,17 @@ export default function Dock() {
   const open = (t: Tool) => { setActive(t); setExpanded(false); };
   const close = () => setActive(null);
 
-  // A "Message" button anywhere (e.g. a profile) opens the chat panel.
+  // A "Message" button anywhere (e.g. a profile) opens the chat panel; the dashboard robot
+  // (and any "ask the assistant" control) opens the AI Slip Assistant panel.
   useEffect(() => {
     const onOpenChat = () => { setActive("friends"); setExpanded(false); };
+    const onOpenAsst = () => { setActive("assistant"); setExpanded(false); };
     window.addEventListener("ss:open-chat", onOpenChat);
-    return () => window.removeEventListener("ss:open-chat", onOpenChat);
+    window.addEventListener("ss:open-assistant", onOpenAsst);
+    return () => {
+      window.removeEventListener("ss:open-chat", onOpenChat);
+      window.removeEventListener("ss:open-assistant", onOpenAsst);
+    };
   }, []);
 
   return (

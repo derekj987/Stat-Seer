@@ -258,8 +258,8 @@ function PlayerSnapshot({ base }: { base: Sport }) {
       <>
         <div className="hb-formwrap">
           <table className="hb-form">
-            <thead><tr><th className="hb-l">Player</th><th>Team</th><th>Prop (book)</th><th>Our proj</th></tr></thead>
-            <tbody><tr className="hb-off"><td className="hb-l" colSpan={4}>Projections publish here as the season&apos;s usage is captured.</td></tr></tbody>
+            <thead><tr><th className="hb-l">Player</th><th>Team</th><th>Prop</th><th>Market #</th><th>Our proj</th></tr></thead>
+            <tbody><tr className="hb-off"><td className="hb-l" colSpan={5}>Projections publish here as the season&apos;s usage is captured.</td></tr></tbody>
           </table>
         </div>
         <p className="hb-empty">See the <a href={href}>Player Model →</a></p>
@@ -273,14 +273,15 @@ function PlayerSnapshot({ base }: { base: Sport }) {
       <tr key={`${r.player}-${r.market}`} className={i >= 3 ? "hb-row--more" : undefined}>
         <td className="hb-l"><a className="hb-plrlink" href={href}>{r.player}</a> <span className="hb-plrpos">{depthTag(r.player, r.pos)}</span></td>
         <td className="hb-num">{r.team}</td>
-        <td>{PROP_LABEL[r.market] ?? r.market} <span className="hb-num hb-tot">{r.book}{unit}</span></td>
+        <td>{PROP_LABEL[r.market] ?? r.market}</td>
+        <td className="hb-num hb-tot">{r.book}{unit}</td>
         <td className="hb-num"><span className={`hb-model${over ? "" : " hb-model--down"}`}>{r.proj}{unit} {over ? "▲" : "▼"}</span></td>
       </tr>
     );
   };
   return (
     <>
-      <MoreTable id={`psnap-more-${base}`} cls="hb-form--psnap" head={<thead><tr><th className="hb-l">Player</th><th>Team</th><th>Prop (book)</th><th>Our proj</th></tr></thead>} extra={Math.max(0, rows.length - 3)} noun="players">
+      <MoreTable id={`psnap-more-${base}`} cls="hb-form--psnap" head={<thead><tr><th className="hb-l">Player</th><th>Team</th><th>Prop</th><th>Market #</th><th>Our proj</th></tr></thead>} extra={Math.max(0, rows.length - 3)} noun="players">
         {rows.map(psnapRow)}
       </MoreTable>
       <p className="lp-cardfoot"><a href={href}>See the full Player Model →</a></p>
