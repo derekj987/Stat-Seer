@@ -1,5 +1,5 @@
 import { Brand, FlowSteps, ShopSubnav, WeekBadge } from "../../Nav";
-import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
+import { NcaafWeekNav, NcaafWeekNote, readNcaafWeek, ncaafCard } from "../NcaafWeek";
 import PinButton from "../../PinButton";
 import { NCAAF_MODEL, type NcaafKeyNum } from "../model-data";
 import { StatCard } from "../StatCard";
@@ -21,6 +21,7 @@ export default async function Page({ searchParams }: {
   const v = M.value;
   const three = v.keyNumbers[0];
   const week = readNcaafWeek((await searchParams).week, M.card.week);
+  const c = ncaafCard(week);
 
   return (
     <main className="wrap">
@@ -31,14 +32,14 @@ export default async function Page({ searchParams }: {
         />
       </header>
 
-      <WeekBadge week={M.card.week} />
+      <WeekBadge week={c.week} />
       <FlowSteps active="value" base="ncaaf" />
       <ShopSubnav active="best" base="ncaaf" />
       <NcaafWeekNav base="/ncaaf/best" week={week} />
       <div className="pinrow"><PinButton pin={{ id: "/ncaaf/best", kind: "sweetspots", label: "NCAAF · Sweet Spots", detail: `Week ${week}`, href: `/ncaaf/best?week=${week}` }} /></div>
-      <NcaafOffWeek current={M.card.week} week={week} />
+      <NcaafWeekNote card={c} />
 
-      <NcaafSweetSpots games={M.card.games} keyNums={v.keyNumbers} week={M.card.week} {...etToday()} />
+      <NcaafSweetSpots games={c.games} keyNums={v.keyNumbers} week={c.week} {...etToday()} />
 
       <section className="explainer">
         <p>

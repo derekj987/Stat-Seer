@@ -1,6 +1,6 @@
 import { Brand, FlowSteps, ContextSubnav, WeekBadge } from "../../Nav";
 import Tip from "@/app/Tip";
-import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
+import { NcaafWeekNav, NcaafWeekNote, readNcaafWeek, ncaafCard } from "../NcaafWeek";
 import PinButton from "../../PinButton";
 import { NCAAF_MODEL, type NcaafConf, type NcaafCardGame } from "../model-data";
 import { StatCard } from "../StatCard";
@@ -21,8 +21,8 @@ export default async function Page({ searchParams }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const cx = M.context;
-  const c = M.card;
-  const week = readNcaafWeek((await searchParams).week, c.week);
+  const week = readNcaafWeek((await searchParams).week, M.card.week);
+  const c = ncaafCard(week);
   const top = cx.conferences[0];
   const games: NcaafCardGame[] = [...c.games]
     .sort((a, b) => (a.commence || "9999").localeCompare(b.commence || "9999")); // soonest kickoff first
@@ -56,7 +56,7 @@ export default async function Page({ searchParams }: {
       </div>
       <NcaafWeekNav base="/ncaaf/considerations" week={week} />
       <div className="pinrow"><PinButton pin={{ id: "/ncaaf/considerations", kind: "considerations", label: "NCAAF · Considerations", detail: `Week ${week}`, href: `/ncaaf/considerations?week=${week}` }} /></div>
-      <NcaafOffWeek current={c.week} week={week} />
+      <NcaafWeekNote card={c} />
 
       <section className="ncf-sec">
         <NcaafConsiderationsView games={games} ratings={ratings} hfa={cx.hfa} slate={slate} {...etToday()} />

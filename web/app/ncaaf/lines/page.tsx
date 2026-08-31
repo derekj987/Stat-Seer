@@ -1,5 +1,5 @@
 import { Brand, FlowSteps, ShopSubnav, WeekBadge } from "../../Nav";
-import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
+import { NcaafWeekNav, NcaafWeekNote, readNcaafWeek, ncaafCard } from "../NcaafWeek";
 import PinButton from "../../PinButton";
 import Tip from "@/app/Tip";
 import { NCAAF_MODEL } from "../model-data";
@@ -22,8 +22,8 @@ export default async function Page({ searchParams }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const bs = M.value.bookShop;
-  const c = M.card;
-  const week = readNcaafWeek((await searchParams).week, c.week);
+  const week = readNcaafWeek((await searchParams).week, M.card.week);
+  const c = ncaafCard(week);
   const games = c.games.filter((g) => g.marketSpread)  // only games with a market line
     .sort((a, b) => (a.commence || "9999").localeCompare(b.commence || "9999")); // soonest kickoff first
   const total = c.games.length;                        // full slate (incl. games w/o odds yet)
@@ -49,7 +49,7 @@ export default async function Page({ searchParams }: {
       <div className="subnavrow"><ShopSubnav active="lines" base="ncaaf" /></div>
       <NcaafWeekNav base="/ncaaf/lines" week={week} />
       <div className="pinrow"><PinButton pin={{ id: "/ncaaf/lines", kind: "lines", label: "NCAAF · Line Shopping", detail: `Week ${week}`, href: `/ncaaf/lines?week=${week}` }} /></div>
-      <NcaafOffWeek current={c.week} week={week} />
+      <NcaafWeekNote card={c} />
 
       <section className="ncf-sec">
         <h2 className="ncf-h">Game lines — Week {c.week}

@@ -75,7 +75,8 @@ async function sumFolder(b: string, bucket: string, prefix: string, depth: numbe
  *  approvals still succeed (they use an RPC), but the welcome/alert emails quietly no-op. */
 export interface EmailHealth {
   keyPresent: boolean;             // RESEND_API_KEY set in the environment?
-  keyValid: boolean | null;        // did Resend accept it? null = couldn't check
+  keyValid: boolean | null;        // true = confirmed; false = rejected; null = can't verify here
+  sendScoped: boolean;             // present but no domain-read scope — a NORMAL send-only key
   domains: { name: string; status: string }[] | null;  // sending domains + verification state
   from: string;                    // the From address welcome/alert emails use
   error: string | null;            // human-readable reason it won't send, if any
@@ -85,30 +86,32 @@ export async function getEmailHealth(): Promise<EmailHealth> {
   const key = process.env.RESEND_API_KEY;
   const from = process.env.BETA_FROM || process.env.FEEDBACK_FROM || "StatSeer <notify@statseeredge.com>";
   if (!key) {
-    return { keyPresent: false, keyValid: null, domains: null, from,
+    return { keyPresent: false, keyValid: null, sendScoped: false, domains: null, from,
       error: "RESEND_API_KEY is not set in Vercel — welcome and alert emails won't send." };
   }
   try {
+    // Read domain status IF the key has full access. A "Sending access" key (the recommended
+    // kind for this app) can't read /domains and returns 401/403 — that is NOT an invalid key,
+    // it just can't introspect. So a 401 here means "present, send-scoped", not "broken".
     const res = await fetch("https://api.resend.com/domains", {
       headers: { Authorization: `Bearer ${key}` },
       cache: "no-store",
     });
     if (res.status === 401 || res.status === 403) {
-      return { keyPresent: true, keyValid: false, domains: null, from,
-        error: "Resend rejected the key (unauthorized) — it may be revoked or mistyped." };
+      return { keyPresent: true, keyValid: null, sendScoped: true, domains: null, from, error: null };
     }
     if (!res.ok) {
-      return { keyPresent: true, keyValid: null, domains: null, from,
+      return { keyPresent: true, keyValid: null, sendScoped: false, domains: null, from,
         error: `Resend responded ${res.status} when checking the key.` };
     }
     const body = (await res.json()) as { data?: { name: string; status: string }[] };
     const domains = (body.data || []).map((d) => ({ name: d.name, status: d.status }));
     const anyVerified = domains.some((d) => d.status === "verified");
-    return { keyPresent: true, keyValid: true, domains, from,
+    return { keyPresent: true, keyValid: true, sendScoped: false, domains, from,
       error: domains.length === 0 ? "Key works, but no sending domain is added in Resend yet."
         : anyVerified ? null : "Key works, but no domain is verified yet — sends will bounce." };
   } catch {
-    return { keyPresent: true, keyValid: null, domains: null, from,
+    return { keyPresent: true, keyValid: null, sendScoped: false, domains: null, from,
       error: "Couldn't reach Resend to verify the key." };
   }
 }

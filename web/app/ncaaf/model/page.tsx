@@ -5,7 +5,7 @@ import { StatCard } from "../StatCard";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
 import { NcaafCardHead, NcaafGameCell } from "../CardCells";
 import { fetchCfbScores, scoreFor, type CfbScores } from "@/lib/cfbScores";
-import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
+import { NcaafWeekNav, NcaafWeekNote, readNcaafWeek, ncaafCard } from "../NcaafWeek";
 import PinButton from "../../PinButton";
 import { marketGap } from "../lean";
 import { etToday, groupByGameDay } from "@/lib/gameDays";
@@ -46,8 +46,8 @@ export default async function Page({ searchParams }: {
   const v = M.validation;
   const a = M.ats;
   const beatsMarket = a.atsPct > a.breakeven;
-  const c = M.card;
-  const week = readNcaafWeek((await searchParams).week, c.week);
+  const week = readNcaafWeek((await searchParams).week, M.card.week);
+  const c = ncaafCard(week);
   // Live/final scores for this week (server-fetched, ~30s ISR) — rendered right in the game cells.
   const scores = await fetchCfbScores(week);
   const { today: todayEt, tomorrow: tomorrowEt } = etToday();
@@ -95,7 +95,7 @@ export default async function Page({ searchParams }: {
       <FlowSteps active="analyze" base="ncaaf" />
       <ModelSubnav active="game" base="ncaaf" />
       <NcaafWeekNav base="/ncaaf/model" week={week} />
-      <NcaafOffWeek current={c.week} week={week} />
+      <NcaafWeekNote card={c} />
 
       {/* The honest record — what it is, how well it does, and why we show it — folded away. */}
       <details className="ncf-method ncf-about">

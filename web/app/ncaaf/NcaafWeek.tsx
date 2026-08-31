@@ -1,9 +1,10 @@
 import { WeekNav } from "../WeekNav";
+import { NCAAF_MODEL, type NcaafCardGame, type NcaafUpset } from "./model-data";
 
-// NCAAF week wheel. College data is published a week at a time (the board overwrites to the
-// current week), so this is UI parity with the NFL side: the wheel shows the full regular
-// season with the current week active, and an honest note explains that only the current
-// week is posted. When per-week college storage lands, this becomes fully functional.
+// NCAAF week wheel. The board now carries EVERY scheduled week (see cfb_export.py → card.weeks):
+// the current slate has market lines, and future weeks show our line-blind projections with the
+// market fields empty until books post them (~2-3 days before kickoff). The wheel spans the full
+// regular season; picking a week swaps in that week's games.
 export const NCAAF_MAX_WEEK = 16;   // FBS regular season + conference championships
 
 /** Clamp the ?week param to the season; default to the current (posted) week. */
@@ -12,18 +13,58 @@ export function readNcaafWeek(spWeek: string | string[] | undefined, current: nu
   return Number.isFinite(w) ? Math.min(NCAAF_MAX_WEEK, Math.max(1, w)) : current;
 }
 
-export function NcaafWeekNav({ base, week, params }: { base: string; week: number; params?: string }) {
-  return <WeekNav min={1} max={NCAAF_MAX_WEEK} current={week} base={base} params={params} />;
+/** A single week's board — the same shape every NCAAF page reads, for any week in the season. */
+export interface NcaafWeekCard {
+  season: number;
+  week: number;
+  preseasonSeeded: boolean;
+  games: readonly NcaafCardGame[];
+  upsets: readonly NcaafUpset[];
+  hasLines: boolean;      // any game this week has a market line/total yet?
+  isCurrent: boolean;     // the currently-posted slate (fully lined)?
 }
 
-/** Shown when a member scrolls to a week that isn't the currently-posted one. */
-export function NcaafOffWeek({ current, week }: { current: number; week: number }) {
-  if (week === current) return null;
-  return (
-    <p className="tgsample">
-      <b>Week {week}.</b> College boards post one week at a time — Week {week}{" "}
-      {week < current ? "isn't archived" : "isn't up yet"}. Showing the current{" "}
-      <b>Week {current}</b> below.
-    </p>
-  );
+/** Pull the card for a given week out of the full-season export. Season-level metadata
+ *  (season, preseasonSeeded) always comes from the base card; games/upsets are per week. */
+export function ncaafCard(week: number): NcaafWeekCard {
+  const base = NCAAF_MODEL.card;
+  const wk = base.weeks?.find((w) => w.week === week);
+  const games: readonly NcaafCardGame[] = wk ? wk.games : (week === base.week ? base.games : []);
+  const upsets: readonly NcaafUpset[] = wk ? wk.upsets : (week === base.week ? base.upsets : []);
+  return {
+    season: base.season,
+    week,
+    preseasonSeeded: base.preseasonSeeded,
+    games,
+    upsets,
+    hasLines: games.some((g) => g.marketSpread !== null || g.marketTotal !== null),
+    isCurrent: week === base.week,
+  };
+}
+
+/** Honest note above a week's board: no games scheduled, or projections-up-lines-to-come. */
+export function NcaafWeekNote({ card }: { card: NcaafWeekCard }) {
+  if (card.games.length === 0) {
+    return (
+      <p className="tgsample">
+        <b>Week {card.week}.</b> No FBS matchups are on the schedule for this week yet — check
+        back as the season fills in.
+      </p>
+    );
+  }
+  if (!card.hasLines) {
+    return (
+      <p className="tgsample">
+        <b>Week {card.week} — projections up, market lines to come.</b> Sportsbooks post spreads,
+        totals, and player props about <b>2–3 days before kickoff</b>. Our <b>line-blind</b> model
+        read is published now; market prices, value tags, and props fill in automatically as books
+        release them.
+      </p>
+    );
+  }
+  return null;
+}
+
+export function NcaafWeekNav({ base, week, params }: { base: string; week: number; params?: string }) {
+  return <WeekNav min={1} max={NCAAF_MAX_WEEK} current={week} base={base} params={params} />;
 }

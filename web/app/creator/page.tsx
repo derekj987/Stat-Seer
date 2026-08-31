@@ -42,12 +42,18 @@ export default async function CreatorPage() {
 
   const [s, email] = await Promise.all([getCreatorStats(), getEmailHealth()]);
 
-  // Boil the email health down to one status word + tone for the card.
+  // Boil the email health down to one status word + tone for the card. A send-scoped key
+  // (the recommended kind) can't read domain status, so it reads as "Configured", not an error.
   const emailOk = email.keyPresent && email.keyValid !== false && !email.error;
   const emailValue = !email.keyPresent ? "Not configured"
     : email.keyValid === false ? "Key invalid"
       : email.error ? "Needs attention"
-        : "Sending ✓";
+        : email.sendScoped ? "Configured ✓"
+          : "Sending ✓";
+  const emailSub = email.error ? email.error
+    : email.sendScoped
+      ? <>Send-only key detected — it can&apos;t read domain status here. Confirm delivery by approving a member and checking <b>Resend → Logs</b>.</>
+      : <>welcome &amp; alert emails are sending from <b>{email.from}</b></>;
   const sendingDomain = email.domains?.find((d) => email.from.includes(d.name)) || email.domains?.[0] || null;
 
   return (
@@ -81,11 +87,11 @@ export default async function CreatorPage() {
       <h2 className="csect">System health <span className="csect__tag">outgoing email</span></h2>
       <div className="cgrid">
         <Stat label="Email delivery (Resend)" value={emailValue} tone={emailOk ? "gold" : "flag"}
-          sub={email.error ? email.error : <>welcome &amp; alert emails are sending from <b>{email.from}</b></>} />
+          sub={emailSub} />
         <Stat label="Sending domain"
-          value={sendingDomain ? (sendingDomain.status === "verified" ? "Verified ✓" : sendingDomain.status) : (email.keyPresent && email.keyValid ? "None added" : "—")}
-          tone={sendingDomain?.status === "verified" ? "gold" : sendingDomain ? "flag" : undefined}
-          sub={sendingDomain ? <b>{sendingDomain.name}</b> : "add & verify a domain in Resend to send"} />
+          value={sendingDomain ? (sendingDomain.status === "verified" ? "Verified ✓" : sendingDomain.status) : (email.sendScoped ? "statseeredge.com" : email.keyPresent && email.keyValid ? "None added" : "—")}
+          tone={sendingDomain?.status === "verified" ? "gold" : sendingDomain ? "flag" : email.sendScoped ? "gold" : undefined}
+          sub={sendingDomain ? <b>{sendingDomain.name}</b> : email.sendScoped ? <>verified earlier — <b>{email.from}</b></> : "add & verify a domain in Resend to send"} />
       </div>
 
       <h2 className="csect">Out-of-pocket costs <span className="csect__tag">what you&apos;re spending now</span></h2>

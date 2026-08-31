@@ -1,5 +1,5 @@
 import { Brand, FlowSteps, ContextSubnav, WeekBadge } from "../../Nav";
-import { NcaafWeekNav, NcaafOffWeek, readNcaafWeek } from "../NcaafWeek";
+import { NcaafWeekNav, NcaafWeekNote, readNcaafWeek, ncaafCard } from "../NcaafWeek";
 import { NCAAF_MODEL, type NcaafUpset } from "../model-data";
 import { ChaosBoard } from "../../ChaosBoard";
 import { buildChaosBoard, returnFromSpread, type ChaosInput } from "@/lib/chaos";
@@ -20,8 +20,8 @@ const M = NCAAF_MODEL;
 export default async function Page({ searchParams }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const c = M.card;
-  const week = readNcaafWeek((await searchParams).week, c.week);
+  const week = readNcaafWeek((await searchParams).week, M.card.week);
+  const c = ncaafCard(week);
   const upsets: readonly NcaafUpset[] = c.upsets;
 
   // Speculative Chaos Board — every game with a real underdog, scored on chaos potential
@@ -55,7 +55,7 @@ export default async function Page({ searchParams }: {
       <FlowSteps active="context" base="ncaaf" />
       <ContextSubnav active="upset" base="ncaaf" />
       <NcaafWeekNav base="/ncaaf/context" week={week} />
-      <NcaafOffWeek current={c.week} week={week} />
+      <NcaafWeekNote card={c} />
 
       {/* --- Chaos Board leads the page: the speculative upset lab, first thing members see --- */}
       <ChaosBoard sport="NCAAF" entries={chaos} windowLabel={winLabel} />
