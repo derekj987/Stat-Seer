@@ -1,6 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCreatorStats, getEmailHealth } from "@/lib/creator";
+import { VisitsChart } from "./VisitsChart";
 import { EXPENSES, USAGE, monthlyTotal, annualTotal } from "@/lib/expenses";
 import { Brand } from "../Nav";
 
@@ -14,13 +15,13 @@ const when = (iso: string) => dfmt.format(new Date(iso));
 const n = (v: number | null | undefined) => (v === null || v === undefined ? "—" : v.toLocaleString());
 const fmtBytes = (b: number) => b >= 1e9 ? `${(b / 1e9).toFixed(2)} GB` : b >= 1e6 ? `${(b / 1e6).toFixed(1)} MB` : b >= 1e3 ? `${(b / 1e3).toFixed(0)} KB` : `${b} B`;
 
-function Stat({ label, value, sub, tone, href }: {
-  label: string; value: React.ReactNode; sub?: React.ReactNode; tone?: "gold" | "flag" | "soon"; href?: string;
+function Stat({ label, value, sub, tone, href, size }: {
+  label: string; value: React.ReactNode; sub?: React.ReactNode; tone?: "gold" | "flag" | "soon"; href?: string; size?: "sm";
 }) {
   const inner = (
     <>
       <span className="cstat__label">{label}</span>
-      <span className={`cstat__value${tone ? ` cstat__value--${tone}` : ""}`}>{value}</span>
+      <span className={`cstat__value${tone ? ` cstat__value--${tone}` : ""}${size === "sm" ? " cstat__value--sm" : ""}`}>{value}</span>
       {sub && <span className="cstat__sub">{sub}</span>}
     </>
   );
@@ -84,11 +85,14 @@ export default async function CreatorPage() {
           sub={<><b>{n(s.replies)}</b> replies</>} />
       </div>
 
+      {/* Daily site-visits trend — the line graph over the recorded range. */}
+      {s.visitSeries.length > 0 && <VisitsChart series={s.visitSeries} />}
+
       <h2 className="csect">System health <span className="csect__tag">outgoing email</span></h2>
       <div className="cgrid">
-        <Stat label="Email delivery (Resend)" value={emailValue} tone={emailOk ? "gold" : "flag"}
+        <Stat label="Email delivery (Resend)" value={emailValue} tone={emailOk ? "gold" : "flag"} size="sm"
           sub={emailSub} />
-        <Stat label="Sending domain"
+        <Stat label="Sending domain" size="sm"
           value={sendingDomain ? (sendingDomain.status === "verified" ? "Verified ✓" : sendingDomain.status) : (email.sendScoped ? "statseeredge.com" : email.keyPresent && email.keyValid ? "None added" : "—")}
           tone={sendingDomain?.status === "verified" ? "gold" : sendingDomain ? "flag" : email.sendScoped ? "gold" : undefined}
           sub={sendingDomain ? <b>{sendingDomain.name}</b> : email.sendScoped ? <>verified earlier — <b>{email.from}</b></> : "add & verify a domain in Resend to send"} />

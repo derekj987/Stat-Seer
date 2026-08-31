@@ -126,6 +126,7 @@ export interface CreatorStats {
   replies: number | null;
   visitsTotal: number | null;   // null => site_visits table not set up yet
   visits7d: number | null;
+  visitSeries: { day: string; hits: number }[];   // daily hits, chronological (for the trend chart)
   storageBytes: number | null;  // total Storage used (bytes); null if unreadable
   recentMembers: { username: string; created_at: string }[];
   recentFeedback: { message: string; created_at: string; email: string | null }[];
@@ -158,9 +159,15 @@ export async function getCreatorStats(): Promise<CreatorStats> {
   const visits7d = hasVisits
     ? visitRows.filter((r) => r.day >= sinceDay).reduce((a, r) => a + Number(r.hits || 0), 0)
     : null;
+  // Chronological daily series for the trend chart (last ~90 days), oldest → newest.
+  const visitSeries = [...visitRows]
+    .map((r) => ({ day: String(r.day).slice(0, 10), hits: Number(r.hits || 0) }))
+    .filter((r) => r.day)
+    .sort((a, b) => a.day.localeCompare(b.day))
+    .slice(-90);
 
   return {
     members, membersThisWeek, feedbackTotal, reportsOpen, threads, replies, pendingBeta,
-    visitsTotal, visits7d, recentMembers, recentFeedback, storageBytes: storageUsed,
+    visitsTotal, visits7d, visitSeries, recentMembers, recentFeedback, storageBytes: storageUsed,
   };
 }

@@ -69,7 +69,11 @@ export default async function Page({ searchParams }: {
       <>
         {dayTables(games.slice(0, limit))}
         <details className="hb-showmore">
-          <summary className="hb-showmore__sum"><span className="hb-showmore__chev" aria-hidden="true">▸</span> Show {rest.length} more game{rest.length === 1 ? "" : "s"}</summary>
+          <summary className="hb-showmore__sum">
+            <span className="hb-showmore__chev" aria-hidden="true">▸</span>
+            <span className="hb-showmore__more">Show {rest.length} more game{rest.length === 1 ? "" : "s"}</span>
+            <span className="hb-showmore__less">Collapse</span>
+          </summary>
           {dayTables(rest)}
         </details>
       </>

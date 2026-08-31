@@ -162,12 +162,16 @@ body{background:var(--bg);color:var(--ink);
 .foot--wide p{max-width:none}
 /* "Show N more games" dropdown that caps a long day-grouped board to a short preview. */
 .hb-showmore{margin-top:4px}
-.hb-showmore__sum{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;
-  font-size:12.5px;font-weight:700;color:var(--accent);padding:7px 2px}
+.hb-showmore__sum{list-style:none;cursor:pointer;display:flex;justify-content:center;align-items:center;gap:6px;
+  font-size:12.5px;font-weight:700;color:var(--accent);padding:8px 2px}
 .hb-showmore__sum::-webkit-details-marker{display:none}
 .hb-showmore__sum:hover{text-decoration:underline}
 .hb-showmore__chev{display:inline-block;transition:transform .15s;font-size:10px;color:var(--muted)}
 .hb-showmore[open] .hb-showmore__chev{transform:rotate(90deg)}
+/* Toggle the summary label: "Show N more" when collapsed, "Collapse" when open. */
+.hb-showmore__less{display:none}
+.hb-showmore[open] .hb-showmore__more{display:none}
+.hb-showmore[open] .hb-showmore__less{display:inline}
 .foot b{color:var(--ink)}
 /* Prominent, CENTERED "Week N" label — the anchor the flow + subsections sit under. The
    number pops in bold gold. A symmetric grid centers the badge on the PAGE, with its info
@@ -1503,13 +1507,28 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .cstat--link:hover{border-color:var(--accent);transform:translateY(-1px)}
 .cstat--soon{opacity:.72}
 .cstat__label{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-.cstat__value{font-size:30px;font-weight:800;color:var(--ink);line-height:1.05;font-variant-numeric:tabular-nums}
+.cstat__value{font-size:30px;font-weight:800;color:var(--ink);line-height:1.05;font-variant-numeric:tabular-nums;
+  min-width:0;max-width:100%;overflow-wrap:anywhere}
+/* Text-valued stats (domains, status words) shrink so a long string can't bleed past the card. */
+.cstat__value--sm{font-size:19px;line-height:1.2}
 .cstat__value--gold{color:var(--gold)}
 .cstat__value--flag{color:var(--key,#b3261e)}
 .cstat__value--soon{color:var(--muted)}
 .cstat__unit{font-size:14px;font-weight:700;color:var(--muted)}
 .cstat__sub{font-size:11.5px;color:var(--muted);line-height:1.4}
 .cstat__sub b{color:var(--ink)}
+/* Site-visits line chart (server-rendered SVG). forced-color-adjust keeps the gold line/area
+   visible in high-contrast mode (see the filled-bar rendering gotcha). */
+.cvchart{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:14px 16px 8px;margin-top:12px}
+.cvchart__head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;margin-bottom:6px}
+.cvchart__title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ink)}
+.cvchart__meta{font-size:11px;color:var(--muted)}
+.cvchart__svg{width:100%;height:auto;display:block;forced-color-adjust:none}
+.cvchart__grid{stroke:var(--line);stroke-width:1}
+.cvchart__ylab,.cvchart__xlab{fill:var(--muted);font-size:10px;font-weight:700}
+.cvchart__area{fill:var(--gold,#b8860b);opacity:.13}
+.cvchart__line{fill:none;stroke:var(--gold,#b8860b);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.cvchart__peak{fill:var(--gold,#b8860b);stroke:var(--surface);stroke-width:1.5}
 .ccols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:24px}
 .ccard{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:16px 18px}
 .ccard__h{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ink);margin:0 0 10px}
