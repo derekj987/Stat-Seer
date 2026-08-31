@@ -42,12 +42,11 @@ export async function sendMail(to: string, subject: string, html: string, text: 
   } catch { return false; }
 }
 
-/** Approve a member (service role) and email them the welcome. Returns whether the row was updated. */
-export async function approveMember(memberId: string): Promise<boolean> {
+/** Email a just-approved member the welcome. Best-effort (needs the service role to read their
+ *  email from auth.users) — never blocks the approval itself. */
+export async function sendWelcomeEmail(memberId: string): Promise<void> {
   const admin = adminClient();
-  if (!admin) return false;
-  const { error } = await admin.from("profiles").update({ status: "approved" }).eq("id", memberId);
-  if (error) return false;
+  if (!admin) return;
   try {
     const { data: prof } = await admin.from("profiles").select("username").eq("id", memberId).single();
     const { data: u } = await admin.auth.admin.getUserById(memberId);
@@ -67,5 +66,4 @@ export async function approveMember(memberId: string): Promise<boolean> {
       );
     }
   } catch { /* welcome email best-effort */ }
-  return true;
 }
