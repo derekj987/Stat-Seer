@@ -61,6 +61,20 @@ export default async function Page({ searchParams }: {
         </div>
       </div>
     ));
+  // Show the first `limit` games, then tuck the rest behind a dropdown (keeps long boards short).
+  const dayTablesCapped = (games: readonly NcaafCardGame[], limit = 5) => {
+    if (games.length <= limit) return dayTables(games);
+    const rest = games.slice(limit);
+    return (
+      <>
+        {dayTables(games.slice(0, limit))}
+        <details className="hb-showmore">
+          <summary className="hb-showmore__sum"><span className="hb-showmore__chev" aria-hidden="true">▸</span> Show {rest.length} more game{rest.length === 1 ? "" : "s"}</summary>
+          {dayTables(rest)}
+        </details>
+      </>
+    );
+  };
   // Where We Differ leads with the games our line-blind read is furthest from the market on, but
   // (like every panel) they're presented grouped by game day. Top 12 divergences.
   const diverged = c.games
@@ -81,7 +95,6 @@ export default async function Page({ searchParams }: {
       <FlowSteps active="analyze" base="ncaaf" />
       <ModelSubnav active="game" base="ncaaf" />
       <NcaafWeekNav base="/ncaaf/model" week={week} />
-      <div className="pinrow"><PinButton pin={{ id: "/ncaaf/model", kind: "model", label: "NCAAF · The Model", detail: `Week ${week}`, href: `/ncaaf/model?week=${week}` }} /></div>
       <NcaafOffWeek current={c.week} week={week} />
 
       {/* The honest record — what it is, how well it does, and why we show it — folded away. */}
@@ -118,22 +131,24 @@ export default async function Page({ searchParams }: {
       </details>
 
       {/* Marquee AP Top 25 board — the ranked matchups, in kickoff order. */}
-      <details className="hb-panel hb-panel--card" open>
+      <details className="hb-panel hb-panel--card" data-embedchart="ap-top-25" open>
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">The Model — AP Top 25 Matchups</span>
+          <PinButton size="sm" pin={{ id: "/ncaaf/model?only=ap-top-25", kind: "model", label: "NCAAF Model · AP Top 25 Matchups", detail: `Week ${week}`, href: `/ncaaf/model?week=${week}&only=ap-top-25` }} />
           <Tip text={<>Every <b>ranked game</b> — one with an <b>AP Top 25</b> team (its poll rank shown beside it) — on the Week {c.week} board, in kickoff order, with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Projection</b>, our own line-blind spread &amp; total. A ◆ marks an <b>off-consensus</b> game. On big favorites we defer to the efficient market, so these mostly agree — the games where our read genuinely differs are in <b>Where We Differ Most</b> below. Published <b>line-blind</b> as context you can check.</>} />
           <span className="hb-bar__hint">AP Top 25 games, by game day · Week {c.week}</span>
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
-          {dayTables(ranked)}
+          {dayTablesCapped(ranked)}
         </div>
       </details>
 
       {/* Then the biggest market divergences — where the model has an independent opinion. */}
-      <details className="hb-panel hb-panel--card" open>
+      <details className="hb-panel hb-panel--card" data-embedchart="where-we-differ" open>
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">The Model — Where We Differ Most</span>
+          <PinButton size="sm" pin={{ id: "/ncaaf/model?only=where-we-differ", kind: "model", label: "NCAAF Model · Where We Differ Most", detail: `Week ${week}`, href: `/ncaaf/model?week=${week}&only=where-we-differ` }} />
           <Tip text={<>The games where our <b>line-blind number is furthest from the market</b> — a <b>Δ</b> beside our projection shows how many points apart we are. This is where the model has an <b>independent opinion</b>. On big favorites we <b>defer to the market</b> (it&apos;s efficient there — heavy favorites cover about half the time), so those agree by design and don&apos;t lead here. Published <b>line-blind</b> as context: a divergence flags where our read differs from the market. The complete slate is in <b>Full Model — every game</b> below.</>} />
           <span className="hb-bar__hint">where we differ most, by game day · Week {c.week}</span>
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
@@ -156,31 +171,20 @@ export default async function Page({ searchParams }: {
       </details>
 
       {/* The FULL model — every game on the board, collapsed. */}
-      <details className="hb-panel">
+      <details className="hb-panel" data-embedchart="full-model">
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">Full Model — every game</span>
           <span className="hb-bar__count">{c.games.length} games</span>
           <span className="hb-bar__hint">today&apos;s games first, then upcoming, then completed</span>
+          <PinButton size="sm" pin={{ id: "/ncaaf/model?only=full-model", kind: "model", label: "NCAAF Model · Full Model", detail: `Week ${week}`, href: `/ncaaf/model?week=${week}&only=full-model` }} />
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
-          {dayTables(c.games)}
+          {dayTablesCapped(c.games)}
         </div>
       </details>
 
-      {/* College player props — the same layer we're building for the NFL, arriving with data. */}
-      <section className="soonpanel" id="player-model">
-        <span className="soonpanel__tag">Arriving with the season</span>
-        <h2 className="soonpanel__h">College player props</h2>
-        <p className="soonpanel__p">
-          The same player-level layer we&apos;re building for the NFL — projected <b>rushing and receiving yards,
-          receptions, and touches</b> for college players. It needs live in-season usage and a prop feed to
-          project honestly, so it turns on as the season&apos;s data flows. Until then, see{" "}
-          <a href="/ncaaf/props">Player Props</a>.
-        </p>
-      </section>
-
-      <footer className="foot">
+      <footer className="foot foot--wide">
         <p>
           <b>Line-blind and graded in public.</b> These reads never see the betting line before they&apos;re set,
           and we publish the track record — including where it falls short. For where the price is actually
