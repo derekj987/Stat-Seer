@@ -4,6 +4,7 @@
 import { weekProps } from "./props";
 import { fetchWeek, buildBoard, weekRange, fmtOdds } from "./board";
 import { cfbWeekProps } from "./cfbProps";
+import { fetchModelWeek } from "./model";
 import { auditVerdict, impliedProb, probToAmerican } from "./fairValue";
 
 export type ChartType = "table" | "bar";
@@ -26,6 +27,7 @@ export const CHART_SOURCES = {
   auditor_deals: "The best-priced player props right now, checked against the de-vigged fair price (Pick Auditor). Columns: Player, Bet, Book price, Fair price, Deal.",
   best_props: "Player props where one book is priced well above the field — the biggest line-shopping edges. Columns: Player, Bet, Best price, Book, Edge %.",
   value_lines: "The best available spread/total prices across books on this week's games, with the shopping edge. Columns: Game, Bet, Best price, Book, Edge %.",
+  model_covers: "StatSeer's line-blind MODEL read of each game — its projected spread, which side of the market spread the model projects to cover, and its projected winner + win %. This is our published, publicly-graded model output (not a bet recommendation). Use this when the member asks what the model projects, who it likes to cover, or who it has winning. Columns: Game, Model spread, Model covers, Model winner.",
 } as const;
 export type ChartSourceId = keyof typeof CHART_SOURCES;
 
@@ -88,6 +90,45 @@ export async function buildChart(spec: ChartSpec): Promise<ChartData> {
       chartType: spec.chartType === "bar" ? "bar" : "table",
       columns: ["Player", "Bet", "Best price", "Edge %"],
       rows: best.map((r) => [r.player, r.bet, fmtOdds(r.price), Number((r.edge * 100).toFixed(1))]),
+    };
+  }
+
+  if (spec.source === "model_covers") {
+    const [preds, board] = await Promise.all([
+      fetchModelWeek(week, SEASON).catch(() => []),
+      fetchWeek(week, SEASON).then(buildBoard).catch(() => []),
+    ]);
+    const spreadByEvent = new Map(board.map((g) => [g.eventId, g.spread.consensus]));
+    const rows = preds
+      .filter((p) => p.favored)
+      .map((p) => {
+        const spread = spreadByEvent.get(p.eventId) ?? null; // home perspective, negative = home favored
+        let covers = "—";
+        if (spread != null) {
+          const mag = Math.abs(spread);
+          const marketFavHome = spread < 0;
+          const fav = marketFavHome ? p.home : p.away;
+          const dog = marketFavHome ? p.away : p.home;
+          const modelMarginForFav = marketFavHome ? p.predMargin : -p.predMargin;
+          covers = mag < 0.5 ? "pick'em" : modelMarginForFav >= mag ? `${fav} -${mag.toFixed(1)}` : `${dog} +${mag.toFixed(1)}`;
+        }
+        const winPct = Math.round((p.favored === p.home ? p.homeWinProb : 1 - p.homeWinProb) * 100);
+        return {
+          game: `${p.away} @ ${p.home}`,
+          modelSpread: `${p.favored} -${Math.abs(p.predMargin).toFixed(1)}`,
+          covers,
+          winner: `${p.favored} (${winPct}%)`,
+          margin: Math.abs(p.predMargin),
+        };
+      })
+      .sort((a, b) => b.margin - a.margin)
+      .slice(0, limit);
+    return {
+      title: spec.title || `What the Model projects — Week ${week}`,
+      chartType: "table",
+      columns: ["Game", "Model spread", "Model covers", "Model winner"],
+      rows: rows.map((r) => [r.game, r.modelSpread, r.covers, r.winner]),
+      note: rows.length ? "Line-blind model — published and graded in the open." : "No model reads published for this week yet.",
     };
   }
 

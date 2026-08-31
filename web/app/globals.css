@@ -1755,7 +1755,10 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
   padding:1px 7px;font-size:12px;font-weight:700}
 /* AI chart builder */
 .cbuild{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:14px 16px;margin:0 0 20px}
-.cbuild__head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:14px}
+.cbuild__head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;font-size:14px}
+.cbuild__reset{border:1px solid var(--line);background:var(--bg);color:var(--muted);border-radius:999px;
+  font:inherit;font-size:12px;font-weight:700;padding:4px 12px;cursor:pointer;flex:0 0 auto}
+.cbuild__reset:hover{border-color:var(--accent);color:var(--accent)}
 .cbuild__x{border:0;background:none;color:var(--muted);cursor:pointer;font-size:14px}
 .cbuild__form{display:flex;gap:8px}
 .cbuild__in{flex:1;min-width:0;border:1px solid var(--line);border-radius:9px;padding:9px 12px;font:inherit;font-size:13.5px;background:var(--bg);color:var(--ink)}

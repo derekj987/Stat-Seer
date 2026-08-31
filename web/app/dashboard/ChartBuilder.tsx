@@ -52,6 +52,10 @@ export default function ChartBuilder() {
     setLoading(false);
   }
 
+  function startOver() {
+    setMessages([]); setChart(null); setSpec(null); setInput(""); setAdded(false); setLoading(false);
+  }
+
   function addToDashboard() {
     if (!chart || !spec) return;
     toggle({
@@ -67,7 +71,12 @@ export default function ChartBuilder() {
 
   return (
     <div className="cbuild">
-      <div className="cbuild__head"><b>Build a chart with AI — and ask me about it</b></div>
+      <div className="cbuild__head">
+        <b>Build a chart with AI — and ask me about it</b>
+        {(messages.length > 0 || chart) && (
+          <button type="button" className="cbuild__reset" onClick={startOver}>↺ Start over</button>
+        )}
+      </div>
 
       {messages.length > 0 && (
         <div className="cbuild__thread" ref={scrollRef}>
