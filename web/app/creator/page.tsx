@@ -1,7 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCreatorStats } from "@/lib/creator";
-import { EXPENSES, monthlyTotal, annualTotal } from "@/lib/expenses";
+import { EXPENSES, USAGE, monthlyTotal, annualTotal } from "@/lib/expenses";
 import { Brand } from "../Nav";
 
 // The Creator's private dashboard — FOUNDER ONLY (not admins/mods). Business-at-a-glance:
@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic";
 const dfmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" });
 const when = (iso: string) => dfmt.format(new Date(iso));
 const n = (v: number | null | undefined) => (v === null || v === undefined ? "—" : v.toLocaleString());
+const fmtBytes = (b: number) => b >= 1e9 ? `${(b / 1e9).toFixed(2)} GB` : b >= 1e6 ? `${(b / 1e6).toFixed(1)} MB` : b >= 1e3 ? `${(b / 1e3).toFixed(0)} KB` : `${b} B`;
 
 function Stat({ label, value, sub, tone, href }: {
   label: string; value: React.ReactNode; sub?: React.ReactNode; tone?: "gold" | "flag" | "soon"; href?: string;
@@ -90,7 +91,34 @@ export default async function CreatorPage() {
             );
           })}
         </div>
-        <p className="ccosts__note">Estimates — tell me your real numbers, or edit <code>lib/expenses.ts</code>, and this updates. Usage-based items (like the API) are your run-rate.</p>
+        <p className="ccosts__note">Edit <code>lib/expenses.ts</code> to change amounts. Usage-based items (like the API) are your run-rate.</p>
+      </div>
+
+      <h2 className="csect">Plan usage <span className="csect__tag">how much you&apos;ve used &amp; how much is left</span></h2>
+      <div className="ccosts">
+        <div className="ccosts__bars">
+          {USAGE.map((mtr) => {
+            const rawUsed = mtr.key === "storage" ? s.storageBytes : s.members;
+            const known = rawUsed !== null && rawUsed !== undefined;
+            const usedInUnit = mtr.key === "storage" ? (rawUsed ?? 0) / 1e9 : (rawUsed ?? 0);
+            const pct = known ? Math.min((usedInUnit / mtr.limit) * 100, 100) : 0;
+            const usedLabel = !known ? "—" : mtr.key === "storage" ? fmtBytes(rawUsed as number) : (rawUsed as number).toLocaleString();
+            const leftLabel = !known ? "usage unavailable"
+              : mtr.key === "storage" ? `${fmtBytes(mtr.limit * 1e9 - (rawUsed as number))} left`
+                : `${(mtr.limit - (rawUsed as number)).toLocaleString()} left`;
+            return (
+              <div className="cusage" key={mtr.key}>
+                <div className="cusage__top">
+                  <span className="cusage__name">{mtr.name}</span>
+                  <span className="cusage__nums">{usedLabel} <span className="cusage__of">of {mtr.limitLabel}</span></span>
+                </div>
+                <span className="ccostbar__track"><span className="cusage__fill" style={{ width: `${known ? Math.max(pct, 0.6) : 0}%` }} /></span>
+                <span className="cusage__left">{leftLabel}{known ? ` · ${pct < 1 ? pct.toFixed(2) : Math.round(pct)}% used` : ""}</span>
+              </div>
+            );
+          })}
+        </div>
+        <p className="ccosts__note">Live from Supabase — file storage is summed across your buckets. (MAU shows registered members; Supabase bills on monthly-active users.) Add more meters in <code>lib/expenses.ts</code>.</p>
       </div>
 
       <h2 className="csect">Revenue <span className="csect__tag">coming with subscriptions</span></h2>

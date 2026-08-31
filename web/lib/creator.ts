@@ -38,6 +38,39 @@ async function rows<T = Record<string, unknown>>(path: string): Promise<T[]> {
   } catch { return []; }
 }
 
+/** Total bytes stored across all Storage buckets (recurses folders). null on any error. */
+async function storageBytes(): Promise<number | null> {
+  const b = base();
+  if (!b) return null;
+  try {
+    const bres = await fetch(`${b}/storage/v1/bucket`, { headers: headers(), cache: "no-store" });
+    if (!bres.ok) return null;
+    const buckets = (await bres.json()) as { name: string }[];
+    let total = 0;
+    for (const bk of buckets) total += await sumFolder(b, bk.name, "", 0);
+    return total;
+  } catch { return null; }
+}
+async function sumFolder(b: string, bucket: string, prefix: string, depth: number): Promise<number> {
+  if (depth > 5) return 0;
+  try {
+    const res = await fetch(`${b}/storage/v1/object/list/${bucket}`, {
+      method: "POST",
+      headers: headers({ "Content-Type": "application/json" }),
+      body: JSON.stringify({ prefix, limit: 1000, offset: 0 }),
+      cache: "no-store",
+    });
+    if (!res.ok) return 0;
+    const items = (await res.json()) as { name: string; id: string | null; metadata: { size?: number } | null }[];
+    let sum = 0;
+    for (const it of items) {
+      if (it.id === null) sum += await sumFolder(b, bucket, prefix ? `${prefix}/${it.name}` : it.name, depth + 1);
+      else sum += Number(it.metadata?.size || 0);
+    }
+    return sum;
+  } catch { return 0; }
+}
+
 export interface CreatorStats {
   members: number | null;
   membersThisWeek: number | null;
@@ -48,6 +81,7 @@ export interface CreatorStats {
   replies: number | null;
   visitsTotal: number | null;   // null => site_visits table not set up yet
   visits7d: number | null;
+  storageBytes: number | null;  // total Storage used (bytes); null if unreadable
   recentMembers: { username: string; created_at: string }[];
   recentFeedback: { message: string; created_at: string; email: string | null }[];
 }
@@ -57,7 +91,7 @@ export async function getCreatorStats(): Promise<CreatorStats> {
 
   const [
     members, membersThisWeek, feedbackTotal, reportsOpen, threads, replies, pendingBeta,
-    recentMembers, recentFeedback, visitRows,
+    recentMembers, recentFeedback, visitRows, storageUsed,
   ] = await Promise.all([
     count("profiles?select=id"),
     count(`profiles?select=id&created_at=gte.${weekAgo}`),
@@ -69,6 +103,7 @@ export async function getCreatorStats(): Promise<CreatorStats> {
     rows<{ username: string; created_at: string }>("profiles?select=username,created_at&order=created_at.desc&limit=6"),
     rows<{ message: string; created_at: string; email: string | null }>("feedback?select=message,created_at,email&order=created_at.desc&limit=5"),
     rows<{ day: string; hits: number }>("site_visits?select=day,hits"),
+    storageBytes(),
   ]);
 
   // site_visits is optional (needs ingest/creator.sql run once). Missing => null, not zero.
@@ -81,6 +116,6 @@ export async function getCreatorStats(): Promise<CreatorStats> {
 
   return {
     members, membersThisWeek, feedbackTotal, reportsOpen, threads, replies, pendingBeta,
-    visitsTotal, visits7d, recentMembers, recentFeedback,
+    visitsTotal, visits7d, recentMembers, recentFeedback, storageBytes: storageUsed,
   };
 }
