@@ -10,6 +10,7 @@ export default function SignUp() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [over21, setOver21] = useState(false);
+  const [betaOk, setBetaOk] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
   const [msg, setMsg] = useState("");
 
@@ -24,6 +25,9 @@ export default function SignUp() {
     }
     if (!over21) {
       setStatus("error"); setMsg("You must confirm you are 21+ and agree to the Terms and Privacy Policy."); return;
+    }
+    if (!betaOk) {
+      setStatus("error"); setMsg("Please acknowledge that StatSeer is in private beta and access is approval-based."); return;
     }
     setStatus("loading");
     const supabase = createClient();
@@ -50,15 +54,20 @@ export default function SignUp() {
     <main className="authwrap">
       <div className="authcard">
         <a href="/" className="authcard__brand">STATSEER</a>
-        <h1 className="authcard__h">Create your account</h1>
+        <h1 className="authcard__h">Request beta access</h1>
 
         {status === "sent" ? (
           <p className="authcard__ok">
-            Check your email — we sent a confirmation link to <b>{email}</b>. Click it to activate your
-            account, then <a href="/login">log in</a>.
+            Check your email — we sent a confirmation link to <b>{email}</b>. Click it to finish creating your
+            account. StatSeer is in <b>private beta</b>, so your access then goes to us for approval — you&apos;ll
+            get an email the moment you&apos;re in.
           </p>
         ) : (
           <>
+            <p className="authcard__sub">
+              StatSeer is in <b>private beta</b>. Create an account to request access — we approve new members in
+              small batches and email you when you&apos;re in.
+            </p>
             {/* Consent gates BOTH sign-up methods — you must be 21+ and agree before Google or email. */}
             <label className="authcheck">
               <input type="checkbox" checked={over21} onChange={(e) => setOver21(e.target.checked)} />
@@ -66,8 +75,12 @@ export default function SignUp() {
                 <a href="/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a> and{" "}
                 <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.</span>
             </label>
-            <GoogleButton label="Sign up with Google" disabled={!over21}
-              onBlocked={() => { setStatus("error"); setMsg("Please confirm you're 21+ and agree to the Terms above first."); }} />
+            <label className="authcheck">
+              <input type="checkbox" checked={betaOk} onChange={(e) => setBetaOk(e.target.checked)} />
+              <span>I understand StatSeer is a <b>private beta</b> and my access must be approved before I can sign in.</span>
+            </label>
+            <GoogleButton label="Sign up with Google" disabled={!over21 || !betaOk}
+              onBlocked={() => { setStatus("error"); setMsg("Please check both boxes above first."); }} />
             <form onSubmit={submit} className="authform">
               <label className="authfield">Username
                 <input value={username} onChange={(e) => setUsername(e.target.value)}
@@ -83,7 +96,7 @@ export default function SignUp() {
               </label>
               {msg && <p className="authcard__err">{msg}</p>}
               <button type="submit" className="btn btn--primary authbtn" disabled={status === "loading"}>
-                {status === "loading" ? "Creating…" : "Create account"}
+                {status === "loading" ? "Submitting…" : "Request beta access"}
               </button>
             </form>
           </>

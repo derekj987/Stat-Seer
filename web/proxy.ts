@@ -16,6 +16,11 @@ const PUBLIC_PREFIXES = [
 function isPublicPath(path: string): boolean {
   return path === "/" || PUBLIC_PREFIXES.some((p) => path === p || path.startsWith(p));
 }
+// A signed-in but not-yet-approved member may reach only these (plus the public paths):
+// the waiting-room page itself, and the auth flow so they can sign out.
+function isPendingAllowed(path: string): boolean {
+  return isPublicPath(path) || path === "/pending" || path.startsWith("/pending");
+}
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -45,12 +50,29 @@ export async function proxy(request: NextRequest) {
   // IMPORTANT: refresh the session (do not run other logic between this and returning response).
   const { data: { user } } = await supabase.auth.getUser();
 
+  const path = request.nextUrl.pathname;
+
   // Gate: a signed-out visitor gets bounced to /login for anything but the public paths.
-  if (!user && !isPublicPath(request.nextUrl.pathname)) {
+  if (!user && !isPublicPath(path)) {
     const login = request.nextUrl.clone();
     login.pathname = "/login";
-    login.search = "?next=" + encodeURIComponent(request.nextUrl.pathname + request.nextUrl.search);
+    login.search = "?next=" + encodeURIComponent(path + request.nextUrl.search);
     return NextResponse.redirect(login);
+  }
+
+  // Private beta: a signed-in member who hasn't been approved yet can see only the
+  // homepage + the waiting-room page. Everything else redirects to /pending.
+  // Fail OPEN: only gate when we affirmatively read a non-approved status. If the
+  // query errors (e.g. the `status` column isn't migrated yet) we let them through,
+  // so shipping this before the migration runs can't lock everyone out.
+  if (user && !isPendingAllowed(path)) {
+    const { data: prof, error } = await supabase.from("profiles").select("status").eq("id", user.id).maybeSingle();
+    if (!error && prof && prof.status && prof.status !== "approved") {
+      const pending = request.nextUrl.clone();
+      pending.pathname = "/pending";
+      pending.search = "";
+      return NextResponse.redirect(pending);
+    }
   }
 
   return response;
