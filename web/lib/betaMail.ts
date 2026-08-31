@@ -8,7 +8,7 @@ const SERVICE = process.env.SUPABASE_SERVICE_KEY;
 
 export const SITE_URL = "https://statseeredge.com";
 export const ALERT_TO = process.env.BETA_ALERT_TO || process.env.FEEDBACK_TO || "customerservice@statseer.info";
-const FROM = process.env.BETA_FROM || process.env.FEEDBACK_FROM || "StatSeer <notify@statseer.info>";
+const FROM = process.env.BETA_FROM || process.env.FEEDBACK_FROM || "StatSeer <notify@statseeredge.com>";
 
 /** Service-role client (bypasses RLS) — for reading a member's email + flipping their status. */
 export function adminClient() {

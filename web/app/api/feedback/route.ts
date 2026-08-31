@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 // Setup (Vercel env vars):
 //   RESEND_API_KEY   — from resend.com (required to actually send)
 //   FEEDBACK_TO      — inbox address (default customerservice@statseer.info)
-//   FEEDBACK_FROM    — verified sender on your domain (default StatSeer <feedback@statseer.info>)
+//   FEEDBACK_FROM    — verified sender on your domain (default StatSeer <feedback@statseeredge.com>)
 
 export const runtime = "nodejs";
 
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 
   const key = process.env.RESEND_API_KEY;
   const to = process.env.FEEDBACK_TO || "customerservice@statseer.info";
-  const from = process.env.FEEDBACK_FROM || "StatSeer Feedback <feedback@statseer.info>";
+  const from = process.env.FEEDBACK_FROM || "StatSeer Feedback <feedback@statseeredge.com>";
 
   // No email service configured yet — the submission still lives in the /feedback inbox.
   if (!key) return NextResponse.json({ ok: true, emailed: false, reason: "no-key", from });
