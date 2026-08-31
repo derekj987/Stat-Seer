@@ -22,6 +22,21 @@ function betLabel(marketLabel: string, side: string, line: number | null): strin
   return line !== null ? `${side} ${line}` : side;
 }
 
+// Group a game's quotes by player (like The Model): one player's bets read as a block, name shown
+// once. Within a player, order by market then Over/Yes before Under/No.
+function groupByPlayer(markets: PropGame["markets"]): { q: Quote; marketLabel: string }[] {
+  const all = markets.flatMap((m) => m.quotes.map((q) => ({ q, marketLabel: m.label })));
+  const order: string[] = [];
+  const by = new Map<string, { q: Quote; marketLabel: string }[]>();
+  for (const it of all) {
+    if (!by.has(it.q.player)) { by.set(it.q.player, []); order.push(it.q.player); }
+    by.get(it.q.player)!.push(it);
+  }
+  const sideRank = (s: string) => (s === "Over" || s === "Yes" ? 0 : 1);
+  return order.flatMap((p) =>
+    by.get(p)!.sort((a, b) => a.marketLabel.localeCompare(b.marketLabel) || sideRank(a.q.side) - sideRank(b.q.side)));
+}
+
 const CIRCLE_TITLE: Record<AuditVerdict, string> = {
   value: "Value — this price beats the de-vigged fair number",
   fair: "Fair — a normal price, in line with the de-vigged market",
@@ -33,8 +48,8 @@ interface Leg {
   best: number; books: string[]; byBook?: Record<string, number>; fairProb?: number | null;
 }
 
-function AuditRow({ q, marketLabel, game, saved, onToggle }: {
-  q: Quote; marketLabel: string; game: string; saved: boolean; onToggle: (l: Leg) => void;
+function AuditRow({ q, marketLabel, game, saved, cont, onToggle }: {
+  q: Quote; marketLabel: string; game: string; saved: boolean; cont: boolean; onToggle: (l: Leg) => void;
 }) {
   const a = auditVerdict(q.price, q.fairProb);
   const bet = betLabel(marketLabel, q.side, q.line);
@@ -45,8 +60,8 @@ function AuditRow({ q, marketLabel, game, saved, onToggle }: {
   };
   const fair = q.fairProb != null ? probToAmerican(q.fairProb) : null;
   return (
-    <div className="aurow" role="row">
-      <span className="aucell aucell--player">{q.player}{q.slot && <span className="auslot"> ({q.slot})</span>}</span>
+    <div className={`aurow${cont ? " aurow--cont" : ""}`} role="row">
+      <span className="aucell aucell--player">{cont ? "" : <>{q.player}{q.slot && <span className="auslot"> ({q.slot})</span>}</>}</span>
       <span className="aucell aucell--bet">{bet}</span>
       <span className="aucell aucell--num aucell--book">{fmtOdds(q.price)}
         <small className="aucell__sub">{q.books[0]}{q.books.length > 1 ? ` +${q.books.length - 1}` : ""}</small>
@@ -97,12 +112,13 @@ function AuditGame({ g, open, has, toggle }: {
               <span className="aucell aucell--deal">Deal</span>
               <span className="aucell aucell--add">Slip</span>
             </div>
-            {g.markets.map((m) =>
-              m.quotes.map((q, i) => {
-                const id = `${q.eventId}:${m.label}:${q.player}:${q.side}:${q.line}`;
-                return <AuditRow key={`${id}:${i}`} q={q} marketLabel={m.label} game={g.matchup} saved={has(id)} onToggle={toggle} />;
-              })
-            )}
+            {groupByPlayer(g.markets).map((it, ri, arr) => {
+              const q = it.q;
+              const id = `${q.eventId}:${it.marketLabel}:${q.player}:${q.side}:${q.line}`;
+              const cont = ri > 0 && arr[ri - 1].q.player === q.player;
+              return <AuditRow key={`${id}:${ri}`} q={q} marketLabel={it.marketLabel} game={g.matchup}
+                saved={has(id)} cont={cont} onToggle={toggle} />;
+            })}
           </div>
         </div>
       </div>

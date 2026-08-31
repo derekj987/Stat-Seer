@@ -7,7 +7,7 @@
 import { useSlip, type SlipItem } from "@/lib/slip";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
 import type { NcaafCardGame, NcaafKeyNum } from "../model-data";
-import { groupByGameDay } from "@/lib/gameDays";
+import { groupByGameDay, dayBasis } from "@/lib/gameDays";
 import { DayHeader } from "../../DayHeader";
 
 const KEYS = [3, 7, 10, 14];
@@ -45,8 +45,9 @@ export default function NcaafSweetSpots({ games, keyNums, week, today, tomorrow 
       <h2 className="ncf-h">Sitting on a key number — Week {week}
         <span className="ncf-h__note">{plays.length} line{plays.length === 1 ? "" : "s"} on 3, 7, 10 or 14</span>
       </h2>
+      <div className="daygrid">
       {groupByGameDay(plays, (pl) => pl.g.commence, today, tomorrow).map((grp) => (
-        <div key={grp.key}>
+        <div className="daygrid__day" key={grp.key} style={dayBasis(grp.items.length, 3, 248, 12)}>
           <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} noun="line" />
           <div className="ncss-grid">
         {grp.items.map(({ g, key }) => {
@@ -77,6 +78,7 @@ export default function NcaafSweetSpots({ games, keyNums, week, today, tomorrow 
           </div>
         </div>
       ))}
+      </div>
       <p className="ncf-note">Consensus lines at −110 — tap a side to add it. Key-number value from {" "}
         {keyNums.length} measured margins below.</p>
     </section>

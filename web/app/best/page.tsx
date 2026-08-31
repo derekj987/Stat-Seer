@@ -3,7 +3,7 @@ import { fetchBets, fetchBestProps, fmtOdds, type KeyPlay, type PropPlay } from 
 import { ShopSubnav, Brand, FlowSteps, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
 import SavableRow from "./SavableRow";
-import { etToday, groupByGameDay } from "@/lib/gameDays";
+import { etToday, groupByGameDay, dayBasis } from "@/lib/gameDays";
 import { DayHeader } from "../DayHeader";
 
 export const revalidate = 120;
@@ -113,12 +113,14 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
                 on a line — the biggest, cheapest edge in the app. Each card shows the number and exactly what
                 the half-point is worth.
               </p>
-              {groupByGameDay(keys, (k) => k.commence, today, tomorrow).map((grp) => (
-                <div key={grp.key}>
-                  <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} noun="play" />
-                  <div className="playgrid">{grp.items.map((k) => <KeyCard key={k.eventId} k={k} />)}</div>
-                </div>
-              ))}
+              <div className="daygrid">
+                {groupByGameDay(keys, (k) => k.commence, today, tomorrow).map((grp) => (
+                  <div className="daygrid__day" key={grp.key} style={dayBasis(grp.items.length, 3, 290, 14)}>
+                    <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} noun="play" />
+                    <div className="playgrid">{grp.items.map((k) => <KeyCard key={k.eventId} k={k} />)}</div>
+                  </div>
+                ))}
+              </div>
             </section>
           )}
 

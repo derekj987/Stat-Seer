@@ -10,7 +10,7 @@ import { CONTENTION } from "@/lib/contention";
 import { Brand, FlowSteps, ContextSubnav, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
 import Tip from "@/app/Tip";
-import { etToday, groupByGameDay } from "@/lib/gameDays";
+import { etToday, groupByGameDay, dayBasis } from "@/lib/gameDays";
 import { DayHeader } from "../DayHeader";
 import CoachTable from "../CoachTable";
 import ConsiderationsFilter from "./ConsiderationsFilter";
@@ -238,12 +238,14 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
         <>
           <ConsiderationsFilter gameTeams={[...new Set(games.flatMap((x) => [x.g.home, x.g.away]))]} />
           <div id="cxgames" aria-label={`Week ${week} considerations`}>
-            {groupByGameDay(games, (x) => x.g.commence, today, tomorrow).map((grp) => (
-              <div key={grp.key}>
-                <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
-                <section className="cxgrid">{grp.items.map(renderCard)}</section>
-              </div>
-            ))}
+            <div className="daygrid">
+              {groupByGameDay(games, (x) => x.g.commence, today, tomorrow).map((grp) => (
+                <div className="daygrid__day" key={grp.key} style={dayBasis(grp.items.length, 2, 476, 16)}>
+                  <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
+                  <section className="cxgrid">{grp.items.map(renderCard)}</section>
+                </div>
+              ))}
+            </div>
           </div>
         </>
       )}

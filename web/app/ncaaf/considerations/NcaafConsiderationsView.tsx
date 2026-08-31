@@ -10,7 +10,7 @@ import { CFB_GAME_WEATHER, type CfbGameWeather } from "@/lib/cfbWeatherData";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
 import { kickET } from "../CardCells";
 import type { NcaafCardGame } from "../model-data";
-import { groupByGameDay } from "@/lib/gameDays";
+import { groupByGameDay, dayBasis } from "@/lib/gameDays";
 import { DayHeader } from "../../DayHeader";
 
 type Rating = { rank: number; rating: number };
@@ -140,14 +140,16 @@ export default function NcaafConsiderationsView({ games, ratings, hfa, slate, to
         <p className="foot">No games match this filter — try another conference, or clear it.</p>
       ) : (
         <div aria-label="Game considerations">
-          {groupByGameDay(shown, (g) => g.commence, today, tomorrow).map((grp) => (
-            <div key={grp.key}>
-              <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
-              <section className="cxgrid">
-                {grp.items.map((g) => <ConsiderationCard key={`${g.away}-${g.home}`} g={g} hfa={hfa} ratings={ratings} />)}
-              </section>
-            </div>
-          ))}
+          <div className="daygrid">
+            {groupByGameDay(shown, (g) => g.commence, today, tomorrow).map((grp) => (
+              <div className="daygrid__day" key={grp.key} style={dayBasis(grp.items.length, 2, 476, 16)}>
+                <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
+                <section className="cxgrid">
+                  {grp.items.map((g) => <ConsiderationCard key={`${g.away}-${g.home}`} g={g} hfa={hfa} ratings={ratings} />)}
+                </section>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </>

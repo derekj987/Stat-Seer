@@ -718,7 +718,7 @@ a.sportstrip__i:hover{color:var(--ink)}
 .wxchip--wind b{color:var(--mkt)}
 /* --- Special Considerations game cards (site+weather, referee, stakes per game) --- */
 /* Context cards: 2 across on desktop (1 on phones), roomier so they don't feel cluttered */
-.cxgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:10px 0 4px}
+.cxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(456px,1fr));gap:16px;margin:10px 0 4px}
 @media (max-width:720px){.cxgrid{grid-template-columns:1fr}}
 .cxcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 22px}
 .cxcard--wind{border-color:color-mix(in srgb,var(--spot) 55%,var(--line))}
@@ -1674,12 +1674,14 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .autbl{min-width:580px}
 /* Even columns (like The Model's table): player wider, then bet + book + fair share equally,
    then fixed deal / slip. Header and data use the same track sizes so they line up exactly. */
-.aurow{display:grid;grid-template-columns:minmax(130px,1.5fr) minmax(88px,1fr) minmax(72px,1fr) minmax(72px,1fr) 54px 44px;
+.aurow{display:grid;grid-template-columns:minmax(150px,1.7fr) minmax(84px,1fr) minmax(72px,1fr) minmax(72px,1fr) 54px 44px;
   gap:16px;align-items:center;padding:9px 16px;border-top:1px solid var(--surface-2)}
 .aurow:first-child{border-top:0}
+/* Continuation row: same player as the row above — blank the name so a player's bets read as one block. */
+.aurow--cont{border-top:0;padding-top:2px}
 .aurow--head{border-top:0;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
 .aucell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.aucell--player{font-weight:600}
+.aucell--player{font-weight:600;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;line-height:1.25}
 .auslot{color:var(--muted);font-weight:500;font-size:11px}
 .aucell--bet{color:var(--muted);font-size:12px;font-family:var(--font-mono)}
 .aucell--num{font-family:var(--font-mono);font-weight:600;font-size:13px}
@@ -2595,11 +2597,11 @@ a.snav__dfeat{display:block}
 .pmtable--data{max-width:880px;min-width:760px}
 /* player flexes, team is compact, the four stat cols are equal width with an even gap —
    identical on every row incl. the header, so columns line up on phone and desktop alike. */
-.pmrow--data{display:grid;grid-template-columns:minmax(110px,1.3fr) 78px repeat(4,minmax(0,1fr)) 104px;gap:16px;
+.pmrow--data{display:grid;grid-template-columns:minmax(150px,1.6fr) 74px repeat(4,minmax(0,1fr)) 104px;gap:16px;
   align-items:baseline;border-top:1px solid var(--line);font-size:13px}
 /* passing table adds Home % / Road % → six stat columns instead of four */
-.pmtable--ha{min-width:1060px;max-width:1240px}
-.pmtable--ha .pmrow--data{grid-template-columns:minmax(110px,1.3fr) 78px repeat(6,minmax(0,1fr)) 104px}
+.pmtable--ha{min-width:1090px;max-width:1240px}
+.pmtable--ha .pmrow--data{grid-template-columns:minmax(150px,1.6fr) 74px repeat(6,minmax(0,1fr)) 104px}
 /* continuation row: a second market for the same player (e.g. a QB's passing-TD line under
    his passing-yards line). No top rule + tighter top padding so the two read as one block. */
 .pmrow--cont{border-top:0}
@@ -2627,7 +2629,7 @@ a.snav__dfeat{display:block}
    numbers below stay lined up under them (never widen the header's column) */
 .pmrow--head .pmcell{white-space:normal;line-height:1.2;align-self:end}
 .pmrow--data:first-child{border-top:0}
-.pmrow--data .pmcell--player{overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.pmrow--data .pmcell--player{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;font-weight:600}
 .pmcell--num{font-family:var(--font-mono);color:var(--muted);text-align:left}
 .pmcell--proj{color:var(--accent);font-weight:700}
 .pmcell--projdown{color:var(--mkt)}
@@ -2660,7 +2662,7 @@ a.snav__dfeat{display:block}
      team stay on ONE line (ellipsis), so "Virginia" never breaks across two lines. */
   .pmcell__sub{display:block;font-size:9px;line-height:1.05;margin-top:0}
   .pmcell{white-space:normal;overflow-wrap:anywhere}
-  .pmrow--data .pmcell--player,
+  .pmrow--data .pmcell--player{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
   .pmrow--data .pmcell--team{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 }
 .pmdisc{background:var(--gold-soft);border:1px solid color-mix(in srgb,var(--gold) 35%,var(--line));
