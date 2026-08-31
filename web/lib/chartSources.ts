@@ -5,6 +5,7 @@ import { weekProps } from "./props";
 import { fetchWeek, buildBoard, weekRange, fmtOdds } from "./board";
 import { cfbWeekProps } from "./cfbProps";
 import { fetchModelWeek } from "./model";
+import { fetchBets } from "./bestbets";
 import { auditVerdict, impliedProb, probToAmerican } from "./fairValue";
 
 export type ChartType = "table" | "bar";
@@ -28,6 +29,7 @@ export const CHART_SOURCES = {
   best_props: "Player props where one book is priced well above the field — the biggest line-shopping edges. Columns: Player, Bet, Best price, Book, Edge %.",
   value_lines: "The best available spread/total prices across books on this week's games, with the shopping edge. Columns: Game, Bet, Best price, Book, Edge %.",
   model_covers: "StatSeer's line-blind MODEL read of each game — its projected spread, which side of the market spread the model projects to cover, and its projected winner + win %. This is our published, publicly-graded model output (not a bet recommendation). Use this when the member asks what the model projects, who it likes to cover, or who it has winning. Columns: Game, Model spread, Model covers, Model winner.",
+  sweet_spots: "Sweet spots — games whose spread or total is sitting ON a key number (3, 7, etc.), where a half-point is worth the most. Shows the key number and how much a half-point is worth. NFL only. Columns: Game, Market, Sits on, Half-pt value.",
 } as const;
 export type ChartSourceId = keyof typeof CHART_SOURCES;
 
@@ -129,6 +131,18 @@ export async function buildChart(spec: ChartSpec): Promise<ChartData> {
       columns: ["Game", "Model spread", "Model covers", "Model winner"],
       rows: rows.map((r) => [r.game, r.modelSpread, r.covers, r.winner]),
       note: rows.length ? "Line-blind model — published and graded in the open." : "No model reads published for this week yet.",
+    };
+  }
+
+  if (spec.source === "sweet_spots") {
+    const { keys } = await fetchBets(week, SEASON).catch(() => ({ keys: [] as Awaited<ReturnType<typeof fetchBets>>["keys"] }));
+    const rows = [...keys].sort((a, b) => b.cost - a.cost).slice(0, limit);
+    return {
+      title: spec.title || `Sweet spots — Week ${week}`,
+      chartType: "table",
+      columns: ["Game", "Market", "Sits on", "Half-pt value"],
+      rows: rows.map((k) => [k.game, k.market, String(k.num), `${k.cost.toFixed(1)}%`]),
+      note: rows.length ? "A half-point near a key number (3, 7) swings win probability the most — buy toward it, sell off it." : "No lines are sitting on a key number this week.",
     };
   }
 
