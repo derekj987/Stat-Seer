@@ -336,13 +336,6 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         </div>
       </details>
 
-      <a href="/model/players" className="soonpanel soonpanel--link" id="player-model">
-        <span className="soonpanel__tag">Player Prop Model</span>
-        <h2 className="soonpanel__h soonpanel__cta">
-          Click here to see our Player Prop Model projections <span aria-hidden="true">→</span>
-        </h2>
-      </a>
-
       <section className="calib">
         <h2 className="calib__h">Calibration</h2>
         {calibration.length === 0 ? (
