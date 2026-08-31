@@ -52,13 +52,13 @@ export default async function Page({ searchParams }: {
       <section className="ncf-sec">
         <h2 className="ncf-h">Game lines — Week {c.week}
           <span className="ncf-h__note">{games.length} of {total} games have a market line{noLine > 0 ? ` · ${noLine} awaiting odds` : ""}</span>
-          <Tip text={<>Every game with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Projection</b> — our own line-blind spread &amp; total. A ◆ marks an <b>off-consensus</b> game (our number is well off the market&apos;s). Our CFB rating ties Elo but doesn&apos;t beat the spread, so treat this as informative context, <b>not a pick</b>.</>} />
+          <Tip text={<>Every game with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Projection</b> — our own line-blind spread &amp; total. A ◆ marks an <b>off-consensus</b> game (our number is well off the market&apos;s). Our CFB rating predicts on par with the best public systems — published <b>line-blind</b> as informative context.</>} />
         </h2>
         <div className="hb-legend">
           <span className="hb-dia">◆</span> Off-consensus — our projected line is well off the market&apos;s.
           <span className="hb-x"> · <b>Tap any spread or total</b> to drop it on your Value Finder slip.
             <b> Our Projection</b> is our line-blind spread &amp; total, shown to compare against
-            the market — <b>not a pick</b> (the rating doesn&apos;t beat the spread; see <a href="/ncaaf/model">The Model</a>).</span>
+            the market — published <b>line-blind</b> as context (see <a href="/ncaaf/model">The Model</a>).</span>
           {c.preseasonSeeded && (
             <span className="hb-x"> · <b>Preseason note:</b> with no {c.season} games played yet, these projections are
               seeded with published preseason ratings (SP+) blended with our own carryover; our in-season rating takes

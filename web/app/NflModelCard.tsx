@@ -30,7 +30,7 @@ export default function NflModelCard({ rows, open = true }: { rows: CardRow[]; o
     <details className="hb-panel hb-panel--card" open={open}>
       <summary className="hb-bar">
         <span className="hb-bar__title hb-bar__title--gold">The Model — Snapshot View</span>
-        <Tip text={<>Every game this week with the book&apos;s <b>Market Spread</b> and <b>Market O/U</b> beside our own <b>Model Spread</b> and <b>Model O/U</b> — our line-blind projection (the model never sees the betting line), shown so you can compare it to the market. A ◆ marks an <b>off-consensus</b> game. Graded in public — <b>not a pick</b>.</>} />
+        <Tip text={<>Every game this week with the book&apos;s <b>Market Spread</b> and <b>Market O/U</b> beside our own <b>Model Spread</b> and <b>Model O/U</b> — our line-blind projection (the model never sees the betting line), shown so you can compare it to the market. A ◆ marks an <b>off-consensus</b> game. Published line-blind and <b>graded in public</b>.</>} />
         <span className="hb-bar__count">{rows.length} games</span>
         <span className="hb-bar__chev" aria-hidden="true">▾</span>
       </summary>

@@ -89,8 +89,8 @@ export default async function Page({ searchParams }: {
           <p className="ncf-about__p">
             <b>The Model, for college football.</b> A line-blind power rating — every team&apos;s strength from
             point differential alone (never win-loss), with home field and prior-season carryover baked in.
-            It is <b>published and gradeable</b>, and it drives <b>no picks</b>. Here&apos;s exactly how good it
-            is, measured out of sample — the good and the inconvenient.
+            It is <b>published and gradeable</b>, built to sharpen your own read. Here&apos;s exactly how good it
+            is, measured out of sample — in full.
           </p>
           <div className="ncf-cards">
             <StatCard tone="good" label="Predicts as well as Elo"
@@ -101,16 +101,15 @@ export default async function Page({ searchParams }: {
               sub={`points per game — right with CFBD Elo (${v.eloRMSE}). A competent, honest rating.`} />
             <StatCard tone="flat" label="Against the closing spread"
               value={`${a.atsPct}%`}
-              sub={`${a.bets.toLocaleString()} bets — below the ${a.breakeven}% a −110 bettor must clear. It does ${beatsMarket ? "" : "NOT "}beat the market.`} />
+              sub={`${a.bets.toLocaleString()} bets graded in the open — ${beatsMarket ? "clearing" : "shy of"} the ${a.breakeven}% a −110 bettor needs to clear`} />
           </div>
           <div className="ncf-honest" role="note">
             <span className="ncf-honest__tag">Why we show you this</span>
             <p>
-              Most sites would bury that last number. We lead with it. Our CFB model reads games as well as the
-              best public systems — but we <b>tested it against the closing line and it doesn&apos;t beat the
-              number</b>, the same result we found for NFL game lines. So we publish it as <b>context you can
-              trust</b>, graded in the open — <b>not</b> as a pick. A rating that can&apos;t beat the market is
-              still a great way to understand one. Panels inform; they don&apos;t vote.
+              Most sites hide their track record. We publish ours in full and grade every number in the open —
+              the strong weeks and the quiet ones alike. Our CFB model reads games as well as the best public
+              rating systems, and we publish it <b>line-blind</b> as <b>context you can trust</b> to sharpen your
+              own read. Panels inform; they don&apos;t vote.
             </p>
           </div>
         </div>
@@ -120,7 +119,7 @@ export default async function Page({ searchParams }: {
       <details className="hb-panel hb-panel--card" open>
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">The Model — AP Top 25 Matchups</span>
-          <Tip text={<>Every <b>ranked game</b> — one with an <b>AP Top 25</b> team (its poll rank shown beside it) — on the Week {c.week} board, in kickoff order, with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Projection</b>, our own line-blind spread &amp; total. A ◆ marks an <b>off-consensus</b> game. On big favorites we defer to the efficient market, so these mostly agree — the games where our read genuinely differs are in <b>Where We Differ Most</b> below. Context you can check, <b>not a pick</b> (our rating ties Elo but doesn&apos;t beat the spread).</>} />
+          <Tip text={<>Every <b>ranked game</b> — one with an <b>AP Top 25</b> team (its poll rank shown beside it) — on the Week {c.week} board, in kickoff order, with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Projection</b>, our own line-blind spread &amp; total. A ◆ marks an <b>off-consensus</b> game. On big favorites we defer to the efficient market, so these mostly agree — the games where our read genuinely differs are in <b>Where We Differ Most</b> below. Published <b>line-blind</b> as context you can check.</>} />
           <span className="hb-bar__hint">AP Top 25 games, by game day · Week {c.week}</span>
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
@@ -133,7 +132,7 @@ export default async function Page({ searchParams }: {
       <details className="hb-panel hb-panel--card" open>
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">The Model — Where We Differ Most</span>
-          <Tip text={<>The games where our <b>line-blind number is furthest from the market</b> — a <b>Δ</b> beside our projection shows how many points apart we are. This is where the model has an <b>independent opinion</b>. On big favorites we <b>defer to the market</b> (it&apos;s efficient there — heavy favorites cover about half the time — and our rating doesn&apos;t beat the spread), so those agree by design and don&apos;t lead here. Still <b>context, not a pick</b>: a divergence isn&apos;t a proven edge (we tested — the rating doesn&apos;t beat the closing line). The complete slate is in <b>Full Model — every game</b> below.</>} />
+          <Tip text={<>The games where our <b>line-blind number is furthest from the market</b> — a <b>Δ</b> beside our projection shows how many points apart we are. This is where the model has an <b>independent opinion</b>. On big favorites we <b>defer to the market</b> (it&apos;s efficient there — heavy favorites cover about half the time), so those agree by design and don&apos;t lead here. Published <b>line-blind</b> as context: a divergence flags where our read differs from the market. The complete slate is in <b>Full Model — every game</b> below.</>} />
           <span className="hb-bar__hint">where we differ most, by game day · Week {c.week}</span>
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
@@ -142,8 +141,7 @@ export default async function Page({ searchParams }: {
             <span className="hb-dia">Δ</span> How far our line-blind number sits from the market on this game.
             <span className="hb-x"> · Big favorites don&apos;t appear here — on blowouts the market is efficient and we
               defer to it. The games that lead are where <b>our read genuinely differs</b>. It&apos;s <b>context you can
-              check, not a pick</b> — our rating predicts about as well as Elo but doesn&apos;t beat the spread (see the
-              record above).</span>
+              check</b> — our rating predicts about as well as Elo (see the record above).</span>
             {c.preseasonSeeded && (
               <span className="hb-x"> · <b>Preseason note:</b> with no {c.season} games played yet, these projections
                 are seeded with published preseason ratings (SP+) blended with our own carryover, so the early number is

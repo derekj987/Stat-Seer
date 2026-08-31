@@ -302,8 +302,8 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
         <p className="ctxsec__d">
           <b>Domes are higher-scoring — and the market knows.</b> Indoor games average <b>47.4</b> pts vs
           <b> 44.2</b> outdoors (2006–25), but books set dome totals ~2 pts higher, so indoor overs hit just
-          <b> 51.8%</b> — <b>below the 52.4% needed to beat the vig</b>. Tested and priced: a scoring environment
-          to understand, not an edge to bet.
+          <b> 51.8%</b> — right about where an efficient market prices them. A scoring environment
+          to understand and factor into your read.
         </p>
         {showWeather && <p className="ctxsec__note">Weather via Open-Meteo · updated {WEATHER_UPDATED} · indoor status per stadium roof.</p>}
       </details>

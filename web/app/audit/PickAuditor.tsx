@@ -79,7 +79,7 @@ export default function PickAuditor() {
             The de-vigged fair price is <b>{fmt(out.fairA)}</b> ({pct(out.fairAProb)} true chance).{" "}
             {out.verdictA === "cheat" && <>You&apos;re paying <b>{fmt(a!)}</b> for something that should pay <b>{fmt(out.fairA)}</b> — a worse price than fair. Shop for a longer number, or pass.</>}
             {out.verdictA === "value" && <>You&apos;re getting <b>{fmt(a!)}</b> on something fairly worth <b>{fmt(out.fairA)}</b> — that&apos;s real value. Grab it.</>}
-            {out.verdictA === "fair" && <>That&apos;s right on the fair number — a square price, no edge either way.</>}
+            {out.verdictA === "fair" && <>That&apos;s right on the fair number — a square price, exactly where it should be.</>}
           </p>
           <div className="pa__grid">
             <div className="pa__cell"><span className="pa__cellk">Your side — fair</span><b>{fmt(out.fairA)}</b><span className="pa__cellsub">you&apos;re offered {fmt(a!)}</span></div>
@@ -95,14 +95,25 @@ export default function PickAuditor() {
         </p>
       )}
 
-      <p className="pa__note">
-        <b>How it works — and its honest limit.</b> A book builds a margin (the <b>vig</b>) into both sides,
-        so the two implied chances add up to more than 100%. We remove that to recover the market&apos;s own
-        fair probability, then price it. This is arithmetic on the book&apos;s numbers — <b>not</b> a claim
-        that our model beats the market (we&apos;ve tested; on props our projection doesn&apos;t beat the
-        closing line). For one-sided markets with no posted &quot;other side,&quot; there&apos;s nothing to
-        de-vig — there, compare across books on <a href="/props">Player Props</a> for the best number.
-      </p>
+      <details className="pa__how">
+        <summary className="pa__howsum">How the Pick Auditor works</summary>
+        <div className="pa__howbody">
+          <p>
+            Every price a book posts has its margin — the <b>vig</b> — built into both sides, which is why
+            the two implied chances add up to more than 100%. The auditor strips that margin back out to
+            recover the market&apos;s own <b>fair probability</b>, then turns it into a fair price.
+          </p>
+          <p>
+            It&apos;s pure arithmetic on the book&apos;s own posted numbers — transparent and easy to check
+            for yourself. Line the fair price up against what you&apos;re offered and you can see at a glance
+            whether a number is a good deal.
+          </p>
+          <p>
+            For a one-sided market with no posted opposite side, there&apos;s nothing to de-vig — there,
+            compare across books on <a href="/props">Player Props</a> to find the best number.
+          </p>
+        </div>
+      </details>
     </div>
   );
 }

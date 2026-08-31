@@ -21,7 +21,7 @@ import { bookName } from "@/lib/slipPricing";
 
 // Plain-English explanations shown behind each section's medieval "?" seal.
 const TIPS = {
-  gameModel: <>Every game this week with the book&apos;s <b>Market Spread</b> and <b>Market O/U</b> beside our own <b>Model Spread</b> and <b>Model O/U</b> — our line-blind projection (the model never sees the betting line), shown so you can compare it to the market. A ◆ marks an <b>off-consensus</b> game. Graded in public — <b>not a pick</b>.</>,
+  gameModel: <>Every game this week with the book&apos;s <b>Market Spread</b> and <b>Market O/U</b> beside our own <b>Model Spread</b> and <b>Model O/U</b> — our line-blind projection (the model never sees the betting line), shown so you can compare it to the market. A ◆ marks an <b>off-consensus</b> game. Published line-blind and <b>graded in public</b>.</>,
   passing: <>Each starting QB&apos;s sportsbook <b>passing-yards line</b> vs <b>our line-blind projection</b> (▲ = we lean over, ▼ = under). <b>Career&nbsp;% over</b> = how often they&apos;ve cleared a similar line across their career; <b>Prior szn&nbsp;% over</b> = last season only; <b>Home&nbsp;% over</b> / <b>Road&nbsp;% over</b> = that same rate split by venue. Higher means they go over more often.</>,
   playerModel: <>Our <b>line-blind</b> player-prop projections shown beside the book&apos;s line. The ▲/▼ shows whether our number lands over or under it. Published and graded in public — not sold as locks.</>,
   fan: <>Players surfaced from fan forums, beat writers and RSS feeds, then <b>hype-rated</b> with a plain bottom line (e.g. take the over on receptions). For discovery — not a graded pick.</>,
@@ -360,7 +360,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf, vf }: { initialSp
           </div>
         </div>
         {ncaafRanked.length > 0 && (
-          <Panel title="AP Top 25 matchups" count={`${ncaafRanked.length} ranked`} hint={<>This week&apos;s games with an <b>AP Top 25</b> team, in kickoff order, each ranked side showing its poll rank. The market&apos;s <b>Spread</b> and <b>O/U</b> sit beside <b>Our Projection</b> — our line-blind read, <b>not a pick</b>.</>} open>
+          <Panel title="AP Top 25 matchups" count={`${ncaafRanked.length} ranked`} hint={<>This week&apos;s games with an <b>AP Top 25</b> team, in kickoff order, each ranked side showing its poll rank. The market&apos;s <b>Spread</b> and <b>O/U</b> sit beside <b>Our Projection</b> — our <b>line-blind</b> read, published for context.</>} open>
             <MoreTable id="gm-ranked-ncaaf" head={<NcaafHead />} extra={Math.max(0, ncaafRanked.length - 3)} noun="ranked games" cls="hb-form--mkt">
               <NcaafRows games={ncaafRanked} moreFrom={3} />
             </MoreTable>

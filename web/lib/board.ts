@@ -2,6 +2,7 @@
 // Runs server-side only (uses the Supabase service key from server env).
 
 import { empWinProb } from "./winCurve";
+import { deVig } from "./fairValue";
 
 const KEY_NUMBERS: Record<number, number> = { 3: 9.0, 7: 6.2 };
 // Total-points key numbers, measured 1999-2025 (analysis/total_key_numbers.py).
@@ -26,6 +27,7 @@ export interface Line {
   price: number;
   books: string[];
   byBook: Record<string, number>;   // every book's best price at this point
+  fairProb?: number | null;         // Pick Auditor: de-vigged fair probability of this side
 }
 export interface MlSide {
   price: number;
@@ -33,6 +35,7 @@ export interface MlSide {
   byBook: Record<string, number>;   // every book's best price for this side
   edge: number;
   n: number;
+  fairProb?: number | null;         // Pick Auditor: de-vigged fair probability of this side
 }
 export interface Coherence {
   fav: string;
@@ -180,6 +183,18 @@ function coherence(h2h: OddsRow[], consensus: number | null, home: string, away:
   };
 }
 
+// Pick Auditor: de-vig a two-sided market (per book, then average) → fair probability of each side.
+function pairFair(a: { byBook: Record<string, number>; fairProb?: number | null } | null | undefined,
+                  b: { byBook: Record<string, number>; fairProb?: number | null } | null | undefined) {
+  if (!a || !b) return;
+  const probs: number[] = [];
+  for (const book of Object.keys(a.byBook)) if (b.byBook[book] != null) probs.push(deVig(a.byBook[book], b.byBook[book]));
+  if (!probs.length) return;
+  const p = probs.reduce((x, y) => x + y, 0) / probs.length;
+  a.fairProb = p;
+  b.fairProb = 1 - p;
+}
+
 export function buildBoard(rows: OddsRow[]): Game[] {
   const games: Record<string, OddsRow[]> = {};
   for (const r of rows) (games[r.event_id] ??= []).push(r);
@@ -190,7 +205,7 @@ export function buildBoard(rows: OddsRow[]): Game[] {
     const byMarket: Record<string, OddsRow[]> = {};
     for (const r of rs) (byMarket[r.market] ??= []).push(r);
     const spr = spread(byMarket["spreads"] ?? [], home, away);
-    board.push({
+    const game: Game = {
       eventId,
       matchup: `${away} @ ${home}`,
       home,
@@ -201,7 +216,13 @@ export function buildBoard(rows: OddsRow[]): Game[] {
       spread: spr,
       total: total(byMarket["totals"] ?? []),
       coherence: coherence(byMarket["h2h"] ?? [], spr.consensus, home, away),
-    });
+    };
+    // Pick Auditor fair prices for each two-sided market.
+    pairFair(game.spread.home, game.spread.away);
+    pairFair(game.total.over, game.total.under);
+    const mlSides = Object.values(game.ml);
+    if (mlSides.length === 2) pairFair(mlSides[0], mlSides[1]);
+    board.push(game);
   }
   board.sort((a, b) => a.commence.localeCompare(b.commence));
   return board;

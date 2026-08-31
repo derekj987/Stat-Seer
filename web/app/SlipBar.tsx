@@ -252,7 +252,7 @@ export default function SlipBar() {
             )}
             <p className="slipbar__note">
               Your <b>Value Finder</b> — every pick you collect across the app, priced. Model reads and
-              fan buzz are here for reference — <b>not a pick, not graded</b>. Line-shopping only.
+              fan buzz are here <b>for reference</b>, to help you shop the best number.
             </p>
             <div className="slipbar__actions">
               <button className="slipbar__share" onClick={shareSlip}>{shared ? "Link copied ✓" : "Share slip"}</button>

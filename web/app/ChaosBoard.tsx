@@ -50,14 +50,14 @@ export function ChaosBoard({
       <h2 className="ncf-h">Chaos Board</h2>
       <p className="cb__caption">See what we&apos;re brewing in the <b>Upset Lab</b>.</p>
       <details className="cb__intro">
-        <summary className="cb__introsum">What is this? — the aggressive bettor&apos;s chaos board · just for fun, not a pick</summary>
+        <summary className="cb__introsum">What is this? — the aggressive bettor&apos;s chaos board · just for fun</summary>
         <div className="cb__introbody">
           <p className="ctxsec__d">
             For the aggressive bettor: which underdogs <em>could</em> pull the outright upset — <b>win the game
             straight up</b> (the moneyline, not the spread) — ranked by <b>chaos potential</b>, not how likely it is.
             It rewards upside and mayhem (a shaky favorite, a high-ceiling dog, weather, a fat payout) and openly
             ignores the priced factors. The market thinks all of these are long shots — <b>that&apos;s the appeal</b>.
-            Just for fun; not a pick.
+            Just for fun.
           </p>
           {earlyOn && (
             <p className="cb__early">
@@ -65,7 +65,7 @@ export function ChaosBoard({
               chaotic: rosters were overhauled and no one has current-season form, so the market works with
               the least information — and dogs win a bit more often at the same price (~+1.5 pts vs mid-season).
               This factor rewards a live dog in the sweet spot. It fades to zero after week 3, and it&apos;s a
-              variance flag, <b>not an edge</b> —{" "}
+              <b> variance flag</b> for fun —{" "}
               {sport === "NFL"
                 ? "early NFL dogs still cover only ~53.5% ATS, within a coin flip of the vig"
                 : "early college dogs actually cover under 50% ATS (the early slate is full of cupcake blowouts), so there's no dog edge here at all"}.
@@ -132,8 +132,7 @@ export function ChaosBoard({
       </ol>
 
       <p className="cb__foot">
-        Entertainment only. The Chaos Index is <b>not predictive</b> and <b>not a bet recommendation</b> —
-        our tested read is that these auxiliary factors don&apos;t beat the market, and the spread already
+        Entertainment only — the Chaos Index is built <b>for fun</b>, not prediction, and the spread already
         prices upsets. Chase at your own risk; bet responsibly.
       </p>
     </section>

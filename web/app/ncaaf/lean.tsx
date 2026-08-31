@@ -27,9 +27,9 @@ export function ncaafLean(g: NcaafCardGame): { cls: string; txt: string; tip: st
   if (Math.abs(diff) < 1) return { cls: "even", txt: "≈ even",
     tip: "Our line-blind number is essentially the market's on this game — no lean either way." };
   if (diff > 0) return { cls: "fav", txt: `fav +${diff.toFixed(1)}`,
-    tip: `Our line-blind read has the favorite covering by ${diff.toFixed(1)} pts — context, not a pick (our rating doesn't beat the spread).` };
+    tip: `Our line-blind read has the favorite covering by ${diff.toFixed(1)} pts — published for context to inform your read.` };
   return { cls: "dog", txt: `dog +${Math.abs(diff).toFixed(1)}`,
-    tip: `Our line-blind read has the underdog covering by ${Math.abs(diff).toFixed(1)} pts — context, not a pick (our rating doesn't beat the spread).` };
+    tip: `Our line-blind read has the underdog covering by ${Math.abs(diff).toFixed(1)} pts — published for context to inform your read.` };
 }
 
 export function LeanTag({ g }: { g: NcaafCardGame }) {

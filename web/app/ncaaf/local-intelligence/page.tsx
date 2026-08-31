@@ -9,7 +9,7 @@ import LocalIntelFeed from "./LocalIntelFeed";
 // Pick a conference → team (or this week's slate) from the dropdowns to navigate.
 export const metadata = {
   title: "StatSeer — CFB Local Intelligence",
-  description: "Fan Stock for college football — which players fans are buying and selling on team boards. Sentiment, not a pick.",
+  description: "Fan Stock for college football — which players fans are buying and selling on team boards. Fan sentiment, shown for context.",
 };
 
 export const revalidate = 300;

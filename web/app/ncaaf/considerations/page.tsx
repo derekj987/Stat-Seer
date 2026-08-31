@@ -45,7 +45,7 @@ export default async function Page({ searchParams }: {
           <b>The stuff that doesn&apos;t fit in a number.</b> One card per game with the context around it: the
           <b> site</b> &amp; <b>weather</b> (⚑ marks notable wind), the <b>AP poll</b> stakes, each side&apos;s
           <b> power rating</b> + national rank, and the <b>scoring environment</b> (our total vs the market&apos;s).
-          These <b>arm your judgment</b> — not a pick. Referee crews and coaching tendencies aren&apos;t published
+          These <b>arm your judgment</b> with the full backdrop. Referee crews and coaching tendencies aren&apos;t published
           for college, so those rows stay NFL-only. The durable backdrop — home field &amp; league strength — is below.
         </>} />
       } />
