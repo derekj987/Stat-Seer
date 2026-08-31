@@ -31,7 +31,7 @@ function slides(sport: Sport): Slide[] {
       path: fan, img: "/localintel.jpg?v=10" },
     { emoji: "💰", kicker: "Value Finder", title: "Find the best price",
       blurb: "We shop every book so you never leave value on the table — line shopping, sweet spots & the single best number.",
-      path: value, img: "/valuefinder.jpg?v=10" },
+      path: value, img: "/valuefinder.jpg?v=11" },
   ];
 }
 
