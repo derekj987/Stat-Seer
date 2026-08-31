@@ -29,12 +29,18 @@ export default function EmbedMode() {
       } catch { /* cross-origin / no parent */ }
     };
 
-    // Show only the requested chart, if the page hosts more than one.
-    if (only) {
+    // Show only the requested chart, if the page hosts more than one. This must be RE-APPLIED, not
+    // run once: the auth gate mounts the page content after this effect fires, so a one-shot filter
+    // would run against a DOM that doesn't have the charts yet and leave both visible. We re-run it
+    // on an interval + whenever the DOM mutates (below), so the non-matching chart is hidden as soon
+    // as it appears and stays hidden across re-renders.
+    const applyOnly = () => {
+      if (!only) return;
       document.querySelectorAll<HTMLElement>("[data-embedchart]").forEach((el) => {
-        if (el.getAttribute("data-embedchart") !== only) el.style.display = "none";
+        el.style.display = el.getAttribute("data-embedchart") === only ? "" : "none";
       });
-    }
+    };
+    applyOnly();
 
     // Collapse to a preview (~2 cards) + a "Show all" toggle, once content has laid out.
     let capped = false;
@@ -66,16 +72,23 @@ export default function EmbedMode() {
 
     post();
     const capTimer = setTimeout(applyCap, 350);
-    const t = setInterval(post, 600);
-    window.addEventListener("load", () => { applyCap(); post(); });
+    const t = setInterval(() => { applyOnly(); post(); }, 600);
+    window.addEventListener("load", () => { applyOnly(); applyCap(); post(); });
     window.addEventListener("resize", post);
     let ro: ResizeObserver | null = null;
     try { ro = new ResizeObserver(post); ro.observe(document.body); } catch { /* older browsers */ }
+    // Catch the gate-mounted content the instant it appears (childList only, so applyOnly's own
+    // style writes don't retrigger it).
+    let mo: MutationObserver | null = null;
+    if (only) {
+      try { mo = new MutationObserver(() => applyOnly()); mo.observe(document.body, { childList: true, subtree: true }); } catch { /* older browsers */ }
+    }
     return () => {
       clearTimeout(capTimer);
       clearInterval(t);
       window.removeEventListener("resize", post);
       ro?.disconnect();
+      mo?.disconnect();
     };
   }, []);
 

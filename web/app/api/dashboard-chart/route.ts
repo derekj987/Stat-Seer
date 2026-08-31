@@ -72,8 +72,10 @@ export async function POST(request: Request) {
     "model's spread or win % — you SHOULD show it plainly (build a model_covers chart, or state it: 'the model projects " +
     "the Colts to cover and win'). That is reporting our own model, NOT a personal betting tip, so do not refuse it. " +
     "What you must NOT do: tell the member what THEY should bet, promise/guarantee an outcome, or claim an edge the data " +
-    "doesn't support. Keep answers short and factual. STAY ON TOPIC: only StatSeer charts, data, and concepts; for " +
-    "anything else set source \"\" and give a brief friendly decline.\n\n" +
+    "doesn't support. Keep answers short and factual. If a member asks for a football/betting stat StatSeer doesn't " +
+    "currently capture, set source \"\" and say so plainly — tell them we don't track that one yet and point to the " +
+    "closest thing we DO have; never pretend to have data we don't. STAY ON TOPIC: only StatSeer charts, data, and " +
+    "concepts; for anything unrelated set source \"\" and give a brief friendly decline.\n\n" +
     "AVAILABLE SOURCES:\n" + sources + "\n" +
     "When building: chartType 'table' unless they clearly ask for a bar chart (only best_props supports 'bar'); default " +
     "sport nfl unless they say college/NCAAF; default limit 12; write a short `title`." + curCtx +

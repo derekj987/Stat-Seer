@@ -75,8 +75,9 @@ export default function ChartBuilder() {
         <div className="cbuild__headtxt">
           <b className="cbuild__h">🛠 Build a chart with AI</b>
           <p className="cbuild__sub">
-            Love our model — or want to explore the numbers your own way? Tell me what you&apos;d like to see and
-            I&apos;ll pull exactly the StatSeer data you need, then answer any questions about it.
+            Love our model, or want to explore the numbers your own way? Ask me for any chart or stat you&apos;re
+            curious about — even an angle StatSeer doesn&apos;t show yet. I&apos;ll pull the exact data we have and
+            answer anything about how our numbers work; if it&apos;s something we don&apos;t track, I&apos;ll tell you straight.
           </p>
         </div>
         {(messages.length > 0 || chart) && (
