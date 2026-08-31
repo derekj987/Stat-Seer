@@ -14,6 +14,9 @@ function slides(sport: Sport): Slide[] {
   const fan = sport === "ncaaf" ? "/ncaaf/local-intelligence" : "/local-intelligence";
   const model = sport === "ncaaf" ? "/ncaaf/model" : "/model";
   return [
+    { emoji: "🛠", kicker: "New · Your Dashboard", title: "Build your own board",
+      blurb: "Pin any chart across StatSeer — the model, value, props, sweet spots — into one personal view, or ask the AI to build one for you.",
+      path: "/dashboard", img: "/dashboard.jpg?v=1" },
     { emoji: "🌪", kicker: "New · just for fun", title: "The Upset Lab — Chaos Board",
       blurb: "Which underdogs could win outright, ranked by pure chaos potential — for the aggressive bettor.",
       path: ctx, img: "/chaosboard.jpg?v=8" },
@@ -54,8 +57,11 @@ export function HighlightBanner({ sport }: { sport: Sport }) {
     >
       <a className={s.img ? "hlb__slide hlb__slide--img" : "hlb__slide"} href={s.path} key={i}>
         {s.img
+          // Blurred copy of the same art fills any letterbox gap (so a squarer image reads as a
+          // soft continuation, never a hard black bar), with the whole image contained on top.
           // eslint-disable-next-line @next/next/no-img-element
-          ? <img className="hlb__img" src={s.img} alt="" style={s.focus ? { objectPosition: s.focus } : undefined} />
+          ? <><img className="hlb__imgbg" src={s.img} alt="" aria-hidden="true" />
+              <img className="hlb__img" src={s.img} alt="" style={s.focus ? { objectPosition: s.focus } : undefined} /></>
           : <span className="hlb__emoji" aria-hidden="true">{s.emoji}</span>}
         <span className="hlb__body">
           <span className="hlb__kicker">{s.kicker}</span>

@@ -3949,9 +3949,12 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
    side-by-side text/emoji is dropped for these — the art carries the promo itself. */
 /* One consistent, not-tall shape for every slide (so the strip never jumps height), showing the
    ENTIRE artwork — contained, never cropped, so each image's title stays whole wherever it sits.
-   A dark plate fills any letterbox gap and blends with the medieval art. */
-.hlb__slide--img{padding:0;background:#140d06;aspect-ratio:1600/620;overflow:hidden}
-.hlb__slide--img .hlb__img{position:static;width:100%;height:100%;object-fit:contain;
+   Any letterbox gap is filled by a BLURRED, scaled copy of the same art (see .hlb__imgbg) rather
+   than a hard black bar, so images of different aspect ratios all read cleanly at one size. */
+.hlb__slide--img{position:relative;padding:0;background:#140d06;aspect-ratio:20/9;overflow:hidden}
+.hlb__imgbg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  filter:blur(22px) brightness(.68) saturate(1.15);transform:scale(1.18);z-index:0;pointer-events:none}
+.hlb__slide--img .hlb__img{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;
   display:block;border:0;border-radius:0}
 .hlb__slide--img .hlb__body,.hlb__slide--img .hlb__go{display:none}
 /* No bottom scrim — it darkened the gold title/flourish that sits at the bottom of the art.
