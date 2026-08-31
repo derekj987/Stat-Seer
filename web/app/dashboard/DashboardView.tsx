@@ -37,32 +37,19 @@ function SizeControl({ size, onSize }: { size: PinSize; onSize: (s: PinSize) => 
   );
 }
 
-// Shared chrome for every card: drag grip, label, size control, open/remove — plus the drag
-// wiring so cards can be reordered within a board.
-function CardShell({ pin, index, count, drag, onRemove, onSize, onMove, showOpen, children }: {
+// Shared chrome for every card: a prominent Move control, label, size control, open/remove.
+// (Reorder is button-driven — native drag was unreliable through the chart iframes.)
+function CardShell({ pin, index, count, onRemove, onSize, onMove, showOpen, children }: {
   pin: Pin; index: number; count: number; showOpen?: boolean; children: React.ReactNode;
   onRemove: (id: string) => void; onSize: (id: string, s: PinSize) => void; onMove: (from: number, to: number) => void;
-  drag: {
-    onDragStart: (i: number) => void; onDragEnterCard: (i: number) => void;
-    onDrop: () => void; onEnd: () => void; over: number | null; from: number | null;
-  };
 }) {
-  const isOver = drag.over === index && drag.from !== null && drag.from !== index;
   return (
-    <div
-      className={`dashembed dashembed--${pin.size ?? "lg"}${drag.from === index ? " dashembed--dragging" : ""}${isOver ? " dashembed--over" : ""}`}
-      draggable
-      onDragStart={(e) => { e.dataTransfer.effectAllowed = "move"; drag.onDragStart(index); }}
-      onDragEnter={() => drag.onDragEnterCard(index)}
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={(e) => { e.preventDefault(); drag.onDrop(); }}
-      onDragEnd={drag.onEnd}
-    >
+    <div className={`dashembed dashembed--${pin.size ?? "lg"}`}>
       <div className="dashembed__bar">
-        <span className="dashembed__grip" title="Drag to reorder" aria-hidden="true">⠿</span>
-        <span className="dashembed__move">
+        <span className="dashembed__move" role="group" aria-label="Move card">
           <button type="button" className="dashembed__mv" title="Move earlier" aria-label={`Move ${pin.label} earlier`}
             disabled={index === 0} onClick={() => onMove(index, index - 1)}>◀</button>
+          <span className="dashembed__movelbl" aria-hidden="true">Move</span>
           <button type="button" className="dashembed__mv" title="Move later" aria-label={`Move ${pin.label} later`}
             disabled={index === count - 1} onClick={() => onMove(index, index + 1)}>▶</button>
         </span>
@@ -131,7 +118,6 @@ function ChartCard(props: CardProps) {
 interface CardProps {
   pin: Pin; index: number; count: number; showOpen?: boolean;
   onRemove: (id: string) => void; onSize: (id: string, s: PinSize) => void; onMove: (from: number, to: number) => void;
-  drag: React.ComponentProps<typeof CardShell>["drag"];
 }
 
 function BoardTabs() {
@@ -182,16 +168,6 @@ function BoardTabs() {
 
 export default function DashboardView() {
   const { pins, remove, setSize, reorder } = useDashboard();
-  const [from, setFrom] = useState<number | null>(null);
-  const [over, setOver] = useState<number | null>(null);
-
-  const drag = {
-    from, over,
-    onDragStart: (i: number) => setFrom(i),
-    onDragEnterCard: (i: number) => setOver(i),
-    onDrop: () => { if (from !== null && over !== null && from !== over) reorder(from, over); setFrom(null); setOver(null); },
-    onEnd: () => { setFrom(null); setOver(null); },
-  };
 
   return (
     <>
@@ -204,7 +180,7 @@ export default function DashboardView() {
           <p className="dash__emptyp">
             Open <b>🧩 Add StatSeer charts</b> above to browse every chart by sport &amp; category and drop
             it in — or tap <b>＋ Add to dashboard</b> anywhere on the site. The <b>whole chart</b> lands right
-            here, live. Then use <b>◀ ▶</b> (or drag the <b>⠿</b> grip) to arrange and <b>S / M / L / ▭</b> to resize.
+            here, live. Then use the <b>◀ Move ▶</b> buttons to arrange and <b>S / M / L / ▭</b> to resize each card.
           </p>
           <div className="dash__emptycta">
             <button type="button" className="btn btn--primary"
@@ -214,9 +190,9 @@ export default function DashboardView() {
           </div>
         </div>
       ) : (
-        <div className={`dash__grid${from !== null ? " dash__grid--dragging" : ""}`}>
+        <div className="dash__grid">
           {pins.map((p, i) => {
-            const common: CardProps = { pin: p, index: i, count: pins.length, onRemove: remove, onSize: setSize, onMove: reorder, drag };
+            const common: CardProps = { pin: p, index: i, count: pins.length, onRemove: remove, onSize: setSize, onMove: reorder };
             return p.kind === "chart" && p.spec
               ? <ChartCard key={p.id} {...common} />
               : <EmbedCard key={p.id} {...common} />;

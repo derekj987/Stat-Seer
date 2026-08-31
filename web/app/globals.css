@@ -1954,16 +1954,15 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 /* While a drag is in flight, let dragover/drop events reach the cards instead of the iframes. */
 .dash__grid--dragging .dashembed__frame iframe,.dash__grid--dragging .dashchart{pointer-events:none}
 .dashembed__bar{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--surface-2)}
-.dashembed__grip{cursor:grab;color:var(--muted);font-size:13px;flex:0 0 auto;user-select:none;letter-spacing:-1px}
-.dashembed__grip:active{cursor:grabbing}
-/* Explicit reorder arrows — always work (the iframe can swallow native drags). */
-.dashembed__move{display:inline-flex;flex:0 0 auto}
-.dashembed__mv{border:1px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer;
-  font-size:8px;font-weight:800;width:19px;height:19px;display:grid;place-items:center;padding:0}
-.dashembed__mv:first-child{border-radius:6px 0 0 6px}
-.dashembed__mv:last-child{border-radius:0 6px 6px 0;border-left:0}
-.dashembed__mv:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
-.dashembed__mv:disabled{opacity:.35;cursor:default}
+/* Prominent Move control — a clear ◀ MOVE ▶ pill (reorder is button-driven; native drag was
+   unreliable through the chart iframes). */
+.dashembed__move{display:inline-flex;align-items:stretch;flex:0 0 auto;border:1px solid var(--accent);border-radius:8px;overflow:hidden}
+.dashembed__mv{border:0;background:var(--accent-soft);color:var(--accent);cursor:pointer;font-size:12px;font-weight:800;
+  padding:4px 10px;display:grid;place-items:center;line-height:1}
+.dashembed__mv:hover:not(:disabled){background:var(--accent);color:#fff}
+.dashembed__mv:disabled{opacity:.3;cursor:default}
+.dashembed__movelbl{display:grid;place-items:center;font-size:9.5px;font-weight:800;color:var(--accent);text-transform:uppercase;
+  letter-spacing:.05em;padding:0 8px;background:var(--accent-soft);border-left:1px solid var(--accent);border-right:1px solid var(--accent)}
 .dashembed__icon{font-size:16px;flex:0 0 auto}
 .dashembed__label{font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}
 .dashembed__detail{font-size:11px;color:var(--muted);white-space:nowrap;flex:0 0 auto}
