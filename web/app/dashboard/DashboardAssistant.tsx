@@ -20,7 +20,7 @@ export default function DashboardAssistant() {
       <button className="dashai__robot" onClick={() => setOpen((v) => !v)} aria-expanded={open}
         aria-label={open ? "Hide assistant help" : "What can the assistant do?"}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/chatbot.png?v=3" alt="StatSeer AI assistant" className="dashai__img" width={132} height={132} />
+        <img src="/chatbot-knight.png?v=1" alt="StatSeer AI assistant" className="dashai__img" width={132} height={132} />
       </button>
 
       <div className="dashai__bubble">
