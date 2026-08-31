@@ -1855,16 +1855,23 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .chartbar__val{font-family:var(--font-mono);font-weight:700;color:var(--model);text-align:right}
 
 /* Live embeds: each pinned view is the actual chart in an auto-sized iframe, stacked full-width. */
-/* Board tabs — switch, add (＋ Board), double-click a tab to rename, ✕ on the active one to delete. */
-.dashtabs{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin:0 0 16px}
+/* Board tabs — switch, add (＋ Board), rename via the active tab or ✎, delete via ✕. */
+.dashtabs{margin:0 0 16px}
+.dashtabs__row{display:flex;flex-wrap:wrap;align-items:center;gap:7px}
+.dashtabs__hint{font-size:11.5px;color:var(--muted);line-height:1.5;margin:9px 2px 0}
+.dashtabs__hint b{color:var(--ink)}
 .dashtab{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
 .dashtab.active{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .dashtab__name{border:0;background:none;cursor:pointer;font-weight:800;font-size:13px;color:var(--ink);
   padding:7px 11px;display:inline-flex;align-items:center;gap:6px}
-.dashtab.active .dashtab__name{color:var(--accent)}
+.dashtab.active .dashtab__name{color:var(--accent);padding-right:6px}
 .dashtab__n{font-size:10.5px;font-weight:800;color:var(--muted);background:var(--surface-2);border-radius:20px;padding:1px 6px}
-.dashtab__del{border:0;background:none;color:var(--muted);cursor:pointer;font-size:11px;padding:6px 9px 6px 0;line-height:1}
+.dashtab__act{border:0;background:none;color:var(--muted);cursor:pointer;font-size:12px;padding:6px 4px;line-height:1}
+.dashtab__act:hover{color:var(--accent)}
+.dashtab__del{border:0;background:none;color:var(--muted);cursor:pointer;font-size:11px;padding:6px 9px 6px 2px;line-height:1}
 .dashtab__del:hover{color:var(--key)}
+.dashtab__edit{border:1px solid var(--accent);border-radius:6px;font:inherit;font-weight:800;font-size:13px;
+  padding:5px 8px;margin:2px;width:132px;max-width:46vw;background:var(--surface);color:var(--ink)}
 .dashtab--add{border-style:dashed;color:var(--accent);font-weight:800;font-size:12.5px;cursor:pointer;padding:7px 11px}
 .dashtab--add:hover{background:var(--surface-2)}
 

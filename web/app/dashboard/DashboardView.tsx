@@ -129,25 +129,46 @@ interface CardProps {
 
 function BoardTabs() {
   const { boards, activeId, setActive, addBoard, renameBoard, deleteBoard } = useDashboard();
+  const [editing, setEditing] = useState<string | null>(null);
+  const [draft, setDraft] = useState("");
+  const startEdit = (id: string, name: string) => { setEditing(id); setDraft(name); };
+  const commit = () => { if (editing) renameBoard(editing, draft.trim()); setEditing(null); };
+
   return (
-    <div className="dashtabs" role="tablist" aria-label="Dashboard boards">
-      {boards.map((b) => (
-        <span key={b.id} className={`dashtab${b.id === activeId ? " active" : ""}`}>
-          <button type="button" className="dashtab__name" role="tab" aria-selected={b.id === activeId}
-            onClick={() => setActive(b.id)}
-            onDoubleClick={() => { const n = window.prompt("Rename board", b.name); if (n != null) renameBoard(b.id, n.trim()); }}
-            title="Click to switch · double-click to rename">
-            {b.name}<span className="dashtab__n">{b.pins.length}</span>
-          </button>
-          {b.id === activeId && boards.length > 1 && (
-            <button type="button" className="dashtab__del" title="Delete this board"
-              aria-label={`Delete board ${b.name}`}
-              onClick={() => { if (window.confirm(`Delete board "${b.name}"? Its pins are removed.`)) deleteBoard(b.id); }}>✕</button>
-          )}
-        </span>
-      ))}
-      <button type="button" className="dashtab dashtab--add" title="New board" aria-label="New board"
-        onClick={() => addBoard()}>＋ Board</button>
+    <div className="dashtabs">
+      <div className="dashtabs__row" role="tablist" aria-label="Dashboard boards">
+        {boards.map((b) => (
+          <span key={b.id} className={`dashtab${b.id === activeId ? " active" : ""}`}>
+            {editing === b.id ? (
+              <input className="dashtab__edit" autoFocus value={draft} maxLength={40} aria-label="Board name"
+                onChange={(e) => setDraft(e.target.value)} onBlur={commit}
+                onKeyDown={(e) => { if (e.key === "Enter") commit(); else if (e.key === "Escape") setEditing(null); }} />
+            ) : (
+              <button type="button" className="dashtab__name" role="tab" aria-selected={b.id === activeId}
+                onClick={() => (b.id === activeId ? startEdit(b.id, b.name) : setActive(b.id))}
+                title={b.id === activeId ? "Click to rename this board" : "Switch to this board"}>
+                {b.name}<span className="dashtab__n">{b.pins.length}</span>
+              </button>
+            )}
+            {b.id === activeId && editing !== b.id && (
+              <>
+                <button type="button" className="dashtab__act" title="Rename board" aria-label={`Rename board ${b.name}`}
+                  onClick={() => startEdit(b.id, b.name)}>✎</button>
+                {boards.length > 1 && (
+                  <button type="button" className="dashtab__del" title="Delete board" aria-label={`Delete board ${b.name}`}
+                    onClick={() => { if (window.confirm(`Delete board "${b.name}"? Its pins are removed.`)) deleteBoard(b.id); }}>✕</button>
+                )}
+              </>
+            )}
+          </span>
+        ))}
+        <button type="button" className="dashtab dashtab--add" title="Create a new board" aria-label="New board"
+          onClick={() => addBoard()}>＋ Board</button>
+      </div>
+      <p className="dashtabs__hint">
+        <b>Boards</b> are separate layouts — keep, say, an <i>NFL Sunday</i> board and a <i>Props</i> board.
+        Click a tab to switch, the active tab (or <b>✎</b>) to rename, <b>✕</b> to delete.
+      </p>
     </div>
   );
 }
