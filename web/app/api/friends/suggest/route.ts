@@ -45,7 +45,7 @@ export async function GET() {
     // Backfill with the newest members so discovery still works with a small graph.
     if (ranked.length < NEED) {
       const have = new Set([...connected, ...ranked.map((r) => r.id)]);
-      const recent = await pg(`profiles?select=id&order=created_at.desc&limit=50`);
+      const recent = await pg(`profiles?select=id&status=eq.approved&order=created_at.desc&limit=50`);
       for (const p of recent) {
         const id = p.id as string;
         if (have.has(id)) continue;
@@ -59,7 +59,8 @@ export async function GET() {
     const names = new Map<string, { username: string; role: string }>();
     if (top.length) {
       const idlist = top.map((r) => r.id).join(",");
-      const profs = await pg(`profiles?id=in.(${idlist})&select=id,username,role`);
+      // Only approved members are suggestable — a pending/unapproved account isn't discoverable.
+      const profs = await pg(`profiles?id=in.(${idlist})&status=eq.approved&select=id,username,role`);
       for (const p of profs) names.set(p.id as string, { username: p.username as string, role: (p.role as string) ?? "member" });
     }
     const suggestions = top

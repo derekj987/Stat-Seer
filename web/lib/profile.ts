@@ -8,6 +8,7 @@ export interface Profile {
   id: string;
   username: string;
   role: string;
+  status: string;   // "approved" | "pending" | "rejected" (beta gate); defaults approved pre-migration
   title: string | null;
   bio: string | null;
   avatarUrl: string | null;
@@ -71,15 +72,19 @@ export { REACTION_EMOJI };
 
 export async function getProfileByUsername(username: string): Promise<Profile | null> {
   // cover_url + accent_color are added by the profile_upgrade migration; fall back if not there yet.
-  const base = `profiles?username=eq.${encodeURIComponent(username)}&limit=1&select=id,username,role,title,bio,avatar_url,created_at`;
+  const base = `profiles?username=eq.${encodeURIComponent(username)}&limit=1&select=id,username,role,status,title,bio,avatar_url,created_at`;
+  const baseNoStatus = base.replace("role,status,", "role,");   // status added by beta_approval.sql
   const sel = (extra: string) => base.replace("bio,", `bio,${extra}`);
   // Optional columns arrive across separate migrations; degrade one level at a time so a newer
-  // column being absent doesn't drop the older ones (cover/accent/teams).
+  // column being absent doesn't drop the older ones (cover/accent/teams/status).
   let rows: Record<string, unknown>[];
   try { rows = await pg(sel("cover_url,accent_color,favorite_teams,pinned_post_id,")); }
   catch {
     try { rows = await pg(sel("cover_url,accent_color,favorite_teams,")); }
-    catch { rows = await pg(base); }
+    catch {
+      try { rows = await pg(base); }
+      catch { rows = await pg(baseNoStatus); }   // pre-beta_approval.sql: no status column
+    }
   }
   const r = rows[0];
   if (!r) return null;
@@ -87,6 +92,7 @@ export async function getProfileByUsername(username: string): Promise<Profile | 
     id: r.id as string,
     username: r.username as string,
     role: (r.role as string) ?? "member",
+    status: (r.status as string) ?? "approved",   // fail-open if the column isn't migrated yet
     title: (r.title as string) ?? null,
     bio: (r.bio as string) ?? null,
     avatarUrl: (r.avatar_url as string) ?? null,

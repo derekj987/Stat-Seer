@@ -6,8 +6,11 @@ import MemberActions from "./MemberActions";
 export const dynamic = "force-dynamic";
 const ADMIN_ROLES = ["founder", "admin"];
 
+// Format in Eastern time so the " ET" label is accurate — without timeZone this rendered in the
+// server's zone (UTC on Vercel) but still said "ET", so the time read ~4-5 hours off.
 const fmt = new Intl.DateTimeFormat("en-US", {
   month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit",
+  timeZone: "America/New_York",
 });
 const when = (iso: string) => fmt.format(new Date(iso)) + " ET";
 

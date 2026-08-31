@@ -23,8 +23,9 @@ import type { CSSProperties } from "react";
 
 export const dynamic = "force-dynamic";
 
-const since = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" });
-const fmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+const since = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "America/New_York" });
+// timeZone makes the " ET" label truthful (server runs UTC otherwise).
+const fmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/New_York" });
 const when = (iso: string) => fmt.format(new Date(iso)) + " ET";
 
 export default async function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
@@ -44,6 +45,12 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   // Profiles are members-only (the proxy gate also enforces this); never expose to a visitor.
   // Gate only where auth is actually configured (prod) — local dev has no client auth env.
   if (!me && process.env.NEXT_PUBLIC_SUPABASE_URL) redirect("/login");
+
+  // Beta gate: a member's profile isn't real until the founder approves them. A pending/rejected
+  // account has an auto-created stub profile — hide it from everyone except the member themselves
+  // and the StatSeer team, so an unapproved account can't be found or interacted with.
+  const viewerIsStaff = !!me && ["founder", "admin"].includes(me.role);
+  if (profile.status !== "approved" && me?.id !== profile.id && !viewerIsStaff) notFound();
 
   const [wall, friends, stats] = await Promise.all([
     getWall(profile.id, me?.id), getFriends(profile.id), getProfileStats(profile.id),
