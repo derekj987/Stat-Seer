@@ -2582,6 +2582,7 @@ export const NCAAF_DEPTH: Record<string, CfbDepthEntry> = {
   "vic listorti": {"team": "Navy", "pos": "RB", "rank": 1},
   "victor rosa": {"team": "Ohio", "pos": "RB", "rank": 2},
   "viliami teu": {"team": "San Jos\u00e9 State", "pos": "RB", "rank": 3},
+  "vincent carner": {"team": "UNLV", "pos": "WR", "rank": 8},
   "viron ellison": {"team": "Delaware", "pos": "RB", "rank": 2},
   "wade mcsparron": {"team": "SMU", "pos": "WR", "rank": 3},
   "waden charles": {"team": "UCF", "pos": "WR", "rank": 2},
