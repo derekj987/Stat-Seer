@@ -3,7 +3,7 @@
 // "Add StatSeer charts to your board" — a browsable catalog of every default chart, grouped by
 // sport and category, right on the dashboard. Tapping ＋ Add drops the live chart onto the ACTIVE
 // board (the tab currently selected), so members don't have to hunt the site for pin buttons.
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDashboard } from "@/lib/dashboard";
 import { CHART_CATALOG, catalogPin } from "@/lib/chartCatalog";
 
@@ -13,10 +13,18 @@ export default function ChartCatalog() {
   const { has, boardOf, activeId, addToBoard, moveToBoard, remove, active } = useDashboard();
   const [open, setOpen] = useState(false);
   const [sport, setSport] = useState<(typeof SPORTS)[number]>("NFL");
+  const ref = useRef<HTMLElement | null>(null);
+
+  // The empty-board CTA opens the catalog from below.
+  useEffect(() => {
+    const onOpen = () => { setOpen(true); ref.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }); };
+    window.addEventListener("ss:open-catalog", onOpen);
+    return () => window.removeEventListener("ss:open-catalog", onOpen);
+  }, []);
   const groups = CHART_CATALOG.filter((g) => g.sport === sport);
 
   return (
-    <section className="chcat">
+    <section className="chcat" ref={ref}>
       <button type="button" className={`chcat__toggle${open ? " open" : ""}`} aria-expanded={open}
         onClick={() => setOpen((v) => !v)}>
         <span className="chcat__togic" aria-hidden="true">🧩</span>

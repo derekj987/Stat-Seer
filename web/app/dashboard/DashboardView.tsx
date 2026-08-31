@@ -39,9 +39,9 @@ function SizeControl({ size, onSize }: { size: PinSize; onSize: (s: PinSize) => 
 
 // Shared chrome for every card: drag grip, label, size control, open/remove — plus the drag
 // wiring so cards can be reordered within a board.
-function CardShell({ pin, index, drag, onRemove, onSize, showOpen, children }: {
-  pin: Pin; index: number; showOpen?: boolean; children: React.ReactNode;
-  onRemove: (id: string) => void; onSize: (id: string, s: PinSize) => void;
+function CardShell({ pin, index, count, drag, onRemove, onSize, onMove, showOpen, children }: {
+  pin: Pin; index: number; count: number; showOpen?: boolean; children: React.ReactNode;
+  onRemove: (id: string) => void; onSize: (id: string, s: PinSize) => void; onMove: (from: number, to: number) => void;
   drag: {
     onDragStart: (i: number) => void; onDragEnterCard: (i: number) => void;
     onDrop: () => void; onEnd: () => void; over: number | null; from: number | null;
@@ -60,6 +60,12 @@ function CardShell({ pin, index, drag, onRemove, onSize, showOpen, children }: {
     >
       <div className="dashembed__bar">
         <span className="dashembed__grip" title="Drag to reorder" aria-hidden="true">⠿</span>
+        <span className="dashembed__move">
+          <button type="button" className="dashembed__mv" title="Move earlier" aria-label={`Move ${pin.label} earlier`}
+            disabled={index === 0} onClick={() => onMove(index, index - 1)}>◀</button>
+          <button type="button" className="dashembed__mv" title="Move later" aria-label={`Move ${pin.label} later`}
+            disabled={index === count - 1} onClick={() => onMove(index, index + 1)}>▶</button>
+        </span>
         <span className="dashembed__icon" aria-hidden="true">{KIND_ICON[pin.kind] ?? "🔖"}</span>
         <span className="dashembed__label">{pin.label}</span>
         {pin.detail && <span className="dashembed__detail">{pin.detail}</span>}
@@ -123,8 +129,8 @@ function ChartCard(props: CardProps) {
 }
 
 interface CardProps {
-  pin: Pin; index: number; showOpen?: boolean;
-  onRemove: (id: string) => void; onSize: (id: string, s: PinSize) => void;
+  pin: Pin; index: number; count: number; showOpen?: boolean;
+  onRemove: (id: string) => void; onSize: (id: string, s: PinSize) => void; onMove: (from: number, to: number) => void;
   drag: React.ComponentProps<typeof CardShell>["drag"];
 }
 
@@ -194,21 +200,23 @@ export default function DashboardView() {
       {!pins.length ? (
         <div className="dash__empty" role="note">
           <span className="dash__emptyicon" aria-hidden="true">📌</span>
-          <h3 className="dash__emptyh">This board is empty</h3>
+          <h3 className="dash__emptyh">Add something to your board now!</h3>
           <p className="dash__emptyp">
-            Use <b>＋ Add StatSeer charts to your board</b> above to browse every chart by sport, or
-            tap <b>＋ Add to dashboard</b> anywhere on the site. The <b>whole chart</b> lands right here,
-            live. Then <b>drag to rearrange</b> and use <b>S / M / L / ▭</b> to resize each card.
+            Open <b>🧩 Add StatSeer charts</b> above to browse every chart by sport &amp; category and drop
+            it in — or tap <b>＋ Add to dashboard</b> anywhere on the site. The <b>whole chart</b> lands right
+            here, live. Then use <b>◀ ▶</b> (or drag the <b>⠿</b> grip) to arrange and <b>S / M / L / ▭</b> to resize.
           </p>
           <div className="dash__emptycta">
-            <a href="/audit" className="btn btn--primary">Open the Pick Auditor</a>
-            <a href="/model" className="btn">See the Model</a>
+            <button type="button" className="btn btn--primary"
+              onClick={() => { try { window.dispatchEvent(new CustomEvent("ss:open-catalog")); } catch { /* SSR */ } }}>
+              🧩 Browse StatSeer charts
+            </button>
           </div>
         </div>
       ) : (
         <div className={`dash__grid${from !== null ? " dash__grid--dragging" : ""}`}>
           {pins.map((p, i) => {
-            const common: CardProps = { pin: p, index: i, onRemove: remove, onSize: setSize, drag };
+            const common: CardProps = { pin: p, index: i, count: pins.length, onRemove: remove, onSize: setSize, onMove: reorder, drag };
             return p.kind === "chart" && p.spec
               ? <ChartCard key={p.id} {...common} />
               : <EmbedCard key={p.id} {...common} />;
