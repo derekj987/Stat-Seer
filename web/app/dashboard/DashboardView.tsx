@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDashboard, type Pin, type PinKind, type PinSize } from "@/lib/dashboard";
 import type { ChartData } from "@/lib/chartSources";
 import ChartRender from "./ChartRender";
+import ChartCatalog from "./ChartCatalog";
 
 const KIND_ICON: Record<PinKind, string> = {
   auditor: "🎯", model: "📊", props: "🎲", lines: "💰", sweetspots: "🍬",
@@ -189,14 +190,15 @@ export default function DashboardView() {
   return (
     <>
       <BoardTabs />
+      <ChartCatalog />
       {!pins.length ? (
         <div className="dash__empty" role="note">
           <span className="dash__emptyicon" aria-hidden="true">📌</span>
           <h3 className="dash__emptyh">This board is empty</h3>
           <p className="dash__emptyp">
-            Explore the app and tap <b>＋ Add to dashboard</b> on any board you love — the Pick Auditor,
-            the Model, Sweet Spots, your props. The <b>whole chart</b> lands right here, live. Then
-            <b> drag to rearrange</b> and use <b>S / M / L / ▭</b> to resize each card.
+            Use <b>＋ Add StatSeer charts to your board</b> above to browse every chart by sport, or
+            tap <b>＋ Add to dashboard</b> anywhere on the site. The <b>whole chart</b> lands right here,
+            live. Then <b>drag to rearrange</b> and use <b>S / M / L / ▭</b> to resize each card.
           </p>
           <div className="dash__emptycta">
             <a href="/audit" className="btn btn--primary">Open the Pick Auditor</a>

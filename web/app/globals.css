@@ -413,6 +413,21 @@ a.cw__fname:hover{text-decoration:underline}
 /* Pending friend requests badge the BOTTOM-right of the profile avatar (unread messages keep the
    red top-right badge on the chat icon), so "someone wants to connect" reads on its own. */
 .dock__badge--profile{top:auto;bottom:-3px;right:-3px;background:var(--accent)}
+/* Notifications dropdown off the profile avatar — opens to the LEFT of the rail. */
+.dock__profwrap{position:relative;display:flex}
+.docknotif{position:absolute;right:62px;bottom:0;z-index:80;min-width:222px;padding:6px;
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 34px rgba(0,0,0,.2);
+  display:flex;flex-direction:column;gap:2px}
+.docknotif__hd{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:5px 9px 6px}
+.docknotif__item{display:flex;align-items:center;gap:9px;text-decoration:none;border:0;background:none;cursor:pointer;
+  font:inherit;font-size:13px;font-weight:700;color:var(--ink);text-align:left;padding:8px 9px;border-radius:8px;width:100%}
+.docknotif__item:hover{background:var(--accent-soft)}
+.docknotif__ic{font-size:15px;flex:0 0 auto}
+.docknotif__lbl{flex:1 1 auto;min-width:0}
+.docknotif__n{flex:0 0 auto;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#c0392b;color:#fff;
+  font-size:11px;font-weight:800;display:grid;place-items:center}
+.docknotif__item--profile{border-top:1px solid var(--line);border-radius:0 0 8px 8px;margin-top:3px;padding-top:10px;color:var(--muted)}
+@media(max-width:560px){.docknotif{right:0;bottom:62px}}
 /* hover label (desktop pointer only) */
 .dock__ic::after{content:attr(data-label);position:absolute;right:60px;top:50%;transform:translateY(-50%);
   background:#14110a;color:#fff;font-size:12px;font-weight:600;padding:4px 9px;border-radius:6px;white-space:nowrap;
@@ -1887,6 +1902,32 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
   padding:5px 8px;margin:2px;width:132px;max-width:46vw;background:var(--surface);color:var(--ink)}
 .dashtab--add{border-style:dashed;color:var(--accent);font-weight:800;font-size:12.5px;cursor:pointer;padding:7px 11px}
 .dashtab--add:hover{background:var(--surface-2)}
+
+/* "Add StatSeer charts" catalog — a collapsible browser of every default chart by sport/category. */
+.chcat{margin:0 0 16px}
+.chcat__toggle{display:flex;align-items:center;gap:10px;width:100%;cursor:pointer;font:inherit;
+  font-weight:800;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 15px}
+.chcat__toggle:hover{border-color:var(--accent)}
+.chcat__toggle.open{border-color:var(--accent);border-bottom-left-radius:0;border-bottom-right-radius:0}
+.chcat__togic{font-size:17px}
+.chcat__togtxt{flex:1 1 auto;text-align:left}
+.chcat__chev{font-size:10px;color:var(--muted)}
+.chcat__body{border:1px solid var(--accent);border-top:0;border-radius:0 0 12px 12px;padding:14px 15px;background:var(--surface)}
+.chcat__note{font-size:12px;color:var(--muted);margin:0 0 12px;line-height:1.5}
+.chcat__note b{color:var(--accent)}
+.chcat__sports{display:inline-flex;gap:4px;border:1px solid var(--line);border-radius:9px;padding:3px;margin:0 0 14px}
+.chcat__sport{border:0;background:none;cursor:pointer;font:inherit;font-weight:800;font-size:12.5px;color:var(--muted);padding:5px 14px;border-radius:6px}
+.chcat__sport.on{background:var(--accent);color:#fff}
+.chcat__grp{margin:0 0 14px}
+.chcat__grph{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--gold,#b8860b);margin:0 0 8px}
+.chcat__items{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:8px}
+.chcat__item{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;font:inherit;
+  text-align:left;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+.chcat__item:hover{border-color:var(--accent)}
+.chcat__item.on{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.chcat__itname{font-weight:700;font-size:13px;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chcat__add{flex:0 0 auto;font-size:11.5px;font-weight:800;color:var(--accent);white-space:nowrap}
+.chcat__add.move{color:var(--muted)}
 
 /* The board canvas: a 4-column grid where each card spans 1–4 columns by its size. */
 .dash__grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;align-items:start}
