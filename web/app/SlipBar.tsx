@@ -44,6 +44,13 @@ export default function SlipBar() {
     });
   }, []);
 
+  // The left rail / dock "Saved Slips" shortcut opens the slip drawer.
+  useEffect(() => {
+    const onOpen = () => { setOpen(true); try { document.querySelector(".slipbar")?.scrollIntoView({ block: "end" }); } catch { /* SSR */ } };
+    window.addEventListener("ss:open-slip", onOpen);
+    return () => window.removeEventListener("ss:open-slip", onOpen);
+  }, []);
+
   if (!items.length) return null;
 
   // Legs we can actually shop: those carrying a per-book price map (lines + props).

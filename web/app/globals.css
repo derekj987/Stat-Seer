@@ -398,6 +398,24 @@ a.cw__fname:hover{text-decoration:underline}
 
 /* ===== Unified tool dock (pigeon + friends + assistant) ===== */
 /* Desktop (Option A): an always-visible vertical rail of icon buttons, bottom-right. */
+/* Facebook-style quick-access rail down the left margin (desktop only; the mobile Dock mirrors it).
+   Shown only where the centered 1120px content leaves room in the left margin. */
+.leftrail{position:fixed;left:16px;top:50%;transform:translateY(-50%);z-index:40;display:flex;flex-direction:column;gap:11px;
+  padding:12px 10px;background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:0 8px 26px rgba(0,0,0,.09)}
+.leftrail__it{position:relative;width:46px;height:46px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface-2);
+  display:grid;place-items:center;cursor:pointer;text-decoration:none;font-size:20px;color:var(--ink);padding:0;transition:border-color .12s,transform .12s}
+.leftrail__it:hover{border-color:var(--accent);transform:translateY(-1px)}
+.leftrail__it--profile{border-color:var(--accent);overflow:hidden}
+.leftrail__av{width:100%;height:100%;object-fit:cover}
+.leftrail__ini{font-weight:800;color:var(--accent);font-size:19px}
+.leftrail__icimg{width:30px;height:30px;object-fit:contain}
+.leftrail__it::after{content:attr(data-label);position:absolute;left:56px;top:50%;transform:translateY(-50%);
+  background:#14110a;color:#fff;font-size:12px;font-weight:600;padding:4px 9px;border-radius:6px;white-space:nowrap;
+  opacity:0;pointer-events:none;transition:opacity .12s;z-index:2}
+.leftrail__it:hover::after{opacity:1}
+@media(max-width:1299px){.leftrail{display:none}}
+[data-embed] .leftrail{display:none}
+
 .dock{position:fixed;right:18px;bottom:18px;z-index:70;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 .dock__handle{display:none}
 .dock__icons{display:flex;flex-direction:column;gap:10px}

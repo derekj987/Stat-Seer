@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { MedievalSharp } from "next/font/google";
 import "./globals.css";
 import SiteNav from "./SiteNav";
+import LeftRail from "./LeftRail";
 import SportStrip from "./SportStrip";
 import SlipBar from "./SlipBar";
 import Dock from "./Dock";
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <EmbedMode />
         <SiteNav />
         <SportStrip />
+        <LeftRail />
         {children}
         <SlipBar />
         <Dock />

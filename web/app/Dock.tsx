@@ -154,6 +154,17 @@ export default function Dock() {
                   </div>
                 );
               })()}
+            {friends.member && (
+              <a className="dock__ic dock__ic--dash" data-label="My Dashboard" aria-label="My Dashboard" href="/dashboard">
+                <span aria-hidden="true">🗂️</span>
+              </a>
+            )}
+            {friends.member && (
+              <button className="dock__ic dock__ic--slip" data-label="Saved Slips" aria-label="Saved Slips"
+                onClick={() => { try { window.dispatchEvent(new CustomEvent("ss:open-slip")); } catch { /* SSR */ } }}>
+                <span aria-hidden="true">🎟️</span>
+              </button>
+            )}
             <button className="dock__ic dock__ic--pigeon" data-label="Message Us" aria-label="Message Us" onClick={() => open("feedback")}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/pigeon.png" alt="" className="dock__icimg" width={52} height={52}
