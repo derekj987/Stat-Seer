@@ -1463,6 +1463,24 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .csect__tag{font-size:10px;font-weight:800;letter-spacing:.04em;color:var(--gold);
   background:var(--gold-soft);border-radius:999px;padding:3px 9px;text-transform:uppercase}
 .cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+/* Out-of-pocket costs: a monthly total + a per-service bar breakdown. */
+.ccosts{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:18px 20px}
+.ccosts__head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.ccosts__total{display:flex;align-items:baseline;gap:6px}
+.ccosts__totv{font-size:34px;font-weight:800;letter-spacing:-.02em;color:var(--key)}
+.ccosts__totl{font-size:14px;font-weight:700;color:var(--muted)}
+.ccosts__year{font-size:13px;color:var(--muted)}
+.ccosts__bars{display:flex;flex-direction:column;gap:9px}
+.ccostbar{display:grid;grid-template-columns:minmax(120px,1.4fr) 3fr 56px;gap:12px;align-items:center;font-size:13px}
+.ccostbar__name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.ccostbar__tag{margin-left:6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--muted);background:var(--surface-2);border-radius:5px;padding:1px 5px}
+.ccostbar__track{height:13px;border-radius:7px;background:var(--surface-2);overflow:hidden}
+.ccostbar__fill{display:block;height:100%;background:#b04521;forced-color-adjust:none}
+.ccostbar__val{font-family:var(--font-mono);font-weight:700;text-align:right;color:var(--key)}
+.ccosts__note{font-size:12px;color:var(--muted);margin:14px 0 0;line-height:1.5}
+.ccosts__note code{font-family:var(--font-mono);font-size:11.5px;background:var(--surface-2);padding:1px 5px;border-radius:4px}
+@media(max-width:520px){.ccostbar{grid-template-columns:1fr 2fr 48px;gap:8px;font-size:12px}}
 .cstat{display:flex;flex-direction:column;gap:4px;padding:16px 16px 15px;border:1px solid var(--line);
   border-radius:14px;background:var(--surface);text-decoration:none}
 .cstat--link{transition:border-color .12s,transform .12s}

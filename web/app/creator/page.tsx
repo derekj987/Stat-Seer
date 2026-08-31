@@ -1,6 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCreatorStats } from "@/lib/creator";
+import { EXPENSES, monthlyTotal, annualTotal } from "@/lib/expenses";
 import { Brand } from "../Nav";
 
 // The Creator's private dashboard — FOUNDER ONLY (not admins/mods). Business-at-a-glance:
@@ -66,6 +67,30 @@ export default async function CreatorPage() {
           sub={s.reportsOpen ? "open reports to review →" : "all clear ✓"} />
         <Stat label="Forum activity" value={<>{n(s.threads)} <span className="cstat__unit">threads</span></>}
           sub={<><b>{n(s.replies)}</b> replies</>} />
+      </div>
+
+      <h2 className="csect">Out-of-pocket costs <span className="csect__tag">what you&apos;re spending now</span></h2>
+      <div className="ccosts">
+        <div className="ccosts__head">
+          <div className="ccosts__total">
+            <span className="ccosts__totv">${monthlyTotal().toLocaleString()}</span>
+            <span className="ccosts__totl">/ month</span>
+          </div>
+          <span className="ccosts__year">≈ ${annualTotal().toLocaleString()} / year</span>
+        </div>
+        <div className="ccosts__bars">
+          {[...EXPENSES].sort((a, b) => b.monthly - a.monthly).map((e) => {
+            const max = Math.max(...EXPENSES.map((x) => x.monthly), 1);
+            return (
+              <div className="ccostbar" key={e.name} title={e.note}>
+                <span className="ccostbar__name">{e.name}{e.variable && <span className="ccostbar__tag">usage</span>}</span>
+                <span className="ccostbar__track"><span className="ccostbar__fill" style={{ width: `${Math.max((e.monthly / max) * 100, e.monthly ? 3 : 0)}%` }} /></span>
+                <span className="ccostbar__val">{e.monthly ? `$${e.monthly}` : "—"}</span>
+              </div>
+            );
+          })}
+        </div>
+        <p className="ccosts__note">Estimates — tell me your real numbers, or edit <code>lib/expenses.ts</code>, and this updates. Usage-based items (like the API) are your run-rate.</p>
       </div>
 
       <h2 className="csect">Revenue <span className="csect__tag">coming with subscriptions</span></h2>
