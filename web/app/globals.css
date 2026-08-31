@@ -410,6 +410,9 @@ a.cw__fname:hover{text-decoration:underline}
 .dock__ic--profile{background:var(--accent-soft);border-color:var(--accent);text-decoration:none;font-size:24px}
 .dock__badge{position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;padding:0 4px;border-radius:999px;
   background:#c0392b;color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;border:2px solid var(--surface)}
+/* Pending friend requests badge the BOTTOM-right of the profile avatar (unread messages keep the
+   red top-right badge on the chat icon), so "someone wants to connect" reads on its own. */
+.dock__badge--profile{top:auto;bottom:-3px;right:-3px;background:var(--accent)}
 /* hover label (desktop pointer only) */
 .dock__ic::after{content:attr(data-label);position:absolute;right:60px;top:50%;transform:translateY(-50%);
   background:#14110a;color:#fff;font-size:12px;font-weight:600;padding:4px 9px;border-radius:6px;white-space:nowrap;

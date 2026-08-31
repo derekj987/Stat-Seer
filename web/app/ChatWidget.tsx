@@ -48,7 +48,7 @@ function MsgSlip({ items }: { items: SlipItem[] }) {
 }
 
 export default function ChatWidget({ open, onClose, onMeta }:
-  { open: boolean; onClose: () => void; onMeta: (m: { member: boolean; unread: number; username?: string; avatarUrl?: string | null }) => void }) {
+  { open: boolean; onClose: () => void; onMeta: (m: { member: boolean; unread: number; requests: number; username?: string; avatarUrl?: string | null }) => void }) {
   const { items: mySlip } = useSlip();
   const [me, setMe] = useState<Me | null | undefined>(undefined);
   const [convs, setConvs] = useState<Conv[]>([]);
@@ -202,12 +202,16 @@ export default function ChatWidget({ open, onClose, onMeta }:
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [me, convs]);
 
-  // Report member + unread up to the Dock, and set the installed-PWA app-icon badge.
+  // Report member + counts up to the Dock, and set the installed-PWA app-icon badge. Unread
+  // messages badge the chat icon; pending friend requests badge the profile avatar (kept separate
+  // so "someone wants to connect" reads apart from "you have unread messages").
   useEffect(() => {
-    const total = convs.reduce((a, c) => a + c.unread, 0) + requests.length;
-    onMeta({ member: !!me, unread: total, username: me?.username, avatarUrl: me?.avatarUrl });
+    const unread = convs.reduce((a, c) => a + c.unread, 0);
+    const reqs = requests.length;
+    onMeta({ member: !!me, unread, requests: reqs, username: me?.username, avatarUrl: me?.avatarUrl });
     try {
       const nav = navigator as Navigator & { setAppBadge?: (n?: number) => void; clearAppBadge?: () => void };
+      const total = unread + reqs;
       if (total > 0) nav.setAppBadge?.(total); else nav.clearAppBadge?.();
     } catch { /* Badging API unavailable */ }
   }, [me, convs, requests, onMeta]);

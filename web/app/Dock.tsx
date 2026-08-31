@@ -13,7 +13,7 @@ type Tool = "feedback" | "friends" | "assistant";
 export default function Dock() {
   const [active, setActive] = useState<Tool | null>(null);
   const [expanded, setExpanded] = useState(false);          // mobile slide-out
-  const [friends, setFriends] = useState<{ member: boolean; unread: number; username?: string; avatarUrl?: string | null }>({ member: false, unread: 0 });
+  const [friends, setFriends] = useState<{ member: boolean; unread: number; requests: number; username?: string; avatarUrl?: string | null }>({ member: false, unread: 0, requests: 0 });
 
   const open = (t: Tool) => { setActive(t); setExpanded(false); };
   const close = () => setActive(null);
@@ -52,10 +52,14 @@ export default function Dock() {
           </button>
           <div className="dock__icons">
             {friends.member && friends.username && (
-              <a className="dock__ic dock__ic--profile" data-label="View my profile" aria-label="View my profile" href={`/u/${friends.username}`}>
+              <a className="dock__ic dock__ic--profile"
+                data-label={friends.requests > 0 ? `${friends.requests} friend request${friends.requests === 1 ? "" : "s"}` : "View my profile"}
+                aria-label={friends.requests > 0 ? `View my profile — ${friends.requests} pending friend request${friends.requests === 1 ? "" : "s"}` : "View my profile"}
+                href={`/u/${friends.username}`}>
                 {friends.avatarUrl
                   ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={friends.avatarUrl} alt="" className="dock__icimg" />
                   : <span aria-hidden="true">👤</span>}
+                {friends.requests > 0 && <span className="dock__badge dock__badge--profile">{friends.requests > 9 ? "9+" : friends.requests}</span>}
               </a>
             )}
             <button className="dock__ic dock__ic--pigeon" data-label="Message Us" aria-label="Message Us" onClick={() => open("feedback")}>
