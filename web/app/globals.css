@@ -1852,13 +1852,49 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .chartbar__val{font-family:var(--font-mono);font-weight:700;color:var(--model);text-align:right}
 
 /* Live embeds: each pinned view is the actual chart in an auto-sized iframe, stacked full-width. */
-.dash__embeds{display:flex;flex-direction:column;gap:16px}
-.dashembed{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
-.dashembed__bar{display:flex;align-items:center;gap:9px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
-.dashembed__icon{font-size:17px;flex:0 0 auto}
-.dashembed__label{font-weight:800;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dashembed__detail{font-size:11.5px;color:var(--muted);white-space:nowrap}
-.dashembed__open{margin-left:auto;font-size:12px;font-weight:700;color:var(--accent);text-decoration:none;flex:0 0 auto}
+/* Board tabs — switch, add (＋ Board), double-click a tab to rename, ✕ on the active one to delete. */
+.dashtabs{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin:0 0 16px}
+.dashtab{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
+.dashtab.active{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.dashtab__name{border:0;background:none;cursor:pointer;font-weight:800;font-size:13px;color:var(--ink);
+  padding:7px 11px;display:inline-flex;align-items:center;gap:6px}
+.dashtab.active .dashtab__name{color:var(--accent)}
+.dashtab__n{font-size:10.5px;font-weight:800;color:var(--muted);background:var(--surface-2);border-radius:20px;padding:1px 6px}
+.dashtab__del{border:0;background:none;color:var(--muted);cursor:pointer;font-size:11px;padding:6px 9px 6px 0;line-height:1}
+.dashtab__del:hover{color:var(--key)}
+.dashtab--add{border-style:dashed;color:var(--accent);font-weight:800;font-size:12.5px;cursor:pointer;padding:7px 11px}
+.dashtab--add:hover{background:var(--surface-2)}
+
+/* The board canvas: a 4-column grid where each card spans 1–4 columns by its size. */
+.dash__grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;align-items:start}
+.dashembed--sm{grid-column:span 1}
+.dashembed--md{grid-column:span 2}
+.dashembed--lg{grid-column:span 3}
+.dashembed--full{grid-column:span 4}
+@media(max-width:960px){.dash__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dashembed--sm{grid-column:span 1}.dashembed--md,.dashembed--lg,.dashembed--full{grid-column:span 2}}
+@media(max-width:620px){.dash__grid{grid-template-columns:1fr}
+  .dashembed--sm,.dashembed--md,.dashembed--lg,.dashembed--full{grid-column:span 1}}
+
+.dashembed{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);
+  transition:box-shadow .12s,opacity .12s,outline-color .12s}
+.dashembed--dragging{opacity:.45}
+.dashembed--over{outline:2px dashed var(--accent);outline-offset:3px}
+/* While a drag is in flight, let dragover/drop events reach the cards instead of the iframes. */
+.dash__grid--dragging .dashembed__frame iframe,.dash__grid--dragging .dashchart{pointer-events:none}
+.dashembed__bar{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.dashembed__grip{cursor:grab;color:var(--muted);font-size:13px;flex:0 0 auto;user-select:none;letter-spacing:-1px}
+.dashembed__grip:active{cursor:grabbing}
+.dashembed__icon{font-size:16px;flex:0 0 auto}
+.dashembed__label{font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}
+.dashembed__detail{font-size:11px;color:var(--muted);white-space:nowrap;flex:0 0 auto}
+.dashembed--sm .dashembed__detail{display:none}
+.dashsize{display:inline-flex;margin-left:auto;border:1px solid var(--line);border-radius:7px;overflow:hidden;flex:0 0 auto}
+.dashsize__b{border:0;border-left:1px solid var(--line);background:var(--surface);color:var(--muted);
+  font-size:10.5px;font-weight:800;padding:3px 6px;cursor:pointer;line-height:1.4}
+.dashsize__b:first-child{border-left:0}
+.dashsize__b.on{background:var(--accent);color:#fff}
+.dashembed__open{font-size:12px;font-weight:700;color:var(--accent);text-decoration:none;flex:0 0 auto}
 .dashembed__open:hover{text-decoration:underline}
 .dashembed__x{border:0;background:none;color:var(--muted);cursor:pointer;font-size:13px;line-height:1;padding:4px 6px;border-radius:6px;flex:0 0 auto}
 .dashembed__x:hover{color:var(--key);background:var(--surface)}
