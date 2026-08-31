@@ -1,6 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getCreatorStats } from "@/lib/creator";
+import { getCreatorStats, getEmailHealth } from "@/lib/creator";
 import { EXPENSES, USAGE, monthlyTotal, annualTotal } from "@/lib/expenses";
 import { Brand } from "../Nav";
 
@@ -40,7 +40,15 @@ export default async function CreatorPage() {
   // (no "Creator" masthead, no "this is private" hint that it exists).
   if (role !== "founder") notFound();
 
-  const s = await getCreatorStats();
+  const [s, email] = await Promise.all([getCreatorStats(), getEmailHealth()]);
+
+  // Boil the email health down to one status word + tone for the card.
+  const emailOk = email.keyPresent && email.keyValid !== false && !email.error;
+  const emailValue = !email.keyPresent ? "Not configured"
+    : email.keyValid === false ? "Key invalid"
+      : email.error ? "Needs attention"
+        : "Sending ✓";
+  const sendingDomain = email.domains?.find((d) => email.from.includes(d.name)) || email.domains?.[0] || null;
 
   return (
     <main className="wrap">
@@ -68,6 +76,16 @@ export default async function CreatorPage() {
           sub={s.reportsOpen ? "open reports to review →" : "all clear ✓"} />
         <Stat label="Forum activity" value={<>{n(s.threads)} <span className="cstat__unit">threads</span></>}
           sub={<><b>{n(s.replies)}</b> replies</>} />
+      </div>
+
+      <h2 className="csect">System health <span className="csect__tag">outgoing email</span></h2>
+      <div className="cgrid">
+        <Stat label="Email delivery (Resend)" value={emailValue} tone={emailOk ? "gold" : "flag"}
+          sub={email.error ? email.error : <>welcome &amp; alert emails are sending from <b>{email.from}</b></>} />
+        <Stat label="Sending domain"
+          value={sendingDomain ? (sendingDomain.status === "verified" ? "Verified ✓" : sendingDomain.status) : (email.keyPresent && email.keyValid ? "None added" : "—")}
+          tone={sendingDomain?.status === "verified" ? "gold" : sendingDomain ? "flag" : undefined}
+          sub={sendingDomain ? <b>{sendingDomain.name}</b> : "add & verify a domain in Resend to send"} />
       </div>
 
       <h2 className="csect">Out-of-pocket costs <span className="csect__tag">what you&apos;re spending now</span></h2>

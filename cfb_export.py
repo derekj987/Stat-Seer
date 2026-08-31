@@ -300,10 +300,25 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
             _resid.append(anchored_margin(home, away, neu, _hsp) - (-float(_hsp)))
     debias = statistics.median(_resid) if _resid else 0.0
 
+    # Totals de-bias (same idea as the spread anchor). Our projected total sits a HAIR below the
+    # market on average, so the board leans UNDER on ~61% of games — vs the ~50/50 over/under the
+    # closing total actually hits (CFB 2023-25: 48-52% over by season). Center the projection on the
+    # market (median gap -> 0) so the over/under lean split matches reality, while keeping our
+    # relative read (which games we see higher/lower than Vegas). Only games with a market total.
+    _tresid = []
+    for away, home, neu, date in rows:
+        _od = match_odds(away, home, odds)
+        _mt = _od["total"] if _od else None
+        if _mt is not None:
+            _pt = 2 * L + off.get(home, 0) + deff.get(away, 0) + off.get(away, 0) + deff.get(home, 0)
+            _tresid.append(_pt - float(_mt))
+    total_debias = statistics.median(_tresid) if _tresid else 0.0
+
     for away, home, neu, date in rows:
         rated = home in ratings and away in ratings          # both have FBS rating history
         rh, ra = ratings.get(home, NEWCOMER_R), ratings.get(away, NEWCOMER_R)
         ptot = 2 * L + off.get(home, 0) + deff.get(away, 0) + off.get(away, 0) + deff.get(home, 0)
+        ptot -= total_debias    # center on the market so the over/under lean split matches ~50/50
         od = match_odds(away, home, odds)
         hsp = od["home_spread"] if od else None                  # home line (neg = home fav)
         mtot = od["total"] if od else None

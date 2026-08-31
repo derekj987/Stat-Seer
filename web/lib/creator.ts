@@ -71,6 +71,48 @@ async function sumFolder(b: string, bucket: string, prefix: string, depth: numbe
   } catch { return 0; }
 }
 
+/** Live health of outgoing email (Resend). Catches the silent "no key = no email" failure:
+ *  approvals still succeed (they use an RPC), but the welcome/alert emails quietly no-op. */
+export interface EmailHealth {
+  keyPresent: boolean;             // RESEND_API_KEY set in the environment?
+  keyValid: boolean | null;        // did Resend accept it? null = couldn't check
+  domains: { name: string; status: string }[] | null;  // sending domains + verification state
+  from: string;                    // the From address welcome/alert emails use
+  error: string | null;            // human-readable reason it won't send, if any
+}
+
+export async function getEmailHealth(): Promise<EmailHealth> {
+  const key = process.env.RESEND_API_KEY;
+  const from = process.env.BETA_FROM || process.env.FEEDBACK_FROM || "StatSeer <notify@statseeredge.com>";
+  if (!key) {
+    return { keyPresent: false, keyValid: null, domains: null, from,
+      error: "RESEND_API_KEY is not set in Vercel — welcome and alert emails won't send." };
+  }
+  try {
+    const res = await fetch("https://api.resend.com/domains", {
+      headers: { Authorization: `Bearer ${key}` },
+      cache: "no-store",
+    });
+    if (res.status === 401 || res.status === 403) {
+      return { keyPresent: true, keyValid: false, domains: null, from,
+        error: "Resend rejected the key (unauthorized) — it may be revoked or mistyped." };
+    }
+    if (!res.ok) {
+      return { keyPresent: true, keyValid: null, domains: null, from,
+        error: `Resend responded ${res.status} when checking the key.` };
+    }
+    const body = (await res.json()) as { data?: { name: string; status: string }[] };
+    const domains = (body.data || []).map((d) => ({ name: d.name, status: d.status }));
+    const anyVerified = domains.some((d) => d.status === "verified");
+    return { keyPresent: true, keyValid: true, domains, from,
+      error: domains.length === 0 ? "Key works, but no sending domain is added in Resend yet."
+        : anyVerified ? null : "Key works, but no domain is verified yet — sends will bounce." };
+  } catch {
+    return { keyPresent: true, keyValid: null, domains: null, from,
+      error: "Couldn't reach Resend to verify the key." };
+  }
+}
+
 export interface CreatorStats {
   members: number | null;
   membersThisWeek: number | null;
