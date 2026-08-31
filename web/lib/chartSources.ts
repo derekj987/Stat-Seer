@@ -7,6 +7,8 @@ import { cfbWeekProps } from "./cfbProps";
 import { fetchModelWeek } from "./model";
 import { fetchBets } from "./bestbets";
 import { auditVerdict, impliedProb, probToAmerican } from "./fairValue";
+import { PLAYER_PROJECTIONS } from "./playerProjections";
+import { NCAAF_PLAYER_PROJECTIONS } from "./ncaafPlayerProjections";
 
 export type ChartType = "table" | "bar";
 export interface ChartSpec {
@@ -15,6 +17,8 @@ export interface ChartSpec {
   source: ChartSourceId;
   sport?: "nfl" | "ncaaf";
   limit?: number;
+  market?: string;               // model_props: focus a prop market (receptions, rushing yards, …)
+  direction?: "over" | "under";  // model_props: projections the model has going over/under the line
 }
 export interface ChartData {
   title: string;
@@ -30,6 +34,7 @@ export const CHART_SOURCES = {
   value_lines: "The best available spread/total prices across books on this week's games, with the shopping edge. Columns: Game, Bet, Best price, Book, Edge %.",
   model_covers: "StatSeer's line-blind MODEL read of each game — its projected spread, which side of the market spread the model projects to cover, and its projected winner + win %. This is our published, publicly-graded model output (not a bet recommendation). Use this when the member asks what the model projects, who it likes to cover, or who it has winning. Columns: Game, Model spread, Model covers, Model winner.",
   sweet_spots: "Sweet spots — games whose spread or total is sitting ON a key number (3, 7, etc.), where a half-point is worth the most. Shows the key number and how much a half-point is worth. NFL only. Columns: Game, Market, Sits on, Half-pt value.",
+  model_props: "StatSeer's line-blind PLAYER-PROP model — our projected number for EVERY player prop beside the book's posted line, across ALL markets (receptions, receiving yards, rushing yards, passing yards, passing TDs). Leave `market` empty to include every market, or set it to focus one. Set `direction` to over/under to show only the players the model projects OVER or UNDER their line; omit it to list all projections. Published, publicly-graded model output — not a bet tip. Columns: Player, Team, Market, Book line, Our proj, Edge vs line.",
 } as const;
 export type ChartSourceId = keyof typeof CHART_SOURCES;
 
@@ -44,6 +49,18 @@ function shopEdge(price: number, byBook?: Record<string, number>): number {
   if (others.length < 2) return 0;
   const avg = others.reduce((s, p) => s + impliedProb(p), 0) / others.length;
   return avg - impliedProb(price);
+}
+// Map a free-text market word ("receptions", "receiving yards", "rushing", "passing TDs") to the
+// projection's market key. Order matters: "receptions" before "receiving".
+function marketFilter(m?: string): (p: { market: string }) => boolean {
+  if (!m) return () => true;
+  const k = m.toLowerCase();
+  if (k.includes("recept")) return (p) => p.market === "receptions";
+  if (k.includes("receiv") || k.includes("catch")) return (p) => p.market === "rec_yds";
+  if (k.includes("rush") || k.includes("carr")) return (p) => p.market === "rush_yds";
+  if (k.includes("pass") && (k.includes("td") || k.includes("touchdown"))) return (p) => p.market === "pass_tds";
+  if (k.includes("pass")) return (p) => p.market === "pass_yds";
+  return () => true;
 }
 function betLabel(marketLabel: string, side: string, line: number | null): string {
   if (side === "Yes") return marketLabel;
@@ -143,6 +160,37 @@ export async function buildChart(spec: ChartSpec): Promise<ChartData> {
       columns: ["Game", "Market", "Sits on", "Half-pt value"],
       rows: rows.map((k) => [k.game, k.market, String(k.num), `${k.cost.toFixed(1)}%`]),
       note: rows.length ? "A half-point near a key number (3, 7) swings win probability the most — buy toward it, sell off it." : "No lines are sitting on a key number this week.",
+    };
+  }
+
+  if (spec.source === "model_props") {
+    const proj = sport === "ncaaf" ? NCAAF_PLAYER_PROJECTIONS : PLAYER_PROJECTIONS;
+    const mk = marketFilter(spec.market);       // no market → EVERY market (td prop aside)
+    const mlabel = (m: string): string =>
+      ({ rec_yds: "rec yds", receptions: "receptions", rush_yds: "rush yds", pass_yds: "pass yds", pass_tds: "pass TDs" } as Record<string, string>)[m] ?? m;
+    let list = proj
+      .filter((p) => p.market !== "anytime_td")   // TD is a Yes/No % prop, not an over/under line
+      .filter(mk)
+      .map((p) => ({ player: p.player, team: p.team, market: p.market, book: p.book, proj: p.proj,
+        diff: p.book !== null ? p.proj - p.book : null }));
+    if (spec.direction === "over" || spec.direction === "under") {
+      const over = spec.direction === "over";
+      list = list.filter((p) => p.diff !== null && (over ? p.diff > 0 : p.diff < 0))
+        .sort((a, b) => Math.abs(b.diff as number) - Math.abs(a.diff as number));
+    } else {
+      list = list.sort((a, b) => b.proj - a.proj);   // no direction → all, biggest projections first
+    }
+    const rows = list.slice(0, limit);
+    const base = spec.direction ? `Players the model projects ${spec.direction}` : "Model player-prop projections";
+    return {
+      title: spec.title || base + (spec.market ? ` — ${spec.market}` : ""),
+      chartType: "table",
+      columns: ["Player", "Team", "Market", "Book line", "Our proj", "Edge vs line"],
+      rows: rows.map((p) => [p.player, p.team, mlabel(p.market), p.book !== null ? p.book : "—", p.proj,
+        p.diff === null ? "—" : `${p.diff > 0 ? "+" : ""}${p.diff.toFixed(1)}`]),
+      note: rows.length
+        ? "Line-blind player-prop projections — published & graded. Edge = our projection minus the book's posted line (＋ model over, − under; — = no line posted yet)."
+        : "No player-prop projections match that yet.",
     };
   }
 

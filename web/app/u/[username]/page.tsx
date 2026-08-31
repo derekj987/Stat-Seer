@@ -161,12 +161,11 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
               <li key={f.id}>
                 <a className="pfrail__item" href={`/u/${encodeURIComponent(f.username)}`}>
                   <span className="pfrail__avwrap">
-                    <span className="pfrail__av">
+                    <span className={`pfrail__av${f.online ? " is-online" : ""}`} title={f.online ? "Online now" : undefined}>
                       {f.avatarUrl
                         ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={f.avatarUrl} alt="" />
                         : f.username.charAt(0).toUpperCase()}
                     </span>
-                    {f.online && <span className="pfrail__dot" title="Online" />}
                   </span>
                   <span className={f.role === "founder" ? "pfrail__name founder" : "pfrail__name"}>{f.username}</span>
                 </a>

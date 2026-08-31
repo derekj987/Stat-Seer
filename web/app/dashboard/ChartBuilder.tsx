@@ -10,7 +10,7 @@ import ChartRender from "./ChartRender";
 
 type Msg = { role: "user" | "assistant"; content: string };
 const EXAMPLES = [
-  "Build a table of the best deals on the Pick Auditor",
+  "Show me the model's picks for all players projected to go over on receptions",
   "Show the biggest prop shopping edges as a bar chart",
   "Table of the best line-shopping value this week",
 ];
@@ -72,7 +72,13 @@ export default function ChartBuilder() {
   return (
     <div className="cbuild">
       <div className="cbuild__head">
-        <b>Build a chart with AI — and ask me about it</b>
+        <div className="cbuild__headtxt">
+          <b className="cbuild__h">🛠 Build a chart with AI</b>
+          <p className="cbuild__sub">
+            Love our model — or want to explore the numbers your own way? Tell me what you&apos;d like to see and
+            I&apos;ll pull exactly the StatSeer data you need, then answer any questions about it.
+          </p>
+        </div>
         {(messages.length > 0 || chart) && (
           <button type="button" className="cbuild__reset" onClick={startOver}>↺ Start over</button>
         )}
@@ -102,7 +108,7 @@ export default function ChartBuilder() {
 
       <form className="cbuild__form" onSubmit={(e) => { e.preventDefault(); send(input); }}>
         <input className="cbuild__in" value={input} onChange={(e) => setInput(e.target.value)}
-          placeholder={chart ? "Ask about this chart, or build a new one…" : "e.g. Build a table of the best deals on the Pick Auditor"} />
+          placeholder={chart ? "Ask about this chart, or build a new one…" : "Describe a chart — I'll pull the real StatSeer numbers…"} />
         <button type="submit" className="btn btn--primary cbuild__go" disabled={loading}>{loading ? "…" : "Send"}</button>
       </form>
 

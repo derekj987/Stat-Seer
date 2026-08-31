@@ -100,27 +100,21 @@ export default function Dock() {
                   : <span aria-hidden="true">👤</span>;
                 const badge = total > 0 && <span className="dock__badge dock__badge--profile">{total > 9 ? "9+" : total}</span>;
 
-                // Nothing waiting → the avatar is a plain link to my profile.
-                if (total === 0) {
-                  return (
-                    <a className="dock__ic dock__ic--profile" data-label="View my profile" aria-label="View my profile" href={`/u/${friends.username}`}>
-                      {avatar}
-                    </a>
-                  );
-                }
-                // Something waiting → tapping opens a dropdown that says exactly what, each row a
-                // jump to the place to act on it.
+                // The avatar always opens the notifications dropdown (so it's always reachable);
+                // a bold green ring marks that you're online. The badge shows only when something
+                // is actually waiting.
                 return (
                   <div className="dock__profwrap" ref={notifRef}>
-                    <button type="button" className="dock__ic dock__ic--profile" data-label={label}
+                    <button type="button" className="dock__ic dock__ic--profile is-online" data-label={total > 0 ? label : "Notifications"}
                       aria-haspopup="menu" aria-expanded={notifOpen}
-                      aria-label={`Notifications — awaiting: ${bits.join(", ")}`}
+                      aria-label={total > 0 ? `Notifications — awaiting: ${bits.join(", ")}` : "Notifications — all caught up"}
                       onClick={() => setNotifOpen((v) => !v)}>
                       {avatar}{badge}
                     </button>
                     {notifOpen && (
                       <div className="docknotif" role="menu" aria-label="Notifications">
                         <div className="docknotif__hd">What&apos;s waiting</div>
+                        {total === 0 && <div className="docknotif__empty">You&apos;re all caught up ✓</div>}
                         {awaiting.betaRequests > 0 && (
                           <a role="menuitem" className="docknotif__item" href="/admin/members" onClick={() => setNotifOpen(false)}>
                             <span className="docknotif__ic" aria-hidden="true">🪪</span>

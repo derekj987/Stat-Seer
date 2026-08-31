@@ -427,7 +427,11 @@ a.cw__fname:hover{text-decoration:underline}
 .docknotif__n{flex:0 0 auto;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#c0392b;color:#fff;
   font-size:11px;font-weight:800;display:grid;place-items:center}
 .docknotif__item--profile{border-top:1px solid var(--line);border-radius:0 0 8px 8px;margin-top:3px;padding-top:10px;color:var(--muted)}
+.docknotif__empty{font-size:12.5px;color:var(--muted);padding:4px 9px 9px}
 @media(max-width:560px){.docknotif{right:0;bottom:62px}}
+/* Online presence = a bold green RING around the avatar (replaces the old green dot). */
+.is-online{box-shadow:0 0 0 2.5px var(--accent)}
+.dock__ic--profile.is-online{box-shadow:0 0 0 3px var(--accent)}
 /* hover label (desktop pointer only) */
 .dock__ic::after{content:attr(data-label);position:absolute;right:60px;top:50%;transform:translateY(-50%);
   background:#14110a;color:#fff;font-size:12px;font-weight:600;padding:4px 9px;border-radius:6px;white-space:nowrap;
@@ -1839,7 +1843,10 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
   padding:1px 7px;font-size:12px;font-weight:700}
 /* AI chart builder */
 .cbuild{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:14px 16px;margin:0 0 20px}
-.cbuild__head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;font-size:14px}
+.cbuild__head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;font-size:14px}
+.cbuild__headtxt{min-width:0}
+.cbuild__h{display:block;font-size:15px;font-weight:800;color:var(--ink)}
+.cbuild__sub{font-size:12.5px;color:var(--muted);line-height:1.5;margin:4px 0 0;max-width:64ch}
 .cbuild__reset{border:1px solid var(--line);background:var(--bg);color:var(--muted);border-radius:999px;
   font:inherit;font-size:12px;font-weight:700;padding:4px 12px;cursor:pointer;flex:0 0 auto}
 .cbuild__reset:hover{border-color:var(--accent);color:var(--accent)}

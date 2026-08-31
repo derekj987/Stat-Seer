@@ -94,6 +94,8 @@ export async function POST(request: Request) {
           chartType: { type: "string", enum: ["table", "bar"] },
           sport: { type: "string", enum: ["nfl", "ncaaf"] },
           limit: { type: "number", description: "how many rows (3-40)" },
+          market: { type: "string", description: "model_props only: focus one prop market, e.g. 'receptions', 'receiving yards', 'rushing yards', 'passing yards', 'passing TDs'" },
+          direction: { type: "string", enum: ["over", "under"], description: "model_props only: players the model projects to go over or under the line (default over)" },
           title: { type: "string", description: "a short chart title (when building)" },
           reply: { type: "string", description: "your conversational reply: a confirmation when building, or the answer to their question" },
         },
@@ -104,7 +106,7 @@ export async function POST(request: Request) {
     tool_choice: { type: "tool", name: "build_chart" },
   };
 
-  let input: { source?: string; chartType?: string; sport?: string; limit?: number; title?: string; reply?: string } = {};
+  let input: { source?: string; chartType?: string; sport?: string; limit?: number; market?: string; direction?: string; title?: string; reply?: string } = {};
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -129,6 +131,8 @@ export async function POST(request: Request) {
     source: input.source as ChartSourceId,
     sport: input.sport === "ncaaf" ? "ncaaf" : "nfl",
     limit: typeof input.limit === "number" ? input.limit : 12,
+    ...(input.market ? { market: input.market } : {}),
+    ...(input.direction === "under" ? { direction: "under" as const } : input.direction === "over" ? { direction: "over" as const } : {}),
   };
   try {
     const chart = await buildChart(spec);
