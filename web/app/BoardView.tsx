@@ -73,12 +73,12 @@ function SavableChip({
     >
       <span className="team">{pick.label}</span>
       <span className="odds">{fmtOdds(pick.price)}</span>
-      {a && a.verdict !== "fair" && (
+      {a && a.verdict === "value" && (
         <span
-          className={`propq__audit propq__audit--${a.verdict}`}
-          title={`${VERDICT_LABEL[a.verdict]} — fair price ${fmtOdds(a.fair)}`}
+          className="propq__audit propq__audit--value"
+          title={`${VERDICT_LABEL.value} — beats the fair price of ${fmtOdds(a.fair)}`}
         >
-          {a.verdict === "value" ? "✓" : "⚠"}
+          ✓
         </span>
       )}
       <BookTag books={pick.books} />

@@ -1540,6 +1540,8 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 /* Game cards tile across the width (no more narrow left column with dead space on the
    right). A collapsed card is one grid cell; opening a game spans the full row so its
    market sections can sit side-by-side. Falls to a single column on a phone. */
+.propdays{display:flex;flex-direction:column;gap:6px}
+.propday{margin-top:4px}
 .propstack{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px;align-items:start}
 .propgame[open]{grid-column:1/-1}
 .propgame{background:var(--surface);border:1px solid var(--line);border-radius:11px;overflow:hidden}
@@ -1567,9 +1569,10 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .propmkt__label{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;
   color:var(--muted);font-weight:700;margin-bottom:6px}
 .propq__list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
-/* left-packed columns (no middle dead space): player · side · price · book · heart */
-.propq{display:grid;grid-template-columns:138px 54px 50px 16px minmax(56px,max-content) 14px;
-  justify-content:start;align-items:baseline;gap:10px;font-size:12.5px;padding:4px 7px;width:100%;text-align:left;
+/* Fluid columns that always fit the market column (name flexes + ellipsizes, never overflows):
+   player · side · price(+audit) · book · heart */
+.propq{display:grid;grid-template-columns:minmax(0,1fr) auto auto minmax(0,auto) 14px;
+  align-items:baseline;gap:10px;font-size:12.5px;padding:4px 7px;width:100%;text-align:left;
   border:1px solid transparent;border-radius:7px;background:none;cursor:pointer;color:inherit;font:inherit}
 .propq:hover{background:var(--surface-2)}
 .propq.saved{background:var(--save-soft);
@@ -1583,8 +1586,9 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .propq__price{font-family:var(--font-mono);font-weight:600;color:var(--accent)}
 .propq__book{color:var(--muted);font-size:10.5px;font-family:var(--font-mono);
   white-space:nowrap;max-width:96px;overflow:hidden;text-overflow:ellipsis}
-/* Pick Auditor verdict icon on a prop price (full detail in the title). */
-.propq__audit{font-size:11px;line-height:1;text-align:center;min-width:14px}
+/* Pick Auditor verdict icon on a prop price — a small superscript beside the number. */
+.propq__price{position:relative}
+.propq__audit{font-size:9px;line-height:1;margin-left:2px;top:-.4em}
 .propq__audit--value{color:#22c55e}
 .propq__audit--cheat{color:#e5484d}
 /* Pick Auditor dot on a slip leg — tiny, non-crowding. */

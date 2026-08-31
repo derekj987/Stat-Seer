@@ -192,10 +192,10 @@ export default function SlipBar() {
                     return (
                       <li key={i.id}>
                         <span className="slipbar__g">{i.title}
-                          {av && av.verdict !== "fair" && (
-                            <span className={`slipbar__audit slipbar__audit--${av.verdict}`}
-                              title={`Pick Auditor: fair ≈ ${fmtOdds(av.fair)} — ${VERDICT_LABEL[av.verdict]}`}>
-                              {av.verdict === "value" ? "✓" : "⚠"}
+                          {av && av.verdict === "value" && (
+                            <span className="slipbar__audit slipbar__audit--value"
+                              title={`Pick Auditor: beats the fair price of ${fmtOdds(av.fair)} — ${VERDICT_LABEL.value}`}>
+                              ✓
                             </span>
                           )}
                         </span>

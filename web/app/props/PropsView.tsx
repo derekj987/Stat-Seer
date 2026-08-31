@@ -47,13 +47,17 @@ function PropChip({ q, market, marketLabel, game, saved, onToggle }: {
     >
       <span className="propq__player">{q.player}{q.slot && <span className="propq__slot"> ({q.slot})</span>}</span>
       <span className="propq__side">{sideLabel(q.side, q.line)}</span>
-      <span className="propq__price">{fmtOdds(q.price)}</span>
-      {a && a.verdict !== "fair" ? (
-        <span className={`propq__audit propq__audit--${a.verdict}`}
-          title={`Pick Auditor: fair price ≈ ${fmtOdds(a.fair)} (de-vigged market) — ${VERDICT_LABEL[a.verdict]}`}>
-          {a.verdict === "value" ? "✓" : "⚠"}
-        </span>
-      ) : <span className="propq__audit" aria-hidden="true" />}
+      <span className="propq__price">
+        {fmtOdds(q.price)}
+        {/* Best price shown, so flag only genuine value (beats the de-vigged market). The
+            overpriced verdict lives on the Pick Auditor, where a specific book's price is judged. */}
+        {a && a.verdict === "value" && (
+          <sup className="propq__audit propq__audit--value"
+            title={`Pick Auditor: fair price ≈ ${fmtOdds(a.fair)} (de-vigged market) — ${VERDICT_LABEL.value}: this beats the fair number`}>
+            ✓
+          </sup>
+        )}
+      </span>
       <span className="propq__book">{q.books.join(" / ")}</span>
       <span className="propq__add" aria-hidden="true">{saved ? "✓" : "+"}</span>
     </button>
@@ -114,11 +118,13 @@ export default function PropsView({ games, embedded, today, tomorrow }: { games:
     <>
       {!embedded && <BetslipPromo />}
       <p className="hint">{games.length} games · {players} players · best price on each, shopped across books.</p>
-      <section className="propstack">
+      <section className="propdays">
         {groupByGameDay(games, (g) => g.commence, today, tomorrow).map((grp) => (
-          <div key={grp.key}>
+          <div className="propday" key={grp.key}>
             <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
-            {grp.items.map((g) => <PropGameCard key={g.eventId} g={g} has={has} toggle={toggle} />)}
+            <div className="propstack">
+              {grp.items.map((g) => <PropGameCard key={g.eventId} g={g} has={has} toggle={toggle} />)}
+            </div>
           </div>
         ))}
       </section>
