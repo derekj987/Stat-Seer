@@ -257,6 +257,22 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
     if (bl && bl.spread !== "pick'em") slipPickByEvent.set(e.eventId, bl.spread);
   }
 
+  // Full Model board — the day-grouped game cards. Rendered for any slice of the week's reads so
+  // we can show a short lead and tuck the rest behind our standard show-more dropdown.
+  const modelDayGrid = (items: ModelPrediction[]) => (
+    <div className="daygrid">
+      {groupByGameDay(items, (p) => p.commence, todayEt, tomorrowEt).map((grp) => (
+        <div className="daygrid__day" key={grp.key} style={dayBasis(grp.items.length)}>
+          <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
+          <section className="grid">
+            {grp.items.map((p) => <PredictionCard key={p.eventId} p={p} slipPick={slipPickByEvent.get(p.eventId)} />)}
+          </section>
+        </div>
+      ))}
+    </div>
+  );
+  const FULL_MODEL_CAP = 2;
+
   return (
     <main className="wrap">
       <header className="masthead">
@@ -287,16 +303,17 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
             <span className="hb-bar__chev" aria-hidden="true">▾</span>
           </summary>
           <div className="hb-body">
-            <div className="daygrid">
-              {groupByGameDay(preds, (p) => p.commence, todayEt, tomorrowEt).map((grp) => (
-                <div className="daygrid__day" key={grp.key} style={dayBasis(grp.items.length)}>
-                  <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
-                  <section className="grid">
-                    {grp.items.map((p) => <PredictionCard key={p.eventId} p={p} slipPick={slipPickByEvent.get(p.eventId)} />)}
-                  </section>
-                </div>
-              ))}
-            </div>
+            {modelDayGrid(preds.slice(0, FULL_MODEL_CAP))}
+            {preds.length > FULL_MODEL_CAP && (
+              <details className="hb-showmore">
+                <summary className="hb-showmore__sum">
+                  <span className="hb-showmore__chev" aria-hidden="true">▸</span>
+                  <span className="hb-showmore__more">Show {preds.length - FULL_MODEL_CAP} more game{preds.length - FULL_MODEL_CAP === 1 ? "" : "s"}</span>
+                  <span className="hb-showmore__less">Collapse</span>
+                </summary>
+                {modelDayGrid(preds.slice(FULL_MODEL_CAP))}
+              </details>
+            )}
           </div>
         </details>
       )}
@@ -318,18 +335,20 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         {scored.length === 0 ? (
           <p className="foot">No lines captured for Week {week} yet.</p>
         ) : (
-          <div className="imp-wrap hb-moretbl">
-            <input type="checkbox" id="imp-more" className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
+          <div className="imp-wrap">
             <p className="imp-scrollhint" aria-hidden="true">
               Swipe for totals <span className="imp-scrollhint__a">→</span>
             </p>
-            <ImpTable rows={scored} refs={refs} today={todayEt} tomorrow={tomorrowEt} />
-            {scored.length > 6 && (
-              <label htmlFor="imp-more" className="hb-moretbl__sum">
-                <span className="hb-more__chev" aria-hidden="true">▸</span>
-                <span className="hb-moretbl__more">See more ({scored.length - 6} more games)</span>
-                <span className="hb-moretbl__less">See less</span>
-              </label>
+            <ImpTable rows={scored.slice(0, 4)} refs={refs} today={todayEt} tomorrow={tomorrowEt} />
+            {scored.length > 4 && (
+              <details className="hb-showmore">
+                <summary className="hb-showmore__sum">
+                  <span className="hb-showmore__chev" aria-hidden="true">▸</span>
+                  <span className="hb-showmore__more">Show {scored.length - 4} more game{scored.length - 4 === 1 ? "" : "s"}</span>
+                  <span className="hb-showmore__less">Collapse</span>
+                </summary>
+                <ImpTable rows={scored.slice(4)} refs={refs} today={todayEt} tomorrow={tomorrowEt} />
+              </details>
             )}
           </div>
         )}

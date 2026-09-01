@@ -105,9 +105,13 @@ body{background:var(--bg);color:var(--ink);
 /* Packed day layout: each day (gold header + its card grid) is a flex block sized to its
    game count, so light days pack side-by-side and heavy days keep room for a multi-column
    grid. Erases the dead space of one full-width day-section per row. */
-.daygrid{display:flex;flex-wrap:wrap;gap:16px 18px;align-items:flex-start}
-.daygrid__day{flex:0 1 auto;min-width:0;max-width:100%}
-.daygrid__day>.grid,.daygrid__day>.propstack{margin-top:0}
+/* align-items:stretch → day columns sharing a row match the tallest column's height, and each
+   column is a flex-column so its card grid fills that height. grid-auto-rows keeps every card
+   ≥ its content (no clipping) while letting extra space stretch cards to equal height. */
+.daygrid{display:flex;flex-wrap:wrap;gap:16px 18px;align-items:stretch}
+.daygrid__day{flex:0 1 auto;min-width:0;max-width:100%;display:flex;flex-direction:column}
+.daygrid__day>.grid,.daygrid__day>.propstack{margin-top:0;flex:1 1 auto;grid-auto-rows:minmax(min-content,1fr)}
+.daygrid__day>.propstack{align-items:stretch}
 @media(max-width:700px){.daygrid__day{flex-basis:100%!important}}
 .game{background:var(--surface);border:1px solid var(--line);border-radius:12px;
   padding:16px 18px;position:relative;overflow:hidden;
@@ -458,16 +462,16 @@ a.cw__fname:hover{text-decoration:underline}
 .docknotif{position:absolute;right:62px;bottom:0;z-index:80;min-width:222px;padding:6px;
   background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 34px rgba(0,0,0,.2);
   display:flex;flex-direction:column;gap:2px}
-.docknotif__hd{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:5px 9px 6px}
+.docknotif__hd{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:7px 10px 5px}
 .docknotif__item{display:flex;align-items:center;gap:9px;text-decoration:none;border:0;background:none;cursor:pointer;
-  font:inherit;font-size:13px;font-weight:700;color:var(--ink);text-align:left;padding:8px 9px;border-radius:8px;width:100%}
+  font:inherit;font-size:13px;font-weight:700;color:var(--ink);text-align:left;padding:8px 10px;border-radius:8px;width:100%}
 .docknotif__item:hover{background:var(--accent-soft)}
 .docknotif__ic{font-size:15px;flex:0 0 auto}
 .docknotif__lbl{flex:1 1 auto;min-width:0}
 .docknotif__n{flex:0 0 auto;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#c0392b;color:#fff;
   font-size:11px;font-weight:800;display:grid;place-items:center}
 .docknotif__item--profile{border-top:1px solid var(--line);border-radius:0 0 8px 8px;margin-top:3px;padding-top:10px;color:var(--muted)}
-.docknotif__empty{font-size:12.5px;color:var(--muted);padding:4px 9px 9px}
+.docknotif__empty{font-size:12.5px;color:var(--muted);padding:3px 10px 8px}
 @media(max-width:560px){.docknotif{right:0;bottom:62px}}
 /* Online presence = a bold, bright LIME ring around the avatar (replaces the old green dot). */
 .is-online{box-shadow:0 0 0 2.5px #39e75f}
@@ -2238,7 +2242,9 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .consentgate__alt a{color:var(--muted);text-decoration:underline}
 
 /* ============================ Profile page — modern redesign ============================ */
-.pmain{max-width:960px;margin:0 auto;padding:0 clamp(10px,3vw,20px) 60px}
+/* Profile fills the content area (rail already reserves the left column), reclaiming the old
+   left/right dead space so the whole section spans the page on wide screens. */
+.pmain{max-width:1280px;margin:0 auto;padding:0 clamp(10px,3vw,20px) 60px}
 /* Cover */
 .pcover{position:relative;height:clamp(150px,26vw,260px);border-radius:0 0 16px 16px;overflow:hidden;
   background:var(--surface-2);box-shadow:0 3px 16px rgba(0,0,0,.18)}
