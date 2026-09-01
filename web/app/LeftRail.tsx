@@ -7,6 +7,7 @@
 // window events, and shows the same online ring + notification counts. Signed-out visitors / embeds
 // don't see it.
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 const fire = (name: string) => { try { window.dispatchEvent(new CustomEvent(name)); } catch { /* SSR */ } };
@@ -62,11 +63,14 @@ export default function LeftRail() {
 
   // Flag <html> so the CSS only reserves the sidebar column + hides the Dock when a member is
   // actually signed in (otherwise signed-out visitors get shifted content with no sidebar).
+  // data-home lets the homepage drop the rail below the "Why StatSeer" drawer tab.
+  const pathname = usePathname();
   useEffect(() => {
     const el = document.documentElement;
     if (me) el.setAttribute("data-rail", "1"); else el.removeAttribute("data-rail");
-    return () => el.removeAttribute("data-rail");
-  }, [me]);
+    if (me && pathname === "/") el.setAttribute("data-home", "1"); else el.removeAttribute("data-home");
+    return () => { el.removeAttribute("data-rail"); el.removeAttribute("data-home"); };
+  }, [me, pathname]);
 
   useEffect(() => {
     if (!notifOpen) return;
@@ -154,7 +158,11 @@ export default function LeftRail() {
         {unread > 0 && <span className="leftrail__badge">{unread > 9 ? "9+" : unread}</span>}
       </button>
       <button type="button" className="leftrail__it" onClick={() => fire("ss:open-feedback")}>
-        <span className="leftrail__ic" aria-hidden="true">🕊️</span><span className="leftrail__lbl">Message Us</span>
+        <span className="leftrail__ic leftrail__ic--pigeon" aria-hidden="true">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/pigeon.png" alt="" className="leftrail__pigeon" />
+        </span>
+        <span className="leftrail__lbl">Message Us</span>
       </button>
     </nav>
   );
