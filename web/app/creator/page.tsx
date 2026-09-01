@@ -89,7 +89,7 @@ export default async function CreatorPage() {
       {s.visitSeries.length > 0 && <VisitsChart series={s.visitSeries} />}
 
       <h2 className="csect">System health <span className="csect__tag">outgoing email</span></h2>
-      <div className="cgrid">
+      <div className="chealth">
         <Stat label="Email delivery (Resend)" value={emailValue} tone={emailOk ? "gold" : "flag"} size="sm"
           sub={emailSub} />
         <Stat label="Sending domain" size="sm"

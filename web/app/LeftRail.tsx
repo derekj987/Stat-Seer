@@ -13,7 +13,7 @@ const fire = (name: string) => { try { window.dispatchEvent(new CustomEvent(name
 const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
 
 export default function LeftRail() {
-  const [me, setMe] = useState<{ username: string; avatarUrl: string | null } | null>(null);
+  const [me, setMe] = useState<{ username: string; avatarUrl: string | null; role: string } | null>(null);
   const [unread, setUnread] = useState(0);
   const [awaiting, setAwaiting] = useState<{ friendRequests: number; betaRequests: number; reports: number }>({ friendRequests: 0, betaRequests: 0, reports: 0 });
   const [notifOpen, setNotifOpen] = useState(false);
@@ -25,8 +25,8 @@ export default function LeftRail() {
     const sb = createClient();
     sb.auth.getUser().then(async ({ data }) => {
       if (!data.user) return;
-      const { data: p } = await sb.from("profiles").select("username,avatar_url").eq("id", data.user.id).single();
-      setMe({ username: (p?.username as string) ?? "member", avatarUrl: (p?.avatar_url as string) ?? null });
+      const { data: p } = await sb.from("profiles").select("username,avatar_url,role").eq("id", data.user.id).single();
+      setMe({ username: (p?.username as string) ?? "member", avatarUrl: (p?.avatar_url as string) ?? null, role: (p?.role as string) ?? "member" });
     }).catch(() => {});
   }, []);
 
@@ -36,7 +36,7 @@ export default function LeftRail() {
       const d = (e as CustomEvent).detail as { unread?: number; username?: string; avatarUrl?: string | null; member?: boolean } | undefined;
       if (!d) return;
       if (typeof d.unread === "number") setUnread(d.unread);
-      if (d.member && d.username) setMe((m) => m ?? { username: d.username as string, avatarUrl: d.avatarUrl ?? null });
+      if (d.member && d.username) setMe((m) => m ?? { username: d.username as string, avatarUrl: d.avatarUrl ?? null, role: "member" });
     };
     window.addEventListener("ss:chat-meta", onMeta);
     return () => window.removeEventListener("ss:chat-meta", onMeta);
@@ -131,6 +131,11 @@ export default function LeftRail() {
       <a className="leftrail__it" href="/dashboard">
         <span className="leftrail__ic" aria-hidden="true">🗂️</span><span className="leftrail__lbl">My Dashboard</span>
       </a>
+      {me.role === "founder" && (
+        <a className="leftrail__it" href="/creator">
+          <span className="leftrail__ic" aria-hidden="true">👑</span><span className="leftrail__lbl">Creator Dashboard</span>
+        </a>
+      )}
       <button type="button" className="leftrail__it" onClick={() => fire("ss:open-assistant")}>
         <span className="leftrail__ic leftrail__ic--asst" aria-hidden="true">
           {/* eslint-disable-next-line @next/next/no-img-element */}

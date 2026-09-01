@@ -12,7 +12,7 @@ import { bookName, decToAmerican, priceSlip } from "@/lib/slipPricing";
 import { formatMessage, wrapSelection, EMOJIS } from "@/lib/chatFormat";
 import { enablePush } from "@/lib/push";
 
-type Me = { id: string; username: string; avatarUrl?: string | null };
+type Me = { id: string; username: string; avatarUrl?: string | null; role?: string };
 type Person = { id: string; username: string; role: string };
 type Friend = Person & { rowId: string };
 type Req = { rowId: string; id: string; username: string };
@@ -48,7 +48,7 @@ function MsgSlip({ items }: { items: SlipItem[] }) {
 }
 
 export default function ChatWidget({ open, onClose, onMeta }:
-  { open: boolean; onClose: () => void; onMeta: (m: { member: boolean; unread: number; requests: number; username?: string; avatarUrl?: string | null }) => void }) {
+  { open: boolean; onClose: () => void; onMeta: (m: { member: boolean; unread: number; requests: number; username?: string; avatarUrl?: string | null; role?: string }) => void }) {
   const { items: mySlip } = useSlip();
   const [me, setMe] = useState<Me | null | undefined>(undefined);
   const [convs, setConvs] = useState<Conv[]>([]);
@@ -84,8 +84,8 @@ export default function ChatWidget({ open, onClose, onMeta }:
     const sb = createClient();
     sb.auth.getUser().then(async ({ data }) => {
       if (!data.user) { setMe(null); return; }
-      const { data: p } = await sb.from("profiles").select("username,avatar_url").eq("id", data.user.id).single();
-      setMe({ id: data.user.id, username: (p?.username as string) ?? "member", avatarUrl: (p?.avatar_url as string) ?? null });
+      const { data: p } = await sb.from("profiles").select("username,avatar_url,role").eq("id", data.user.id).single();
+      setMe({ id: data.user.id, username: (p?.username as string) ?? "member", avatarUrl: (p?.avatar_url as string) ?? null, role: (p?.role as string) ?? "member" });
     });
   }, [configured]);
 
@@ -208,7 +208,7 @@ export default function ChatWidget({ open, onClose, onMeta }:
   useEffect(() => {
     const unread = convs.reduce((a, c) => a + c.unread, 0);
     const reqs = requests.length;
-    const meta = { member: !!me, unread, requests: reqs, username: me?.username, avatarUrl: me?.avatarUrl };
+    const meta = { member: !!me, unread, requests: reqs, username: me?.username, avatarUrl: me?.avatarUrl, role: me?.role };
     onMeta(meta);
     // Broadcast so the left rail (which isn't the Dock's child) can show the same unread/avatar.
     try { window.dispatchEvent(new CustomEvent("ss:chat-meta", { detail: meta })); } catch { /* SSR */ }

@@ -13,7 +13,7 @@ type Tool = "feedback" | "friends" | "assistant";
 export default function Dock() {
   const [active, setActive] = useState<Tool | null>(null);
   const [expanded, setExpanded] = useState(false);          // mobile slide-out
-  const [friends, setFriends] = useState<{ member: boolean; unread: number; requests: number; username?: string; avatarUrl?: string | null }>({ member: false, unread: 0, requests: 0 });
+  const [friends, setFriends] = useState<{ member: boolean; unread: number; requests: number; username?: string; avatarUrl?: string | null; role?: string }>({ member: false, unread: 0, requests: 0 });
   // "What's awaiting me" — friend requests for everyone, plus beta approvals + flagged posts for
   // founders/admins. Polled from /api/awaiting; drives the master badge on the profile avatar.
   const [awaiting, setAwaiting] = useState<{ friendRequests: number; betaRequests: number; reports: number }>({ friendRequests: 0, betaRequests: 0, reports: 0 });
@@ -160,6 +160,11 @@ export default function Dock() {
             {friends.member && (
               <a className="dock__ic dock__ic--dash" data-label="My Dashboard" aria-label="My Dashboard" href="/dashboard">
                 <span aria-hidden="true">🗂️</span>
+              </a>
+            )}
+            {friends.member && friends.role === "founder" && (
+              <a className="dock__ic dock__ic--creator" data-label="Creator Dashboard" aria-label="Creator Dashboard" href="/creator">
+                <span aria-hidden="true">👑</span>
               </a>
             )}
             {friends.member && (
