@@ -14,6 +14,10 @@ const PUBLIC_PREFIXES = [
   "/manifest", "/robots", "/sw.js", "/favicon",  // assets + metadata
 ];
 function isPublicPath(path: string): boolean {
+  // QA preview: on the LOCAL dev server only (NODE_ENV==="development"; never on Vercel, where
+  // NODE_ENV==="production") the whole app is reachable signed-out so member pages can be
+  // rendered + audited without a real session. Pairs with the auth mock in lib/supabase/client.ts.
+  if (process.env.NODE_ENV === "development") return true;
   return path === "/" || PUBLIC_PREFIXES.some((p) => path === p || path.startsWith(p));
 }
 // A signed-in but not-yet-approved member may reach only these (plus the public paths):
