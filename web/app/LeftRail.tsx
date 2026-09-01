@@ -97,6 +97,21 @@ export default function LeftRail() {
         <span className="leftrail__lbl">{me.username}</span>
       </a>
 
+      {me.role === "founder" && (
+        <a className="leftrail__it" href="/creator">
+          <span className="leftrail__ic" aria-hidden="true">👑</span><span className="leftrail__lbl">Creator Dashboard</span>
+        </a>
+      )}
+
+      <button type="button" className="leftrail__it" onClick={() => fire("ss:open-chat")}>
+        <span className="leftrail__ic" aria-hidden="true">👥</span><span className="leftrail__lbl">Friends</span>
+      </button>
+
+      <button type="button" className="leftrail__it" onClick={() => fire("ss:open-chat")}>
+        <span className="leftrail__ic" aria-hidden="true">💬</span><span className="leftrail__lbl">Chat</span>
+        {unread > 0 && <span className="leftrail__badge">{unread > 9 ? "9+" : unread}</span>}
+      </button>
+
       <div className="leftrail__notifwrap" ref={notifRef}>
         <button type="button" className="leftrail__it" aria-haspopup="menu" aria-expanded={notifOpen}
           onClick={() => setNotifOpen((v) => !v)}>
@@ -135,11 +150,6 @@ export default function LeftRail() {
       <a className="leftrail__it" href="/dashboard">
         <span className="leftrail__ic" aria-hidden="true">🗂️</span><span className="leftrail__lbl">My Dashboard</span>
       </a>
-      {me.role === "founder" && (
-        <a className="leftrail__it" href="/creator">
-          <span className="leftrail__ic" aria-hidden="true">👑</span><span className="leftrail__lbl">Creator Dashboard</span>
-        </a>
-      )}
       <button type="button" className="leftrail__it" onClick={() => fire("ss:open-assistant")}>
         <span className="leftrail__ic leftrail__ic--asst" aria-hidden="true">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -147,15 +157,8 @@ export default function LeftRail() {
         </span>
         <span className="leftrail__lbl">AI Slip Assistant</span>
       </button>
-      <button type="button" className="leftrail__it" onClick={() => fire("ss:open-chat")}>
-        <span className="leftrail__ic" aria-hidden="true">👥</span><span className="leftrail__lbl">Friends</span>
-      </button>
       <button type="button" className="leftrail__it" onClick={() => fire("ss:open-slip")}>
         <span className="leftrail__ic" aria-hidden="true">🎟️</span><span className="leftrail__lbl">Saved Slips</span>
-      </button>
-      <button type="button" className="leftrail__it" onClick={() => fire("ss:open-chat")}>
-        <span className="leftrail__ic" aria-hidden="true">💬</span><span className="leftrail__lbl">Chat</span>
-        {unread > 0 && <span className="leftrail__badge">{unread > 9 ? "9+" : unread}</span>}
       </button>
       <button type="button" className="leftrail__it" onClick={() => fire("ss:open-feedback")}>
         <span className="leftrail__ic leftrail__ic--pigeon" aria-hidden="true">
