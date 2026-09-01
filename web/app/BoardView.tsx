@@ -183,15 +183,11 @@ export default function BoardView({
 
         <ValueFinderDrawer />
 
-        <WeekBadge week={week} />
+        <WeekBadge week={week} pin={<PinButton size="sm" pin={{ id: "/lines", kind: "lines", label: "Value Finder · Line Shopping", detail: `NFL · Week ${week}`, href: `/lines?week=${week}` }} />} />
         <FlowSteps active="value" />
         <div className="subnavrow"><ShopSubnav active="lines" /></div>
 
         <WeekNav min={min} max={max} current={week} base="/lines" />
-
-        <div className="pinrow">
-          <PinButton pin={{ id: "/lines", kind: "lines", label: "Value Finder · Line Shopping", detail: `NFL · Week ${week}`, href: `/lines?week=${week}` }} />
-        </div>
 
         {board.length === 0 ? (
           <p className="foot">No odds captured for Week {week} yet.</p>

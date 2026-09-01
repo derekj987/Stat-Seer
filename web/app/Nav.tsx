@@ -10,7 +10,7 @@ import MastheadSport from "./MastheadSport";
 
 /** Prominent "Week N" label for the top of a section page. An optional `tip` (the info "?"
  *  popover) sits just to its right — the page's informational scroll. */
-export function WeekBadge({ week, note, tip }: { week: number; note?: string; tip?: import("react").ReactNode }) {
+export function WeekBadge({ week, note, tip, pin }: { week: number; note?: string; tip?: import("react").ReactNode; pin?: import("react").ReactNode }) {
   return (
     <div className="pageweekrow">
       <div className="pageweek">
@@ -18,7 +18,7 @@ export function WeekBadge({ week, note, tip }: { week: number; note?: string; ti
         <span className="pageweek__n">{week}</span>
         {note && <span className="pageweek__note">{note}</span>}
       </div>
-      {tip}
+      {(tip || pin) && <div className="pageweek__aside">{tip}{pin}</div>}
     </div>
   );
 }

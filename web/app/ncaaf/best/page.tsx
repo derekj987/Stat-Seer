@@ -32,11 +32,10 @@ export default async function Page({ searchParams }: {
         />
       </header>
 
-      <WeekBadge week={c.week} />
+      <WeekBadge week={c.week} pin={<PinButton size="sm" pin={{ id: "/ncaaf/best", kind: "sweetspots", label: "NCAAF · Sweet Spots", detail: `Week ${week}`, href: `/ncaaf/best?week=${week}` }} />} />
       <FlowSteps active="value" base="ncaaf" />
       <ShopSubnav active="best" base="ncaaf" />
       <NcaafWeekNav base="/ncaaf/best" week={week} />
-      <div className="pinrow"><PinButton pin={{ id: "/ncaaf/best", kind: "sweetspots", label: "NCAAF · Sweet Spots", detail: `Week ${week}`, href: `/ncaaf/best?week=${week}` }} /></div>
       <NcaafWeekNote card={c} />
 
       <NcaafSweetSpots games={c.games} keyNums={v.keyNumbers} week={c.week} {...etToday()} />

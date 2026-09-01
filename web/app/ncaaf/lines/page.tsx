@@ -44,11 +44,10 @@ export default async function Page({ searchParams }: {
           line-blind read of which side it covers. The market number is a consensus snapshot; the per-book
           best-price shopping turns on as the live NCAAF odds capture feeds the site.
         </>} />
-      } />
+      } pin={<PinButton size="sm" pin={{ id: "/ncaaf/lines", kind: "lines", label: "NCAAF · Line Shopping", detail: `Week ${week}`, href: `/ncaaf/lines?week=${week}` }} />} />
       <FlowSteps active="value" base="ncaaf" />
       <div className="subnavrow"><ShopSubnav active="lines" base="ncaaf" /></div>
       <NcaafWeekNav base="/ncaaf/lines" week={week} />
-      <div className="pinrow"><PinButton pin={{ id: "/ncaaf/lines", kind: "lines", label: "NCAAF · Line Shopping", detail: `Week ${week}`, href: `/ncaaf/lines?week=${week}` }} /></div>
       <NcaafWeekNote card={c} />
 
       <section className="ncf-sec">

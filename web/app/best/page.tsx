@@ -83,12 +83,9 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
         />
       </header>
 
-      <WeekBadge week={week} />
+      <WeekBadge week={week} pin={<PinButton size="sm" pin={{ id: "/best", kind: "sweetspots", label: "Sweet Spots · Best Prices", detail: `NFL · Week ${week}`, href: `/best?week=${week}` }} />} />
       <FlowSteps active="value" />
       <div className="subnavrow"><ShopSubnav active="best" /></div>
-      <div className="pinrow">
-        <PinButton pin={{ id: "/best", kind: "sweetspots", label: "Sweet Spots · Best Prices", detail: `NFL · Week ${week}`, href: `/best?week=${week}` }} />
-      </div>
       <WeekNav min={min} max={max} current={week} base="/best" />
 
       <details className="readbox">

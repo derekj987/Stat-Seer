@@ -49,13 +49,12 @@ export default async function Page({ searchParams }: {
           These <b>arm your judgment</b> with the full backdrop. Referee crews and coaching tendencies aren&apos;t published
           for college, so those rows stay NFL-only. The durable backdrop — home field &amp; league strength — is below.
         </>} />
-      } />
+      } pin={<PinButton size="sm" pin={{ id: "/ncaaf/considerations", kind: "considerations", label: "NCAAF · Considerations", detail: `Week ${week}`, href: `/ncaaf/considerations?week=${week}` }} />} />
       <FlowSteps active="context" base="ncaaf" />
       <div className="subnavrow">
         <ContextSubnav active="special" base="ncaaf" />
       </div>
       <NcaafWeekNav base="/ncaaf/considerations" week={week} />
-      <div className="pinrow"><PinButton pin={{ id: "/ncaaf/considerations", kind: "considerations", label: "NCAAF · Considerations", detail: `Week ${week}`, href: `/ncaaf/considerations?week=${week}` }} /></div>
       <NcaafWeekNote card={c} />
 
       <section className="ncf-sec">

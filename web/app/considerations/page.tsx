@@ -226,15 +226,12 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
           each team&apos;s offense/defense ratings. These <b>arm your judgment</b> — not an adjusted line or a pick.
           (How we read each factor is in the reference below.)
         </>} />
-      } />
+      } pin={<PinButton size="sm" pin={{ id: "/considerations", kind: "considerations", label: "Special Considerations", detail: `NFL · Week ${week}`, href: `/considerations?week=${week}` }} />} />
       <FlowSteps active="context" />
       <div className="subnavrow">
         <ContextSubnav active="special" />
       </div>
       <WeekNav min={min} max={max} current={week} base="/considerations" />
-      <div className="pinrow">
-        <PinButton pin={{ id: "/considerations", kind: "considerations", label: "Special Considerations", detail: `NFL · Week ${week}`, href: `/considerations?week=${week}` }} />
-      </div>
 
       {games.length === 0 ? (
         <p className="foot">No games captured for Week {week} yet.</p>

@@ -179,6 +179,7 @@ body{background:var(--bg);color:var(--ink);
 .pageweekrow{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;margin:14px 0 10px}
 .pageweekrow > .pageweek{grid-column:2;justify-self:center}
 .pageweekrow > :not(.pageweek){grid-column:3;justify-self:start}
+.pageweek__aside{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .pageweek{display:flex;width:fit-content;align-items:baseline;gap:14px;
   padding:14px 34px;border-radius:15px;background:var(--surface-2);
   border:1px solid color-mix(in srgb,var(--gold) 40%,var(--line))}

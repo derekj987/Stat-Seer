@@ -65,7 +65,7 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
         {!isPre && snap && <div className="asof">props as of<br /><b>{et(snap)}</b></div>}
       </header>
 
-      <WeekBadge week={week} />
+      <WeekBadge week={week} pin={<PinButton size="sm" pin={{ id: `/props?cat=${cat.key}`, kind: "props", label: `Player Props · ${cat.label}`, detail: `NFL · Week ${week}`, href: `/props?cat=${cat.key}&week=${week}` }} />} />
       <FlowSteps active="value" />
       <div className="subnavrow"><ShopSubnav active="props" /></div>
 
@@ -82,9 +82,6 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
       ) : (
         <>
           <CatNav current={cat.key} week={week} />
-          <div className="pinrow">
-            <PinButton pin={{ id: `/props?cat=${cat.key}`, kind: "props", label: `Player Props · ${cat.label}`, detail: `NFL · Week ${week}`, href: `/props?cat=${cat.key}&week=${week}` }} />
-          </div>
           <WeekNav min={min} max={max} current={week} base="/props" params={`cat=${cat.key}`} />
           {games.length === 0 ? (
             <p className="foot">

@@ -59,11 +59,10 @@ export default async function Page({ searchParams }: PageProps<"/ncaaf/props">) 
         />
       </header>
 
-      <WeekBadge week={cur} />
+      <WeekBadge week={cur} pin={<PinButton size="sm" pin={{ id: `/ncaaf/props?cat=${cat.key}`, kind: "props", label: `NCAAF Props · ${cat.label}`, detail: `Week ${week}`, href: `/ncaaf/props?cat=${cat.key}&week=${week}` }} />} />
       <FlowSteps active="value" base="ncaaf" />
       <ShopSubnav active="props" base="ncaaf" />
       <NcaafWeekNav base="/ncaaf/props" week={week} params={`cat=${cat.key}`} />
-      <div className="pinrow"><PinButton pin={{ id: `/ncaaf/props?cat=${cat.key}`, kind: "props", label: `NCAAF Props · ${cat.label}`, detail: `Week ${week}`, href: `/ncaaf/props?cat=${cat.key}&week=${week}` }} /></div>
       <NcaafWeekNote card={ncaafCard(week)} />
 
       {all.length ? (
