@@ -160,6 +160,9 @@ export default function LeftRail() {
       <button type="button" className="leftrail__it" onClick={() => fire("ss:open-slip")}>
         <span className="leftrail__ic" aria-hidden="true">🎟️</span><span className="leftrail__lbl">Saved Slips</span>
       </button>
+      <a className="leftrail__it" href="/bankroll">
+        <span className="leftrail__ic" aria-hidden="true">💰</span><span className="leftrail__lbl">Bankroll</span>
+      </a>
       <button type="button" className="leftrail__it" onClick={() => fire("ss:open-feedback")}>
         <span className="leftrail__ic leftrail__ic--pigeon" aria-hidden="true">
           {/* eslint-disable-next-line @next/next/no-img-element */}
