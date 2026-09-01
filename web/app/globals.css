@@ -429,8 +429,10 @@ a.cw__fname:hover{text-decoration:underline}
     border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 26px rgba(0,0,0,.09)}
   /* Homepage has the vertical "Why StatSeer" drawer tab on the left edge. Slide it up flush under
      the top banner and start the rail just below it, so both fit and no rail items fall off-screen. */
-  html[data-rail] .lp-drawer__tab{top:52px}
   html[data-rail][data-home] .leftrail{top:220px}
+  /* The homepage eyes-banner hero is designed full-bleed; cancel the sidebar column's left padding
+     so it spans edge to edge again (the rail overlays its left edge). */
+  html[data-rail] .lp-hero{margin-left:-246px;width:calc(100% + 246px)}
   html[data-rail] .dock{display:none}            /* the left rail is the desktop launcher */
   html[data-rail] .siteshift{padding-left:246px} /* reserve the sidebar column so content doesn't overlap */
 }
@@ -3731,27 +3733,28 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
    (checkbox). Collapsed by default and OUT of the content flow, so it never pushes the
    board down or sits on top of it in the layout. */
 .lp-drawer__chk{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-.lp-drawer__tab{position:fixed;left:0;top:30%;z-index:60;cursor:pointer;display:flex;flex-direction:column;
-  align-items:center;gap:8px;padding:16px 7px;border-radius:0 14px 14px 0;background:var(--accent);color:#fff;
-  box-shadow:2px 3px 14px rgba(0,0,0,.28);transition:transform .2s ease,opacity .25s ease}
-.lp-drawer__tab:hover{transform:translateX(2px)}
+/* Pinned to the RIGHT edge, just below the eyes-banner hero. */
+.lp-drawer__tab{position:fixed;right:0;left:auto;top:240px;z-index:60;cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;gap:8px;padding:16px 7px;border-radius:14px 0 0 14px;background:var(--accent);color:#fff;
+  box-shadow:-2px 3px 14px rgba(0,0,0,.28);transition:transform .2s ease,opacity .25s ease}
+.lp-drawer__tab:hover{transform:translateX(-2px)}
 .lp-drawer__tabtext{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;
   font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
 .lp-drawer__chev{font-size:15px;font-weight:800;line-height:1}
-.lp-drawer__chk:checked ~ .lp-drawer__tab{opacity:0;pointer-events:none;transform:translateX(-100%)}
+.lp-drawer__chk:checked ~ .lp-drawer__tab{opacity:0;pointer-events:none;transform:translateX(100%)}
 .lp-drawer__scrim{position:fixed;inset:0;z-index:61;background:rgba(0,0,0,.2);opacity:0;pointer-events:none;
   transition:opacity .3s ease}
 .lp-drawer__chk:checked ~ .lp-drawer__scrim{opacity:1;pointer-events:auto;cursor:pointer}
 /* See-through on every device: a light tint + light blur so the homepage clearly reads
    through the panel (a window, not frosted glass). */
-.lp-drawer__panel{position:fixed;left:0;top:0;bottom:0;z-index:62;width:min(430px,92vw);max-height:100dvh;
+.lp-drawer__panel{position:fixed;right:0;left:auto;top:0;bottom:0;z-index:62;width:min(430px,92vw);max-height:100dvh;
   overflow-y:auto;--pitch-bot:color-mix(in srgb, var(--surface) 30%, transparent);
   background:linear-gradient(180deg,
     color-mix(in srgb, var(--surface) 94%, transparent) 0%,
     color-mix(in srgb, var(--surface) 90%, transparent) 44%,
     var(--pitch-bot) 64%, var(--pitch-bot) 100%);
-  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);border-right:1px solid var(--line);
-  box-shadow:6px 0 30px rgba(0,0,0,.28);transform:translateX(-100%);transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);border-left:1px solid var(--line);
+  box-shadow:-6px 0 30px rgba(0,0,0,.28);transform:translateX(100%);transition:transform .35s cubic-bezier(.2,.7,.2,1)}
 .lp-drawer__chk:checked ~ .lp-drawer__panel{transform:translateX(0)}
 .lp-drawer__close{position:absolute;top:10px;right:12px;z-index:2;cursor:pointer;width:30px;height:30px;display:flex;
   align-items:center;justify-content:center;border-radius:50%;font-size:16px;line-height:1;color:var(--muted);background:var(--surface-2)}
