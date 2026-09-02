@@ -504,6 +504,13 @@ a.cw__fname:hover{text-decoration:underline}
 .ncline__chip.on .ncline__t{color:var(--save)}
 .ncline__plus{font-weight:800;color:var(--accent);font-size:13px;line-height:1}
 .ncline__chip.on .ncline__plus{color:var(--save)}
+/* The lines board packs a two-side slip chip (a bet leg like "Oklahoma -41.5", which must not wrap)
+   into the spread + O/U cells. The shared model table is table-layout:fixed with narrow % columns, so
+   on a phone those columns squeezed the chip and the number bled past the pill border. table-layout:auto
+   sizes each column to its chip content and the table scrolls horizontally in its .hb-formwrap wrapper
+   instead; min-width:100% keeps it filling on wide screens. */
+.hb-form.ncline{table-layout:auto;min-width:100%}
+.ncline__t{white-space:nowrap}
 /* NCAAF Sweet Spots play cards */
 .ncss-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:12px;margin:14px 0}
 .ncss{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface);display:flex;flex-direction:column;gap:8px}

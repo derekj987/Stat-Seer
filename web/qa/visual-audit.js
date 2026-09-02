@@ -194,13 +194,26 @@
     const br = Math.max(...RADII.map((k) => parseFloat(s[k]) || 0));
     const hasBg = (parseRGB(s.backgroundColor) || { a: 0 }).a > 0.1;
     const hasBorder = ["borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth"].some((k) => parseFloat(s[k]) > 0.5);
-    if (br < 8 || !(hasBg || hasBorder)) continue;         // must actually look like a bubble
+    if (br < 6 || !(hasBg || hasBorder)) continue;         // must actually look like a bubble (pills use ~6-7px radii)
     const r = rectOf(el);
     if (r.height < 6 || r.height > 64 || r.width > 460 || !onScreenish(r)) continue; // pill-sized, not a card
     const t = (el.textContent || "").trim(); if (t.length < 1) continue;
-    const ox = el.scrollWidth - el.clientWidth, oy = el.scrollHeight - el.clientHeight;
+    // scrollWidth misses content that overflows an overflow:visible box (a chip squished by a
+    // fixed-layout table column, text bleeding past the pill border). Measure the text's real ink
+    // extent with a Range and compare it to the content-box edges — that catches the visible bleed.
+    let inkR = 0, inkL = 0;
+    try {
+      const range = document.createRange(); range.selectNodeContents(el);
+      const tr = range.getBoundingClientRect();
+      const padR = parseFloat(s.paddingRight) || 0, bR = parseFloat(s.borderRightWidth) || 0;
+      const padL = parseFloat(s.paddingLeft) || 0, bL = parseFloat(s.borderLeftWidth) || 0;
+      inkR = tr.right - (r.right - padR - bR);
+      inkL = (r.left + padL + bL) - tr.left;
+    } catch { /* detached */ }
+    const ox = Math.max(el.scrollWidth - el.clientWidth, Math.round(inkR), Math.round(inkL));
+    const oy = el.scrollHeight - el.clientHeight;
     if (ox > 2 || oy > 3) {
-      const dir = [ox > 2 ? `${ox}px wide` : "", oy > 3 ? `${oy}px tall` : ""].filter(Boolean).join(" + ");
+      const dir = [ox > 2 ? `${ox}px past edge` : "", oy > 3 ? `${oy}px tall` : ""].filter(Boolean).join(" + ");
       add("bubble-overflow", "high", el, `text overflows its bubble (${dir}) — "${t.slice(0, 32)}"`, { box: `${Math.round(r.width)}x${Math.round(r.height)}` });
     }
   }
