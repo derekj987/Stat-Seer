@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { isApprovedMember } from "@/lib/supabase/approval";
 import { buildChart, CHART_SOURCES, type ChartSpec, type ChartSourceId } from "@/lib/chartSources";
 
 export const dynamic = "force-dynamic";
@@ -14,14 +15,16 @@ function isSpec(x: unknown): x is ChartSpec {
 }
 
 export async function POST(request: Request) {
-  // Members only.
+  // Members only — and approved members only (this route can spend on the paid Anthropic API).
   let userId: string | null = null;
+  let supabase: Awaited<ReturnType<typeof createClient>> | null = null;
   try {
-    const supabase = await createClient();
+    supabase = await createClient();
     const { data } = await supabase.auth.getUser();
     userId = data.user?.id ?? null;
   } catch { /* env not configured */ }
-  if (!userId) return NextResponse.json({ error: "Please log in to build a dashboard chart." }, { status: 401 });
+  if (!userId || !supabase) return NextResponse.json({ error: "Please log in to build a dashboard chart." }, { status: 401 });
+  if (!(await isApprovedMember(supabase, userId))) return NextResponse.json({ error: "Your account is still pending approval." }, { status: 403 });
 
   const body = await request.json().catch(() => ({}));
 

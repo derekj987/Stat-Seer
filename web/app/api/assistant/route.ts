@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { isApprovedMember } from "@/lib/supabase/approval";
 import { weekRange } from "@/lib/board";
 import { buildCandidates, buildCandidatesNcaaf, buildMenuSlip, combinedAmerican, combinedDecimal, type Candidate, type Sport } from "@/lib/assistant";
 import { toDecimal } from "@/lib/slipPricing";
@@ -32,14 +33,16 @@ function respond(legs: Candidate[], note: string) {
 }
 
 export async function POST(request: Request) {
-  // Members only.
+  // Members only — and approved members only (this route spends on the paid Anthropic API).
   let userId: string | null = null;
+  let supabase: Awaited<ReturnType<typeof createClient>> | null = null;
   try {
-    const supabase = await createClient();
+    supabase = await createClient();
     const { data } = await supabase.auth.getUser();
     userId = data.user?.id ?? null;
   } catch { /* env not configured */ }
-  if (!userId) return NextResponse.json({ error: "Please log in to use the slip assistant." }, { status: 401 });
+  if (!userId || !supabase) return NextResponse.json({ error: "Please log in to use the slip assistant." }, { status: 401 });
+  if (!(await isApprovedMember(supabase, userId))) return NextResponse.json({ error: "Your account is still pending approval." }, { status: 403 });
 
   const body = await request.json().catch(() => ({}));
   const mode: "menu" | "text" = body?.mode === "text" ? "text" : "menu";
