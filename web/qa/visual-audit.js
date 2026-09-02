@@ -180,6 +180,31 @@
     if (img.getAttribute("src") && img.complete && img.naturalWidth === 0) add("broken-image", "high", img, `failed to load: ${img.getAttribute("src")}`);
   }
 
+  // ---- 8. Text bleeding out of its bubble (pill / badge / chip / tag) --------
+  // A "bubble" is a small rounded element with a fill or border. If its content extent
+  // (scrollWidth/Height) exceeds its box, the text spills past the rounded edge — the mobile
+  // "text bleeding over bubbles" bug. Content extent catches overflow even when overflow:visible.
+  const RADII = ["borderTopLeftRadius", "borderTopRightRadius", "borderBottomLeftRadius", "borderBottomRightRadius"];
+  for (const el of document.querySelectorAll(
+    "[class*='badge'],[class*='chip'],[class*='pill'],[class*='tag'],[class*='bubble'],[class*='count'],[class*='crumb']," +
+    "[class*='dot'],[class*='mark'],[class*='flag'],[class*='dayhdr'],[class*='daybadge'],[class*='hb-bar__'],span,small,b,em,time,li")) {
+    if (cap(findings, "bubble-overflow")) break;
+    if (!vis(el)) continue;
+    const s = getComputedStyle(el);
+    const br = Math.max(...RADII.map((k) => parseFloat(s[k]) || 0));
+    const hasBg = (parseRGB(s.backgroundColor) || { a: 0 }).a > 0.1;
+    const hasBorder = ["borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth"].some((k) => parseFloat(s[k]) > 0.5);
+    if (br < 8 || !(hasBg || hasBorder)) continue;         // must actually look like a bubble
+    const r = rectOf(el);
+    if (r.height < 6 || r.height > 64 || r.width > 460 || !onScreenish(r)) continue; // pill-sized, not a card
+    const t = (el.textContent || "").trim(); if (t.length < 1) continue;
+    const ox = el.scrollWidth - el.clientWidth, oy = el.scrollHeight - el.clientHeight;
+    if (ox > 2 || oy > 3) {
+      const dir = [ox > 2 ? `${ox}px wide` : "", oy > 3 ? `${oy}px tall` : ""].filter(Boolean).join(" + ");
+      add("bubble-overflow", "high", el, `text overflows its bubble (${dir}) — "${t.slice(0, 32)}"`, { box: `${Math.round(r.width)}x${Math.round(r.height)}` });
+    }
+  }
+
   const bySev = { high: 0, medium: 0, low: 0 };
   for (const f of findings) bySev[f.severity] = (bySev[f.severity] || 0) + 1;
   return JSON.stringify({

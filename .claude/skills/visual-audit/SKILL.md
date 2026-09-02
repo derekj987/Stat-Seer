@@ -17,7 +17,19 @@ says the right thing) still belong to Derek — the audit only surfaces candidat
 `zero-size` (a button/img/badge that's visible but 0×0 — the "green ring not showing" family) ·
 `clipped-text` · `low-contrast-text` (the filled-bar-blank / invisible-text family) ·
 `click-intercepted` (a control covered by an overlay — the "move button doesn't work" family) ·
-`broken-image`. Console errors + network 4xx/5xx are collected separately (see step 4).
+`broken-image` · `bubble-overflow` (text spilling past a pill/badge/chip's rounded edge — the mobile
+"text bleeding over bubbles" bug: a small rounded, filled element whose content extent exceeds its box).
+Console errors + network 4xx/5xx are collected separately (see step 4).
+
+### Data-dependent bubble bugs (stress pass)
+`bubble-overflow` only fires when the *current* data is long enough to overflow. Many pill/badge
+bugs only bite with a long team name ("Massachusetts Minutemen"), long player name, or a big number
+that isn't on this week's board. To catch these latent bugs, run a **stress pass**: for each visible
+leaf bubble (rounded + filled, `children.length === 0`, `overflow: visible`), save its text, set it to
+a long string, force reflow, measure `scrollWidth/Height − clientWidth/Height`, then restore the text.
+Any that overflow are fragile — they *will* bleed with real long data (fix with `white-space`,
+`max-width`, `overflow`, or letting the bubble size to content). Ignore count-only badges (`.slipbar__count`)
+that never hold long text. Do this at 320–375px width; overflow appears at the narrowest widths first.
 
 ## Prerequisites (already in the repo)
 - **QA preview mode** is automatic on the local dev server: `web/proxy.ts` opens the gate when
