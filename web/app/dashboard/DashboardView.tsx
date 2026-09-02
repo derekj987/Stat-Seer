@@ -71,6 +71,9 @@ function EmbedCard(props: CardProps) {
   const [h, setH] = useState(560);
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
+      // e.source must be THIS iframe (the strong check); the origin check is belt-and-braces —
+      // we only ever embed same-origin pages, so anything else isn't ours.
+      if (e.origin !== window.location.origin) return;
       const d = e.data as { type?: string; height?: number } | null;
       if (d?.type === "ss-embed-height" && typeof d.height === "number" && ref.current
           && e.source === ref.current.contentWindow) {

@@ -25,7 +25,9 @@ export default function EmbedMode() {
     const post = () => {
       try {
         const h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
-        window.parent?.postMessage({ type: "ss-embed-height", height: h }, "*");
+        // Target our own origin, not "*": the dashboard only ever embeds same-origin pages
+        // (`${href}?embed=1`), so a wildcard just hands the message to any parent that frames us.
+        window.parent?.postMessage({ type: "ss-embed-height", height: h }, window.location.origin);
       } catch { /* cross-origin / no parent */ }
     };
 

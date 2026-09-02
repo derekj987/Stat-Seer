@@ -45,9 +45,13 @@ jobs:
           ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
           SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          # Dispatch input via env, not inline ${{ }} — inline values are pasted into the script as
+          # text before bash runs, so a crafted input could execute. (matrix.shard is a static
+          # workflow-defined value, not user input.)
+          IN_MODE:              ${{ github.event.inputs.mode }}
         # Scheduled runs (no mode input) fall through to the full write of each shard.
         run: |
-          if [ "${{ github.event.inputs.mode }}" = "test" ]; then
+          if [ "$IN_MODE" = "test" ]; then
             if [ "${{ matrix.shard }}" = "1" ]; then
               python tailgate_reddit.py --current --no-extract --shard 1/4
             else
