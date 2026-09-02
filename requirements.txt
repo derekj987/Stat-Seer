@@ -1,0 +1,13 @@
+# Python dependencies for the data pipeline (scrapers, model, exports).
+#
+# Pinned so CI is reproducible and a bad upstream release can't silently enter the nightly refresh.
+# Previously each workflow ran a bare `pip install numpy certifi` (floating versions).
+# Versions match the local dev environment that these scripts are developed and tested against.
+#
+# Workflows install with:  pip install -r requirements.txt
+# To upgrade: bump a pin here, run the pipeline locally, then commit.
+
+certifi==2026.7.22          # TLS cert bundle — see SSL_CERT_FILE handling in odds_client.py
+numpy==2.5.2                # cfb_power / cfb_ats rating fits
+pandas==3.0.5               # analysis scripts
+anthropic==1.0.0            # presser extraction (ingest/presser_collector.py)

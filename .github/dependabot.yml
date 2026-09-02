@@ -1,0 +1,45 @@
+# Automated dependency updates + vulnerability alerts.
+#
+# Closes the vulnerability-management gap found in the security review: `npm audit` was clean at a
+# point in time, but nothing watched for FUTURE CVEs in Next.js / React / the Supabase SDK.
+# Dependabot alerts and version updates are free on private repos.
+#
+# Grouped + weekly so this produces one reviewable PR per ecosystem, not a stream of noise.
+version: 2
+updates:
+  # The Next.js app.
+  - package-ecosystem: "npm"
+    directory: "/web"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      # Patch/minor bumps land as ONE PR; majors come separately so they get a real review.
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "chore(deps)"
+
+  # The Python data pipeline (requirements.txt).
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 3
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "chore(deps)"
+
+  # The GitHub Actions themselves (actions/checkout, setup-python, …) — these are supply chain too.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore(ci)"

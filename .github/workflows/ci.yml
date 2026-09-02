@@ -1,0 +1,49 @@
+name: CI
+
+# Automated pre-deploy checks. Closes the change-management gap from the security review: every other
+# workflow in this repo is a data job — nothing verified the app itself before it reached production.
+# Pushes to main auto-deploy via Vercel, so this is the gate that runs against what ships.
+#
+# Deliberately fast and reliable (typecheck + dependency audit). `next build` is NOT run here: several
+# routes are force-dynamic and read Supabase/API env vars, so a CI build would fail for reasons that
+# have nothing to do with code quality. Vercel runs the real build on deploy.
+
+on:
+  push:
+    branches: [main, dev]
+    paths: ["web/**", ".github/workflows/ci.yml"]
+  pull_request:
+    paths: ["web/**", ".github/workflows/ci.yml"]
+  workflow_dispatch: {}
+
+# A newer push supersedes an in-flight run for the same branch.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: Typecheck + dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install (locked)
+        run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      # Fails the run on a HIGH/CRITICAL advisory in a production dependency. Moderate and below are
+      # reported by Dependabot as PRs rather than blocking a deploy.
+      - name: Dependency audit (high+)
+        run: npm audit --omit=dev --audit-level=high

@@ -39,7 +39,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install --quiet numpy certifi
+      - run: pip install --quiet numpy certifi -c requirements.txt
 
       - name: Rebuild cfb.db — games (2020..current) + betting lines
         env:

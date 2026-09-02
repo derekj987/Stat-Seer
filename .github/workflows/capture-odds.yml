@@ -27,7 +27,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install --quiet certifi
+      - run: pip install --quiet certifi -c requirements.txt
       - name: Capture odds -> Supabase
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
