@@ -439,7 +439,12 @@ def main():
     sp = fetch_preseason_sp(CARD_SEASON)
     prior_pre = seed_preseason_prior(final, sp, SP_BLEND)
     completed = load_completed(DB, CARD_SEASON)
-    cur_ratings = cp.fit_ratings(completed, LAM, CAP, prior_pre)[0] if completed else prior_pre
+    # Merge the fit OVER the seeded prior: fit_ratings only returns teams that appear in the
+    # completed games, so early in the season most FBS teams are missing from the fit. Without the
+    # {**prior_pre, ...} merge they silently fell back to NEWCOMER_R (-9.0), throwing away their
+    # SP+ seed — e.g. Miami (true ~+16) got floored to -9 and the card read "Stanford -0.7" for a
+    # game the market has at Miami -24.5. Keep every seeded team; override only those that have played.
+    cur_ratings = {**prior_pre, **cp.fit_ratings(completed, LAM, CAP, prior_pre)[0]} if completed else prior_pre
     preseason_seeded = bool(sp) and not completed
     card_week = detect_upcoming_week(DB, CARD_SEASON, CARD_WEEK)
     top_set = {t for t, _ in sorted(final.items(), key=lambda kv: kv[1], reverse=True)[:25]}
