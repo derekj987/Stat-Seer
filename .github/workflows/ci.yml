@@ -40,6 +40,13 @@ jobs:
       - name: Install (locked)
         run: npm ci
 
+      # Next 16 generates the global PageProps/LayoutProps types into .next/types (tsconfig includes
+      # that path). A clean checkout has no .next/, so `tsc` alone fails with "Cannot find name
+      # 'PageProps'" — it only passes locally because `next dev` has already written them. `typegen`
+      # produces them without needing a full build (no runtime env vars required).
+      - name: Generate route types
+        run: npx next typegen
+
       - name: Typecheck
         run: npx tsc --noEmit
 
