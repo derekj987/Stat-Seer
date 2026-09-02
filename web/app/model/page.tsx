@@ -69,8 +69,8 @@ function ImpTable({ rows, refs, today, tomorrow, cap }: { rows: Env[]; refs: Awa
         <div key={grp.key} className={groupHidden ? "hb-row--more" : undefined}>
           <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
           <div className="improw improw--head" role="row">
-            <span>game</span><span>spread</span>
-            <span className="improw__modh">model spread</span><span>total</span>
+            <span>game</span><span>spread</span><span>total</span>
+            <span className="improw__modh improw__modstart">model spread</span>
             <span className="improw__modh">model total</span>
           </div>
           {grp.items.map((e) => {
@@ -89,13 +89,13 @@ function ImpTable({ rows, refs, today, tomorrow, cap }: { rows: Env[]; refs: Awa
                 {e.favLabel}
                 {e.spreadKey && <span className="ssmark" title={`Sweet spot — key number ${e.spreadKey.num} (½pt ≈ ${e.spreadKey.cost.toFixed(0)}%)`}>◆</span>}
               </span>
-              <span className="improw__mod">
-                {e.modelSpread ?? "—"}
-                {e.modelDisagree && <span className="offcmark" title="Off consensus — our model favors a different side than the market">⚑</span>}
-              </span>
               <span className="improw__tot">
                 {e.total!.toFixed(1)}
                 {e.totalKey && <span className="ssmark" title={`Sweet spot — key total ${e.totalKey.num} (½pt ≈ ${e.totalKey.cost.toFixed(0)}%)`}>◆</span>}
+              </span>
+              <span className="improw__mod improw__modstart">
+                {e.modelSpread ?? "—"}
+                {e.modelDisagree && <span className="offcmark" title="Off consensus — our model favors a different side than the market">⚑</span>}
               </span>
               <span className="improw__mod">{e.modelTotal !== null ? e.modelTotal.toFixed(1) : "—"}</span>
             </div>
@@ -338,8 +338,9 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         </summary>
         <div className="hb-body">
         <p className="ctxsec__d">
-          The market&apos;s <b>spread</b> and <b>total</b> for each game, with our <b>line-blind model&apos;s</b>
-          own read of each sitting right beside it.
+          The market&apos;s <b>spread</b> and <b>total</b> for each game — the <b>median</b> across the
+          sportsbooks we track, not any single book — with our <b>line-blind model&apos;s</b> own read of
+          each sitting beside it. Market numbers are grouped on the left, our model&apos;s on the right.
         </p>
 
         {scored.length === 0 ? (

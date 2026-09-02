@@ -896,9 +896,13 @@ a.sportstrip__i:hover{color:var(--ink)}
 .imptable{display:flex;flex-direction:column;align-items:stretch;gap:8px;overflow-x:auto;
   max-width:none;width:100%}
 .improw{display:grid;
-  grid-template-columns:minmax(150px,1.9fr) minmax(74px,1fr) minmax(96px,1.15fr) minmax(66px,.92fr) minmax(96px,1.15fr);
+  /* game | spread | total | model spread | model total — market pair then model pair. The two
+     "team + number" columns (spread, model spread) are wider than the bare-number totals. */
+  grid-template-columns:minmax(150px,1.9fr) minmax(90px,1.15fr) minmax(66px,.9fr) minmax(90px,1.15fr) minmax(66px,.9fr);
   gap:20px;align-items:center;padding:7px 12px;background:var(--surface);border:1px solid var(--line);
   border-radius:8px;font-size:13px}
+/* A subtle divider before the model pair keeps the market/model grouping legible. */
+.improw__modstart{border-left:1px solid var(--line);padding-left:14px;margin-left:-6px}
 /* +1px inline padding vs .improw so the header tracks line up with the bordered
    game rows (each .impgame adds a 1px border that shifts its grid inward). */
 .improw--head{background:none;border:0;color:var(--muted);font-size:11px;
