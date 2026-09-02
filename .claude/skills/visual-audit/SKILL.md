@@ -20,8 +20,32 @@ says the right thing) still belong to Derek — the audit only surfaces candidat
 `broken-image` · `bubble-overflow` (text spilling past a pill/badge/chip's rounded edge — the mobile
 "text bleeding over bubbles" bug: a small rounded, filled element whose content extent exceeds its box) ·
 `split-group` (a day/group header repeats within one board — the signature of a capped list rendered as
-two sub-tables/`<details>`, which duplicates the header and strands the collapse control mid-list).
+two sub-tables/`<details>`, which duplicates the header and strands the collapse control mid-list) ·
+`off-center-content` (a fixed sidebar reserved via padding centres content in the REMAINING space, so
+the page reads as "shifted right") · `grid-dead-space` (`repeat(auto-fill, …)` keeps empty tracks when
+items < columns, leaving a block of dead space — `auto-fit` collapses them) ·
+`chart-truncated-with-space` (a cell ellipsizes its text while its row still has unused width).
 Console errors + network 4xx/5xx are collected separately (see step 4).
+
+### ⚠️ Chart changes ALWAYS get an alignment pass
+Standing rule from Derek: **any time a chart/table/board is changed, re-check alignment before
+shipping** — don't wait for the periodic audit. Check, at desktop AND mobile:
+- **Even spacing** between rows and between columns (no one column hogging or starving).
+- **No dead space**: does the content actually fill the card? Watch for `auto-fill` grids (phantom
+  tracks) and `object-fit: contain` media that shrinks inside an over-wide box.
+- **No truncation while space is available** — an ellipsized name next to an empty gap is the tell.
+- **Column order/pairing still reads correctly** (e.g. market pair then model pair).
+- Repeated-looking rows are often legitimate pairs (Over/Under on the same player). Before "fixing a
+  duplicate", confirm whether the rows differ by side/line/book — widening the column usually reveals
+  they were never duplicates, just unreadable.
+
+### Mobile-specific checks
+Several bugs only appear on a phone. At 375px (and 320px), verify:
+- Banner/hero images **fill their box** — a fixed `aspect-ratio` far from the art's own ratio makes
+  `contain` shrink it to a stamp in blurred filler. Match the box to the most common asset ratio.
+- Header pills/among-title chips don't squeeze titles onto cramped lines (hide the pill, let the
+  title span).
+- The floating dock/bubble menu is short enough to thumb — every extra icon costs.
 
 ### Data-dependent bubble bugs (stress pass)
 `bubble-overflow` only fires when the *current* data is long enough to overflow. Many pill/badge

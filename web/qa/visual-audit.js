@@ -237,6 +237,59 @@
     }
   }
 
+  // ---- 10. Main content not centred in the viewport ---------------------------
+  // A fixed sidebar reserved via padding centres content in the REMAINING space, which reads as
+  // "the whole page shifted right". Flags a content column whose centre is well off the viewport's.
+  {
+    const main = document.querySelector(".siteshift main, main");
+    if (main && vis(main)) {
+      const r = rectOf(main);
+      const off = Math.round((r.left + r.right) / 2 - vw / 2);
+      // Only meaningful if there IS spare room — a column wider than the viewport can't be centred.
+      if (Math.abs(off) > 40 && r.width < vw - 40) {
+        add("off-center-content", "medium", main, `content centre is ${off > 0 ? "+" : ""}${off}px from viewport centre (left gap ${Math.round(r.left)}, right gap ${Math.round(vw - r.right)})`);
+      }
+    }
+  }
+
+  // ---- 11. Grid dead space from auto-fill phantom tracks -----------------------
+  // `repeat(auto-fill, …)` keeps empty tracks when there are fewer items than columns, leaving a
+  // block of dead space (use auto-fit to collapse them). Detect: more tracks than laid-out children.
+  for (const el of document.querySelectorAll("*")) {
+    if (cap(findings, "grid-dead-space")) break;
+    if (!vis(el)) continue;
+    const s = getComputedStyle(el);
+    if (s.display !== "grid") continue;
+    const tracks = (s.gridTemplateColumns || "").trim().split(/\s+/).filter(Boolean).length;
+    if (tracks < 2) continue;
+    const kids = [...el.children].filter((k) => vis(k));
+    if (!kids.length || kids.length >= tracks) continue;
+    const r = rectOf(el); if (r.width < 200 || !onScreenish(r)) continue;
+    // Only flag when the empty tracks amount to real visible space.
+    const wasted = Math.round(r.width * ((tracks - kids.length) / tracks));
+    if (wasted > 160) {
+      add("grid-dead-space", "medium", el, `${kids.length} item(s) in a ${tracks}-track grid — ~${wasted}px of empty tracks (auto-fill instead of auto-fit?)`);
+    }
+  }
+
+  // ---- 12. Chart alignment: truncated text beside dead space -------------------
+  // Derek's standing rule — whenever a chart changes, check alignment. The signature of the props
+  // board bug: a cell ellipsizes its text while its own row still has unused width.
+  for (const el of document.querySelectorAll("[class*='__player'],[class*='__name'],[class*='__title'],td,th,[class*='cell']")) {
+    if (cap(findings, "chart-truncated-with-space")) break;
+    if (!vis(el)) continue;
+    if (el.scrollWidth <= el.clientWidth + 2) continue;      // not truncated
+    const row = el.closest("tr,li,[class*='row'],[class*='__list']>*");
+    if (!row || !vis(row)) continue;
+    const rr = rectOf(row);
+    const used = [...row.children].filter(vis).reduce((a, c) => a + rectOf(c).width, 0);
+    const spare = Math.round(rr.width - used);
+    if (spare > 60) {
+      add("chart-truncated-with-space", "medium", el,
+        `text is ellipsized ("${(el.textContent || "").trim().slice(0, 24)}") while its row has ~${spare}px unused — widen the column`);
+    }
+  }
+
   const bySev = { high: 0, medium: 0, low: 0 };
   for (const f of findings) bySev[f.severity] = (bySev[f.severity] || 0) + 1;
   return JSON.stringify({

@@ -463,6 +463,14 @@ a.cw__fname:hover{text-decoration:underline}
   html[data-rail] .dock{display:none}            /* the left rail is the desktop launcher */
   html[data-rail] .siteshift{padding-left:246px} /* reserve the sidebar column so content doesn't overlap */
 }
+/* The left gutter alone centers content in the REMAINING space, which reads as "the whole page
+   shifted right" (content sat 123px — half the gutter — right of true centre). Mirror the gutter on
+   the right so the content column is centred in the VIEWPORT again. Only from 1600px, where there's
+   room to do it without narrowing the 1120px content column; below that, reserving both sides would
+   squeeze the content, which is worse than the offset. */
+@media(min-width:1600px){
+  html[data-rail] .siteshift{padding-right:246px}
+}
 
 .dock{position:fixed;right:18px;bottom:18px;z-index:70;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 .dock__handle{display:none}
@@ -534,7 +542,7 @@ a.cw__fname:hover{text-decoration:underline}
 .hb-form.ncline{table-layout:auto;min-width:100%}
 .ncline__t{white-space:nowrap}
 /* NCAAF Sweet Spots play cards */
-.ncss-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:12px;margin:14px 0}
+.ncss-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));gap:12px;margin:14px 0}
 .ncss{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface);display:flex;flex-direction:column;gap:8px}
 .ncss__hd{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .ncss__g{font-weight:700;font-size:13.5px}
@@ -828,7 +836,7 @@ a.sportstrip__i:hover{color:var(--ink)}
 .wxchip--wind b{color:var(--mkt)}
 /* --- Special Considerations game cards (site+weather, referee, stakes per game) --- */
 /* Context cards: 2 across on desktop (1 on phones), roomier so they don't feel cluttered */
-.cxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(456px,1fr));gap:16px;margin:10px 0 4px}
+.cxgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(456px,1fr));gap:16px;margin:10px 0 4px}
 @media (max-width:720px){.cxgrid{grid-template-columns:1fr}}
 .cxcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 22px}
 .cxcard--wind{border-color:color-mix(in srgb,var(--spot) 55%,var(--line))}
@@ -1182,7 +1190,7 @@ a.sportstrip__i:hover{color:var(--ink)}
   .forumlayout{grid-template-columns:1fr;gap:20px}
   .forumside{position:static;max-width:340px;margin:0 auto}
 }
-.forumsections{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.forumsections{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
 .forumsec{display:flex;flex-direction:column;gap:5px;padding:18px;border-radius:12px;
   background:var(--surface);border:1px solid var(--line);text-decoration:none;transition:border-color .15s,transform .15s}
 .forumsec:hover{border-color:var(--accent);transform:translateY(-2px)}
@@ -1667,7 +1675,7 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .slipcta__h{font-size:13.5px;color:var(--accent);letter-spacing:.01em}
 
 /* --- Best Bets --- */
-.playgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.playgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
 .play{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
 .play--key{border-color:color-mix(in srgb,var(--spot) 55%,var(--line))}
 .play__head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
@@ -1722,7 +1730,7 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
    market sections can sit side-by-side. Falls to a single column on a phone. */
 .propdays{display:flex;flex-direction:column;gap:6px}
 .propday{margin-top:4px}
-.propstack{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px;align-items:start}
+.propstack{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:10px;align-items:start}
 .propgame[open]{grid-column:1/-1}
 .propgame{background:var(--surface);border:1px solid var(--line);border-radius:11px;overflow:hidden}
 .propgame__head{list-style:none;cursor:pointer;display:flex;align-items:baseline;
@@ -1741,7 +1749,7 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
    side-by-side rather than stacked — separates ATTD from 1st TD so members don't tap the
    wrong one, and uses the width. Each column is its own bordered block. */
 @media (min-width:641px){
-  .propgame[open] .propgame__body{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));
+  .propgame[open] .propgame__body{display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));
     gap:4px 20px;align-items:start}
   .propgame[open] .propgame__body .propmkt{margin-top:8px}
   .propgame[open] .propgame__body .propmkt+.propmkt{border-top:0;padding-top:0}
@@ -2007,7 +2015,7 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .chcat__sport.on{background:var(--accent);color:#fff}
 .chcat__grp{margin:0 0 14px}
 .chcat__grph{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--gold,#b8860b);margin:0 0 8px}
-.chcat__items{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:8px}
+.chcat__items{display:grid;grid-template-columns:repeat(auto-fit,minmax(228px,1fr));gap:8px}
 .chcat__item{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;font:inherit;
   text-align:left;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
 .chcat__item:hover{border-color:var(--accent)}
@@ -3220,6 +3228,13 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-bar__count{font-size:11px;font-weight:700;color:var(--muted);border:1px solid var(--line);
   border-radius:20px;padding:1px 8px;flex:0 0 auto}
 .hb-bar__count--gold{background:var(--spot);color:#4a3c00;border:none;font-weight:800}
+/* On a phone the little category pill ("props", "context", "line shopping", "5 off consensus")
+   squeezes the gold panel title into two cramped lines for no real information gain — the title
+   already says what the panel is. Drop the pill and let the title run the full width of the bar. */
+@media (max-width:640px){
+  .hb-bar__count{display:none}
+  .hb-bar__title{flex:1 1 auto;min-width:0}
+}
 .hb-bar__hint{font-size:11.5px;color:var(--muted);font-style:italic}
 .hb-bar__chev{margin-left:auto;color:var(--muted);font-size:13px;transition:transform .2s;flex:0 0 auto}
 .hb-panel[open] .hb-bar__chev{transform:rotate(180deg)}
@@ -4224,6 +4239,12 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 /* isolation:isolate keeps the blurred backdrop + contained image stacking (z-index 0/1) WITHIN
    the slide, so the image can't paint over the absolutely-positioned dots/arrows below. */
 .hlb__slide--img{position:relative;isolation:isolate;padding:0;background:#140d06;aspect-ratio:20/9;overflow:hidden}
+/* On a phone the 20/9 strip is so short that object-fit:contain shrinks the art to a small stamp
+   floating in blurred filler. Half the banner images are 16/9 (1600x900), so match that on mobile:
+   those fill the box edge to edge, and the wider ones (2.0-2.55) still scale up noticeably. */
+@media (max-width:640px){
+  .hlb__slide--img{aspect-ratio:16/9}
+}
 .hlb__imgbg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
   filter:blur(22px) brightness(.68) saturate(1.15);transform:scale(1.18);z-index:0;pointer-events:none}
 .hlb__slide--img .hlb__img{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;

@@ -157,34 +157,17 @@ export default function Dock() {
                   </div>
                 );
               })()}
-            {friends.member && (
-              <a className="dock__ic dock__ic--dash" data-label="My Dashboard" aria-label="My Dashboard" href="/dashboard">
-                <span aria-hidden="true">🗂️</span>
-              </a>
-            )}
+            {/* Mobile bubble order (deliberate — keep in sync with the label above each):
+                Profile · Creator Dashboard · Messages · AI Slip Assistant · Message Us (pigeon).
+                Saved Slips, My Dashboard and Bankroll are intentionally NOT here — they're reachable
+                from the profile/nav, and the bubble stays short enough to thumb through on a phone. */}
             {friends.member && friends.role === "founder" && (
               <a className="dock__ic dock__ic--creator" data-label="Creator Dashboard" aria-label="Creator Dashboard" href="/creator">
                 <span aria-hidden="true">👑</span>
               </a>
             )}
             {friends.member && (
-              <button className="dock__ic dock__ic--slip" data-label="Saved Slips" aria-label="Saved Slips"
-                onClick={() => { try { window.dispatchEvent(new CustomEvent("ss:open-slip")); } catch { /* SSR */ } }}>
-                <span aria-hidden="true">🎟️</span>
-              </button>
-            )}
-            {friends.member && (
-              <a className="dock__ic dock__ic--bank" data-label="Bankroll" aria-label="Bankroll" href="/bankroll">
-                <span aria-hidden="true">💰</span>
-              </a>
-            )}
-            <button className="dock__ic dock__ic--pigeon" data-label="Message Us" aria-label="Message Us" onClick={() => open("feedback")}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/pigeon.png" alt="" className="dock__icimg" width={52} height={52}
-                style={{ objectPosition: "72% 40%" }} />
-            </button>
-            {friends.member && (
-              <button className="dock__ic dock__ic--friends" data-label="Friends" aria-label="Friends" onClick={() => open("friends")}>
+              <button className="dock__ic dock__ic--friends" data-label="Messages" aria-label="Messages" onClick={() => open("friends")}>
                 <span aria-hidden="true">💬</span>
                 {friends.unread > 0 && <span className="dock__badge">{friends.unread > 9 ? "9+" : friends.unread}</span>}
               </button>
@@ -192,6 +175,11 @@ export default function Dock() {
             <button className="dock__ic dock__ic--asst" data-label="AI Slip Assistant" aria-label="AI Slip Assistant" onClick={() => open("assistant")}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/chatbot-icon.png?v=3" alt="" className="dock__icimg" width={52} height={52} />
+            </button>
+            <button className="dock__ic dock__ic--pigeon" data-label="Message Us" aria-label="Message Us" onClick={() => open("feedback")}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/pigeon.png" alt="" className="dock__icimg" width={52} height={52}
+                style={{ objectPosition: "72% 40%" }} />
             </button>
           </div>
         </div>
