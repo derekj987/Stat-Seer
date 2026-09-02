@@ -218,6 +218,25 @@
     }
   }
 
+  // ---- 9. Split group headers — a capped list rendered as two sub-lists (first N + the rest in a
+  // separate table/details) duplicates a day/group header and strands the collapse control mid-list.
+  // The signature is the same group header appearing twice inside one board. Only visible when the
+  // list is EXPANDED, so expand collapsibles before running (see the skill's pre-step).
+  {
+    const byBoard = new Map();
+    for (const h of document.querySelectorAll(".gday, [class*='dayhdr'], [class*='dayhead'], [class*='dayhdr']")) {
+      if (cap(findings, "split-group")) break;
+      if (!vis(h)) continue;
+      const board = h.closest("[data-embedchart], .hb-panel, .imptable, .daygrid, .hb-body");
+      if (!board) continue;
+      const txt = (h.textContent || "").trim().replace(/\s+/g, " ");
+      if (!txt) continue;
+      let set = byBoard.get(board); if (!set) byBoard.set(board, (set = new Set()));
+      if (set.has(txt)) add("split-group", "medium", h, `group header "${txt.slice(0, 28)}" repeats within one board — a capped list split across two sub-tables (collapse control ends up mid-list)?`);
+      else set.add(txt);
+    }
+  }
+
   const bySev = { high: 0, medium: 0, low: 0 };
   for (const f of findings) bySev[f.severity] = (bySev[f.severity] || 0) + 1;
   return JSON.stringify({

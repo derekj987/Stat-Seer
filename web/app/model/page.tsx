@@ -55,11 +55,18 @@ function bottomLine(e: Env): { spread: string; total: string | null } | null {
   return { spread, total };
 }
 
-function ImpTable({ rows, refs, today, tomorrow }: { rows: Env[]; refs: Awaited<ReturnType<typeof weekRefs>>; today: string; tomorrow: string }) {
+function ImpTable({ rows, refs, today, tomorrow, cap }: { rows: Env[]; refs: Awaited<ReturnType<typeof weekRefs>>; today: string; tomorrow: string; cap?: number }) {
+  // `cap` shows the first N games and marks the rest `hb-row--more`, which the surrounding
+  // hb-moretbl checkbox reveals — all in ONE table so the day headers never split and the
+  // collapse control stays at the bottom (a two-table slice duplicated the day header and
+  // stranded the toggle mid-list). `gi` counts games across day groups to apply the cap.
+  let gi = 0;
   return (
     <div className="imptable" role="table" aria-label="Lines and the model's read">
-      {groupByGameDay(rows, (e) => e.commence, today, tomorrow).map((grp) => (
-        <div key={grp.key}>
+      {groupByGameDay(rows, (e) => e.commence, today, tomorrow).map((grp) => {
+        const groupHidden = cap != null && gi >= cap; // every game in this day group is past the cap
+        return (
+        <div key={grp.key} className={groupHidden ? "hb-row--more" : undefined}>
           <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
           <div className="improw improw--head" role="row">
             <span>game</span><span>spread</span>
@@ -67,10 +74,12 @@ function ImpTable({ rows, refs, today, tomorrow }: { rows: Env[]; refs: Awaited<
             <span className="improw__modh">model total</span>
           </div>
           {grp.items.map((e) => {
+        const rowHidden = cap != null && gi >= cap && !groupHidden;
+        gi++;
         const bl = bottomLine(e);
         const crew = refs.get(e.home);
         return (
-          <div className="impgame" key={e.eventId}>
+          <div className={rowHidden ? "impgame hb-row--more" : "impgame"} key={e.eventId}>
             <div className="improw" role="row">
               <span className="improw__g">
                 {e.away}<span className="at">@</span>{e.home}
@@ -105,7 +114,8 @@ function ImpTable({ rows, refs, today, tomorrow }: { rows: Env[]; refs: Awaited<
         );
       })}
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -335,20 +345,18 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         {scored.length === 0 ? (
           <p className="foot">No lines captured for Week {week} yet.</p>
         ) : (
-          <div className="imp-wrap">
+          <div className="imp-wrap hb-moretbl">
+            <input type="checkbox" id="imp-more" className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
             <p className="imp-scrollhint" aria-hidden="true">
               Swipe for totals <span className="imp-scrollhint__a">→</span>
             </p>
-            <ImpTable rows={scored.slice(0, 4)} refs={refs} today={todayEt} tomorrow={tomorrowEt} />
+            <ImpTable rows={scored} cap={4} refs={refs} today={todayEt} tomorrow={tomorrowEt} />
             {scored.length > 4 && (
-              <details className="hb-showmore">
-                <summary className="hb-showmore__sum">
-                  <span className="hb-showmore__chev" aria-hidden="true">▸</span>
-                  <span className="hb-showmore__more">Show {scored.length - 4} more game{scored.length - 4 === 1 ? "" : "s"}</span>
-                  <span className="hb-showmore__less">Collapse</span>
-                </summary>
-                <ImpTable rows={scored.slice(4)} refs={refs} today={todayEt} tomorrow={tomorrowEt} />
-              </details>
+              <label htmlFor="imp-more" className="hb-moretbl__sum">
+                <span className="hb-more__chev" aria-hidden="true">▸</span>
+                <span className="hb-moretbl__more">Show {scored.length - 4} more game{scored.length - 4 === 1 ? "" : "s"}</span>
+                <span className="hb-moretbl__less">Collapse</span>
+              </label>
             )}
           </div>
         )}

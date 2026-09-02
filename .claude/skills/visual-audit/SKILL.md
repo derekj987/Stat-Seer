@@ -18,7 +18,9 @@ says the right thing) still belong to Derek — the audit only surfaces candidat
 `clipped-text` · `low-contrast-text` (the filled-bar-blank / invisible-text family) ·
 `click-intercepted` (a control covered by an overlay — the "move button doesn't work" family) ·
 `broken-image` · `bubble-overflow` (text spilling past a pill/badge/chip's rounded edge — the mobile
-"text bleeding over bubbles" bug: a small rounded, filled element whose content extent exceeds its box).
+"text bleeding over bubbles" bug: a small rounded, filled element whose content extent exceeds its box) ·
+`split-group` (a day/group header repeats within one board — the signature of a capped list rendered as
+two sub-tables/`<details>`, which duplicates the header and strands the collapse control mid-list).
 Console errors + network 4xx/5xx are collected separately (see step 4).
 
 ### Data-dependent bubble bugs (stress pass)
@@ -44,6 +46,9 @@ that never hold long text. Do this at 320–375px width; overflow appears at the
 2. **Host the probe for the run** so it can be re-fetched per page without re-pasting:
    `cp web/qa/visual-audit.js web/public/__ss_audit.js` — **delete this file before committing.**
 3. **For each page × viewport × theme** in the matrix below:
+   - **Expand collapsibles first** (some bugs — `split-group`, mid-list collapse controls, hidden
+     overflow rows — only show when expanded): before the probe, run
+     `document.querySelectorAll('details:not([open])').forEach(d=>{try{d.open=true}catch{}}); document.querySelectorAll('.hb-moretbl__chk').forEach(c=>{c.checked=true});`
    - `navigate` to the URL, then in `javascript_tool`:
      `await new Promise(r=>setTimeout(r,1500)); JSON.parse(eval(await (await fetch('/__ss_audit.js?v='+Date.now())).text()))`
    - Sizes: `resize_window {width:1440,height:900}` (desktop, exercises the rail gutter),
