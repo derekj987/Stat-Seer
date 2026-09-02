@@ -11,9 +11,9 @@ name: CI
 on:
   push:
     branches: [main, dev]
-    paths: ["web/**", ".github/workflows/ci.yml"]
+    paths: ["web/**", "**.py", "ingest/**", "requirements.txt", ".github/workflows/ci.yml"]
   pull_request:
-    paths: ["web/**", ".github/workflows/ci.yml"]
+    paths: ["web/**", "**.py", "ingest/**", "requirements.txt", ".github/workflows/ci.yml"]
   workflow_dispatch: {}
 
 # A newer push supersedes an in-flight run for the same branch.
@@ -54,3 +54,77 @@ jobs:
       # reported by Dependabot as PRs rather than blocking a deploy.
       - name: Dependency audit (high+)
         run: npm audit --omit=dev --audit-level=high
+
+  # ---------------------------------------------------------------------------
+  # SAST. CodeQL is the obvious choice but it needs GitHub Advanced Security on a
+  # PRIVATE repo, so we use Semgrep OSS with registry rulesets (free, no account).
+  # For the same reason we do NOT upload SARIF to code scanning (also GHAS-gated) —
+  # findings are printed in the log and kept as an artifact.
+  #
+  # NON-BLOCKING for now (continue-on-error): a fresh opinionated ruleset shouldn't wedge
+  # deploys on day one. Review the baseline, tune/ignore what's noise, then drop the flag.
+  sast:
+    name: SAST (Semgrep) — advisory
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet semgrep
+
+      - name: Scan
+        continue-on-error: true
+        run: |
+          semgrep scan \
+            --config=p/typescript \
+            --config=p/react \
+            --config=p/python \
+            --config=p/owasp-top-ten \
+            --exclude=node_modules --exclude=.next --exclude='*.min.js' \
+            --metrics=off --sarif --output=semgrep.sarif
+          semgrep scan \
+            --config=p/typescript --config=p/react --config=p/python --config=p/owasp-top-ten \
+            --exclude=node_modules --exclude=.next --exclude='*.min.js' \
+            --metrics=off || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: semgrep-sarif
+          path: semgrep.sarif
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------------------
+  # Secret scanning. GitHub's native secret scanning is also GHAS-gated on private repos,
+  # so we run gitleaks ourselves. fetch-depth: 0 so it scans full history — a key committed
+  # once is still exposed even if a later commit removed it.
+  # (Checked before enabling: .env / .env.local are gitignored and were never committed;
+  # only .env.example is tracked. So this should start clean.)
+  secrets:
+    name: Secret scan (gitleaks) — advisory
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        continue-on-error: true
+        env:
+          GITLEAKS_VERSION: "8.30.1"
+        run: |
+          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" -o gitleaks.tgz
+          tar -xzf gitleaks.tgz gitleaks
+          ./gitleaks git . --redact --report-format sarif --report-path gitleaks.sarif --exit-code 0 --verbose
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gitleaks-sarif
+          path: gitleaks.sarif
+          if-no-files-found: ignore
