@@ -17,6 +17,7 @@ print-first so we can eyeball the real payload before wiring storage + a model.
 import argparse
 import json
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -26,8 +27,15 @@ import odds_client as oc  # reuse load_env() + ensure_ssl_certs()
 CFBD_BASE = "https://api.collegefootballdata.com"
 
 
-def cfbd_get(path, params, api_key):
-    """One authenticated GET against the CFBD v2 API -> parsed JSON. Raises on non-200."""
+# CFBD sits behind Cloudflare and intermittently returns a 502/503 (or a request hits a network
+# blip). A single such hiccup used to crash the whole nightly refresh — retry transient errors with
+# exponential backoff so one bad moment on their end doesn't fail the run.
+_TRANSIENT = {408, 425, 429, 500, 502, 503, 504}
+
+def cfbd_get(path, params, api_key, retries=4):
+    """One authenticated GET against the CFBD v2 API -> (status, parsed JSON).
+    Retries transient 5xx/429 responses and network errors; on a persistent failure returns a
+    (status, body) tuple (status 0 for network errors) so callers fail cleanly instead of crashing."""
     oc.ensure_ssl_certs()
     url = CFBD_BASE + path + "?" + urllib.parse.urlencode(params)
     req = urllib.request.Request(url, headers={
@@ -35,11 +43,23 @@ def cfbd_get(path, params, api_key):
         "Accept": "application/json",
         "User-Agent": "statseer-cfbd/0.1",
     })
-    try:
-        with urllib.request.urlopen(req, timeout=60) as r:
-            return r.getcode(), json.loads(r.read().decode("utf-8", "replace"))
-    except urllib.error.HTTPError as e:
-        return e.code, e.read().decode("utf-8", "replace")
+    last = (0, "no attempt made")
+    for attempt in range(retries + 1):
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                return r.getcode(), json.loads(r.read().decode("utf-8", "replace"))
+        except urllib.error.HTTPError as e:
+            body = e.read().decode("utf-8", "replace")
+            if e.code in _TRANSIENT and attempt < retries:
+                last = (e.code, body)
+            else:
+                return e.code, body
+        except (urllib.error.URLError, TimeoutError, OSError) as e:
+            if attempt >= retries:
+                return 0, f"network error: {e}"
+            last = (0, f"network error: {e}")
+        time.sleep(min(30.0, 2 ** attempt) + 0.5)  # 1.5, 2.5, 4.5, 8.5s backoff
+    return last
 
 
 def fetch_games(api_key, year, season_type="regular", week=None):
