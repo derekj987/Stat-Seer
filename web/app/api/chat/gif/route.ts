@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { rateLimit, clientIp } from "@/lib/ratelimit";
 
 // GIF search proxy (Tenor). Keeps the key server-side. Degrades gracefully: with no
 // TENOR_API_KEY set, returns an empty list + a flag so the UI can hide the GIF tab.
@@ -9,6 +10,9 @@ export const maxDuration = 15;
 export async function GET(request: Request) {
   const key = process.env.TENOR_API_KEY;
   if (!key) return NextResponse.json({ gifs: [], configured: false });
+
+  // Unauthenticated proxy — throttle per IP so it can't be looped to burn the Tenor quota.
+  if (!(await rateLimit(`gif:${clientIp(request)}`, 30, 60))) return NextResponse.json({ gifs: [], configured: true });
 
   const q = (new URL(request.url).searchParams.get("q") ?? "").slice(0, 80).trim();
   const base = q

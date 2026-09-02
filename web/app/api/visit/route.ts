@@ -8,6 +8,7 @@
 //   3. a signed-in founder (which also stamps the cookie for that device going forward).
 // Manual escape hatch: open /api/visit?exclude=1 on any device to exclude it (…?exclude=0 undoes it).
 import { createClient } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/ratelimit";
 
 const YEAR = 60 * 60 * 24 * 365;
 const setCookie = (on: boolean) =>
@@ -47,6 +48,9 @@ export async function POST(req: Request) {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
   if (!url || !key) return Response.json({ ok: false });
+
+  // Cap per IP so the counter can't be looped to poison the "site visits" metric.
+  if (!(await rateLimit(`visit:${clientIp(req)}`, 10, 60))) return Response.json({ ok: true, skipped: "rate" });
 
   // 1) Device already flagged as the owner's → never count.
   if (hasNoCount(req)) return Response.json({ ok: true, skipped: "device" });
