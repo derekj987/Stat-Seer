@@ -33,10 +33,13 @@ export async function GET() {
 
     if (!isStaff) return NextResponse.json({ friendRequests, betaRequests: 0, reports: 0, isStaff: false });
 
-    const [betaRequests, reports] = await Promise.all([
-      countOf(supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "pending") as unknown as Countable),
-      countOf(supabase.from("reports").select("id", { count: "exact", head: true }).eq("resolved", false) as unknown as Countable),
-    ]);
+    const reports = await countOf(supabase.from("reports").select("id", { count: "exact", head: true }).eq("resolved", false) as unknown as Countable);
+    // Pending-member count via the staff-only definer (profiles.status is no longer client-readable
+    // once roster_privacy_authed.sql is applied); fall back to a direct count until then.
+    let betaRequests = 0;
+    const pc = await supabase.rpc("pending_member_count");
+    if (!pc.error && typeof pc.data === "number") betaRequests = pc.data;
+    else betaRequests = await countOf(supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "pending") as unknown as Countable);
     return NextResponse.json({ friendRequests, betaRequests, reports, isStaff: true });
   } catch {
     return NextResponse.json(empty);

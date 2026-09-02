@@ -15,8 +15,11 @@ export default function Pending() {
     sb.auth.getUser().then(async ({ data }) => {
       if (!data.user) { location.href = "/login"; return; }
       setEmail(data.user.email ?? null);
-      const { data: prof } = await sb.from("profiles").select("status").eq("id", data.user.id).maybeSingle();
-      if (prof?.status === "approved") { location.href = "/nfl"; return; }
+      const ia = await sb.rpc("is_approved", { uid: data.user.id });
+      let approved = false;
+      if (!ia.error && typeof ia.data === "boolean") approved = ia.data;
+      else { const { data: prof } = await sb.from("profiles").select("status").eq("id", data.user.id).maybeSingle(); approved = prof?.status === "approved"; }
+      if (approved) { location.href = "/nfl"; return; }
       // Let the ops inbox know a request is waiting (server sends once, then flags it).
       fetch("/api/beta/notify", { method: "POST" }).catch(() => {});
       setChecking(false);

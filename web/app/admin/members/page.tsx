@@ -32,11 +32,18 @@ export default async function MembersPage() {
     );
   }
 
-  const { data: rows } = await supabase
-    .from("profiles")
-    .select("id, username, status, role, created_at")
-    .order("created_at", { ascending: false });
-  const all = (rows ?? []) as Row[];
+  // status is no longer client-readable once roster_privacy_authed.sql is applied — get the roster via
+  // the staff-only list_members() definer; fall back to a direct read until then.
+  const lm = await supabase.rpc("list_members");
+  let all: Row[];
+  if (!lm.error && Array.isArray(lm.data)) {
+    all = lm.data as Row[];
+  } else {
+    const { data: rows } = await supabase
+      .from("profiles").select("id, username, status, role, created_at")
+      .order("created_at", { ascending: false });
+    all = (rows ?? []) as Row[];
+  }
   const pending = all.filter((r) => r.status === "pending");
   const approved = all.filter((r) => r.status === "approved");
   const rejected = all.filter((r) => r.status === "rejected");

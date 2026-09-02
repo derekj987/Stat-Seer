@@ -39,18 +39,24 @@ export default async function ApprovePage({ searchParams }: { searchParams: Prom
     </Shell>;
   }
 
-  const { data: target } = await supabase.from("profiles").select("username, status").eq("id", m).single();
+  const { data: target } = await supabase.from("profiles").select("username").eq("id", m).single();
   if (!target) {
     return <Shell><h1 className="authcard__h">Member not found</h1><p className="authcard__ok">Check <a href="/admin/members">Beta approvals</a>.</p></Shell>;
   }
+  // status via the staff-only member_status() definer (profiles.status isn't client-readable once
+  // roster_privacy_authed.sql is applied); fall back to a direct read until then.
+  let targetStatus: string | null = null;
+  const ms = await supabase.rpc("member_status", { target: m });
+  if (!ms.error && typeof ms.data === "string") targetStatus = ms.data;
+  else { const { data: s } = await supabase.from("profiles").select("status").eq("id", m).maybeSingle(); targetStatus = (s?.status as string) ?? null; }
 
   return (
     <Shell>
       <h1 className="authcard__h">Approve this member?</h1>
       <p className="authcard__ok">
-        <b>{target.username}</b> requested beta access{target.status === "approved" ? " — already approved ✓" : "."}
+        <b>{target.username}</b> requested beta access{targetStatus === "approved" ? " — already approved ✓" : "."}
       </p>
-      <ApproveConfirm memberId={m} username={target.username} already={target.status === "approved"} />
+      <ApproveConfirm memberId={m} username={target.username} already={targetStatus === "approved"} />
     </Shell>
   );
 }

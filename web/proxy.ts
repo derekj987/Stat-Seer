@@ -70,8 +70,16 @@ export async function proxy(request: NextRequest) {
   // query errors (e.g. the `status` column isn't migrated yet) we let them through,
   // so shipping this before the migration runs can't lock everyone out.
   if (user && !isPendingAllowed(path)) {
-    const { data: prof, error } = await supabase.from("profiles").select("status").eq("id", user.id).maybeSingle();
-    if (!error && prof && prof.status && prof.status !== "approved") {
+    // Prefer the is_approved() definer (profiles.status is no longer client-readable once
+    // roster_privacy_authed.sql is applied); fall back to a direct status read until then.
+    let approved: boolean | null = null;
+    const ia = await supabase.rpc("is_approved", { uid: user.id });
+    if (!ia.error && typeof ia.data === "boolean") approved = ia.data;
+    else {
+      const { data: prof, error } = await supabase.from("profiles").select("status").eq("id", user.id).maybeSingle();
+      if (!error && prof && prof.status) approved = prof.status === "approved";
+    }
+    if (approved === false) {   // null = couldn't determine → fail OPEN (as before)
       const pending = request.nextUrl.clone();
       pending.pathname = "/pending";
       pending.search = "";

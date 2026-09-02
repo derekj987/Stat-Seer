@@ -13,11 +13,20 @@ export async function POST() {
     const { data } = await supabase.auth.getUser();
     if (data.user) {
       user = { id: data.user.id, email: data.user.email ?? undefined };
-      const { data: prof } = await supabase.from("profiles").select("username, status, request_notified").eq("id", data.user.id).single();
-      if (!prof || prof.status !== "pending" || prof.request_notified) {
+      // status + request_notified are no longer client-readable once roster_privacy_authed.sql is
+      // applied — read them via the my_beta_state() definer (fall back to a direct read until then).
+      let status: string | null = null, requestNotified = false;
+      const st = await supabase.rpc("my_beta_state");
+      if (!st.error && Array.isArray(st.data) && st.data[0]) { status = st.data[0].status ?? null; requestNotified = !!st.data[0].request_notified; }
+      else {
+        const { data: bs } = await supabase.from("profiles").select("status, request_notified").eq("id", data.user.id).maybeSingle();
+        status = bs?.status ?? null; requestNotified = !!bs?.request_notified;
+      }
+      if (status !== "pending" || requestNotified) {
         return NextResponse.json({ ok: true, sent: false });
       }
-      const username = (prof.username as string) || "a new member";
+      const { data: prof } = await supabase.from("profiles").select("username").eq("id", data.user.id).single();
+      const username = (prof?.username as string) || "a new member";
       const sig = signApprove(user.id);
       const approveLink = sig ? `${SITE_URL}/admin/approve?m=${user.id}&exp=${sig.exp}&t=${sig.token}` : "";
       const email = user.email || "(no email on file)";
