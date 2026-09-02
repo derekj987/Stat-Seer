@@ -14,7 +14,7 @@ const fmt = new Intl.DateTimeFormat("en-US", {
 });
 const when = (iso: string) => fmt.format(new Date(iso)) + " ET";
 
-type Row = { id: string; username: string; status: string; role: string; created_at: string };
+type Row = { id: string; username: string; status: string; role: string; created_at: string; first_name?: string | null; referral?: string | null };
 
 export default async function MembersPage() {
   const supabase = await createClient();
@@ -63,8 +63,8 @@ export default async function MembersPage() {
           {pending.map((r) => (
             <div key={r.id} className="memberrow">
               <div className="memberrow__main">
-                <span className="memberrow__name">{r.username}</span>
-                <span className="memberrow__meta">requested {when(r.created_at)}</span>
+                <span className="memberrow__name">{r.first_name || r.username}{r.first_name && <span className="memberrow__role"> · @{r.username}</span>}</span>
+                <span className="memberrow__meta">requested {when(r.created_at)}{r.referral ? ` · heard via ${r.referral}` : ""}</span>
               </div>
               <MemberActions id={r.id} username={r.username} status={r.status} />
             </div>

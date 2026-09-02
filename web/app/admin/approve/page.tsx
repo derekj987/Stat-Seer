@@ -39,24 +39,33 @@ export default async function ApprovePage({ searchParams }: { searchParams: Prom
     </Shell>;
   }
 
-  const { data: target } = await supabase.from("profiles").select("username").eq("id", m).single();
-  if (!target) {
+  // Signup detail (username, status, first_name, referral) via the staff-only member_detail() definer;
+  // fall back to a direct read of the public columns + member_status() until the migrations are applied.
+  let username = "", targetStatus: string | null = null, firstName: string | null = null, referral: string | null = null, found = false;
+  const md = await supabase.rpc("member_detail", { target: m });
+  if (!md.error && Array.isArray(md.data) && md.data[0]) {
+    const d = md.data[0]; username = d.username ?? ""; targetStatus = d.status ?? null; firstName = d.first_name ?? null; referral = d.referral ?? null; found = true;
+  } else {
+    const { data: t } = await supabase.from("profiles").select("username").eq("id", m).maybeSingle();
+    if (t) {
+      found = true; username = (t.username as string) ?? "";
+      const ms = await supabase.rpc("member_status", { target: m });
+      if (!ms.error && typeof ms.data === "string") targetStatus = ms.data;
+      else { const { data: s } = await supabase.from("profiles").select("status").eq("id", m).maybeSingle(); targetStatus = (s?.status as string) ?? null; }
+    }
+  }
+  if (!found) {
     return <Shell><h1 className="authcard__h">Member not found</h1><p className="authcard__ok">Check <a href="/admin/members">Beta approvals</a>.</p></Shell>;
   }
-  // status via the staff-only member_status() definer (profiles.status isn't client-readable once
-  // roster_privacy_authed.sql is applied); fall back to a direct read until then.
-  let targetStatus: string | null = null;
-  const ms = await supabase.rpc("member_status", { target: m });
-  if (!ms.error && typeof ms.data === "string") targetStatus = ms.data;
-  else { const { data: s } = await supabase.from("profiles").select("status").eq("id", m).maybeSingle(); targetStatus = (s?.status as string) ?? null; }
 
   return (
     <Shell>
       <h1 className="authcard__h">Approve this member?</h1>
       <p className="authcard__ok">
-        <b>{target.username}</b> requested beta access{targetStatus === "approved" ? " — already approved ✓" : "."}
+        <b>{firstName ? `${firstName} (@${username})` : `@${username}`}</b> requested beta access{targetStatus === "approved" ? " — already approved ✓" : "."}
       </p>
-      <ApproveConfirm memberId={m} username={target.username} already={targetStatus === "approved"} />
+      {referral && <p className="authcard__sub">Heard about StatSeer via: <b>{referral}</b></p>}
+      <ApproveConfirm memberId={m} username={username} already={targetStatus === "approved"} />
     </Shell>
   );
 }

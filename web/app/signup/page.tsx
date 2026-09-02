@@ -7,6 +7,8 @@ import { GoogleButton } from "../GoogleAuth";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [referral, setReferral] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [over21, setOver21] = useState(false);
@@ -39,6 +41,8 @@ export default function SignUp() {
         // row from this metadata): which legal version, when they agreed, and the device.
         data: {
           username,
+          first_name: firstName.trim().slice(0, 60),
+          referral: referral.trim().slice(0, 200),
           legal_version: LEGAL_VERSION,
           consent_at: new Date().toISOString(),
           user_agent: (navigator.userAgent || "").slice(0, 300),
@@ -82,6 +86,10 @@ export default function SignUp() {
             <GoogleButton label="Sign up with Google" disabled={!over21 || !betaOk}
               onBlocked={() => { setStatus("error"); setMsg("Please check both boxes above first."); }} />
             <form onSubmit={submit} className="authform">
+              <label className="authfield">First name
+                <input value={firstName} onChange={(e) => setFirstName(e.target.value)}
+                  autoComplete="given-name" placeholder="so we know who's requesting" maxLength={60} required />
+              </label>
               <label className="authfield">Username
                 <input value={username} onChange={(e) => setUsername(e.target.value)}
                   autoComplete="username" placeholder="how you'll show up in the forum" required />
@@ -93,6 +101,10 @@ export default function SignUp() {
               <label className="authfield">Password
                 <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
                   autoComplete="new-password" minLength={8} required />
+              </label>
+              <label className="authfield">How did you hear about us?
+                <input value={referral} onChange={(e) => setReferral(e.target.value)}
+                  placeholder="a friend, Reddit, X, a group chat…" maxLength={200} required />
               </label>
               {msg && <p className="authcard__err">{msg}</p>}
               <button type="submit" className="btn btn--primary authbtn" disabled={status === "loading"}>
