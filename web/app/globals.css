@@ -3816,7 +3816,11 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
    transparent; once you scroll past the hero it fades to the solid surface (.snav--solid,
    toggled from SiteNav) so links stay readable over page content. */
 body:has(.lp-hero) .snav{position:fixed;top:0;left:0;right:0;z-index:60;
-  background:transparent;box-shadow:none;border-bottom:0;transition:background .25s ease,box-shadow .25s ease,border-color .25s ease}
+  box-shadow:none;border-bottom:0;transition:background .25s ease,box-shadow .25s ease,border-color .25s ease}
+/* Force the transparent background in the not-solid state (matching the !important on the cream
+   text below). Without this the base .snav{background:var(--surface)} could win under some CSS
+   orderings and leave cream nav text on a light bar — see the not-solid text rules. */
+body:has(.lp-hero) .snav:not(.snav--solid){background:transparent!important}
 body:has(.lp-hero) .snav.snav--solid{background:var(--surface);border-bottom:1px solid var(--line);box-shadow:0 2px 12px rgba(0,0,0,.14)}
 body:has(.lp-hero) .sportstrip{display:none}
 /* The white nav wordmark + tagline are dropped on the landing page — the gold hero
