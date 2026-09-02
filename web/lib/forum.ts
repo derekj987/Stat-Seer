@@ -24,6 +24,12 @@ export interface ReplyRow {
   id: string; body: string; createdAt: string; authorId: string; author: Author | null;
 }
 
+// Any value interpolated into a pg() path MUST be validated/encoded: pg() runs with the SERVICE KEY,
+// so an injected `&select=…` bypasses RLS *and* the column grants (it could alias back the profiles
+// columns roster_privacy_authed.sql hides). UUID-shaped ids are the only thing we splice in.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export const isUuid = (s: string): boolean => UUID_RE.test(s);
+
 export async function pg(path: string): Promise<Record<string, unknown>[]> {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
@@ -58,8 +64,9 @@ export async function listThreads(section: string): Promise<ThreadRow[]> {
 }
 
 export async function getThread(id: string): Promise<ThreadFull | null> {
+  if (!isUuid(id)) return null;
   const rows = await pg(
-    `threads?id=eq.${id}&select=id,section,title,body,created_at,author_id,author:profiles(username,role,title)&limit=1`,
+    `threads?id=eq.${encodeURIComponent(id)}&select=id,section,title,body,created_at,author_id,author:profiles(username,role,title)&limit=1`,
   );
   const r = rows[0];
   if (!r) return null;
@@ -125,8 +132,9 @@ export async function listReports(): Promise<ReportItem[]> {
 }
 
 export async function getReplies(threadId: string): Promise<ReplyRow[]> {
+  if (!isUuid(threadId)) return [];
   const rows = await pg(
-    `replies?thread_id=eq.${threadId}&select=id,body,created_at,author_id,author:profiles(username,role,title)&order=created_at.asc&limit=1000`,
+    `replies?thread_id=eq.${encodeURIComponent(threadId)}&select=id,body,created_at,author_id,author:profiles(username,role,title)&order=created_at.asc&limit=1000`,
   );
   return rows.map((r) => ({
     id: r.id as string,

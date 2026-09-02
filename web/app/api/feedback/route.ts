@@ -57,9 +57,12 @@ export async function POST(req: Request) {
       }),
     });
     if (res.ok) return NextResponse.json({ ok: true, emailed: true });
-    const detail = await res.text().catch(() => "");
-    return NextResponse.json({ ok: true, emailed: false, reason: "resend-rejected", status: res.status, detail, from });
+    // Log provider detail server-side only — this route is unauthenticated, so echoing the Resend
+    // response body / sender identity to the caller discloses config state.
+    console.error("[feedback] resend rejected", res.status, await res.text().catch(() => ""));
+    return NextResponse.json({ ok: true, emailed: false });
   } catch (e) {
-    return NextResponse.json({ ok: true, emailed: false, reason: "fetch-threw", err: String(e) });
+    console.error("[feedback] send failed", e);
+    return NextResponse.json({ ok: true, emailed: false });
   }
 }

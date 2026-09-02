@@ -24,7 +24,8 @@ export default function Login() {
     if (error) { setStatus("error"); setMsg(error.message); return; }
     // Return the member to the page they were gated from (?next=/...), else the community.
     const next = new URLSearchParams(window.location.search).get("next");
-    router.push(next && next.startsWith("/") && !next.startsWith("//") ? next : "/forum");
+    // Reject "//evil.com" and "/\evil.com" (the URL parser normalizes the latter to //evil.com).
+    router.push(next && next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\") ? next : "/forum");
     router.refresh();
   }
 

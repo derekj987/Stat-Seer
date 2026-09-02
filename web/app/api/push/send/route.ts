@@ -42,14 +42,19 @@ export async function POST(request: Request) {
   const conversationId = String(body?.conversationId ?? "");
   const title = String(body?.title ?? "New message").slice(0, 80);
   const preview = String(body?.body ?? "").slice(0, 140);
-  if (!conversationId) return NextResponse.json({ ok: false }, { status: 400 });
+  // Must be UUID-shaped: this path runs with the SERVICE KEY, so an unvalidated value could inject
+  // extra PostgREST params and corrupt the membership check this route authorizes on.
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(conversationId)) {
+    return NextResponse.json({ ok: false }, { status: 400 });
+  }
+  const cid = encodeURIComponent(conversationId), sid = encodeURIComponent(senderId);
 
   // The sender must be a member of the conversation.
-  const meRes = await pg(`conversation_members?conversation_id=eq.${conversationId}&user_id=eq.${senderId}&select=user_id`);
+  const meRes = await pg(`conversation_members?conversation_id=eq.${cid}&user_id=eq.${sid}&select=user_id`);
   if (!meRes.ok || !((await meRes.json()) as unknown[]).length) return NextResponse.json({ ok: false }, { status: 403 });
 
   // Everyone else in the conversation.
-  const otherRes = await pg(`conversation_members?conversation_id=eq.${conversationId}&user_id=neq.${senderId}&select=user_id`);
+  const otherRes = await pg(`conversation_members?conversation_id=eq.${cid}&user_id=neq.${sid}&select=user_id`);
   const others = otherRes.ok ? ((await otherRes.json()) as { user_id: string }[]).map((r) => r.user_id) : [];
   if (!others.length) return NextResponse.json({ ok: true, sent: 0 });
 

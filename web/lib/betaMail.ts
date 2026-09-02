@@ -11,6 +11,13 @@ export const ALERT_TO = process.env.BETA_ALERT_TO || process.env.FEEDBACK_TO || 
 const FROM = process.env.BETA_FROM || process.env.FEEDBACK_FROM || "StatSeer <notify@statseeredge.com>";
 
 /** Service-role client (bypasses RLS) — for reading a member's email + flipping their status. */
+/** Escape user-controlled text before interpolating it into an HTML email body. The username format
+ *  check on the signup page is client-side only, so a crafted signup can otherwise inject markup
+ *  (e.g. a fake "Approve" link) into the ops/approval email. */
+export const esc = (s: unknown): string =>
+  String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+
 export function adminClient() {
   if (!SUPA_URL || !SERVICE) return null;
   return createClient(SUPA_URL, SERVICE, { auth: { persistSession: false } });
@@ -58,7 +65,7 @@ export async function sendWelcomeEmail(memberId: string): Promise<void> {
         "You're in — welcome to StatSeer",
         `<div style="font-family:system-ui,Arial,sans-serif;font-size:15px;line-height:1.6;color:#12261b">
            <h2 style="color:#17794a">You're approved 🎉</h2>
-           <p>Hi ${name}, your StatSeer beta access is live. Just sign in and the full site opens up.</p>
+           <p>Hi ${esc(name)}, your StatSeer beta access is live. Just sign in and the full site opens up.</p>
            <p><a href="${SITE_URL}/login" style="display:inline-block;background:#17794a;color:#fff;text-decoration:none;padding:10px 18px;border-radius:9px;font-weight:700">Sign in to StatSeer</a></p>
            <p style="color:#576a5e;font-size:13px">See the model, find the value, build your dashboard. Have fun — and bet responsibly.</p>
          </div>`,
