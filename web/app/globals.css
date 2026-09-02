@@ -2645,8 +2645,8 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .snav__brand{flex:0 0 auto;padding-left:4px;text-decoration:none;white-space:nowrap;
   font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;font-weight:400;
   font-size:23px;line-height:1;letter-spacing:.02em;color:#6a0f1c}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .snav__brand{color:#a92133}}
-:root[data-theme="dark"] .snav__brand{color:#a92133}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .snav__brand{color:#ec6a7e}}
+:root[data-theme="dark"] .snav__brand{color:#ec6a7e}
 .snav__tagline{flex:0 1 auto;min-width:0;padding-left:8px;white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis;font-family:var(--font-medieval),"Palatino Linotype",Palatino,serif;
   font-size:13px;font-style:italic;letter-spacing:.01em;color:var(--muted)}
