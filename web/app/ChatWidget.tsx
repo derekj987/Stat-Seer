@@ -413,7 +413,7 @@ export default function ChatWidget({ open, onClose, onMeta }:
             {tab !== "groups" && !q && friends.length > 0 && (
               <div className="cw__bubbles" aria-label="Friends — tap to chat">
                 {friends.map((f) => (
-                  <button className="cw__bubble" key={f.id} onClick={() => startWith(f)} title={`Chat with ${f.username}`}>
+                  <button className="cw__fbubble" key={f.id} onClick={() => startWith(f)} title={`Chat with ${f.username}`}>
                     <span className="cw__bubav is-online">
                       {f.username.charAt(0).toUpperCase()}
                       {friendUnread.get(f.id) ? <span className="cw__bubdot">{friendUnread.get(f.id)! > 9 ? "9+" : friendUnread.get(f.id)}</span> : null}
