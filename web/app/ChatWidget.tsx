@@ -62,6 +62,8 @@ export default function ChatWidget({ open, onClose, onMeta }:
   const [chatErr, setChatErr] = useState("");
   const [picked, setPicked] = useState<Set<string>>(new Set());   // group builder (＋)
   const [groupName, setGroupName] = useState("");
+  const [search, setSearch] = useState("");                        // Messenger-style search
+  const [tab, setTab] = useState<"all" | "unread" | "groups">("all");
   // pickers
   const [showEmoji, setShowEmoji] = useState(false);
   const [showGif, setShowGif] = useState(false);
@@ -355,6 +357,21 @@ export default function ChatWidget({ open, onClose, onMeta }:
       if (other) friendUnread.set(other.id, (friendUnread.get(other.id) ?? 0) + c.unread);
     }
   }
+  // Messenger-style unified list: every group chat + every friend (their 1:1), filtered by the
+  // active tab (All / Unread / Groups) and the search box. One row type for both.
+  const totalUnread = convs.reduce((a, c) => a + c.unread, 0);
+  type Row = { key: string; kind: "group" | "friend"; name: string; sub: string; av: string; unread: number; founder?: boolean; conv?: Conv; friend?: Friend };
+  const rows: Row[] = [
+    ...groups.map((c): Row => ({ key: `g-${c.id}`, kind: "group", name: convName(c, me.id), sub: `${c.members.length} members`, av: "👥", unread: c.unread, conv: c })),
+    ...friends.map((f): Row => ({ key: `f-${f.id}`, kind: "friend", name: f.username, sub: "", av: f.username.charAt(0).toUpperCase(), unread: friendUnread.get(f.id) ?? 0, founder: f.role === "founder", friend: f })),
+  ];
+  const q = search.trim().toLowerCase();
+  const listRows = rows.filter((r) => {
+    if (tab === "groups" && r.kind !== "group") return false;
+    if (tab === "unread" && r.unread === 0) return false;
+    if (q && !r.name.toLowerCase().includes(q)) return false;
+    return true;
+  });
 
   return (
     <div className="cw">
@@ -363,7 +380,7 @@ export default function ChatWidget({ open, onClose, onMeta }:
           {view !== "list" ? (
             <button className="cw__back" onClick={() => { setView("list"); setActive(null); setShowEmoji(false); setShowGif(false); }} aria-label="Back">‹</button>
           ) : <span className="cw__hdic" aria-hidden="true">💬</span>}
-          <span className="cw__title">{view === "chat" && active ? convName(active, me.id) : view === "new" ? "New group" : "Friends"}</span>
+          <span className="cw__title">{view === "chat" && active ? convName(active, me.id) : view === "new" ? "New group" : "Chats"}</span>
           {view === "list" && <button className="cw__new" onClick={() => { setView("new"); setChatErr(""); setPicked(new Set()); setGroupName(""); }} title="New group chat">＋</button>}
           <button className="cw__min" onClick={onClose} aria-label="Minimize">–</button>
         </div>
@@ -372,10 +389,46 @@ export default function ChatWidget({ open, onClose, onMeta }:
         {view === "list" && (
           <div className="cw__list">
             {chatErr && <p className="cw__err">{chatErr}</p>}
+
+            {/* Search */}
+            <div className="cw__search">
+              <span className="cw__searchic" aria-hidden="true">🔍</span>
+              <input className="cw__searchin" value={search} onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search chats" aria-label="Search chats" />
+              {search && <button className="cw__searchx" onClick={() => setSearch("")} aria-label="Clear search">✕</button>}
+            </div>
+
+            {/* Filter tabs */}
+            <div className="cw__tabs" role="tablist" aria-label="Filter chats">
+              {(["all", "unread", "groups"] as const).map((t) => (
+                <button key={t} role="tab" aria-selected={tab === t}
+                  className={tab === t ? "cw__tab is-on" : "cw__tab"} onClick={() => setTab(t)}>
+                  {t === "all" ? "All" : t === "unread" ? "Unread" : "Groups"}
+                  {t === "unread" && totalUnread > 0 && <span className="cw__tabn">{totalUnread > 9 ? "9+" : totalUnread}</span>}
+                </button>
+              ))}
+            </div>
+
+            {/* Friend bubbles — tap to chat (hidden while searching or on the Groups tab) */}
+            {tab !== "groups" && !q && friends.length > 0 && (
+              <div className="cw__bubbles" aria-label="Friends — tap to chat">
+                {friends.map((f) => (
+                  <button className="cw__bubble" key={f.id} onClick={() => startWith(f)} title={`Chat with ${f.username}`}>
+                    <span className="cw__bubav is-online">
+                      {f.username.charAt(0).toUpperCase()}
+                      {friendUnread.get(f.id) ? <span className="cw__bubdot">{friendUnread.get(f.id)! > 9 ? "9+" : friendUnread.get(f.id)}</span> : null}
+                    </span>
+                    <span className="cw__bubname">{f.username}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
             {notifPerm === "default" && (
               <button className="cw__notif" onClick={enableNotifs}>🔔 Turn on notifications for new messages</button>
             )}
-            {requests.length > 0 && (
+
+            {requests.length > 0 && tab === "all" && !q && (
               <div className="cw__reqs">
                 <div className="cw__reqh">Friend requests</div>
                 {requests.map((r) => (
@@ -389,30 +442,26 @@ export default function ChatWidget({ open, onClose, onMeta }:
                 ))}
               </div>
             )}
-            {groups.length > 0 && (
-              <>
-                <div className="cw__section">Group chats</div>
-                {groups.map((c) => (
-                  <button className="cw__friend" key={c.id} onClick={() => openConv(c)}>
-                    <span className="cw__avatar" aria-hidden="true">👥</span>
-                    <span className="cw__cvinfo">
-                      <span className="cw__fname">{convName(c, me.id)}</span>
-                      <span className="cw__cvsub">{c.members.length} members</span>
-                    </span>
-                    {c.unread > 0 && <span className="cw__fdot">{c.unread}</span>}
-                  </button>
-                ))}
-              </>
-            )}
-            <div className="cw__section">Friends</div>
-            {friends.length === 0 ? (
-              <p className="cw__empty">Add friends from a member&apos;s profile — then tap one here to chat.</p>
+
+            {/* Unified, filtered chat list */}
+            {listRows.length === 0 ? (
+              <p className="cw__empty">
+                {friends.length === 0
+                  ? "Add friends from a member's profile — then tap one here to chat."
+                  : tab === "unread" ? "No unread chats — you're all caught up ✓"
+                  : tab === "groups" ? "No group chats yet. Tap ＋ above to start one."
+                  : q ? `No chats match “${search}”.`
+                  : "Tap a friend above to start chatting."}
+              </p>
             ) : (
-              friends.map((f) => (
-                <button className="cw__friend" key={f.id} onClick={() => startWith(f)}>
-                  <span className="cw__avatar" aria-hidden="true">{f.username.charAt(0).toUpperCase()}</span>
-                  <span className={f.role === "founder" ? "cw__fname founder" : "cw__fname"}>{f.username}</span>
-                  {friendUnread.get(f.id) ? <span className="cw__fdot">{friendUnread.get(f.id)}</span> : <span className="cw__pick" aria-hidden="true">›</span>}
+              listRows.map((r) => (
+                <button className="cw__friend" key={r.key} onClick={() => (r.kind === "group" ? openConv(r.conv!) : startWith(r.friend!))}>
+                  <span className="cw__avatar" aria-hidden="true">{r.av}</span>
+                  <span className="cw__cvinfo">
+                    <span className={r.founder ? "cw__fname founder" : "cw__fname"}>{r.name}</span>
+                    {r.sub && <span className="cw__cvsub">{r.sub}</span>}
+                  </span>
+                  {r.unread > 0 ? <span className="cw__fdot">{r.unread > 9 ? "9+" : r.unread}</span> : <span className="cw__pick" aria-hidden="true">›</span>}
                 </button>
               ))
             )}
