@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { rateLimit, clientIp } from "@/lib/ratelimit";
 
 // Emails a feedback submission to the team inbox, on top of the Supabase row the widget
 // already writes. Best-effort: if email isn't configured (no RESEND_API_KEY) or the send
@@ -19,11 +20,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "bad request" }, { status: 400 });
   }
 
-  const message = (body.message ?? "").trim();
+  const message = (body.message ?? "").trim().slice(0, 4000);   // cap length (goes into the email body)
   if (!message) return NextResponse.json({ ok: false, error: "empty" }, { status: 400 });
 
-  const email = (body.email ?? "")?.toString().trim() || null;
-  const path = (body.path ?? "")?.toString().trim() || "(unknown page)";
+  // Unauthenticated route that sends email — throttle per IP so it can't be looped into a spam/quota amplifier.
+  if (!(await rateLimit(`fb:${clientIp(req)}`, 5, 3600)))
+    return NextResponse.json({ ok: false, error: "Too many messages — please try again in a bit." }, { status: 429 });
+
+  // Only reuse the submitter's email as reply_to if it's actually a valid address (don't let an
+  // attacker point replies at an arbitrary victim with a malformed value).
+  const rawEmail = (body.email ?? "")?.toString().trim() || null;
+  const email = rawEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail) ? rawEmail.slice(0, 200) : null;
+  const path = (body.path ?? "")?.toString().trim().slice(0, 300) || "(unknown page)";
 
   const key = process.env.RESEND_API_KEY;
   const to = process.env.FEEDBACK_TO || "customerservice@statseer.info";

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isApprovedMember } from "@/lib/supabase/approval";
+import { rateLimit } from "@/lib/ratelimit";
 import { weekRange } from "@/lib/board";
 import { buildCandidates, buildCandidatesNcaaf, buildMenuSlip, combinedAmerican, combinedDecimal, type Candidate, type Sport } from "@/lib/assistant";
 import { toDecimal } from "@/lib/slipPricing";
@@ -43,6 +44,8 @@ export async function POST(request: Request) {
   } catch { /* env not configured */ }
   if (!userId || !supabase) return NextResponse.json({ error: "Please log in to use the slip assistant." }, { status: 401 });
   if (!(await isApprovedMember(supabase, userId))) return NextResponse.json({ error: "Your account is still pending approval." }, { status: 403 });
+  if (!(await rateLimit(`asst:min:${userId}`, 15, 60)) || !(await rateLimit(`asst:day:${userId}`, 200, 86400)))
+    return NextResponse.json({ error: "You're going a bit fast — give it a minute and try again." }, { status: 429 });
 
   const body = await request.json().catch(() => ({}));
   const mode: "menu" | "text" = body?.mode === "text" ? "text" : "menu";
