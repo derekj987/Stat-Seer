@@ -75,6 +75,34 @@ const pkFmt = new Intl.DateTimeFormat("en-US", {
 });
 const kickET = (iso: string) => pkFmt.format(new Date(iso)) + " ET";
 
+// How many PLAYERS (not rows) each market shows before the dropdown. Counted in players because a
+// player usually occupies two rows — his Over and his Under — so a row cap would cut a pair in half.
+const PLAYER_CAP = 3;
+
+/** One market's quote rows. `cont` is recomputed against THIS list, so a segment never opens on a
+ *  blank name: the player label is blanked only when the row above it (in the same segment) is the
+ *  same player. Splitting a pre-computed list would strand a nameless row at the top of the
+ *  dropdown. */
+function QuoteList({ quotes, market, marketLabel, game, has, toggle }: {
+  quotes: Quote[]; market: string; marketLabel: string; game: string;
+  has: (id: string) => boolean; toggle: (l: Leg) => void;
+}) {
+  return (
+    <ul className="propq__list">
+      {quotes.map((q, i) => {
+        const id = `${q.eventId}:${market}:${q.player}:${q.side}:${q.line}`;
+        const cont = i > 0 && quotes[i - 1].player === q.player;
+        return (
+          <li key={`${id}:${i}`}>
+            <PropChip q={q} market={market} marketLabel={marketLabel} game={game}
+              saved={has(id)} cont={cont} onToggle={toggle} />
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 function PropGameCard({ g, open, has, toggle }: {
   g: PropGame; open?: boolean; has: (id: string) => boolean; toggle: (l: Leg) => void;
 }) {
@@ -87,23 +115,33 @@ function PropGameCard({ g, open, has, toggle }: {
         <span className="propgame__meta">{nPlayers} players<span className="propgame__chev">▸</span></span>
       </summary>
       <div className="propgame__body">
-        {g.markets.map((m) => (
-          <div className="propmkt" key={m.market}>
-            <div className="propmkt__label">{m.label}</div>
-            <ul className="propq__list">
-              {m.quotes.map((q, i) => {
-                const id = `${q.eventId}:${m.market}:${q.player}:${q.side}:${q.line}`;
-                const cont = i > 0 && m.quotes[i - 1].player === q.player;
-                return (
-                  <li key={`${id}:${i}`}>
-                    <PropChip q={q} market={m.market} marketLabel={m.label} game={g.matchup}
-                      saved={has(id)} cont={cont} onToggle={toggle} />
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ))}
+        {g.markets.map((m) => {
+          // Split on a PLAYER boundary so a player's Over/Under pair is never separated across the
+          // dropdown. Quotes arrive sorted by player, so filtering preserves the grouping.
+          const players = [...new Set(m.quotes.map((q) => q.player))];
+          const head = new Set(players.slice(0, PLAYER_CAP));
+          const shown = m.quotes.filter((q) => head.has(q.player));
+          const rest = m.quotes.filter((q) => !head.has(q.player));
+          const more = players.length - head.size;
+          return (
+            <div className="propmkt" key={m.market}>
+              <div className="propmkt__label">{m.label}</div>
+              <QuoteList quotes={shown} market={m.market} marketLabel={m.label} game={g.matchup}
+                has={has} toggle={toggle} />
+              {more > 0 && (
+                <details className="hb-showmore">
+                  <summary className="hb-showmore__sum">
+                    <span className="hb-showmore__chev" aria-hidden="true">▸</span>
+                    <span className="hb-showmore__more">Show {more} more player{more === 1 ? "" : "s"}</span>
+                    <span className="hb-showmore__less">Collapse</span>
+                  </summary>
+                  <QuoteList quotes={rest} market={m.market} marketLabel={m.label} game={g.matchup}
+                    has={has} toggle={toggle} />
+                </details>
+              )}
+            </div>
+          );
+        })}
       </div>
     </details>
   );

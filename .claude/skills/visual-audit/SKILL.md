@@ -33,8 +33,26 @@ screen — usually the per-column widths don't cover every column) · `rail-asym
 `rail-uneven-rows` / `rail-overflows` / `rail-overlaps-content` (the side rails — see below) ·
 `stranded-disclosure` (an open "show more" whose Collapse control has content above AND below it) ·
 `chart-header-order` (a chart header's dashboard button isn't hard right, or the scroll tooltip
-drifted past it).
+drifted past it) · `uncapped-long-list` (a long item list with no "show more" control) ·
+`orphaned-continuation` (a grouped list whose first row has a blank leading label).
 Console errors + network 4xx/5xx are collected separately (see step 4).
+
+### Capping a list: count the ENTITY, not the rows
+Every long list caps behind the standard `.hb-showmore` dropdown (chevron · "Show N more X" ·
+"Collapse"). Two rules that are easy to get wrong:
+
+1. **Cap on the entity the reader counts, and split on its boundary.** Value Finder prop markets show
+   the first **3 players**, not the first 3 rows — a player usually occupies two rows (his Over and
+   his Under), so a row cap slices a pair in half and the dropdown opens mid-player. Same idea as
+   `capDayGroups` capping on whole days rather than raw games.
+2. **Recompute the grouping flag per segment.** A grouped list blanks a repeated leading label
+   (`cont = i > 0 && rows[i-1].player === rows[i].player`). If you slice that list across the
+   boundary, the first hidden row keeps its blank and the dropdown opens on a **nameless row**. Build
+   each segment's rows with `cont` computed against *that segment*, never by slicing an
+   already-rendered list. `orphaned-continuation` catches the symptom.
+
+This is the same family as the duplicate-day-header bug: splitting a list is safe only when the thing
+that identifies a row is recomputed for the segment it lands in.
 
 ### Chart headers are arranged in CSS, not per panel
 Every `.hb-bar` chart header must read the same way, app-wide:

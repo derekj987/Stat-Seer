@@ -532,6 +532,46 @@
     }
   }
 
+  // ---- 20. Long item lists must be capped behind the standard dropdown --------
+  // Boards cap a long list and hide the tail behind .hb-showmore. An uncapped list runs the card to
+  // full length and buries everything below it. Player-prop markets cap at 3 PLAYERS (not rows) —
+  // counted in players because a player usually occupies two rows, his Over and his Under.
+  for (const list of document.querySelectorAll(".propq__list, [class*='__list']")) {
+    if (cap(findings, "uncapped-long-list")) break;
+    if (!vis(list)) continue;
+    const items = [...list.children].filter(vis);
+    if (items.length <= 8) continue;                    // short lists need no control
+    // A dropdown anywhere in this list's own block counts as capped.
+    const block = list.parentElement;
+    if (block && block.querySelector(".hb-showmore, .hb-more, .hb-moretbl__chk")) continue;
+    add("uncapped-long-list", "low", list,
+      `${items.length} rows rendered with no "show more" control — should this cap behind the standard dropdown?`);
+  }
+
+  // ---- 21. A split grouped list must not open on a blank label ----------------
+  // Grouped lists blank a repeated leading label (a player's second row). If such a list is later
+  // SPLIT across a "show more" boundary, the first hidden row inherits the blank and the dropdown
+  // opens on a nameless row. `cont` has to be recomputed per segment, not sliced.
+  for (const list of document.querySelectorAll(".propq__list, tbody")) {
+    if (cap(findings, "orphaned-continuation")) break;
+    if (!vis(list)) continue;
+    const rows = [...list.children].filter(vis);
+    if (!rows.length) continue;
+    const lead = rows[0].querySelector(".propq__player, .hb-l, td, span");
+    if (!lead) continue;
+    const txt = (lead.textContent || "").trim();
+    if (txt !== "") continue;
+    // Only a real finding when the list holds more rows that DO have labels — an all-blank column
+    // is a different (intentional) design.
+    if (rows.slice(1).some((r) => {
+      const c = r.querySelector(".propq__player, .hb-l, td, span");
+      return c && (c.textContent || "").trim() !== "";
+    })) {
+      add("orphaned-continuation", "medium", rows[0],
+        "this list's FIRST row has a blank leading label — a grouped list was sliced instead of recomputing the continuation flag per segment");
+    }
+  }
+
   const bySev = { high: 0, medium: 0, low: 0 };
   for (const f of findings) bySev[f.severity] = (bySev[f.severity] || 0) + 1;
   return JSON.stringify({
