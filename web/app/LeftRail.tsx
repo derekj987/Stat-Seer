@@ -1,17 +1,35 @@
 "use client";
 
-// Facebook-style quick-access sidebar down the LEFT margin — on desktop this REPLACES the bottom-
-// right Dock bubble (the Dock is hidden ≥1100px and carries the same tools on phones). Labeled
-// icon+text rows for the member's whole space: Profile, Notifications, My Dashboard, the AI Slip
-// Assistant, Friends, Saved Slips, Chat, and Message Us. It opens the same panels the Dock does via
-// window events, and shows the same online ring + notification counts. Signed-out visitors / embeds
-// don't see it.
+// Facebook-style quick-access sidebars down BOTH margins — on desktop these REPLACE the bottom-right
+// Dock bubble (the Dock is hidden ≥1100px and carries the same tools on phones). Two rails:
+//   • Member Rail (left)   — who you are and who you talk to: Profile, Creator Dashboard, Friends,
+//                            Chat, Notifications.
+//   • Bettor's Rail (right) — what you bet with: My Dashboard, AI Slip Assistant, Saved Slips,
+//                            Bankroll, Message Us.
+// The split only happens ≥1600px, because that's the only width where BOTH 246px gutters fit around
+// the 1120px content column (1120 + 492 = 1612). Below it there is one rail holding every item, so
+// nothing becomes unreachable on a 1440px laptop — the rails merge rather than the tools vanishing.
+// Both rails share the .leftrail class (identical size, padding, border, shadow, scroll behaviour);
+// only the side differs. Signed-out visitors / embeds don't see either.
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 const fire = (name: string) => { try { window.dispatchEvent(new CustomEvent(name)); } catch { /* SSR */ } };
-const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
+
+// True once the viewport is wide enough for a rail on each side. Starts false so the first paint is
+// the safe single-rail layout, then splits after hydration.
+function useWideEnoughForTwoRails(): boolean {
+  const [wide, setWide] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width:1600px)");
+    const sync = () => setWide(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+  return wide;
+}
 
 export default function LeftRail() {
   const [me, setMe] = useState<{ username: string; avatarUrl: string | null; role: string } | null>(null);
@@ -19,6 +37,7 @@ export default function LeftRail() {
   const [awaiting, setAwaiting] = useState<{ friendRequests: number; betaRequests: number; reports: number }>({ friendRequests: 0, betaRequests: 0, reports: 0 });
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement | null>(null);
+  const twoRails = useWideEnoughForTwoRails();
 
   // Identity (username + avatar). Also refreshed live from ChatWidget's broadcast.
   useEffect(() => {
@@ -61,9 +80,9 @@ export default function LeftRail() {
     return () => { alive = false; clearInterval(iv); window.removeEventListener("focus", onFocus); };
   }, [me]);
 
-  // Flag <html> so the CSS only reserves the sidebar column + hides the Dock when a member is
+  // Flag <html> so the CSS only reserves the sidebar columns + hides the Dock when a member is
   // actually signed in (otherwise signed-out visitors get shifted content with no sidebar).
-  // data-home lets the homepage drop the rail below the "Why StatSeer" drawer tab.
+  // data-home lets the homepage drop the rails below the "Why StatSeer" drawer tab.
   const pathname = usePathname();
   useEffect(() => {
     const el = document.documentElement;
@@ -71,6 +90,28 @@ export default function LeftRail() {
     if (me && pathname === "/") el.setAttribute("data-home", "1"); else el.removeAttribute("data-home");
     return () => { el.removeAttribute("data-rail"); el.removeAttribute("data-home"); };
   }, [me, pathname]);
+
+  // On the homepage the rails start 220px down to clear the hero + the "Why StatSeer" drawer tab.
+  // Once you've scrolled past the hero that offset is just dead space above the rail, so flag the
+  // scroll and let the CSS pull the rails up to fill it. rAF-throttled; passive listener.
+  useEffect(() => {
+    if (!me) return;
+    const el = document.documentElement;
+    // Toggling one attribute is cheap enough to do straight from the scroll handler, and the `past`
+    // guard means we only touch the DOM on an actual crossing. Deliberately NOT rAF-throttled:
+    // requestAnimationFrame is paused while the tab is hidden, which would leave the flag stale.
+    let past: boolean | null = null;
+    const apply = () => {
+      const now = window.scrollY > 160;
+      if (now === past) return;
+      past = now;
+      if (now) el.setAttribute("data-scrolled", "1");
+      else el.removeAttribute("data-scrolled");
+    };
+    apply();
+    window.addEventListener("scroll", apply, { passive: true });
+    return () => { window.removeEventListener("scroll", apply); el.removeAttribute("data-scrolled"); };
+  }, [me]);
 
   useEffect(() => {
     if (!notifOpen) return;
@@ -85,8 +126,9 @@ export default function LeftRail() {
 
   const total = unread + awaiting.friendRequests + awaiting.betaRequests + awaiting.reports;
 
-  return (
-    <nav className="leftrail" aria-label="Your space">
+  // ---- Member Rail items: identity + people ---------------------------------
+  const memberItems = (
+    <>
       <a className="leftrail__it leftrail__it--profile" href={`/u/${me.username}`}>
         <span className="leftrail__ic is-online">
           {me.avatarUrl
@@ -146,7 +188,12 @@ export default function LeftRail() {
           </div>
         )}
       </div>
+    </>
+  );
 
+  // ---- Bettor's Rail items: the betting tools -------------------------------
+  const bettorItems = (
+    <>
       <a className="leftrail__it" href="/dashboard">
         <span className="leftrail__ic" aria-hidden="true">🗂️</span><span className="leftrail__lbl">My Dashboard</span>
       </a>
@@ -170,6 +217,29 @@ export default function LeftRail() {
         </span>
         <span className="leftrail__lbl">Message Us</span>
       </button>
-    </nav>
+    </>
+  );
+
+  return (
+    <>
+      <nav className="leftrail leftrail--left" aria-label="Member Rail">
+        <h2 className="leftrail__hd">Member Rail</h2>
+        {memberItems}
+        {/* Narrow desktops get one rail: keep the betting tools here rather than losing them. */}
+        {!twoRails && (
+          <>
+            <hr className="leftrail__rule" />
+            {bettorItems}
+          </>
+        )}
+      </nav>
+
+      {twoRails && (
+        <nav className="leftrail leftrail--right" aria-label="Bettor's Rail">
+          <h2 className="leftrail__hd">Bettor&apos;s Rail</h2>
+          {bettorItems}
+        </nav>
+      )}
+    </>
   );
 }
