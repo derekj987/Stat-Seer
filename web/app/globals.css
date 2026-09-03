@@ -478,35 +478,32 @@ a.cw__fname:hover{text-decoration:underline}
   /* …but once you've scrolled past the hero, that 220px offset is pure dead space above the rail.
      LeftRail flags the scroll; pull the rails back up to the standard offset so they fill it. */
   html[data-rail][data-home][data-scrolled] .leftrail{top:108px;max-height:calc(100vh - 124px)}
-  /* The homepage eyes-banner hero is designed full-bleed; cancel the sidebar column's left padding
-     so it spans edge to edge again (the rail overlays its left edge). */
-  html[data-rail] .lp-hero{margin-left:-284px;width:calc(100% + 284px)}
-  html[data-rail] .dock{display:none}            /* the rails are the desktop launcher */
-  html[data-rail] .siteshift{padding-left:284px} /* reserve the sidebar column so content doesn't overlap */
+  html[data-rail] .dock{display:none}             /* the rails are the desktop launcher */
+  /* BOTH gutters are reserved at every rail width, never just the left one. A left-only gutter
+     centres content in the REMAINING space, which reads as "the whole page shifted right" — it put
+     the content 142px (half the gutter) right of true centre on every page. Symmetric gutters cost
+     some content width below 1688px, but .wrap is a max-width so the column simply narrows and stays
+     CENTRED, which is the thing that was actually complained about. */
+  html[data-rail] .siteshift{padding-left:284px;padding-right:284px}
+  /* The homepage eyes-banner hero is full-bleed, so it has to cancel BOTH gutters (568px total) or
+     it stops short of an edge. */
+  html[data-rail] .lp-hero{margin-left:-284px;margin-right:-284px;width:calc(100% + 568px)}
 }
-/* The left gutter alone centers content in the REMAINING space, which reads as "the whole page
-   shifted right" (content sat 123px — half the gutter — right of true centre). Mirror the gutter on
-   the right so the content column is centred in the VIEWPORT again. Only from 1688px, where there's
-   room to do it without narrowing the 1120px content column (1120 + 2×284 = 1688); below that,
-   reserving both sides would squeeze the content, which is worse than the offset.
-   That reserved right gutter is also where the Bettor's Rail lives — which is why the rail splits at
-   exactly this width and merges back into the Member Rail below it. */
 /* Which copy of the betting tools is shown is decided HERE, not in JS — the two rules below are
    exact complements, so exactly one copy is visible at every width and a resize can never leave the
    tools unreachable. `display:contents` lets the folded-in items sit directly in the rail's flex
-   column, so they keep the same even row gap as everything above them. */
-@media(max-width:1687.98px){
+   column, so they keep the same even row gap as everything above them.
+   The split threshold is 1280px, NOT the 1688px that "1120px content + both gutters" would imply:
+   1120 is a MAX width, so below 1688 the content column just narrows (872px at 1440) rather than
+   overlapping anything. Gating on 1688 meant a 1440px laptop — the common case — never saw the
+   Bettor's Rail at all and the split looked like it had never shipped. At 1280 the content still
+   gets 712px. Below that the rails merge, which is the only band where the merged rail exists. */
+@media(max-width:1279.98px){
   .leftrail--right{display:none!important}
   .leftrail__merged{display:contents}
 }
-@media(min-width:1688px){
+@media(min-width:1280px){
   .leftrail__merged{display:none}
-}
-@media(min-width:1688px){
-  html[data-rail] .siteshift{padding-right:284px}
-  /* The full-bleed hero cancels the LEFT gutter above; once a right gutter exists it has to cancel
-     that too, or it stops 284px short of the right edge. Both sides = 568px of width to add back. */
-  html[data-rail] .lp-hero{margin-right:-284px;width:calc(100% + 568px)}
 }
 
 .dock{position:fixed;right:18px;bottom:18px;z-index:70;display:flex;flex-direction:column;align-items:flex-end;gap:10px}

@@ -62,6 +62,28 @@
     return { r: p[0], g: p[1], b: p[2], a: p[3] == null ? 1 : p[3] };
   };
   function effectiveBg(el) {
+    // A fixed/sticky bar is painted OVER content that is not its ancestor — the transparent site nav
+    // sits above the hero image, which is its SIBLING. Walking ancestors alone therefore reads the
+    // bar's own colour and reports cream-on-white for text that actually renders over a dark photo.
+    // Hit-test what is really stacked underneath instead, and bail if any of it is imagery.
+    for (let a = el; a && a.nodeType === 1; a = a.parentElement) {
+      const pos = getComputedStyle(a).position;
+      if (pos !== "fixed" && pos !== "sticky") continue;
+      const r = el.getBoundingClientRect();
+      if (r.width <= 0 || r.height <= 0) break;
+      // Geometric overlap, NOT elementsFromPoint: the hero banner sets pointer-events:none for its
+      // scrim, so hit-testing walks straight past the image and reports the bar's own colour for
+      // text that actually renders over a dark photo. Overlap doesn't care about pointer events.
+      for (const img of document.querySelectorAll("img,picture,video,canvas,[class*='hero'],[class*='banner']")) {
+        if (img.contains(el) || !vis(img)) continue;
+        const q = img.getBoundingClientRect();
+        if (q.width < 40 || q.height < 20) continue;
+        const over = Math.min(q.right, r.right) - Math.max(q.left, r.left) > 0
+                  && Math.min(q.bottom, r.bottom) - Math.max(q.top, r.top) > 0;
+        if (over) return null;                  // real backdrop is imagery — can't assess
+      }
+      break;
+    }
     let n = el;
     while (n && n.nodeType === 1) {
       const cs = getComputedStyle(n);
@@ -399,7 +421,11 @@
     const R = rails.find((r) => r.classList.contains("leftrail--right"));
     if (L && R) {
       const a = rectOf(L), b = rectOf(R);
-      const leftGap = Math.round(a.left), rightGap = Math.round(vw - b.right);
+      // Measure the right gap against the LAYOUT viewport, not window.innerWidth: innerWidth counts
+      // the classic scrollbar, but a position:fixed rail is laid out inside the scrollbar, so a
+      // correctly mirrored pair reads as ~15px asymmetric on any page long enough to scroll.
+      const layoutW = document.documentElement.clientWidth || vw;
+      const leftGap = Math.round(a.left), rightGap = Math.round(layoutW - b.right);
       if (Math.abs(leftGap - rightGap) > 2) {
         add("rail-asymmetry", "medium", R,
           `rails aren't mirrored: left rail sits ${leftGap}px from the left edge, right rail ${rightGap}px from the right`);

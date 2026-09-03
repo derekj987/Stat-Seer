@@ -66,17 +66,21 @@ gutter, and the width at which the rails split are **one arithmetic chain**; cha
 the others is the failure mode to watch for:
 
 ```
-rail width + 16px offset + clearance = gutter        (230 + 16 + 14 = 260)
-content column + 2 × gutter          = split width   (1120 + 520 = 1640)
+rail width + 16px offset + clearance = gutter   (254 + 16 + 14 = 284)
+BOTH gutters are always reserved (symmetric) so content stays CENTRED; .wrap's 1120px is a max, so
+below 1688px the column simply narrows (872px at 1440). The rails SPLIT at 1280px — do not derive
+that threshold from 1120 + 2×gutter: gating it there hid the right rail on every 1440px laptop.
 ```
 
 So when you resize a rail or its icons, re-check **all** of: `.leftrail{width}`, `.siteshift`
 `padding-left`/`padding-right`, the `.lp-hero` full-bleed cancellations (both sides), the
-`@media(min-width:…)` / `@media(max-width:…)` pair, **and** the `matchMedia` string in
-`LeftRail.tsx` — the CSS threshold and the JS threshold must be the same number, or the rail mounts
-at a width the gutter doesn't cover and paints over the content.
+`@media(min-width:…)` / `@media(max-width:…)` pair, **and** the two complementary
+`@media` blocks that swap `.leftrail--right` for `.leftrail__merged`. That swap is CSS-only on
+purpose: it was once a JS `matchMedia` decision, and a resize that outran the re-render hid the right
+rail while its items had not yet folded back, leaving all five betting tools unreachable. Never move
+that choice back into JS.
 
-Check at desktop, in both the split (≥1640px) and merged (1100–1639px) layouts:
+Check at desktop, in both the split (≥1280px) and merged (1100–1279px) layouts:
 - **Mirrored**: equal width, equal top, equal gap to their own viewport edge.
 - **Evenly spaced**: one row height and one gap for every row — rows size from a shared icon +
   padding pair, so a per-item override is the usual culprit. A merged rail's divider is the one
@@ -198,7 +202,16 @@ Always include: `/` and `/model` at **mobile** (overflow) and one page in **dark
 - **Founder-only UI is hidden**: the mock profile read is empty, so `role` falls back to "member"
   (no Creator Dashboard rail item). Navigate to `/creator` directly to see that page.
 - **Text over background images** can't be contrast-checked (the probe skips it) — a nav/card over a
-  photo won't be assessed either way.
+  photo won't be assessed either way. `effectiveBg` handles the overlay case (a `position:fixed` bar
+  painted over a hero that is its SIBLING, not its ancestor) by testing rect overlap against imagery,
+  deliberately not `elementsFromPoint` — the hero scrim sets `pointer-events:none`, so hit-testing
+  walks straight past it.
+- **Known false positive**: `low-contrast-text` on the homepage nav ("Logged in as <name>", contrast
+  1.08). The cream text is correct — it renders over the dark hero image, confirmed by screenshot. It
+  fires only because the dev preview sometimes keeps a **stale duplicate DOM tree** in which the hero
+  reports `visible:false` with a 0×0 rect, so the overlap check finds no imagery and falls back to the
+  bar's own colour. Tell-tale: query an element like `.leftrail__icimg` and see two copies, one 0×0.
+  When the probe reports something impossible, check for the duplicate tree before believing it.
 - **Dev CSS-ordering quirks**: a contrast/background finding that only appears in dev may not
   reproduce in production — confirm ambiguous ones against the live site before asserting a prod bug.
 - Tune thresholds via `window.__SS_AUDIT_CFG = { rowHeightTol, contrastMin, maxPerType }` before eval.
