@@ -3417,10 +3417,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-form td{font-size:13px;padding:9px 0;border-bottom:1px solid var(--line);white-space:nowrap}
 .hb-form td+td,.hb-form th+th{padding-left:16px}
 .hb-form tbody tr{position:relative}
-/* Cross-division marker on a model number whose FCS side is rated from FCS play + a fitted division
-   offset. Deliberately quiet: it marks PROVENANCE, and the measured error band on those rows is at
-   parity with the FBS rows, so it must not read as a warning. */
-.xdiv{margin-left:3px;font-size:9px;font-weight:700;color:var(--muted);cursor:help}
+
 .hb-form tbody tr:hover td{background:color-mix(in srgb,var(--ink) 4%,transparent)}
 .hb-game{font-weight:700;font-size:14px;border-bottom:1px dotted var(--muted);padding-bottom:1px;cursor:default}
 .hb-at{color:var(--muted);font-weight:400;margin:0 6px}
