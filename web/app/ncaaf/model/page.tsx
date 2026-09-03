@@ -31,14 +31,15 @@ function CardRows({ games, scores }: { games: readonly NcaafCardGame[]; scores?:
             <NcaafGameCell g={g} score={scores ? scoreFor(scores, g.away, g.home) : null} />
             <td className="hb-num">{ms ? `${abbrevTeam(ms.fav)} ${ms.num}` : "—"}</td>
             <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
-            {/* FBS-vs-FCS games belong on the board — the books price them and members bet them —
-                but our rating has no history for an FCS side, so its projection is a floor value.
-                Show the market numbers and withhold OUR number rather than publishing a figure we
-                can't grade: the whole point of the panel is that every read is checkable. */}
+            {/* FCS opponents are now rated from their own results plus a fitted division offset, so
+                these rows carry a real projection (measured 2025 out of sample: MAE 13.9 vs the
+                market's 12.4). `rated` stays the guard for a side we genuinely cannot rate — a team
+                with no game history at all — where the number would be a floor value we can't grade
+                and a dash is the honest answer. */}
             {g.rated === false ? (
               <>
-                <td className="hb-num" title="No FBS rating history for one side (FCS opponent) — we don't publish a projection we can't grade.">—</td>
-                <td className="hb-num" title="No FBS rating history for one side (FCS opponent) — we don't publish a projection we can't grade.">—</td>
+                <td className="hb-num" title="No game history for one side, so we have no rating for it — we don't publish a projection we can't grade.">—</td>
+                <td className="hb-num" title="No game history for one side, so we have no rating for it — we don't publish a projection we can't grade.">—</td>
               </>
             ) : (
               <>

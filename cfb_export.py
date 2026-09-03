@@ -156,6 +156,76 @@ def seed_preseason_prior(final, sp, blend):
     return out
 
 
+def load_fbs_fcs_games(db, start, end):
+    """Completed games where BOTH sides are FBS or FCS, `start`..`end`, oldest first.
+
+    Wider than cp.load_games on purpose: that one requires a CFBD pregame Elo, which exists only for
+    FBS, so it can never rate an FCS team. This sample adds FCS-vs-FCS results plus the ~637
+    FBS-vs-FCS games that provide the CROSS-DIVISION LINKAGE — without those, an FCS-only fit would
+    sit on its own arbitrary scale and be useless next to an FBS rating."""
+    conn = sqlite3.connect(db)
+    rows = conn.execute(
+        """SELECT season, week, home_team, away_team, home_points, away_points, neutral_site
+             FROM games
+            WHERE home_class IN ('fbs','fcs') AND away_class IN ('fbs','fcs')
+              AND home_points IS NOT NULL AND away_points IS NOT NULL
+              AND season BETWEEN ? AND ?
+            ORDER BY season, week""", (start, end)).fetchall()
+    conn.close()
+    return [{"season": s, "week": w or 0, "home": h, "away": a,
+             "margin": hp - ap, "neutral": 1 if neu else 0}
+            for s, w, h, a, hp, ap, neu in rows]
+
+
+def rate_non_fbs(db, start, end, fbs_ratings, hfa):
+    """Ratings for the NON-FBS teams that appear on the board, on the same scale as `fbs_ratings`.
+
+    Additive by construction: the wide fit is anchored by passing the FBS ratings in as the ridge
+    prior, and the caller then lets the FBS values WIN on merge. So every FBS-vs-FBS projection stays
+    bit-identical to the FBS-only fit and the published SU/RMSE/ATS record keeps meaning exactly what
+    it did — this only fills in teams that previously had no rating at all and therefore fell back to
+    the NEWCOMER_R floor (which is why those rows showed an empty model column)."""
+    wide = load_fbs_fcs_games(db, start, end)
+    if not wide:
+        return {}
+    seasons = sorted({g["season"] for g in wide})
+    prior, fitted = dict(fbs_ratings), {}
+    for s in seasons:
+        sg = [g for g in wide if g["season"] == s]
+        fitted, _ = cp.fit_ratings(sg, LAM, CAP, prior)
+        prior = {t: DECAY * r for t, r in fitted.items()}
+        # Re-anchor FBS teams each season so the chain can't drift away from the published rating.
+        prior.update({t: DECAY * r for t, r in fbs_ratings.items()})
+    out = {t: r for t, r in fitted.items() if t not in fbs_ratings}
+
+    # DIVISION OFFSET, fitted from the cross-division results themselves.
+    # Without it the fit under-projects FBS-vs-FCS games by ~23 points: the ridge (CAP margins,
+    # shrinkage) compresses, and an FCS team's rating earned against other FCS teams does not place
+    # it 30+ points below an FBS team, however many games it has. Measured 2025 out of sample:
+    # raw MAE 24.6 -> 13.9 and bias -22.8 -> -3.3, against a market MAE of 12.4. That turns the
+    # column from unpublishable into a real line-blind read that is honestly a shade worse than the
+    # market — the same position the FBS model occupies. Fitted here rather than hardcoded so it
+    # tracks the actual gap as seasons are added.
+    # Fit the offset against the ratings the BOARD actually uses — published FBS values, wide-fit
+    # non-FBS values — not against the wide fit's own FBS numbers. Using the latter measures a
+    # different model than the one that ships and understated the gap (-9.6 vs -15.3 rating pts).
+    board = {**out, **fbs_ratings}
+    resid = []
+    for g in wide:
+        h, a = g["home"], g["away"]
+        h_new, a_new = h in out, a in out
+        if h_new == a_new or h not in board or a not in board:
+            continue                                    # need exactly one non-FBS side
+        m = CARD_SCALE * (board[h] - board[a] + (0.0 if g["neutral"] else hfa))
+        resid.append((m - g["margin"]) * (-1 if h_new else 1))
+    if resid:
+        off_r = statistics.median(resid) / CARD_SCALE
+        out = {t: r + off_r for t, r in out.items()}
+        print("  FCS division offset: %+.1f rating pts (from %d cross-division games)"
+              % (off_r, len(resid)))
+    return out
+
+
 def load_completed(db, season):
     """Completed FBS-vs-FBS games of `season` (scores only, no Elo needed) for the
     in-season rating fit."""
@@ -520,6 +590,12 @@ def main():
     # SP+ seed — e.g. Miami (true ~+16) got floored to -9 and the card read "Stanford -0.7" for a
     # game the market has at Miami -24.5. Keep every seeded team; override only those that have played.
     cur_ratings = {**prior_pre, **cp.fit_ratings(completed, LAM, CAP, prior_pre)[0]} if completed else prior_pre
+    # Rate the FCS opponents too, so FBS-vs-FCS games on the board get a real projection instead of
+    # the NEWCOMER_R floor (an empty model column). FBS values win the merge, so nothing about the
+    # graded FBS-vs-FBS model changes.
+    non_fbs = rate_non_fbs(DB, 2020, last, cur_ratings, hfa)
+    cur_ratings = {**non_fbs, **cur_ratings}
+    print("  rated %d non-FBS opponents from their own results (FBS ratings untouched)" % len(non_fbs))
     preseason_seeded = bool(sp) and not completed
     card_week = detect_upcoming_week(DB, CARD_SEASON, CARD_WEEK)
     top_set = {t for t, _ in sorted(final.items(), key=lambda kv: kv[1], reverse=True)[:25]}
