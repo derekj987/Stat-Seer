@@ -290,6 +290,36 @@
     }
   }
 
+  // ---- 13. Repeated row label — the "double names" bug ------------------------
+  // Consecutive rows whose FIRST cell repeats the same text read as duplicated rows even when the
+  // rest of the row differs (the Value Finder props board showed a player's Over and Under rows with
+  // his name on both). Fix is to group: blank the label on the continuation row. Only flagged when
+  // the rows genuinely differ elsewhere — identical rows are a real duplicate, not a grouping miss.
+  {
+    const containers = new Set();
+    for (const r of document.querySelectorAll("tbody, ul, ol, [class*='__list'], [class*='rows']")) {
+      if (vis(r)) containers.add(r);
+    }
+    for (const c of containers) {
+      if (cap(findings, "repeated-row-label")) break;
+      const rows = [...c.children].filter(vis);
+      if (rows.length < 2) continue;
+      const labelOf = (row) => {
+        const cell = row.querySelector("td,th,li,span,div");
+        return cell ? (cell.textContent || "").trim() : "";
+      };
+      const fullOf = (row) => (row.textContent || "").replace(/\s+/g, " ").trim();
+      for (let i = 1; i < rows.length; i++) {
+        const a = labelOf(rows[i - 1]), b = labelOf(rows[i]);
+        if (!b || a !== b) continue;
+        if (fullOf(rows[i - 1]) === fullOf(rows[i])) continue;   // truly identical row — different bug
+        add("repeated-row-label", "medium", rows[i],
+          `row label "${b.slice(0, 28)}" repeats on consecutive rows that otherwise differ — group it (blank the continuation) so it doesn't read as a duplicate`);
+        break;   // one finding per container is enough
+      }
+    }
+  }
+
   const bySev = { high: 0, medium: 0, low: 0 };
   for (const f of findings) bySev[f.severity] = (bySev[f.severity] || 0) + 1;
   return JSON.stringify({

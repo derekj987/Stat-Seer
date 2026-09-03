@@ -24,7 +24,8 @@ two sub-tables/`<details>`, which duplicates the header and strands the collapse
 `off-center-content` (a fixed sidebar reserved via padding centres content in the REMAINING space, so
 the page reads as "shifted right") · `grid-dead-space` (`repeat(auto-fill, …)` keeps empty tracks when
 items < columns, leaving a block of dead space — `auto-fit` collapses them) ·
-`chart-truncated-with-space` (a cell ellipsizes its text while its row still has unused width).
+`chart-truncated-with-space` (a cell ellipsizes its text while its row still has unused width) ·
+`repeated-row-label` (consecutive rows repeat the same first-cell text — the "double names" bug).
 Console errors + network 4xx/5xx are collected separately (see step 4).
 
 ### ⚠️ Chart changes ALWAYS get an alignment pass
@@ -35,9 +36,22 @@ shipping** — don't wait for the periodic audit. Check, at desktop AND mobile:
   tracks) and `object-fit: contain` media that shrinks inside an over-wide box.
 - **No truncation while space is available** — an ellipsized name next to an empty gap is the tell.
 - **Column order/pairing still reads correctly** (e.g. market pair then model pair).
+- **Double names / repeated row labels.** Consecutive rows repeating the same leading label (a player
+  name on both his Over and Under rows) read as duplicated data. The fix is to GROUP — blank the label
+  on the continuation row (`cont = i > 0 && rows[i-1].player === row.player`), the way the Model chart
+  stacks a player's markets. Give the stacked rows a column that says what distinguishes them (a
+  `Prop`/side column); without one the reader has to infer it from the units.
 - Repeated-looking rows are often legitimate pairs (Over/Under on the same player). Before "fixing a
   duplicate", confirm whether the rows differ by side/line/book — widening the column usually reveals
-  they were never duplicates, just unreadable.
+  they were never duplicates, just unreadable. Delete a row only if it is byte-identical to its
+  neighbour; otherwise group, don't remove (each side is a separately bettable price).
+
+### Check the reported tab/filter, not just the default view
+Boards are often category- or week-scoped by URL (`/props?cat=passing`, `?week=N`, sport tabs). A bug
+reported on one tab will NOT reproduce on the default one — `/props` defaults to Touchdowns (one row
+per player, no pairs), so the double-name bug was invisible there and only appeared under
+`?cat=passing`. Always reproduce on the exact URL/tab the report came from, then spot-check the
+sibling tabs before calling it fixed.
 
 ### Mobile-specific checks
 Several bugs only appear on a phone. At 375px (and 320px), verify:
