@@ -26,8 +26,8 @@ interface Leg {
   fairProb?: number | null;
 }
 
-function PropChip({ q, market, marketLabel, game, saved, onToggle }: {
-  q: Quote; market: string; marketLabel: string; game: string; saved: boolean; onToggle: (l: Leg) => void;
+function PropChip({ q, market, marketLabel, game, saved, cont, onToggle }: {
+  q: Quote; market: string; marketLabel: string; game: string; saved: boolean; cont?: boolean; onToggle: (l: Leg) => void;
 }) {
   const bet = marketLabel === "ATTD" ? "ATTD" : sideLabel(q.side, q.line) || q.side;
   const name = q.slot ? `${q.player} (${q.slot})` : q.player;
@@ -45,7 +45,10 @@ function PropChip({ q, market, marketLabel, game, saved, onToggle }: {
       aria-pressed={saved}
       title={saved ? "Remove from slip" : "Add to slip"}
     >
-      <span className="propq__player">{q.player}{q.slot && <span className="propq__slot"> ({q.slot})</span>}</span>
+      {/* `cont` = the Over/Under partner of the row above. Blanking the repeated name (the same way
+          the Model chart stacks a player's markets) makes the pair read as one player with two
+          sides, instead of looking like a duplicated row. */}
+      <span className="propq__player">{cont ? "" : <>{q.player}{q.slot && <span className="propq__slot"> ({q.slot})</span>}</>}</span>
       <span className="propq__side">{sideLabel(q.side, q.line)}</span>
       <span className="propq__price">
         {fmtOdds(q.price)}
@@ -87,10 +90,11 @@ function PropGameCard({ g, open, has, toggle }: {
             <ul className="propq__list">
               {m.quotes.map((q, i) => {
                 const id = `${q.eventId}:${m.market}:${q.player}:${q.side}:${q.line}`;
+                const cont = i > 0 && m.quotes[i - 1].player === q.player;
                 return (
                   <li key={`${id}:${i}`}>
                     <PropChip q={q} market={m.market} marketLabel={m.label} game={g.matchup}
-                      saved={has(id)} onToggle={toggle} />
+                      saved={has(id)} cont={cont} onToggle={toggle} />
                   </li>
                 );
               })}
