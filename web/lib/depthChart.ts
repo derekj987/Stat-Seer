@@ -399,7 +399,7 @@ export const DEPTH: Record<string, DepthEntry> = {
   'isaiah williams': { team: 'NYJ', pos: 'WR', rank: 4 },
   'isaiah winstead': { team: 'PIT', pos: 'WR', rank: 12 },
   'isaiah wooden': { team: 'CLE', pos: 'WR', rank: 11 },
-  'isiah pacheco': { team: 'DET', pos: 'RB', rank: 5 },
+  'isiah pacheco': { team: 'DET', pos: 'RB', rank: 4 },
   'israel abanikanda': { team: 'DAL', pos: 'RB', rank: 5 },
   'j michael sturdivant': { team: 'GB', pos: 'WR', rank: 6 },
   'jabari small': { team: 'DET', pos: 'RB', rank: 4 },
