@@ -4,10 +4,10 @@
 // Dock bubble (the Dock is hidden ≥1100px and carries the same tools on phones). Two rails:
 //   • Member Rail (left)   — who you are and who you talk to: Profile, Creator Dashboard, Friends,
 //                            Chat, Notifications.
-//   • Bettor's Rail (right) — what you bet with: My Dashboard, AI Slip Assistant, Saved Slips,
+//   • Bettor's Rail (right) — what you bet with: My Analytics, AI Slip Assistant, Saved Slips,
 //                            Bankroll, Message Us.
-// The split only happens ≥1600px, because that's the only width where BOTH 246px gutters fit around
-// the 1120px content column (1120 + 492 = 1612). Below it there is one rail holding every item, so
+// The split only happens ≥1640px, because that's the only width where BOTH 260px gutters fit around
+// the 1120px content column (1120 + 520 = 1640). Below it there is one rail holding every item, so
 // nothing becomes unreachable on a 1440px laptop — the rails merge rather than the tools vanishing.
 // Both rails share the .leftrail class (identical size, padding, border, shadow, scroll behaviour);
 // only the side differs. Signed-out visitors / embeds don't see either.
@@ -17,27 +17,12 @@ import { createClient } from "@/lib/supabase/client";
 
 const fire = (name: string) => { try { window.dispatchEvent(new CustomEvent(name)); } catch { /* SSR */ } };
 
-// True once the viewport is wide enough for a rail on each side. Starts false so the first paint is
-// the safe single-rail layout, then splits after hydration.
-function useWideEnoughForTwoRails(): boolean {
-  const [wide, setWide] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width:1600px)");
-    const sync = () => setWide(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-  return wide;
-}
-
 export default function LeftRail() {
   const [me, setMe] = useState<{ username: string; avatarUrl: string | null; role: string } | null>(null);
   const [unread, setUnread] = useState(0);
   const [awaiting, setAwaiting] = useState<{ friendRequests: number; betaRequests: number; reports: number }>({ friendRequests: 0, betaRequests: 0, reports: 0 });
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement | null>(null);
-  const twoRails = useWideEnoughForTwoRails();
 
   // Identity (username + avatar). Also refreshed live from ChatWidget's broadcast.
   useEffect(() => {
@@ -93,7 +78,7 @@ export default function LeftRail() {
 
   // On the homepage the rails start 220px down to clear the hero + the "Why StatSeer" drawer tab.
   // Once you've scrolled past the hero that offset is just dead space above the rail, so flag the
-  // scroll and let the CSS pull the rails up to fill it. rAF-throttled; passive listener.
+  // scroll and let the CSS pull the rails up to fill it. Passive listener.
   useEffect(() => {
     if (!me) return;
     const el = document.documentElement;
@@ -195,7 +180,7 @@ export default function LeftRail() {
   const bettorItems = (
     <>
       <a className="leftrail__it" href="/dashboard">
-        <span className="leftrail__ic" aria-hidden="true">🗂️</span><span className="leftrail__lbl">My Dashboard</span>
+        <span className="leftrail__ic" aria-hidden="true">🗂️</span><span className="leftrail__lbl">My Analytics</span>
       </a>
       <button type="button" className="leftrail__it" onClick={() => fire("ss:open-assistant")}>
         <span className="leftrail__ic leftrail__ic--asst" aria-hidden="true">
@@ -225,21 +210,23 @@ export default function LeftRail() {
       <nav className="leftrail leftrail--left" aria-label="Member Rail">
         <h2 className="leftrail__hd">Member Rail</h2>
         {memberItems}
-        {/* Narrow desktops get one rail: keep the betting tools here rather than losing them. */}
-        {!twoRails && (
-          <>
-            <hr className="leftrail__rule" />
-            {bettorItems}
-          </>
-        )}
+        {/* Narrow desktops get ONE rail, so the betting tools fold back in here. Which copy shows is
+            decided purely by CSS (.leftrail__merged vs .leftrail--right) rather than by a JS media
+            query: a JS decision has to survive hydration AND every resize, and when it lags, the
+            CSS hides the right rail while the items have not yet folded back — leaving all five
+            tools unreachable, with the Dock hidden too. Rendering both copies cannot get out of
+            sync. The duplicate is five stateless buttons; the stateful item (Notifications, with its
+            popup + ref) lives in memberItems, which is rendered exactly once. */}
+        <div className="leftrail__merged">
+          <hr className="leftrail__rule" />
+          {bettorItems}
+        </div>
       </nav>
 
-      {twoRails && (
-        <nav className="leftrail leftrail--right" aria-label="Bettor's Rail">
-          <h2 className="leftrail__hd">Bettor&apos;s Rail</h2>
-          {bettorItems}
-        </nav>
-      )}
+      <nav className="leftrail leftrail--right" aria-label="Bettor's Rail">
+        <h2 className="leftrail__hd">Bettor&apos;s Rail</h2>
+        {bettorItems}
+      </nav>
     </>
   );
 }

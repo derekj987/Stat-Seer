@@ -429,16 +429,18 @@ a.cw__fname:hover{text-decoration:underline}
    Dock (≥1100px, where the centered content leaves room); phones keep the Dock. Labeled icon+text
    rows for the member's space. */
 .leftrail{display:none}
-.leftrail__it{position:relative;display:flex;align-items:center;gap:11px;width:100%;padding:6px 10px;border:0;background:none;
-  border-radius:11px;cursor:pointer;text-decoration:none;text-align:left;font:inherit;font-size:13.5px;font-weight:700;color:var(--ink)}
+/* Row height is driven entirely by the icon + this padding, and every row uses the same pair, so the
+   rows stay evenly spaced as the icons grow — there is one row height, not one per item type. */
+.leftrail__it{position:relative;display:flex;align-items:center;gap:12px;width:100%;padding:9px 10px;border:0;background:none;
+  border-radius:12px;cursor:pointer;text-decoration:none;text-align:left;font:inherit;font-size:14px;font-weight:700;color:var(--ink)}
 .leftrail__it:hover{background:var(--accent-soft)}
-.leftrail__ic{width:36px;height:36px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;font-size:18px;
+.leftrail__ic{width:46px;height:46px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;font-size:23px;
   background:var(--surface-2);border:1px solid var(--line)}
 .leftrail__it--profile .leftrail__ic{padding:0;overflow:hidden}
 .leftrail__av{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.leftrail__ini{font-weight:800;color:var(--accent);font-size:17px}
+.leftrail__ini{font-weight:800;color:var(--accent);font-size:21px}
 .leftrail__ic--asst{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
-.leftrail__icimg{width:26px;height:26px;object-fit:contain}
+.leftrail__icimg{width:34px;height:34px;object-fit:contain}
 .leftrail__ic--pigeon{overflow:hidden;padding:0}
 .leftrail__pigeon{width:100%;height:100%;object-fit:cover;object-position:62% 38%}
 .leftrail__lbl{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1 1 auto}
@@ -449,7 +451,9 @@ a.cw__fname:hover{text-decoration:underline}
 /* Rail headings use the homepage section-title style (.hb-bar__title): accent green, 800, uppercase. */
 .leftrail__hd{margin:1px 2px 6px;font-size:13.5px;font-weight:800;letter-spacing:.05em;
   text-transform:uppercase;color:var(--accent)}
-.leftrail__rule{border:0;border-top:1px solid var(--line);margin:8px 4px}
+/* Keep the divider tight: the merged rail carries ~twice the rows, and at the homepage's lower
+   starting offset every pixel here is a row that would otherwise fall behind a scroll. */
+.leftrail__rule{border:0;border-top:1px solid var(--line);margin:1px 4px}
 [data-embed] .leftrail{display:none!important}
 [data-embed] .siteshift{padding-left:0!important}
 /* Only reserve the column / hide the Dock when a member is signed in (LeftRail sets data-rail). */
@@ -457,8 +461,8 @@ a.cw__fname:hover{text-decoration:underline}
   /* Sits BELOW the masthead art and stretches down the page to fill its column. Both rails share
      this block, so the Bettor's Rail is dimensionally identical to the Member Rail — only the side
      differs (.leftrail--right below). max-height + overflow keep a tall rail from running off-screen. */
-  html[data-rail] .leftrail{display:flex;position:fixed;left:16px;top:108px;width:216px;z-index:45;
-    flex-direction:column;gap:2px;padding:9px 10px;background:var(--surface);
+  html[data-rail] .leftrail{display:flex;position:fixed;left:16px;top:108px;width:230px;z-index:45;
+    flex-direction:column;gap:6px;padding:12px 11px;background:var(--surface);
     border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 26px rgba(0,0,0,.09);
     max-height:calc(100vh - 124px);overflow-y:auto;transition:top .18s ease,max-height .18s ease}
   html[data-rail] .leftrail--right{left:auto;right:16px}
@@ -470,27 +474,33 @@ a.cw__fname:hover{text-decoration:underline}
   html[data-rail][data-home][data-scrolled] .leftrail{top:108px;max-height:calc(100vh - 124px)}
   /* The homepage eyes-banner hero is designed full-bleed; cancel the sidebar column's left padding
      so it spans edge to edge again (the rail overlays its left edge). */
-  html[data-rail] .lp-hero{margin-left:-246px;width:calc(100% + 246px)}
+  html[data-rail] .lp-hero{margin-left:-260px;width:calc(100% + 260px)}
   html[data-rail] .dock{display:none}            /* the rails are the desktop launcher */
-  html[data-rail] .siteshift{padding-left:246px} /* reserve the sidebar column so content doesn't overlap */
+  html[data-rail] .siteshift{padding-left:260px} /* reserve the sidebar column so content doesn't overlap */
 }
 /* The left gutter alone centers content in the REMAINING space, which reads as "the whole page
    shifted right" (content sat 123px — half the gutter — right of true centre). Mirror the gutter on
-   the right so the content column is centred in the VIEWPORT again. Only from 1600px, where there's
-   room to do it without narrowing the 1120px content column (1120 + 2×246 = 1612); below that,
+   the right so the content column is centred in the VIEWPORT again. Only from 1640px, where there's
+   room to do it without narrowing the 1120px content column (1120 + 2×260 = 1640); below that,
    reserving both sides would squeeze the content, which is worse than the offset.
    That reserved right gutter is also where the Bettor's Rail lives — which is why the rail splits at
    exactly this width and merges back into the Member Rail below it. */
-@media(max-width:1599.98px){
-  /* Belt-and-braces: React only mounts the right rail ≥1600px, but never let it paint over content
-     if a resize lands between the media-query change and the re-render. */
+/* Which copy of the betting tools is shown is decided HERE, not in JS — the two rules below are
+   exact complements, so exactly one copy is visible at every width and a resize can never leave the
+   tools unreachable. `display:contents` lets the folded-in items sit directly in the rail's flex
+   column, so they keep the same even row gap as everything above them. */
+@media(max-width:1639.98px){
   .leftrail--right{display:none!important}
+  .leftrail__merged{display:contents}
 }
-@media(min-width:1600px){
-  html[data-rail] .siteshift{padding-right:246px}
+@media(min-width:1640px){
+  .leftrail__merged{display:none}
+}
+@media(min-width:1640px){
+  html[data-rail] .siteshift{padding-right:260px}
   /* The full-bleed hero cancels the LEFT gutter above; once a right gutter exists it has to cancel
-     that too, or it stops 246px short of the right edge. Both sides = 492px of width to add back. */
-  html[data-rail] .lp-hero{margin-right:-246px;width:calc(100% + 492px)}
+     that too, or it stops 260px short of the right edge. Both sides = 520px of width to add back. */
+  html[data-rail] .lp-hero{margin-right:-260px;width:calc(100% + 520px)}
 }
 
 .dock{position:fixed;right:18px;bottom:18px;z-index:70;display:flex;flex-direction:column;align-items:flex-end;gap:10px}

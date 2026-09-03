@@ -29,8 +29,37 @@ items < columns, leaving a block of dead space — `auto-fit` collapses them) ·
 `nav-alignment-mismatch` (one header/nav row doesn't share the alignment of its siblings) ·
 `full-bleed-short` (a hero/banner with negative margins stops short of the viewport edge — a container
 gutter it doesn't cancel) · `table-overflows-container` (a chart needs a horizontal scrollbar on a wide
-screen — usually the per-column widths don't cover every column).
+screen — usually the per-column widths don't cover every column) · `rail-asymmetry` /
+`rail-uneven-rows` / `rail-overflows` / `rail-overlaps-content` (the side rails — see below).
 Console errors + network 4xx/5xx are collected separately (see step 4).
+
+### The side rails (Member Rail + Bettor's Rail)
+Two fixed sidebars share one `.leftrail` class — Member Rail on the left, Bettor's Rail on the right —
+so they are mirror images by construction and any difference is a bug. The rail width, the reserved
+gutter, and the width at which the rails split are **one arithmetic chain**; changing any one without
+the others is the failure mode to watch for:
+
+```
+rail width + 16px offset + clearance = gutter        (230 + 16 + 14 = 260)
+content column + 2 × gutter          = split width   (1120 + 520 = 1640)
+```
+
+So when you resize a rail or its icons, re-check **all** of: `.leftrail{width}`, `.siteshift`
+`padding-left`/`padding-right`, the `.lp-hero` full-bleed cancellations (both sides), the
+`@media(min-width:…)` / `@media(max-width:…)` pair, **and** the `matchMedia` string in
+`LeftRail.tsx` — the CSS threshold and the JS threshold must be the same number, or the rail mounts
+at a width the gutter doesn't cover and paints over the content.
+
+Check at desktop, in both the split (≥1640px) and merged (1100–1639px) layouts:
+- **Mirrored**: equal width, equal top, equal gap to their own viewport edge.
+- **Evenly spaced**: one row height and one gap for every row — rows size from a shared icon +
+  padding pair, so a per-item override is the usual culprit. A merged rail's divider is the one
+  legitimate bigger gap.
+- **Nothing hidden**: `scrollHeight > clientHeight` means items are behind a scroll. The merged rail
+  holds ~twice the items, so it is the one that overflows first — check it at a short viewport
+  (900px tall and less).
+- **No overlap** with the content column, and no rail item unreachable at any width: below the split
+  threshold every item must still be present in the merged rail.
 
 ### Column-width budget (tables)
 When a table declares per-column widths (`th:nth-child(n)`), **the rules must cover EVERY column and

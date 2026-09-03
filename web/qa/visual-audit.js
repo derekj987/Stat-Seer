@@ -389,6 +389,66 @@
     }
   }
 
+  // ---- 17. Side rails: mirror symmetry, even spacing, overflow ----------------
+  // The Member Rail (left) and Bettor's Rail (right) are meant to be mirror images: same width, same
+  // top, and the same gap to their own edge of the viewport. They share one CSS class, so a mismatch
+  // means something side-specific (a gutter, a width override) drifted.
+  {
+    const rails = [...document.querySelectorAll(".leftrail")].filter(vis);
+    const L = rails.find((r) => r.classList.contains("leftrail--left"));
+    const R = rails.find((r) => r.classList.contains("leftrail--right"));
+    if (L && R) {
+      const a = rectOf(L), b = rectOf(R);
+      const leftGap = Math.round(a.left), rightGap = Math.round(vw - b.right);
+      if (Math.abs(leftGap - rightGap) > 2) {
+        add("rail-asymmetry", "medium", R,
+          `rails aren't mirrored: left rail sits ${leftGap}px from the left edge, right rail ${rightGap}px from the right`);
+      }
+      if (Math.abs(a.width - b.width) > 2) {
+        add("rail-asymmetry", "medium", R,
+          `rails differ in width (${Math.round(a.width)}px vs ${Math.round(b.width)}px) — they share .leftrail, so a side-specific override drifted`);
+      }
+      if (Math.abs(a.top - b.top) > 2) {
+        add("rail-asymmetry", "low", R,
+          `rails start at different heights (${Math.round(a.top)}px vs ${Math.round(b.top)}px)`);
+      }
+    }
+    for (const rail of rails) {
+      // Rows must be evenly spaced: one row height and one gap for every item, whatever the icon size.
+      const items = [...rail.querySelectorAll(".leftrail__it")].filter(vis).map(rectOf);
+      if (items.length >= 3) {
+        const hs = items.map((r) => Math.round(r.height));
+        if (Math.max(...hs) - Math.min(...hs) > 3) {
+          add("rail-uneven-rows", "low", rail,
+            `rail rows differ in height (${Math.min(...hs)}–${Math.max(...hs)}px) — rows should share one icon size + padding`);
+        }
+        const gaps = [];
+        for (let i = 1; i < items.length; i++) gaps.push(Math.round(items[i].top - items[i - 1].bottom));
+        // A divider (merged rail) legitimately adds one bigger gap, so allow a single outlier.
+        const sorted = [...gaps].sort((x, y) => x - y);
+        const spread = sorted[sorted.length - 2] - sorted[0];
+        if (gaps.length >= 3 && spread > 4) {
+          add("rail-uneven-rows", "low", rail, `rail row gaps are uneven (${gaps.join(", ")}px)`);
+        }
+      }
+      // A rail taller than its own max-height hides items behind a scrollbar.
+      if (rail.scrollHeight - rail.clientHeight > 8) {
+        add("rail-overflows", "medium", rail,
+          `rail content is ${rail.scrollHeight - rail.clientHeight}px taller than the rail — items are hidden behind a scroll`);
+      }
+      // The rail must not overlap the content column it reserves a gutter for.
+      const main = document.querySelector(".siteshift main, main.wrap, .wrap");
+      if (main && vis(main)) {
+        const m = rectOf(main), r = rectOf(rail);
+        const overlap = Math.min(m.right, r.right) - Math.max(m.left, r.left);
+        if (overlap > 2) {
+          add("rail-overlaps-content", "high", rail,
+            `rail overlaps the content column by ${Math.round(overlap)}px — the reserved gutter is narrower than the rail`);
+        }
+      }
+    }
+  }
+
   const bySev = { high: 0, medium: 0, low: 0 };
   for (const f of findings) bySev[f.severity] = (bySev[f.severity] || 0) + 1;
   return JSON.stringify({
