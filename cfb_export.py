@@ -12,6 +12,7 @@ Stdlib + numpy; reuses cfb_power / cfb_ats.
 import json
 import math
 import sqlite3
+import unicodedata
 import statistics
 import sys
 import urllib.request
@@ -178,9 +179,32 @@ def detect_upcoming_week(db, season, fallback):
     return r[0] or fallback
 
 
+# CFBD's school name vs the sportsbook feed's nickname, where they share no leading words so no
+# amount of prefix matching can bridge them. Keyed by the normalized CFBD name.
+# Symptom when one is missing: the board shows "—" for a game whose line the books have had for days.
+_TEAM_ALIASES = {
+    "massachusetts": "umass",
+    "umass": "massachusetts",
+    "nc state": "north carolina state",
+    "north carolina state": "nc state",
+    "ole miss": "mississippi",
+    "southern mississippi": "southern miss",
+    "louisiana monroe": "ul monroe",
+    "sam houston": "sam houston state",
+    "app state": "appalachian state",
+}
+
+
 def _norm(s):
-    """Normalize a team name for cross-source matching (Odds API full names vs CFBD)."""
-    return " ".join("".join(c if c.isalnum() else " " for c in (s or "").lower()).split())
+    """Normalize a team name for cross-source matching (Odds API full names vs CFBD).
+
+    Accents and apostrophes are stripped rather than treated as separators: 'é'.isalnum() is True,
+    so the old version kept "san josé state" while the feed says "san jose state", and it turned
+    "Hawai'i" into the two tokens "hawai i" against the feed's "hawaii". Both silently lost their
+    market line."""
+    s = unicodedata.normalize("NFKD", s or "").encode("ascii", "ignore").decode()
+    s = s.lower().replace("'", "").replace("’", "")
+    return " ".join("".join(c if c.isalnum() else " " for c in s).split())
 
 
 def fetch_ncaaf_odds():
@@ -222,9 +246,41 @@ def fetch_ncaaf_odds():
 def match_odds(away, home, odds):
     a, h = _norm(away), _norm(home)
     def m(x, y):
-        return y == x or y.startswith(x + " ") or x.startswith(y + " ")
+        if y == x or y.startswith(x + " ") or x.startswith(y + " "):
+            return True
+        alt = _TEAM_ALIASES.get(x)
+        return bool(alt) and (y == alt or y.startswith(alt + " "))
     cands = [o for o in odds if m(a, o["away_n"]) and m(h, o["home_n"])]
     return min(cands, key=lambda o: len(o["away_n"]) + len(o["home_n"])) if cands else None
+
+
+def db_lines(db, season, week):
+    """Consensus spread + total per game from our OWN `lines` table (CFBD, filled by cfb_lines.py),
+    keyed by game_id so there is no name matching to get wrong.
+
+    This is the safety net the board was missing. The live Odds API only serves UPCOMING events, so
+    the moment a game kicks off its number vanished from the board and the row showed "—" forever
+    even though we had already captured the line. It also covers any game the live feed simply
+    doesn't carry. Same sign convention as the feed: negative = home favored."""
+    conn = sqlite3.connect(db)
+    rows = conn.execute(
+        """SELECT l.game_id, l.spread, l.over_under FROM lines l
+             JOIN games g ON g.id = l.game_id
+            WHERE g.season=? AND g.week=?""", (season, week)).fetchall()
+    conn.close()
+    sp, tot = {}, {}
+    for gid, s, t in rows:
+        if s is not None:
+            sp.setdefault(gid, []).append(float(s))
+        if t is not None:
+            tot.setdefault(gid, []).append(float(t))
+    out = {}
+    for gid in set(sp) | set(tot):
+        out[gid] = (
+            round(statistics.median(sp[gid]), 1) if sp.get(gid) else None,
+            round(statistics.median(tot[gid]), 1) if tot.get(gid) else None,
+        )
+    return out
 
 
 def team_scoring(db, season, decay):
@@ -261,11 +317,30 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
     Upsets are off-consensus competitive games where the model backs the market dog."""
     L, off, deff = scoring
     conn = sqlite3.connect(db)
+    # At least ONE FBS team, not both. The board used to require FBS-vs-FBS, which silently dropped
+    # every FBS-vs-FCS game — 7 of the 11 games on a typical opening Thursday, all of them real games
+    # the books price and members bet. The rating FIT stays FBS-vs-FBS (that is the right sample);
+    # this is only about what the board DISPLAYS. Non-FBS-vs-FBS noise (D-II/D-III) is excluded by
+    # requiring an FBS side.
     rows = conn.execute(
-        """SELECT away_team, home_team, neutral_site, start_date FROM games
-             WHERE season=? AND week=? AND home_class='fbs' AND away_class='fbs'""",
+        """SELECT away_team, home_team, neutral_site, start_date, id FROM games
+             WHERE season=? AND week=? AND (home_class='fbs' OR away_class='fbs')""",
         (season, week)).fetchall()
     conn.close()
+    dbl = db_lines(db, season, week)
+
+    def market_for(away, home, gid):
+        """Live feed first (freshest), then our captured CFBD line by game_id."""
+        od = match_odds(away, home, odds)
+        hsp = od["home_spread"] if od else None
+        mtot = od["total"] if od else None
+        if hsp is None or mtot is None:
+            fs, ft = dbl.get(gid, (None, None))
+            if hsp is None:
+                hsp = fs
+            if mtot is None:
+                mtot = ft
+        return hsp, mtot
     cards, upsets = [], []
 
     def anchored_margin(home, away, neu, hsp):
@@ -293,9 +368,8 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
     # which would leave the majority still slightly under. The median puts exactly half the anchored
     # favorites above the market and half below -> ~50% projected cover, matching reality.
     _resid = []
-    for away, home, neu, date in rows:
-        _od = match_odds(away, home, odds)
-        _hsp = _od["home_spread"] if _od else None
+    for away, home, neu, date, gid in rows:
+        _hsp, _ = market_for(away, home, gid)
         if _hsp is not None and abs(float(_hsp)) > ANCHOR_LO:
             _resid.append(anchored_margin(home, away, neu, _hsp) - (-float(_hsp)))
     debias = statistics.median(_resid) if _resid else 0.0
@@ -306,22 +380,19 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
     # market (median gap -> 0) so the over/under lean split matches reality, while keeping our
     # relative read (which games we see higher/lower than Vegas). Only games with a market total.
     _tresid = []
-    for away, home, neu, date in rows:
-        _od = match_odds(away, home, odds)
-        _mt = _od["total"] if _od else None
+    for away, home, neu, date, gid in rows:
+        _, _mt = market_for(away, home, gid)
         if _mt is not None:
             _pt = 2 * L + off.get(home, 0) + deff.get(away, 0) + off.get(away, 0) + deff.get(home, 0)
             _tresid.append(_pt - float(_mt))
     total_debias = statistics.median(_tresid) if _tresid else 0.0
 
-    for away, home, neu, date in rows:
+    for away, home, neu, date, gid in rows:
         rated = home in ratings and away in ratings          # both have FBS rating history
         rh, ra = ratings.get(home, NEWCOMER_R), ratings.get(away, NEWCOMER_R)
         ptot = 2 * L + off.get(home, 0) + deff.get(away, 0) + off.get(away, 0) + deff.get(home, 0)
         ptot -= total_debias    # center on the market so the over/under lean split matches ~50/50
-        od = match_odds(away, home, odds)
-        hsp = od["home_spread"] if od else None                  # home line (neg = home fav)
-        mtot = od["total"] if od else None
+        hsp, mtot = market_for(away, home, gid)                  # home line (neg = home fav)
         margin = anchored_margin(home, away, neu, hsp)           # home perspective, market-anchored
         # De-bias big-spread games so their divergences straddle the market (~50% cover), not a
         # systematic dog-lean. Close/mid games (<=ANCHOR_LO) keep their full independent read.
@@ -367,6 +438,10 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
             "homeRiser": round((risers or {}).get(home, 0.0)),
             "awayRiser": round((risers or {}).get(away, 0.0)),
             "pick": pick, "totalLean": total_lean, "off": off_flag,
+            # False when a side has no FBS rating history (an FCS opponent): the market numbers
+            # are real, but our projection for it is a floor value, so the UI must not present
+            # it as a graded line-blind read.
+            "rated": bool(rated),
             "featured": bool(home in top_set or away in top_set),
             "_interest": min(rh, ra),
         })
@@ -545,7 +620,8 @@ def main():
             " projSpread: { fav: string; num: number }; projTotal: number;"
             " homeRiser: number; awayRiser: number;"
             " pick: { side: string; num: number } | null;"
-            " totalLean: { dir: string; num: number } | null; off: boolean; featured: boolean };\n"
+            " totalLean: { dir: string; num: number } | null; off: boolean;"
+            " rated: boolean; featured: boolean };\n"
             "export type NcaafUpset = { dog: string; matchup: string; spread: string;"
             " modelPct: number; marketPct: number; byPoints: number };\n"
             "export const NCAAF_MODEL = " + json.dumps(data, indent=2) + " as const;\n")

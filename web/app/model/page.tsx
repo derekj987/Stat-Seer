@@ -274,7 +274,8 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
     <div className="daygrid">
       {groups.map((grp) => (
         <div className="daygrid__day" key={grp.key} style={dayBasis(grp.items.length)}>
-          <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
+          {/* `cont` = tail of a day split across the "show more" boundary — header already drawn. */}
+          {!grp.cont && <DayHeader label={grp.label} tone={grp.tone} count={grp.total ?? grp.items.length} />}
           <section className="grid">
             {grp.items.map((p) => <PredictionCard key={p.eventId} p={p} slipPick={slipPickByEvent.get(p.eventId)} />)}
           </section>

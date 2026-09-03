@@ -11,12 +11,16 @@ name: Refresh CFB ratings
 # CFBD is cheap (a few calls/season), so we run DAILY in-season: college games land on
 # Thu/Fri/Sat plus the odd Sun/Mon, so a weekly cadence left a weekend's finals + ratings
 # stale for up to 6 days and delayed the newly-posted odds/props on upcoming-week boards.
-# Daily at 14:00 UTC (~9-10am ET) catches the prior day's finals after overnight west-coast
-# games settle. All times UTC.
+# Every 6h (02/08/14/20 UTC). A once-daily run at 14:00 UTC meant the board's MARKET numbers were
+# only ever as fresh as ~10am ET: a line that posted later in the day did not appear until the next
+# morning, and games kicking off that evening showed whatever number existed at 10am. CFBD is cheap
+# and the NCAAF odds call is 2 credits (2 markets x 1 region), so 4 runs/day costs ~8 credits/day.
+# The 14:00 run still catches the prior day's finals after overnight west-coast games settle.
+# All times UTC.
 
 on:
   schedule:
-    - cron: "0 14 * 8-12,1 *"   # daily 14:00 UTC, Aug-Jan (through the playoff)
+    - cron: "0 2,8,14,20 * 8-12,1 *"   # every 6h, Aug-Jan (through the playoff)
   workflow_dispatch: {}         # manual "Run workflow"
 
 concurrency:

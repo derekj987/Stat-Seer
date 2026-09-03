@@ -31,8 +31,21 @@ function CardRows({ games, scores }: { games: readonly NcaafCardGame[]; scores?:
             <NcaafGameCell g={g} score={scores ? scoreFor(scores, g.away, g.home) : null} />
             <td className="hb-num">{ms ? `${abbrevTeam(ms.fav)} ${ms.num}` : "—"}</td>
             <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
-            <td className="hb-num hb-model">{abbrevTeam(g.projSpread.fav)} {g.projSpread.num}</td>
-            <td className="hb-num hb-model">{g.projTotal}</td>
+            {/* FBS-vs-FCS games belong on the board — the books price them and members bet them —
+                but our rating has no history for an FCS side, so its projection is a floor value.
+                Show the market numbers and withhold OUR number rather than publishing a figure we
+                can't grade: the whole point of the panel is that every read is checkable. */}
+            {g.rated === false ? (
+              <>
+                <td className="hb-num" title="No FBS rating history for one side (FCS opponent) — we don't publish a projection we can't grade.">—</td>
+                <td className="hb-num" title="No FBS rating history for one side (FCS opponent) — we don't publish a projection we can't grade.">—</td>
+              </>
+            ) : (
+              <>
+                <td className="hb-num hb-model">{abbrevTeam(g.projSpread.fav)} {g.projSpread.num}</td>
+                <td className="hb-num hb-model">{g.projTotal}</td>
+              </>
+            )}
           </tr>
         );
       })}
@@ -56,7 +69,9 @@ export default async function Page({ searchParams }: {
     groupByGameDay(games, (g) => g.commence, todayEt, tomorrowEt);
   const dayTable = (grp: DayGroup<NcaafCardGame>) => (
     <div key={grp.key}>
-      <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
+      {/* `cont` = the tail of a day split across the "show more" boundary; its header is already
+          drawn above the boundary, so drawing another is the duplicate-day-header bug. */}
+      {!grp.cont && <DayHeader label={grp.label} tone={grp.tone} count={grp.total ?? grp.items.length} />}
       <div className="hb-formwrap">
         <table className="hb-form hb-form--mkt"><NcaafCardHead /><tbody><CardRows games={grp.items} scores={scores} /></tbody></table>
       </div>
@@ -67,7 +82,7 @@ export default async function Page({ searchParams }: {
   // short). Group ONCE over the whole list and cap on whole day groups — see capDayGroups: slicing
   // the games first and grouping each half duplicated day headers, stranded this Collapse control
   // mid-list, and let a completed day surface among the upcoming ones.
-  const dayTablesCapped = (games: readonly NcaafCardGame[], limit = 5) => {
+  const dayTablesCapped = (games: readonly NcaafCardGame[], limit = 4) => {
     const { head, rest, restCount } = capDayGroups(dayGroups(games), limit);
     if (!restCount) return head.map(dayTable);
     return (
@@ -153,6 +168,20 @@ export default async function Page({ searchParams }: {
         </div>
       </details>
 
+      {/* The FULL model — every game on the board, collapsed. */}
+      <details className="hb-panel hb-panel--card" data-embedchart="full-model" open>
+        <summary className="hb-bar">
+          <span className="hb-bar__title hb-bar__title--gold">Full Model — every game</span>
+          <span className="hb-bar__count">{c.games.length} games</span>
+          <span className="hb-bar__hint">today&apos;s games first, then upcoming, then completed</span>
+          <PinButton size="sm" pin={{ id: "/ncaaf/model?only=full-model", kind: "model", label: "NCAAF Model · Full Model", detail: `Week ${week}`, href: `/ncaaf/model?week=${week}&only=full-model` }} />
+          <span className="hb-bar__chev" aria-hidden="true">▾</span>
+        </summary>
+        <div className="hb-body">
+          {dayTablesCapped(c.games)}
+        </div>
+      </details>
+
       {/* Then the biggest market divergences — where the model has an independent opinion. */}
       <details className="hb-panel hb-panel--card" data-embedchart="where-we-differ" open>
         <summary className="hb-bar">
@@ -175,21 +204,7 @@ export default async function Page({ searchParams }: {
                 over and the seed washes out by about week 5.</span>
             )}
           </div>
-          {dayTables(lead)}
-        </div>
-      </details>
-
-      {/* The FULL model — every game on the board, collapsed. */}
-      <details className="hb-panel" data-embedchart="full-model">
-        <summary className="hb-bar">
-          <span className="hb-bar__title hb-bar__title--gold">Full Model — every game</span>
-          <span className="hb-bar__count">{c.games.length} games</span>
-          <span className="hb-bar__hint">today&apos;s games first, then upcoming, then completed</span>
-          <PinButton size="sm" pin={{ id: "/ncaaf/model?only=full-model", kind: "model", label: "NCAAF Model · Full Model", detail: `Week ${week}`, href: `/ncaaf/model?week=${week}&only=full-model` }} />
-          <span className="hb-bar__chev" aria-hidden="true">▾</span>
-        </summary>
-        <div className="hb-body">
-          {dayTablesCapped(c.games)}
+          {dayTablesCapped(lead)}
         </div>
       </details>
 

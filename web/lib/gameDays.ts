@@ -4,7 +4,13 @@
 // the "today"/"tomorrow" keys once per render on the server with etToday() and pass them in.
 
 export type DayTone = "today" | "upcoming" | "done" | "tbd";
-export interface DayGroup<T> { key: string; tone: DayTone; label: string; items: T[] }
+/** Set when a day is split across a "show more" boundary:
+ *  - `cont` marks the HIDDEN tail. The renderer must NOT draw a day header for it — the day already
+ *    has one above the boundary, and drawing a second is exactly the duplicate-header bug (two
+ *    "Sat, Sep 5" sections).
+ *  - `total` is the day's FULL game count, carried on the VISIBLE part so its header can still say
+ *    "Today 11 games" instead of counting only the 4 rows above the boundary. */
+export interface DayGroup<T> { key: string; tone: DayTone; label: string; items: T[]; cont?: boolean; total?: number }
 
 const ET_DAY = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" });
 const ET_LABEL = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric" });
@@ -25,21 +31,41 @@ export function dayBasis(count: number, cols = 3, card = 340, gap = 14): { flexB
   return { flexBasis: `${n * card + (n - 1) * gap}px` };
 }
 
-/** Split already-grouped days at a cap WITHOUT ever splitting a day across the boundary: whole
- *  groups go to `head`, the remainder to `rest` (for a "show N more" disclosure).
+/** Split already-grouped days at a cap of `limit` games: whole days go to `head` while they fit,
+ *  the remainder to `rest` (for a "show N more" disclosure). If the next day is too big to take
+ *  whole, it is split so the board shows exactly `limit` games — the visible part keeps the day
+ *  header (with the day's real `total`), the hidden tail is flagged `cont` so no SECOND header is
+ *  drawn for it.
  *
  *  Always group ONCE over the FULL list and cap the groups — never `slice()` the games first and
  *  group each half. Grouping each half re-derives day headers from that half, which duplicates a day
  *  that straddles the cut ("two Sep 5 sections"), strands the collapse control in the middle of the
  *  list, and re-sorts each half independently so a completed day can appear among upcoming ones.
- *  That was one bug reported three different ways on the NCAAF model board. */
+ *  That was one bug reported three different ways on the NCAAF model board. Splitting HERE is safe
+ *  precisely because the grouping is already done: the header is rendered exactly once either way. */
 export function capDayGroups<T>(groups: DayGroup<T>[], limit: number): {
   head: DayGroup<T>[]; rest: DayGroup<T>[]; restCount: number;
 } {
-  let shown = 0, cut = 0;
-  while (cut < groups.length && shown < limit) { shown += groups[cut].items.length; cut++; }
-  const rest = groups.slice(cut);
-  return { head: groups.slice(0, cut), rest, restCount: rest.reduce((n, g) => n + g.items.length, 0) };
+  const head: DayGroup<T>[] = [];
+  let shown = 0, i = 0;
+  // Take whole days while they fit.
+  for (; i < groups.length && shown + groups[i].items.length <= limit; i++) {
+    head.push(groups[i]);
+    shown += groups[i].items.length;
+  }
+  const rest = groups.slice(i);
+  // Still short of the limit and the next day is too big to take whole? Split THAT day: the visible
+  // part keeps the day header, the hidden tail is flagged `cont` so no second header is drawn. This
+  // is what lets a board honour "show the first N" without the duplicate-header bug — the header is
+  // rendered exactly once either way.
+  if (shown < limit && rest.length) {
+    const g = rest[0], take = limit - shown;
+    if (take > 0 && take < g.items.length) {
+      head.push({ ...g, items: g.items.slice(0, take), total: g.items.length });
+      rest[0] = { ...g, items: g.items.slice(take), cont: true };
+    }
+  }
+  return { head, rest, restCount: rest.reduce((n, g) => n + g.items.length, 0) };
 }
 
 export function groupByGameDay<T>(
