@@ -470,6 +470,9 @@ a.cw__fname:hover{text-decoration:underline}
    squeeze the content, which is worse than the offset. */
 @media(min-width:1600px){
   html[data-rail] .siteshift{padding-right:246px}
+  /* The full-bleed hero cancels the LEFT gutter above; once a right gutter exists it has to cancel
+     that too, or it stops 246px short of the right edge. Both sides = 492px of width to add back. */
+  html[data-rail] .lp-hero{margin-right:-246px;width:calc(100% + 492px)}
 }
 
 .dock{position:fixed;right:18px;bottom:18px;z-index:70;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
@@ -3352,10 +3355,14 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 /* single Model values sit centered against the two-chip Market cells (even vertical rhythm) */
 .hb-form--mkt td{vertical-align:middle}
 /* player-snapshot 4-col: Player · Team · Prop(book) · Our proj */
-.hb-form--psnap th:nth-child(1),.hb-form--psnap td:nth-child(1){width:34%}
+/* FIVE columns (Player, Team, Prop, Market #, Our proj) — only four widths were defined, so the
+   fifth fell outside the 100% budget, the table overflowed its wrapper and the Player column got
+   scrolled out of view behind a scrollbar. Widths must cover every column and sum to 100%. */
+.hb-form--psnap th:nth-child(1),.hb-form--psnap td:nth-child(1){width:32%}
 .hb-form--psnap th:nth-child(2),.hb-form--psnap td:nth-child(2){width:12%}
-.hb-form--psnap th:nth-child(3),.hb-form--psnap td:nth-child(3){width:30%}
-.hb-form--psnap th:nth-child(4),.hb-form--psnap td:nth-child(4){width:24%}
+.hb-form--psnap th:nth-child(3),.hb-form--psnap td:nth-child(3){width:20%}
+.hb-form--psnap th:nth-child(4),.hb-form--psnap td:nth-child(4){width:18%}
+.hb-form--psnap th:nth-child(5),.hb-form--psnap td:nth-child(5){width:18%}
 .hb-form th,.hb-form td{text-align:left}
 .hb-form th{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
   font-weight:700;padding:0 0 6px;border-bottom:1px solid var(--line)}

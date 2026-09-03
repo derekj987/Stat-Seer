@@ -26,8 +26,24 @@ the page reads as "shifted right") · `grid-dead-space` (`repeat(auto-fill, …)
 items < columns, leaving a block of dead space — `auto-fit` collapses them) ·
 `chart-truncated-with-space` (a cell ellipsizes its text while its row still has unused width) ·
 `repeated-row-label` (consecutive rows repeat the same first-cell text — the "double names" bug) ·
-`nav-alignment-mismatch` (one header/nav row doesn't share the alignment of its siblings).
+`nav-alignment-mismatch` (one header/nav row doesn't share the alignment of its siblings) ·
+`full-bleed-short` (a hero/banner with negative margins stops short of the viewport edge — a container
+gutter it doesn't cancel) · `table-overflows-container` (a chart needs a horizontal scrollbar on a wide
+screen — usually the per-column widths don't cover every column).
 Console errors + network 4xx/5xx are collected separately (see step 4).
+
+### Column-width budget (tables)
+When a table declares per-column widths (`th:nth-child(n)`), **the rules must cover EVERY column and
+sum to 100%**. `.hb-form--psnap` declared four widths for a five-column table, so the fifth fell
+outside the budget: the table overflowed its wrapper, a scrollbar appeared, and the Player column
+scrolled out of view. After adding or removing a column, always re-check the width rules — count the
+`<th>`s and count the `nth-child` rules, and make sure they match.
+
+### Full-bleed elements and gutters
+A hero/banner escapes its container with negative margins plus an over-100% width
+(`margin-left:-Xpx; width:calc(100% + Xpx)`). If a gutter is later added on the **other** side, the
+element has to cancel that too — otherwise it stops short and leaves a strip of page background.
+Whenever you change a container's padding, re-check every full-bleed child inside it.
 
 ### Why a change "over here" surfaces a bug "over there"
 Two distinct causes — tell them apart before assuming you broke something:

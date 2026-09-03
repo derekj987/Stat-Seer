@@ -347,6 +347,48 @@
     }
   }
 
+  // ---- 15. Full-bleed element that doesn't reach the viewport edges ------------
+  // A banner/hero escapes its container's gutters with negative margins + an over-100% width. If a
+  // gutter is later added on one side and the element doesn't cancel it too, the art stops short and
+  // leaves a strip of page background. Intent is inferred from a negative horizontal margin or a
+  // width that exceeds 100% — both mean "deliberately wider than my parent".
+  for (const el of document.querySelectorAll("[class*='hero'],[class*='banner'],[class*='bleed'],[class*='full'],header,section")) {
+    if (cap(findings, "full-bleed-short")) break;
+    if (!vis(el)) continue;
+    const s = getComputedStyle(el);
+    const ml = parseFloat(s.marginLeft) || 0, mr = parseFloat(s.marginRight) || 0;
+    const wantsBleed = ml < -8 || mr < -8 || /calc\(.*\+/.test(s.width);
+    if (!wantsBleed) continue;
+    const r = rectOf(el);
+    if (r.width < 200 || !onScreenish(r)) continue;
+    const left = Math.round(r.left), right = Math.round(vw - r.right);
+    if (left > 4 || right > 4) {
+      add("full-bleed-short", "medium", el,
+        `full-bleed element stops short of the viewport (left gap ${left}px, right gap ${right}px) — a container gutter it doesn't cancel?`);
+    }
+  }
+
+  // ---- 16. Table overflowing its own scroll container (desktop) ----------------
+  // A chart that needs a horizontal scrollbar on a wide screen is usually a column-budget bug: the
+  // per-column width rules don't cover every column (e.g. 4 widths declared for a 5-column table), so
+  // the extras fall outside 100%, the table overflows and the first column scrolls out of sight.
+  // Horizontal scroll on a PHONE is often deliberate ("swipe for totals"), so only check wide views.
+  if (vw >= 1000) {
+    for (const wrap of document.querySelectorAll("[class*='formwrap'],[class*='wrap'],[class*='scroll'],div")) {
+      if (cap(findings, "table-overflows-container")) break;
+      if (!vis(wrap)) continue;
+      const s = getComputedStyle(wrap);
+      if (!/auto|scroll/.test(s.overflowX)) continue;
+      const over = wrap.scrollWidth - wrap.clientWidth;
+      if (over <= 8) continue;
+      const table = wrap.querySelector("table, [role='table'], [class*='table']");
+      if (!table) continue;
+      const cols = table.querySelector("tr") ? table.querySelector("tr").children.length : 0;
+      add("table-overflows-container", "medium", wrap,
+        `table overflows its container by ${over}px at ${vw}px wide${cols ? ` (${cols} columns)` : ""} — do the per-column widths cover every column and sum to 100%?`);
+    }
+  }
+
   const bySev = { high: 0, medium: 0, low: 0 };
   for (const f of findings) bySev[f.severity] = (bySev[f.severity] || 0) + 1;
   return JSON.stringify({
