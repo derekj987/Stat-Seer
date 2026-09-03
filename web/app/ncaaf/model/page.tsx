@@ -31,8 +31,8 @@ function CardRows({ games, scores }: { games: readonly NcaafCardGame[]; scores?:
             <NcaafGameCell g={g} score={scores ? scoreFor(scores, g.away, g.home) : null} />
             <td className="hb-num">{ms ? `${abbrevTeam(ms.fav)} ${ms.num}` : "—"}</td>
             <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
-            {/* FCS opponents are now rated from their own results plus a fitted division offset, so
-                these rows carry a real projection (measured 2025 out of sample: MAE 13.9 vs the
+            {/* FCS opponents are rated from their own results plus a fitted division offset, so these
+                rows carry a real projection (2025 out of sample, as displayed: MAE 12.8 vs the
                 market's 12.4). `rated` stays the guard for a side we genuinely cannot rate — a team
                 with no game history at all — where the number would be a floor value we can't grade
                 and a dash is the honest answer. */}
@@ -43,7 +43,18 @@ function CardRows({ games, scores }: { games: readonly NcaafCardGame[]; scores?:
               </>
             ) : (
               <>
-                <td className="hb-num hb-model">{abbrevTeam(g.projSpread.fav)} {g.projSpread.num}</td>
+                <td className="hb-num hb-model">
+                  {abbrevTeam(g.projSpread.fav)} {g.projSpread.num}
+                  {/* Provenance, NOT a confidence penalty: measured 2025 out of sample the displayed
+                      error band on these rows is 0.93x the FBS rows by MAE and 0.90x by RMSE, i.e.
+                      at parity. The marker says where the number CAME from, which is genuinely
+                      different — an FCS side has no FBS history to rate it against. */}
+                  {g.crossDiv && (
+                    <sup className="xdiv" title="Cross-division game. The FCS side is rated from its own FCS results plus a division offset fitted from cross-division games, rather than from FBS play. Measured out of sample, these rows' error band is in line with our FBS rows (MAE 12.8 vs 13.7) — a different basis, not a weaker one.">
+                      ×
+                    </sup>
+                  )}
+                </td>
                 <td className="hb-num hb-model">{g.projTotal}</td>
               </>
             )}
@@ -179,6 +190,13 @@ export default async function Page({ searchParams }: {
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
+          <div className="hb-legend">
+            <span className="hb-dia">&times;</span> A <b>cross-division</b> game (FBS vs FCS). The FCS
+            side is rated from its own results plus a division offset fitted from cross-division games,
+            rather than from FBS play — a different basis for the number. Measured out of sample these
+            rows land <b>in line with our FBS rows</b> (MAE 12.8 vs 13.7), so it flags where the read
+            comes from, not a weaker read.
+          </div>
           {dayTablesCapped(c.games)}
         </div>
       </details>

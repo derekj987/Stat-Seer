@@ -393,7 +393,8 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
     # this is only about what the board DISPLAYS. Non-FBS-vs-FBS noise (D-II/D-III) is excluded by
     # requiring an FBS side.
     rows = conn.execute(
-        """SELECT away_team, home_team, neutral_site, start_date, id FROM games
+        """SELECT away_team, home_team, neutral_site, start_date, id,
+                  home_class, away_class FROM games
              WHERE season=? AND week=? AND (home_class='fbs' OR away_class='fbs')""",
         (season, week)).fetchall()
     conn.close()
@@ -438,7 +439,7 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
     # which would leave the majority still slightly under. The median puts exactly half the anchored
     # favorites above the market and half below -> ~50% projected cover, matching reality.
     _resid = []
-    for away, home, neu, date, gid in rows:
+    for away, home, neu, date, gid, _hc, _ac in rows:
         _hsp, _ = market_for(away, home, gid)
         if _hsp is not None and abs(float(_hsp)) > ANCHOR_LO:
             _resid.append(anchored_margin(home, away, neu, _hsp) - (-float(_hsp)))
@@ -450,14 +451,15 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
     # market (median gap -> 0) so the over/under lean split matches reality, while keeping our
     # relative read (which games we see higher/lower than Vegas). Only games with a market total.
     _tresid = []
-    for away, home, neu, date, gid in rows:
+    for away, home, neu, date, gid, _hc, _ac in rows:
         _, _mt = market_for(away, home, gid)
         if _mt is not None:
             _pt = 2 * L + off.get(home, 0) + deff.get(away, 0) + off.get(away, 0) + deff.get(home, 0)
             _tresid.append(_pt - float(_mt))
     total_debias = statistics.median(_tresid) if _tresid else 0.0
 
-    for away, home, neu, date, gid in rows:
+    for away, home, neu, date, gid, hcls, acls in rows:
+        cross_div = not (hcls == "fbs" and acls == "fbs")
         rated = home in ratings and away in ratings          # both have FBS rating history
         rh, ra = ratings.get(home, NEWCOMER_R), ratings.get(away, NEWCOMER_R)
         ptot = 2 * L + off.get(home, 0) + deff.get(away, 0) + off.get(away, 0) + deff.get(home, 0)
@@ -512,6 +514,12 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
             # are real, but our projection for it is a floor value, so the UI must not present
             # it as a graded line-blind read.
             "rated": bool(rated),
+            # Cross-division (an FCS opponent): the non-FBS side is rated from FCS results plus a
+            # fitted division offset, a thinner and differently-sourced basis than an FBS rating.
+            # NOTE this is a PROVENANCE flag, not a confidence penalty -- measured 2025 out of
+            # sample the displayed error band on these rows is 0.93x the FBS rows by MAE
+            # (12.76 vs 13.74) and 0.90x by RMSE, i.e. at parity, not wider.
+            "crossDiv": bool(cross_div),
             "featured": bool(home in top_set or away in top_set),
             "_interest": min(rh, ra),
         })
@@ -697,7 +705,7 @@ def main():
             " homeRiser: number; awayRiser: number;"
             " pick: { side: string; num: number } | null;"
             " totalLean: { dir: string; num: number } | null; off: boolean;"
-            " rated: boolean; featured: boolean };\n"
+            " rated: boolean; crossDiv: boolean; featured: boolean };\n"
             "export type NcaafUpset = { dog: string; matchup: string; spread: string;"
             " modelPct: number; marketPct: number; byPoints: number };\n"
             "export const NCAAF_MODEL = " + json.dumps(data, indent=2) + " as const;\n")

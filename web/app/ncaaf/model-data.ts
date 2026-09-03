@@ -3,7 +3,7 @@
 export type NcaafTeam = { rank: number; team: string; conf: string; rating: number };
 export type NcaafConf = { conf: string; avgRating: number; teams: number };
 export type NcaafKeyNum = { margin: number; pct: number; nfl: number };
-export type NcaafCardGame = { away: string; home: string; neutral: number; conf: string; commence?: string; apAway?: number | null; apHome?: number | null; marketSpread: { fav: string; num: number } | null; marketTotal: number | null; projSpread: { fav: string; num: number }; projTotal: number; homeRiser: number; awayRiser: number; pick: { side: string; num: number } | null; totalLean: { dir: string; num: number } | null; off: boolean; rated: boolean; featured: boolean };
+export type NcaafCardGame = { away: string; home: string; neutral: number; conf: string; commence?: string; apAway?: number | null; apHome?: number | null; marketSpread: { fav: string; num: number } | null; marketTotal: number | null; projSpread: { fav: string; num: number }; projTotal: number; homeRiser: number; awayRiser: number; pick: { side: string; num: number } | null; totalLean: { dir: string; num: number } | null; off: boolean; rated: boolean; crossDiv: boolean; featured: boolean };
 export type NcaafUpset = { dog: string; matchup: string; spread: string; modelPct: number; marketPct: number; byPoints: number };
 export const NCAAF_MODEL = {
   "season": 2025,
@@ -292,6 +292,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -324,6 +325,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": true
       },
       {
@@ -356,6 +358,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -388,6 +391,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -417,6 +421,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": true,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -449,6 +454,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -478,6 +484,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -510,6 +517,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -539,6 +547,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -571,6 +580,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -585,7 +595,7 @@ export const NCAAF_MODEL = {
           "fav": "Wake Forest",
           "num": -25.5
         },
-        "marketTotal": 49.0,
+        "marketTotal": 50.0,
         "projSpread": {
           "fav": "Wake Forest",
           "num": -27.0
@@ -600,6 +610,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -612,23 +623,24 @@ export const NCAAF_MODEL = {
         "conf": "Conference USA",
         "marketSpread": {
           "fav": "Delaware",
-          "num": -31.0
+          "num": -31.5
         },
         "marketTotal": 55.5,
         "projSpread": {
           "fav": "Delaware",
-          "num": -30.4
+          "num": -30.8
         },
         "projTotal": 57.0,
         "homeRiser": 0,
         "awayRiser": 0,
         "pick": {
           "side": "Merrimack",
-          "num": 31.0
+          "num": 31.5
         },
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -661,6 +673,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -693,6 +706,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -725,6 +739,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -754,6 +769,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -786,6 +802,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -818,6 +835,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": true
       },
       {
@@ -850,6 +868,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -879,6 +898,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -911,6 +931,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -943,6 +964,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -975,6 +997,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": true
       },
       {
@@ -1007,6 +1030,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -1036,6 +1060,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -1065,6 +1090,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": true
       },
       {
@@ -1094,6 +1120,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": true
       },
       {
@@ -1123,6 +1150,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": true
       },
       {
@@ -1155,6 +1183,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": true
       },
       {
@@ -1187,6 +1216,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": true
       },
       {
@@ -1216,6 +1246,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -1248,6 +1279,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -1277,6 +1309,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -1309,6 +1342,7 @@ export const NCAAF_MODEL = {
         },
         "off": true,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -1341,6 +1375,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -1373,6 +1408,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -1402,6 +1438,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -1434,6 +1471,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": true
       },
       {
@@ -1466,6 +1504,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -1498,6 +1537,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -1530,6 +1570,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -1559,6 +1600,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -1588,6 +1630,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -1620,6 +1663,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -1652,6 +1696,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": true
       },
       {
@@ -1684,6 +1729,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": true
       },
       {
@@ -1713,6 +1759,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": true
       },
       {
@@ -1745,6 +1792,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": true
       },
       {
@@ -1777,6 +1825,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": true
       },
       {
@@ -1809,6 +1858,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -1841,6 +1891,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -1855,7 +1906,7 @@ export const NCAAF_MODEL = {
           "fav": "Cincinnati",
           "num": -7.5
         },
-        "marketTotal": 49.5,
+        "marketTotal": 50.0,
         "projSpread": {
           "fav": "Cincinnati",
           "num": -10.4
@@ -1869,10 +1920,11 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "OVER",
-          "num": 49.5
+          "num": 50.0
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -1902,6 +1954,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -1934,6 +1987,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -1963,6 +2017,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -1995,6 +2050,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -2027,6 +2083,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -2059,6 +2116,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -2088,6 +2146,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": true
       },
       {
@@ -2120,6 +2179,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -2152,6 +2212,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -2181,6 +2242,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -2210,6 +2272,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -2242,6 +2305,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": true
       },
       {
@@ -2274,6 +2338,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": true
       },
       {
@@ -2306,6 +2371,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": true
       },
       {
@@ -2338,6 +2404,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": true
       },
       {
@@ -2367,6 +2434,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -2399,6 +2467,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -2431,6 +2500,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -2460,6 +2530,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -2489,6 +2560,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -2518,6 +2590,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -2550,6 +2623,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -2582,6 +2656,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -2614,6 +2689,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -2646,6 +2722,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -2678,6 +2755,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -2707,6 +2785,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -2739,6 +2818,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -2771,6 +2851,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -2803,6 +2884,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -2835,6 +2917,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": true
       },
       {
@@ -2867,6 +2950,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -2899,6 +2983,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -2931,6 +3016,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -2960,6 +3046,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -2992,6 +3079,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -3024,6 +3112,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -3056,6 +3145,7 @@ export const NCAAF_MODEL = {
         },
         "off": true,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -3085,6 +3175,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -3114,6 +3205,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -3146,6 +3238,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": true,
         "featured": false
       },
       {
@@ -3175,6 +3268,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": true,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -3207,6 +3301,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": false
       },
       {
@@ -3239,6 +3334,7 @@ export const NCAAF_MODEL = {
         },
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": true
       },
       {
@@ -3268,6 +3364,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": true
       },
       {
@@ -3297,6 +3394,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": true
       },
       {
@@ -3326,6 +3424,7 @@ export const NCAAF_MODEL = {
         "totalLean": null,
         "off": false,
         "rated": true,
+        "crossDiv": false,
         "featured": true
       }
     ],
@@ -3397,6 +3496,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -3429,6 +3529,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -3461,6 +3562,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -3493,6 +3595,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -3522,6 +3625,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": true,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -3554,6 +3658,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -3583,6 +3688,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -3615,6 +3721,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -3644,6 +3751,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -3676,6 +3784,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -3690,7 +3799,7 @@ export const NCAAF_MODEL = {
               "fav": "Wake Forest",
               "num": -25.5
             },
-            "marketTotal": 49.0,
+            "marketTotal": 50.0,
             "projSpread": {
               "fav": "Wake Forest",
               "num": -27.0
@@ -3705,6 +3814,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -3717,23 +3827,24 @@ export const NCAAF_MODEL = {
             "conf": "Conference USA",
             "marketSpread": {
               "fav": "Delaware",
-              "num": -31.0
+              "num": -31.5
             },
             "marketTotal": 55.5,
             "projSpread": {
               "fav": "Delaware",
-              "num": -30.4
+              "num": -30.8
             },
             "projTotal": 57.0,
             "homeRiser": 0,
             "awayRiser": 0,
             "pick": {
               "side": "Merrimack",
-              "num": 31.0
+              "num": 31.5
             },
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -3766,6 +3877,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -3798,6 +3910,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -3830,6 +3943,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -3859,6 +3973,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -3891,6 +4006,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -3923,6 +4039,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": true
           },
           {
@@ -3955,6 +4072,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -3984,6 +4102,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -4016,6 +4135,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -4048,6 +4168,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -4080,6 +4201,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -4112,6 +4234,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -4141,6 +4264,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -4170,6 +4294,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -4199,6 +4324,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -4228,6 +4354,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -4260,6 +4387,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -4292,6 +4420,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -4321,6 +4450,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -4353,6 +4483,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -4382,6 +4513,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -4414,6 +4546,7 @@ export const NCAAF_MODEL = {
             },
             "off": true,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -4446,6 +4579,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -4478,6 +4612,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -4507,6 +4642,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -4539,6 +4675,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -4571,6 +4708,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -4603,6 +4741,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -4635,6 +4774,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -4664,6 +4804,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -4693,6 +4834,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -4725,6 +4867,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -4757,6 +4900,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": true
           },
           {
@@ -4789,6 +4933,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -4818,6 +4963,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -4850,6 +4996,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -4882,6 +5029,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": true
           },
           {
@@ -4914,6 +5062,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -4946,6 +5095,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -4960,7 +5110,7 @@ export const NCAAF_MODEL = {
               "fav": "Cincinnati",
               "num": -7.5
             },
-            "marketTotal": 49.5,
+            "marketTotal": 50.0,
             "projSpread": {
               "fav": "Cincinnati",
               "num": -10.4
@@ -4974,10 +5124,11 @@ export const NCAAF_MODEL = {
             },
             "totalLean": {
               "dir": "OVER",
-              "num": 49.5
+              "num": 50.0
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -5007,6 +5158,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -5039,6 +5191,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -5068,6 +5221,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -5100,6 +5254,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -5132,6 +5287,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -5164,6 +5320,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -5193,6 +5350,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -5225,6 +5383,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -5257,6 +5416,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -5286,6 +5446,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -5315,6 +5476,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -5347,6 +5509,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -5379,6 +5542,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": true
           },
           {
@@ -5411,6 +5575,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -5443,6 +5608,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": true
           },
           {
@@ -5472,6 +5638,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -5504,6 +5671,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -5536,6 +5704,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -5565,6 +5734,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -5594,6 +5764,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -5623,6 +5794,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -5655,6 +5827,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -5687,6 +5860,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -5719,6 +5893,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -5751,6 +5926,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -5783,6 +5959,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -5812,6 +5989,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -5844,6 +6022,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -5876,6 +6055,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -5908,6 +6088,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -5940,6 +6121,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": true
           },
           {
@@ -5972,6 +6154,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -6004,6 +6187,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -6036,6 +6220,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -6065,6 +6250,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -6097,6 +6283,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -6129,6 +6316,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -6161,6 +6349,7 @@ export const NCAAF_MODEL = {
             },
             "off": true,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -6190,6 +6379,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -6219,6 +6409,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -6251,6 +6442,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -6280,6 +6472,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": true,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -6312,6 +6505,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -6344,6 +6538,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -6373,6 +6568,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -6402,6 +6598,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -6431,6 +6628,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           }
         ],
@@ -6493,6 +6691,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": true
           },
           {
@@ -6516,6 +6715,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": true
           },
           {
@@ -6539,6 +6739,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -6562,6 +6763,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -6585,6 +6787,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -6614,6 +6817,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -6643,6 +6847,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": true,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -6672,6 +6877,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -6704,6 +6910,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -6727,6 +6934,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -6750,6 +6958,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -6773,6 +6982,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": true
           },
           {
@@ -6796,6 +7006,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -6819,6 +7030,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -6848,6 +7060,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -6871,6 +7084,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -6894,6 +7108,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -6917,6 +7132,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -6940,6 +7156,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -6963,6 +7180,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -6986,6 +7204,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -7009,6 +7228,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -7032,6 +7252,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -7061,6 +7282,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -7090,6 +7312,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -7113,6 +7336,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -7136,6 +7360,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -7159,6 +7384,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": true
           },
           {
@@ -7188,6 +7414,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -7217,6 +7444,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -7240,6 +7468,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -7269,6 +7498,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -7292,6 +7522,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -7315,6 +7546,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -7338,6 +7570,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -7361,6 +7594,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -7384,6 +7618,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -7407,6 +7642,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -7430,6 +7666,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -7453,6 +7690,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -7476,6 +7714,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -7499,6 +7738,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": true
           },
           {
@@ -7522,6 +7762,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -7551,6 +7792,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -7574,6 +7816,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -7597,6 +7840,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -7620,6 +7864,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -7649,6 +7894,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -7672,6 +7918,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -7695,6 +7942,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -7718,6 +7966,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -7741,6 +7990,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -7770,6 +8020,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -7793,6 +8044,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -7816,6 +8068,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -7839,6 +8092,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -7862,6 +8116,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -7885,6 +8140,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -7908,6 +8164,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -7931,6 +8188,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -7954,6 +8212,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -7977,6 +8236,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -8000,6 +8260,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -8023,6 +8284,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -8046,6 +8308,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -8075,6 +8338,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -8098,6 +8362,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -8127,6 +8392,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": true,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -8159,6 +8425,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -8182,6 +8449,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -8205,6 +8473,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -8228,6 +8497,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -8251,6 +8521,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -8274,6 +8545,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -8297,6 +8569,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -8320,6 +8593,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -8343,6 +8617,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -8366,6 +8641,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -8389,6 +8665,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -8412,6 +8689,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -8435,6 +8713,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -8467,6 +8746,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -8490,6 +8770,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -8513,6 +8794,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -8536,6 +8818,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -8559,6 +8842,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           }
         ],
@@ -8605,6 +8889,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -8628,6 +8913,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -8657,6 +8943,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -8680,6 +8967,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": true
           },
           {
@@ -8703,6 +8991,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -8735,6 +9024,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -8758,6 +9048,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -8781,6 +9072,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -8804,6 +9096,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -8827,6 +9120,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -8850,6 +9144,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -8873,6 +9168,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -8896,6 +9192,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -8919,6 +9216,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -8942,6 +9240,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -8965,6 +9264,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -8988,6 +9288,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -9011,6 +9312,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -9034,6 +9336,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -9057,6 +9360,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -9080,6 +9384,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -9103,6 +9408,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -9132,6 +9438,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -9164,6 +9471,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -9187,6 +9495,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -9210,6 +9519,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -9233,6 +9543,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -9256,6 +9567,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -9279,6 +9591,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -9302,6 +9615,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -9325,6 +9639,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -9348,6 +9663,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -9371,6 +9687,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -9394,6 +9711,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": true
           },
           {
@@ -9417,6 +9735,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -9440,6 +9759,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -9463,6 +9783,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -9486,6 +9807,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -9509,6 +9831,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -9532,6 +9855,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -9555,6 +9879,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -9578,6 +9903,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -9601,6 +9927,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -9624,6 +9951,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": true
           },
           {
@@ -9656,6 +9984,7 @@ export const NCAAF_MODEL = {
             },
             "off": true,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -9679,6 +10008,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -9702,6 +10032,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -9725,6 +10056,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -9748,6 +10080,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -9771,6 +10104,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -9794,6 +10128,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -9817,6 +10152,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -9840,6 +10176,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -9863,6 +10200,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -9886,6 +10224,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": true
           },
           {
@@ -9909,6 +10248,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -9941,6 +10281,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -9964,6 +10305,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -9987,6 +10329,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10010,6 +10353,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10033,6 +10377,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -10056,6 +10401,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -10079,6 +10425,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -10102,6 +10449,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10131,6 +10479,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10154,6 +10503,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -10177,6 +10527,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -10200,6 +10551,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -10223,6 +10575,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10246,6 +10599,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -10269,6 +10623,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -10292,6 +10647,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -10315,6 +10671,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -10338,6 +10695,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -10361,6 +10719,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           }
         ],
@@ -10399,6 +10758,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -10422,6 +10782,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -10445,6 +10806,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -10468,6 +10830,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -10491,6 +10854,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10514,6 +10878,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -10546,6 +10911,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10575,6 +10941,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10598,6 +10965,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10627,6 +10995,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10650,6 +11019,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10673,6 +11043,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10696,6 +11067,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10719,6 +11091,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10742,6 +11115,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10765,6 +11139,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10788,6 +11163,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10811,6 +11187,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10834,6 +11211,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10857,6 +11235,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10880,6 +11259,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10903,6 +11283,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10926,6 +11307,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -10949,6 +11331,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -10972,6 +11355,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -10995,6 +11379,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11018,6 +11403,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11041,6 +11427,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11064,6 +11451,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11087,6 +11475,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11110,6 +11499,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11133,6 +11523,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11156,6 +11547,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11179,6 +11571,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11202,6 +11595,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11225,6 +11619,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11248,6 +11643,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11271,6 +11667,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11294,6 +11691,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11317,6 +11715,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11340,6 +11739,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11363,6 +11763,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11386,6 +11787,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11409,6 +11811,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -11432,6 +11835,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11455,6 +11859,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11478,6 +11883,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11510,6 +11916,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -11533,6 +11940,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -11556,6 +11964,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11579,6 +11988,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -11602,6 +12012,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11625,6 +12036,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11648,6 +12060,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -11671,6 +12084,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -11694,6 +12108,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -11717,6 +12132,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -11740,6 +12156,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -11763,6 +12180,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -11786,6 +12204,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -11809,6 +12228,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -11832,6 +12252,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11855,6 +12276,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11878,6 +12300,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -11901,6 +12324,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": true
           },
           {
@@ -11924,6 +12348,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11947,6 +12372,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11970,6 +12396,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -11993,6 +12420,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12016,6 +12444,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12039,6 +12468,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           }
         ],
@@ -12068,6 +12498,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12091,6 +12522,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -12114,6 +12546,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12137,6 +12570,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12160,6 +12594,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -12183,6 +12618,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -12206,6 +12642,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -12238,6 +12675,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -12261,6 +12699,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -12284,6 +12723,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -12307,6 +12747,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -12330,6 +12771,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -12353,6 +12795,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -12385,6 +12828,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -12408,6 +12852,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -12431,6 +12876,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -12454,6 +12900,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -12477,6 +12924,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -12500,6 +12948,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -12523,6 +12972,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12546,6 +12996,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12569,6 +13020,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12592,6 +13044,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12615,6 +13068,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12638,6 +13092,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12661,6 +13116,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12684,6 +13140,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12707,6 +13164,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12730,6 +13188,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12753,6 +13212,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12776,6 +13236,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12799,6 +13260,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12822,6 +13284,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12845,6 +13308,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12868,6 +13332,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12891,6 +13356,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12914,6 +13380,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12937,6 +13404,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12960,6 +13428,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -12983,6 +13452,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13006,6 +13476,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13029,6 +13500,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13052,6 +13524,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13075,6 +13548,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13098,6 +13572,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13121,6 +13596,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13144,6 +13620,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13167,6 +13644,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13190,6 +13668,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13213,6 +13692,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13236,6 +13716,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -13259,6 +13740,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13282,6 +13764,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -13305,6 +13788,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13328,6 +13812,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -13351,6 +13836,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -13374,6 +13860,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13397,6 +13884,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13420,6 +13908,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           }
         ],
@@ -13449,6 +13938,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13472,6 +13962,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13495,6 +13986,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13518,6 +14010,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13541,6 +14034,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13564,6 +14058,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -13587,6 +14082,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13610,6 +14106,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -13633,6 +14130,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -13656,6 +14154,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13679,6 +14178,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -13702,6 +14202,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -13731,6 +14232,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -13754,6 +14256,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -13783,6 +14286,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -13806,6 +14310,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -13829,6 +14334,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -13852,6 +14358,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -13875,6 +14382,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -13898,6 +14406,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -13921,6 +14430,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -13944,6 +14454,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -13967,6 +14478,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -13990,6 +14502,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14013,6 +14526,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14036,6 +14550,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14059,6 +14574,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14082,6 +14598,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14105,6 +14622,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14128,6 +14646,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14151,6 +14670,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14174,6 +14694,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14197,6 +14718,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14220,6 +14742,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14243,6 +14766,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14266,6 +14790,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14289,6 +14814,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14312,6 +14838,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14335,6 +14862,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14358,6 +14886,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14381,6 +14910,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14404,6 +14934,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14427,6 +14958,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14450,6 +14982,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14473,6 +15006,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14496,6 +15030,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14519,6 +15054,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14542,6 +15078,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14565,6 +15102,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14588,6 +15126,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14617,6 +15156,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -14640,6 +15180,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -14663,6 +15204,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14686,6 +15228,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14709,6 +15252,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14732,6 +15276,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14755,6 +15300,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14778,6 +15324,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           }
         ],
@@ -14807,6 +15354,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14830,6 +15378,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14853,6 +15402,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14876,6 +15426,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14899,6 +15450,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14922,6 +15474,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14945,6 +15498,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14968,6 +15522,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -14991,6 +15546,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -15014,6 +15570,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15043,6 +15600,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -15072,6 +15630,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": true,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -15101,6 +15660,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -15130,6 +15690,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -15153,6 +15714,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -15176,6 +15738,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -15199,6 +15762,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -15231,6 +15795,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -15263,6 +15828,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -15295,6 +15861,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -15318,6 +15885,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -15341,6 +15909,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -15364,6 +15933,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -15387,6 +15957,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -15410,6 +15981,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -15433,6 +16005,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -15456,6 +16029,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -15479,6 +16053,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15502,6 +16077,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15531,6 +16107,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15560,6 +16137,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15583,6 +16161,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15606,6 +16185,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15629,6 +16209,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15652,6 +16233,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15675,6 +16257,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15698,6 +16281,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15721,6 +16305,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15744,6 +16329,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15767,6 +16353,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15790,6 +16377,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15813,6 +16401,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15836,6 +16425,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15859,6 +16449,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15882,6 +16473,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15905,6 +16497,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15928,6 +16521,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15951,6 +16545,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15974,6 +16569,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -15997,6 +16593,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16020,6 +16617,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16043,6 +16641,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -16066,6 +16665,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16089,6 +16689,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16112,6 +16713,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": true
           },
           {
@@ -16135,6 +16737,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16158,6 +16761,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16181,6 +16785,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16204,6 +16809,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16227,6 +16833,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -16250,6 +16857,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16273,6 +16881,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           }
         ],
@@ -16311,6 +16920,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16334,6 +16944,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16357,6 +16968,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16380,6 +16992,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16403,6 +17016,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -16426,6 +17040,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16449,6 +17064,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16481,6 +17097,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16504,6 +17121,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16527,6 +17145,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16550,6 +17169,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16573,6 +17193,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16605,6 +17226,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -16634,6 +17256,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -16666,6 +17289,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -16689,6 +17313,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -16712,6 +17337,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -16744,6 +17370,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -16767,6 +17394,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -16790,6 +17418,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -16813,6 +17442,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -16836,6 +17466,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -16859,6 +17490,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -16882,6 +17514,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -16905,6 +17538,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -16928,6 +17562,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -16951,6 +17586,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16974,6 +17610,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -16997,6 +17634,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17020,6 +17658,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17043,6 +17682,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17066,6 +17706,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17089,6 +17730,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17112,6 +17754,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17135,6 +17778,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17158,6 +17802,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17181,6 +17826,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17204,6 +17850,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17227,6 +17874,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17250,6 +17898,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17273,6 +17922,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17296,6 +17946,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17319,6 +17970,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17342,6 +17994,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17365,6 +18018,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17388,6 +18042,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17411,6 +18066,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17434,6 +18090,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17457,6 +18114,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17480,6 +18138,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -17503,6 +18162,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17526,6 +18186,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17549,6 +18210,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17572,6 +18234,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17595,6 +18258,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17618,6 +18282,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           }
         ],
@@ -17647,6 +18312,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17670,6 +18336,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17693,6 +18360,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17716,6 +18384,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17739,6 +18408,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -17762,6 +18432,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -17785,6 +18456,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17808,6 +18480,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17831,6 +18504,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -17860,6 +18534,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -17883,6 +18558,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -17906,6 +18582,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -17929,6 +18606,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -17952,6 +18630,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -17975,6 +18654,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -17998,6 +18678,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -18021,6 +18702,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -18044,6 +18726,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -18067,6 +18750,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -18090,6 +18774,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -18113,6 +18798,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -18136,6 +18822,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -18159,6 +18846,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -18182,6 +18870,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -18205,6 +18894,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -18237,6 +18927,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18260,6 +18951,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18283,6 +18975,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18306,6 +18999,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18329,6 +19023,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18352,6 +19047,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18375,6 +19071,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18398,6 +19095,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18421,6 +19119,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18444,6 +19143,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18467,6 +19167,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18490,6 +19191,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18513,6 +19215,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18536,6 +19239,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18559,6 +19263,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18582,6 +19287,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18605,6 +19311,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18628,6 +19335,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18651,6 +19359,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18674,6 +19383,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18697,6 +19407,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18720,6 +19431,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -18743,6 +19455,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18766,6 +19479,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18795,6 +19509,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -18818,6 +19533,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18841,6 +19557,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18864,6 +19581,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18887,6 +19605,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18910,6 +19629,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18933,6 +19653,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           }
         ],
@@ -18962,6 +19683,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -18985,6 +19707,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19008,6 +19731,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19031,6 +19755,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19054,6 +19779,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19077,6 +19803,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -19100,6 +19827,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19123,6 +19851,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -19146,6 +19875,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -19169,6 +19899,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19192,6 +19923,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19215,6 +19947,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19247,6 +19980,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -19279,6 +20013,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -19308,6 +20043,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -19331,6 +20067,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -19354,6 +20091,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -19377,6 +20115,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -19409,6 +20148,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -19432,6 +20172,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -19455,6 +20196,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -19478,6 +20220,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -19501,6 +20244,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -19524,6 +20268,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -19547,6 +20292,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -19570,6 +20316,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -19593,6 +20340,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19616,6 +20364,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19639,6 +20388,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19662,6 +20412,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19685,6 +20436,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19708,6 +20460,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19731,6 +20484,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19760,6 +20514,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19783,6 +20538,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19806,6 +20562,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19829,6 +20586,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19852,6 +20610,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19875,6 +20634,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19898,6 +20658,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19921,6 +20682,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19944,6 +20706,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19967,6 +20730,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -19990,6 +20754,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20013,6 +20778,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20036,6 +20802,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20059,6 +20826,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20082,6 +20850,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20105,6 +20874,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20128,6 +20898,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -20151,6 +20922,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20174,6 +20946,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20197,6 +20970,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20220,6 +20994,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20243,6 +21018,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20266,6 +21042,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20289,6 +21066,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20312,6 +21090,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20341,6 +21120,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -20364,6 +21144,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20387,6 +21168,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20410,6 +21192,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20433,6 +21216,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           }
         ],
@@ -20462,6 +21246,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20485,6 +21270,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20508,6 +21294,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20531,6 +21318,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20554,6 +21342,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20577,6 +21366,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20600,6 +21390,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -20623,6 +21414,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20646,6 +21438,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20669,6 +21462,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20692,6 +21486,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -20724,6 +21519,7 @@ export const NCAAF_MODEL = {
             },
             "off": true,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -20753,6 +21549,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -20785,6 +21582,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -20814,6 +21612,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -20837,6 +21636,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -20866,6 +21666,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -20889,6 +21690,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -20912,6 +21714,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -20941,6 +21744,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -20964,6 +21768,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -20987,6 +21792,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -21010,6 +21816,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -21033,6 +21840,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -21056,6 +21864,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -21088,6 +21897,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -21111,6 +21921,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -21134,6 +21945,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -21157,6 +21969,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -21180,6 +21993,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21203,6 +22017,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21226,6 +22041,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21249,6 +22065,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21272,6 +22089,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21295,6 +22113,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21318,6 +22137,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21341,6 +22161,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21364,6 +22185,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21387,6 +22209,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21410,6 +22233,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21433,6 +22257,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21456,6 +22281,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21479,6 +22305,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21502,6 +22329,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21525,6 +22353,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21548,6 +22377,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21571,6 +22401,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21594,6 +22425,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21617,6 +22449,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21640,6 +22473,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21663,6 +22497,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21686,6 +22521,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21709,6 +22545,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21732,6 +22569,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -21755,6 +22593,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21778,6 +22617,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21801,6 +22641,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21824,6 +22665,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -21847,6 +22689,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21870,6 +22713,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21893,6 +22737,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21916,6 +22761,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21939,6 +22785,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21962,6 +22809,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -21985,6 +22833,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22008,6 +22857,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22031,6 +22881,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           }
         ],
@@ -22069,6 +22920,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22092,6 +22944,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22124,6 +22977,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22147,6 +23001,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22170,6 +23025,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22193,6 +23049,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22216,6 +23073,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22239,6 +23097,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22262,6 +23121,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22285,6 +23145,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -22308,6 +23169,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22337,6 +23199,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -22366,6 +23229,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": true,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -22389,6 +23253,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -22412,6 +23277,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -22435,6 +23301,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -22458,6 +23325,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -22481,6 +23349,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -22504,6 +23373,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -22527,6 +23397,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -22559,6 +23430,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -22582,6 +23454,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -22605,6 +23478,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -22628,6 +23502,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -22651,6 +23526,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -22674,6 +23550,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -22697,6 +23574,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -22720,6 +23598,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -22743,6 +23622,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22766,6 +23646,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22789,6 +23670,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22812,6 +23694,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22835,6 +23718,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22858,6 +23742,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22881,6 +23766,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22904,6 +23790,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22927,6 +23814,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22950,6 +23838,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22973,6 +23862,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -22996,6 +23886,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23019,6 +23910,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23042,6 +23934,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23065,6 +23958,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23088,6 +23982,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23111,6 +24006,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23134,6 +24030,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23157,6 +24054,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23180,6 +24078,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23203,6 +24102,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23226,6 +24126,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23249,6 +24150,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": true
           },
           {
@@ -23272,6 +24174,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23295,6 +24198,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23318,6 +24222,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23341,6 +24246,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -23364,6 +24270,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": true
           },
           {
@@ -23387,6 +24294,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23410,6 +24318,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23433,6 +24342,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23456,6 +24366,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23479,6 +24390,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23502,6 +24414,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": true,
             "featured": false
           },
           {
@@ -23525,6 +24438,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23548,6 +24462,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23571,6 +24486,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23603,6 +24519,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -23626,6 +24543,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23649,6 +24567,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23672,6 +24591,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23695,6 +24615,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           }
         ],
@@ -23733,6 +24654,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23756,6 +24678,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23785,6 +24708,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -23808,6 +24732,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -23831,6 +24756,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23854,6 +24780,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23877,6 +24804,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -23909,6 +24837,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -23932,6 +24861,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23955,6 +24885,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -23978,6 +24909,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24007,6 +24939,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24030,6 +24963,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24062,6 +24996,7 @@ export const NCAAF_MODEL = {
             },
             "off": true,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -24085,6 +25020,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24108,6 +25044,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -24137,6 +25074,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -24160,6 +25098,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -24192,6 +25131,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -24224,6 +25164,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -24247,6 +25188,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -24270,6 +25212,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -24302,6 +25245,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -24325,6 +25269,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -24348,6 +25293,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -24371,6 +25317,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -24394,6 +25341,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -24417,6 +25365,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -24440,6 +25389,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -24463,6 +25413,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -24486,6 +25437,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -24518,6 +25470,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24547,6 +25500,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": true,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24576,6 +25530,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24599,6 +25554,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24628,6 +25584,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24651,6 +25608,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24674,6 +25632,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24697,6 +25656,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24729,6 +25689,7 @@ export const NCAAF_MODEL = {
             },
             "off": true,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24752,6 +25713,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24775,6 +25737,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24798,6 +25761,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24821,6 +25785,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24844,6 +25809,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24867,6 +25833,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24890,6 +25857,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24913,6 +25881,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24936,6 +25905,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24959,6 +25929,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -24982,6 +25953,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -25005,6 +25977,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -25028,6 +26001,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -25060,6 +26034,7 @@ export const NCAAF_MODEL = {
             },
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": true
           },
           {
@@ -25083,6 +26058,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -25106,6 +26082,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -25129,6 +26106,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -25152,6 +26130,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -25175,6 +26154,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -25198,6 +26178,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -25221,6 +26202,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -25244,6 +26226,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -25267,6 +26250,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -25290,6 +26274,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           },
           {
@@ -25313,6 +26298,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           }
         ],
@@ -25373,6 +26359,7 @@ export const NCAAF_MODEL = {
             "totalLean": null,
             "off": false,
             "rated": true,
+            "crossDiv": false,
             "featured": false
           }
         ],

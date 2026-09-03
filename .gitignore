@@ -43,3 +43,7 @@ Thumbs.db
 
 # Local backfill progress state — regenerated per machine
 .backfill_progress.json
+
+# Full-res rail icon sources. The served copies in web/public are downscaled to 128px
+# (they render at 42-56px); these ~1MB originals stay local so re-exports are possible.
+assets/rail-src/

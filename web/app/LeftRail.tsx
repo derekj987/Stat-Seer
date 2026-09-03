@@ -17,6 +17,18 @@ import { createClient } from "@/lib/supabase/client";
 
 const fire = (name: string) => { try { window.dispatchEvent(new CustomEvent(name)); } catch { /* SSR */ } };
 
+// Rail icon. Custom artwork lives in /public and is served at 128px for a 42-56px slot (2x retina);
+// the full-res originals are kept out of the repo in assets/rail-src. `alt=""` because every row
+// already carries a text label, so announcing the image would just repeat it.
+function RailIcon({ src, cls }: { src: string; cls?: string }) {
+  return (
+    <span className={`leftrail__ic${cls ? " " + cls : ""}`} aria-hidden="true">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt="" className="leftrail__icimg" />
+    </span>
+  );
+}
+
 export default function LeftRail() {
   const [me, setMe] = useState<{ username: string; avatarUrl: string | null; role: string } | null>(null);
   const [unread, setUnread] = useState(0);
@@ -126,23 +138,23 @@ export default function LeftRail() {
 
       {me.role === "founder" && (
         <a className="leftrail__it" href="/creator">
-          <span className="leftrail__ic" aria-hidden="true">👑</span><span className="leftrail__lbl">Creator Dashboard</span>
+          <RailIcon src="/creator.png" /><span className="leftrail__lbl">Creator Dashboard</span>
         </a>
       )}
 
       <button type="button" className="leftrail__it" onClick={() => fire("ss:open-chat")}>
-        <span className="leftrail__ic" aria-hidden="true">👥</span><span className="leftrail__lbl">Friends</span>
+        <RailIcon src="/friends.png" /><span className="leftrail__lbl">Friends</span>
       </button>
 
       <button type="button" className="leftrail__it" onClick={() => fire("ss:open-chat")}>
-        <span className="leftrail__ic" aria-hidden="true">💬</span><span className="leftrail__lbl">Chat</span>
+        <RailIcon src="/message.png" /><span className="leftrail__lbl">Chat</span>
         {unread > 0 && <span className="leftrail__badge">{unread > 9 ? "9+" : unread}</span>}
       </button>
 
       <div className="leftrail__notifwrap" ref={notifRef}>
         <button type="button" className="leftrail__it" aria-haspopup="menu" aria-expanded={notifOpen}
           onClick={() => setNotifOpen((v) => !v)}>
-          <span className="leftrail__ic" aria-hidden="true">🔔</span>
+          <RailIcon src="/notifications.png" />
           <span className="leftrail__lbl">Notifications</span>
           {total > 0 && <span className="leftrail__badge">{total > 9 ? "9+" : total}</span>}
         </button>
@@ -180,7 +192,7 @@ export default function LeftRail() {
   const bettorItems = (
     <>
       <a className="leftrail__it" href="/dashboard">
-        <span className="leftrail__ic" aria-hidden="true">🗂️</span><span className="leftrail__lbl">My Analytics</span>
+        <RailIcon src="/analytics.png" /><span className="leftrail__lbl">My Analytics</span>
       </a>
       <button type="button" className="leftrail__it" onClick={() => fire("ss:open-assistant")}>
         <span className="leftrail__ic leftrail__ic--asst" aria-hidden="true">
@@ -190,10 +202,10 @@ export default function LeftRail() {
         <span className="leftrail__lbl">AI Slip Assistant</span>
       </button>
       <button type="button" className="leftrail__it" onClick={() => fire("ss:open-slip")}>
-        <span className="leftrail__ic" aria-hidden="true">🎟️</span><span className="leftrail__lbl">Saved Slips</span>
+        <RailIcon src="/slip.png" /><span className="leftrail__lbl">Saved Slips</span>
       </button>
       <a className="leftrail__it" href="/bankroll">
-        <span className="leftrail__ic" aria-hidden="true">💰</span><span className="leftrail__lbl">Bankroll</span>
+        <RailIcon src="/bankroll.png" /><span className="leftrail__lbl">Bankroll</span>
       </a>
       <button type="button" className="leftrail__it" onClick={() => fire("ss:open-feedback")}>
         <span className="leftrail__ic leftrail__ic--pigeon" aria-hidden="true">
