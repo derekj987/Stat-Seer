@@ -495,6 +495,43 @@
     }
   }
 
+  // ---- 19. Chart header arrangement ------------------------------------------
+  // Every chart header must read the same way: title (+count) and the scroll tooltip together on the
+  // LEFT, "Add to dashboard" hard RIGHT, chevron last. Panels write these children in different
+  // source orders, so the arrangement is enforced by flex `order` in CSS — which means a new panel
+  // silently inherits it, and a regression shows up as a pin stranded mid-header (the usual cause is
+  // a SECOND `margin-left:auto` in the row splitting the free space).
+  for (const bar of document.querySelectorAll(".hb-bar")) {
+    if (cap(findings, "chart-header-order")) break;
+    if (!vis(bar)) continue;
+    const b = rectOf(bar);
+    if (b.width < 120) continue;
+    const title = bar.querySelector(".hb-bar__title");
+    const pin = bar.querySelector(".pinbtn-wrap");
+    const tip = bar.querySelector(".tip");
+    const chev = bar.querySelector(".hb-bar__chev");
+    if (pin && vis(pin)) {
+      const p = rectOf(pin);
+      // The pin should hug the right edge — allow room for the chevron beside it.
+      const gapRight = b.right - p.right;
+      if (gapRight > 90) {
+        add("chart-header-order", "medium", pin,
+          `"Add to dashboard" sits ${Math.round(gapRight)}px from the header's right edge — is a second margin-left:auto splitting the free space?`);
+      }
+      if (title && vis(title) && tip && vis(tip)) {
+        // The scroll belongs beside the title, not out past the pin.
+        if (rectOf(tip).left > p.left) {
+          add("chart-header-order", "low", tip,
+            "the scroll tooltip renders to the RIGHT of the dashboard button — it should sit next to the title");
+        }
+      }
+    }
+    if (chev && vis(chev) && b.right - rectOf(chev).right > 40) {
+      add("chart-header-order", "low", chev,
+        `the chevron is ${Math.round(b.right - rectOf(chev).right)}px from the header's right edge`);
+    }
+  }
+
   const bySev = { high: 0, medium: 0, low: 0 };
   for (const f of findings) bySev[f.severity] = (bySev[f.severity] || 0) + 1;
   return JSON.stringify({

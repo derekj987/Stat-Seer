@@ -1936,8 +1936,10 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .pinmenu__on{color:var(--accent);font-weight:800}
 .pinmenu__item--new{color:var(--accent);border-top:1px solid var(--line);border-radius:0 0 8px 8px;margin-top:3px;padding-top:9px}
 /* Pin sitting inside a panel header/summary bar — pushed to the right, before the chevron. */
-.hb-bar .pinbtn-wrap,.ncf-h .pinbtn-wrap{margin-left:auto}
-.hb-bar .pinbtn-wrap+.hb-bar__chev{margin-left:11px}
+/* .hb-bar's own pin push + chevron spacing live in the chart-header ordering block further down;
+   this adjacency rule assumed the pin was the chevron's previous sibling, which it isn't on panels
+   that render the Tip between them. */
+.ncf-h .pinbtn-wrap{margin-left:auto}
 @media(max-width:560px){.pinbtn--sm .pinbtn__lbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}}
 
 /* --- Embed mode (a page shown inside a Custom Dashboard card's iframe): hide all site chrome
@@ -3272,8 +3274,20 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .hb-bar__count{display:none}
   .hb-bar__title{flex:1 1 auto;min-width:0}
 }
-.hb-bar__hint{font-size:11.5px;color:var(--muted);font-style:italic}
-.hb-bar__chev{margin-left:auto;color:var(--muted);font-size:13px;transition:transform .2s;flex:0 0 auto}
+.hb-bar__chev{color:var(--muted);font-size:13px;transition:transform .2s;flex:0 0 auto}
+/* Chart-header layout, fixed HERE rather than per panel, because each panel writes its header
+   children in a different source order (some put the Tip before the pin, some after). Flex `order`
+   makes the rendered arrangement identical on every chart app-wide:
+     title (+count) and the scroll tooltip together on the LEFT, then free space,
+     then "Add to dashboard" hard right, then the chevron.
+   Only the pin carries `margin-left:auto` — giving the chevron one too would split the free space
+   between them and leave the pin stranded mid-header, which is the bug this replaces. Panels with no
+   pin hand that job to the chevron instead. */
+.hb-bar > *{order:2}
+.hb-bar__title,.hb-bar__count,.hb-bar .tip{order:1}
+.hb-bar .pinbtn-wrap{order:3;margin-left:auto}
+.hb-bar__chev{order:4;margin-left:11px}
+.hb-bar:not(:has(.pinbtn-wrap)) .hb-bar__chev{margin-left:auto}
 .hb-panel[open] .hb-bar__chev{transform:rotate(180deg)}
 
 /* ===== Scroll "?" tooltips (Tip.tsx) — explain what each table shows =====
@@ -3614,7 +3628,6 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .hb-up:first-child{border-top:none}
   .hb-players__grid{grid-template-columns:1fr}
   .hb-slipf__steps{grid-template-columns:1fr}
-  .hb-bar__hint{display:none}
   .hb-tav__hint{display:none}
   .hb-tav__bar{flex-wrap:wrap}
   .hb-tav__title{font-size:16px}

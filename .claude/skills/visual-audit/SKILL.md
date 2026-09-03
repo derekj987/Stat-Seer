@@ -31,8 +31,30 @@ items < columns, leaving a block of dead space — `auto-fit` collapses them) ·
 gutter it doesn't cancel) · `table-overflows-container` (a chart needs a horizontal scrollbar on a wide
 screen — usually the per-column widths don't cover every column) · `rail-asymmetry` /
 `rail-uneven-rows` / `rail-overflows` / `rail-overlaps-content` (the side rails — see below) ·
-`stranded-disclosure` (an open "show more" whose Collapse control has content above AND below it).
+`stranded-disclosure` (an open "show more" whose Collapse control has content above AND below it) ·
+`chart-header-order` (a chart header's dashboard button isn't hard right, or the scroll tooltip
+drifted past it).
 Console errors + network 4xx/5xx are collected separately (see step 4).
+
+### Chart headers are arranged in CSS, not per panel
+Every `.hb-bar` chart header must read the same way, app-wide:
+
+```
+[ TITLE (+count)  scroll ] ......... free space ......... [ Add to dashboard ] [ chevron ]
+```
+
+Panels write those children in **different source orders** — some put the `Tip` before the pin, some
+after — so the arrangement is enforced by flex `order` on `.hb-bar` rather than by editing each
+panel. A new panel therefore inherits it for free, and you should **not** fix a misplaced header by
+reordering one panel's JSX.
+
+The failure mode to watch for: **two `margin-left:auto` in the same header**. Flex splits the free
+space between them, which parks "Add to dashboard" in the middle of the bar instead of at the right
+edge — exactly the reported bug. Only the pin carries the auto margin; the chevron gets a fixed
+`margin-left`, and panels with no pin hand the auto margin to the chevron via
+`:not(:has(.pinbtn-wrap))`. Beware sibling selectors here too: `order` changes the visual position
+but NOT DOM order, so `.pinbtn-wrap + .hb-bar__chev` silently stops matching once a Tip sits between
+them in the source.
 
 ### ⚠️ A check that is never RUN catches nothing
 `split-group` was in this skill and still shipped three reported bugs on `/ncaaf/model` — duplicate
