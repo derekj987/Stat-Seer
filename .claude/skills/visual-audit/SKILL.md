@@ -34,8 +34,26 @@ screen — usually the per-column widths don't cover every column) · `rail-asym
 `stranded-disclosure` (an open "show more" whose Collapse control has content above AND below it) ·
 `chart-header-order` (a chart header's dashboard button isn't hard right, or the scroll tooltip
 drifted past it) · `uncapped-long-list` (a long item list with no "show more" control) ·
-`orphaned-continuation` (a grouped list whose first row has a blank leading label).
+`orphaned-continuation` (a grouped list whose first row has a blank leading label) ·
+`all-cards-collapsed` (every per-game card on a board is closed, so nothing reads without a click).
 Console errors + network 4xx/5xx are collected separately (see step 4).
+
+### A cap only counts if the capped items are ON SCREEN
+Capping a list at "the first 3" is worthless when the container holding it is collapsed. The prop
+board capped each market at 3 players while every game card was a closed `<details>`, so the board
+still read as 16 clickable rows with no prices on it — the cap changed nothing the reader could see.
+
+So when asked to preview the first N of something, check **both** halves:
+1. the list caps at N behind the standard dropdown, **and**
+2. those N are visible without any interaction — the card/panel containing them defaults to open.
+
+`all-cards-collapsed` catches half 2 by flagging a board whose per-item cards (`.propgame`,
+`.augame`, `.pmgame`, anything `*game`) are ALL closed. It deliberately ignores a single shut card
+among open ones — that's just a card the reader closed. **Verify with the probe on a fresh load, not
+after the expand-collapsibles step**, which opens everything and hides exactly this bug.
+
+Boards that show every item with nothing collapsed (`/lines`, `/ncaaf/lines`) need the opposite fix —
+add the cap, since there is nothing to open.
 
 ### Capping a list: count the ENTITY, not the rows
 Every long list caps behind the standard `.hb-showmore` dropdown (chevron · "Show N more X" ·

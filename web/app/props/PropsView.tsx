@@ -107,8 +107,12 @@ function PropGameCard({ g, open, has, toggle }: {
   g: PropGame; open?: boolean; has: (id: string) => boolean; toggle: (l: Leg) => void;
 }) {
   const nPlayers = new Set(g.markets.flatMap((m) => m.quotes.map((q) => q.player))).size;
+  // Open by DEFAULT. The 3-player cap per market is only useful if you can SEE those 3 players
+  // without opening anything — a collapsed card meant every game still cost a click before you saw
+  // a single price, which is the whole thing the cap was meant to fix. The card still collapses on
+  // click for anyone who wants to skim matchups.
   return (
-    <details className="propgame" open={open}>
+    <details className="propgame" open={open ?? true}>
       <summary className="propgame__head">
         <span className="matchup">{g.away}<span className="at">@</span>{g.home}</span>
         {g.commence && <time className="propgame__kick">{kickET(g.commence)}</time>}

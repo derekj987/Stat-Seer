@@ -572,6 +572,34 @@
     }
   }
 
+  // ---- 22. A board where NO data is visible until you click ------------------
+  // Capping a list at "the first 3" only helps if those 3 are on screen. When every game card on a
+  // board is a COLLAPSED <details>, the cap buys nothing: the reader still pays a click per game
+  // before seeing a single price, and a board of 16 games reads as 16 empty rows. Flag a board whose
+  // per-item cards are all closed. Deliberately not per-card — one collapsed card among open ones is
+  // just a card the reader shut.
+  {
+    const groups = {};
+    for (const d of document.querySelectorAll("details")) {
+      if (!vis(d)) continue;
+      const cls = (d.className || "").toString().split(/\s+/).filter(Boolean);
+      // Only per-item cards: skip page furniture (panels, methodology, the show-more control itself).
+      const key = cls.find((c) => /game$/i.test(c) || /^(propgame|augame|pmgame)$/i.test(c));
+      if (!key) continue;
+      (groups[key] = groups[key] || []).push(d);
+    }
+    for (const key of Object.keys(groups)) {
+      if (cap(findings, "all-cards-collapsed")) break;
+      const all = groups[key];
+      if (all.length < 3) continue;                       // too few to call it a board
+      const open = all.filter((d) => d.open).length;
+      if (open === 0) {
+        add("all-cards-collapsed", "medium", all[0],
+          `all ${all.length} .${key} cards on this board are collapsed — nothing is readable without a click per game; open them by default so the per-card cap is actually visible`);
+      }
+    }
+  }
+
   const bySev = { high: 0, medium: 0, low: 0 };
   for (const f of findings) bySev[f.severity] = (bySev[f.severity] || 0) + 1;
   return JSON.stringify({

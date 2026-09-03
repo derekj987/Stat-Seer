@@ -9,7 +9,7 @@ import { useSlip, type SlipItem } from "@/lib/slip";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
 import { NcaafCardHead, NcaafGameCell } from "../CardCells";
 import type { NcaafCardGame } from "../model-data";
-import { groupByGameDay } from "@/lib/gameDays";
+import { capDayGroups, groupByGameDay, type DayGroup } from "@/lib/gameDays";
 import { DayHeader } from "../../DayHeader";
 
 function Chip({ item }: { item: SlipItem }) {
@@ -31,12 +31,16 @@ function Chip({ item }: { item: SlipItem }) {
 
 const gkey = (g: NcaafCardGame) => `${g.away}-${g.home}`.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
 
+const GAME_CAP = 3;   // games shown before the "show more" dropdown
+
 export default function NcaafLinesTable({ games, today, tomorrow }: { games: NcaafCardGame[]; today: string; tomorrow: string }) {
-  return (
-    <div>
-      {groupByGameDay(games, (g) => g.commence, today, tomorrow).map((grp) => (
+  // First GAME_CAP games visible, the rest behind the standard dropdown. capDayGroups splits a day
+  // at the boundary and flags the tail `cont`, so the day header is drawn exactly once.
+  const { head, rest, restCount } = capDayGroups(
+    groupByGameDay(games, (g) => g.commence, today, tomorrow), GAME_CAP);
+  const dayTable = (grp: DayGroup<NcaafCardGame>) => (
         <div key={grp.key}>
-          <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
+          {!grp.cont && <DayHeader label={grp.label} tone={grp.tone} count={grp.total ?? grp.items.length} />}
           <div className="hb-formwrap">
           <table className="hb-form hb-form--mkt ncline">
             <NcaafCardHead />
@@ -72,7 +76,20 @@ export default function NcaafLinesTable({ games, today, tomorrow }: { games: Nca
           </table>
           </div>
         </div>
-      ))}
+  );
+  return (
+    <div>
+      {head.map(dayTable)}
+      {restCount > 0 && (
+        <details className="hb-showmore">
+          <summary className="hb-showmore__sum">
+            <span className="hb-showmore__chev" aria-hidden="true">&#9656;</span>
+            <span className="hb-showmore__more">Show {restCount} more game{restCount === 1 ? "" : "s"}</span>
+            <span className="hb-showmore__less">Collapse</span>
+          </summary>
+          {rest.map(dayTable)}
+        </details>
+      )}
     </div>
   );
 }
