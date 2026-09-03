@@ -8,7 +8,7 @@ import { fetchCfbScores, scoreFor, type CfbScores } from "@/lib/cfbScores";
 import { NcaafWeekNav, NcaafWeekNote, readNcaafWeek, ncaafCard } from "../NcaafWeek";
 import PinButton from "../../PinButton";
 import { marketGap } from "../lean";
-import { etToday, groupByGameDay } from "@/lib/gameDays";
+import { capDayGroups, etToday, groupByGameDay, type DayGroup } from "@/lib/gameDays";
 import { DayHeader } from "../../DayHeader";
 
 // College Football — The Model. Mirrors the NFL Model page: the full model-vs-market
@@ -52,29 +52,34 @@ export default async function Page({ searchParams }: {
   const scores = await fetchCfbScores(week);
   const { today: todayEt, tomorrow: tomorrowEt } = etToday();
   // Every panel on this page renders the same day-grouped card tables (Today / Upcoming / Completed).
-  const dayTables = (games: readonly NcaafCardGame[]) =>
-    groupByGameDay(games, (g) => g.commence, todayEt, tomorrowEt).map((grp) => (
-      <div key={grp.key}>
-        <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
-        <div className="hb-formwrap">
-          <table className="hb-form hb-form--mkt"><NcaafCardHead /><tbody><CardRows games={grp.items} scores={scores} /></tbody></table>
-        </div>
+  const dayGroups = (games: readonly NcaafCardGame[]) =>
+    groupByGameDay(games, (g) => g.commence, todayEt, tomorrowEt);
+  const dayTable = (grp: DayGroup<NcaafCardGame>) => (
+    <div key={grp.key}>
+      <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
+      <div className="hb-formwrap">
+        <table className="hb-form hb-form--mkt"><NcaafCardHead /><tbody><CardRows games={grp.items} scores={scores} /></tbody></table>
       </div>
-    ));
-  // Show the first `limit` games, then tuck the rest behind a dropdown (keeps long boards short).
+    </div>
+  );
+  const dayTables = (games: readonly NcaafCardGame[]) => dayGroups(games).map(dayTable);
+  // Show roughly the first `limit` games, then tuck the rest behind a dropdown (keeps long boards
+  // short). Group ONCE over the whole list and cap on whole day groups — see capDayGroups: slicing
+  // the games first and grouping each half duplicated day headers, stranded this Collapse control
+  // mid-list, and let a completed day surface among the upcoming ones.
   const dayTablesCapped = (games: readonly NcaafCardGame[], limit = 5) => {
-    if (games.length <= limit) return dayTables(games);
-    const rest = games.slice(limit);
+    const { head, rest, restCount } = capDayGroups(dayGroups(games), limit);
+    if (!restCount) return head.map(dayTable);
     return (
       <>
-        {dayTables(games.slice(0, limit))}
+        {head.map(dayTable)}
         <details className="hb-showmore">
           <summary className="hb-showmore__sum">
             <span className="hb-showmore__chev" aria-hidden="true">▸</span>
-            <span className="hb-showmore__more">Show {rest.length} more game{rest.length === 1 ? "" : "s"}</span>
+            <span className="hb-showmore__more">Show {restCount} more game{restCount === 1 ? "" : "s"}</span>
             <span className="hb-showmore__less">Collapse</span>
           </summary>
-          {dayTables(rest)}
+          {rest.map(dayTable)}
         </details>
       </>
     );

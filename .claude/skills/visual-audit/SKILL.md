@@ -30,8 +30,34 @@ items < columns, leaving a block of dead space — `auto-fit` collapses them) ·
 `full-bleed-short` (a hero/banner with negative margins stops short of the viewport edge — a container
 gutter it doesn't cancel) · `table-overflows-container` (a chart needs a horizontal scrollbar on a wide
 screen — usually the per-column widths don't cover every column) · `rail-asymmetry` /
-`rail-uneven-rows` / `rail-overflows` / `rail-overlaps-content` (the side rails — see below).
+`rail-uneven-rows` / `rail-overflows` / `rail-overlaps-content` (the side rails — see below) ·
+`stranded-disclosure` (an open "show more" whose Collapse control has content above AND below it).
 Console errors + network 4xx/5xx are collected separately (see step 4).
+
+### ⚠️ A check that is never RUN catches nothing
+`split-group` was in this skill and still shipped three reported bugs on `/ncaaf/model` — duplicate
+"Sep 5" sections, a stranded Collapse, and a completed Aug 29 day among the upcoming ones. The check
+was correct; **it had simply never been run against that page**. Adding a check is half the job.
+After adding one, run it over the page matrix — at minimum over the boards that share the shape it
+detects — rather than waiting for the next audit. And when a bug is reported that an existing check
+covers, the first question is "was this page ever probed?", not "is the check wrong?".
+
+### Capped lists: group ONCE, cap on whole groups
+The single root cause behind that whole cluster. A board that caps a long list must group by day
+**once over the full list** and then split on whole group boundaries (`capDayGroups` in
+`lib/gameDays.ts`). Slicing the games first and grouping each half separately re-derives day headers
+per half, which:
+- **duplicates** any day straddling the cut ("two Sep 5 sections"),
+- **strands** the collapse control between the two halves, and
+- **re-sorts each half independently**, so a completed day can surface among upcoming ones.
+
+Three symptoms, one bug — so when any one of them is reported, check for the other two. This shape
+existed on BOTH `/ncaaf/model` and `/model`; when you find it, grep for the sibling
+(`slice(` immediately around a grouping call) rather than fixing only the page that was reported.
+
+Separately, an open `<details>` keeps its `<summary>` in source position, so the control must be
+pushed below what it revealed with the flex-order trick (`.hb-more`, `.hb-showmore[open]`:
+`display:flex; flex-direction:column`, content `order:1`, summary `order:2`).
 
 ### The side rails (Member Rail + Bettor's Rail)
 Two fixed sidebars share one `.leftrail` class — Member Rail on the left, Bettor's Rail on the right —

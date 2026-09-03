@@ -449,6 +449,26 @@
     }
   }
 
+  // ---- 18. An open disclosure whose control is stranded mid-content --------------
+  // A <summary> keeps its source position, so an expanded "Show N more" leaves its Collapse control
+  // with rows above AND below it, reading as a control dropped into the middle of the chart. The fix
+  // is the flex-order trick (.hb-more / .hb-showmore[open]): container flex-column, content order:1,
+  // summary order:2. Only meaningful once the disclosure is open, so expand before probing.
+  for (const d of document.querySelectorAll("details[open]")) {
+    if (cap(findings, "stranded-disclosure")) break;
+    const sum = d.querySelector(":scope > summary");
+    if (!sum || !vis(sum) || !vis(d)) continue;
+    const sibs = [...d.children].filter((c) => c !== sum && vis(c)).map(rectOf).filter((r) => r.height > 0);
+    if (sibs.length < 2) continue;                       // nothing meaningful revealed
+    const s = rectOf(sum);
+    const above = sibs.filter((r) => r.bottom <= s.top + 2).length;
+    const below = sibs.filter((r) => r.top >= s.bottom - 2).length;
+    if (above > 0 && below > 0) {
+      add("stranded-disclosure", "medium", sum,
+        `an open disclosure's control sits mid-content (${above} block(s) above, ${below} below) — give it order:2 in a flex-column so it follows what it revealed`);
+    }
+  }
+
   const bySev = { high: 0, medium: 0, low: 0 };
   for (const f of findings) bySev[f.severity] = (bySev[f.severity] || 0) + 1;
   return JSON.stringify({

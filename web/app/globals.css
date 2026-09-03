@@ -166,6 +166,12 @@ body{background:var(--bg);color:var(--ink);
 .foot--wide p{max-width:none}
 /* "Show N more games" dropdown that caps a long day-grouped board to a short preview. */
 .hb-showmore{margin-top:4px}
+/* When open, move the control BELOW the rows it revealed (same trick as .hb-more). A <summary> keeps
+   its place in source order by default, so an expanded disclosure leaves "Collapse" stranded in the
+   middle of the chart with rows above and below it. */
+.hb-showmore[open]{display:flex;flex-direction:column}
+.hb-showmore[open]>*{order:1}
+.hb-showmore[open]>.hb-showmore__sum{order:2;margin-top:10px}
 .hb-showmore__sum{list-style:none;cursor:pointer;display:flex;justify-content:center;align-items:center;gap:6px;
   font-size:12.5px;font-weight:700;color:var(--accent);padding:8px 2px}
 .hb-showmore__sum::-webkit-details-marker{display:none}
@@ -431,16 +437,16 @@ a.cw__fname:hover{text-decoration:underline}
 .leftrail{display:none}
 /* Row height is driven entirely by the icon + this padding, and every row uses the same pair, so the
    rows stay evenly spaced as the icons grow — there is one row height, not one per item type. */
-.leftrail__it{position:relative;display:flex;align-items:center;gap:12px;width:100%;padding:9px 10px;border:0;background:none;
-  border-radius:12px;cursor:pointer;text-decoration:none;text-align:left;font:inherit;font-size:14px;font-weight:700;color:var(--ink)}
+.leftrail__it{position:relative;display:flex;align-items:center;gap:13px;width:100%;padding:11px 11px;border:0;background:none;
+  border-radius:14px;cursor:pointer;text-decoration:none;text-align:left;font:inherit;font-size:15px;font-weight:700;color:var(--ink)}
 .leftrail__it:hover{background:var(--accent-soft)}
-.leftrail__ic{width:46px;height:46px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;font-size:23px;
+.leftrail__ic{width:56px;height:56px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;font-size:28px;
   background:var(--surface-2);border:1px solid var(--line)}
 .leftrail__it--profile .leftrail__ic{padding:0;overflow:hidden}
 .leftrail__av{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.leftrail__ini{font-weight:800;color:var(--accent);font-size:21px}
+.leftrail__ini{font-weight:800;color:var(--accent);font-size:25px}
 .leftrail__ic--asst{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
-.leftrail__icimg{width:34px;height:34px;object-fit:contain}
+.leftrail__icimg{width:42px;height:42px;object-fit:contain}
 .leftrail__ic--pigeon{overflow:hidden;padding:0}
 .leftrail__pigeon{width:100%;height:100%;object-fit:cover;object-position:62% 38%}
 .leftrail__lbl{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1 1 auto}
@@ -461,8 +467,8 @@ a.cw__fname:hover{text-decoration:underline}
   /* Sits BELOW the masthead art and stretches down the page to fill its column. Both rails share
      this block, so the Bettor's Rail is dimensionally identical to the Member Rail — only the side
      differs (.leftrail--right below). max-height + overflow keep a tall rail from running off-screen. */
-  html[data-rail] .leftrail{display:flex;position:fixed;left:16px;top:108px;width:230px;z-index:45;
-    flex-direction:column;gap:6px;padding:12px 11px;background:var(--surface);
+  html[data-rail] .leftrail{display:flex;position:fixed;left:16px;top:108px;width:254px;z-index:45;
+    flex-direction:column;gap:8px;padding:14px 12px;background:var(--surface);
     border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 26px rgba(0,0,0,.09);
     max-height:calc(100vh - 124px);overflow-y:auto;transition:top .18s ease,max-height .18s ease}
   html[data-rail] .leftrail--right{left:auto;right:16px}
@@ -474,14 +480,14 @@ a.cw__fname:hover{text-decoration:underline}
   html[data-rail][data-home][data-scrolled] .leftrail{top:108px;max-height:calc(100vh - 124px)}
   /* The homepage eyes-banner hero is designed full-bleed; cancel the sidebar column's left padding
      so it spans edge to edge again (the rail overlays its left edge). */
-  html[data-rail] .lp-hero{margin-left:-260px;width:calc(100% + 260px)}
+  html[data-rail] .lp-hero{margin-left:-284px;width:calc(100% + 284px)}
   html[data-rail] .dock{display:none}            /* the rails are the desktop launcher */
-  html[data-rail] .siteshift{padding-left:260px} /* reserve the sidebar column so content doesn't overlap */
+  html[data-rail] .siteshift{padding-left:284px} /* reserve the sidebar column so content doesn't overlap */
 }
 /* The left gutter alone centers content in the REMAINING space, which reads as "the whole page
    shifted right" (content sat 123px — half the gutter — right of true centre). Mirror the gutter on
-   the right so the content column is centred in the VIEWPORT again. Only from 1640px, where there's
-   room to do it without narrowing the 1120px content column (1120 + 2×260 = 1640); below that,
+   the right so the content column is centred in the VIEWPORT again. Only from 1688px, where there's
+   room to do it without narrowing the 1120px content column (1120 + 2×284 = 1688); below that,
    reserving both sides would squeeze the content, which is worse than the offset.
    That reserved right gutter is also where the Bettor's Rail lives — which is why the rail splits at
    exactly this width and merges back into the Member Rail below it. */
@@ -489,18 +495,18 @@ a.cw__fname:hover{text-decoration:underline}
    exact complements, so exactly one copy is visible at every width and a resize can never leave the
    tools unreachable. `display:contents` lets the folded-in items sit directly in the rail's flex
    column, so they keep the same even row gap as everything above them. */
-@media(max-width:1639.98px){
+@media(max-width:1687.98px){
   .leftrail--right{display:none!important}
   .leftrail__merged{display:contents}
 }
-@media(min-width:1640px){
+@media(min-width:1688px){
   .leftrail__merged{display:none}
 }
-@media(min-width:1640px){
-  html[data-rail] .siteshift{padding-right:260px}
+@media(min-width:1688px){
+  html[data-rail] .siteshift{padding-right:284px}
   /* The full-bleed hero cancels the LEFT gutter above; once a right gutter exists it has to cancel
-     that too, or it stops 260px short of the right edge. Both sides = 520px of width to add back. */
-  html[data-rail] .lp-hero{margin-right:-260px;width:calc(100% + 520px)}
+     that too, or it stops 284px short of the right edge. Both sides = 568px of width to add back. */
+  html[data-rail] .lp-hero{margin-right:-284px;width:calc(100% + 568px)}
 }
 
 .dock{position:fixed;right:18px;bottom:18px;z-index:70;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
@@ -3392,8 +3398,11 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-form--psnap th:nth-child(4),.hb-form--psnap td:nth-child(4){width:18%}
 .hb-form--psnap th:nth-child(5),.hb-form--psnap td:nth-child(5){width:18%}
 .hb-form th,.hb-form td{text-align:left}
-.hb-form th{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
-  font-weight:700;padding:0 0 6px;border-bottom:1px solid var(--line)}
+/* Column headers (Market Spread / Market O/U / Model Spread / Model O/U) carry the meaning of every
+   number under them, so they read as headings rather than fine print: full ink, heavier, a touch
+   larger. */
+.hb-form th{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink);
+  font-weight:800;padding:0 0 6px;border-bottom:1px solid var(--line)}
 .hb-form td{font-size:13px;padding:9px 0;border-bottom:1px solid var(--line);white-space:nowrap}
 .hb-form td+td,.hb-form th+th{padding-left:16px}
 .hb-form tbody tr{position:relative}

@@ -6,8 +6,8 @@
 //                            Chat, Notifications.
 //   • Bettor's Rail (right) — what you bet with: My Analytics, AI Slip Assistant, Saved Slips,
 //                            Bankroll, Message Us.
-// The split only happens ≥1640px, because that's the only width where BOTH 260px gutters fit around
-// the 1120px content column (1120 + 520 = 1640). Below it there is one rail holding every item, so
+// The split only happens ≥1688px, because that's the only width where BOTH 284px gutters fit around
+// the 1120px content column (1120 + 568 = 1688). Below it there is one rail holding every item, so
 // nothing becomes unreachable on a 1440px laptop — the rails merge rather than the tools vanishing.
 // Both rails share the .leftrail class (identical size, padding, border, shadow, scroll behaviour);
 // only the side differs. Signed-out visitors / embeds don't see either.

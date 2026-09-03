@@ -6,7 +6,7 @@ import { Brand, FlowSteps, ModelSubnav, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
 import Tip from "../Tip";
 import AddToSlip from "../AddToSlip";
-import { etToday, groupByGameDay, dayBasis } from "@/lib/gameDays";
+import { capDayGroups, etToday, groupByGameDay, dayBasis, type DayGroup } from "@/lib/gameDays";
 import { DayHeader } from "../DayHeader";
 import PinButton from "../PinButton";
 
@@ -269,9 +269,10 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
 
   // Full Model board — the day-grouped game cards. Rendered for any slice of the week's reads so
   // we can show a short lead and tuck the rest behind our standard show-more dropdown.
-  const modelDayGrid = (items: ModelPrediction[]) => (
+  const modelDayGroups = (items: ModelPrediction[]) => groupByGameDay(items, (p) => p.commence, todayEt, tomorrowEt);
+  const modelDayGrid = (groups: DayGroup<ModelPrediction>[]) => (
     <div className="daygrid">
-      {groupByGameDay(items, (p) => p.commence, todayEt, tomorrowEt).map((grp) => (
+      {groups.map((grp) => (
         <div className="daygrid__day" key={grp.key} style={dayBasis(grp.items.length)}>
           <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
           <section className="grid">
@@ -313,17 +314,26 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
             <span className="hb-bar__chev" aria-hidden="true">▾</span>
           </summary>
           <div className="hb-body">
-            {modelDayGrid(preds.slice(0, FULL_MODEL_CAP))}
-            {preds.length > FULL_MODEL_CAP && (
-              <details className="hb-showmore">
-                <summary className="hb-showmore__sum">
-                  <span className="hb-showmore__chev" aria-hidden="true">▸</span>
-                  <span className="hb-showmore__more">Show {preds.length - FULL_MODEL_CAP} more game{preds.length - FULL_MODEL_CAP === 1 ? "" : "s"}</span>
-                  <span className="hb-showmore__less">Collapse</span>
-                </summary>
-                {modelDayGrid(preds.slice(FULL_MODEL_CAP))}
-              </details>
-            )}
+            {/* Cap on whole day groups, never on a raw game slice — grouping each half separately
+                duplicates a day header across the cut and strands this Collapse mid-list. */}
+            {(() => {
+              const { head, rest, restCount } = capDayGroups(modelDayGroups(preds), FULL_MODEL_CAP);
+              return (
+                <>
+                  {modelDayGrid(head)}
+                  {restCount > 0 && (
+                    <details className="hb-showmore">
+                      <summary className="hb-showmore__sum">
+                        <span className="hb-showmore__chev" aria-hidden="true">▸</span>
+                        <span className="hb-showmore__more">Show {restCount} more game{restCount === 1 ? "" : "s"}</span>
+                        <span className="hb-showmore__less">Collapse</span>
+                      </summary>
+                      {modelDayGrid(rest)}
+                    </details>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </details>
       )}

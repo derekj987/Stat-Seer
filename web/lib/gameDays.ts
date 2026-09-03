@@ -25,6 +25,23 @@ export function dayBasis(count: number, cols = 3, card = 340, gap = 14): { flexB
   return { flexBasis: `${n * card + (n - 1) * gap}px` };
 }
 
+/** Split already-grouped days at a cap WITHOUT ever splitting a day across the boundary: whole
+ *  groups go to `head`, the remainder to `rest` (for a "show N more" disclosure).
+ *
+ *  Always group ONCE over the FULL list and cap the groups — never `slice()` the games first and
+ *  group each half. Grouping each half re-derives day headers from that half, which duplicates a day
+ *  that straddles the cut ("two Sep 5 sections"), strands the collapse control in the middle of the
+ *  list, and re-sorts each half independently so a completed day can appear among upcoming ones.
+ *  That was one bug reported three different ways on the NCAAF model board. */
+export function capDayGroups<T>(groups: DayGroup<T>[], limit: number): {
+  head: DayGroup<T>[]; rest: DayGroup<T>[]; restCount: number;
+} {
+  let shown = 0, cut = 0;
+  while (cut < groups.length && shown < limit) { shown += groups[cut].items.length; cut++; }
+  const rest = groups.slice(cut);
+  return { head: groups.slice(0, cut), rest, restCount: rest.reduce((n, g) => n + g.items.length, 0) };
+}
+
 export function groupByGameDay<T>(
   items: readonly T[],
   getCommence: (it: T) => string | null | undefined,
