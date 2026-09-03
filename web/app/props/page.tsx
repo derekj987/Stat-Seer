@@ -1,6 +1,6 @@
 import { weekRange } from "@/lib/board";
 import { weekProps, CATEGORIES, categoryByKey } from "@/lib/props";
-import { playerSlot } from "@/lib/playerSlot";
+import { playerSlot, playerTeam } from "@/lib/playerSlot";
 import { ShopSubnav, Brand, FlowSteps, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
 import PropsView from "./PropsView";
@@ -49,7 +49,11 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
     .map((g) => ({
       ...g,
       markets: g.markets.filter((m) => catSet.has(m.market)).map((m) => ({
-        ...m, quotes: m.quotes.map((q) => ({ ...q, slot: playerSlot(q.player, "nfl") ?? undefined })),
+        ...m, quotes: m.quotes.map((q) => ({
+          ...q,
+          slot: playerSlot(q.player, "nfl") ?? undefined,
+          team: playerTeam(q.player, "nfl") ?? undefined,
+        })),
       })),
     }))
     .filter((g) => g.markets.length > 0);

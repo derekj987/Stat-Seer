@@ -17,3 +17,12 @@ export function playerSlot(name: string, base: "nfl" | "ncaaf"): string | null {
   const key = normName(name);
   return base === "ncaaf" ? slot(NCAAF_DEPTH[key]) : slot(DEPTH[key]);
 }
+
+// The player's team, from the same depth-chart entry — so prop rows can read "Drake Maye (QB1, NE)"
+// like the Model chart does. The odds feed only carries the two teams per GAME, not per player, so
+// the depth chart is where a player-level team comes from.
+export function playerTeam(name: string, base: "nfl" | "ncaaf"): string | null {
+  const key = normName(name);
+  const entry = base === "ncaaf" ? NCAAF_DEPTH[key] : DEPTH[key];
+  return entry?.team ?? null;
+}

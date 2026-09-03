@@ -64,6 +64,8 @@ export interface Quote {
   byBook: Record<string, number>; // every book's price — needed for single-book parlays
   eventId: string;
   slot?: string; // position + depth rank, e.g. "RB1" — attached by the page for display
+  team?: string; // player's team, e.g. "NE" — also attached by the page (the feed has teams per game,
+                 // not per player), so a row can read "Drake Maye (QB1, NE)" like the Model chart
   fairProb?: number | null; // Pick Auditor: de-vigged fair probability of THIS side (null if one-sided)
 }
 export interface MarketBlock {

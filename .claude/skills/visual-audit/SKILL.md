@@ -25,8 +25,23 @@ two sub-tables/`<details>`, which duplicates the header and strands the collapse
 the page reads as "shifted right") · `grid-dead-space` (`repeat(auto-fill, …)` keeps empty tracks when
 items < columns, leaving a block of dead space — `auto-fit` collapses them) ·
 `chart-truncated-with-space` (a cell ellipsizes its text while its row still has unused width) ·
-`repeated-row-label` (consecutive rows repeat the same first-cell text — the "double names" bug).
+`repeated-row-label` (consecutive rows repeat the same first-cell text — the "double names" bug) ·
+`nav-alignment-mismatch` (one header/nav row doesn't share the alignment of its siblings).
 Console errors + network 4xx/5xx are collected separately (see step 4).
+
+### Why a change "over here" surfaces a bug "over there"
+Two distinct causes — tell them apart before assuming you broke something:
+
+1. **Shared global CSS.** Everything lives in one `globals.css` with generic class names (`.grid`,
+   `.propstack`, `.catnav`, `.hb-bar__count`). Editing one rule hits *every* page using it. Before
+   changing a shared class, `grep -c` the class across `app/` to see the blast radius, and re-check
+   the other consumers — not just the page you were asked about.
+2. **A latent bug that was camouflaged.** Fixing alignment/spacing often *reveals* a neighbour that
+   was always wrong. The category pills looked fine while the whole page was shifted right; once the
+   page was centred, the one left-aligned row stood out. **Check git before apologising**:
+   `git log -S'.theRule{' --oneline -- web/app/globals.css` and `git show HEAD~N:web/app/globals.css |
+   grep '^.theRule{'` — if the rule is byte-identical to before your change, you exposed it, you
+   didn't cause it. Say which it was.
 
 ### ⚠️ Chart changes ALWAYS get an alignment pass
 Standing rule from Derek: **any time a chart/table/board is changed, re-check alignment before

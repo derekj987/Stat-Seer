@@ -30,7 +30,10 @@ function PropChip({ q, market, marketLabel, game, saved, cont, onToggle }: {
   q: Quote; market: string; marketLabel: string; game: string; saved: boolean; cont?: boolean; onToggle: (l: Leg) => void;
 }) {
   const bet = marketLabel === "ATTD" ? "ATTD" : sideLabel(q.side, q.line) || q.side;
-  const name = q.slot ? `${q.player} (${q.slot})` : q.player;
+  // "(QB1, NE)" — depth slot + team, matching the Model chart. Either part may be missing (a player
+  // absent from the depth chart), so build from whatever we have.
+  const tag = [q.slot, q.team].filter(Boolean).join(", ");
+  const name = tag ? `${q.player} (${tag})` : q.player;
   const a = q.fairProb != null ? audit(q.price, q.fairProb) : null;   // Pick Auditor
   const leg: Leg = {
     id: `${q.eventId}:${market}:${q.player}:${q.side}:${q.line}`,
@@ -48,7 +51,7 @@ function PropChip({ q, market, marketLabel, game, saved, cont, onToggle }: {
       {/* `cont` = the Over/Under partner of the row above. Blanking the repeated name (the same way
           the Model chart stacks a player's markets) makes the pair read as one player with two
           sides, instead of looking like a duplicated row. */}
-      <span className="propq__player">{cont ? "" : <>{q.player}{q.slot && <span className="propq__slot"> ({q.slot})</span>}</>}</span>
+      <span className="propq__player">{cont ? "" : <>{q.player}{tag && <span className="propq__slot"> ({tag})</span>}</>}</span>
       <span className="propq__side">{sideLabel(q.side, q.line)}</span>
       <span className="propq__price">
         {fmtOdds(q.price)}

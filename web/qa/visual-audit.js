@@ -320,6 +320,33 @@
     }
   }
 
+  // ---- 14. Header/nav rows that don't share the page's alignment ---------------
+  // A stack of nav rows (week badge, flow steps, subnav, category pills) should agree: all centred or
+  // all left. One `display:inline-flex` row among centred siblings parks itself at the left edge and
+  // reads as broken. Compares each row's centre to the median of its siblings.
+  {
+    const bars = [...document.querySelectorAll(
+      ".catnav, .subnav, .subnavrow, .pageweek, .flow, .flowsteps, .weeknav, .teamnav, .pinrow")].filter(vis);
+    if (bars.length >= 3) {
+      const main = document.querySelector(".siteshift main, main");
+      if (main && vis(main)) {
+        const mr = rectOf(main), mc = (mr.left + mr.right) / 2;
+        const offs = bars.map((b) => { const r = rectOf(b); return { b, off: (r.left + r.right) / 2 - mc, w: r.width }; })
+          .filter((x) => x.w > 40 && x.w < mr.width - 40);   // full-width rows can't be "off-centre"
+        if (offs.length >= 3) {
+          const med = offs.map((x) => x.off).sort((a, b) => a - b)[Math.floor(offs.length / 2)];
+          for (const x of offs) {
+            if (cap(findings, "nav-alignment-mismatch")) break;
+            if (Math.abs(x.off - med) > 60) {
+              add("nav-alignment-mismatch", "medium", x.b,
+                `this row sits ${Math.round(x.off - med)}px off the alignment its sibling nav rows share (inline-flex without auto margins?)`);
+            }
+          }
+        }
+      }
+    }
+  }
+
   const bySev = { high: 0, medium: 0, low: 0 };
   for (const f of findings) bySev[f.severity] = (bySev[f.severity] || 0) + 1;
   return JSON.stringify({

@@ -7,7 +7,7 @@ import PropsView from "../../props/PropsView";
 import { etToday } from "@/lib/gameDays";
 import { cfbWeekProps } from "@/lib/cfbProps";
 import { CATEGORIES, categoryByKey } from "@/lib/props";
-import { playerSlot } from "@/lib/playerSlot";
+import { playerSlot, playerTeam } from "@/lib/playerSlot";
 
 function CatNav({ current }: { current: string }) {
   return (
@@ -45,7 +45,11 @@ export default async function Page({ searchParams }: PageProps<"/ncaaf/props">) 
     .map((g) => ({
       ...g,
       markets: g.markets.filter((m) => catSet.has(`player_${m.market}`) || catSet.has(m.market)).map((m) => ({
-        ...m, quotes: m.quotes.map((q) => ({ ...q, slot: playerSlot(q.player, "ncaaf") ?? undefined })),
+        ...m, quotes: m.quotes.map((q) => ({
+          ...q,
+          slot: playerSlot(q.player, "ncaaf") ?? undefined,
+          team: playerTeam(q.player, "ncaaf") ?? undefined,
+        })),
       })),
     }))
     .filter((g) => g.markets.length > 0);
