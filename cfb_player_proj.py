@@ -331,6 +331,15 @@ DEFAULT_VOL = {"carries": 10.0, "receptions": 3.6, "pass_att": 28.0}   # per-gam
 # question (why CFB own-volume reads so low against the role baseline) is still open. A genuine
 # promotion still lifts a player, just not without limit.
 ROLE_VOL_CAP = 1.6
+# ...and how many games of that stat we need before the cap is allowed to bite at all.
+#
+# The cap is multiplicative on a player's own volume, so on a near-zero own volume ANY multiple is
+# still near zero. Applied unconditionally it wrecked exactly the players it should have left alone:
+# a promoted QB1 with 3 games of mop-up duty was clamped to 39.2 passing yards against a 155.5 line.
+# Measured, median(proj / line) split cleanly by sample size -- 0.52 for players with <=4 games
+# against 1.07 for those with >=10. With two or three games a player's own volume is noise and the
+# ROLE baseline is the better estimate, which is what project_role did before the cap existed.
+CAP_MIN_GAMES = 8
 
 
 def _sum(games, f):
@@ -410,9 +419,10 @@ def project_role(games, market, pos, rank, team, per_team, league):
         decay = _decay_for(games, field, base)
         own = _recent_avg(games, field, decay) or 0.0
         v = max(base, own)
-        # Cap the role lift against what the player has actually done. Only when we HAVE an own
-        # volume: with none there is nothing better to fall back on than the role baseline.
-        if own > 0:
+        # Cap the role lift against what the player has actually done -- but only when his own
+        # volume is worth trusting. Too few games and this clamps a genuine promotion to his
+        # backup workload; see CAP_MIN_GAMES.
+        if own > 0 and _gp(games, field) >= CAP_MIN_GAMES:
             v = min(v, ROLE_VOL_CAP * own)
         return v, decay
 
