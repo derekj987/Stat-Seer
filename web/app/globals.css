@@ -4076,6 +4076,15 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 /* Second row: the other two sections, named. Tighter above so it reads as a continuation of the
    button row rather than a separate block. */
 .lp-lead__cta--alt{gap:10px 22px;margin:-6px 0 16px}
+/* Free-beta invitation, signed-out only. Sits between the value prop and the explore buttons: it is
+   the primary action for a first-time visitor, and the gate is friendly news (free) rather than a
+   wall, so it reads as an offer instead of a paywall notice. */
+.lp-beta{max-width:640px;margin:0 auto 18px;padding:14px 18px;border-radius:14px;
+  background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line))}
+.lp-beta__h{margin:0 0 6px;font-size:16px;font-weight:800;color:var(--accent)}
+.lp-beta__h em{font-style:normal;text-transform:uppercase;letter-spacing:.04em}
+.lp-beta__p{margin:0 0 12px;font-size:13.5px;line-height:1.5;color:var(--ink)}
+.lp-beta__cta{display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap}
 .lp-lead__go{font-size:14px}
 .lp-lead__alt{font-size:13.5px;font-weight:700;color:var(--accent);text-decoration:none}
 .lp-lead__alt:hover{text-decoration:underline}

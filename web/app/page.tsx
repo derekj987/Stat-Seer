@@ -115,6 +115,25 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
           One model reads every game <b>line-blind</b>, shows you exactly where it disagrees with the
           market, then finds the sportsbook paying the most for your <b>exact slip</b>.
         </p>
+        {/* Signed-out visitors only: members have already been approved and don't need the ask.
+            Wording matches /signup and /pending exactly ("private beta", "small batches", "email you
+            when you're in") so the promise doesn't change between the pitch and the form. */}
+        {!isMember && (
+          <div className="lp-beta">
+            <p className="lp-beta__h">Join our <em>FREE</em> beta</p>
+            <p className="lp-beta__p">
+              StatSeer is in <b>private beta</b> and it&apos;s <b>completely free</b> — nothing to buy.
+              These pages show a <b>sample</b> of each board; the full model — every game, every player
+              prop, and the graded track record — opens up once you <b>request access and get approved</b>.
+              We approve in small batches and email you when you&apos;re in.
+            </p>
+            <div className="lp-beta__cta">
+              <a href="/signup" className="btn btn--primary">Request free beta access</a>
+              <a href="/login" className="lp-lead__alt">Already a member? Log in →</a>
+            </div>
+          </div>
+        )}
+
         {/* Name the destination. "Explore today's board" jumped to an anchor further down this same
             page, which told a first-time visitor nothing about what the site actually contains —
             these go straight into The Model for each sport, and the secondary links name the other
