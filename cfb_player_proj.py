@@ -315,6 +315,23 @@ FIELDS = ["carries", "receptions", "pass_att"]                       # volumes w
 TE_VOL_FACTOR = 0.72          # a TE1 sees fewer targets than a WR1 at the same "rank"
 DEFAULT_VOL = {"carries": 10.0, "receptions": 3.6, "pass_att": 28.0}   # per-game fallback
 
+# How far the ROLE's baseline workload may exceed the volume a player has actually demonstrated.
+#
+# rolevol() takes max(role_baseline, own_recent), so it can only ratchet volume UP -- a player whose
+# depth slot is generous is handed the role's workload even when his own history is far below it.
+# That is what put a TE1 on 4.9 receptions/game (exactly Miami's WR1 baseline x TE_VOL_FACTOR) when
+# he had cleared a 1.5-reception line in 9 of 19 games, and turned a 16.5-yard receiving line into a
+# 56.7-yard projection -- 3.4x a number his own median sits right on.
+#
+# Measured before this cap: median(proj / book line) for well-sampled players whose line IS their
+# median (they clear it 40-60% of the time) was 1.52 in NCAAF against 1.01 in the NFL, whose depth
+# and game samples are rich enough that this never bites.
+#
+# This is a BLUNT INSTRUMENT and deliberately so -- it clamps the symptom while the underlying
+# question (why CFB own-volume reads so low against the role baseline) is still open. A genuine
+# promotion still lifts a player, just not without limit.
+ROLE_VOL_CAP = 1.6
+
 
 def _sum(games, f):
     return sum(g[f] or 0 for g in games if g.get(f) is not None)
@@ -391,7 +408,13 @@ def project_role(games, market, pos, rank, team, per_team, league):
         if pos == "TE" and field == "receptions":
             base *= TE_VOL_FACTOR
         decay = _decay_for(games, field, base)
-        return max(base, _recent_avg(games, field, decay) or 0.0), decay
+        own = _recent_avg(games, field, decay) or 0.0
+        v = max(base, own)
+        # Cap the role lift against what the player has actually done. Only when we HAVE an own
+        # volume: with none there is nothing better to fall back on than the role baseline.
+        if own > 0:
+            v = min(v, ROLE_VOL_CAP * own)
+        return v, decay
 
     if market == "pass_yds":
         v, dec = rolevol("pass_att")
