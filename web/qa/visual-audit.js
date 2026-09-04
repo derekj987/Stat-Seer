@@ -600,6 +600,37 @@
     }
   }
 
+  // ---- 23. The column header repeated inside one board ------------------------
+  // A board that renders one <table> per day group emits a <thead> per group, so the column row
+  // ("Game / Market Spread / Market O/U / …") reappears under every date — and again wherever a day
+  // is split at the show-more cap. It reads as several charts chopped up rather than one, which is
+  // the reported bug. The column header belongs ONCE, at the top of the board; the per-column widths
+  // are declared on td as well as th, so a headerless continuation table still lines up.
+  for (const board of document.querySelectorAll(".hb-panel, .hb-body, main, section")) {
+    if (cap(findings, "repeated-column-header")) break;
+    if (!vis(board)) continue;
+    // Only look at the innermost board that owns these tables, so one finding isn't reported again
+    // for every ancestor.
+    const tables = [...board.querySelectorAll("table")].filter(vis);
+    if (tables.length < 2) continue;
+    if ([...board.querySelectorAll(".hb-panel, .hb-body")].some((n) => n !== board && n.querySelectorAll("table").length === tables.length)) continue;
+    const seen = new Map();
+    for (const t of tables) {
+      const head = t.querySelector("thead");
+      if (!head || !vis(head)) continue;
+      const key = (head.textContent || "").replace(/\s+/g, " ").trim();
+      if (!key) continue;
+      seen.set(key, (seen.get(key) || 0) + 1);
+    }
+    for (const [key, n] of seen) {
+      if (n > 1) {
+        add("repeated-column-header", "medium", board,
+          `the column header repeats ${n}x inside one board ("${key.slice(0, 60)}") — render it on the first day group only`);
+        break;
+      }
+    }
+  }
+
   const bySev = { high: 0, medium: 0, low: 0 };
   for (const f of findings) bySev[f.severity] = (bySev[f.severity] || 0) + 1;
   return JSON.stringify({

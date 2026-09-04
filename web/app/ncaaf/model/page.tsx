@@ -68,13 +68,21 @@ export default async function Page({ searchParams }: {
   // Every panel on this page renders the same day-grouped card tables (Today / Upcoming / Completed).
   const dayGroups = (games: readonly NcaafCardGame[]) =>
     groupByGameDay(games, (g) => g.commence, todayEt, tomorrowEt);
-  const dayTable = (grp: DayGroup<NcaafCardGame>) => (
+  // `i` is the day group's position on the board. The COLUMN header is drawn only for i === 0:
+  // every day group used to render its own <thead>, so "Game / Market Spread / Market O/U / Model
+  // Spread / Model O/U" reappeared under every date and chopped one chart into several. Column
+  // widths are declared on both th AND td (.hb-form--mkt nth-child), so a headerless table still
+  // lines up exactly with the one above it.
+  const dayTable = (grp: DayGroup<NcaafCardGame>, i: number) => (
     <div key={grp.key}>
       {/* `cont` = the tail of a day split across the "show more" boundary; its header is already
           drawn above the boundary, so drawing another is the duplicate-day-header bug. */}
       {!grp.cont && <DayHeader label={grp.label} tone={grp.tone} count={grp.total ?? grp.items.length} />}
       <div className="hb-formwrap">
-        <table className="hb-form hb-form--mkt"><NcaafCardHead /><tbody><CardRows games={grp.items} scores={scores} /></tbody></table>
+        <table className="hb-form hb-form--mkt">
+          {i === 0 && <NcaafCardHead />}
+          <tbody><CardRows games={grp.items} scores={scores} /></tbody>
+        </table>
       </div>
     </div>
   );
@@ -95,7 +103,7 @@ export default async function Page({ searchParams }: {
             <span className="hb-showmore__more">Show {restCount} more game{restCount === 1 ? "" : "s"}</span>
             <span className="hb-showmore__less">Collapse</span>
           </summary>
-          {rest.map(dayTable)}
+          {rest.map((g, i) => dayTable(g, i + 1))}
         </details>
       </>
     );

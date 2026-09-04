@@ -38,12 +38,14 @@ export default function NcaafLinesTable({ games, today, tomorrow }: { games: Nca
   // at the boundary and flags the tail `cont`, so the day header is drawn exactly once.
   const { head, rest, restCount } = capDayGroups(
     groupByGameDay(games, (g) => g.commence, today, tomorrow), GAME_CAP);
-  const dayTable = (grp: DayGroup<NcaafCardGame>) => (
+  // Column header on the FIRST day group only — see the model board: a <thead> per day group
+  // repeats the column row under every date and reads as several charts instead of one.
+  const dayTable = (grp: DayGroup<NcaafCardGame>, i: number) => (
         <div key={grp.key}>
           {!grp.cont && <DayHeader label={grp.label} tone={grp.tone} count={grp.total ?? grp.items.length} />}
           <div className="hb-formwrap">
           <table className="hb-form hb-form--mkt ncline">
-            <NcaafCardHead />
+            {i === 0 && <NcaafCardHead />}
             <tbody>
               {grp.items.map((g) => {
                 const ms = g.marketSpread!;
@@ -87,7 +89,7 @@ export default function NcaafLinesTable({ games, today, tomorrow }: { games: Nca
             <span className="hb-showmore__more">Show {restCount} more game{restCount === 1 ? "" : "s"}</span>
             <span className="hb-showmore__less">Collapse</span>
           </summary>
-          {rest.map(dayTable)}
+          {rest.map((g, i) => dayTable(g, i + 1))}
         </details>
       )}
     </div>

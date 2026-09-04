@@ -35,8 +35,33 @@ screen — usually the per-column widths don't cover every column) · `rail-asym
 `chart-header-order` (a chart header's dashboard button isn't hard right, or the scroll tooltip
 drifted past it) · `uncapped-long-list` (a long item list with no "show more" control) ·
 `orphaned-continuation` (a grouped list whose first row has a blank leading label) ·
-`all-cards-collapsed` (every per-game card on a board is closed, so nothing reads without a click).
+`all-cards-collapsed` (every per-game card on a board is closed, so nothing reads without a click) ·
+`repeated-column-header` (the column row reappears mid-board, chopping one chart into several).
 Console errors + network 4xx/5xx are collected separately (see step 4).
+
+### One board = ONE column header
+A board that renders a `<table>` per day group emits a `<thead>` per group, so the column row
+("Game / Market Spread / Market O/U / Model Spread / Model O/U") reappears under every date — and
+again wherever a day is split at the show-more cap. The reader sees one chart chopped into several.
+
+Draw the column header on the **first day group only**, and make the show-more tail continue the
+numbering so it never re-emits one:
+
+```tsx
+const dayTable = (grp, i) => (
+  <table>{i === 0 && <ColumnHead />}<tbody>…</tbody></table>
+);
+head.map(dayTable)                       // i starts at 0 → header
+rest.map((g, i) => dayTable(g, i + 1))   // never 0 → no header in the dropdown
+```
+
+Headerless continuation tables still line up because the per-column widths are declared on **`td` as
+well as `th`** (`.hb-form--mkt th:nth-child(n), .hb-form--mkt td:nth-child(n)`). If you ever move
+those widths onto `th` alone, every headerless table will collapse to content width — check both
+selectors before changing them.
+
+Day headers are the opposite case: those SHOULD repeat per day, except on the tail of a day split
+across the cap (`grp.cont`), which already has one above the boundary.
 
 ### A cap only counts if the capped items are ON SCREEN
 Capping a list at "the first 3" is worthless when the container holding it is collapsed. The prop
