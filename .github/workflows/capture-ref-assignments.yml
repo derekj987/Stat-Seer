@@ -3,10 +3,18 @@ name: Capture referee assignments
 # Populates ref_assignments (per-game crew chief) from the free nflverse `referee`
 # field. Assignments appear game-week; a daily in-season run picks them up. No Odds
 # API credits. Context reads the table to show each game's crew as a factor.
+#
+# TWICE daily, because the source posts crews mid-week and a single morning run could sit a full day
+# behind: an assignment published Tuesday afternoon ET would not have shown until Wednesday morning,
+# and Thursday-night games only get one look before kickoff. The evening pass halves that lag.
+# Free source, no API credits, and the script writes nothing when there is nothing new -- verified in
+# the run log ("0 games with an assigned crew / nothing to write"), so the extra run costs nothing but
+# a minute of runner time.
 
 on:
   schedule:
-    - cron: "0 14 * 9-12,1-2 *"   # 14:00 UTC (~9-10am ET) daily, Sep-Feb (through the Super Bowl)
+    - cron: "0 14 * 9-12,1-2 *"   # 14:00 UTC (~9-10am ET), Sep-Feb (through the Super Bowl)
+    - cron: "0 22 * 9-12,1-2 *"   # 22:00 UTC (~5-6pm ET) — catches same-day afternoon assignments
   workflow_dispatch: {}
 
 concurrency:
