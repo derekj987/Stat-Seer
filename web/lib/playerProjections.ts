@@ -9,33 +9,68 @@ export interface PlayerProj { game: string; commence: string; player: string; te
 /** Games of "no opinion" mixed into a player's own over-rate, so a 2-game sample cannot produce a
  *  confident lean. */
 const LEAN_PRIOR_GAMES = 6;
-/** How far the shrunk rate must sit from 50% before we show a lean at all. */
+/** How far the shrunk rate must sit from the BASELINE before we show a lean at all. */
 const LEAN_MARGIN = 0.04;
 
 export type Lean = "over" | "under" | null;
+
+const rateOf = (r: PlayerProj): number | null => (r.cG ? r.cOver / r.cG : null);
+
+/** Median historical over-rate per category, over the rows that actually have a posted line.
+ *
+ *  The lean is centred HERE rather than on 50%, because the raw rate is not centred on 50% and the
+ *  offset differs by sport. Measured at the posted lines: NFL pools to 50.9% (an efficient market —
+ *  the line sits at the historical median), but NCAAF pools to 37.7%, because books post college
+ *  props on players expected to take a leap and last season's log understates them. Centring on 50%
+ *  in that world calls almost every college row UNDER — which is how a fix for a 90%-OVER bias
+ *  became a 20%-OVER one.
+ *
+ *  Note this was NOT role change: rows whose projection implies a much bigger role than the line
+ *  ran 31.4% vs 32.6% for stable roles — indistinguishable. The offset is in the data source, not
+ *  in the players.
+ *
+ *  Centring on the observed median is the same de-bias the game model already applies to spreads and
+ *  totals (`debias = statistics.median(_resid)` in cfb_export.py). It makes the arrow a RELATIVE
+ *  read — "more likely to clear this number than a typical player at his line" — which is what it
+ *  should have been saying all along. It is explicitly not a claim of edge over the closing line. */
+export function leanCentres(rows: PlayerProj[]): Map<string, number> {
+  const by = new Map<string, number[]>();
+  for (const r of rows) {
+    if (r.book === null || r.cat === "td") continue;
+    const v = rateOf(r);
+    if (v === null) continue;
+    (by.get(r.cat) ?? by.set(r.cat, []).get(r.cat)!).push(v);
+  }
+  const out = new Map<string, number>();
+  for (const [cat, vs] of by) {
+    vs.sort((a, b) => a - b);
+    const mid = vs.length % 2 ? vs[(vs.length - 1) / 2] : (vs[vs.length / 2 - 1] + vs[vs.length / 2]) / 2;
+    out.set(cat, mid);
+  }
+  return out;
+}
 
 /** The over/under lean for a projection row.
  *
  *  Do NOT compare `proj` to the line on a continuous market. `proj` is a recency-weighted MEAN,
  *  while a book sets its line near the MEDIAN, and yardage/reception distributions are right-skewed
- *  — one big game drags the mean well above the middle. Comparing the two therefore said OVER
- *  almost always: measured on the NCAAF board, rushing leaned over on 90% of priced rows and
- *  receptions on 100%, and 46% of all rows leaned OVER on players whose own history cleared that
- *  same number less than half the time (Daniel Hill: line 57.5, proj 75.1, cleared it in 1 of 17
- *  games). The lean now comes from the player's empirical exceedance rate AT THIS LINE (cOver/cG),
- *  shrunk toward 50% so a short sample stays quiet rather than shouting.
+ *  — one big game drags the mean above the middle. Comparing the two said OVER almost always:
+ *  NCAAF rushing leaned over on 90% of priced rows, receptions on 100%, and 46% of rows leaned OVER
+ *  on players whose own history cleared that same number less than half the time.
  *
- *  ANYTIME TD is deliberately untouched: there `proj` and `book` are both probabilities, so
- *  comparing them is already like-for-like — and it measures healthy (36% over in both sports),
- *  which is itself the evidence that the bias is distributional and not general miscalibration. */
-export function projLean(r: PlayerProj): Lean {
+ *  ANYTIME TD is deliberately untouched: there `proj` and `book` are both probabilities, so the
+ *  comparison is already like-for-like — and it measures healthy (36% over in BOTH sports), which is
+ *  the control showing the bias was distributional and not general miscalibration. */
+export function projLean(r: PlayerProj, centres: Map<string, number>): Lean {
   if (r.book === null) return null;
   if (r.cat === "td") return r.proj >= r.book ? "over" : "under";
-  if (!r.cG) return null;                     // no history at this line — no opinion
-  const p = (r.cOver + LEAN_PRIOR_GAMES * 0.5) / (r.cG + LEAN_PRIOR_GAMES);
-  if (p >= 0.5 + LEAN_MARGIN) return "over";
-  if (p <= 0.5 - LEAN_MARGIN) return "under";
-  return null;                                // genuinely a coin flip — show no arrow
+  const v = rateOf(r);
+  if (v === null) return null;                        // no history at this line — no opinion
+  const centre = centres.get(r.cat) ?? 0.5;
+  const p = (r.cOver + LEAN_PRIOR_GAMES * centre) / (r.cG + LEAN_PRIOR_GAMES);
+  if (p >= centre + LEAN_MARGIN) return "over";
+  if (p <= centre - LEAN_MARGIN) return "under";
+  return null;                                        // indistinguishable from a typical row
 }
 
 export const PROJ_SEASON = 2026;

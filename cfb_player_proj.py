@@ -632,6 +632,9 @@ def main(argv=None):
         "import type { PlayerProj } from \"./playerProjections\";\n"
         f"export const NCAAF_PROJ_SEASON = {CUR_SEASON};\n"
         f"export const NCAAF_PROJ_PRIOR = {PRIOR_SEASON};\n"
+        # The week this slate was built for. Without it the board had no way to tell which week the
+        # rows belong to, so it showed them on EVERY week — week 5 rendered week 1's games.
+        f"export const NCAAF_PROJ_WEEK = {wk};\n"
         "export const NCAAF_PLAYER_PROJECTIONS: PlayerProj[] = [\n"
         + "".join("  " + json.dumps(r) + ",\n" for r in rows)
         + "];\n"

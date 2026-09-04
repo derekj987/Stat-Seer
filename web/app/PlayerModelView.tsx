@@ -7,9 +7,9 @@ import { Brand, FlowSteps, ModelSubnav, ScrollHint, WeekBadge } from "./Nav";
 import { WeekNav } from "./WeekNav";
 import Tip from "./Tip";
 import { PLAYER_PROJECTIONS, PROJ_WEEK, PROJ_PRIOR, type PlayerProj } from "@/lib/playerProjections";
-import { NCAAF_PLAYER_PROJECTIONS } from "@/lib/ncaafPlayerProjections";
+import { NCAAF_PLAYER_PROJECTIONS, NCAAF_PROJ_WEEK } from "@/lib/ncaafPlayerProjections";
 import { isRealistic } from "@/lib/depthChart";
-import { projLean } from "@/lib/playerProjections";
+import { projLean, leanCentres } from "@/lib/playerProjections";
 import PropAdd, { type PricedSide } from "./PropAdd";
 import PinButton from "./PinButton";
 import { playerSlot, normName } from "@/lib/playerSlot";
@@ -57,7 +57,14 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
   // Group the active category's rows by game. (isRealistic is an NFL depth-chart filter, so
   // it's applied to NFL only — CFB rows are already limited to players with posted props.)
   const projections = base === "ncaaf" ? NCAAF_PLAYER_PROJECTIONS : PLAYER_PROJECTIONS;
-  const onProjWeek = base === "ncaaf" ? projections.length > 0 : week === PROJ_WEEK;
+  // Baseline over-rate per category for THIS sport — the lean is read relative to it, not to 50%.
+  const centres = leanCentres(projections);
+  // Both sports gate on the week their projection set was BUILT for. NCAAF used to gate on
+  // `projections.length > 0`, which is true for every week — so weeks 2-18 all rendered week 1's
+  // games and the board never emptied out as the season moved on. The exporter now stamps
+  // NCAAF_PROJ_WEEK so the two sides agree on which week the rows describe.
+  const projWeek = base === "ncaaf" ? NCAAF_PROJ_WEEK : PROJ_WEEK;
+  const onProjWeek = week === projWeek;
   const rows: PlayerProj[] = onProjWeek
     ? projections.filter((p) => p.cat === active.key && (base === "nfl" ? isRealistic(p.player) : true))
     : [];
@@ -192,7 +199,7 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                         // from proj vs book — see projLean. `proj` is a mean and the line sits near
                         // the median, so the old comparison leaned OVER on 90-100% of continuous
                         // markets. A row with too little history now shows no arrow at all.
-                        const lean = projLean(r);
+                        const lean = projLean(r, centres);
                         // A continuation row (same player as the row above, e.g. a QB's TD line
                         // under his yards line) blanks the name/team so the block reads as one.
                         const cont = ri > 0 && sec.rows[ri - 1].player === r.player;
@@ -219,7 +226,7 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                                 <>{" "}<span className={`pmarrow ${lean === "over" ? "pmarrow--up" : "pmarrow--down"}`}
                                   title={r.cat === "td"
                                     ? "Our projected TD probability vs the book's implied probability."
-                                    : `Lean from ${r.player}'s own rate at this number: ${r.cOver}/${r.cG} games over ${r.book}. Our projection is an average, and averages sit above the middle on these markets, so the lean is read from how often he actually clears the line.`}
+                                    : `${r.player} has cleared ${r.book} in ${r.cOver} of ${r.cG} games. That is ${lean === "over" ? "more" : "less"} often than a typical ${propLabel(r.market).toLowerCase()} line is cleared (${Math.round(100 * (centres.get(r.cat) ?? 0.5))}% here), which is what this arrow compares against — a relative read, not a probability of winning the bet.`}
                                   aria-hidden="true">{lean === "over" ? "▲" : "▼"}</span></>
                               )}
                             </span>

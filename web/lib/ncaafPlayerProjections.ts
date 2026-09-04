@@ -4,6 +4,7 @@
 import type { PlayerProj } from "./playerProjections";
 export const NCAAF_PROJ_SEASON = 2026;
 export const NCAAF_PROJ_PRIOR = 2025;
+export const NCAAF_PROJ_WEEK = 1;
 export const NCAAF_PLAYER_PROJECTIONS: PlayerProj[] = [
   {"game": "San Jos\u00e9 State @ Eastern Michigan", "commence": "2026-09-04T22:30:00.000Z", "player": "Cooper Hoch", "team": "San Jos\u00e9 State", "pos": "WR", "cat": "receiving", "market": "rec_yds", "book": null, "proj": 96.8, "g": 8, "cOver": 0, "cG": 0, "pOver": 0, "pG": 0, "hOver": 0, "hG": 0, "rOver": 0, "rG": 0},
   {"game": "San Jos\u00e9 State @ Eastern Michigan", "commence": "2026-09-04T22:30:00.000Z", "player": "Cooper Hoch", "team": "San Jos\u00e9 State", "pos": "WR", "cat": "receptions", "market": "receptions", "book": null, "proj": 8.7, "g": 8, "cOver": 0, "cG": 0, "pOver": 0, "pG": 0, "hOver": 0, "hG": 0, "rOver": 0, "rG": 0},

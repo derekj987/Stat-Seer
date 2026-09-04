@@ -68,6 +68,31 @@ The NCAAF game model does NOT have this bug — it already centres on the median
 market (`debias = statistics.median(_resid)`, `total_debias` likewise in `cfb_export.py`), added for
 exactly this reason. Game margins and totals are near-symmetric anyway, so mean ≈ median there.
 
+### A week-scoped board must be able to say WHICH week its data is for
+`/ncaaf/model/players` rendered week 1's games on every week of the season. The generated data set
+carried `season` and `prior` but **no week**, so the view gated on `projections.length > 0` — true
+for every week — instead of on a week match. The NFL side gated correctly on `week === PROJ_WEEK`;
+only NCAAF had no week to compare against.
+
+**The rule: if a generator emits a slate for one week, it must stamp that week, and the view must
+gate on it.** A truthy-length check is not a week check. Whenever you add a week wheel to a board,
+verify the data actually changes with the week — a nav that changes only the badge is worse than no
+nav, because it looks authoritative.
+
+Verify by diffing two weeks rather than trusting the badge:
+
+```bash
+curl -s "$BASE/ncaaf/model/players?cat=rushing"        | grep -c 'pmrow--data'   # 234
+curl -s "$BASE/ncaaf/model/players?cat=rushing&week=5" | grep -c 'pmrow--data'   # 0
+```
+
+Identical counts across two different weeks means the board is ignoring the week. An empty board off
+the projection week is the CORRECT answer — better than confidently showing stale games.
+
+Watch for the sibling shape too: a data fetch that takes no week at all (`cfbWeekProps()` has no week
+argument) can only ever return "current", so it silently pairs whatever it holds with any week you
+select.
+
 ### Depth rank is an input, not a fact — cross-check it against the market
 Depth slots (RB1/WR2) come from scraping Ourlads (`cfb_depth.py`) because CFBD has no depth order and
 ESPN's college depth-chart page returns no player data. That rank then **feeds the projection**
