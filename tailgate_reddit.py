@@ -53,6 +53,13 @@ import odds_client as oc  # reuse load_env() + ensure_ssl_certs()
 UA = "statseer-tailgate/0.2"   # plain UA; Reddit RSS 200s this, 429s browser UAs
 MODEL = "claude-sonnet-5"
 SKILL_POS = {"QB", "RB", "WR", "TE", "FB"}
+# Roster `status` values that mean the player CANNOT take a snap this week, so he must never become
+# the subject of a Fan Stock card: RES = reserve/injured (IR, PUP, NFI, suspended), CUT = released,
+# RET = retired, EXE = exempt. ACT is active and DEV is the practice squad, which can be elevated on
+# game day, so both stay eligible. This is the authoritative IR signal — far better than pattern
+# matching prose, which cannot tell whether the injured name is the card's SUBJECT or a team-mate
+# mentioned as the reason the subject now matters.
+UNAVAILABLE_STATUS = {"RES", "CUT", "RET", "EXE"}
 ROSTER_URL = ("https://github.com/nflverse/nflverse-data/releases/download/"
               "rosters/roster_{season}.csv")
 INJURIES_URL = ("https://github.com/nflverse/nflverse-data/releases/download/"
@@ -284,8 +291,12 @@ def load_roster(season):
         print(f"  roster unavailable ({e}); skipping mention pre-filter", file=sys.stderr)
         return None
     idx = {}
+    dropped = 0
     for row in rows:
         if (row.get("position") or "").upper() not in SKILL_POS:
+            continue
+        if (row.get("status") or "").upper().strip() in UNAVAILABLE_STATUS:
+            dropped += 1          # on IR / released / retired — not a bettable subject
             continue
         team = (row.get("team") or "").upper().strip()
         team = TEAM_ALIAS.get(team, team)
@@ -299,6 +310,8 @@ def load_roster(season):
         toks = nn.split()
         if toks:
             d["last"].add(toks[-1])
+    if dropped:
+        print(f"  roster: excluded {dropped} unavailable players (IR/released/retired)", file=sys.stderr)
     return idx or None
 
 
