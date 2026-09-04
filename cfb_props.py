@@ -210,6 +210,11 @@ def main(argv=None):
             continue
         if now <= ct <= horizon:
             upcoming.append(e)
+    # SORT before truncating. This list arrives in whatever order the API returns it, so slicing it
+    # raw meant the cap could drop TODAY's games while polling next weekend's — which is how the
+    # player board ended up with 5 of the 8 games being played today. Soonest kickoff first, so the
+    # cap always spends itself on the most imminent slate.
+    upcoming.sort(key=lambda e: e.get("commence_time") or "9999")
     upcoming = upcoming[:args.max_events]
     emit(f"[{snapshot_at}] {len(events)} NCAAF events posted; {len(upcoming)} kick off "
          f"within {args.within_days} days (polling those).")
