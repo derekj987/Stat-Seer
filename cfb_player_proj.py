@@ -582,6 +582,57 @@ def build_slate(slate, depth, prop_index, key):
                             "hOver": hO, "hG": hG, "rOver": rO, "rG": rG,
                         })
                         seen.add(sig)
+
+    # ---- Second pass: players the MARKET priced but the depth chart never mentioned ------------
+    # The loop above walks the depth chart only, so a player missing from it is invisible no matter
+    # how the books price him. Measured on one snapshot: 195 of 813 players with posted props (24%)
+    # are absent from the scraped chart -- including Malachi Toney, whom the market had at -250 to
+    # score, second shortest in his game, while our chart's "WR1" sat at +350 and Toney had no row
+    # at all. Ourlads lags the transfer portal and early-season depth moves, and it lists only a
+    # handful per position, so "not in the chart" says nothing about whether a player matters.
+    #
+    # A posted prop is the market telling us he matters, so he gets projected. This does NOT make
+    # the model line-aware: we use the EXISTENCE of a prop to decide who appears -- coverage, which
+    # was already prop-driven -- never its VALUE, which would break the line-blind rule. And with no
+    # depth rank there is no role baseline to scale to, so these rows use the player's own history
+    # straight, which also keeps them clear of the role-volume ratchet.
+    for away, home, commence in slate:
+        gk = f"{away} @ {home}"
+        for (pgk, pname, mk), book in prop_index.items():
+            if pgk != gk:
+                continue
+            sig = (gk, pname, mk)
+            if sig in seen:
+                continue
+            e = logs.get(pname)
+            if not e or e["team"] not in (away, home):
+                continue                          # no CFBD game log -> nothing to project from
+            games = e["games"]
+            if mk != "anytime_td" and not series(games, mk):
+                continue
+            proj = project(games, mk)             # own history, NO role re-scaling (no rank known)
+            if proj is None:
+                continue
+            if mk == "anytime_td":
+                cO, cG = over_split(games, mk, None, lambda g: True)
+                pO, pG = over_split(games, mk, None, lambda g: g["season"] == PRIOR_SEASON)
+                hO, hG = over_split(games, mk, None, lambda g: g["homeAway"] == "home")
+                rO, rG = over_split(games, mk, None, lambda g: g["homeAway"] == "away")
+            else:
+                cO, cG = over_split(games, mk, book, lambda g: True)
+                pO, pG = over_split(games, mk, book, lambda g: g["season"] == PRIOR_SEASON)
+                hO, hG = over_split(games, mk, book, lambda g: g["homeAway"] == "home")
+                rO, rG = over_split(games, mk, book, lambda g: g["homeAway"] == "away")
+            cat, _unit = MARKET_CAT[mk]
+            out.append({
+                "game": gk, "commence": commence, "player": e["display"],
+                "team": e["team"], "pos": _pos_from_usage(games), "cat": cat, "market": mk,
+                "book": book, "proj": proj,
+                "g": len([g for g in games if g.get(mk) is not None]) if mk != "anytime_td" else len(games),
+                "cOver": cO, "cG": cG, "pOver": pO, "pG": pG,
+                "hOver": hO, "hG": hG, "rOver": rO, "rG": rG,
+            })
+            seen.add(sig)
     return out
 
 
