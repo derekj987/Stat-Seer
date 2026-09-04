@@ -36,6 +36,11 @@ def fetch_games():
             data = r.read()
     except (urllib.error.URLError, urllib.error.HTTPError):
         return None
+    # `data/` is gitignored, so on a fresh CI checkout the DIRECTORY does not exist and this open()
+    # raised FileNotFoundError -- which the transient guard above doesn't catch (it only covers
+    # network errors), so the run died with a traceback and emailed a FAILURE even though the
+    # download had succeeded. Every other script writing under data/ already does this.
+    os.makedirs(os.path.dirname(GAMES_LOCAL) or ".", exist_ok=True)
     with open(GAMES_LOCAL, "wb") as fh:
         fh.write(data)
     return pd.read_csv(GAMES_LOCAL, low_memory=False)
