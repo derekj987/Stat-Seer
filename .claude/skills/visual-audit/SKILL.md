@@ -136,6 +136,48 @@ A cap fixes a tail, not a level: the small well-sampled subset still ran 1.45 af
 NFL's 1.01. **Re-measure both the tail and the median — a headline number can improve while the bias
 you were chasing is still there.**
 
+### A scraped roster must never GATE who appears
+`cfb_player_proj.build_slate` walked the depth chart only, so a player absent from the scraped chart
+was invisible however the books priced him. Malachi Toney was the market's **second shortest price**
+in his game (−250 to score) and had no row at all, while our chart's "WR1" sat at +350.
+
+Not a stale scrape and not a name-matching artifact: a live `--probe` returned the same six Miami
+receivers with no Toney, and "Toney" appeared nowhere in `cfb_depth.json`. Ourlads lags the transfer
+portal and lists only a handful per position. **Measured: 195 of 813 players with posted props — 24%
+— were missing from the chart entirely**, and every one was being dropped.
+
+A posted prop is the market saying a player matters, so he now gets projected whether or not he is on
+the chart. Once added, Toney projected 72.3 against a 73.5 line and 7.0 receptions against 6.5 — the
+board had been silently omitting one of its best-calibrated rows.
+
+**This does not break line-blindness**: it uses the EXISTENCE of a prop to decide who appears
+(coverage, already prop-driven), never its VALUE. Keep that line sharp — using the book's number to
+set a projection would.
+
+Generalise: whenever a scraped reference list decides *who gets shown*, measure how many entities the
+authoritative source has that the list lacks. A roster, a schedule, a team list — any of them can
+silently truncate a board.
+
+### A cap fixes a tail; measure the OTHER tail too
+`ROLE_VOL_CAP` clamped the inflated rows and regressed exactly the players it should have left alone.
+The cap was multiplicative on a player's own volume, so on a near-zero own volume any multiple is
+still near zero: a promoted QB1 with 3 games of mop-up duty went to 39.2 passing yards against a
+155.5 line. One bad tail became the opposite bad tail:
+
+```
+median(proj/line)   <=4 games   >=10 games
+before any cap         1.74        1.23
+after a blunt cap      0.52        1.07     <- new damage, low side
+after CAP_MIN_GAMES    1.74        1.10
+```
+
+**Always measure both tails after clamping anything** (`<0.5×` and `>=2×`, not just the one you were
+chasing), and gate a multiplicative correction on having enough sample for the base to mean anything.
+
+Still open: rows with ≤4 games run 1.74×. With two games you cannot project a player, and the honest
+options are to suppress the number or to stop trusting the depth chart's role for them — not to pick
+a multiplier that happens to look tidy.
+
 ### Depth rank is an input, not a fact — cross-check it against the market
 Depth slots (RB1/WR2) come from scraping Ourlads (`cfb_depth.py`) because CFBD has no depth order and
 ESPN's college depth-chart page returns no player data. That rank then **feeds the projection**
