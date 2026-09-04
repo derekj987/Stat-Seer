@@ -75,7 +75,7 @@ export async function buildChart(spec: ChartSpec): Promise<ChartData> {
   const week = await curWeek();
 
   if (spec.source === "auditor_deals" || spec.source === "best_props") {
-    const games = sport === "ncaaf" ? await cfbWeekProps() : await weekProps(week, SEASON);
+    const games = sport === "ncaaf" ? await cfbWeekProps(week) : await weekProps(week, SEASON);
     type Row = { player: string; bet: string; price: number; fair: number | null; edge: number; verdictScore: number; deal: string };
     const rows: Row[] = [];
     for (const g of games) for (const m of g.markets) for (const q of m.quotes) {

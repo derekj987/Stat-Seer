@@ -3,6 +3,22 @@
 // (tap-to-add chips + single best book). Server-side only (Supabase service key).
 import type { PropGame, Quote, MarketBlock } from "./props";
 import { PROP_LABELS } from "./props";
+import { etDayKey } from "./gameDays";
+import { NCAAF_MODEL } from "@/app/ncaaf/model-data";
+
+/** The ET day-keys a scheduled week covers, taken from the card's own kickoffs.
+ *
+ *  cfb_prop_snapshots carries no season/week column — only `commence` — so the week has to be
+ *  derived from the kickoff. Returns null when the card knows nothing about that week, which the
+ *  caller treats as "no props for this week" rather than "show everything". */
+function weekDays(week: number): Set<string> | null {
+  const card = NCAAF_MODEL.card;
+  const wk = card.weeks?.find((w) => w.week === week) ?? (card.week === week ? card : null);
+  if (!wk || !wk.games.length) return null;
+  const days = new Set<string>();
+  for (const g of wk.games) if (g.commence) days.add(etDayKey(g.commence));
+  return days.size ? days : null;
+}
 
 const label = (k: string) => PROP_LABELS[k] ?? k.replace(/^player_/, "").replace(/_/g, " ");
 
@@ -41,10 +57,22 @@ function isBetter(a: Quote, b: Quote): boolean {
   return a.price > b.price;
 }
 
-export async function cfbWeekProps(): Promise<PropGame[]> {
+/** The NCAAF prop board for one week.
+ *
+ *  `week` is optional only for callers that genuinely want "whatever is in the latest snapshot".
+ *  Prefer passing it: without a week this returns the whole snapshot, so a week-scoped page would
+ *  pair week 1's prices with any week you selected — the same class of bug as the player board
+ *  rendering week 1's games on every week. */
+export async function cfbWeekProps(week?: number): Promise<PropGame[]> {
   let rows: Row[];
   try { rows = await fetchRows(); } catch { return []; }
   if (!rows.length) return [];
+  if (week !== undefined) {
+    const days = weekDays(week);
+    if (!days) return [];                                  // card has no games that week
+    rows = rows.filter((r) => days.has(etDayKey(r.commence)));
+    if (!rows.length) return [];
+  }
 
   // Best price per book for each (event, market, player, side, line).
   const agg = new Map<string, { r: Row; byBook: Record<string, number> }>();

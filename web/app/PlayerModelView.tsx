@@ -43,7 +43,7 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
   // every book (byBook), exactly like Value Finder. Missing → PropAdd uses consensus.
   const priceIx = new Map<string, PricedSide>();
   try {
-    const priced = base === "ncaaf" ? await cfbWeekProps() : await weekProps(week);
+    const priced = base === "ncaaf" ? await cfbWeekProps(week) : await weekProps(week);
     for (const pg of priced) for (const m of pg.markets) for (const q of m.quotes) {
       priceIx.set(`${normName(q.player)}|${m.market}|${q.side}`, { line: q.line, price: q.price, books: q.books, byBook: q.byBook });
     }

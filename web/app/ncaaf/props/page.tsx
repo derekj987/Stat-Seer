@@ -38,7 +38,7 @@ export default async function Page({ searchParams }: PageProps<"/ncaaf/props">) 
   const cur = NCAAF_MODEL.card.week;
   const week = readNcaafWeek(sp.week, cur);
   const catSet = new Set(cat.markets);
-  const all = await cfbWeekProps();
+  const all = await cfbWeekProps(week);
   // Filter each game to the active category's markets — same tabbed layout as the NFL board
   // and The Model, so every prop type is represented (not a single ATTD wall).
   const games = all
@@ -63,7 +63,9 @@ export default async function Page({ searchParams }: PageProps<"/ncaaf/props">) 
         />
       </header>
 
-      <WeekBadge week={cur} pin={<PinButton size="sm" pin={{ id: `/ncaaf/props?cat=${cat.key}`, kind: "props", label: `NCAAF Props · ${cat.label}`, detail: `Week ${week}`, href: `/ncaaf/props?cat=${cat.key}&week=${week}` }} />} />
+      {/* The SELECTED week, not `cur` — everything else on the page (nav, note, the board itself)
+          follows the selection, so a badge pinned to the current week just mislabels the board. */}
+      <WeekBadge week={week} pin={<PinButton size="sm" pin={{ id: `/ncaaf/props?cat=${cat.key}`, kind: "props", label: `NCAAF Props · ${cat.label}`, detail: `Week ${week}`, href: `/ncaaf/props?cat=${cat.key}&week=${week}` }} />} />
       <FlowSteps active="value" base="ncaaf" />
       <ShopSubnav active="props" base="ncaaf" />
       <NcaafWeekNav base="/ncaaf/props" week={week} params={`cat=${cat.key}`} />
