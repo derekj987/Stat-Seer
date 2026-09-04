@@ -9,6 +9,7 @@ import Tip from "./Tip";
 import { PLAYER_PROJECTIONS, PROJ_WEEK, PROJ_PRIOR, type PlayerProj } from "@/lib/playerProjections";
 import { NCAAF_PLAYER_PROJECTIONS } from "@/lib/ncaafPlayerProjections";
 import { isRealistic } from "@/lib/depthChart";
+import { projLean } from "@/lib/playerProjections";
 import PropAdd, { type PricedSide } from "./PropAdd";
 import PinButton from "./PinButton";
 import { playerSlot, normName } from "@/lib/playerSlot";
@@ -187,7 +188,11 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                         // No book line yet (line-blind projection ahead of the market) → show "—"
                         // for the book number and drop the over/under arrow (nothing to compare to).
                         const hasBook = r.book !== null;
-                        const projUp = hasBook && r.proj >= (r.book as number);
+                        // The lean comes from the player's own exceedance rate at this line, NOT
+                        // from proj vs book — see projLean. `proj` is a mean and the line sits near
+                        // the median, so the old comparison leaned OVER on 90-100% of continuous
+                        // markets. A row with too little history now shows no arrow at all.
+                        const lean = projLean(r);
                         // A continuation row (same player as the row above, e.g. a QB's TD line
                         // under his yards line) blanks the name/team so the block reads as one.
                         const cont = ri > 0 && sec.rows[ri - 1].player === r.player;
@@ -208,9 +213,15 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                                 distinguishes a player's stacked rows from each other. */}
                             <span className="pmcell pmcell--team">{propLabel(r.market)}</span>
                             <span className="pmcell pmcell--num">{hasBook ? <>{r.book}{unitFor(r.market)}</> : "—"}</span>
-                            <span className={`pmcell pmcell--num pmcell--proj${!hasBook || projUp ? "" : " pmcell--projdown"}`}>
+                            <span className={`pmcell pmcell--num pmcell--proj${lean === "under" ? " pmcell--projdown" : ""}`}>
                               {r.proj}{unitFor(r.market)}
-                              {hasBook && <>{" "}<span className={`pmarrow ${projUp ? "pmarrow--up" : "pmarrow--down"}`} aria-hidden="true">{projUp ? "▲" : "▼"}</span></>}
+                              {lean && (
+                                <>{" "}<span className={`pmarrow ${lean === "over" ? "pmarrow--up" : "pmarrow--down"}`}
+                                  title={r.cat === "td"
+                                    ? "Our projected TD probability vs the book's implied probability."
+                                    : `Lean from ${r.player}'s own rate at this number: ${r.cOver}/${r.cG} games over ${r.book}. Our projection is an average, and averages sit above the middle on these markets, so the lean is read from how often he actually clears the line.`}
+                                  aria-hidden="true">{lean === "over" ? "▲" : "▼"}</span></>
+                              )}
                             </span>
                             <span className={`pmcell pmcell--career ${cls(cpct)}`}>
                               {cpct === null ? "—" : <>{cpct}% <small className="pmcell__sub">{r.cOver}/{r.cG} gm</small></>}

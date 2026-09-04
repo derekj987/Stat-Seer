@@ -6,6 +6,38 @@ export interface PlayerProj { game: string; commence: string; player: string; te
   cOver: number; cG: number; pOver: number; pG: number;
   hOver: number; hG: number; rOver: number; rG: number;
   env?: number | null; envDelta?: number | null }
+/** Games of "no opinion" mixed into a player's own over-rate, so a 2-game sample cannot produce a
+ *  confident lean. */
+const LEAN_PRIOR_GAMES = 6;
+/** How far the shrunk rate must sit from 50% before we show a lean at all. */
+const LEAN_MARGIN = 0.04;
+
+export type Lean = "over" | "under" | null;
+
+/** The over/under lean for a projection row.
+ *
+ *  Do NOT compare `proj` to the line on a continuous market. `proj` is a recency-weighted MEAN,
+ *  while a book sets its line near the MEDIAN, and yardage/reception distributions are right-skewed
+ *  — one big game drags the mean well above the middle. Comparing the two therefore said OVER
+ *  almost always: measured on the NCAAF board, rushing leaned over on 90% of priced rows and
+ *  receptions on 100%, and 46% of all rows leaned OVER on players whose own history cleared that
+ *  same number less than half the time (Daniel Hill: line 57.5, proj 75.1, cleared it in 1 of 17
+ *  games). The lean now comes from the player's empirical exceedance rate AT THIS LINE (cOver/cG),
+ *  shrunk toward 50% so a short sample stays quiet rather than shouting.
+ *
+ *  ANYTIME TD is deliberately untouched: there `proj` and `book` are both probabilities, so
+ *  comparing them is already like-for-like — and it measures healthy (36% over in both sports),
+ *  which is itself the evidence that the bias is distributional and not general miscalibration. */
+export function projLean(r: PlayerProj): Lean {
+  if (r.book === null) return null;
+  if (r.cat === "td") return r.proj >= r.book ? "over" : "under";
+  if (!r.cG) return null;                     // no history at this line — no opinion
+  const p = (r.cOver + LEAN_PRIOR_GAMES * 0.5) / (r.cG + LEAN_PRIOR_GAMES);
+  if (p >= 0.5 + LEAN_MARGIN) return "over";
+  if (p <= 0.5 - LEAN_MARGIN) return "under";
+  return null;                                // genuinely a coin flip — show no arrow
+}
+
 export const PROJ_SEASON = 2026;
 export const PROJ_WEEK = 1;
 export const PROJ_PRIOR = 2025;

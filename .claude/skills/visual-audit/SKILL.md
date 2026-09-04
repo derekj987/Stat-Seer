@@ -39,6 +39,55 @@ drifted past it) · `uncapped-long-list` (a long item list with no "show more" c
 `repeated-column-header` (the column row reappears mid-board, chopping one chart into several).
 Console errors + network 4xx/5xx are collected separately (see step 4).
 
+### ⚠️ Numbers on a board are auditable too
+This skill started on layout, but the highest-value findings have come from reading the numbers a
+board publishes. **A board whose every row leans the same way is a bug, not a signal.** Derek spotted
+"every RB is going over" by eye; measuring it found a systematic error across two sports.
+
+When a board shows a projection beside a market number, check the lean split before trusting it:
+
+```python
+over = sum(1 for r in rows if r['proj'] > r['book'])   # ~50% expected on a fair board
+```
+
+- NCAAF player props leaned OVER on **90% of rushing rows and 100% of receptions**.
+- 46% of rows leaned OVER on players whose **own history cleared that same number less than half
+  the time** (Daniel Hill: line 57.5, projection 75.1, cleared it in 1 of 17 games).
+
+**Root cause — mean vs median.** The projection was a recency-weighted MEAN; a book sets its line
+near the MEDIAN; yardage and reception distributions are right-skewed, so one big game drags the mean
+above the middle and `proj > line` fires almost always. The fix is `projLean()` in
+`lib/playerProjections.ts`: read the lean from the player's empirical exceedance rate at that line,
+shrunk toward 50% so a short sample shows no arrow at all.
+
+**The control that proves it is distributional**: anytime TD was unaffected (36% over in both
+sports) because there `proj` and `book` are both probabilities — like-for-like. When you find a
+one-sided board, look for the market that ISN'T biased; it usually names the mechanism.
+
+The NCAAF game model does NOT have this bug — it already centres on the median of the residual vs
+market (`debias = statistics.median(_resid)`, `total_debias` likewise in `cfb_export.py`), added for
+exactly this reason. Game margins and totals are near-symmetric anyway, so mean ≈ median there.
+
+### Depth rank is an input, not a fact — cross-check it against the market
+Depth slots (RB1/WR2) come from scraping Ourlads (`cfb_depth.py`) because CFBD has no depth order and
+ESPN's college depth-chart page returns no player data. That rank then **feeds the projection**
+(`proj = own_per_game × role_vol/own_vol`), so a contested rank actively scales the wrong player up.
+
+Worked example: USC had Waymond Jordan RB1 / King Miller RB2 — faithful to Ourlads, and a live
+re-probe confirmed our scrape was current, so the label was not a bug. But the **market disagreed**:
+Miller's line 74.5 vs Jordan's 58.5. We had Jordan at 95.9 off a 6-game sample scaled to starter
+workload, against a 58.5 line.
+
+So when a projection looks wrong for a player, check in this order:
+1. **Is our scrape stale?** Re-probe the live source (`python cfb_depth.py --probe <team>`) and
+   compare — don't assume.
+2. **Does the market's ordering within the position group match ours?** The book line is money on
+   expected workload and is usually the better read. A conflict means one is wrong.
+3. **How many games back the projection?** A thin sample amplified by role re-scaling is the
+   dangerous combination.
+4. **Is the sample even from this season?** Identical career and prior-season splits (Jordan 4/6 and
+   4/6) mean we hold NO games from the current season for that player.
+
 ### One board = ONE column header
 A board that renders a `<table>` per day group emits a `<thead>` per group, so the column row
 ("Game / Market Spread / Market O/U / Model Spread / Model O/U") reappears under every date — and
