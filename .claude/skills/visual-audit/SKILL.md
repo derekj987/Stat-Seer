@@ -93,6 +93,35 @@ Watch for the sibling shape too: a data fetch that takes no week at all (`cfbWee
 argument) can only ever return "current", so it silently pairs whatever it holds with any week you
 select.
 
+### An indicator must sit with the number it describes
+A ▲/▼ rendered inside the "OUR PROJ" cell is read as a claim about that projection — always, no
+matter what it is actually computed from. After the lean moved to an exceedance rate, the board
+showed `193.2 ▼` against a 180.5 line and `194.5 ▲` against a 232.5 line: both arrows pointing the
+opposite way to the two numbers beside them. The statistics were right and the placement made them
+look broken.
+
+**Put the indicator on the column it is derived from**, and make the arrow, the colour and the figure
+one statement — the lean now lives on the % over cell and inherits that cell's red/green. Watch for
+the sibling bug: a colour threshold that disagrees with the indicator (a flat 50% cut while the arrow
+compares to a 22% baseline) reproduces the same contradiction one column over.
+
+### Projection sanity: the projection ÷ line ratio
+For a player who clears his line about half the time, **the line IS his median**, so a projection
+should sit near it — a little above, since a mean exceeds a median on a right-skewed stat, but not
+multiples above. That makes a one-line calibration test:
+
+```python
+rows = [r for r in proj if r['book'] and r['cat'] != 'td' and r['cG'] >= 8]
+mid  = [r for r in rows if 0.40 <= r['cOver']/r['cG'] <= 0.60]   # line ≈ his median
+statistics.median(r['proj']/r['book'] for r in mid)              # want ≈ 1.0
+```
+
+Measured: **NFL 1.01** (healthy) vs **NCAAF 1.52, worst 3.44×**. Elija Lofton cleared a 16.5 line in
+10 of 19 games — his median is 16.5 — while we projected 56.7. A number multiples above a player's
+own median is a defect, not skew, and the usual suspect is the role-adjusted volume step
+(`proj = own_per_game × role_vol/own_vol`) inflating a player whose own volume is understated or
+whose depth slot is wrong. Run this test per sport after any change to the projection pipeline.
+
 ### Depth rank is an input, not a fact — cross-check it against the market
 Depth slots (RB1/WR2) come from scraping Ourlads (`cfb_depth.py`) because CFBD has no depth order and
 ESPN's college depth-chart page returns no player data. That rank then **feeds the projection**

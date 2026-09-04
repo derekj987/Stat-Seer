@@ -178,7 +178,9 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                         <span className="pmcell">Prop</span>
                         <span className="pmcell pmcell--num">{isTd ? "Book %" : "Book line"}</span>
                         <span className="pmcell pmcell--num">{isTd ? "Our %" : "Our proj"}</span>
-                        <span className="pmcell pmcell--career">{isTd ? "Career TD rate" : "Career % over"}</span>
+                        <span className="pmcell pmcell--career"
+                          title={isTd ? undefined : `How often each player has cleared his own line. Green/▲ and red/▼ compare against the TYPICAL rate for this market rather than a flat 50%, because these lines are not set at a coin flip — so a rate below 50% can still be an above-typical one.`}>
+                          {isTd ? "Career TD rate" : "Career % over"}</span>
                         <span className="pmcell pmcell--career">{isTd ? "Prior szn TD rate" : "Prior szn % over"}</span>
                         {active.key === "passing" && <>
                           <span className="pmcell pmcell--career">Home % over</span>
@@ -191,7 +193,13 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                         const ppct = r.pG ? Math.round((100 * r.pOver) / r.pG) : null;
                         const hpct = r.hG ? Math.round((100 * r.hOver) / r.hG) : null;
                         const rpct = r.rG ? Math.round((100 * r.rOver) / r.rG) : null;
-                        const cls = (v: number | null) => v === null ? "" : v >= 50 ? "pmread--over" : "pmread--under";
+                        // Colour these against the SAME baseline the lean uses, not a flat 50%.
+                        // Mixing the two encodings is what made the board look broken: a college QB
+                        // clearing his line 30% of the time is ABOVE the 22% typical for that market,
+                        // so the arrow said "over" while a 50%-threshold colour said "under" in the
+                        // very next column. One yardstick per row, named in the header tooltip.
+                        const base50 = Math.round(100 * (centres.get(r.cat) ?? 0.5));
+                        const cls = (v: number | null) => v === null ? "" : v >= base50 ? "pmread--over" : "pmread--under";
                         // No book line yet (line-blind projection ahead of the market) → show "—"
                         // for the book number and drop the over/under arrow (nothing to compare to).
                         const hasBook = r.book !== null;
@@ -220,18 +228,25 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                                 distinguishes a player's stacked rows from each other. */}
                             <span className="pmcell pmcell--team">{propLabel(r.market)}</span>
                             <span className="pmcell pmcell--num">{hasBook ? <>{r.book}{unitFor(r.market)}</> : "—"}</span>
-                            <span className={`pmcell pmcell--num pmcell--proj${lean === "under" ? " pmcell--projdown" : ""}`}>
+                            {/* NO arrow here. The lean is not a claim about THIS number: `proj` is an
+                                average and the book's line sits near the median, so a projection can
+                                sit above the line while the player rarely clears it. An arrow inside
+                                this cell reads as "our projection is under the line" and flatly
+                                contradicted the figure beside it (proj 193.2 vs a 180.5 line, arrow
+                                down). It now lives on the % over column it is actually computed from. */}
+                            <span className="pmcell pmcell--num pmcell--proj"
+                              title={`Our line-blind projection: ${r.player}'s expected ${propLabel(r.market).toLowerCase()}, an AVERAGE. Averages sit above the middle on these markets, so this can read higher than the book's line even when he clears that line less than half the time — the % over columns are what say how often he actually gets there.`}>
                               {r.proj}{unitFor(r.market)}
-                              {lean && (
-                                <>{" "}<span className={`pmarrow ${lean === "over" ? "pmarrow--up" : "pmarrow--down"}`}
-                                  title={r.cat === "td"
-                                    ? "Our projected TD probability vs the book's implied probability."
-                                    : `${r.player} has cleared ${r.book} in ${r.cOver} of ${r.cG} games. That is ${lean === "over" ? "more" : "less"} often than a typical ${propLabel(r.market).toLowerCase()} line is cleared (${Math.round(100 * (centres.get(r.cat) ?? 0.5))}% here), which is what this arrow compares against — a relative read, not a probability of winning the bet.`}
-                                  aria-hidden="true">{lean === "over" ? "▲" : "▼"}</span></>
-                              )}
                             </span>
-                            <span className={`pmcell pmcell--career ${cls(cpct)}`}>
-                              {cpct === null ? "—" : <>{cpct}% <small className="pmcell__sub">{r.cOver}/{r.cG} gm</small></>}
+                            {/* The lean sits HERE, on the number it is derived from, so the arrow, the
+                                colour and the figure are one statement instead of three. */}
+                            <span className={`pmcell pmcell--career ${cls(cpct)}`}
+                              title={cpct === null ? undefined
+                                : `${r.player} has cleared ${r.book ?? "this line"} in ${r.cOver} of ${r.cG} games (${cpct}%). Typical for ${propLabel(r.market).toLowerCase()} is ${base50}%, which is what the arrow and the colour compare against — a relative read, not a probability of winning the bet.`}>
+                              {cpct === null ? "—" : <>
+                                {lean && <span className={`pmarrow ${lean === "over" ? "pmarrow--up" : "pmarrow--down"}`} aria-hidden="true">{lean === "over" ? "▲" : "▼"}</span>}
+                                {lean ? " " : ""}{cpct}% <small className="pmcell__sub">{r.cOver}/{r.cG} gm</small>
+                              </>}
                             </span>
                             <span className={`pmcell pmcell--career ${cls(ppct)}`}>
                               {ppct === null ? <span className="pmcell__sub">no {PROJ_PRIOR}</span> : <>{ppct}% <small className="pmcell__sub">{r.pOver}/{r.pG} gm</small></>}

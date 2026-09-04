@@ -3145,11 +3145,13 @@ a.snav__dfeat{display:block}
 .pmrow--data .pmcell--player{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;font-weight:600}
 .pmcell--num{font-family:var(--font-mono);color:var(--muted);text-align:left}
 .pmcell--proj{color:var(--model);font-weight:700}
-.pmcell--projdown{color:var(--model)}
-/* over/under-the-line arrow next to a projection / suggestion */
+/* over/under lean arrow. In the % over column it INHERITS that cell's red/green so the arrow, the
+   colour and the figure read as one statement — the arrow is derived from that number, and having
+   it in a different colour was part of what made the two look like competing claims. */
 .pmarrow{font-size:10px;font-weight:700}
 .pmarrow--up{color:var(--model)}
 .pmarrow--down{color:var(--model)}
+.pmcell--career .pmarrow{color:inherit}
 .pmcell--team{color:var(--muted);font-size:11.5px;font-family:var(--font-mono);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pmcell--career{font-weight:800;font-family:var(--font-mono);font-size:13px}
