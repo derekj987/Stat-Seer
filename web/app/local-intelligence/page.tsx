@@ -1,18 +1,27 @@
 import { weekRange } from "@/lib/board";
 import { weekTailgate } from "@/lib/tailgate";
 import { Brand, FlowSteps, ContextSubnav, WeekBadge } from "../Nav";
+import { WeekNav } from "../WeekNav";
 import Tip from "../Tip";
 import NflIntelFeed from "./NflIntelFeed";
 
 export const revalidate = 300;
 const SEASON = 2026;
 
-// Fan Stock is CURRENT-WEEK ONLY — boards are about the game in front of them, so no week
-// wheel: we show the latest posted week and label it at the top.
-export default async function Page() {
+// Every week is served, with the same week wheel as the other boards. This page used to pin itself
+// to `range.max` on the theory that fan boards are only about the game in front of them — but
+// weekRange().max is the LAST week the schedule knows about (18), not the current one, so the page
+// asked for Week 18, found no buzz, and silently fell back to the hand-written sample feed. That one
+// bug produced both reported symptoms: the wrong week label AND a "reddit-only" source list, because
+// the sample is reddit-heavy while the live scan also covers all 32 SB Nation team blogs.
+export default async function Page({ searchParams }: PageProps<"/local-intelligence">) {
+  const sp = await searchParams;
   let range: { min: number; max: number } | null = null;
   try { range = await weekRange(SEASON); } catch { range = null; }
-  const week = range?.max ?? 1;   // the current (latest) week
+  const min = range?.min ?? 1;
+  const max = range?.max ?? 1;
+  const requested = typeof sp.week === "string" ? parseInt(sp.week, 10) : NaN;
+  const week = Number.isFinite(requested) ? Math.min(max, Math.max(min, requested)) : min;
 
   const feed = await weekTailgate(week, SEASON);
 
@@ -26,7 +35,7 @@ export default async function Page() {
         />
       </header>
 
-      <WeekBadge week={week} note="current week · fan boards this week" />
+      <WeekBadge week={week} note="fan boards this week" />
       <FlowSteps active="context" />
       <div className="subnavrow">
         <ContextSubnav active="fan" />
@@ -37,10 +46,12 @@ export default async function Page() {
           league — do your own homework.</>} />
       </div>
 
+      <WeekNav min={min} max={max} current={week} base="/local-intelligence" />
+
       {feed.sample && (
         <p className="tgsample">
-          <b>Sample feed.</b> The live fan scan (Reddit team boards first, more forums to follow) turns on for
-          the season — these entries show the format.
+          <b>Sample feed.</b> No fan buzz has been gathered for Week {week} yet — these entries show the
+          format. The live scan reads each team&apos;s Reddit board and its SB Nation blog.
         </p>
       )}
 
