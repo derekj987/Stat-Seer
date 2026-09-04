@@ -174,9 +174,23 @@ after CAP_MIN_GAMES    1.74        1.10
 **Always measure both tails after clamping anything** (`<0.5×` and `>=2×`, not just the one you were
 chasing), and gate a multiplicative correction on having enough sample for the base to mean anything.
 
-Still open: rows with ≤4 games run 1.74×. With two games you cannot project a player, and the honest
-options are to suppress the number or to stop trusting the depth chart's role for them — not to pick
-a multiplier that happens to look tidy.
+**Resolved by suppression, not by tuning.** Rows with a thin own-sample were the source of BOTH
+numbers that looked broken — a receiver at 3.7x his line, and (under a blunt cap) a starting QB at a
+quarter of his. Two games is not a projection, and no multiplier fixes that. The board now dashes
+its own number below `MIN_PROJ_GAMES` (5) while still showing the player, his line and his real
+hit-rates — the same honesty the game board uses when it cannot rate a side.
+
+Pick such a threshold from the data, not by feel. The buckets made the break obvious:
+
+```
+ games   0-2    3-4    5-7    8-9   10-14  15+
+ median  1.74   1.87   1.10   1.21   1.13  1.08
+```
+
+Published result: NCAAF median 1.10 (max 2.53, none under 0.5x) keeping 84% of rows, NFL 1.02
+keeping 94% — NFL suppresses almost nothing because its players carry long histories. Suppress in
+the VIEW rather than the generator, so the data keeps the value and the number returns by itself
+once the sample fills in.
 
 ### Depth rank is an input, not a fact — cross-check it against the market
 Depth slots (RB1/WR2) come from scraping Ourlads (`cfb_depth.py`) because CFBD has no depth order and

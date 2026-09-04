@@ -14,6 +14,24 @@ const LEAN_MARGIN = 0.04;
 
 export type Lean = "over" | "under" | null;
 
+/** Games of a player's OWN history required before we publish a projection for him.
+ *
+ *  Below this the number cannot be defended in either direction, and it showed: measured
+ *  median(proj / book line) by sample size on the NCAAF board ran 1.74 at 0-2 games and 1.87 at 3-4,
+ *  against 1.10 from 5 games up. Those thin rows produced both of the numbers that looked broken on
+ *  the board — a receiver at 3.7x his line and, when a blunt cap was applied instead, a starting QB
+ *  at a quarter of his. Two games is not a projection.
+ *
+ *  We still show the row: the player has a posted prop, and his line and hit-rates are real. We just
+ *  do not publish OUR number, exactly as the game board dashes a side it cannot rate. The data keeps
+ *  the value, so it returns on its own once the sample fills in.
+ *
+ *  Costs 16% of NCAAF rows and 6% of NFL, and moves the published median to 1.10 / 1.02. */
+export const MIN_PROJ_GAMES = 5;
+
+/** Do we have enough of this player's own history to publish a projection for him? */
+export const hasProjSample = (r: PlayerProj): boolean => (r.g ?? 0) >= MIN_PROJ_GAMES;
+
 const rateOf = (r: PlayerProj): number | null => (r.cG ? r.cOver / r.cG : null);
 
 /** Median historical over-rate per category, over the rows that actually have a posted line.

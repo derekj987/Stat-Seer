@@ -9,7 +9,7 @@ import Tip from "./Tip";
 import { PLAYER_PROJECTIONS, PROJ_WEEK, PROJ_PRIOR, type PlayerProj } from "@/lib/playerProjections";
 import { NCAAF_PLAYER_PROJECTIONS, NCAAF_PROJ_WEEK } from "@/lib/ncaafPlayerProjections";
 import { isRealistic } from "@/lib/depthChart";
-import { projLean, leanCentres } from "@/lib/playerProjections";
+import { projLean, leanCentres, hasProjSample, MIN_PROJ_GAMES } from "@/lib/playerProjections";
 import PropAdd, { type PricedSide } from "./PropAdd";
 import PinButton from "./PinButton";
 import { playerSlot, normName } from "@/lib/playerSlot";
@@ -207,7 +207,11 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                         // from proj vs book — see projLean. `proj` is a mean and the line sits near
                         // the median, so the old comparison leaned OVER on 90-100% of continuous
                         // markets. A row with too little history now shows no arrow at all.
-                        const lean = projLean(r, centres);
+                        // Too little of the player's own history to stand behind a number: show the
+                        // book's line and his real hit-rates, but dash OUR projection and drop the
+                        // lean rather than publish a read we cannot defend. See MIN_PROJ_GAMES.
+                        const enough = hasProjSample(r);
+                        const lean = enough ? projLean(r, centres) : null;
                         // A continuation row (same player as the row above, e.g. a QB's TD line
                         // under his yards line) blanks the name/team so the block reads as one.
                         const cont = ri > 0 && sec.rows[ri - 1].player === r.player;
@@ -234,9 +238,11 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                                 this cell reads as "our projection is under the line" and flatly
                                 contradicted the figure beside it (proj 193.2 vs a 180.5 line, arrow
                                 down). It now lives on the % over column it is actually computed from. */}
-                            <span className="pmcell pmcell--num pmcell--proj"
-                              title={`Our line-blind projection: ${r.player}'s expected ${propLabel(r.market).toLowerCase()}, an AVERAGE. Averages sit above the middle on these markets, so this can read higher than the book's line even when he clears that line less than half the time — the % over columns are what say how often he actually gets there.`}>
-                              {r.proj}{unitFor(r.market)}
+                            <span className={`pmcell pmcell--num${enough ? " pmcell--proj" : ""}`}
+                              title={enough
+                                ? `Our line-blind projection: ${r.player}'s expected ${propLabel(r.market).toLowerCase()}, an AVERAGE. Averages sit above the middle on these markets, so this can read higher than the book's line even when he clears that line less than half the time — the % over columns are what say how often he actually gets there.`
+                                : `Only ${r.g} game${r.g === 1 ? "" : "s"} of ${r.player}'s own history here — under ${MIN_PROJ_GAMES} we don't publish a projection we can't stand behind. His line and hit-rates are still real; our number returns once the sample fills in.`}>
+                              {enough ? <>{r.proj}{unitFor(r.market)}</> : "—"}
                             </span>
                             {/* The lean sits HERE, on the number it is derived from, so the arrow, the
                                 colour and the figure are one statement instead of three. */}
