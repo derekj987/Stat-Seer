@@ -118,9 +118,23 @@ statistics.median(r['proj']/r['book'] for r in mid)              # want ≈ 1.0
 
 Measured: **NFL 1.01** (healthy) vs **NCAAF 1.52, worst 3.44×**. Elija Lofton cleared a 16.5 line in
 10 of 19 games — his median is 16.5 — while we projected 56.7. A number multiples above a player's
-own median is a defect, not skew, and the usual suspect is the role-adjusted volume step
-(`proj = own_per_game × role_vol/own_vol`) inflating a player whose own volume is understated or
-whose depth slot is wrong. Run this test per sport after any change to the projection pipeline.
+own median is a defect, not skew. Run this test per sport after any change to the projection pipeline.
+
+**The mechanism — a one-way ratchet.** `rolevol()` in `cfb_player_proj.py` returned
+`max(role_baseline, own_recent)`, so it could only push volume UP. A player whose depth slot is
+generous was handed the ROLE's workload however far below it his own history sat: Lofton's projected
+4.9 receptions is *exactly* Miami's WR1 baseline × `TE_VOL_FACTOR`, not anything he had done. That
+volume then multiplies through his own efficiency into the yardage number.
+
+Whenever a projection looks inflated, check whether it equals a **role baseline** rather than
+anything the player produced — that equality is the tell. `ROLE_VOL_CAP` (1.6) now bounds the lift
+against demonstrated volume, which moved the NCAAF board from median 1.31 / 21% of rows ≥2× the line
+to **1.06 / 3%**. It is a blunt clamp on the symptom; the open question is why CFB own-volume reads
+so low against the role baseline in the first place.
+
+A cap fixes a tail, not a level: the small well-sampled subset still ran 1.45 afterwards against the
+NFL's 1.01. **Re-measure both the tail and the median — a headline number can improve while the bias
+you were chasing is still there.**
 
 ### Depth rank is an input, not a fact — cross-check it against the market
 Depth slots (RB1/WR2) come from scraping Ourlads (`cfb_depth.py`) because CFBD has no depth order and
