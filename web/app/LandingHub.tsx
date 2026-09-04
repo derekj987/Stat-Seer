@@ -329,13 +329,17 @@ export default function LandingHub({ initialSport, nfl, ncaaf, vf, isMember }: {
 
       {/* NFL panel */}
       <div className="lp-sport lp-sport--nfl">
-        <HighlightBanner sport="nfl" />
-        <div className="lpf__head lpf__head--snap">
-          <div className="lp-snaplabel">NFL WEEK {nfl.week} SNAPSHOT</div>
+        {/* The sport toggle sits ABOVE the banner: it switches this entire panel, so it has to be
+            the first thing you see rather than something you find after scrolling past the art. */}
+        <div className="lpf__sportbar">
           <div className="lpf__toggle" role="tablist" aria-label="Choose a sport">
             <label htmlFor="lps-nfl" className="lpf__t">NFL</label>
             <label htmlFor="lps-ncaaf" className="lpf__t">NCAAF</label>
           </div>
+        </div>
+        <HighlightBanner sport="nfl" />
+        <div className="lpf__head lpf__head--snap">
+          <div className="lp-snaplabel">NFL WEEK {nfl.week} SNAPSHOT</div>
         </div>
         {/* Aggressive curation: 3 disagreements + 3 player reads + 1 context. Everything else
             lives on its own section page (linked from each panel + the feature cards below). */}
@@ -362,13 +366,17 @@ export default function LandingHub({ initialSport, nfl, ncaaf, vf, isMember }: {
 
       {/* NCAAF panel */}
       <div className="lp-sport lp-sport--ncaaf">
-        <HighlightBanner sport="ncaaf" />
-        <div className="lpf__head lpf__head--snap">
-          <div className="lp-snaplabel">COLLEGE FOOTBALL WEEK {ncaaf.week} SNAPSHOT</div>
+        {/* Mirrors the NFL panel — the toggle leads, above the banner. Both panels carry their own
+            copy because only one panel is ever displayed, and the labels drive the same radios. */}
+        <div className="lpf__sportbar">
           <div className="lpf__toggle" role="tablist" aria-label="Choose a sport">
             <label htmlFor="lps-nfl" className="lpf__t">NFL</label>
             <label htmlFor="lps-ncaaf" className="lpf__t">NCAAF</label>
           </div>
+        </div>
+        <HighlightBanner sport="ncaaf" />
+        <div className="lpf__head lpf__head--snap">
+          <div className="lp-snaplabel">COLLEGE FOOTBALL WEEK {ncaaf.week} SNAPSHOT</div>
         </div>
         {ncaafRanked.length > 0 && (
           <Panel title="AP Top 25 matchups" count={`${ncaafRanked.length} ranked`} hint={<>This week&apos;s games with an <b>AP Top 25</b> team, in kickoff order, each ranked side showing its poll rank. The market&apos;s <b>Spread</b> and <b>O/U</b> sit beside <b>Our Projection</b> — our <b>line-blind</b> read, published for context.</>} open

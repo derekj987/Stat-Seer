@@ -4071,6 +4071,9 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 .lp-lead__p{font-size:clamp(14px,2.2vw,16px);color:var(--muted);line-height:1.55;margin:0 auto 16px;max-width:60ch}
 .lp-lead__p b{color:var(--ink)}
 .lp-lead__cta{display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;margin:0 0 16px}
+/* Second row: the other two sections, named. Tighter above so it reads as a continuation of the
+   button row rather than a separate block. */
+.lp-lead__cta--alt{gap:10px 22px;margin:-6px 0 16px}
 .lp-lead__go{font-size:14px}
 .lp-lead__alt{font-size:13.5px;font-weight:700;color:var(--accent);text-decoration:none}
 .lp-lead__alt:hover{text-decoration:underline}
@@ -4342,6 +4345,10 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 #lps-ncaaf:checked ~ .lp-sport--ncaaf{display:block}
 .lpf__head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
 .lpf__h{font-size:clamp(20px,3.4vw,26px);margin:0;color:var(--ink)}
+/* The sport toggle now leads each panel, above the rotating banner — it switches the WHOLE panel, so
+   it belongs before the artwork rather than after it. Centred so it reads as a control for
+   everything below, not as a label on the snapshot heading it used to sit beside. */
+.lpf__sportbar{display:flex;justify-content:center;margin:0 0 12px}
 .lpf__toggle{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--surface)}
 .lpf__t{display:inline-flex;align-items:center;border:0;background:none;cursor:pointer;font:inherit;
   font-weight:800;font-size:13px;letter-spacing:.03em;padding:6px 18px;border-radius:999px;color:var(--muted)}

@@ -115,8 +115,16 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
           One model reads every game <b>line-blind</b>, shows you exactly where it disagrees with the
           market, then finds the sportsbook paying the most for your <b>exact slip</b>.
         </p>
+        {/* Name the destination. "Explore today's board" jumped to an anchor further down this same
+            page, which told a first-time visitor nothing about what the site actually contains —
+            these go straight into The Model for each sport, and the secondary links name the other
+            two sections by name so the whole structure is visible from the hero. */}
         <div className="lp-lead__cta">
-          <a href="#lp-board" className="btn btn--primary lp-lead__go">Explore today&apos;s board</a>
+          <a href="/model" className="btn btn--primary lp-lead__go">Explore the Model&apos;s NFL predictions</a>
+          <a href="/ncaaf/model" className="btn btn--primary lp-lead__go">Explore the Model&apos;s NCAAF predictions</a>
+        </div>
+        <div className="lp-lead__cta lp-lead__cta--alt">
+          <a href="/considerations" className="lp-lead__alt">See the Context that shapes a game →</a>
           <a href="/lines" className="lp-lead__alt">See how Value Finder works →</a>
         </div>
         <ul className="lp-trust" aria-label="What StatSeer stands for">
