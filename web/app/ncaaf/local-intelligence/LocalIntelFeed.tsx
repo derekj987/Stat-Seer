@@ -17,6 +17,11 @@ const TEAM_COLOR: Record<string, string> = {
   Oregon: "#5cb06a", "Notre Dame": "#cbab52", LSU: "#8a6fe0", Tennessee: "#e8843c",
   Clemson: "#e8843c", Miami: "#2fae90",
 };
+// Team sections shown before the dropdown, in the UNFILTERED view only. Capped on TEAMS rather than
+// cards, so a team's buzz is never split across the boundary. Once a conference/team (or the slate)
+// is chosen the reader has already narrowed the board deliberately, so everything is shown.
+const TEAM_CAP = 2;
+
 const teamColor = (t: string) => TEAM_COLOR[t] ?? "var(--gold)";
 
 function BuzzCard({ b }: { b: Buzz }) {
@@ -82,6 +87,23 @@ export default function LocalIntelFeed({ buzz, slate }: { buzz: Buzz[]; slate: s
     return [...m.entries()].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]));
   }, [shown]);
 
+  // The cap applies only when nothing is filtered.
+  const unfiltered = !conf && !team && !slateOnly;
+  // One team's section. Shared by the visible head and the dropdown tail so both render identically.
+  const teamSection = ([tm, items]: [string, Buzz[]]) => (
+    <section className="tgteam" id={`tgteam-${tm.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`} key={tm} aria-label={`${tm} fan stock`}>
+      <h3 className="tgteam__h" style={{ color: teamColor(tm) }}>
+        {tm}<span className="tgteam__n">{items.length}</span>
+        {NCAAF_CONF[tm] ? <span className="tgteam__conf">{NCAAF_CONF[tm]}</span> : null}
+      </h3>
+      <div className="tgfeed">
+        {[...items].sort((a, b) => b.heat - a.heat || a.player.localeCompare(b.player)).map((b) => <BuzzCard key={b.id} b={b} />)}
+      </div>
+    </section>
+  );
+  const head = unfiltered ? byTeam.slice(0, TEAM_CAP) : byTeam;
+  const rest = unfiltered ? byTeam.slice(TEAM_CAP) : [];
+
   return (
     <>
       <div className="lictl">
@@ -121,17 +143,19 @@ export default function LocalIntelFeed({ buzz, slate }: { buzz: Buzz[]; slate: s
             : "No buzz matches this filter yet — try another conference, or clear the filter."}
         </p>
       ) : (
-        byTeam.map(([tm, items]) => (
-          <section className="tgteam" id={`tgteam-${tm.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`} key={tm} aria-label={`${tm} fan stock`}>
-            <h3 className="tgteam__h" style={{ color: teamColor(tm) }}>
-              {tm}<span className="tgteam__n">{items.length}</span>
-              {NCAAF_CONF[tm] && <span className="tgteam__conf">{NCAAF_CONF[tm]}</span>}
-            </h3>
-            <div className="tgfeed">
-              {[...items].sort((a, b) => b.heat - a.heat || a.player.localeCompare(b.player)).map((b) => <BuzzCard key={b.id} b={b} />)}
-            </div>
-          </section>
-        ))
+        <>
+          {head.map(teamSection)}
+          {rest.length > 0 && (
+            <details className="hb-showmore">
+              <summary className="hb-showmore__sum">
+                <span className="hb-showmore__chev" aria-hidden="true">&#9656;</span>
+                <span className="hb-showmore__more">Show {rest.length} more team{rest.length === 1 ? "" : "s"}</span>
+                <span className="hb-showmore__less">Collapse</span>
+              </summary>
+              {rest.map(teamSection)}
+            </details>
+          )}
+        </>
       )}
     </>
   );

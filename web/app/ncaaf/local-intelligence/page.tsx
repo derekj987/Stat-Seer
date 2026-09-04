@@ -2,6 +2,7 @@ import { cfbWeekTailgate } from "@/lib/cfbTailgate";
 import { Brand, FlowSteps, ContextSubnav, WeekBadge } from "../../Nav";
 import Tip from "../../Tip";
 import { NCAAF_MODEL } from "../model-data";
+import { NcaafWeekNav, readNcaafWeek, ncaafCard } from "../NcaafWeek";
 import LocalIntelFeed from "./LocalIntelFeed";
 
 // College Football — Context · Local Intelligence ("Fan Stock"). Which players fans are
@@ -14,12 +15,16 @@ export const metadata = {
 
 export const revalidate = 300;
 
-export default async function Page() {
-  const week = NCAAF_MODEL.card.week;
+// Serves every scheduled week with the standard week wheel, matching the NFL page and every other
+// NCAAF board. The slate filter follows the SELECTED week, not the current one — otherwise picking
+// week 3 would filter its buzz against week 1's fixtures.
+export default async function Page({ searchParams }: PageProps<"/ncaaf/local-intelligence">) {
+  const sp = await searchParams;
+  const week = readNcaafWeek(sp.week, NCAAF_MODEL.card.week);
   const season = NCAAF_MODEL.card.season;
   const feed = await cfbWeekTailgate(week, season);
-  // Teams playing this weekend — powers the "This week's slate" filter.
-  const slate = [...new Set(NCAAF_MODEL.card.games.flatMap((g) => [g.home, g.away]))];
+  // Teams playing in the SELECTED week — powers the "This week's slate" filter.
+  const slate = [...new Set(ncaafCard(week).games.flatMap((g) => [g.home, g.away]))];
 
   return (
     <main className="tg">
@@ -31,7 +36,7 @@ export default async function Page() {
         />
       </header>
 
-      <WeekBadge week={week} note="current week · fan boards this week" />
+      <WeekBadge week={week} note="fan boards this week" />
       <FlowSteps active="context" base="ncaaf" />
       <div className="subnavrow">
         <ContextSubnav active="fan" base="ncaaf" />
@@ -41,10 +46,12 @@ export default async function Page() {
           our model, not a StatSeer pick, and it is <b>never graded</b>.</>} />
       </div>
 
+      <NcaafWeekNav base="/ncaaf/local-intelligence" week={week} />
+
       {feed.sample && (
         <p className="tgsample">
-          <b>Sample feed.</b> The live college fan scan (r/CFB + team boards) turns on for the season — these
-          entries show the format with real current starters.
+          <b>Sample feed.</b> No fan buzz has been gathered for Week {week} yet — these entries show the
+          format. The live scan reads r/CFB and each school&apos;s SB Nation team blog.
         </p>
       )}
 
