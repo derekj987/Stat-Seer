@@ -5,6 +5,29 @@ import { createClient } from "@/lib/supabase/client";
 import { LEGAL_VERSION } from "@/lib/legal";
 import { GoogleButton } from "../GoogleAuth";
 
+/** Supabase auth errors are raw API strings ("email rate limit exceeded") — accurate for a log,
+ *  meaningless to someone trying to sign up, and they read as "the site is broken". Map the ones a
+ *  real person actually hits to something that says what happened and what to do. Anything
+ *  unrecognised falls through unchanged so we never swallow a genuine error. */
+function friendlyAuthError(raw: string): string {
+  const m = (raw || "").toLowerCase();
+  if (m.includes("rate limit") || m.includes("too many requests")) {
+    return "We're getting a lot of sign-ups right now and our email provider is throttling us. "
+      + "Please wait a few minutes and try again — your details above are fine, nothing is wrong with them.";
+  }
+  if (m.includes("already registered") || m.includes("already been registered")) {
+    return "There's already an account with this email. Try logging in instead, or use the password-reset link on the login page.";
+  }
+  if (m.includes("invalid format") || m.includes("validate email")) {
+    return "That email address doesn't look right — please check it and try again.";
+  }
+  if (m.includes("signups not allowed") || m.includes("signup is disabled")) {
+    return "Sign-ups are paused at the moment. Please try again a bit later.";
+  }
+  if (m.includes("password")) return raw;   // Supabase's password rules are already readable
+  return raw;
+}
+
 export default function SignUp() {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -50,7 +73,7 @@ export default function SignUp() {
         emailRedirectTo: `${location.origin}/auth/callback`,
       },
     });
-    if (error) { setStatus("error"); setMsg(error.message); return; }
+    if (error) { setStatus("error"); setMsg(friendlyAuthError(error.message)); return; }
     setStatus("sent");
   }
 
