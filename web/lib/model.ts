@@ -4,7 +4,19 @@
 
 import { fetchWeek, implied, median, type OddsRow } from "./board";
 
-export const MODEL_VERSION = "game-v2-powercal";
+/** Which published model the board reads. Bumped when the METHOD changes, so old predictions stay
+ *  attributed to the method that made them and calibration is never computed across two of them.
+ *
+ *  Must match analysis/game_model.MODEL_VERSION, and it can only be raised once rows for the new
+ *  version actually exist in the ledger — fetchModelWeek returns [] for a version with no rows, so
+ *  bumping first would blank the board.
+ *
+ *  v2 -> v3 (2026-09-05): v2 rated teams on LAST season's point differential only, so it produced
+ *  the same number for a given matchup every day of the season. v3 blends the current season in as
+ *  results arrive. On held-out 2023-2025: margin MAE 11.095 -> 10.303, calibration -1.5 -> +0.0,
+ *  Brier .2420 -> .2240 (closing line 9.744 — still sharper, as it should be). The v1/v2 rows stay
+ *  in the ledger as the record of what was claimed on 2026-08-14. */
+export const MODEL_VERSION = "game-v3-inseason";
 
 export interface ModelPrediction {
   eventId: string;
