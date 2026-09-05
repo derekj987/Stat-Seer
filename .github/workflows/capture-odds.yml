@@ -4,11 +4,28 @@ name: Capture odds
 # writes to Supabase. No Vercel/Pro needed -- GitHub Actions is the scheduler.
 # All times UTC. Cadence is a starting point; tune the crons below as needed.
 
+# TIERED CAPTURE. The 3-hourly sweep used to run with no commence window, so every 3 hours it wrote
+# a snapshot of EVERY upcoming game -- all 18 weeks. In early September that meant re-recording Week
+# 17's line eight times a day, for lines that barely move. Measured: 4,660 rows per snapshot spread
+# across the whole season, ~29,000 rows/day against a lifetime average of 989, with 87% of the table
+# belonging to games not yet played. odds_snapshots and prop_snapshots together are ~1.44M of the
+# ~1.47M rows in the database, which is what pushed the project over its storage limit.
+#
+# So: frequent captures are now NEAR-TERM only, and the long-range opening lines are kept by a single
+# daily full sweep instead of eight. Far-future line movement is still recorded, just once a day.
+#
+# This costs NO extra Odds API credits either way -- filter_commence_window is applied after the API
+# response is parsed, so the request is identical; only the number of rows written to Supabase changes.
+
 on:
   schedule:
-    # Sweep every 3 hours (all upcoming games), Aug-Jan. Establishes lines and,
-    # via the closing_lines view, backs up the pre-kickoff capture.
+    # Near-term sweep every 3 hours, Aug-Jan: games kicking off within 10 days (14400 min).
+    # Establishes lines and, via the closing_lines view, backs up the pre-kickoff capture.
     - cron: "0 */3 * 8-12,1 *"
+    # Long-range sweep once daily: the WHOLE season, no window, so opening lines for later weeks are
+    # still captured for line-movement/CLV work. Hour 10 deliberately avoids the */3 hours
+    # (0,3,6,9,12,15,18,21) so the two never fire together.
+    - cron: "0 10 * 8-12,1 *"
     # Pre-kickoff sharpener: every 15 min during afternoon/evening game windows
     # on Sun/Mon/Thu, filtered to games within 30 min of kickoff.
     - cron: "*/15 17-23 * 8-12,1 0,1,4"
@@ -34,8 +51,17 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: |
-          if [ "${{ github.event.schedule }}" = "*/15 17-23 * 8-12,1 0,1,4" ]; then
-            python odds_client.py --live --write --reason PRE_KICKOFF --commence-within 30
-          else
-            python odds_client.py --live --write --reason SCHEDULED
-          fi
+          case "${{ github.event.schedule }}" in
+            "*/15 17-23 * 8-12,1 0,1,4")
+              # Closing line: only games about to kick off.
+              python odds_client.py --live --write --reason PRE_KICKOFF --commence-within 30
+              ;;
+            "0 10 * 8-12,1 *")
+              # Once daily: the whole season, unwindowed, for long-range opening lines.
+              python odds_client.py --live --write --reason SCHEDULED
+              ;;
+            *)
+              # Every 3 hours (and manual runs): near-term only, 10 days = 14400 minutes.
+              python odds_client.py --live --write --reason SCHEDULED --commence-within 14400
+              ;;
+          esac
