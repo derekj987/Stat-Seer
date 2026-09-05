@@ -130,8 +130,19 @@ def current_week_games(season, week):
     if not latest:
         return []
     snap = urllib.parse.quote(latest[0]["snapshot_at"])
-    rows = sb(f"odds_snapshots?season=eq.{season}&week=eq.{week}&snapshot_at=eq.{snap}"
-              f"&select=event_id,home_team,away_team,commence_time&limit=5000")
+    # PAGED via Range. `limit=5000` does not raise PostgREST's 1000-row ceiling, and one week's
+    # snapshot is already 1,042 rows -- past the cap that the "one snapshot fits" assumption relied
+    # on. Only distinct event_ids are needed, so a truncated read would quietly drop whole games
+    # from the weather capture rather than erroring.
+    rows, PAGE, off = [], 1000, 0
+    while True:
+        page = sb(f"odds_snapshots?season=eq.{season}&week=eq.{week}&snapshot_at=eq.{snap}"
+                  f"&select=event_id,home_team,away_team,commence_time"
+                  f"&offset={off}&limit={PAGE}")
+        rows += page
+        if len(page) < PAGE:
+            break
+        off += PAGE
     seen, games = set(), []
     for r in rows:
         if r["event_id"] in seen:

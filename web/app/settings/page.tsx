@@ -27,14 +27,27 @@ export default function SettingsPage() {
     sb.auth.getUser().then(async ({ data }) => {
       setEmail(data.user?.email ?? null);
       if (!data.user) return;
-      const { data: p } = await sb.from("profiles")
+      // Two-step read, because profiles is locked to a column allow-list
+      // (roster_privacy_authed.sql) and `username_changed_at` was added to the table after that
+      // list was written. Selecting a column a member cannot read fails the WHOLE select, so the
+      // first attempt used to return null, this effect returned early, and the Username card was
+      // never drawn — which is exactly how it looked to a member: silently absent.
+      //
+      // So: ask for the timestamp, and if that is refused fall back to the username alone and
+      // still offer the form. Nothing is lost by guessing "not yet changed" here — the once-rule
+      // lives in change_username(), which returns `already_changed` and refuses. The UI is a
+      // convenience; the database is the authority.
+      const full = await sb.from("profiles")
         .select("username,username_changed_at").eq("id", data.user.id).single();
-      if (!p) return;
-      setUname((p.username as string) ?? "");
-      // username_changed_at only exists once ingest/username_change.sql has been run. Before that
-      // the field comes back undefined; treat it as "not available" rather than "never changed",
-      // so we don't offer a form whose RPC doesn't exist yet.
-      setChangedAt((p as Record<string, unknown>).username_changed_at as string ?? null);
+      if (full.data) {
+        setUname((full.data.username as string) ?? "");
+        setChangedAt((full.data as Record<string, unknown>).username_changed_at as string ?? null);
+        return;
+      }
+      const basic = await sb.from("profiles").select("username").eq("id", data.user.id).single();
+      if (!basic.data) return;                     // no profile at all — leave the card hidden
+      setUname((basic.data.username as string) ?? "");
+      setChangedAt(null);                          // offer it; the RPC enforces the real rule
     });
   }, []);
 

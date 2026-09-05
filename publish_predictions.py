@@ -30,25 +30,57 @@ import game_model as gm  # noqa: E402
 
 
 def _get(env, table, query):
-    url = f"{env['SUPABASE_URL'].rstrip('/')}/rest/v1/{table}{query}"
+    """PostgREST read, PAGED.
+
+    A `limit=` in the query string does NOT raise the ceiling: the server caps every response at
+    1000 rows, so `&limit=5000` returns 1000 and looks complete. Page until a short page arrives."""
     key = env["SUPABASE_SERVICE_KEY"]
-    req = urllib.request.Request(url, headers={"apikey": key, "Authorization": f"Bearer {key}"})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return json.loads(r.read())
+    base = f"{env['SUPABASE_URL'].rstrip('/')}/rest/v1/{table}{query}"
+    out, PAGE, off = [], 1000, 0
+    while True:
+        req = urllib.request.Request(base, headers={"apikey": key, "Authorization": f"Bearer {key}",
+                                                    "Range-Unit": "items",
+                                                    "Range": f"{off}-{off + PAGE - 1}"})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            page = json.loads(r.read())
+        out += page
+        if len(page) < PAGE:
+            return out
+        off += PAGE
+        if off >= 200000:
+            print(f"  WARNING: _get stopped at {off} rows for {table} — result may be partial")
+            return out
 
 
 def event_map(env, season, week):
-    """(home_abbr, away_abbr) -> (event_id, commence_time), from odds_snapshots."""
+    """(home_abbr, away_abbr) -> (event_id, commence_time), from odds_snapshots.
+
+    PINNED to one snapshot. This read used to be the whole week unfiltered with `limit=5000`, which
+    matched 138,340 rows for 2026 week 1 and returned the first 1,000. odds_snapshots holds one row
+    per book per market per capture, roughly 8,600 rows per game, so 1,000 rows covered about ONE
+    game — every other game fell out of the map and was skipped as "no event_id". The publisher
+    would have published almost nothing on its first scheduled run.
+
+    One snapshot is all this needs: it only wants each game's event_id and kickoff, which do not
+    change between captures. Paging on top means it stays correct as a single snapshot grows past
+    1,000 rows (a Week 1 sweep is already 1,042)."""
+    latest = _get(env, "odds_snapshots",
+                  f"?season=eq.{season}&week=eq.{week}"
+                  "&capture_reason=in.(SCHEDULED,MANUAL)"
+                  "&select=snapshot_at&order=snapshot_at.desc&limit=1")
+    if not latest:
+        return {}
+    snap = urllib.parse.quote(latest[0]["snapshot_at"])
     rows = _get(env, "odds_snapshots",
-                f"?season=eq.{season}&week=eq.{week}"
-                "&select=event_id,home_team,away_team,commence_time&limit=5000")
+                f"?season=eq.{season}&week=eq.{week}&snapshot_at=eq.{snap}"
+                "&select=event_id,home_team,away_team,commence_time")
     return {(r["home_team"], r["away_team"]): (r["event_id"], r["commence_time"]) for r in rows}
 
 
 def already_published(env, model_version, season, week):
     rows = _get(env, "prediction_ledger",
                 f"?season=eq.{season}&week=eq.{week}"
-                f"&model_version=eq.{model_version}&select=event_id&limit=5000")
+                f"&model_version=eq.{model_version}&select=event_id")
     return {r["event_id"] for r in rows}
 
 

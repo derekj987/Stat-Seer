@@ -131,12 +131,23 @@ async function cfbLatestProps(): Promise<CfbPropRow[]> {
   const lat = (await latRes.json()) as { snapshot_at: string }[];
   if (!lat.length) return [];
   const snap = encodeURIComponent(lat[0].snapshot_at);
-  const res = await fetch(
-    `${base}?snapshot_at=eq.${snap}&select=event_id,commence,home_team,away_team,book,market,player,side,line,price&limit=5000`,
-    { headers, next: { revalidate: 120 } }
-  );
-  if (!res.ok) throw new Error(`Supabase ${res.status}`);
-  return (await res.json()) as CfbPropRow[];
+  // PAGED. `limit=5000` does not raise PostgREST's 1000-row ceiling — it returns 1000 and looks
+  // complete. A CFB snapshot is 4,167 rows, so the assistant was reasoning from ~24% of the slate
+  // and had no way to know it. Which 24% was arbitrary, because the query is unordered.
+  const url2 = `${base}?snapshot_at=eq.${snap}&select=event_id,commence,home_team,away_team,book,market,player,side,line,price`;
+  const PAGE = 1000;
+  const out: CfbPropRow[] = [];
+  for (let off = 0; off < 200000; off += PAGE) {
+    const res = await fetch(url2, {
+      headers: { ...headers, "Range-Unit": "items", Range: `${off}-${off + PAGE - 1}` },
+      next: { revalidate: 120 },
+    });
+    if (!res.ok) throw new Error(`Supabase ${res.status}`);
+    const rows = (await res.json()) as CfbPropRow[];
+    out.push(...rows);
+    if (rows.length < PAGE) break;
+  }
+  return out;
 }
 
 export async function buildCandidatesNcaaf(): Promise<Candidate[]> {

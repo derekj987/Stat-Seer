@@ -229,16 +229,38 @@ export function buildBoard(rows: OddsRow[]): Game[] {
 }
 
 // ---- Supabase fetch (server-side) ----
+/** PostgREST read, PAGED.
+ *
+ *  A `limit=` in the query string does NOT raise PostgREST's ceiling — the server caps every
+ *  response at 1000 rows, so `&limit=5000` returns 1000 and looks complete.
+ *
+ *  fetchWeek/fetchPreseason below pin to a single snapshot and carried the comment "so it's whole
+ *  and under the 1000-row cap". That was true when written and has since expired: one Week 1
+ *  snapshot is now 1,042 rows, so the board was silently dropping the tail. Paging removes the
+ *  assumption rather than re-tuning it — a snapshot only grows as books and markets are added.
+ *
+ *  A `limit=1` query still works: the first page comes back short and the loop stops. */
 async function pgFrom(table: string, path: string): Promise<unknown[]> {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
   if (!url || !key) throw new Error("SUPABASE_URL / SUPABASE_SERVICE_KEY not set");
-  const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/${table}${path}`, {
-    headers: { apikey: key, Authorization: `Bearer ${key}` },
-    next: { revalidate: 120 }, // refresh at most every 2 min
-  });
-  if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
-  return (await res.json()) as unknown[];
+  const base = `${url.replace(/\/$/, "")}/rest/v1/${table}${path}`;
+  const PAGE = 1000;
+  const out: unknown[] = [];
+  for (let off = 0; off < 200000; off += PAGE) {
+    const res = await fetch(base, {
+      headers: {
+        apikey: key, Authorization: `Bearer ${key}`,
+        "Range-Unit": "items", Range: `${off}-${off + PAGE - 1}`,
+      },
+      next: { revalidate: 120 }, // refresh at most every 2 min
+    });
+    if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
+    const rows = (await res.json()) as unknown[];
+    out.push(...rows);
+    if (rows.length < PAGE) break;
+  }
+  return out;
 }
 const pg = (path: string) => pgFrom("odds_snapshots", path);
 
