@@ -89,6 +89,44 @@ Next 16 generates those globals into `.next/types`, which a clean checkout doesn
 alone fails while it passes locally (because `next dev` already wrote them). `ci.yml` runs
 `npx next typegen` before `tsc`. Reproduce locally by deleting `.next/types` and running `tsc`.
 
+## A job that "succeeds" can still be the problem — measure what it WRITES
+Exit code 0 only says the script ran. Two failures this repo has actually had, both from green jobs:
+
+**1. An unbounded capture scope.** The odds sweep ran every 3 hours with no commence window, so it
+snapshotted *every upcoming game — all 18 weeks* — re-recording Week 17's line eight times a day in
+early September. Measured: 4,660 rows per snapshot, **~29,152 rows/day against a lifetime average of
+989**, and 87% of the table was games not yet played. `odds_snapshots` + `prop_snapshots` reached
+~1.44M of the database's ~1.47M rows and pushed the project over its storage limit. Fixed by tiering:
+near-term every 3h (`--commence-within 14400`), whole season once daily, closing line unchanged.
+
+**2. A cap that silently truncates.** The CFB prop capture polled `upcoming[:max_events]` over an
+**unsorted** list, so which 40 of 167 events got polled was arbitrary — today's games could be dropped
+while next weekend's were polled. Sorting by kickoff before truncating, and raising the cap, took
+coverage from 22 to 40 games. Credits were never the constraint (4,997,453 remaining).
+
+So when a scheduled job is implicated, ask three questions, not one:
+```
+did it run?          -> the run log
+did it write?        -> row counts, and the growth RATE vs its own history
+is what it wrote RIGHT? -> scope, ordering, and how much is redundant
+```
+A rate that has jumped 30x against its own lifetime average is the signal; a single day's count in
+isolation tells you nothing.
+
+Useful shape for the second question — compare recent volume against the table's own baseline:
+```python
+n_total = count(table)                      # lifetime
+n_7d    = count(table, "&snapshot_at=gte." + seven_days_ago)
+# rows/day recently vs rows/day over the table's whole life
+```
+
+## Empty output is not the same as broken
+`ref_assignments` was empty and the pipeline was healthy: the run log said *"2026: 0 games with an
+assigned crew / nothing to write (no assignments yet)"*, and the upstream nflverse `games.csv` had
+**0 of 272** 2026 games with a referee against **285 of 285** for 2025 — the NFL simply had not posted
+crews yet. A job that correctly writes nothing looks identical, from the table, to one that is broken.
+**Always separate "the source is empty" from "we failed to read it"**, and say which.
+
 ## Verifying a fix without waiting for the cron
 Reproduce the runner's condition rather than trusting the code read — for class 1 that means an empty
 directory with no `data/`:
