@@ -7,6 +7,7 @@
 // The launcher + unread badge live in the Dock; this reports {member, unread} up via onMeta.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { ONLINE_MS } from "@/lib/presence";
 import { useSlip, encodeSlip, type SlipItem } from "@/lib/slip";
 import { bookName, decToAmerican, priceSlip } from "@/lib/slipPricing";
 import { formatMessage, wrapSelection, EMOJIS } from "@/lib/chatFormat";
@@ -54,6 +55,9 @@ export default function ChatWidget({ open, onClose, onMeta }:
   const [convs, setConvs] = useState<Conv[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [requests, setRequests] = useState<Req[]>([]);
+  // Ids of friends currently online (fresh profiles.last_seen). Empty until loadFriends runs —
+  // an unknown presence shows NO ring, never a green one.
+  const [onlineIds, setOnlineIds] = useState<Set<string>>(new Set());
   const [view, setView] = useState<"list" | "chat" | "new">("list");
   const [active, setActive] = useState<Conv | null>(null);
   const [msgs, setMsgs] = useState<Msg[]>([]);
@@ -104,10 +108,22 @@ export default function ChatWidget({ open, onClose, onMeta }:
     }
     const ids = [...new Set([...fr.map((f) => f.otherId), ...rq.map((r) => r.id)])];
     const names = new Map<string, Person>();
+    // last_seen drives the green "online" ring. The bubbles used to hard-code `is-online` on every
+    // friend, so the widget told you the whole roster was online at all times, including people who
+    // had never come back. The heartbeat already exists (Presence.tsx stamps profiles.last_seen
+    // about once a minute for a visible tab) and the profile page already reads it — this just uses
+    // the same source and the same 3-minute freshness rule instead of inventing a second one.
+    const online = new Set<string>();
     if (ids.length) {
-      const { data: profs } = await sb.from("profiles").select("id,username,role").in("id", ids);
-      for (const p of profs ?? []) names.set(p.id as string, { id: p.id as string, username: p.username as string, role: (p.role as string) ?? "member" });
+      const { data: profs } = await sb.from("profiles").select("id,username,role,last_seen").in("id", ids);
+      const now = Date.now();
+      for (const p of profs ?? []) {
+        names.set(p.id as string, { id: p.id as string, username: p.username as string, role: (p.role as string) ?? "member" });
+        const seen = p.last_seen as string | null;
+        if (seen && now - new Date(seen).getTime() < ONLINE_MS) online.add(p.id as string);
+      }
     }
+    setOnlineIds(online);
     setFriends(fr.map((f) => ({ id: f.otherId, rowId: f.rowId, username: names.get(f.otherId)?.username ?? "member", role: names.get(f.otherId)?.role ?? "member" })));
     setRequests(rq.map((r) => ({ rowId: r.rowId, id: r.id, username: names.get(r.id)?.username ?? "member" })));
   }, []);
@@ -189,6 +205,16 @@ export default function ChatWidget({ open, onClose, onMeta }:
     return () => { sb.removeChannel(ch); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [me, loadFriends, loadConvs]);
+
+  // Presence goes stale on its own: last_seen is only read when the friend list loads, so without
+  // this a friend keeps their green ring until something else happens to reload. Refresh while the
+  // panel is actually open — faster than the 3-minute window so a ring disappears within one beat
+  // of them leaving, and no queries at all while the widget is closed.
+  useEffect(() => {
+    if (!me || !open) return;
+    const iv = setInterval(() => loadFriends(me.id), 60000);
+    return () => clearInterval(iv);
+  }, [me, open, loadFriends]);
 
   useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight }); }, [msgs, active]);
 
@@ -414,7 +440,8 @@ export default function ChatWidget({ open, onClose, onMeta }:
               <div className="cw__bubbles" aria-label="Friends — tap to chat">
                 {friends.map((f) => (
                   <button className="cw__fbubble" key={f.id} onClick={() => startWith(f)} title={`Chat with ${f.username}`}>
-                    <span className="cw__bubav is-online">
+                    <span className={`cw__bubav${onlineIds.has(f.id) ? " is-online" : ""}`}
+                      title={onlineIds.has(f.id) ? `${f.username} is online now` : undefined}>
                       {f.username.charAt(0).toUpperCase()}
                       {friendUnread.get(f.id) ? <span className="cw__bubdot">{friendUnread.get(f.id)! > 9 ? "9+" : friendUnread.get(f.id)}</span> : null}
                     </span>

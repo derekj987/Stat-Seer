@@ -38,7 +38,9 @@ export interface Story {
   createdAt: string;
 }
 
-const ONLINE_MS = 3 * 60 * 1000; // "online" = seen in the last 3 minutes
+// "online" = seen in the last 3 minutes. Defined in ./presence so client components (the chat
+// widget's friend bubbles) can share the same threshold without bundling this server-only module.
+import { ONLINE_MS } from "./presence";
 
 export interface WallComment {
   id: string;

@@ -263,6 +263,38 @@ Generalise: **when our data and the market disagree about a fact the market cann
 stale. Never resolve that disagreement by dropping the row silently. Count the drops and print them;
 this bug was invisible because `offteam` was appended to a list nobody read.
 
+### 🚨 A status indicator must READ the status, not assert it
+The chat widget's friend bubbles rendered `<span className="cw__bubav is-online">` — the online
+class **hardcoded on every friend**. So the widget told every member that their entire roster was
+online, permanently. Measured against `profiles.last_seen` at the moment it was reported: **1 of 16
+members was actually online, and it was Derek himself.** Two of the five bubbles on screen belonged
+to members who had *never* had a session (`last_seen` null); another had last been seen 8.7 days
+earlier.
+
+Worse, the truth was already in the database and already being used elsewhere: `Presence.tsx`
+heartbeats `last_seen` every ~60s and the profile page renders `f.online` from it. The widget had
+simply never been wired to it.
+
+This is the same failure as a projection that contradicts its own line — **the UI states a fact it
+never checked** — and it is the most damaging kind on a product whose pitch is verifiable trust.
+
+Audit sweep for it: any presence dot, "live" pill, "verified" tick, freshness stamp or status badge
+whose class is unconditional in JSX.
+```bash
+grep -rnE 'className="[^"]*(is-online|is-live|is-verified|is-fresh)' web/app web/components
+```
+Every hit must be a ternary on real data, or belong to the signed-in user themselves (the rail and
+dock render `is-online` on *your own* avatar, which is trivially true and fine).
+
+Two rules that came out of the fix:
+- **Unknown renders as nothing, never as the good state.** `onlineIds` starts empty, so a friend
+  shows no ring until presence is actually known.
+- **A freshness-based indicator must refresh on a timer.** Presence was read once when the friend
+  list loaded, so a ring would have persisted long after the member left. It now re-reads every 60s
+  while the panel is open — inside the 3-minute window, and no queries while closed.
+- The threshold lives in ONE place (`lib/presence.ts`, client-safe so it isn't duplicated into a
+  server-only module). Two copies of "how stale is stale" drift.
+
 ### A prop board shows ONLY players the sportsbook lists
 The reconciliation below runs in both directions, and the second one is a product rule, not just a
 bug: **a name on the prop board that is not in the book's app is noise.** A bettor reads our board
