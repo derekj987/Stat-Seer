@@ -1,0 +1,76 @@
+name: Capture CFB depth chart
+
+# Weekly snapshot of the NCAAF depth chart -> cfb_depth_snapshots.
+#
+# WHY. College football has no mandatory injury report, so there is no pre-kickoff availability
+# feed to model from — verified, not assumed: CFBD /player/injuries and /injuries both 404, and
+# ESPN's injuries endpoints 403 for college and pro alike (EMPIRICAL_REFERENCE 9e). The only
+# availability-shaped signal this project can build for itself is a CHANGE HISTORY of the scraped
+# depth chart: a starter who drops off or down the chart between weeks probably had something
+# happen to him.
+#
+# That history exists ONLY if it is recorded as it happens. Today's chart says nothing about who
+# was listed last week, and no later effort reconstructs it — the same shape as the practice
+# trajectory in CLAUDE.md. This workflow is the recording step and nothing more. Nothing is
+# modelled on it yet, and nothing should be until there are enough weeks to validate against.
+#
+# WEEKLY, DELIBERATELY. A full snapshot is ~2,541 rows. Weekly across a 22-week season is ~56k
+# rows, about 4% of the current database; DAILY would be ~391k, which is the kind of growth that
+# put this project over its storage limit once already (see the tiering note in capture-odds.yml).
+#
+# Runs Tuesday, after the weekend's results are in and depth charts have been updated for the
+# coming week, and before Thursday kickoffs. All times UTC.
+
+on:
+  schedule:
+    - cron: "0 16 * 8-12,1 2"     # Tuesdays 16:00 UTC (noon ET), Aug-Jan
+  workflow_dispatch:
+    inputs:
+      backfill_git:
+        description: "Also seed from every committed version of cfb_depth.json"
+        required: false
+        default: "false"
+
+concurrency:
+  group: capture-cfb-depth
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # --backfill-git needs the full history of cfb_depth.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi -c requirements.txt
+
+      # cfb.db carries the schedule, which is how the capture works out which week a snapshot
+      # belongs to. It is gitignored, so a fresh runner has to rebuild it; without it the capture
+      # still runs and falls back to week 1 rather than failing, but the week would be wrong.
+      - name: Rebuild cfb.db (schedule only — for week derivation)
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+        run: python cfb_backfill.py --start 2026 --end 2026
+
+      # Scrape the CURRENT chart rather than trusting the committed copy: the committed
+      # cfb_depth.json is refreshed by a different workflow on its own schedule, and a snapshot
+      # recording yesterday's scrape under today's date would quietly corrupt the change history.
+      - name: Scrape the current depth chart
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+        run: python cfb_depth.py
+
+      - name: Capture -> cfb_depth_snapshots
+        env:
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          if [ "${{ github.event.inputs.backfill_git }}" = "true" ]; then
+            python cfb_depth_capture.py --backfill-git --write
+          else
+            python cfb_depth_capture.py --write
+          fi
