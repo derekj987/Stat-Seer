@@ -9,7 +9,7 @@ import Tip from "./Tip";
 import { PLAYER_PROJECTIONS, PROJ_WEEK, PROJ_PRIOR, type PlayerProj } from "@/lib/playerProjections";
 import { NCAAF_PLAYER_PROJECTIONS, NCAAF_PROJ_WEEK } from "@/lib/ncaafPlayerProjections";
 import { isRealistic } from "@/lib/depthChart";
-import { projLean, leanCentres, hasProjSample, MIN_PROJ_GAMES } from "@/lib/playerProjections";
+import { projLean, leanCentres, hasProjSample, MIN_PROJ_GAMES } from "@/lib/projLean";
 import PropAdd, { type PricedSide } from "./PropAdd";
 import PinButton from "./PinButton";
 import { playerSlot, normName } from "@/lib/playerSlot";
