@@ -153,6 +153,16 @@ def main(argv=None):
     if g is None:
         print("games.csv unavailable (transient) — skipping today; the next run retries.")
         return 0
+    # Log what the injury correction did before publishing. An adjustment that silently moves a
+    # published, locked number is the kind of thing that should never be discovered later from a
+    # diff — the same reason the off-team drops are printed rather than appended to a list nobody
+    # reads. Prints "none available" in the preseason, which is also worth seeing.
+    try:
+        import injury_adj
+        print(injury_adj.describe(args.season, week))
+    except Exception as e:                       # noqa: BLE001 — never block a publish on the log
+        print(f"  injury adjustment: unavailable ({e})")
+
     preds = gm.predict_week(g, args.season, week)
     emap = event_map(env, args.season, week)
     done = already_published(env, gm.MODEL_VERSION, args.season, week)

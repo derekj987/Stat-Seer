@@ -21,7 +21,7 @@ import argparse
 import numpy as np
 import pandas as pd
 
-MODEL_VERSION = "game-v3-inseason"
+MODEL_VERSION = "game-v4-injury"
 HFA = 2.0        # home-field advantage, points
 REGRESS = 0.65   # shrink the rating gap toward the mean
 
@@ -103,7 +103,7 @@ def win_curve(g):
     return s[["fav_mag", "fav_margin"]].to_numpy()
 
 
-def model_win_curve(g, before_season):
+def model_win_curve(g, before_season, adj_fn=None):
     """Self-calibrating curve: (predicted fav-margin magnitude, actual fav margin)
     from the MODEL's OWN out-of-sample predictions over seasons < before_season.
     Because it learns win rates from the model's noisier margins, a given predicted
@@ -125,11 +125,34 @@ def model_win_curve(g, before_season):
             neutral = s["location"].astype(str).eq("Neutral") if "location" in s else False
             hfa = np.where(neutral, 0.0, HFA)
             margin = REGRESS * (s.home_team.map(rt).fillna(0.0) - s.away_team.map(rt).fillna(0.0)) + hfa
+            if adj_fn is not None:
+                # Same correction the live prediction gets. If the curve were built WITHOUT it while
+                # predictions applied it, the two would again disagree about what a given predicted
+                # margin means — the exact mismatch the week-aware fix above was written for.
+                a = adj_fn(season, week) or {}
+                if a:
+                    margin = margin + s.home_team.map(a).fillna(0.0) - s.away_team.map(a).fillna(0.0)
             s["fav_mag"] = margin.abs()
             s["fav_margin"] = np.where(margin >= 0, s.home_score - s.away_score, s.away_score - s.home_score)
             s["wk"] = week
             frames.append(s[["fav_mag", "fav_margin", "wk"]])
     return pd.concat(frames).to_numpy() if frames else np.empty((0, 3))
+
+
+_HIST_ADJ = {}
+
+
+def _hist_adj(season, week):
+    """Injury adjustment for a PAST week, memoised — model_win_curve asks for every week of every
+    training season, so recomputing shares each time would dominate the run."""
+    kk = (season, week)
+    if kk not in _HIST_ADJ:
+        try:
+            import injury_adj
+            _HIST_ADJ[kk] = injury_adj.team_adjustment(season, week)
+        except Exception:                        # noqa: BLE001
+            _HIST_ADJ[kk] = {}
+    return _HIST_ADJ[kk]
 
 
 # How far either side of the target week the curve may look for comparable predictions.
@@ -175,12 +198,22 @@ def winprob(mag, curve, week=None, bw=1.0):
     return wins / denom if denom else 0.5
 
 
-def predict_week(g, season, week):
+def predict_week(g, season, week, adj=None):
     # Ratings AS OF this week: last season blended with everything played so far this season.
     # This is the input that lets a published number move during the season instead of being a
     # fixed function of last year's point differential.
     prior = ratings_asof(g, season, week)
-    curve = model_win_curve(g, before_season=season)   # self-calibrated on prior seasons
+    # Points each team loses to players ruled OUT. {} when no injury report exists yet (preseason,
+    # or before a week's reports are filed), in which case the model predicts unadjusted rather
+    # than guessing. See analysis/injury_adj.py for how the coefficients were measured.
+    if adj is None:
+        try:
+            import injury_adj
+            adj = injury_adj.team_adjustment(season, week)
+        except Exception:                        # noqa: BLE001 — the correction is never a hard dep
+            adj = {}
+    curve = model_win_curve(g, before_season=season,
+                            adj_fn=(lambda sn, wk: _hist_adj(sn, wk)) if adj else None)
     games = g[(g.season == season) & (g.week == week)]
     out = []
     for _, r in games.iterrows():
@@ -190,7 +223,8 @@ def predict_week(g, season, week):
         # here (small, heterogeneous sample; don't fabricate a number).
         neutral = str(r.get("location")) == "Neutral"
         hfa = 0.0 if neutral else HFA
-        margin = REGRESS * (prior.get(h, 0.0) - prior.get(a, 0.0)) + hfa  # home perspective
+        margin = (REGRESS * (prior.get(h, 0.0) - prior.get(a, 0.0)) + hfa
+                  + adj.get(h, 0.0) - adj.get(a, 0.0))                     # home perspective
         fav = h if margin >= 0 else a
         p_fav = winprob(abs(margin), curve, week)
         p_home = p_fav if fav == h else 1 - p_fav

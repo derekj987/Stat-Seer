@@ -11,12 +11,18 @@ import { fetchWeek, implied, median, type OddsRow } from "./board";
  *  version actually exist in the ledger — fetchModelWeek returns [] for a version with no rows, so
  *  bumping first would blank the board.
  *
+ *  v3 -> v4 (2026-09-05): adds an injury correction — points off a team's margin for the SHARE of
+ *  its volume that is ruled out, by position (QB/RB/WR/TE). Held-out 2023-2025: MAE 10.303 ->
+ *  10.239, Brier .2240 -> .2224, and exactly 0.000 change on the 289 games where nobody was out.
+ *  Currently contributes nothing — no 2026 injury reports are filed yet — and activates on its own
+ *  once nflverse publishes them, which is why v4's Week 1 numbers equal v3's.
+ *
  *  v2 -> v3 (2026-09-05): v2 rated teams on LAST season's point differential only, so it produced
  *  the same number for a given matchup every day of the season. v3 blends the current season in as
  *  results arrive. On held-out 2023-2025: margin MAE 11.095 -> 10.303, calibration -1.5 -> +0.0,
  *  Brier .2420 -> .2240 (closing line 9.744 — still sharper, as it should be). The v1/v2 rows stay
  *  in the ledger as the record of what was claimed on 2026-08-14. */
-export const MODEL_VERSION = "game-v3-inseason";
+export const MODEL_VERSION = "game-v4-injury";
 
 export interface ModelPrediction {
   eventId: string;
