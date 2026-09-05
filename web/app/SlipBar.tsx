@@ -44,9 +44,16 @@ export default function SlipBar() {
     });
   }, []);
 
-  // The left rail / dock "Saved Slips" shortcut opens the slip drawer.
+  // The left rail / dock "Saved Slips" shortcut TOGGLES the slip drawer — a second click on the
+  // same rail item closes it again, matching the chat/assistant/feedback panels in Dock.tsx.
+  // Only scroll it into view when we are opening; scrolling on the way out yanks the page for a
+  // drawer that is no longer there.
   useEffect(() => {
-    const onOpen = () => { setOpen(true); try { document.querySelector(".slipbar")?.scrollIntoView({ block: "end" }); } catch { /* SSR */ } };
+    const onOpen = () => setOpen((cur) => {
+      if (cur) return false;
+      try { document.querySelector(".slipbar")?.scrollIntoView({ block: "end" }); } catch { /* SSR */ }
+      return true;
+    });
     window.addEventListener("ss:open-slip", onOpen);
     return () => window.removeEventListener("ss:open-slip", onOpen);
   }, []);

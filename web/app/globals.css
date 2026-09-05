@@ -453,7 +453,18 @@ a.cw__fname:hover{text-decoration:underline}
 .leftrail__badge{flex:0 0 auto;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#c0392b;color:#fff;
   font-size:11px;font-weight:800;display:grid;place-items:center}
 .leftrail__notifwrap{position:relative}
-.docknotif--rail{position:absolute;left:calc(100% + 10px);top:0;right:auto;bottom:auto}
+/* The rail's notifications popup. FIXED, not absolute: .leftrail sets overflow-y:auto, and a
+   scroll container clips on both axes — an absolutely-positioned menu at left:calc(100% + 10px)
+   was rendered outside the rail and then clipped away, so the button looked dead and the menu was
+   only reachable by scrolling the rail sideways. Coordinates come from LeftRail (it measures the
+   button), which also lets it flip to the left for the right-hand Bettor's Rail.
+   Wider and larger than the dock version — this is a popup you read, not a tooltip. */
+.docknotif--rail{position:fixed;right:auto;bottom:auto;width:292px;min-width:0;padding:8px;
+  font-size:14px;box-shadow:0 14px 40px rgba(0,0,0,.20)}
+.docknotif--rail .docknotif__hd{font-size:11px;padding:8px 11px 6px}
+.docknotif--rail .docknotif__item{padding:11px;gap:11px;font-size:14.5px;border-radius:9px}
+.docknotif--rail .docknotif__ic{font-size:17px}
+.docknotif--rail .docknotif__empty{font-size:13.5px;padding:4px 11px 10px}
 /* Rail headings use the homepage section-title style (.hb-bar__title): accent green, 800, uppercase. */
 .leftrail__hd{margin:1px 2px 6px;font-size:13.5px;font-weight:800;letter-spacing:.05em;
   text-transform:uppercase;color:var(--accent)}
@@ -470,7 +481,12 @@ a.cw__fname:hover{text-decoration:underline}
   html[data-rail] .leftrail{display:flex;position:fixed;left:16px;top:108px;width:254px;z-index:45;
     flex-direction:column;gap:8px;padding:14px 12px;background:var(--surface);
     border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 26px rgba(0,0,0,.09);
-    max-height:calc(100vh - 124px);overflow-y:auto;transition:top .18s ease,max-height .18s ease}
+    /* overflow-x MUST be hidden explicitly. `overflow-y:auto` alone computes overflow-x to `auto`
+       too, so anything sticking out sideways gave the rail a horizontal scrollbar and shoved the
+       icons out of view — which is exactly what the notifications popup used to do. Vertical
+       scrolling is intentional (a tall rail must not run off-screen); sideways never is. */
+    max-height:calc(100vh - 124px);overflow-y:auto;overflow-x:hidden;
+    transition:top .18s ease,max-height .18s ease}
   html[data-rail] .leftrail--right{left:auto;right:16px}
   /* Homepage has the vertical "Why StatSeer" drawer tab on the left edge. Slide it up flush under
      the top banner and start the rails just below it, so both fit and no rail items fall off-screen. */

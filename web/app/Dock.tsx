@@ -52,10 +52,25 @@ export default function Dock() {
 
   // A "Message" button anywhere (e.g. a profile) opens the chat panel; the dashboard robot
   // (and any "ask the assistant" control) opens the AI Slip Assistant panel.
+  //
+  // These TOGGLE. A rail item that opens a panel in place rather than navigating has to close on a
+  // second click, because the button is the only affordance the user aims at — clicking "Chat"
+  // again did nothing, so the panel could only be dismissed via its own small ✕. Rail items that
+  // DO navigate (Creator Dashboard, Friends) are plain links and are unaffected.
+  //
+  // Exception: a targeted open carries detail.userId ("message THIS member" from a profile). That
+  // must always open, never toggle shut — the user asked for a specific conversation, and if the
+  // panel happened to be open already, closing it would look like the button was broken.
   useEffect(() => {
-    const onOpenChat = () => { setActive("friends"); setExpanded(false); };
-    const onOpenAsst = () => { setActive("assistant"); setExpanded(false); };
-    const onOpenFb = () => { setActive("feedback"); setExpanded(false); };
+    const toggle = (t: Tool) => setActive((cur) => (cur === t ? null : t));
+    const onOpenChat = (e: Event) => {
+      const d = (e as CustomEvent).detail as { userId?: string } | undefined;
+      if (d?.userId) setActive("friends");        // targeted: always open
+      else toggle("friends");
+      setExpanded(false);
+    };
+    const onOpenAsst = () => { toggle("assistant"); setExpanded(false); };
+    const onOpenFb = () => { toggle("feedback"); setExpanded(false); };
     window.addEventListener("ss:open-chat", onOpenChat);
     window.addEventListener("ss:open-assistant", onOpenAsst);
     window.addEventListener("ss:open-feedback", onOpenFb);

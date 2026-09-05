@@ -15,7 +15,12 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-const fire = (name: string) => { try { window.dispatchEvent(new CustomEvent(name)); } catch { /* SSR */ } };
+// `detail.force` means "open it", as opposed to the plain rail click which TOGGLES (see Dock.tsx).
+// Used by the notification menu items: "you have unread messages" must always land you in the chat,
+// never close it because it happened to be open already.
+const fire = (name: string, detail?: Record<string, unknown>) => {
+  try { window.dispatchEvent(new CustomEvent(name, detail ? { detail } : undefined)); } catch { /* SSR */ }
+};
 
 // Rail icon. Custom artwork lives in /public and is served at 128px for a 42-56px slot (2x retina);
 // the full-res originals are kept out of the repo in assets/rail-src. `alt=""` because every row
@@ -35,6 +40,10 @@ export default function LeftRail() {
   const [awaiting, setAwaiting] = useState<{ friendRequests: number; betaRequests: number; reports: number }>({ friendRequests: 0, betaRequests: 0, reports: 0 });
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement | null>(null);
+  const notifBtnRef = useRef<HTMLButtonElement | null>(null);
+  // Viewport coordinates for the notifications popup. It renders position:fixed so it can escape
+  // the rail's overflow clip, which means it needs real coordinates rather than a CSS offset.
+  const [notifPos, setNotifPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
   // Identity (username + avatar). Also refreshed live from ChatWidget's broadcast.
   useEffect(() => {
@@ -119,6 +128,29 @@ export default function LeftRail() {
     return () => { document.removeEventListener("mousedown", onDoc); document.removeEventListener("keydown", onKey); };
   }, [notifOpen]);
 
+  // Place the popup beside the button, in viewport coordinates. Recomputed while it is open,
+  // because the rail is fixed but scrollable and the page moves under it.
+  useEffect(() => {
+    if (!notifOpen) return;
+    const place = () => {
+      const b = notifBtnRef.current?.getBoundingClientRect();
+      if (!b) return;
+      const W = 292, GAP = 10, PAD = 12;
+      // The Bettor's Rail sits on the RIGHT, so a menu opening rightwards would run off-screen.
+      // Flip to the button's left when there isn't room, and clamp to the viewport either way.
+      const right = b.right + GAP;
+      const left = right + W + PAD > window.innerWidth ? Math.max(PAD, b.left - GAP - W) : right;
+      setNotifPos({
+        top: Math.min(Math.max(PAD, b.top), Math.max(PAD, window.innerHeight - 240)),
+        left,
+      });
+    };
+    place();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);   // capture: the rail's own scroll counts too
+    return () => { window.removeEventListener("resize", place); window.removeEventListener("scroll", place, true); };
+  }, [notifOpen]);
+
   if (!me) return null;
 
   const total = unread + awaiting.friendRequests + awaiting.betaRequests + awaiting.reports;
@@ -152,14 +184,22 @@ export default function LeftRail() {
       </button>
 
       <div className="leftrail__notifwrap" ref={notifRef}>
-        <button type="button" className="leftrail__it" aria-haspopup="menu" aria-expanded={notifOpen}
+        <button type="button" ref={notifBtnRef} className="leftrail__it" aria-haspopup="menu" aria-expanded={notifOpen}
           onClick={() => setNotifOpen((v) => !v)}>
           <RailIcon src="/notifications.png" />
           <span className="leftrail__lbl">Notifications</span>
           {total > 0 && <span className="leftrail__badge">{total > 9 ? "9+" : total}</span>}
         </button>
         {notifOpen && (
-          <div className="docknotif docknotif--rail" role="menu" aria-label="Notifications">
+          // position:fixed, with coordinates measured off the button. The menu USED to be
+          // position:absolute at left:calc(100% + 10px) — i.e. deliberately outside the rail — but
+          // .leftrail sets overflow-y:auto, and a scroll container clips on BOTH axes. So the popup
+          // was rendered off the rail's edge and then clipped away: clicking Notifications looked
+          // like nothing happened, and the menu could only be reached by scrolling the rail
+          // sideways. position:fixed escapes an ancestor's overflow clip (nothing on the rail sets
+          // transform/filter, which would re-trap it), so the menu now floats above the page.
+          <div className="docknotif docknotif--rail" role="menu" aria-label="Notifications"
+            style={{ top: notifPos.top, left: notifPos.left }}>
             <div className="docknotif__hd">What&apos;s waiting</div>
             {total === 0 && <div className="docknotif__empty">You&apos;re all caught up ✓</div>}
             {awaiting.betaRequests > 0 && (
@@ -173,12 +213,12 @@ export default function LeftRail() {
               </a>
             )}
             {awaiting.friendRequests > 0 && (
-              <button type="button" role="menuitem" className="docknotif__item" onClick={() => { setNotifOpen(false); fire("ss:open-chat"); }}>
+              <button type="button" role="menuitem" className="docknotif__item" onClick={() => { setNotifOpen(false); fire("ss:open-chat", { force: true }); }}>
                 <span className="docknotif__ic" aria-hidden="true">🤝</span><span className="docknotif__lbl">Friend requests</span><span className="docknotif__n">{awaiting.friendRequests}</span>
               </button>
             )}
             {unread > 0 && (
-              <button type="button" role="menuitem" className="docknotif__item" onClick={() => { setNotifOpen(false); fire("ss:open-chat"); }}>
+              <button type="button" role="menuitem" className="docknotif__item" onClick={() => { setNotifOpen(false); fire("ss:open-chat", { force: true }); }}>
                 <span className="docknotif__ic" aria-hidden="true">💬</span><span className="docknotif__lbl">Unread messages</span><span className="docknotif__n">{unread}</span>
               </button>
             )}
