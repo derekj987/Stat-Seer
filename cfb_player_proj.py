@@ -270,12 +270,14 @@ def _fetch_all_logs(teams, key):
     return out
 
 
-def team_logs(teams, key):
+def team_logs(teams, key, cur_team=None):
     """Per-athlete game logs for the given teams across HIST_SEASONS.
-    -> { norm_name: {"team": t, "games": [ {season, homeAway, pass_yds, pass_tds, rush_yds,
-                                            rec_yds, receptions, td} ] } }"""
+    -> { norm_name: {"team": t, "display": name, "games": [ {season, homeAway, pass_yds, ...} ] } }
+
+    `cur_team` ({norm_name: team}, from the depth chart) is used only to break name collisions --
+    see the collapse step at the end."""
     payloads = _fetch_all_logs(teams, key)
-    logs = {}
+    by_id = {}
     # Parse SEQUENTIALLY in a fixed (team, season) order. Only the network is parallel: `logs` is
     # built by appending to shared lists, and the ordering feeds recency weighting downstream, so
     # parsing off the completion order would make the output depend on which request finished first.
@@ -297,16 +299,20 @@ def team_logs(teams, key):
                         for typ in cat.get("types", []):
                             tname = typ.get("name")
                             for a in typ.get("athletes", []):
-                                nm = norm(a.get("name"))
-                                if not nm:
+                                # Key on CFBD's athlete id, not the name. Once logs are pulled for
+                                # every FBS team rather than just the slate, name collisions are
+                                # routine, and a name-keyed dict merges two different players'
+                                # games into one projection.
+                                aid = str(a.get("id") or "") or ("name:" + norm(a.get("name")))
+                                if not norm(a.get("name")):
                                     continue
-                                slot = per.setdefault(nm, {"display": a.get("name")})
+                                slot = per.setdefault(aid, {"display": a.get("name")})
                                 if cname == "passing" and tname == "C/ATT":
                                     m = re.match(r"\s*\d+\s*/\s*(\d+)", str(a.get("stat") or ""))
                                     slot[("passing", "ATT")] = float(m.group(1)) if m else None
                                 else:
                                     slot[(cname, tname)] = _num(a.get("stat"))
-                    for nm, slot in per.items():
+                    for aid, slot in per.items():
                         td = (slot.get(("rushing", "TD")) or 0) + (slot.get(("receiving", "TD")) or 0)
                         rec = {
                             "season": season, "homeAway": ha, "gid": gid,
@@ -319,12 +325,37 @@ def team_logs(teams, key):
                             "receptions": slot.get(("receiving", "REC")),
                             "td": td, "scored": (1 if td > 0 else 0),
                         }
-                        e = logs.setdefault(nm, {"team": team, "display": slot["display"], "games": []})
+                        e = by_id.setdefault(aid, {"team": team, "display": slot["display"],
+                                                   "teams": set(), "games": []})
+                        e["teams"].add(team)
                         e["games"].append(rec)
+
     # chronological order (season, then ESPN game id) so recency weighting sees the true
     # end-of-season role — a late-season promotion is the most recent games.
-    for e in logs.values():
+    for e in by_id.values():
         e["games"].sort(key=lambda g: (g["season"], g["gid"]))
+
+    # Collapse athlete-id records to the name key the rest of the module looks up by.
+    #
+    # Two DIFFERENT players can normalise to the same name across 138 teams, so when that happens
+    # pick deliberately rather than letting the last one win: prefer the athlete whose schools
+    # include the team the depth chart says this name is on now, and otherwise the one with the
+    # most games. A transfer is NOT this case -- he is one athlete id with two schools, and his
+    # games from both are kept, which is what we want to project from.
+    logs, by_name = {}, {}
+    for aid, e in by_id.items():
+        by_name.setdefault(norm(e["display"]), []).append(e)
+    collisions = 0
+    for nm, cands in by_name.items():
+        if len(cands) > 1:
+            collisions += 1
+            want = (cur_team or {}).get(nm)
+            cands = sorted(cands, key=lambda e: ((want in e["teams"]) if want else False,
+                                                 len(e["games"])), reverse=True)
+        e = cands[0]
+        logs[nm] = {"team": e["team"], "display": e["display"], "games": e["games"]}
+    if collisions:
+        print(f"  {collisions} name collisions across athlete ids, resolved by current team + games")
     return logs
 
 
@@ -608,7 +639,6 @@ def build(props, key, depth):
     # Re-tag every player with the team he is on NOW. Must happen BEFORE rank_baselines and before
     # either pass reads e["team"] — the role baselines and both in-game guards key off it.
     # See current_team_map().
-    cur = current_team_map(depth)
     retagged = 0
     for _nm, _e in logs.items():
         _t = cur.get(_nm)
@@ -690,15 +720,24 @@ def build_slate(slate, depth, prop_index, key):
     starters/rotation on each side (DEPTH_LIMIT), whether or not a book has posted a prop yet — so
     the board is full of our line-blind numbers ahead of the market. A posted prop attaches its line
     (`book`); otherwise `book` is None and the over-rates use our own projection as the reference."""
-    teams = set()
+    # Pull logs for EVERY team on the depth chart, not just the teams playing this week.
+    #
+    # A transfer's history lives under his OLD school. Fetching only slate teams meant that unless
+    # he happened to be facing that school we had no log for him at all, so he was dropped -- 274
+    # priced players on the 2026-09-05 slate, after the team re-tag had already recovered 150.
+    # Completed seasons are immutable and cached per team-season, so the extra teams cost CFBD
+    # calls exactly once and nothing on every run after.
+    slate_teams = set()
     for away, home, _ in slate:
-        teams.add(away)
-        teams.add(home)
-    logs = team_logs(teams, key)
+        slate_teams.add(away)
+        slate_teams.add(home)
+    cur = current_team_map(depth)
+    teams = set(depth or {}) | slate_teams
+    print(f"  pulling game logs for {len(teams)} teams ({len(slate_teams)} on this slate)")
+    logs = team_logs(teams, key, cur)
     # Re-tag every player with the team he is on NOW. Must happen BEFORE rank_baselines and before
     # either pass reads e["team"] — the role baselines and both in-game guards key off it.
     # See current_team_map().
-    cur = current_team_map(depth)
     retagged = 0
     for _nm, _e in logs.items():
         _t = cur.get(_nm)

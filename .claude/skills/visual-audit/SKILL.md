@@ -271,6 +271,25 @@ only the authority on what he DID.** Re-tag before anything reads `team` — rol
 in-game guard key off it. NFL uses `roster_<season>.csv` joined on `gsis_id`; NCAAF uses
 `current_team_map(depth)` from the scraped chart.
 
+**Two follow-on rules that came out of finishing this fix:**
+
+**Fetch history beyond the entities on screen.** `team_logs` pulled logs only for teams *playing
+this week*, so a transfer whose old school wasn't on the slate had no log anywhere and was dropped
+even after the team re-tag — 274 priced players. Pulling all 138 FBS teams took coverage to 68%,
+and it is nearly free because completed seasons are immutable and cached per team-season. **Where a
+player's history lives is not the same question as which teams are on the board.**
+
+**Key player records on a STABLE ID, never on a name.** Once logs cover 138 teams instead of 86,
+name collisions stop being exotic: **191 normalised names matched more than one athlete.** A
+name-keyed dict silently merges two different players' game logs into one projection, and nothing
+about the output looks wrong. CFBD returns an athlete `id` on every stat line — key on that, then
+collapse to names at the very end, resolving collisions deliberately (prefer the athlete whose
+schools include the team the depth chart says that name is on now; fall back to most games).
+
+Note the distinction the collapse has to preserve: **a transfer is one athlete id with two schools
+and both his log sets are wanted; a collision is two athlete ids sharing a name and only one is
+wanted.** Treating them the same way corrupts one or the other.
+
 Standing check, both sports — this is cheap and catches it instantly:
 ```python
 mismatches = [r for r in rows if depth.get(nkey(r["player"]), {}).get("team") not in (None, r["team"])]
