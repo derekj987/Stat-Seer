@@ -453,18 +453,6 @@ a.cw__fname:hover{text-decoration:underline}
 .leftrail__badge{flex:0 0 auto;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#c0392b;color:#fff;
   font-size:11px;font-weight:800;display:grid;place-items:center}
 .leftrail__notifwrap{position:relative}
-/* The rail's notifications popup. FIXED, not absolute: .leftrail sets overflow-y:auto, and a
-   scroll container clips on both axes — an absolutely-positioned menu at left:calc(100% + 10px)
-   was rendered outside the rail and then clipped away, so the button looked dead and the menu was
-   only reachable by scrolling the rail sideways. Coordinates come from LeftRail (it measures the
-   button), which also lets it flip to the left for the right-hand Bettor's Rail.
-   Wider and larger than the dock version — this is a popup you read, not a tooltip. */
-.docknotif--rail{position:fixed;right:auto;bottom:auto;width:292px;min-width:0;padding:8px;
-  font-size:14px;box-shadow:0 14px 40px rgba(0,0,0,.20)}
-.docknotif--rail .docknotif__hd{font-size:11px;padding:8px 11px 6px}
-.docknotif--rail .docknotif__item{padding:11px;gap:11px;font-size:14.5px;border-radius:9px}
-.docknotif--rail .docknotif__ic{font-size:17px}
-.docknotif--rail .docknotif__empty{font-size:13.5px;padding:4px 11px 10px}
 /* Rail headings use the homepage section-title style (.hb-bar__title): accent green, 800, uppercase. */
 .leftrail__hd{margin:1px 2px 6px;font-size:13.5px;font-weight:800;letter-spacing:.05em;
   text-transform:uppercase;color:var(--accent)}
@@ -553,6 +541,32 @@ a.cw__fname:hover{text-decoration:underline}
 .docknotif__item--profile{border-top:1px solid var(--line);border-radius:0 0 8px 8px;margin-top:3px;padding-top:10px;color:var(--muted)}
 .docknotif__empty{font-size:12.5px;color:var(--muted);padding:3px 10px 8px}
 @media(max-width:560px){.docknotif{right:0;bottom:62px}}
+
+/* The RAIL's notifications popup (the dock's own copy above is unchanged).
+ *
+ * Must be declared AFTER .docknotif and with higher specificity than it. Both were single-class
+ * selectors, and this modifier sat ~80 lines EARLIER in the file, so under equal specificity the
+ * later `.docknotif{position:absolute;right:62px;bottom:0}` silently won — the menu went straight
+ * back inside the rail and the button looked dead a second time. `.docknotif.docknotif--rail`
+ * (0,2,0) beats it on specificity, so neither order nor a future insertion can revive that.
+ *
+ * FIXED, not absolute, because .leftrail is overflow-y:auto and a scroll container clips on BOTH
+ * axes: an absolutely-positioned menu at left:calc(100% + 10px) is outside the rail, so it was
+ * clipped away AND it stretched the rail's scroll width (that horizontal scrollbar). Nothing on
+ * the rail sets transform/filter, so position:fixed genuinely escapes the clip.
+ *
+ * top/left are inline, measured off the button by LeftRail — which also flips the menu to the
+ * left when there is no room on the right, as there never is for the Bettor's Rail.
+ * z-index sits above the rail (45) and the masthead. Wider and larger than the dock copy: this is
+ * a popup you read, not a tooltip. */
+.docknotif.docknotif--rail{position:fixed;right:auto;bottom:auto;width:292px;min-width:0;
+  padding:8px;font-size:14px;z-index:120;box-shadow:0 14px 40px rgba(0,0,0,.22)}
+.docknotif--rail .docknotif__hd{font-size:11px;padding:8px 11px 6px}
+.docknotif--rail .docknotif__item{padding:11px;gap:11px;font-size:14.5px;border-radius:9px}
+.docknotif--rail .docknotif__ic{font-size:17px}
+.docknotif--rail .docknotif__empty{font-size:13.5px;padding:4px 11px 10px}
+/* The narrow-screen dock rule above must not drag the rail popup back to the corner. */
+@media(max-width:560px){.docknotif.docknotif--rail{right:auto;bottom:auto}}
 /* Online presence = a bold, bright LIME ring around the avatar (replaces the old green dot). */
 .is-online{box-shadow:0 0 0 2.5px #39e75f}
 .dock__ic--profile.is-online{box-shadow:0 0 0 3px #39e75f,0 0 9px rgba(57,231,95,.55);border-color:#39e75f}
