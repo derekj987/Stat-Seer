@@ -263,6 +263,51 @@ Generalise: **when our data and the market disagree about a fact the market cann
 stale. Never resolve that disagreement by dropping the row silently. Count the drops and print them;
 this bug was invisible because `offteam` was appended to a list nobody read.
 
+### 🚨 A BEM modifier declared BEFORE its base rule silently loses
+`.docknotif--rail{position:fixed}` and `.docknotif{position:absolute;right:62px;bottom:0}` are both
+single-class selectors — **equal specificity (0,1,0)** — and the modifier sat ~80 lines earlier in
+globals.css. So the base won on source order, the notifications popup stayed `absolute` inside the
+rail's overflow-clipped box, and the button looked dead. This shipped **twice**, because the fix
+read correctly and was never opened in a browser.
+
+`element.className` looking right tells you nothing. Check the COMPUTED value:
+```js
+getComputedStyle(el).position     // the only answer that counts
+```
+**The rule: a `--modifier` block goes AFTER its base block, and gets doubled up
+(`.block.block--mod`, 0,2,0) when it overrides positioning or layout.** Then neither source order
+nor a later insertion can revive it. Also check narrow-screen rules — a `@media` override on the
+base (`.docknotif{right:0;bottom:62px}`) drags the modifier back too unless it is answered.
+
+Grep for the shape after any CSS fix that "didn't take":
+```bash
+grep -n "^\.block" web/app/globals.css   # is the --modifier line number BELOW the base's?
+```
+
+### Verifying UI that only renders for a signed-in member
+The rails and chat return `null` unless a member is signed in, which is why several fixes here were
+shipped unverified. Do not sign in as Derek. Instead drop a **temporary probe route** that renders
+the same markup with no auth, measure it, then delete it:
+
+1. `web/app/cssprobe/page.tsx` with the component's markup and the panel forced open.
+   **Not** a `_`-prefixed folder — the App Router treats a leading underscore as a private folder
+   and never routes it (that 404 cost a round trip).
+2. `preview_start {name:"web"}`, then `javascript_tool` to `location.href = "/cssprobe"`.
+3. `document.documentElement.setAttribute("data-rail","1")` — the rail CSS is gated on that
+   attribute, which only LeftRail sets for a signed-in member.
+4. **`resize_window` to an explicit size first.** A hidden Browser pane reports `innerWidth 0`, so
+   every `getBoundingClientRect()` is zero and *everything* looks invisible. And never `await`
+   `requestAnimationFrame` in a hidden pane — rAF is paused, so the call just times out.
+5. Assert the things that actually matter, not just that the element exists:
+   ```js
+   getComputedStyle(pop).position
+   pop.getBoundingClientRect().width > 0                 // really laid out
+   pr.left >= railRect.right                             // escaped the rail
+   rail.scrollWidth > rail.clientWidth                   // no sideways scrollbar
+   document.elementFromPoint(pr.left+20, pr.top+20)      // nothing covering it
+   ```
+6. **Delete the probe route** before committing.
+
 ### 🚨 A status indicator must READ the status, not assert it
 The chat widget's friend bubbles rendered `<span className="cw__bubav is-online">` — the online
 class **hardcoded on every friend**. So the widget told every member that their entire roster was
