@@ -19,7 +19,11 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # Raised from 25. Fixing the 1000-row truncation in cfb_player_proj.sb_get took the slate from
+    # 7 games to 35, so team_logs now walks 86 teams instead of 14. The per-team-season log cache
+    # below makes a warm run fast again, but the FIRST run after a cache miss still pays the full
+    # ~172 CFBD calls, and a cold run must not fail.
+    timeout-minutes: 50
     permissions:
       contents: write   # commit the regenerated projection + depth-chart files
     steps:
@@ -30,6 +34,15 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install --quiet certifi -c requirements.txt
+
+      # Completed-season game logs (2024/2025) are immutable, but data/ is gitignored so a fresh
+      # runner re-downloads all of them every day. Cache them across runs; the key is pinned to the
+      # season list so bumping HIST_SEASONS naturally invalidates it.
+      - name: Cache CFBD completed-season game logs
+        uses: actions/cache@v4
+        with:
+          path: data/cfb_logs
+          key: cfb-logs-2024-2025-v1
 
       # The projector reads data/cfb.db for the UPCOMING slate (which games to project) — that
       # file is gitignored and absent on a fresh runner, so rebuild the current-season schedule

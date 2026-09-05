@@ -19,6 +19,7 @@ first-pass -- not graded against closing lines yet, exactly like the NFL Week-1 
 Auth: CFBD_API_KEY + SUPABASE_URL/SUPABASE_SERVICE_KEY in .env. Stdlib + cfbd_client.
 """
 import argparse
+import concurrent.futures as cf
 import json
 import os
 import re
@@ -97,13 +98,36 @@ def cfbd_team_map(odds_names, key):
 
 
 def sb_get(path):
+    """PostgREST read, PAGED.
+
+    This used to be a single un-ranged request, which silently capped at PostgREST's default 1000
+    rows. Measured on the 2026-09-05 slate: the latest snapshot held 4,167 rows, sb_get returned
+    exactly 1,000 of them, and because the query is unordered *which* 1,000 was arbitrary. The
+    downstream effect was that fetch_props() saw 7 of 35 games and 145 of 716 priced players, so
+    28 games had no prop coverage and starters the book had a line on -- Keelon Russell's 244.5
+    passing yards among them -- had no row on the board at all.
+
+    A response that comes back exactly at the page size is indistinguishable from a complete one, so
+    the only safe read is to keep asking until a short page arrives. Same fix as pg() in
+    analysis/player_proj_export.py, which already did this correctly."""
     url, key = oc.load_env().get("SUPABASE_URL"), oc.load_env().get("SUPABASE_SERVICE_KEY")
     if not (url and key):
         raise SystemExit("SUPABASE_URL / SUPABASE_SERVICE_KEY missing in .env")
-    req = urllib.request.Request(url.rstrip("/") + "/rest/v1/" + path,
-                                 headers={"apikey": key, "Authorization": f"Bearer {key}"})
-    with urllib.request.urlopen(req, timeout=60) as r:
-        return json.loads(r.read())
+    out, PAGE, off = [], 1000, 0
+    while True:
+        req = urllib.request.Request(url.rstrip("/") + "/rest/v1/" + path,
+                                     headers={"apikey": key, "Authorization": f"Bearer {key}",
+                                              "Range-Unit": "items",
+                                              "Range": f"{off}-{off + PAGE - 1}"})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            page = json.loads(r.read())
+        out += page
+        if len(page) < PAGE:
+            return out
+        off += PAGE
+        if off >= 200000:                     # runaway guard; a slate is ~5k rows
+            print(f"  WARNING: sb_get stopped at {off} rows for {path[:60]} -- result may be partial")
+            return out
 
 
 def implied_pct(american):
@@ -162,15 +186,103 @@ def _num(x):
         return None
 
 
+LOG_CACHE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "cfb_logs")
+
+
+def _cache_path(team, season):
+    safe = re.sub(r"[^A-Za-z0-9]+", "_", team).strip("_") or "team"
+    return os.path.join(LOG_CACHE, str(season), f"{safe}.json")
+
+
+def _cached_team_season(team, season):
+    """Read a cached /games/players payload, or None.
+
+    Only COMPLETED seasons are cached. HIST_SEASONS is [2024, 2025] against a CUR_SEASON of 2026,
+    so every payload here is finished and immutable — a game log for 2024 will never change.
+
+    This exists because fixing the 1000-row truncation in sb_get raised the slate from 7 games to
+    35, and team_logs walks TEAMS: 14 -> 86, i.e. 172 CFBD calls per run instead of ~28. That does
+    not fit in the workflow's 25-minute budget, so the correct fix is to stop re-downloading data
+    that cannot change rather than to raise the timeout."""
+    if season >= CUR_SEASON:                     # in-progress season: always fetch fresh
+        return None
+    p = _cache_path(team, season)
+    try:
+        with open(p, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return None
+
+
+def _cache_team_season(team, season, data):
+    if season >= CUR_SEASON:
+        return
+    p = _cache_path(team, season)
+    try:
+        os.makedirs(os.path.dirname(p), exist_ok=True)   # data/ is gitignored -> may not exist
+        with open(p, "w", encoding="utf-8") as f:
+            json.dump(data, f)
+    except OSError:
+        pass                                     # cache is an optimisation, never a dependency
+
+
+CFBD_WORKERS = 8      # concurrent /games/players pulls; see _fetch_all_logs
+
+
+def _fetch_one(team, season, key):
+    """Cache-first fetch of one team-season payload. Returns (team, season, data|None)."""
+    data = _cached_team_season(team, season)
+    if data is not None:
+        return team, season, data
+    st, data = cc.cfbd_get("/games/players", {"year": season, "team": team}, key)
+    if st != 200 or not isinstance(data, list):
+        return team, season, None
+    _cache_team_season(team, season, data)
+    return team, season, data
+
+
+def _fetch_all_logs(teams, key):
+    """Pull every (team, season) payload CONCURRENTLY.
+
+    These calls are pure network wait — the old loop issued them one at a time, so a 86-team slate
+    spent ~40 minutes with the CPU idle. cfbd_get is stateless per call (it builds its own Request)
+    and already retries 429/5xx with backoff, so it is safe to run in a thread pool.
+
+    Workers are kept modest deliberately: the point is to overlap latency, not to hammer CFBD.
+    Eight in flight turns ~172 sequential round-trips into ~22 waves. Cached team-seasons return
+    without a request at all, so a warm run barely touches the pool.
+
+    Returns {(team, season): payload}; failures are simply absent, exactly as the sequential
+    version skipped them via `continue`."""
+    jobs = [(t, s) for t in sorted(set(teams)) for s in HIST_SEASONS]
+    out, failed = {}, 0
+    oc.ensure_ssl_certs()          # once, up front — not from inside every worker
+    with cf.ThreadPoolExecutor(max_workers=CFBD_WORKERS) as ex:
+        futures = [ex.submit(_fetch_one, t, s, key) for t, s in jobs]
+        for fut in cf.as_completed(futures):
+            team, season, data = fut.result()
+            if data is None:
+                failed += 1
+            else:
+                out[(team, season)] = data
+    if failed:
+        print(f"  WARNING: {failed} of {len(jobs)} team-season log pulls failed (skipped)")
+    return out
+
+
 def team_logs(teams, key):
     """Per-athlete game logs for the given teams across HIST_SEASONS.
     -> { norm_name: {"team": t, "games": [ {season, homeAway, pass_yds, pass_tds, rush_yds,
                                             rec_yds, receptions, td} ] } }"""
+    payloads = _fetch_all_logs(teams, key)
     logs = {}
+    # Parse SEQUENTIALLY in a fixed (team, season) order. Only the network is parallel: `logs` is
+    # built by appending to shared lists, and the ordering feeds recency weighting downstream, so
+    # parsing off the completion order would make the output depend on which request finished first.
     for team in sorted(set(teams)):
         for season in HIST_SEASONS:
-            st, data = cc.cfbd_get("/games/players", {"year": season, "team": team}, key)
-            if st != 200 or not isinstance(data, list):
+            data = payloads.get((team, season))
+            if not isinstance(data, list):
                 continue
             for g in data:
                 gid = g.get("id") or 0
@@ -701,6 +813,24 @@ def main(argv=None):
     rows = build_slate(slate, depth, prop_index, key)
     lined = sum(1 for r in rows if r["book"] is not None)
     print(f"  {len(rows)} projection rows ({lined} with a posted book line, {len(rows) - lined} line-blind).")
+
+    # ---- Publish ONLY players a sportsbook actually lists -------------------------------------
+    # build_slate walks the whole depth chart, so it also emits rows for players no book has priced
+    # (book = None, rendered as a "—" line). That was deliberate — line-blind numbers ahead of the
+    # market — but it fills the board with players a bettor cannot bet: on the 2026-09-05 slate 649
+    # of 756 rows (86%) had no posted line. A prop board is read against a sportsbook, so a name
+    # that is not in the book's app is noise on it.
+    #
+    # This is a COVERAGE filter, not a model input: it uses the EXISTENCE of a posted prop to decide
+    # who appears, never its VALUE. Same line the second pass in build_slate already draws, applied
+    # in the other direction. Our number is still produced line-blind and is not altered here.
+    #
+    # Consequence to keep in mind: a game with no posted props shows no players at all, and a slate
+    # captured before the books post will be thin. That is the intended reading — it says the market
+    # has not priced this game yet, rather than showing rows nobody can act on.
+    rows = [r for r in rows if r["book"] is not None]
+    print(f"  publishing {len(rows)} rows the sportsbook lists "
+          f"({len({(r['game']) for r in rows})} games with posted props).")
 
     if args.probe:
         for r in rows[:25]:

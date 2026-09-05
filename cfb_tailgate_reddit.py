@@ -221,14 +221,29 @@ def load_roster_from_depth():
 
 
 def sb_get(path):
+    """PostgREST read, PAGED — see cfb_player_proj.sb_get for why.
+
+    prop_slate_teams() reads every home/away pair in the latest snapshot to decide which games get
+    Fan Stock buzz. Un-paged that read stopped at PostgREST's 1000-row cap, so the team list was
+    whatever arbitrary 1000 rows came back rather than the full slate."""
     env = oc.load_env()
     url, key = env.get("SUPABASE_URL"), env.get("SUPABASE_SERVICE_KEY")
     if not (url and key):
         raise SystemExit("SUPABASE_URL / SUPABASE_SERVICE_KEY missing")
-    req = urllib.request.Request(url.rstrip("/") + "/rest/v1/" + path,
-                                 headers={"apikey": key, "Authorization": f"Bearer {key}"})
-    with urllib.request.urlopen(req, timeout=60) as r:
-        return json.loads(r.read())
+    out, PAGE, off = [], 1000, 0
+    while True:
+        req = urllib.request.Request(url.rstrip("/") + "/rest/v1/" + path,
+                                     headers={"apikey": key, "Authorization": f"Bearer {key}",
+                                              "Range-Unit": "items",
+                                              "Range": f"{off}-{off + PAGE - 1}"})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            page = json.loads(r.read())
+        out += page
+        if len(page) < PAGE:
+            return out
+        off += PAGE
+        if off >= 200000:
+            return out
 
 
 def _alpha(s):

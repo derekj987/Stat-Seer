@@ -3145,6 +3145,11 @@ a.snav__dfeat{display:block}
 .pmrow--data .pmcell--player{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;font-weight:600}
 .pmcell--num{font-family:var(--font-mono);color:var(--muted);text-align:left}
 .pmcell--proj{color:var(--model);font-weight:700}
+/* A projection built on very little of the player's own history. We publish it (hiding it blanked
+   well-calibrated rows — see PlayerModelView), but mark it so a thin number does not read with the
+   same authority as a 17-game one. Dotted underline only: no colour change, because recolouring it
+   would collide with the over/under meaning the other columns carry. */
+.pmcell--thin{text-decoration:underline dotted var(--model);text-underline-offset:3px;opacity:.82}
 /* over/under lean arrow. In the % over column it INHERITS that cell's red/green so the arrow, the
    colour and the figure read as one statement — the arrow is derived from that number, and having
    it in a different colour was part of what made the two look like competing claims. */

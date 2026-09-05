@@ -209,6 +209,138 @@ Generalise: whenever a scraped reference list decides *who gets shown*, measure 
 authoritative source has that the list lacks. A roster, a schedule, a team list — any of them can
 silently truncate a board.
 
+### 🚨 A paged read that stops at the cap looks EXACTLY like a complete one
+The single highest-yield check in this file. **PostgREST caps every response at 1000 rows and does
+not tell you.** `&limit=5000` does not raise the ceiling — it returns 1000 and looks finished. A
+truncated read is not an error, is not logged, and produces a board that is merely *smaller* than it
+should be, which reads as "the data isn't there yet."
+
+Measured on the 2026-09-05 NCAAF slate: `cfb_player_proj.sb_get` was one un-ranged request. The
+latest snapshot held **4,167 rows; it returned exactly 1,000**, and since the query was unordered,
+*which* 1,000 was arbitrary. Downstream, `fetch_props()` saw **7 of 35 games and 145 of 716 priced
+players** — 28 games with no prop coverage at all, and starters with posted lines (Keelon Russell,
+244.5 passing yards) had no row on the board. After paging: 247 → 1,109 player-markets, 7 → 35 games.
+
+Two tells that a read is truncated:
+```python
+len(rows) == 1000          # or == whatever PAGE size — never a coincidence at a round number
+len({r["event_id"] for r in rows}) < len(expected_events)
+```
+
+**The rule: every Supabase/PostgREST read pages until a SHORT page comes back.** Never trust
+`limit=`. `pg()` in `analysis/player_proj_export.py` is the correct pattern; `sb_get` in
+`cfb_player_proj.py`, `sb_get` in `cfb_tailgate_reddit.py` and `_get` in `grade_predictions.py` were
+all fixed to match. When you find one, **grep the siblings** — the same helper is copy-pasted per
+script:
+```bash
+grep -rn "rest/v1" --include=*.py . | grep -v Range     # reads with no Range header
+grep -rn "limit=[0-9]\{4,\}" --include=*.py .           # limits above 1000 = false confidence
+```
+`grade_predictions._get` is the one that would have hurt most: it read the set of already-graded
+prediction ids to dedupe. Past 1000 graded rows the dedupe silently fails and the **published track
+record** accumulates duplicate grades. It was caught while the table still had 0 rows — latent, not
+yet firing. A truncation bug is usually found *before* it does damage only if you go looking.
+
+### 🚨 Never join a player to LAST season's team
+`player_proj_export` took each player's team from his most recent game log — i.e. the team he played
+for **last** season — and then dropped any player whose team was not in the game the book priced him
+in ("bad source row"). That guard silently deleted **every player who changed teams in the
+offseason**, which is exactly the set the books price most heavily.
+
+Measured on the 2026 Week 1 board, all with posted lines and no row: A.J. Brown (PHI→NE), Mike Evans
+(TB→SF), DJ Moore (CHI→BUF), Geno Smith (LV→NYJ), Kyler Murray (ARI→MIN), Tua Tagovailoa (MIA→ATL),
+Travis Etienne (JAX→NO), David Montgomery (DET→HOU), Michael Pittman (IND→PIT), Rico Dowdle
+(CAR→PIT), Stefon Diggs (NE→WAS), Jauan Jennings (SF→MIN). Teammates who *stayed* — DeVonta Smith,
+Saquon Barkley — came through fine, which is the signature to look for.
+
+**The book had them on the right team the whole time; we were holding last year's roster.** Fixed by
+re-tagging from `roster_<season>.csv` (nflverse) joined on `gsis_id`, never on name. Usage still
+comes from last season — that is the projection — only the team LABEL is refreshed. Off-team drops
+went ~120 → 14, rows 593 → 701.
+
+Generalise: **when our data and the market disagree about a fact the market cannot be wrong about**
+— who is on which roster, who is playing in which game — the market is right and our reference is
+stale. Never resolve that disagreement by dropping the row silently. Count the drops and print them;
+this bug was invisible because `offteam` was appended to a list nobody read.
+
+### A prop board shows ONLY players the sportsbook lists
+The reconciliation below runs in both directions, and the second one is a product rule, not just a
+bug: **a name on the prop board that is not in the book's app is noise.** A bettor reads our board
+next to a sportsbook; a row they cannot bet costs them time and makes the board look padded.
+
+`cfb_player_proj.build_slate` walks the whole depth chart and emitted every rotation player, with
+`book: None` rendered as a "—" line. On the 2026-09-05 slate that was **649 of 756 rows (86%)** with
+no posted line. Now filtered at the write step in `main()` — see the comment there.
+
+Keep the direction of the rule straight, because it is the same line the second pass draws:
+- **EXISTENCE** of a posted prop decides who appears → coverage. Allowed, in both directions.
+- **VALUE** of the posted line decides a projection or whether we publish one → line-blindness is
+  broken. Never.
+
+Consequence to state rather than hide: a game the books have not priced shows no players, and a
+slate captured early looks thin. That reads correctly — the market has not priced it yet.
+
+Audit check: `rows.filter(r => r.book === null).length` should be **0** on any prop board.
+
+### The board must reconcile against the market — run this every audit
+Both bugs above presented identically: a board that looked fine, just missing people. Neither shows
+up in a screenshot. The only way to catch them is to diff **who the book prices** against **who we
+publish**, and require a reason for every gap:
+
+```python
+priced  = {norm(r["player"]) for r in prop_snapshots_for_the_slate}   # PAGED
+shown   = {norm(r["player"]) for r in projections_file}
+missing = priced - shown
+```
+Then bucket `missing` by cause and be suspicious of any bucket that isn't tiny:
+`no prior-season stats` (rookies — legitimate), `team mismatch` (stale roster — a BUG),
+`no game log` (true freshmen — legitimate in NCAAF), `absent from the fetch` (truncation — a BUG).
+A star name anywhere in that list means it is a join bug, not a data gap.
+
+### ⚠️ A measurement taken on broken data justifies a broken fix
+`MIN_PROJ_GAMES = 5` blanked any projection built on under 5 of a player's own games. Its stated
+evidence was median(proj ÷ line) of **1.74 at 0-2 games and 1.87 at 3-4, against 1.10 from 5 up**.
+That measurement was real — and taken on a board where the 1000-row truncation left only **7 of 35
+games visible**. Re-measured after the fix:
+
+| own games | n | median | verdict |
+|---|---|---|---|
+| 0-2 | 5 | **0.88** | the BEST bucket |
+| 3-4 | 6 | 1.83 | |
+| 5-9 | 42 | **1.31** | published, and worse than what we hid |
+| 10+ | 120 | 1.09 | |
+
+The gate was hiding Keelon Russell at 1.00 and Quaid Carr at 0.95 while passing 42 rows at 1.31.
+
+**The rule: when you fix a data-collection bug, re-run every measurement that was taken before the
+fix — especially the ones you used to justify a behaviour.** A derived constant carries the bias of
+the data it was derived from, and it does not announce that it is stale. Grep for tuned constants
+after any pipeline fix and check what each was measured on.
+
+Second rule from the same fix: **gate CLAIMS, not MEASUREMENTS.** A projection is our number and the
+row already shows the sample size next to it ("0/2 gm") — the reader can discount it. A lean is an
+assertion about what will happen, so it stays gated *and* shrinks toward the category baseline. The
+board now publishes the number, marks it `.pmcell--thin`, and withholds only the arrow.
+
+### Verify a "fix" did not just move the cost somewhere else
+Paging `sb_get` was correct, and it took the slate from 7 games to 35 — which took `team_logs` from
+14 teams to 86, i.e. **172 CFBD calls against the workflow's `timeout-minutes: 25`**. The nightly job
+would have started failing that night, and the failure would have looked unrelated to the fix.
+
+Two things to check on any fix that widens a data set:
+```bash
+grep -rn "timeout-minutes" .github/workflows/    # does the job still fit?
+```
+- **Runtime**: time the job locally before trusting the cron. 45+ min sequential here.
+- **Upstream load**: 6x the API calls. Cache what cannot change — `HIST_SEASONS` is [2024, 2025]
+  against a 2026 season, so those payloads are immutable; they are now cached per team-season and
+  the workflow keeps the cache via `actions/cache`.
+
+And when the work is pure network wait, make it concurrent rather than buying a faster machine:
+`_fetch_all_logs` runs 8 in flight through a `ThreadPoolExecutor` (`cfbd_get` is stateless per call
+and already retries 429/5xx). **Measured: 45+ minutes → 6m16s.** Parse SEQUENTIALLY afterwards —
+the fetch order is nondeterministic and the parse feeds recency weighting.
+
 ### A cap fixes a tail; measure the OTHER tail too
 `ROLE_VOL_CAP` clamped the inflated rows and regressed exactly the players it should have left alone.
 The cap was multiplicative on a player's own volume, so on a near-zero own volume any multiple is

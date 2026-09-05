@@ -207,9 +207,18 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                         // from proj vs book — see projLean. `proj` is a mean and the line sits near
                         // the median, so the old comparison leaned OVER on 90-100% of continuous
                         // markets. A row with too little history now shows no arrow at all.
-                        // Too little of the player's own history to stand behind a number: show the
-                        // book's line and his real hit-rates, but dash OUR projection and drop the
-                        // lean rather than publish a read we cannot defend. See MIN_PROJ_GAMES.
+                        // Thin own-history gates the LEAN (a claim), not the PROJECTION (a number).
+                        // The projection used to be dashed too, on a measurement that has since been
+                        // shown to be an artifact: median(proj/line) by sample size was read off a
+                        // board where a 1000-row truncation left only 7 of 35 games visible. Measured
+                        // again on the corrected board, 0-2 games came in at 0.88 — the BEST bucket —
+                        // while the 5-9 bucket we were publishing sat at 1.31. Games played simply
+                        // does not separate a good projection from a bad one here, and the gate was
+                        // blanking Keelon Russell at 1.00 against his line while passing 42 worse rows.
+                        // The games count is already on the row ("0/2 gm"), so the reader can discount
+                        // a thin number themselves rather than be shown nothing.
+                        // The lean stays gated: it IS a claim, and projLean already shrinks a thin
+                        // rate toward the category baseline, so the two guards work together.
                         const enough = hasProjSample(r);
                         const lean = enough ? projLean(r, centres) : null;
                         // A continuation row (same player as the row above, e.g. a QB's TD line
@@ -238,11 +247,11 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                                 this cell reads as "our projection is under the line" and flatly
                                 contradicted the figure beside it (proj 193.2 vs a 180.5 line, arrow
                                 down). It now lives on the % over column it is actually computed from. */}
-                            <span className={`pmcell pmcell--num${enough ? " pmcell--proj" : ""}`}
+                            <span className={`pmcell pmcell--num pmcell--proj${enough ? "" : " pmcell--thin"}`}
                               title={enough
                                 ? `Our line-blind projection: ${r.player}'s expected ${propLabel(r.market).toLowerCase()}, an AVERAGE. Averages sit above the middle on these markets, so this can read higher than the book's line even when he clears that line less than half the time — the % over columns are what say how often he actually gets there.`
-                                : `Only ${r.g} game${r.g === 1 ? "" : "s"} of ${r.player}'s own history here — under ${MIN_PROJ_GAMES} we don't publish a projection we can't stand behind. His line and hit-rates are still real; our number returns once the sample fills in.`}>
-                              {enough ? <>{r.proj}{unitFor(r.market)}</> : "—"}
+                                : `Our line-blind projection, built on only ${r.g} game${r.g === 1 ? "" : "s"} of ${r.player}'s own history — read it as a thin one. We publish it rather than hide it, and we hold back the over/under lean until ${MIN_PROJ_GAMES} games, because a lean is a claim and a projection is a measurement.`}>
+                              {r.proj}{unitFor(r.market)}
                             </span>
                             {/* The lean sits HERE, on the number it is derived from, so the arrow, the
                                 colour and the figure are one statement instead of three. */}

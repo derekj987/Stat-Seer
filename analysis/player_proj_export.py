@@ -197,6 +197,47 @@ def prior_year_rates(prior):
     return rates
 
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # repo root
+import odds_client as oc  # noqa: E402 — needs the path insert above
+
+ROSTER_URL = "https://github.com/nflverse/nflverse-data/releases/download/rosters/roster_%d.csv"
+
+
+def current_teams(season):
+    """{gsis_id: team} from THIS season's roster.
+
+    `prior_year_rates` reads the player's team off his last game log, which is the team he played
+    for LAST season. That is the wrong team for anyone who moved in the offseason, and the
+    off-team guard below then drops him as "bad source row" — silently, and for exactly the
+    players the books price most. Measured on the 2026 Week 1 board: A.J. Brown (PHI->NE), Mike
+    Evans (TB->SF), DJ Moore (CHI->BUF), Geno Smith (LV->NYJ), Kyler Murray (ARI->MIN), Tua
+    Tagovailoa (MIA->ATL), Travis Etienne (JAX->NO), David Montgomery (DET->HOU), Michael Pittman
+    (IND->PIT), Rico Dowdle (CAR->PIT), Stefon Diggs (NE->WAS) and Jauan Jennings (SF->MIN) all
+    had posted lines and no row on the board. The book had them on the right team the whole time;
+    we were the ones holding last year's roster.
+
+    Joined on gsis_id (== the `player_id` in the stats files), never on name. Best-effort: if the
+    roster can't be fetched we fall back to last season's team, which is the old behaviour."""
+    os.makedirs("data", exist_ok=True)
+    path = f"data/roster_{season}.csv"
+    if not os.path.exists(path):
+        try:
+            oc.ensure_ssl_certs()
+            with urllib.request.urlopen(ROSTER_URL % season, timeout=120) as r:
+                data = r.read()
+            with open(path, "wb") as f:
+                f.write(data)
+        except Exception as e:  # noqa: BLE001 — roster is an improvement, never a hard dependency
+            print(f"  WARNING: {season} roster unavailable ({e}); using prior-season teams "
+                  f"— players who changed teams will be dropped", file=sys.stderr)
+            return {}
+    d = pd.read_csv(path, low_memory=False)
+    d = d[d.gsis_id.notna()]
+    if "status" in d.columns:                      # ACT/RES/... keep the active entry per player
+        d = d.sort_values("status", key=lambda s: (s != "ACT").astype(int))
+    return dict(zip(d.gsis_id.astype(str), d.team.astype(str)))
+
+
 CAREER_STAT = {"pass_yds": "passing_yards", "rush_yds": "rushing_yards",
                "rec_yds": "receiving_yards", "receptions": "receptions",
                "pass_tds": "passing_tds"}
@@ -381,6 +422,18 @@ def main():
     prior = args.season - 1
     base = build_baselines(range(args.season - 3, args.season))   # e.g. 2023-2025
     rates = prior_year_rates(prior)
+    # Re-tag every player with the team he is on NOW. His USAGE still comes from last season (that
+    # is the projection); only the team label changes, which is what the off-team guard and the
+    # scoring-environment lookup key off. See current_teams().
+    cur_team = current_teams(args.season)
+    moved = 0
+    for r in rates.values():
+        t = cur_team.get(str(r["pid"]))
+        if t and t != r["team"]:
+            r["team"] = t
+            moved += 1
+    print(f"  re-tagged {moved} players to their {args.season} team "
+          f"({len(cur_team)} on the roster)")
     career = load_career(range(2016, args.season), *load_venue_sets())   # all game logs, venue-tagged
 
     # Forward scoring-environment context (Context flag, NOT a projection input). Degrades to

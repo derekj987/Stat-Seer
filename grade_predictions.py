@@ -96,11 +96,26 @@ def backtest(seasons):
 # ---------- live grading (reads ledger + results, writes grades) ----------
 
 def _get(env, table, query):
-    url = f"{env['SUPABASE_URL'].rstrip('/')}/rest/v1/{table}{query}"
+    """PostgREST read, PAGED.
+
+    A `limit=` in the query string does NOT raise the ceiling: the server caps every response at
+    1000 rows, so `&limit=10000` returns 1000 and looks complete. That matters most for the
+    `graded` set below — it is the dedupe of prediction_ids already scored, so a truncated read
+    would silently re-grade predictions and write duplicate rows into the published track record.
+    Paging until a short page arrives is the only read that is safe as the ledger grows."""
     key = env["SUPABASE_SERVICE_KEY"]
-    req = urllib.request.Request(url, headers={"apikey": key, "Authorization": f"Bearer {key}"})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return json.loads(r.read())
+    base = f"{env['SUPABASE_URL'].rstrip('/')}/rest/v1/{table}{query}"
+    out, PAGE, off = [], 1000, 0
+    while True:
+        req = urllib.request.Request(base, headers={"apikey": key, "Authorization": f"Bearer {key}",
+                                                    "Range-Unit": "items",
+                                                    "Range": f"{off}-{off + PAGE - 1}"})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            page = json.loads(r.read())
+        out += page
+        if len(page) < PAGE:
+            return out
+        off += PAGE
 
 
 def fetch_fresh_games():
