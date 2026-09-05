@@ -80,9 +80,20 @@ def fetch_week(env, week, season=2026):
            "Authorization": f"Bearer {env['SUPABASE_SERVICE_KEY']}"}
 
     def get(q):
-        with urllib.request.urlopen(urllib.request.Request(base + q, headers=hdr),
-                                    timeout=45) as r:
-            return json.loads(r.read())
+        """PAGED. Pinning to one snapshot was written when a sweep comfortably fitted under
+        PostgREST's 1000-row cap; a 2026 Week 1 sweep is now 1,042 rows, so the docstring's
+        promise above had quietly expired and the board was losing its tail. `limit=` does not
+        raise the ceiling — only Range does."""
+        out, PAGE, off = [], 1000, 0
+        while True:
+            req = urllib.request.Request(base + q, headers={**hdr, "Range-Unit": "items",
+                                                            "Range": f"{off}-{off + PAGE - 1}"})
+            with urllib.request.urlopen(req, timeout=45) as r:
+                page = json.loads(r.read())
+            out += page
+            if len(page) < PAGE:
+                return out
+            off += PAGE
 
     latest = get(f"?season=eq.{season}&week=eq.{week}"
                  "&capture_reason=in.(SCHEDULED,MANUAL)"

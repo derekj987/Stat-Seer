@@ -312,6 +312,116 @@ PASS_K = 300.0   # QB YPA persists (unlike RB/WR efficiency), so we regress the 
                  # YPA toward the starter baseline by ~300 attempts, not strip it to league avg.
 
 
+DEPTH_URL = ("https://github.com/nflverse/nflverse-data/releases/download/"
+             "depth_charts/depth_charts_{season}.csv")
+# Games of the ROLE's typical volume mixed into a player's own prior-season volume. Measured, not
+# picked: predicting each player's actual per-game volume from the season before, n=700
+# player-seasons across 2024-25 —
+#     prior volume only   MAE 1.609
+#     blended, k=8              1.201
+#     blended, k=12             1.158   <- used
+#     role median only          1.302
+# The blend beats BOTH extremes, which is the tell that a player's own history and his current role
+# each carry information the other lacks.
+ROLE_K = 12.0
+# Games of the volume-implied TD probability mixed into a player's own scoring rate. Scoring is the
+# one thing that genuinely does not persist (receiving TD r=0.093, CLAUDE.md), so the prior is
+# heavy: Brier on 33,861 player-games in 2024-25 was 0.14028 volume-only, 0.13895 at k=40, and
+# 0.15160 using the player's own rate alone. Own rate helps a little; trusting it would be worse.
+TD_K = 40.0
+
+
+def current_ranks(season):
+    """{gsis_id or norm-name: (pos, rank)} from this season's nflverse depth chart.
+
+    Same source as analysis/depth_export.py. Fetched independently rather than reading the
+    generated depthChart.ts, so this does not depend on which script ran first."""
+    try:
+        oc.ensure_ssl_certs()
+        req = urllib.request.Request(DEPTH_URL.format(season=season),
+                                     headers={"User-Agent": "statseer-proj/1.0"})
+        with urllib.request.urlopen(req, timeout=90) as r:
+            d = pd.read_csv(io.StringIO(r.read().decode("utf-8", "replace")), low_memory=False)
+    except Exception as e:  # noqa: BLE001 — the correction degrades off rather than failing
+        print(f"  WARNING: depth chart unavailable ({e}); volume not role-adjusted", file=sys.stderr)
+        return {}
+    # Column names are nflverse's, not the obvious ones: the position is `pos_abb` (not
+    # `position`) and the name is `player_name` (not `full_name`). Getting this wrong does not
+    # raise — it silently matches nothing and returns an empty map, so the whole correction turns
+    # itself off while the run still looks successful. Hence the assertion below.
+    d = d[pd.to_numeric(d.get("pos_rank"), errors="coerce").notna()]
+    d = d[d.get("pos_abb").isin(["QB", "RB", "WR", "TE", "FB"])]
+    if "dt" in d.columns:                       # 498k rows = every weekly snapshot; keep the newest
+        d = d.sort_values("dt").groupby(["gsis_id", "pos_abb"], as_index=False).last()
+    out = {}
+    for _, r in d.iterrows():
+        pos, rank = str(r["pos_abb"]), int(r["pos_rank"])
+        gid = str(r.get("gsis_id") or "")
+        for key in (gid if gid and gid != "nan" else None, norm(str(r.get("player_name", "")))):
+            if not key:
+                continue
+            if key not in out or rank < out[key][1]:
+                out[key] = (pos, rank)
+    if not out:
+        print("  WARNING: depth chart parsed to ZERO entries — column names may have changed",
+              file=sys.stderr)
+    return out
+
+
+def role_volume(rates, ranks):
+    """{(pos, rank): median per-game volume} from the prior season's own players.
+
+    The yardstick for "what does an RB3 actually get" comes from the same data the projections do,
+    so it moves with the league instead of being a constant someone has to remember to retune."""
+    buckets = {}
+    for r in rates.values():
+        key = ranks.get(str(r.get("pid"))) or ranks.get(norm(r["name"]))
+        if not key:
+            continue
+        pos, rank = key
+        vol = r["carries_pg"] if pos in ("RB", "FB") else r["targets_pg"] if pos in ("WR", "TE") else r["att_pg"]
+        buckets.setdefault((pos, rank), []).append(vol)
+    return {k: float(np.median(v)) for k, v in buckets.items() if len(v) >= 5}
+
+
+def apply_role(rates, ranks, rolevol):
+    """Blend each player's prior per-game volume toward his CURRENT role's typical volume.
+
+    This is the fix for the most visible defect on the prop board: Jawhar Jordan played 4 games in
+    2025 at 10.8 carries and is RB3 now, so projecting his 2025 volume gave a 31.9% anytime-TD
+    number against a 7.7% market — while the row beside it read "0 TD in 0/4 games". A typical RB3
+    gets 2.7 carries. The projection was not wrong about the arithmetic; it was projecting last
+    year's role.
+
+    Line-blind: the role comes from our own depth chart and the yardstick from our own history.
+    The book's number is never consulted — only whether a prop EXISTS decides who appears."""
+    moved = 0
+    for r in rates.values():
+        key = ranks.get(str(r.get("pid"))) or ranks.get(norm(r["name"]))
+        if not key:
+            continue
+        pos, rank = key
+        target = rolevol.get((pos, rank))
+        if target is None:
+            continue
+        n = max(r.get("games", 0), 0)
+        for field, applies in (("carries_pg", pos in ("RB", "FB")),
+                               ("targets_pg", pos in ("WR", "TE", "RB")),
+                               ("att_pg", pos == "QB")):
+            if not applies or field not in r:
+                continue
+            # Only the volume that DEFINES the role is pulled to the role's median; a running
+            # back's targets are pulled toward his own share of it rather than a receiver's.
+            t = target if (field == "carries_pg" and pos in ("RB", "FB")) or \
+                          (field == "targets_pg" and pos in ("WR", "TE")) or \
+                          (field == "att_pg" and pos == "QB") else r[field]
+            before = r[field]
+            r[field] = (before * n + t * ROLE_K) / (n + ROLE_K)
+            if abs(r[field] - before) > 0.5:
+                moved += 1
+    return moved
+
+
 def project(rate, base):
     b = base.get(rate["pos"], base["WR"])
     # Passing: volume x the QB's own YPA regressed toward the starter league YPA. Using pure
@@ -333,7 +443,8 @@ def project(rate, base):
         # YPA, a QB's TD rate doesn't persist, so we don't credit his own rate — this lands
         # near the book line by design (scoring is not where a projection edge lives).
         "pass_tds": round(rate["att_pg"] * b.get("tdr", 0.0), 2),
-        # anytime-TD probability, as a percent
+        # anytime-TD probability, as a percent. Blended with the player's OWN scoring rate in
+        # main() — see TD_K. Kept raw here so `project` stays a pure volume x efficiency function.
         "anytime_td": round(100.0 * (1.0 - math.exp(-lam)), 1),
     }
 
@@ -434,6 +545,14 @@ def main():
             moved += 1
     print(f"  re-tagged {moved} players to their {args.season} team "
           f"({len(cur_team)} on the roster)")
+    # Blend prior-season volume toward the player's CURRENT depth role. Without this the board
+    # projects last year's usage: a former starter now third on the chart keeps a starter's number.
+    _ranks = current_ranks(args.season)
+    if _ranks:
+        _rolevol = role_volume(rates, _ranks)
+        _moved = apply_role(rates, _ranks, _rolevol)
+        print(f"  role-adjusted volume for {_moved} player-fields "
+              f"({len(_ranks)} on the depth chart, {len(_rolevol)} role baselines)")
     career = load_career(range(2016, args.season), *load_venue_sets())   # all game logs, venue-tagged
 
     # Forward scoring-environment context (Context flag, NOT a projection input). Degrades to
@@ -483,6 +602,13 @@ def main():
             continue
         proj = project(rate, base)[key]
         cover, cgames = career_over(career, rate["pid"], key, book)
+        if key == "anytime_td" and cgames:
+            # Blend the volume-implied probability with the player's OWN scoring rate over the
+            # same history the row displays. Without this the board could print "0 TD in 41 games"
+            # beside a 10.5% projection — a contradiction on one line. TD_K is heavy because
+            # scoring genuinely does not persist; own rate alone scores WORSE (Brier .1516 vs
+            # .1403 volume-only), so this nudges rather than overrides.
+            proj = round((100.0 * cover + proj * TD_K) / (cgames + TD_K), 1)
         pover, pgames = prior_over(career, rate["pid"], key, book, prior)
         hOver, hG, rOver, rG = home_road_over(career, rate["pid"], key, book)
         # Forward scoring-environment change vs the player's prior-season norm (Context flag).
