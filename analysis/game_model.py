@@ -127,16 +127,45 @@ def model_win_curve(g, before_season):
             margin = REGRESS * (s.home_team.map(rt).fillna(0.0) - s.away_team.map(rt).fillna(0.0)) + hfa
             s["fav_mag"] = margin.abs()
             s["fav_margin"] = np.where(margin >= 0, s.home_score - s.away_score, s.away_score - s.home_score)
-            frames.append(s[["fav_mag", "fav_margin"]])
-    return pd.concat(frames).to_numpy() if frames else np.empty((0, 2))
+            s["wk"] = week
+            frames.append(s[["fav_mag", "fav_margin", "wk"]])
+    return pd.concat(frames).to_numpy() if frames else np.empty((0, 3))
 
 
-def winprob(mag, curve, bw=1.0):
-    """Empirical P(favored team wins | predicted margin ~= mag)."""
+# How far either side of the target week the curve may look for comparable predictions.
+WEEK_BAND = 4
+
+
+def winprob(mag, curve, week=None, bw=1.0):
+    """Empirical P(favored team wins | predicted margin ~= mag), CONDITIONED ON SEASON PROGRESS.
+
+    The week matters because the estimator itself changes over a season: in Week 1 a rating is pure
+    prior-season, by Week 12 it is mostly current-season and materially sharper. A single curve
+    learns the AVERAGE accuracy and therefore hands Week 1 the confidence Week 12 earned.
+
+    Measured on held-out 2023-2025 with an unconditioned curve, and note how the aggregate hides it:
+
+        weeks 1-2    predicted 63.6%   actual 60.4%   -3.2   overconfident
+        weeks 3-5    predicted 63.4%   actual 56.9%   -6.5   overconfident
+        weeks 6-10   predicted 63.2%   actual 66.8%   +3.6   underconfident
+        weeks 11-18  predicted 63.0%   actual 64.7%   +1.6
+        ALL WEEKS    predicted 63.2%   actual 63.4%   +0.2   <- looks perfect
+
+    That +0.2 is two real errors cancelling. Since these numbers are published and locked, an early
+    week publishing 63.6% where 60.4% is earned is a calibration claim we would later fail in public.
+
+    Falls back to the whole curve when a week band is too thin to say anything — a wider,
+    slightly-miscalibrated estimate beats a confident one drawn from 20 games."""
     m, fm = curve[:, 0], curve[:, 1]
-    sel = (m >= mag - bw) & (m <= mag + bw)
-    if sel.sum() < 120:
-        sel = (m >= mag - 2.5) & (m <= mag + 2.5)
+    wk = curve[:, 2] if curve.shape[1] > 2 else None
+    near = np.ones(len(m), dtype=bool) if (week is None or wk is None) else (np.abs(wk - week) <= WEEK_BAND)
+
+    for band in (bw, 2.5, 4.0):
+        sel = near & (m >= mag - band) & (m <= mag + band)
+        if sel.sum() >= 120:
+            break
+    else:
+        sel = (m >= mag - 2.5) & (m <= mag + 2.5)      # give up on the week, keep the magnitude
     s = fm[sel]
     if not len(s):
         return 0.5
@@ -163,7 +192,7 @@ def predict_week(g, season, week):
         hfa = 0.0 if neutral else HFA
         margin = REGRESS * (prior.get(h, 0.0) - prior.get(a, 0.0)) + hfa  # home perspective
         fav = h if margin >= 0 else a
-        p_fav = winprob(abs(margin), curve)
+        p_fav = winprob(abs(margin), curve, week)
         p_home = p_fav if fav == h else 1 - p_fav
         out.append({
             "away": a, "home": h, "gameday": r.get("gameday"),
