@@ -562,6 +562,34 @@ def project_role(games, market, pos, rank, team, per_team, league):
     return project(games, market)
 
 
+def current_team_map(depth):
+    """{norm_name: team} — the team a player is on NOW, from the scraped depth charts.
+
+    team_logs takes a player's team from his CFBD GAME LOGS, i.e. wherever he last played. In
+    college that is wrong constantly: the transfer portal moves thousands of players a year, and
+    `logs` is built with setdefault over an alphabetically sorted team list, so a transfer's team
+    is whichever of his schools sorts first. Tayven Jackson showed on the board as "QB1, Indiana"
+    while the depth chart had him at North Texas — Indiana simply sorts earlier.
+
+    Two failures came out of that, and the second is much worse than the first:
+      1. Visible: the wrong team printed next to a player's slot.
+      2. Invisible: build_slate drops a player whose logged team is not in the game. For a
+         transfer that is the OLD school, so unless he happens to be facing it he vanishes.
+         Measured on the 2026-09-05 slate: 345 priced players who ARE on the current depth chart
+         had no row — 35 QB1s, 30 RB1s, 36 WR1s, 35 TE1s. The board carried 292 of 716 priced
+         players.
+
+    The depth chart is scraped fresh, so it is the authority on who is on which roster now. His
+    game LOGS still come from wherever he played them — that is the projection — only the team
+    LABEL and the in-game check are corrected."""
+    out = {}
+    for team, groups in (depth or {}).items():
+        for names in (groups or {}).values():
+            for name in names or []:
+                out.setdefault(norm(name), team)
+    return out
+
+
 def depth_lookup(depth):
     """{(cfbd_team, norm_name): (pos, rank)} from the scraped depth charts."""
     out = {}
@@ -577,6 +605,17 @@ def build(props, key, depth):
     for p in props:
         teams.add(p["home"]); teams.add(p["away"])
     logs = team_logs(teams, key)
+    # Re-tag every player with the team he is on NOW. Must happen BEFORE rank_baselines and before
+    # either pass reads e["team"] — the role baselines and both in-game guards key off it.
+    # See current_team_map().
+    cur = current_team_map(depth)
+    retagged = 0
+    for _nm, _e in logs.items():
+        _t = cur.get(_nm)
+        if _t and _t != _e["team"]:
+            _e["team"] = _t
+            retagged += 1
+    print(f"  re-tagged {retagged} players to their current team from the depth chart")
     per_team, league = rank_baselines(logs)
     dlook = depth_lookup(depth)
 
@@ -656,6 +695,17 @@ def build_slate(slate, depth, prop_index, key):
         teams.add(away)
         teams.add(home)
     logs = team_logs(teams, key)
+    # Re-tag every player with the team he is on NOW. Must happen BEFORE rank_baselines and before
+    # either pass reads e["team"] — the role baselines and both in-game guards key off it.
+    # See current_team_map().
+    cur = current_team_map(depth)
+    retagged = 0
+    for _nm, _e in logs.items():
+        _t = cur.get(_nm)
+        if _t and _t != _e["team"]:
+            _e["team"] = _t
+            retagged += 1
+    print(f"  re-tagged {retagged} players to their current team from the depth chart")
     per_team, league = rank_baselines(logs)
 
     out, seen = [], set()

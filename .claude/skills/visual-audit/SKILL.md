@@ -241,6 +241,45 @@ prediction ids to dedupe. Past 1000 graded rows the dedupe silently fails and th
 record** accumulates duplicate grades. It was caught while the table still had 0 rows — latent, not
 yet firing. A truncation bug is usually found *before* it does damage only if you go looking.
 
+### 🚨 A player's team comes from the CURRENT roster, never from his game log
+This bug has now appeared in **both** sports from **different** code, which is why it gets its own
+entry: the NFL version keyed off last season's stats team, the NCAAF version off the CFBD game log.
+Same mistake, same two symptoms.
+
+Derek caught it as *"Tayven Jackson (QB1, **Indiana**)"* — he is North Texas's QB1. The rank was
+right and the team was wrong, because `team_logs` takes a player's team from wherever he last
+played and builds the map with `setdefault` over an **alphabetically sorted** team list. For a
+transfer that means his team is whichever school sorts first: "Indiana" beat "North Texas".
+
+**The visible symptom is the small half.** `build_slate` drops any player whose logged team is not
+in the game, so a transfer vanishes entirely unless he happens to be facing his old school — which
+is exactly why the only three visibly-mislabelled players were all playing their former team. The
+survivors are the ones you can see; the rest are silently gone.
+
+Measured on the 2026-09-05 NCAAF slate, before the fix:
+| | |
+|---|---|
+| rows disagreeing with the depth chart | 3 (all facing their old school) |
+| priced players on the board | **292 of 716 (41%)** |
+| priced players WITH a depth-chart entry and no row | **345** — 35 QB1s, 30 RB1s, 36 WR1s, 35 TE1s |
+
+After re-tagging from the scraped depth chart: **441 players re-tagged, rows 464 → 726, coverage
+41% → 62%, mismatches 3 → 0.**
+
+**The rule: the roster source is the authority on which team a player is on NOW; the game log is
+only the authority on what he DID.** Re-tag before anything reads `team` — role baselines and every
+in-game guard key off it. NFL uses `roster_<season>.csv` joined on `gsis_id`; NCAAF uses
+`current_team_map(depth)` from the scraped chart.
+
+Standing check, both sports — this is cheap and catches it instantly:
+```python
+mismatches = [r for r in rows if depth.get(nkey(r["player"]), {}).get("team") not in (None, r["team"])]
+# must be 0
+```
+Watch the parser: `ncaafDepth.ts` is double-quoted JSON, `depthChart.ts` is single-quoted TS object
+literal. A regex written for one silently matches **nothing** in the other and reports a clean zero
+— which is a false pass, not a pass. Assert the entry count before trusting the result.
+
 ### 🚨 Never join a player to LAST season's team
 `player_proj_export` took each player's team from his most recent game log — i.e. the team he played
 for **last** season — and then dropped any player whose team was not in the game the book priced him
