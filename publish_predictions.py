@@ -13,10 +13,12 @@ Re-running is safe: it skips games already published for this model_version + we
 (the ledger has no UPDATE/DELETE, so we must not double-insert).
 """
 import argparse
+import datetime
 import json
 import os
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 
 import pandas as pd
@@ -50,19 +52,78 @@ def already_published(env, model_version, season, week):
     return {r["event_id"] for r in rows}
 
 
+GAMES_LOCAL = "data/games.csv"
+
+
+def load_games():
+    """nflverse games.csv — the schedule + results the model predicts from.
+
+    Fetched here rather than assumed present: data/ is gitignored, so on a fresh runner the file
+    AND its directory are absent. Mirrors grade_predictions.fetch_fresh_games() — same canonical
+    URL (oc.GAMES_URL), same makedirs, same transient-failure contract.
+
+    Returns None on a network blip so a scheduled run skips the day and exits 0 instead of emailing
+    a failure; a genuine problem still surfaces on the Supabase calls, which are not guarded."""
+    oc.ensure_ssl_certs()
+    req = urllib.request.Request(oc.GAMES_URL, headers={"User-Agent": "statseer/1.0"})
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            data = r.read()
+    except (urllib.error.URLError, urllib.error.HTTPError):
+        if os.path.exists(GAMES_LOCAL):          # fall back to the copy we already have
+            return pd.read_csv(GAMES_LOCAL, low_memory=False)
+        return None
+    os.makedirs(os.path.dirname(GAMES_LOCAL) or ".", exist_ok=True)
+    with open(GAMES_LOCAL, "wb") as fh:
+        fh.write(data)
+    return pd.read_csv(GAMES_LOCAL, low_memory=False)
+
+
+def current_week(env, season):
+    """The nearest week that still has a game to come — the same rule the site's week nav uses
+    (`currentWeek()` in web/lib/board.ts): the lowest week with a kickoff still in the future.
+
+    This is what makes a DAILY cron correct without a hardcoded week. The week only rolls forward
+    once the last game of the current week has kicked off, so week N+1 becomes publishable on the
+    Monday night / Tuesday after week N finishes -- comfortably before its own Thursday kickoff,
+    which the ledger requires (published_at < commence_time is enforced at the database).
+
+    Returns None when no future game has odds yet; the caller treats that as "nothing to do today"
+    rather than an error, so the run is a clean no-op and retries tomorrow."""
+    now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    rows = _get(env, "odds_snapshots",
+                f"?season=eq.{season}&commence_time=gt.{urllib.parse.quote(now)}"
+                "&select=week&order=week.asc&limit=1")
+    return rows[0]["week"] if rows else None
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--season", type=int, default=2026)
-    ap.add_argument("--week", type=int, default=1)
+    ap.add_argument("--week", default="auto",
+                    help="week number, or 'auto' (default) for the nearest week with a game to come")
     ap.add_argument("--write", action="store_true")
     args = ap.parse_args(argv)
 
     env = oc.load_env()
     oc.ensure_ssl_certs()
-    g = pd.read_csv("data/games.csv", low_memory=False)
-    preds = gm.predict_week(g, args.season, args.week)
-    emap = event_map(env, args.season, args.week)
-    done = already_published(env, gm.MODEL_VERSION, args.season, args.week)
+
+    if str(args.week).lower() == "auto":
+        week = current_week(env, args.season)
+        if week is None:
+            print(f"No upcoming {args.season} game has odds captured yet — nothing to publish.")
+            return 0
+        print(f"auto week -> {week}")
+    else:
+        week = int(args.week)
+
+    g = load_games()
+    if g is None:
+        print("games.csv unavailable (transient) — skipping today; the next run retries.")
+        return 0
+    preds = gm.predict_week(g, args.season, week)
+    emap = event_map(env, args.season, week)
+    done = already_published(env, gm.MODEL_VERSION, args.season, week)
 
     rows, skipped = [], []
     for p in preds:
@@ -75,7 +136,7 @@ def main(argv=None):
             skipped.append(f"already published: {p['away']}@{p['home']}")
             continue
         rows.append({
-            "commence_time": commence, "season": args.season, "week": args.week,
+            "commence_time": commence, "season": args.season, "week": week,
             "event_id": eid, "section": "MODEL", "model_version": gm.MODEL_VERSION,
             "market": "h2h", "subject": p["home"],  # P(home team wins)
             "model_prob": round(p["home_winprob"], 4),
@@ -84,7 +145,7 @@ def main(argv=None):
                           "neutral": p["neutral"], "venue": p["venue"]},
         })
 
-    print(f"MODEL {gm.MODEL_VERSION} — {args.season} Week {args.week}")
+    print(f"MODEL {gm.MODEL_VERSION} — {args.season} Week {week}")
     print(f"  to publish: {len(rows)}   skipped: {len(skipped)}")
     for s in skipped:
         print(f"    - {s}")

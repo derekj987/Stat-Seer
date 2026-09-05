@@ -1,0 +1,66 @@
+name: Publish predictions
+
+# Publishes the NFL Model's line-blind predictions to prediction_ledger.
+#
+# WHY THIS EXISTS: publish_predictions.py has been in the repo since the start, but nothing ever
+# ran it. It was executed by hand ONCE, on 2026-08-14, for Week 1 only -- 16 rows. Everything the
+# /model board showed was that one snapshot, which is why the numbers never moved. Worse than
+# stale: fetchModelWeek() returns [] for a week with no rows, so the section would have gone BLANK
+# the moment the site rolled to Week 2.
+#
+# WHAT DAILY DOES AND DOES NOT DO. The ledger is write-once and append-only -- published_at <
+# commence_time is enforced at the database and UPDATE/DELETE are revoked -- and the script skips
+# any event already published for this model_version + week. So a daily run does NOT refresh a
+# prediction: each game is locked the first time it is published and every later run skips it.
+# That is the trust engine working as designed, not a limitation to route around.
+#
+# What daily buys is COVERAGE, not freshness:
+#   * every week gets published automatically, with no manual step and no missed week;
+#   * it self-heals -- if a day's run finds no odds yet, or fails transiently, the next day
+#     catches it, and the week is still locked well before kickoff;
+#   * --week auto resolves to the nearest week with a kickoff still ahead, so week N+1 becomes
+#     publishable once week N's last game has started (Monday night / Tuesday), which is early
+#     enough for its Thursday kickoff and late enough to use current information.
+#
+# COST: ~90s per run, ~1.5 min/day, ~46 min/month across the season -- about 4% on top of the
+# ~1,135 min/month the existing scheduled workflows use. It spends NO Odds API credits (it reads
+# event ids from odds_snapshots in Supabase, never the API) and writes ~16 rows per week.
+#
+# All times UTC.
+
+on:
+  schedule:
+    # Daily at 14:00 UTC (10am ET), Aug-Jan. Deliberately after the 10:00 full-season odds sweep
+    # in capture-odds.yml, so the next week's event ids exist before we try to map predictions
+    # onto them.
+    - cron: "0 14 * 8-12,1 *"
+  workflow_dispatch:
+    inputs:
+      week:
+        description: "Week number, or 'auto' for the nearest upcoming week"
+        required: false
+        default: "auto"
+
+concurrency:
+  group: publish-predictions
+  cancel-in-progress: false   # never interrupt a write to an append-only ledger
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet pandas numpy certifi -c requirements.txt
+
+      # No games.csv step: publish_predictions.load_games() fetches it itself (same canonical
+      # nflverse URL as grade_predictions), creates the gitignored data/ dir, and degrades to a
+      # clean skip on a network blip rather than emailing a failure.
+      - name: Publish -> prediction_ledger
+        env:
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python publish_predictions.py --week "${{ github.event.inputs.week || 'auto' }}" --write
