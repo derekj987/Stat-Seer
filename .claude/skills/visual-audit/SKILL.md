@@ -308,6 +308,53 @@ the same markup with no auth, measure it, then delete it:
    ```
 6. **Delete the probe route** before committing.
 
+### A control that OPENS a panel in place must CLOSE it on the second click
+Every rail item that opens a panel rather than navigating — Chat, Friends, AI Slip Assistant, Saved
+Slips, Message Us — force-set the open state on every event:
+
+```js
+const onOpenChat = () => { setActive("friends"); ... };   // never closes
+```
+
+So a second click did nothing, and the panel could only be dismissed via its own small ✕. The
+button is the only affordance a user aims at; if clicking it again does nothing, the control reads
+as broken. Notifications was already correct (`setNotifOpen(v => !v)`), which is the shape to copy.
+
+**Two rules, and the second is what makes this non-trivial:**
+- A control that opens an in-place panel toggles: `setActive(cur => cur === t ? null : t)`.
+- **A TARGETED open must never toggle shut.** "Message *this* member" from a profile carries
+  `detail.userId`, and the notification menu's "Unread messages" passes `detail.force`. Both must
+  land you in the panel; closing it because it happened to be open already is the same broken-button
+  feeling in reverse. Toggle on the plain click, force on the targeted one.
+
+Controls that NAVIGATE (Creator Dashboard, My Analytics, Bankroll) are plain `<a>` links and are
+correctly exempt — the page change is the feedback.
+
+Audit sweep: for each rail/dock item, click it twice and confirm the panel is gone. Then check any
+deep-link into that panel still opens it while it is already open.
+
+### 🚨 `overflow-y:auto` clips SIDEWAYS too
+Setting one axis to `auto` computes the *other* to `auto` as well — there is no "scroll vertically,
+overflow visibly sideways". `.leftrail{max-height:...;overflow-y:auto}` therefore did two things
+nobody intended: it clipped the notifications popup that was deliberately positioned outside the
+rail, and it counted that popup toward the rail's scroll width, giving the rail a **horizontal
+scrollbar that pushed the icons out of frame**. One cause, two unrelated-looking symptoms — the
+popup bug and the "rails should not scroll like that" bug were the same line of CSS.
+
+**The rule: any element with a scrolling axis states the other axis explicitly.**
+```css
+max-height:calc(100vh - 124px);overflow-y:auto;overflow-x:hidden;
+```
+And anything that must escape such a box needs `position:fixed` (with JS-measured coordinates),
+not `absolute` — `absolute` is still clipped by an ancestor's overflow. `fixed` escapes *unless* an
+ancestor sets `transform`, `filter`, `perspective`, `will-change` or `contain`, any of which makes
+that ancestor the containing block and re-traps it. Check for those before assuming `fixed` is safe.
+
+Detection:
+```js
+el.scrollWidth > el.clientWidth        // sideways scroll nobody asked for
+```
+
 ### 🚨 A status indicator must READ the status, not assert it
 The chat widget's friend bubbles rendered `<span className="cw__bubav is-online">` — the online
 class **hardcoded on every friend**. So the widget told every member that their entire roster was
