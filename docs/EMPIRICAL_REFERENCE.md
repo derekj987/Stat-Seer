@@ -628,6 +628,62 @@ a calibration exhibit — **not** an ATS pick driver. CFB value, if anywhere, is
 
 ---
 
+## 9e. Injury / availability — NFL yes, NCAAF no (`analysis/injury_adj.py`)
+
+Two sports, opposite answers, and the difference is data availability rather than football.
+
+### NFL — a real correction, shipped as `game-v4-injury`
+
+Feature = the SHARE of a team's volume that is ruled Out/Doubtful, per position group
+(QB→attempts, RB→carries, WR/TE→targets). Share, not headcount: a first pass using a binary
+"is a starter out" found nothing outside QB, because it treats a WR1 on a 28% target share the
+same as a WR2 on 15%.
+
+| spec | QB | RB | WR | TE |
+|---|---|---|---|---|
+| binary starter-out | −3.59 (t −2.90) | −1.16 (t −0.99) | −1.09 (t −1.38) | +0.34 (t 0.31) |
+| **share of volume** | **−4.35 (t −2.94)** | −2.25 (t −1.31) | **−4.96 (t −2.24)** | −1.45 (t −0.91) |
+
+Points per 100% of the group's volume missing, fitted 2017–2022 (n=1567). QB and WR significant;
+RB and TE right-signed but not established. Held out on 2023–2025:
+
+| subset | n | MAE before | MAE after |
+|---|---|---|---|
+| a QB1 is out | 70 | 13.175 | **12.311** |
+| any real absence | 398 | 11.436 | 11.312 |
+| **nobody out** | 289 | 9.088 | **9.088 (+0.0000)** |
+
+Season split is honest about the size: 2024 −0.228, 2023 +0.008, 2025 +0.029 — most of the
+aggregate gain is one season. What survives is the shape: worth ~0.9 pts where a QB is out, inert
+otherwise. Measured against the MODEL's own error, not the closing line — this is a correction,
+not an edge claim.
+
+### NCAAF — cannot be built, and probably not worth buying
+
+**There is no pre-kickoff availability source.** The NFL mandates injury reports; the NCAA does
+not. Verified, not assumed: CFBD `/player/injuries` and `/injuries` both 404, and ESPN's injuries
+endpoints 403 for college *and* pro alike (an access block, not a college gap).
+
+So the only definition available is post-hoc — a contributor who did not appear in the box score —
+which is knowable only after kickoff and therefore useless for a locked pre-kickoff prediction.
+Measured anyway, to price what an availability feed would be worth. Missing share vs the **closing
+line**, fitted on 2024 (n=699), tested on 2025 (n=725):
+
+| group | coef | t | verdict |
+|---|---|---|---|
+| QB | +1.43 | 0.80 | priced |
+| RB | −2.51 | −0.69 | priced |
+| receiving | +3.61 | 0.99 | priced |
+
+Held-out MAE against the closing line **12.145 → 12.189 — worse**. WR and TE cannot be separated
+(box scores carry no position), so they are one receiving group; stated rather than faked with two
+identical columns.
+
+**Reading: college availability is already in the number.** Even a perfect pre-kickoff CFB injury
+feed looks unlikely to beat the line on this evidence, so paying for one is hard to justify. Caveats
+worth keeping: 2 seasons only, one train/test split, and "did not appear" also catches benchings,
+ejections and blowout rest, which is noisier than a real report.
+
 ## 10. Errors caught during this work
 
 Recorded because these are the failure modes that produce confident, wrong betting
