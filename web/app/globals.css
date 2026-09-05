@@ -525,6 +525,19 @@ a.cw__fname:hover{text-decoration:underline}
 /* Pending friend requests badge the BOTTOM-right of the profile avatar (unread messages keep the
    red top-right badge on the chat icon), so "someone wants to connect" reads on its own. */
 .dock__badge--profile{top:auto;bottom:-3px;right:-3px;background:var(--accent)}
+/* Count on the COLLAPSED dock handle (phones). The dock starts collapsed there, so the icons and
+   their badges are hidden behind the handle — a member with unread messages saw a bare "⋯" and no
+   reason to tap it. Red rather than the accent green: this is an alert, not decoration, and it has
+   to read against the gold handle. The ring pulses to catch the eye on a screen the member is
+   scrolling past, and stops for anyone who asked for reduced motion. */
+.dock__badge--handle{top:-4px;right:-4px;background:#c0392b;border:2px solid var(--gold);
+  box-shadow:0 0 0 0 rgba(192,57,43,.55);animation:dockpulse 2.4s ease-out infinite}
+@keyframes dockpulse{
+  0%   {box-shadow:0 0 0 0   rgba(192,57,43,.55)}
+  70%  {box-shadow:0 0 0 9px rgba(192,57,43,0)}
+  100% {box-shadow:0 0 0 0   rgba(192,57,43,0)}
+}
+@media(prefers-reduced-motion:reduce){.dock__badge--handle{animation:none}}
 /* Notifications dropdown off the profile avatar — opens to the LEFT of the rail. */
 .dock__profwrap{position:relative;display:flex}
 .docknotif{position:absolute;right:62px;bottom:0;z-index:80;min-width:222px;padding:6px;
@@ -579,7 +592,10 @@ a.cw__fname:hover{text-decoration:underline}
 @media (max-width:640px){
   .dock{right:14px;bottom:80px;gap:8px}
   /* Gold so it stands out from the green background instead of blending in. */
-  .dock__handle{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;border:1.5px solid var(--gold);
+  /* position:relative anchors .dock__badge--handle; without it the badge would hang off whatever
+     ancestor happens to be positioned instead of the button. */
+  .dock__handle{position:relative;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;
+    border:1.5px solid var(--gold);
     background:var(--gold);box-shadow:0 3px 13px rgba(0,0,0,.28);cursor:pointer;font-size:22px;line-height:1;
     color:#1c1405;font-weight:800;opacity:.92;order:2}
   .dock__handle:active{opacity:1}

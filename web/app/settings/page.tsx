@@ -14,9 +14,57 @@ export default function SettingsPage() {
   const [delBusy, setDelBusy] = useState(false);
   const [delMsg, setDelMsg] = useState("");
 
+  // Username, and whether the one change has been used. `changedAt === undefined` means we
+  // haven't loaded yet; null means never changed (the change is still available).
+  const [uname, setUname] = useState("");
+  const [changedAt, setChangedAt] = useState<string | null | undefined>(undefined);
+  const [newName, setNewName] = useState("");
+  const [nameMsg, setNameMsg] = useState("");
+  const [nameBusy, setNameBusy] = useState(false);
+
   useEffect(() => {
-    createClient().auth.getUser().then(({ data }) => setEmail(data.user?.email ?? null));
+    const sb = createClient();
+    sb.auth.getUser().then(async ({ data }) => {
+      setEmail(data.user?.email ?? null);
+      if (!data.user) return;
+      const { data: p } = await sb.from("profiles")
+        .select("username,username_changed_at").eq("id", data.user.id).single();
+      if (!p) return;
+      setUname((p.username as string) ?? "");
+      // username_changed_at only exists once ingest/username_change.sql has been run. Before that
+      // the field comes back undefined; treat it as "not available" rather than "never changed",
+      // so we don't offer a form whose RPC doesn't exist yet.
+      setChangedAt((p as Record<string, unknown>).username_changed_at as string ?? null);
+    });
   }, []);
+
+  async function changeUsername(e: React.FormEvent) {
+    e.preventDefault();
+    setNameMsg("");
+    const want = newName.trim();
+    if (!/^[A-Za-z0-9_]{3,20}$/.test(want)) {
+      setNameMsg("3–20 characters, letters, numbers or underscores only."); return;
+    }
+    setNameBusy(true);
+    // The once-rule lives in the database, not here — this call can't be talked out of it from
+    // the console. The client check above is only to give a faster, friendlier message.
+    const { data, error } = await createClient().rpc("change_username", { new_username: want });
+    setNameBusy(false);
+    if (error) { setNameMsg("Couldn't change your username. Please try again."); return; }
+    const r = (data ?? {}) as { ok?: boolean; error?: string; username?: string };
+    if (r.ok) {
+      setUname(r.username ?? want);
+      setChangedAt(new Date().toISOString());
+      setNameMsg("Username updated ✓");
+      return;
+    }
+    setNameMsg(
+      r.error === "taken" ? "That username is already taken — try another." :
+      r.error === "already_changed" ? "You've already used your one username change." :
+      r.error === "bad_format" ? "3–20 characters, letters, numbers or underscores only." :
+      r.error === "unchanged" ? "That's already your username." :
+      "Couldn't change your username. Please try again.");
+  }
 
   async function changePw(e: React.FormEvent) {
     e.preventDefault();
@@ -68,6 +116,39 @@ export default function SettingsPage() {
   return (
     <main className="wrap settings">
       <h1 className="settings__h">Account settings</h1>
+
+      {/* First card on the page: a member who signed in with Google was handed a generated name
+          like member_f315ce11, and this is the only place to fix it. */}
+      {changedAt !== undefined && (
+        <section className="setcard">
+          <h2 className="setcard__h">Username</h2>
+          <p className="setcard__email">{uname}</p>
+          {changedAt === null ? (
+            <form onSubmit={changeUsername} className="setform">
+              <p className="setcard__warn">
+                You can change your username <b>once</b>. Pick carefully — it&apos;s how you show up
+                in the forum, on your profile and in chat, and it can&apos;t be changed again.
+              </p>
+              <input className="setinput" placeholder="New username" value={newName}
+                onChange={(e) => setNewName(e.target.value)} autoComplete="username"
+                maxLength={20} aria-label="New username" />
+              {nameMsg && <p className="setmsg">{nameMsg}</p>}
+              <button type="submit" className="btn btn--primary" disabled={nameBusy || !newName.trim()}>
+                {nameBusy ? "Saving…" : "Change my username"}
+              </button>
+              <p className="setcard__hint">3–20 characters — letters, numbers and underscores.</p>
+            </form>
+          ) : (
+            <>
+              {nameMsg && <p className="setmsg">{nameMsg}</p>}
+              <p className="setcard__hint">
+                You&apos;ve used your one username change
+                {` (${new Date(changedAt).toLocaleDateString()})`}. Message us if something&apos;s wrong.
+              </p>
+            </>
+          )}
+        </section>
+      )}
 
       <section className="setcard">
         <h2 className="setcard__h">Email</h2>

@@ -50,6 +50,17 @@ export default function Dock() {
   const open = (t: Tool) => { setActive(t); setExpanded(false); };
   const close = () => setActive(null);
 
+  // "What's awaiting me", computed once at dock level so BOTH the collapsed handle and the
+  // profile avatar read from the same number instead of each deriving its own.
+  const waitingBits: string[] = [];
+  const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
+  if (friends.unread > 0) waitingBits.push(plural(friends.unread, "unread message"));
+  if (awaiting.friendRequests > 0) waitingBits.push(plural(awaiting.friendRequests, "friend request"));
+  if (awaiting.betaRequests > 0) waitingBits.push(plural(awaiting.betaRequests, "beta request"));
+  if (awaiting.reports > 0) waitingBits.push(plural(awaiting.reports, "flagged post"));
+  const waitingTotal = friends.unread + awaiting.friendRequests + awaiting.betaRequests + awaiting.reports;
+  const waitingLabel = waitingBits.join(" · ");
+
   // A "Message" button anywhere (e.g. a profile) opens the chat panel; the dashboard robot
   // (and any "ask the assistant" control) opens the AI Slip Assistant panel.
   //
@@ -94,25 +105,32 @@ export default function Dock() {
         <div className={expanded ? "dock dock--expanded" : "dock"}>
           <button
             className="dock__handle"
-            aria-label={expanded ? "Close tools" : "Open tools"}
+            aria-label={expanded
+              ? "Close tools"
+              : waitingTotal > 0 ? `Open tools — ${waitingLabel}` : "Open tools"}
             aria-expanded={expanded}
             onClick={() => setExpanded((v) => !v)}
           >
             {expanded ? "✕" : "⋯"}
+            {/* On a phone the dock is COLLAPSED by default, so the icons — and the badge on the
+                profile avatar — are hidden behind this handle. A member with unread messages saw
+                a plain "⋯" and no reason to tap it. The count rides on the handle itself so the
+                alert is visible without opening anything. Hidden while expanded, because the
+                per-icon badges underneath are showing the same thing more precisely. */}
+            {!expanded && waitingTotal > 0 && (
+              <span className="dock__badge dock__badge--handle" aria-hidden="true">
+                {waitingTotal > 9 ? "9+" : waitingTotal}
+              </span>
+            )}
           </button>
           <div className="dock__icons">
             {friends.member && friends.username && (() => {
                 // Master "awaiting me" total on the profile avatar: unread messages + friend
                 // requests + (founder) beta approvals + flagged posts. The tooltip spells out
                 // exactly what's waiting so it's clear at a glance.
-                const bits: string[] = [];
-                const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
-                if (friends.unread > 0) bits.push(plural(friends.unread, "unread message"));
-                if (awaiting.friendRequests > 0) bits.push(plural(awaiting.friendRequests, "friend request"));
-                if (awaiting.betaRequests > 0) bits.push(plural(awaiting.betaRequests, "beta request"));
-                if (awaiting.reports > 0) bits.push(plural(awaiting.reports, "flagged post"));
-                const total = friends.unread + awaiting.friendRequests + awaiting.betaRequests + awaiting.reports;
-                const label = bits.length ? bits.join(" · ") : "View my profile";
+                const bits = waitingBits;
+                const total = waitingTotal;
+                const label = waitingLabel || "View my profile";
                 const avatar = friends.avatarUrl
                   ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={friends.avatarUrl} alt="" className="dock__icimg" />
                   : <span aria-hidden="true">👤</span>;
