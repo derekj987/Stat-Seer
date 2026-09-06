@@ -4,17 +4,31 @@
 -- the browser bundle, so anything granted to `anon` is readable by anyone who views source). Of 26
 -- tables probed, three came back readable:
 --
---   wall_posts          MEMBER-WRITTEN content, in an approval-gated private beta   <- closed here
---   profiles            id, username, avatar_url for every member                   <- closed here
---   cfb_tailgate_buzz   our own derived analysis content                            <- left open
---   tailgate_buzz       our own derived analysis content                            <- left open
+--   threads             the FORUM -- title, body, author of every post            <- closed here
+--   replies             forum replies                                             <- closed here
+--   wall_posts          profile walls                                             <- closed here
+--   wall_comments       comments on those walls                                    <- closed here
+--   wall_reactions      who reacted to what                                        <- closed here
+--   profiles            id, username, avatar_url for every member                  <- closed here
+--   cfb_tailgate_buzz   our own derived analysis content                           <- left open
+--   tailgate_buzz       our own derived analysis content                           <- left open
+--
+-- Correctly blocked already, and left alone: direct_messages, conversations,
+-- conversation_messages, stories, follows, reports, consents, feedback. The genuinely private
+-- layer was private; it is the SOCIAL layer that was open.
 --
 -- The buzz tables are output we generate, not member data, so they stay readable.
 --
--- 1) wall_posts. A member posting on someone's wall inside a private beta reasonably expects it to
---    stay inside it. Only two rows exist today and both are auto-generated slip shares, so nothing
---    sensitive has leaked — but the policy is wrong now and the exposure grows with every post.
---    The profile page is unaffected: lib/profile.ts reads walls with the SERVICE key.
+-- 1) The forum and the walls. A member posting inside an approval-gated private beta reasonably
+--    expects it to stay inside it. web/proxy.ts already redirects a signed-out visitor away from
+--    every page — but that only covers HTML navigation, not PostgREST, so `curl` with the public
+--    anon key read straight past it. This is the same shape as the HIGH finding in
+--    beta_gate_rls.sql ("the redirect was cosmetic"), which fixed WRITES and left READS open.
+--
+--    Little has leaked yet -- one forum thread, two auto-generated slip shares -- but the exposure
+--    grows with every post, and it is the whole premise of a private beta.
+--
+--    Pages are unaffected: lib/profile.ts and lib/forum.ts read with the SERVICE key.
 --
 -- 2) profiles. anon could read (id, username, avatar_url) for all 18 members — a complete roster
 --    dump for anyone who wants one, and the raw material for targeted phishing of a beta tester.
@@ -31,8 +45,12 @@
 
 begin;
 
-revoke select on public.wall_posts from anon;
-revoke select on public.profiles   from anon;
+revoke select on public.threads        from anon;
+revoke select on public.replies        from anon;
+revoke select on public.wall_posts     from anon;
+revoke select on public.wall_comments  from anon;
+revoke select on public.wall_reactions from anon;
+revoke select on public.profiles       from anon;
 
 commit;
 
