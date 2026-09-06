@@ -593,6 +593,86 @@ def project_role(games, market, pos, rank, team, per_team, league):
     return project(games, market)
 
 
+# ---- Matchup: how a defence has handled this CATEGORY (Context, never a projection input) ----
+# Same idea as the NFL tag, measured separately on CFB rather than assumed to transfer — and it is
+# STRONGER here, which is what you would expect when the talent gap between defences is enormous.
+# Opponent defence vs category, against how much a player beat his OWN baseline, 2024-25:
+#
+#     passing    corr +0.1036   bad -10.55 | toss-up  +1.75 | good +10.81   (yds vs own baseline)
+#     rushing    corr +0.1258   bad  -4.34 | toss-up  +0.81 | good  +5.35
+#     receiving  corr +0.0541   bad  -1.78 | toss-up  +0.62 | good  +1.80
+#     overall    corr +0.0842   (the NFL equivalent is +0.0581)
+#
+# CFB box scores carry no position, so the groups are the stat categories themselves. That is also
+# why PASSING gets a tag here while NFL QBs do not: it was measured here and has not been there.
+#
+# Context only. Not folded into any projection, not an edge claim.
+CFB_MATCHUP_LO, CFB_MATCHUP_HI = 0.94, 1.06
+# our market -> the defensive category that matters for it
+MARKET_GRP = {"pass_yds": "passing", "pass_tds": "passing",
+              "rush_yds": "rushing", "rec_yds": "receiving", "receptions": "receiving"}
+# anytime TD spans both, so it follows the player's depth-chart position instead
+POS_GRP = {"QB": "passing", "RB": "rushing", "FB": "rushing", "WR": "receiving", "TE": "receiving"}
+
+
+def defence_by_category(payloads, meta):
+    """{(team, category): yards allowed per game relative to the league} from completed games.
+
+    Built from the SAME cached team-season payloads team_logs already pulled, so it costs no extra
+    CFBD calls. Uses the prior season, because this runs before the current one has games."""
+    allowed, played = {}, {}
+    for (team, season), games in payloads.items():
+        if season != PRIOR_SEASON:
+            continue
+        for g in games or []:
+            tms = g.get("teams") or []
+            if len(tms) != 2:
+                continue
+            for i, tm in enumerate(tms):
+                opp = tms[1 - i].get("team")
+                if not opp:
+                    continue
+                for cat in tm.get("categories", []):
+                    if cat.get("name") not in ("passing", "rushing", "receiving"):
+                        continue
+                    for ty in cat.get("types", []):
+                        if ty.get("name") != "YDS":
+                            continue
+                        tot = 0.0
+                        for a in ty.get("athletes", []):
+                            try:
+                                tot += float(str(a.get("stat") or "").replace(",", ""))
+                            except ValueError:
+                                pass
+                        k = (opp, cat["name"])
+                        allowed[k] = allowed.get(k, 0.0) + tot
+                        played[k] = played.get(k, 0) + 1
+    per = {k: allowed[k] / played[k] for k in allowed if played[k] >= 4}
+    out = {}
+    for cat in ("passing", "rushing", "receiving"):
+        vals = [v for (t, c), v in per.items() if c == cat]
+        if not vals:
+            continue
+        lg = sum(vals) / len(vals)
+        if lg <= 0:
+            continue
+        for (t, c), v in per.items():
+            if c == cat:
+                out[(t, c)] = v / lg
+    return out
+
+
+def cfb_matchup(defmap, opponent, market, pos):
+    """'good' | 'toss' | 'bad', or None when this opponent has no rate yet."""
+    grp = MARKET_GRP.get(market) or POS_GRP.get(pos)
+    if not grp:
+        return None
+    rel = defmap.get((str(opponent), grp))
+    if rel is None:
+        return None
+    return "good" if rel >= CFB_MATCHUP_HI else "bad" if rel <= CFB_MATCHUP_LO else "toss"
+
+
 def current_team_map(depth):
     """{norm_name: team} — the team a player is on NOW, from the scraped depth charts.
 
@@ -745,6 +825,10 @@ def build_slate(slate, depth, prop_index, key):
             _e["team"] = _t
             retagged += 1
     print(f"  re-tagged {retagged} players to their current team from the depth chart")
+    # Context matchup tag. _fetch_all_logs reads the same per-team-season cache team_logs just
+    # used, so this is disk-only — no extra CFBD calls. See defence_by_category().
+    defmap = defence_by_category(_fetch_all_logs(teams, key), None)
+    print(f"  matchup: {len(defmap)} team-category defence rates from {PRIOR_SEASON}")
     per_team, league = rank_baselines(logs)
 
     out, seen = [], set()
@@ -791,6 +875,7 @@ def build_slate(slate, depth, prop_index, key):
                             "g": len([g for g in games if g.get(mk) is not None]) if mk != "anytime_td" else len(games),
                             "cOver": cO, "cG": cG, "pOver": pO, "pG": pG,
                             "hOver": hO, "hG": hG, "rOver": rO, "rG": rG,
+                            "matchup": cfb_matchup(defmap, home if team == away else away, mk, pos),
                         })
                         seen.add(sig)
 
@@ -842,6 +927,10 @@ def build_slate(slate, depth, prop_index, key):
                 "g": len([g for g in games if g.get(mk) is not None]) if mk != "anytime_td" else len(games),
                 "cOver": cO, "cG": cG, "pOver": pO, "pG": pG,
                 "hOver": hO, "hG": hG, "rOver": rO, "rG": rG,
+                # No depth rank on this path (that is what makes it the second pass), so the
+                # anytime-TD tag falls back to the position inferred from usage.
+                "matchup": cfb_matchup(defmap, home if e["team"] == away else away, mk,
+                                       _pos_from_usage(games)),
             })
             seen.add(sig)
     return out

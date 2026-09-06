@@ -37,6 +37,16 @@ export const playerCatByKey = (k: string): PlayerCat =>
   PLAYER_CATS.find((c) => c.key === k) ?? PLAYER_CATS[0];
 
 
+// Measured size of the matchup effect, per sport, in yards a player beats his own baseline by
+// between the worst and best tercile. Different numbers because they were measured separately —
+// college defences vary far more than NFL ones, so the tag carries more there.
+//   NFL   2021-25: RB +5.6 / TE +3.6 / WR +1.0   (overall corr +0.058)
+//   NCAAF 2024-25: passing +/-10.8, rushing +/-5.4, receiving +/-1.8  (overall corr +0.084)
+const MATCHUP_SIZE: Record<"nfl" | "ncaaf", string> = {
+  nfl: "Worth about +5.6 yards for a running back, +3.6 for a tight end and +1.0 for a receiver.",
+  ncaaf: "Worth about 10.8 yards on passing, 5.4 on rushing and 1.8 on receiving.",
+};
+
 export default async function PlayerModelView({ base, cat, week }: { base: "nfl" | "ncaaf"; cat: string; week: number }) {
   const active = playerCatByKey(cat);
   // Live book market per (player, market, side) — so the ＋ chips add the real best price +
@@ -240,11 +250,9 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                                   binary forced every player into a verdict. */}
                               {r.matchup && (
                                 <span className={`pmmatch pmmatch--${r.matchup}`}
-                                  title={r.matchup === "good"
-                                    ? `Context, not a pick: this opponent gave up more to ${r.pos}s than an average defence last season. Measured effect on a player beating his own baseline — RB +5.6 yds, TE +3.6, WR +1.0. Real, small, and not built into our projection.`
-                                    : r.matchup === "bad"
-                                    ? `Context, not a pick: this opponent gave up less to ${r.pos}s than an average defence last season. Measured effect — RB −1.4 yds, TE −0.0, WR −1.4. Real, small, and not built into our projection.`
-                                    : `Context, not a pick: this opponent handled ${r.pos}s about like an average defence last season. Nothing to read into either way.`}>
+                                  title={r.matchup === "toss"
+                                    ? `Context, not a pick: this opponent handled this about like an average defence last season. Nothing to read into either way.`
+                                    : `Context, not a pick: this opponent gave up ${r.matchup === "good" ? "more" : "less"} than an average defence last season. ${MATCHUP_SIZE[base]} Measured on how much a player beats his OWN baseline — real, small, and deliberately NOT built into our projection.`}>
                                   {r.matchup === "good" ? "▲ good matchup"
                                     : r.matchup === "bad" ? "▼ bad matchup" : "= toss-up matchup"}
                                 </span>
