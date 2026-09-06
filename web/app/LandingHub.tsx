@@ -303,7 +303,11 @@ function NflValueTable({ rows }: { rows: VfRow[] }) {
               <td className="hb-l">{r.away}<span className="at">@</span>{r.home}</td>
               <td className="hb-num">{r.line}</td>
               <td className="hb-num"><b className="hb-model">{r.price > 0 ? `+${r.price}` : r.price}</b></td>
-              <td>{r.books.map(bookName).join(" / ")}</td>
+              {/* A tie at several books makes this the longest cell on the board
+                  ("BetOnline / BetUS / Bovada / Fanatics / LowVig"). .hb-form td is nowrap, so it
+                  overflowed its 34% column and gave the whole table a horizontal scrollbar — only
+                  on slates where a line happened to be tied that widely. Let this one wrap. */}
+              <td className="hb-books">{r.books.map(bookName).join(" / ")}</td>
             </tr>
           ))}
         </tbody>

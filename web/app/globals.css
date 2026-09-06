@@ -510,7 +510,19 @@ a.cw__fname:hover{text-decoration:underline}
   .leftrail__merged{display:none}
 }
 
-.dock{position:fixed;right:18px;bottom:18px;z-index:70;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+/* pointer-events:none on the CONTAINER, auto on its children.
+   The collapsed dock already hides its icons with opacity:0 + pointer-events:none (see the mobile
+   block near .dock--expanded) — but .dock itself is a position:fixed flex column still sized to
+   hold them, so the CONTAINER kept capturing taps over its whole height. On a 375px phone that was
+   an invisible 52x294px strip down the right edge that swallowed clicks while painting only the
+   handle at the bottom: elementFromPoint returned DIV.dock at y=450, 500 and 600, and the
+   "Receiving" tab on /props sat underneath it, untappable.
+   The container is never a target; only what it draws is. The mobile rule that sets
+   .dock__icons{pointer-events:none} comes later in the file, so a COLLAPSED dock still lets taps
+   through to the page beneath. */
+.dock{position:fixed;right:18px;bottom:18px;z-index:70;display:flex;flex-direction:column;align-items:flex-end;gap:10px;
+  pointer-events:none}
+.dock > *{pointer-events:auto}
 .dock__handle{display:none}
 .dock__icons{display:flex;flex-direction:column;gap:10px}
 .dock__ic{position:relative;width:52px;height:52px;border-radius:50%;border:1.5px solid var(--line);
@@ -3526,6 +3538,13 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-gkick{display:block;font-size:10.5px;color:var(--muted);font-family:var(--font-mono);font-weight:400;
   margin-top:3px;white-space:nowrap}
 .hb-num{font-variant-numeric:tabular-nums}
+/* A "/"-joined book list is the one cell on these tables whose length is unbounded — it grows with
+   how many books tie a price. .hb-form td is nowrap, so five books overflowed the column and put a
+   scrollbar under the whole table. Wrapping is the right answer for a list; the fixed per-column
+   widths keep the rest aligned.
+   Specificity matters here: `.hb-form td` is (0,1,1), so a bare `.hb-books` (0,1,0) LOSES and the
+   cell stays nowrap — verified by getComputedStyle, not by reading the rule. Qualify it. */
+.hb-form td.hb-books{white-space:normal}
 
 /* Live / final score badge on NCAAF game cards. */
 .lsc{display:inline-flex;align-items:center;gap:5px;margin-left:8px;padding:1px 7px;border-radius:999px;
@@ -4024,8 +4043,12 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
    board down or sits on top of it in the layout. */
 .lp-drawer__chk{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 /* Pinned to the RIGHT edge, just below the eyes-banner hero. */
+/* .lp-drawer overrides --accent to --gold (see the bottom of this file), so this tab is GOLD in
+   both themes — and white on gold measured 1.71:1, the worst contrast on the site. Every other
+   gold-backed element pairs with a dark brown ink (.aiw__hd, .asst__sportchip, .pmadd__b.on);
+   this one had simply kept #fff from before the accent override. */
 .lp-drawer__tab{position:fixed;right:0;left:auto;top:240px;z-index:60;cursor:pointer;display:flex;flex-direction:column;
-  align-items:center;gap:8px;padding:16px 7px;border-radius:14px 0 0 14px;background:var(--accent);color:#fff;
+  align-items:center;gap:8px;padding:16px 7px;border-radius:14px 0 0 14px;background:var(--accent);color:#1c1405;
   box-shadow:-2px 3px 14px rgba(0,0,0,.28);transition:transform .2s ease,opacity .25s ease}
 .lp-drawer__tab:hover{transform:translateX(-2px)}
 .lp-drawer__tabtext{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;

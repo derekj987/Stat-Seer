@@ -66,23 +66,24 @@
     // sits above the hero image, which is its SIBLING. Walking ancestors alone therefore reads the
     // bar's own colour and reports cream-on-white for text that actually renders over a dark photo.
     // Hit-test what is really stacked underneath instead, and bail if any of it is imagery.
-    for (let a = el; a && a.nodeType === 1; a = a.parentElement) {
-      const pos = getComputedStyle(a).position;
-      if (pos !== "fixed" && pos !== "sticky") continue;
-      const r = el.getBoundingClientRect();
-      if (r.width <= 0 || r.height <= 0) break;
+    // The overlap test is NOT limited to fixed/sticky ancestors. A hero lockup is an ordinary
+    // in-flow child sitting over a SIBLING <img>: nothing in its ancestor chain is positioned, and
+    // nothing carries a background, so the colour walk fell through to the page background and
+    // reported cream-on-cream at contrast 1.07 for ".lp-hero__wmtag" — text that is plainly legible
+    // over a dark photo. Test the element's own rect against imagery whatever its position.
+    const r = el.getBoundingClientRect();
+    if (r.width > 0 && r.height > 0) {
       // Geometric overlap, NOT elementsFromPoint: the hero banner sets pointer-events:none for its
       // scrim, so hit-testing walks straight past the image and reports the bar's own colour for
       // text that actually renders over a dark photo. Overlap doesn't care about pointer events.
       for (const img of document.querySelectorAll("img,picture,video,canvas,[class*='hero'],[class*='banner']")) {
-        if (img.contains(el) || !vis(img)) continue;
+        if (img.contains(el) || img === el || !vis(img)) continue;
         const q = img.getBoundingClientRect();
         if (q.width < 40 || q.height < 20) continue;
         const over = Math.min(q.right, r.right) - Math.max(q.left, r.left) > 0
                   && Math.min(q.bottom, r.bottom) - Math.max(q.top, r.top) > 0;
         if (over) return null;                  // real backdrop is imagery — can't assess
       }
-      break;
     }
     let n = el;
     while (n && n.nodeType === 1) {
@@ -188,6 +189,20 @@
     if (r.width < 6 || r.height < 6) continue;
     const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
     if (cx < 0 || cy < 0 || cx > vw || cy > vh) continue; // must be in the viewport to hit-test
+    // An element scrolled out of a horizontal scroller (the week nav, the sport strip, the category
+    // pills) still reports a rect at its unscrolled position, so hit-testing that point finds
+    // whatever is painted there — the right rail, in practice. That is not an intercepted click,
+    // it is a clipped element you are supposed to scroll to. Skip anything a scrolling ancestor
+    // has clipped out of view; this reported 4 FALSE high-severity findings on every page.
+    let clipped = false;
+    for (let a = el.parentElement; a && a !== document.body && !clipped; a = a.parentElement) {
+      const as = getComputedStyle(a);
+      if (!/auto|scroll|hidden/.test(as.overflowX + as.overflowY)) continue;
+      const ar = rectOf(a);
+      if (r.right <= ar.left + 1 || r.left >= ar.right - 1
+        || r.bottom <= ar.top + 1 || r.top >= ar.bottom - 1) clipped = true;
+    }
+    if (clipped) continue;
     const hit = document.elementFromPoint(cx, cy);
     if (!hit) continue;
     if (hit !== el && !el.contains(hit) && !hit.contains(el)) {
@@ -286,6 +301,11 @@
     if (tracks < 2) continue;
     const kids = [...el.children].filter((k) => vis(k));
     if (!kids.length || kids.length >= tracks) continue;
+    // A CENTERING grid (`1fr auto 1fr` with the child placed in column 2) has empty outer tracks on
+    // purpose — they are the spacers that centre it. auto-fill dead space is the opposite: children
+    // flow into whatever tracks exist. Explicit placement tells them apart, and without this every
+    // page reported .pageweekrow and .subnavrow as ~250-510px of dead space.
+    if (kids.some((k) => getComputedStyle(k).gridColumnStart !== "auto")) continue;
     const r = rectOf(el); if (r.width < 200 || !onScreenish(r)) continue;
     // Only flag when the empty tracks amount to real visible space.
     const wasted = Math.round(r.width * ((tracks - kids.length) / tracks));
@@ -383,7 +403,11 @@
     if (!wantsBleed) continue;
     const r = rectOf(el);
     if (r.width < 200 || !onScreenish(r)) continue;
-    const left = Math.round(r.left), right = Math.round(vw - r.right);
+    // Measure against the LAYOUT viewport, not window.innerWidth: innerWidth counts the classic
+    // scrollbar, so a hero that correctly reaches the edge reads as ~15px short on any page long
+    // enough to scroll. Same correction the rail-symmetry check already makes.
+    const layoutW = document.documentElement.clientWidth || vw;
+    const left = Math.round(r.left), right = Math.round(layoutW - r.right);
     if (left > 4 || right > 4) {
       add("full-bleed-short", "medium", el,
         `full-bleed element stops short of the viewport (left gap ${left}px, right gap ${right}px) — a container gutter it doesn't cancel?`);
@@ -541,6 +565,10 @@
     if (!vis(list)) continue;
     const items = [...list.children].filter(vis);
     if (items.length <= 8) continue;                    // short lists need no control
+    // A horizontally-scrolling picker is not a "long list" — the week nav (18 weeks), the sport
+    // strip and the category pills are meant to be swiped, and a "show more" on them would be
+    // absurd. Skip a list that is inside a <nav> or that scrolls sideways on purpose.
+    if (list.closest("nav") || /auto|scroll/.test(getComputedStyle(list).overflowX)) continue;
     // A dropdown anywhere in this list's own block counts as capped.
     const block = list.parentElement;
     if (block && block.querySelector(".hb-showmore, .hb-more, .hb-moretbl__chk")) continue;
@@ -614,6 +642,11 @@
     const tables = [...board.querySelectorAll("table")].filter(vis);
     if (tables.length < 2) continue;
     if ([...board.querySelectorAll(".hb-panel, .hb-body")].some((n) => n !== board && n.querySelectorAll("table").length === tables.length)) continue;
+    // A container holding SEVERAL panels is not one board. /ncaaf/model stacks three charts ("AP
+    // Top 25 Matchups", "Full Model", "Where We Differ Most"), each correctly drawing its own
+    // column header once — reported as one board repeating its header 3x, because no single
+    // descendant panel owned all the tables. Only the innermost panel counts as a chart.
+    if (board.querySelector(".hb-panel")) continue;
     const seen = new Map();
     for (const t of tables) {
       const head = t.querySelector("thead");
@@ -628,6 +661,61 @@
           `the column header repeats ${n}x inside one board ("${key.slice(0, 60)}") — render it on the first day group only`);
         break;
       }
+    }
+  }
+
+  // ---- 24. Content drawn OUTSIDE the card that is supposed to contain it -------
+  // A table built as `display:flex; flex-direction:column; align-items:stretch` sizes each row to the
+  // CONTAINER's width, not the content's. Put overflow-x:auto on that same element and the container
+  // IS the phone — so a row's border box stops at the viewport while its grid tracks carry on past
+  // it. The row does not scroll; it spills out of its own card. Measured on /model at 375px: the
+  // .impgame border box was 301px around 554px of content, so MODEL SPREAD / MODEL TOTAL drew
+  // outside the card's right edge. The fix is overflow-x on a WRAPPER plus min-width:min-content.
+  //
+  // Deliberately looks at the CARD, not the scroller: a scroll container is *meant* to have
+  // scrollWidth > clientWidth. The bug is a bordered/filled box that clips nothing yet is narrower
+  // than what it draws around.
+  for (const el of document.querySelectorAll(".impgame,.refrow,.aurow,.improw,[class*='row'],[class*='card']")) {
+    if (cap(findings, "content-escapes-card")) break;
+    if (!vis(el)) continue;
+    const r = rectOf(el);
+    if (r.width < 60 || !onScreenish(r)) continue;
+    const s = getComputedStyle(el);
+    // Only boxes that visually assert a boundary — a plain wrapper overflowing is someone else's job.
+    const bordered = parseFloat(s.borderTopWidth) > 0 || parseFloat(s.borderLeftWidth) > 0
+      || (s.backgroundColor && s.backgroundColor !== "rgba(0, 0, 0, 0)");
+    if (!bordered) continue;
+    if (/auto|scroll|hidden/.test(s.overflowX)) continue;   // it clips or scrolls: not this bug
+    const over = el.scrollWidth - el.clientWidth;
+    if (over <= 2) continue;
+    add("content-escapes-card", "high", el,
+      `content is ${over}px wider than the card drawn around it (${Math.round(r.width)}px box vs ${el.scrollWidth}px of content) — the last columns render OUTSIDE the border instead of scrolling. Move overflow-x to a wrapper and give the flex column min-width:min-content.`);
+  }
+
+  // ---- 25. One chart rendered as TWO independently-scrolling tables ------------
+  // The sibling of split-group. /considerations rendered the referee crews as slice(0,6) in one
+  // .reftable and slice(6) in a SECOND .reftable inside a <details>. Both carried overflow-x, so one
+  // chart had two horizontal scrollbars — scrolling the top half left the bottom half where it was —
+  // and the second table had no header row, so its columns were unlabelled once scrolled.
+  // Cap by hiding rows INSIDE the one table (the hb-moretbl checkbox pattern), never by slicing it.
+  const TBL = [".reftable", ".imptable", ".autbl", ".charttbl", ".pmtable--data"];
+  for (const panel of document.querySelectorAll(".ctxsec, .hb-panel, .hb-body, section")) {
+    if (cap(findings, "chart-split-scrollers")) break;
+    if (!vis(panel)) continue;
+    for (const cls of TBL) {
+      const tabs = [...panel.querySelectorAll(cls)].filter(vis);
+      if (tabs.length < 2) continue;
+      // Report the innermost panel that owns them, so one bug isn't re-reported per ancestor.
+      if ([...panel.querySelectorAll(".ctxsec, .hb-panel, .hb-body")]
+            .some((n) => n !== panel && n.querySelectorAll(cls).length === tabs.length)) continue;
+      const scrollers = tabs.filter((t) => {
+        const o = getComputedStyle(t).overflowX;
+        return /auto|scroll/.test(o) || /auto|scroll/.test(getComputedStyle(t.parentElement || t).overflowX);
+      }).length;
+      const headless = tabs.filter((t) => !t.querySelector("[class*='--head'], thead")).length;
+      add("chart-split-scrollers", scrollers > 1 ? "high" : "medium", panel,
+        `one chart is rendered as ${tabs.length} separate ${cls} tables (${scrollers} of them scroll sideways independently, ${headless} have no header row) — cap by hiding rows inside the ONE table with the hb-moretbl pattern`);
+      break;
     }
   }
 

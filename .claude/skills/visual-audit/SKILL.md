@@ -479,9 +479,24 @@ causes seen so far:
 - **401s from the anon lockdown**: the signed-out QA preview hits tables `anon` can no longer read,
   a client component throws, and hydration never completes. Expected locally; not a product bug.
 
-Don't burn the session fighting it. A layout question is answerable **without the page**, because
-the real stylesheet is already loaded in the browser: inject a replica of the markup at the real
-container width, measure, then flip the property back to the old value and measure again.
+**The fix that makes a whole audit possible: splice `#S:0` into place yourself.** The server
+finished — the complete, correct markup is sitting inside that hidden div; only the client-side swap
+failed. Move it into the live tree and the page lays out normally, with the real stylesheet at the
+real width. Run this right after `navigate`, before the probe, on every page:
+
+```js
+(()=>{const h=document.getElementById('S:0'), s=document.querySelector('.siteshift');
+  if(h&&s&&h.children.length){const f=s.querySelector('main.wrap'); if(f) f.remove();
+    h.removeAttribute('hidden'); h.style.display='contents'; s.appendChild(h);}})();
+```
+
+Caveat to state when reporting: the spliced tree is **not hydrated**, so geometry, contrast and
+overflow are all trustworthy while anything depending on React event handlers is not. Every finding
+in this file's last audit was geometric, so it cost nothing there.
+
+If even that fails, a layout question is still answerable **without the page**, because the real
+stylesheet is already loaded: inject a replica of the markup at the real container width, measure,
+then flip the property back to the old value and measure again.
 
 ```js
 const host = document.createElement('div');
@@ -616,6 +631,61 @@ cells measure 0×0 — but that is deliberate: a media query near `.ctxsec__h--b
 columns and sets `display:none` on Avg Total and Read. The real defect there was only the split.
 A zero-width cell is a *candidate*, not a finding, until you have checked for a media query that
 hides it on purpose.
+
+### 🚨 A fixed CONTAINER captures clicks even when everything it holds is `pointer-events:none`
+The collapsed phone dock hides its icons correctly — `.dock__icons{opacity:0;pointer-events:none}`.
+But `.dock` itself is a `position:fixed` flex column still *sized* to hold them, and it had no
+`pointer-events` of its own. The result was an **invisible 52×294px strip down the right edge of
+every phone screen that swallowed taps** while painting only the handle at the bottom.
+
+`elementFromPoint` told the whole story — before, at 375px on `/props`:
+
+| point | hit |
+|---|---|
+| (320, 450) — the "Receiving" tab | `DIV.dock` |
+| (331, 500) — the week nav | `DIV.dock` |
+| (331, 600) — the slip bar | `DIV.dock` |
+
+Three separate controls unreachable, none of them near anything the user could see. Afterwards each
+point hits its real control and (331, 700) still hits `BUTTON.dock__handle`.
+
+**The rule: `pointer-events:none` goes on the fixed container, `auto` on its children.**
+```css
+.dock{position:fixed;…;pointer-events:none}
+.dock > *{pointer-events:auto}
+```
+Order matters: the mobile rule that sets `.dock__icons{pointer-events:none}` must come *after*
+`.dock > *`, or a collapsed dock starts eating clicks again.
+
+Audit sweep — for every `position:fixed` overlay, check whether its box is bigger than what it
+paints:
+```js
+[...document.querySelectorAll('*')].filter(e => getComputedStyle(e).position === 'fixed'
+  && getComputedStyle(e).pointerEvents !== 'none'
+  && getComputedStyle(e).backgroundColor === 'rgba(0, 0, 0, 0)')
+```
+
+### ⚠️ A probe that cries wolf buries the real bug
+One audit produced **17 findings across 5 pages; 16 were false positives** — and the one real bug
+(the dock above) was sitting in the middle of them. Tuning the checks was most of the work, and it
+is worth doing the moment a finding repeats on every page: *a finding that appears everywhere is
+almost always a probe bug, not a site-wide bug.*
+
+The five that were fixed, each with the general lesson:
+
+| symptom | cause | rule |
+|---|---|---|
+| `click-intercepted` on week nav 14-18, every page | items scrolled out of a horizontal scroller still report a rect at their unscrolled position, so hit-testing finds whatever is painted there | before hit-testing, skip anything a scrolling ancestor has clipped out of view |
+| `repeated-column-header` 3× on `/ncaaf/model` | three *separate* panels each correctly drew one header; no single descendant owned all the tables, so the whole page counted as one board | a container holding several `.hb-panel`s is not one chart — `if (board.querySelector('.hb-panel')) continue` |
+| `grid-dead-space` on `.pageweekrow`/`.subnavrow` | `1fr auto 1fr` is a CENTERING grid whose outer tracks are deliberate spacers | skip grids whose children are explicitly placed (`gridColumnStart !== 'auto'`); auto-fill dead space is the case where children just flow |
+| `low-contrast-text` 1.07 on the hero tagline | the imagery-overlap bail-out only ran for `fixed`/`sticky` ancestors; a hero lockup is an ordinary in-flow child over a sibling `<img>` | test the element's own rect against imagery **whatever its position** |
+| `full-bleed-short`, right gap 15px | measured against `window.innerWidth`, which counts the scrollbar | measure against `document.documentElement.clientWidth` — the same correction the rail check already makes |
+| `uncapped-long-list` on the 18-week nav | a horizontally-scrolling picker is meant to be swiped | skip lists inside a `<nav>` or with `overflow-x:auto` |
+
+**Verify a triage before acting on it, in both directions.** Each of those was settled by one
+measurement — a rect comparison, a computed style, an ancestor query — not by reading the CSS. The
+same discipline found the real dock bug, which *looked* like the same false positive as the other
+`click-intercepted` hits until `overlapsDock` came back true with the element fully in view.
 
 ### 🚨 A status indicator must READ the status, not assert it
 The chat widget's friend bubbles rendered `<span className="cw__bubav is-online">` — the online
