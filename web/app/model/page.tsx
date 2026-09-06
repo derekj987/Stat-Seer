@@ -362,7 +362,13 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
             <p className="imp-scrollhint" aria-hidden="true">
               Swipe for totals <span className="imp-scrollhint__a">→</span>
             </p>
-            <ImpTable rows={scored} cap={4} refs={refs} today={todayEt} tomorrow={tomorrowEt} />
+            {/* The scroller wraps the TABLE ONLY — the hint above and the "show more" below must
+                not scroll with it. .imptable itself must never carry overflow-x (see .imp-scroll
+                in globals.css: it makes every row size to the phone, not the content, and the
+                model columns then draw outside the card border). */}
+            <div className="imp-scroll">
+              <ImpTable rows={scored} cap={4} refs={refs} today={todayEt} tomorrow={tomorrowEt} />
+            </div>
             {scored.length > 4 && (
               <label htmlFor="imp-more" className="hb-moretbl__sum">
                 <span className="hb-more__chev" aria-hidden="true">▸</span>

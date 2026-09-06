@@ -21,9 +21,13 @@ function isPublicPath(path: string): boolean {
   return path === "/" || PUBLIC_PREFIXES.some((p) => path === p || path.startsWith(p));
 }
 // A signed-in but not-yet-approved member may reach only these (plus the public paths):
-// the waiting-room page itself, and the auth flow so they can sign out.
+// the waiting-room page itself, the pick-your-username step a Google sign-up lands on
+// (they arrive there straight from /auth/callback, before approval), and the auth flow so
+// they can sign out.
 function isPendingAllowed(path: string): boolean {
-  return isPublicPath(path) || path === "/pending" || path.startsWith("/pending");
+  return isPublicPath(path)
+    || path === "/pending" || path.startsWith("/pending")
+    || path === "/welcome";
 }
 
 export async function proxy(request: NextRequest) {

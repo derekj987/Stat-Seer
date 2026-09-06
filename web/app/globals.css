@@ -1020,12 +1020,19 @@ a.sportstrip__i:hover{color:var(--ink)}
 .imp-wrap .hb-more__sum{justify-content:flex-start}
 /* mobile swipe hint — the 5-column table is wider than a phone, so it scrolls */
 .imp-scrollhint{display:none}
-/* Fill the page: rows stretch to the container width (align-items:stretch); the
-   fractional columns below spread the extra space. The minmax() mins still sum
-   wider than a phone, so on mobile each row keeps its min-width and the table
-   scrolls (overflow-x). */
-.imptable{display:flex;flex-direction:column;align-items:stretch;gap:8px;overflow-x:auto;
-  max-width:none;width:100%}
+/* The horizontal scroller is the WRAPPER, never .imptable itself.
+   Why: .imptable is a flex COLUMN, so align-items:stretch sizes each row to the
+   CONTAINER's width — not to the content's. With overflow-x on the table, that
+   container is the phone (301px) while a row's grid needs 554px, so every
+   .impgame border box stopped at 301px and the model spread/total columns drew
+   OUTSIDE the card — the numbers visibly escaping the chart on mobile.
+   Scrolling the wrapper instead lets min-width:min-content grow the table to the
+   widest row, so the card border wraps all five columns and one scroll moves
+   the whole chart. Keep the hint + "show more" OUTSIDE this scroller so they
+   stay put while the table scrolls. */
+.imp-scroll{overflow-x:auto;max-width:100%}
+.imptable{display:flex;flex-direction:column;align-items:stretch;gap:8px;
+  max-width:none;width:100%;min-width:min-content}
 .improw{display:grid;
   /* game | spread | total | model spread | model total — market pair then model pair. The two
      "team + number" columns (spread, model spread) are wider than the bare-number totals. */
@@ -1506,7 +1513,19 @@ a.fauthor:hover{text-decoration:underline}
 }
 
 /* --- referee crews --- */
-.reftable{display:flex;flex-direction:column;gap:4px;overflow-x:auto}
+/* This table used to be rendered TWICE — the first 6 crews, then the rest inside a
+   separate "see more" <details> holding a second .reftable. Each carried its own
+   overflow-x, so one chart had TWO independent scrollbars (you had to swipe each half
+   across separately) and the second half had no header row at all. It is now a single
+   table; the extra crews are .hb-row--more inside it.
+   Below 640px the media query near .ctxsec__h--big reflows this to 4 columns, so the
+   phone needs no scroll. The scroller matters between 641px and ~760px, where the
+   6-column layout is back but the mins (728px) can still exceed the container. As with
+   .imp-scroll, it goes on the WRAPPER — overflow-x on a flex column sizes its rows to
+   the container rather than the content, which draws the last columns outside the row
+   border instead of scrolling them. */
+.reftable-scroll{overflow-x:auto;max-width:100%}
+.reftable{display:flex;flex-direction:column;gap:4px;min-width:min-content}
 /* flexible columns (fr) so the table stretches to fill the page instead of sitting cramped.
    Order: Crew (games in parens) · Avg Total · Leans O/U · Leans ATS · Pen/G · Read */
 .refrow{display:grid;

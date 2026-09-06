@@ -36,7 +36,11 @@ screen — usually the per-column widths don't cover every column) · `rail-asym
 drifted past it) · `uncapped-long-list` (a long item list with no "show more" control) ·
 `orphaned-continuation` (a grouped list whose first row has a blank leading label) ·
 `all-cards-collapsed` (every per-game card on a board is closed, so nothing reads without a click) ·
-`repeated-column-header` (the column row reappears mid-board, chopping one chart into several).
+`repeated-column-header` (the column row reappears mid-board, chopping one chart into several) ·
+`content-escapes-card` (a row's border box is narrower than the content it wraps — the last columns
+draw *outside* the card instead of scrolling; `overflow-x` on the flex column itself) ·
+`chart-split-scrollers` (one chart rendered as two tables, so each half scrolls sideways
+independently and the second half has no header).
 Console errors + network 4xx/5xx are collected separately (see step 4).
 
 ### 🚨 Never hand-edit an AUTO-GENERATED file
@@ -417,6 +421,29 @@ Grep for the shape after any CSS fix that "didn't take":
 grep -n "^\.block" web/app/globals.css   # is the --modifier line number BELOW the base's?
 ```
 
+### A fallback that becomes an identity is a bug, not a default
+`handle_new_user()` names a new profile from the signup metadata and falls back to
+`'member_' || substr(id::text,1,8)`. The email form collects a username, so it never fires. **Google
+OAuth carries no username field**, so every Google member silently became `member_f315ce11` — and
+that string is then their name in the forum, on their wall and in DMs, permanently.
+
+Nothing errors, nothing looks broken, and the member has no way to fix it (the column grant
+excludes `username` by design). It only surfaces when someone reads a members list and asks why
+half the names are hex.
+
+**The rule: when a signup path can't supply a field the product treats as identity, ask for it —
+don't generate one.** `/welcome` + `claim_username()` (ingest/oauth_username.sql) does that; it
+accepts *only* a `member_[0-9a-f]{8}` placeholder and deliberately leaves `username_changed_at`
+null, so the first real choice doesn't consume the one-time rename that email signups keep.
+
+Generalise past usernames: any `coalesce(<from the user>, <generated>)` in a trigger is worth a
+look. Ask which signup paths actually populate the first argument — if a whole provider can't, the
+fallback is not a fallback, it is that provider's default state.
+
+```sql
+select count(*) from profiles where username ~ '^member_[0-9a-f]{8}$';  -- should trend to 0
+```
+
 ### Verifying UI that only renders for a signed-in member
 The rails and chat return `null` unless a member is signed in, which is why several fixes here were
 shipped unverified. Do not sign in as Derek. Instead drop a **temporary probe route** that renders
@@ -440,6 +467,39 @@ the same markup with no auth, measure it, then delete it:
    document.elementFromPoint(pr.left+20, pr.top+20)      // nothing covering it
    ```
 6. **Delete the probe route** before committing.
+
+### When the dev page won't render, measure the CSS against a REPLICA
+Some days the preview never gets past `Loading…` and every element you query measures 0×0 inside
+`<div hidden id="S:0">` — React's streaming placeholder. That is not the layout bug you were
+chasing; it means the page's data never arrived, so the Suspense boundary never resolved. Two
+causes seen so far:
+
+- **TLS**: `UNABLE_TO_VERIFY_LEAF_SIGNATURE` in `preview_logs` — Node can't verify Supabase's chain.
+  Fix in `.claude/launch.json`: `"env": {"NODE_OPTIONS": "--use-system-ca"}`.
+- **401s from the anon lockdown**: the signed-out QA preview hits tables `anon` can no longer read,
+  a client component throws, and hydration never completes. Expected locally; not a product bug.
+
+Don't burn the session fighting it. A layout question is answerable **without the page**, because
+the real stylesheet is already loaded in the browser: inject a replica of the markup at the real
+container width, measure, then flip the property back to the old value and measure again.
+
+```js
+const host = document.createElement('div');
+host.style.cssText = 'width:301px;position:absolute;left:0;top:0;';   // the REAL container width
+host.innerHTML = `<div class="imp-scroll" id="S"><div class="imptable" id="T">…one real row…</div></div>`;
+document.body.appendChild(host);
+const R = id => { const e = document.getElementById(id); return {w: Math.round(e.getBoundingClientRect().width), sw: e.scrollWidth}; };
+const after = {scroll: R('S'), table: R('T')};
+T.style.overflowX = 'auto'; T.style.minWidth = 'auto'; S.style.overflowX = 'visible';   // the OLD rule
+const before = {scroll: R('S'), table: R('T')};
+host.remove();
+```
+
+Two things make this trustworthy rather than a toy: take the container width from a real
+measurement of the live page, and **check that `before` reproduces the numbers you measured on the
+broken page**. When the replica's `before` matched the live `.impgame` exactly (301px box, 554px
+content), the `after` was believable. If `before` doesn't reproduce, the replica is wrong — fix it
+before trusting anything it says.
 
 ### A control that OPENS a panel in place must CLOSE it on the second click
 Every rail item that opens a panel rather than navigating — Chat, Friends, AI Slip Assistant, Saved
@@ -487,6 +547,75 @@ Detection:
 ```js
 el.scrollWidth > el.clientWidth        // sideways scroll nobody asked for
 ```
+
+### 🚨 `overflow-x` belongs on a WRAPPER, never on the scrolling flex/grid column itself
+A table built as `display:flex; flex-direction:column; align-items:stretch` sizes each row to the
+**container's** width, not to the content's. Put `overflow-x:auto` on that same element and the
+container *is* the phone — so every row's border box stops at the viewport while its grid tracks
+carry on past it. The rows do not scroll; they **spill out of their own card**.
+
+Derek reported it as *"the model predictions are not contained within the chart itself"* — on
+`/model` the market spread/total sat inside a bordered card and MODEL SPREAD / MODEL TOTAL drew
+outside its right edge.
+
+Measured at 375px, `.imptable` before and after (same stylesheet, same container):
+
+| | `.impgame` box | its content | reads as |
+|---|---|---|---|
+| `overflow-x` on the table | **301px** | 554px | border cuts off mid-row, model columns outside it |
+| `overflow-x` on a wrapper + `min-width:min-content` | **568px** | 566px | border wraps all five columns, one scrollbar |
+
+**The rule:**
+```css
+.thing-scroll{overflow-x:auto;max-width:100%}          /* the scroller */
+.thing{display:flex;flex-direction:column;align-items:stretch;
+       width:100%;min-width:min-content}               /* grows to the widest row */
+```
+`min-width:min-content` is the half that does the work — without it the table stays viewport-wide
+and nothing changes. Keep scroll hints and "show more" controls **outside** the wrapper so they
+stay put while the table scrolls.
+
+Detection — a box narrower than the content it draws a border around:
+```js
+[...document.querySelectorAll('.impgame,.refrow,.aurow,.pmrow--data')]
+  .filter(e => e.checkVisibility() && e.scrollWidth > e.clientWidth + 1)
+```
+Correct siblings to copy: `.auscroll`/`.autbl`, `.chartscroll`/`.charttbl`, `.pmscroll`/`.pmtable--data`.
+When you find one, grep for the shape — it is copy-pasted per board:
+```bash
+grep -n "overflow-x:auto" app/globals.css   # then check each: wrapper, or the flex column itself?
+```
+
+### 🚨 One chart, one scrollbar — a "show more" must not render a SECOND table
+The sibling of the split-group bug, and the one Derek described as *"a chart that split the chart
+in half and I had to scroll 2 different sections to the right."*
+
+`/considerations` rendered the referee crews as `REF_STATS.slice(0, 6)` in one `.reftable` and
+`REF_STATS.slice(6)` in a **second** `.reftable` inside a `<details>`. Both carried `overflow-x`,
+so one chart had two independent horizontal scrollbars — scrolling the top half left the bottom
+half where it was — and the second table had **no header row at all**, so its columns were
+unlabelled once you scrolled.
+
+**The rule: cap by hiding rows INSIDE the one table, never by slicing it into two.** Use the
+`hb-moretbl` checkbox pattern — the rest of the rows get `hb-row--more`, and
+`.hb-moretbl__chk:not(:checked) ~ * .hb-row--more{display:none}` reveals them in place. `ImpTable`
+already documents this for day groups; the referee table was the last holdout.
+
+Detection:
+```js
+// same table class appearing more than once in one panel = a sliced chart
+[...document.querySelectorAll('.ctxsec,.hb-panel')].filter(p =>
+  ['.reftable','.imptable','.autbl','.charttbl'].some(c => p.querySelectorAll(c).length > 1))
+// and: a scrolling table with no header row
+[...document.querySelectorAll('.reftable,.imptable')]
+  .filter(t => t.checkVisibility() && !t.querySelector('[class*="--head"]'))
+```
+
+**Check the responsive rule before "fixing" the columns.** `.refrow` looks broken at 375px — two
+cells measure 0×0 — but that is deliberate: a media query near `.ctxsec__h--big` reflows it to four
+columns and sets `display:none` on Avg Total and Read. The real defect there was only the split.
+A zero-width cell is a *candidate*, not a finding, until you have checked for a media query that
+hides it on purpose.
 
 ### 🚨 A status indicator must READ the status, not assert it
 The chat widget's friend bubbles rendered `<span className="cw__bubav is-online">` — the online

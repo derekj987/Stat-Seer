@@ -14,8 +14,24 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) return NextResponse.redirect(`${origin}${next}`);
+    const { error, data } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error) {
+      // Google carries no username, so handle_new_user() named this member 'member_<8 hex>'.
+      // Send them to pick a real one before they land anywhere their name is shown. Email signups
+      // supply a username in their metadata, so they never match and go straight through.
+      //
+      // Best effort only: if the read fails for any reason we continue to `next` rather than
+      // block a valid sign-in on a cosmetic step.
+      if (data?.user) {
+        const { data: prof } = await supabase.from("profiles")
+          .select("username").eq("id", data.user.id).single();
+        const uname = (prof?.username as string) ?? "";
+        if (/^member_[0-9a-f]{8}$/.test(uname)) {
+          return NextResponse.redirect(`${origin}/welcome?next=${encodeURIComponent(next)}`);
+        }
+      }
+      return NextResponse.redirect(`${origin}${next}`);
+    }
   }
   return NextResponse.redirect(`${origin}/login?error=confirm`);
 }

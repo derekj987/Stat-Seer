@@ -67,13 +67,18 @@ function crewFlag(pen: number): { label: string; tone: "hot" | "cool" } | null {
   return null;
 }
 
-/** One crew row in the featured referee table. */
-function refRow(r: (typeof REF_STATS)[number]) {
+/** Crews shown before the "see more" fold. The rest render in the SAME table as
+ *  .hb-row--more rather than in a second table — two tables meant two scrollbars
+ *  on one chart and a second half with no header. */
+const REF_CAP = 6;
+
+/** One crew row in the featured referee table. `i` is the index .map() passes. */
+function refRow(r: (typeof REF_STATS)[number], i: number) {
   const flag = crewFlag(r.pen);
   const ou = r.over >= 50 ? { d: "Over", p: r.over } : { d: "Under", p: 100 - r.over };
   const ats = r.atsFav >= 50 ? { d: "Fav", p: r.atsFav } : { d: "Dog", p: 100 - r.atsFav };
   return (
-    <div className="refrow" key={r.name}>
+    <div className={i >= REF_CAP ? "refrow hb-row--more" : "refrow"} key={r.name}>
       <span className="refrow__name">{r.name} <span className="refrow__n">({r.games})</span></span>
       <span className="refrow__v">{r.total}</span>
       <span className="reflean"><b className="reflean__d">{ou.d}</b> <span className="reflean__p">({ou.p}%)</span></span>
@@ -270,23 +275,27 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
             card once weekly assignments post.
           </p>
         </div>
-        <div className="reftable">
-          <div className="refrow refrow--head">
-            <span>crew</span><span>avg total</span><span>leans O/U</span><span>leans ATS</span><span>pen/g</span><span>read</span>
-          </div>
-          {REF_STATS.slice(0, 6).map(refRow)}
-        </div>
-        {REF_STATS.length > 6 && (
-          <details className="hb-more cxmore">
-            <summary className="hb-more__sum">
-              <span className="hb-more__chev" aria-hidden="true">▸</span>
-              See {REF_STATS.length - 6} more crews
-            </summary>
+        {/* ONE table, one scroller. The extra crews are hidden rows inside it, revealed by the
+            checkbox — not a second .reftable in a <details>, which gave this chart two separate
+            scrollbars and left the second half without a header. */}
+        <div className="hb-moretbl">
+          <input type="checkbox" id="ref-more" className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
+          <div className="reftable-scroll">
             <div className="reftable">
-              {REF_STATS.slice(6).map(refRow)}
+              <div className="refrow refrow--head">
+                <span>crew</span><span>avg total</span><span>leans O/U</span><span>leans ATS</span><span>pen/g</span><span>read</span>
+              </div>
+              {REF_STATS.map(refRow)}
             </div>
-          </details>
-        )}
+          </div>
+          {REF_STATS.length > REF_CAP && (
+            <label htmlFor="ref-more" className="hb-moretbl__sum">
+              <span className="hb-more__chev" aria-hidden="true">▸</span>
+              <span className="hb-moretbl__more">See {REF_STATS.length - REF_CAP} more crews</span>
+              <span className="hb-moretbl__less">See less</span>
+            </label>
+          )}
+        </div>
         <p className="ctxsec__note">Historical crew tendencies, 2021–25.</p>
         <div className="ref-soon">
           <span className="ref-soon__tag">Coming soon</span>
