@@ -422,6 +422,65 @@ def apply_role(rates, ranks, rolevol):
     return moved
 
 
+# ---- Matchup: how a defence has handled this POSITION (Context, never a projection input) ----
+# Replaces the old "better/tougher spot" pill, which was built on envDelta (the change in a team's
+# implied total vs the player's prior-season norm). Measured head to head against how much a player
+# beat his OWN in-season baseline, 2021-25:
+#
+#     opponent defence vs position   corr +0.0581
+#     envDelta (what we were showing) corr +0.0053   <- no measurable signal
+#     the two combined                     +0.0459   <- worse than defence alone
+#
+# Effect by position, yards vs the player's own baseline:
+#     RB   bad -1.42 | toss-up +1.47 | good +5.61      (the real one)
+#     TE   bad -0.03 | toss-up +1.71 | good +3.58
+#     WR   bad -1.38 | toss-up -0.43 | good +1.00      (weak)
+#
+# Small, honest, and Context ONLY: it is not folded into the projection and it is not an edge
+# claim. A ~5-yard tilt for a running back is worth knowing and nowhere near worth betting alone.
+MATCHUP_LO, MATCHUP_HI = 0.94, 1.06   # terciles of defence-allowed relative to league average
+
+
+def defence_by_position(season):
+    """{(team, pos): allowed-per-game relative to league average} from the most recent completed
+    season. >1 means that defence gave up MORE than average to that position.
+
+    Prior season rather than season-to-date because this runs before Week 1; once the season is
+    under way the same shape can be recomputed from games played so far."""
+    path = f"data/stats_{season}.csv"
+    if not os.path.exists(path):
+        return {}
+    s = pd.read_csv(path, low_memory=False)
+    s = s[(s.season_type == "REG") & s.position.isin(["RB", "WR", "TE"])].copy()
+    if "opponent_team" not in s.columns:
+        return {}
+    for c in ("rushing_yards", "receiving_yards"):
+        s[c] = pd.to_numeric(s.get(c), errors="coerce").fillna(0.0)
+    s["prod"] = np.where(s.position == "RB", s.rushing_yards, s.receiving_yards)
+    out = {}
+    for pos, grp in s.groupby("position"):
+        per = grp.groupby(["opponent_team", "week"], as_index=False)["prod"].sum()
+        allowed = per.groupby("opponent_team")["prod"].mean()
+        lg = allowed.mean()
+        if lg <= 0:
+            continue
+        for team, v in allowed.items():
+            out[(str(team), str(pos))] = float(v / lg)
+    return out
+
+
+def matchup_tag(defmap, opponent, pos):
+    """'good' | 'toss' | 'bad' for this player against this opponent, or None when unknown.
+
+    QBs are deliberately excluded: the measurement covered RB/WR/TE, and a passing matchup is a
+    different quantity that has not been tested here. Showing a tag we have not measured would be
+    the same mistake as the env pill this replaces."""
+    rel = defmap.get((str(opponent), str(pos)))
+    if rel is None:
+        return None
+    return "good" if rel >= MATCHUP_HI else "bad" if rel <= MATCHUP_LO else "toss"
+
+
 def project(rate, base):
     b = base.get(rate["pos"], base["WR"])
     # Passing: volume x the QB's own YPA regressed toward the starter league YPA. Using pure
@@ -566,6 +625,11 @@ def main():
     except Exception as e:  # noqa: BLE001 — env is optional context
         print(f"  env context unavailable ({e}); envDelta skipped", file=sys.stderr)
 
+    # Opponent defence vs position, for the Context matchup tag. Prior season, since this runs
+    # before Week 1. See defence_by_position().
+    defmap = defence_by_position(prior)
+    print(f"  matchup: {len(defmap)} team-position defence rates from {prior}")
+
     # median book line per (player, market) across books, for the yardage/reception markets
     ALIAS = {"LAR": "LA", "LAC": "LAC", "WSH": "WAS", "OAK": "LV", "SD": "LAC"}
     def team_norm(t): return ALIAS.get(t, t)
@@ -622,6 +686,10 @@ def main():
             "g": rate["games"], "cOver": cover, "cG": cgames, "pOver": pover, "pG": pgames,
             "hOver": hOver, "hG": hG, "rOver": rOver, "rG": rG,
             "env": round(_ce, 1) if _ce is not None else None, "envDelta": env_delta,
+            # Context: how this opponent has handled this position. RB/WR/TE only — a passing
+            # matchup is a different quantity and has not been measured, so QBs get no tag.
+            "matchup": matchup_tag(defmap, (teams - {team_norm(rate["team"])} or {None}).pop(),
+                                   rate["pos"]),
         })
 
     out.sort(key=lambda r: (r["commence"], r["game"], r["cat"], -(r["proj"] or 0)))
@@ -637,7 +705,10 @@ def main():
     ts += "  pos: string; cat: string; market: string; book: number | null; proj: number; g: number;\n"
     ts += "  cOver: number; cG: number; pOver: number; pG: number;\n"
     ts += "  hOver: number; hG: number; rOver: number; rG: number;\n"
-    ts += "  env?: number | null; envDelta?: number | null }\n"
+    ts += "  env?: number | null; envDelta?: number | null;\n"
+    # 'good' | 'toss' | 'bad' — how this opponent has handled this position. Context only, and
+    # RB/WR/TE only: a passing matchup is a different quantity that has not been measured.
+    ts += "  matchup?: 'good' | 'toss' | 'bad' | null }\n"
     ts += f"export const PROJ_SEASON = {args.season};\nexport const PROJ_WEEK = {week};\nexport const PROJ_PRIOR = {prior};\n"
     ts += "export const PLAYER_PROJECTIONS: PlayerProj[] = [\n"
     for r in out:

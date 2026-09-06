@@ -231,10 +231,22 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                         return (
                           <div className={`pmrow pmrow--data${isMore ? " hb-row--more" : ""}${cont ? " pmrow--cont" : ""}`} role="row" key={`${r.player}-${r.market}`}>
                             <span className="pmcell pmcell--player">{cont ? "" : <>{r.player}<span className="pmslot"> ({[slot, r.team].filter(Boolean).join(", ")})</span>
-                              {r.envDelta != null && Math.abs(r.envDelta) >= 2 && (
-                                <span className={`pmenv pmenv--${r.envDelta > 0 ? "up" : "down"}`}
-                                  title={`Scoring-environment context (not built into our number): ${r.team}'s implied team total this week (${r.env}) is ${Math.abs(r.envDelta).toFixed(1)} pts ${r.envDelta > 0 ? "higher" : "lower"} than ${r.player}'s ${PROJ_PRIOR} norm. Our projection is anchored to last season, so on a ${r.envDelta > 0 ? "much improved" : "tougher"} spot it may run ${r.envDelta > 0 ? "low" : "high"}. Most measurable for QB passing.`}>
-                                  {r.envDelta > 0 ? "▲ better spot" : "▼ tougher spot"}
+                              {/* Matchup, not "spot". The old pill was built on envDelta — the change
+                                  in a team's implied total vs the player's prior-season norm — which
+                                  measured corr +0.0053 against how much a player beat his OWN
+                                  baseline, i.e. nothing. Opponent defence vs his POSITION measured
+                                  +0.0581 over 2021-25, so that is what the tag now says. Three
+                                  states, because "toss-up" is the honest answer for most rows and a
+                                  binary forced every player into a verdict. */}
+                              {r.matchup && (
+                                <span className={`pmmatch pmmatch--${r.matchup}`}
+                                  title={r.matchup === "good"
+                                    ? `Context, not a pick: this opponent gave up more to ${r.pos}s than an average defence last season. Measured effect on a player beating his own baseline — RB +5.6 yds, TE +3.6, WR +1.0. Real, small, and not built into our projection.`
+                                    : r.matchup === "bad"
+                                    ? `Context, not a pick: this opponent gave up less to ${r.pos}s than an average defence last season. Measured effect — RB −1.4 yds, TE −0.0, WR −1.4. Real, small, and not built into our projection.`
+                                    : `Context, not a pick: this opponent handled ${r.pos}s about like an average defence last season. Nothing to read into either way.`}>
+                                  {r.matchup === "good" ? "▲ good matchup"
+                                    : r.matchup === "bad" ? "▼ bad matchup" : "= toss-up matchup"}
                                 </span>
                               )}</>}</span>
                             {/* Shown on EVERY row (not blanked on continuations) — it's what
