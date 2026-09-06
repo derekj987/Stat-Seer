@@ -665,6 +665,22 @@ paints:
   && getComputedStyle(e).backgroundColor === 'rgba(0, 0, 0, 0)')
 ```
 
+### An `<a>` with no colour rule is a dark-theme bug waiting to happen
+"Reset it by email" on `/settings` had no CSS at all, so it fell back to the browser default
+`#0000ee`. That is ~8:1 on a light card and **1.35:1 on the dark one** — invisible, while the
+sentence around it measured 11.4. It only ever showed in dark mode, which is why it survived.
+
+```js
+[...document.querySelectorAll('a')].filter(a => a.checkVisibility()
+  && /rgb\(0, 0, 238\)|rgb\(85, 26, 139\)/.test(getComputedStyle(a).color)
+  && [...a.childNodes].some(n => n.nodeType === 3 && n.textContent.trim()))
+```
+
+**The `childNodes` filter is the whole trick.** Without it the sweep returns every card-sized link
+on the homepage, because a link wrapping `<h3>` + `<p>` inherits the UA blue while its children set
+their own colours — 6 false positives to 1 real hit. Only an `<a>` with its own direct text can
+actually paint blue. Fix with the house convention: `color:var(--accent);font-weight:600`.
+
 ### ⚠️ A probe that cries wolf buries the real bug
 One audit produced **17 findings across 5 pages; 16 were false positives** — and the one real bug
 (the dock above) was sitting in the middle of them. Tuning the checks was most of the work, and it

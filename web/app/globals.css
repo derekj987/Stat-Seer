@@ -2945,6 +2945,11 @@ a.snav__dfeat{display:block}
 .setcard--danger{border-color:color-mix(in srgb,var(--key) 45%,var(--line))}
 .setcard__warn{font-size:13px;color:var(--muted);margin:0 0 12px;line-height:1.5}
 .setcard__warn b{color:var(--key)}
+/* "Reset it by email" had NO colour rule at all, so it fell back to the browser default #0000ee:
+   fine on a light card, contrast 1.35 on the dark one while the text beside it read 11.4 — a link
+   nobody could see in dark mode. An unstyled <a> is a dark-theme bug waiting to happen; every other
+   body link in this file uses the accent. */
+.setcard__hint a{color:var(--accent);font-weight:600}
 .setdel__row{display:flex;gap:10px;flex-wrap:wrap}
 .btn--danger{background:var(--key);color:#fff;border:0}
 .btn--danger:hover{filter:brightness(1.06)}
