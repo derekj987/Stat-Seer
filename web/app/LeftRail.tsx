@@ -170,7 +170,11 @@ export default function LeftRail() {
 
       {me.role === "founder" && (
         <a className="leftrail__it" href="/creator">
-          <RailIcon src="/creator.png" /><span className="leftrail__lbl">Creator Dashboard</span>
+          {/* "Creator Dashboard" is the one label too long for the rail — it ellipsized to
+              "Creator Dashb…" at the old 254px width and would be worse at 208px. The rail's width
+              feeds the gutter arithmetic, so the label gives way, not the geometry. The page it
+              opens is still titled Creator · Dashboard. */}
+          <RailIcon src="/creator.png" /><span className="leftrail__lbl">Creator</span>
         </a>
       )}
 

@@ -437,16 +437,26 @@ a.cw__fname:hover{text-decoration:underline}
 .leftrail{display:none}
 /* Row height is driven entirely by the icon + this padding, and every row uses the same pair, so the
    rows stay evenly spaced as the icons grow — there is one row height, not one per item type. */
-.leftrail__it{position:relative;display:flex;align-items:center;gap:13px;width:100%;padding:11px 11px;border:0;background:none;
-  border-radius:14px;cursor:pointer;text-decoration:none;text-align:left;font:inherit;font-size:15px;font-weight:700;color:var(--ink)}
+/* Row metrics are a budget, not taste: rail 208 − rail padding 20 − item padding 16 − icon 40 −
+   gap 9 leaves 123px for the label, and the longest one ("AI Slip Assistant") needs ~106. It
+   clipped at the first pass; these are the numbers that clear it without another width change. */
+.leftrail__it{position:relative;display:flex;align-items:center;gap:9px;width:100%;padding:7px 8px;border:0;background:none;
+  border-radius:12px;cursor:pointer;text-decoration:none;text-align:left;font:inherit;font-size:14px;font-weight:700;color:var(--ink)}
 .leftrail__it:hover{background:var(--accent-soft)}
-.leftrail__ic{width:56px;height:56px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;font-size:28px;
-  background:var(--surface-2);border:1px solid var(--line)}
-.leftrail__it--profile .leftrail__ic{padding:0;overflow:hidden}
+/* overflow:hidden belongs on EVERY icon, not just the profile one. Without it an artwork PNG that
+   carries its own opaque background painted a square inside the round chip — visible in Chrome as a
+   white box sitting on the circle (Friends was the obvious one; it depends on the individual PNG,
+   which is why only some showed it). */
+.leftrail__ic{width:40px;height:40px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;font-size:20px;
+  background:var(--surface-2);border:1px solid var(--line);overflow:hidden}
+.leftrail__it--profile .leftrail__ic{padding:0}
 .leftrail__av{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.leftrail__ini{font-weight:800;color:var(--accent);font-size:25px}
+.leftrail__ini{font-weight:800;color:var(--accent);font-size:19px}
 .leftrail__ic--asst{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
-.leftrail__icimg{width:42px;height:42px;object-fit:contain}
+/* Fill the circle rather than sitting inside it. `contain` at a fixed 42px left the artwork's own
+   background as a square with the chip showing around its corners; `cover` at 100% makes the image
+   BE the circle, matching what .leftrail__av and .leftrail__pigeon already do. */
+.leftrail__icimg{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
 .leftrail__ic--pigeon{overflow:hidden;padding:0}
 .leftrail__pigeon{width:100%;height:100%;object-fit:cover;object-position:62% 38%}
 .leftrail__lbl{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1 1 auto}
@@ -466,8 +476,13 @@ a.cw__fname:hover{text-decoration:underline}
   /* Sits BELOW the masthead art and stretches down the page to fill its column. Both rails share
      this block, so the Bettor's Rail is dimensionally identical to the Member Rail — only the side
      differs (.leftrail--right below). max-height + overflow keep a tall rail from running off-screen. */
-  html[data-rail] .leftrail{display:flex;position:fixed;left:16px;top:108px;width:254px;z-index:45;
-    flex-direction:column;gap:8px;padding:14px 12px;background:var(--surface);
+  /* WIDTH IS AN ARITHMETIC CHAIN — see the .siteshift and .lp-hero rules below. Changing this
+     number alone leaves the page shifted or the hero short:
+         rail width + left offset + clearance = gutter      (208 + 16 + 14 = 238)
+     Also note the ring: .is-online paints a 2.5px box-shadow OUTSIDE the avatar, and a scroll
+     container clips it, so padding-top here has to clear the item's own padding plus that ring. */
+  html[data-rail] .leftrail{display:flex;position:fixed;left:16px;top:108px;width:208px;z-index:45;
+    flex-direction:column;gap:5px;padding:12px 10px;background:var(--surface);
     border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 26px rgba(0,0,0,.09);
     /* overflow-x MUST be hidden explicitly. `overflow-y:auto` alone computes overflow-x to `auto`
        too, so anything sticking out sideways gave the rail a horizontal scrollbar and shoved the
@@ -488,10 +503,10 @@ a.cw__fname:hover{text-decoration:underline}
      the content 142px (half the gutter) right of true centre on every page. Symmetric gutters cost
      some content width below 1688px, but .wrap is a max-width so the column simply narrows and stays
      CENTRED, which is the thing that was actually complained about. */
-  html[data-rail] .siteshift{padding-left:284px;padding-right:284px}
-  /* The homepage eyes-banner hero is full-bleed, so it has to cancel BOTH gutters (568px total) or
+  html[data-rail] .siteshift{padding-left:238px;padding-right:238px}
+  /* The homepage eyes-banner hero is full-bleed, so it has to cancel BOTH gutters (476px total) or
      it stops short of an edge. */
-  html[data-rail] .lp-hero{margin-left:-284px;margin-right:-284px;width:calc(100% + 568px)}
+  html[data-rail] .lp-hero{margin-left:-238px;margin-right:-238px;width:calc(100% + 476px)}
 }
 /* Which copy of the betting tools is shown is decided HERE, not in JS — the two rules below are
    exact complements, so exactly one copy is visible at every width and a resize can never leave the
