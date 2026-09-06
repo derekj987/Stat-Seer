@@ -681,6 +681,34 @@ on the homepage, because a link wrapping `<h3>` + `<p>` inherits the UA blue whi
 their own colours — 6 false positives to 1 real hit. Only an `<a>` with its own direct text can
 actually paint blue. Fix with the house convention: `color:var(--accent);font-weight:600`.
 
+### Auditing the LIVE site: the two pages the QA preview can never reach
+`/creator` and `/settings` are the blind spot in every local pass, for two different reasons, and
+both were audited for the first time via **Claude in Chrome** driving Derek's own signed-in browser.
+Do not sign in as Derek; ask him to connect the extension instead.
+
+- **`/creator` is a server component** — `redirect("/login")`, then `notFound()` for anyone who
+  isn't the founder. The QA mock in `lib/supabase/client.ts` is client-only, so nothing local
+  renders it. No probe route helps either; it is the *data* that is gated.
+- **`/settings` renders locally** but the username card does NOT, because the QA mock's `profiles`
+  read 401s under the anon lockdown. **Its absence locally is an artifact, not a bug** — confirmed
+  present and correct on production. Never report that card missing from a local pass.
+
+The hosted-probe trick (`cp web/qa/visual-audit.js web/public/`) does not work here: the live origin
+can't fetch it, and localhost is blocked by CORS + mixed content. Paste a trimmed probe inline via
+`javascript_tool` instead — page-overflow, content-escapes-card, zero-size, contrast, intercepted
+clicks, unstyled links, unequal rows is enough to be worth the trip.
+
+Two findings from that first live pass:
+- **`.ccard__more a` ("Open the full inbox →") was unstyled**, same class as `.setcard__hint a`.
+  Note the honest measurement: UA blue on the light card is **8.81**, and the accent is **5.08** —
+  the fix *lowers* light-mode contrast. It is still right, because the same blue measured **1.35**
+  on the dark card and the app has one link convention. Don't sell a consistency fix as a rescue.
+- **"Creator Dashboard" is the only rail label that truncates** — 133px of text in a 122px slot.
+  The 11px it needs is exactly the item's right padding, so this is NOT dead space and the label
+  genuinely has no room. Resist "fixing" it by trimming rail padding or the gap: rail width, gutter
+  and breakpoint are one arithmetic chain (see the rails section). Shortening the label is the safe
+  change, and it is Derek's call.
+
 ### ⚠️ A probe that cries wolf buries the real bug
 One audit produced **17 findings across 5 pages; 16 were false positives** — and the one real bug
 (the dock above) was sitting in the middle of them. Tuning the checks was most of the work, and it

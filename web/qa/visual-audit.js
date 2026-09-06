@@ -194,13 +194,17 @@
     // whatever is painted there — the right rail, in practice. That is not an intercepted click,
     // it is a clipped element you are supposed to scroll to. Skip anything a scrolling ancestor
     // has clipped out of view; this reported 4 FALSE high-severity findings on every page.
+    // Test the POINT being hit-tested, not the whole rect. A half-scrolled item is partly visible,
+    // so a whole-rect test says "not clipped" while the centre we probe sits in the hidden half and
+    // elementFromPoint returns the page behind. That is what the live rails did on a 551px-tall
+    // window: "Notifications" and "Message Us" spanned y 502-580 inside a rail ending at 535, and
+    // both were reported as covered by .siteshift. They are scrolled, not covered.
     let clipped = false;
     for (let a = el.parentElement; a && a !== document.body && !clipped; a = a.parentElement) {
       const as = getComputedStyle(a);
       if (!/auto|scroll|hidden/.test(as.overflowX + as.overflowY)) continue;
       const ar = rectOf(a);
-      if (r.right <= ar.left + 1 || r.left >= ar.right - 1
-        || r.bottom <= ar.top + 1 || r.top >= ar.bottom - 1) clipped = true;
+      if (cx < ar.left || cx > ar.right || cy < ar.top || cy > ar.bottom) clipped = true;
     }
     if (clipped) continue;
     const hit = document.elementFromPoint(cx, cy);
