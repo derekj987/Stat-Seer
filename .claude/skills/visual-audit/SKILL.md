@@ -187,6 +187,81 @@ A cap fixes a tail, not a level: the small well-sampled subset still ran 1.45 af
 NFL's 1.01. **Re-measure both the tail and the median — a headline number can improve while the bias
 you were chasing is still there.**
 
+### 🚨 A projection must not contradict the history printed beside it
+The cheapest number check in this file, because the board does the work for you: **every row shows
+its own evidence, so read the row.**
+
+Derek asked whether Jawhar Jordan really had a 31.9% chance to score against a 7.7% market. The same
+line answered it — `CAREER TD RATE 0% · 0/4 gm`. Adam Prentice was worse: **0 touchdowns in 41
+games, published at 10.5%**. A reader does not need any of our methodology to see that is wrong.
+
+```python
+# anytime TD: never scored, yet projected above the book
+[r for r in rows if r["cat"]=="td" and r["cOver"]==0 and r["cG"] >= 10 and r["proj"] > r["book"]]
+# yardage: projected far from what he has actually done
+[r for r in rows if r["cG"] >= 8 and not 0.5 <= r["proj"]/max(r["book"],1e-9) <= 2.0]
+```
+
+Both had the same root cause, and it is one worth stating on its own: **the projection deliberately
+ignored the player's own history.** TD projection was volume × league TD-per-touch, justified by
+"scoring doesn't persist" (receiving TD r=0.093 — true!). The finding was right and the conclusion
+went one step too far. Measured on 33,861 player-games:
+
+| | Brier |
+|---|---|
+| volume only (what shipped) | 0.14028 |
+| blended with own rate, k=40 | **0.13895** |
+| own rate only | 0.15160 |
+
+Own rate alone IS worse — the original finding holds. It is still not worth *zero*. When a finding
+says "X barely persists", the correct weight is small, not none, and the difference between those
+is visible on the board.
+
+### 🚨 Projecting last season's role
+The other half of the same bug, and the bigger one. Jordan played 4 games in 2025 at **10.8 carries**
+and is **RB3** now; 10.8 carries × league TD-per-carry is exactly 31.9%. The arithmetic was right and
+the role was a year out of date. A typical RB3 gets **2.7** carries.
+
+Measured per-game volume by current depth rank (2025):
+
+| rank | RB car/g | WR tgt/g | TE tgt/g |
+|---|---|---|---|
+| 1 | 15.0 | 7.5 | 5.0 |
+| 2 | 6.2 | 5.4 | 1.9 |
+| 3 | **2.7** | 3.8 | 1.8 |
+
+Blending a player's prior volume toward his CURRENT rank beats both extremes — predicting actual
+per-game volume, n=700 player-seasons: prior-only **1.609**, blended k=12 **1.158**, role-median-only
+**1.302**. That the blend beats *both* is the tell that each carries something the other lacks.
+
+**It fixed both tails, not just the reported one**: Josh Allen 28.2% → 43.8% (market 43.5%) and
+David Montgomery 28.7% → 45.0% (market 50.7%) had been badly UNDER. A role-blind projection is
+wrong in both directions; only the inflated half gets reported, because only that half looks silly.
+
+**Do NOT tune until the number matches the book.** Jordan sits at 16.4% against 7.7% and is left
+there: 0-for-4 is genuinely weak evidence and a line-blind model is allowed to disagree. Closing
+that gap on purpose would mean reading the number we are supposed to be blind to. Fix the mechanism,
+then publish whatever it says.
+
+### 🚨 A parser that matches nothing reports success
+`current_ranks()` returned **zero entries** and disabled the entire role correction, while the run
+printed its normal output and exited 0. The cause: nflverse names those columns `pos_abb` and
+`player_name`; the code looked for `position` and `full_name`. Neither raises — the filter just
+matches no rows.
+
+This is the THIRD form of the same failure in this file, so treat the shape as the lesson rather
+than the instance: a truncated page looks complete, a regex written for double-quoted JSON reports a
+clean zero against a single-quoted TS literal, and now a column rename silently switches a feature
+off. **An empty result is a claim, and it needs the same proof as a non-empty one.**
+
+```python
+if not out:
+    print("WARNING: parsed ZERO entries — column names may have changed", file=sys.stderr)
+```
+
+Assert non-empty at every parse boundary, print the count on success (`1857 on the depth chart`),
+and treat a silent zero as a failure rather than as "nothing to do".
+
 ### A scraped roster must never GATE who appears
 `cfb_player_proj.build_slate` walked the depth chart only, so a player absent from the scraped chart
 was invisible however the books priced him. Malachi Toney was the market's **second shortest price**
