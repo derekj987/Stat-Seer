@@ -3703,7 +3703,20 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-tav[open] .hb-tav__ic--open{display:inline}
 .hb-tav__chev{color:var(--muted);font-size:13px;flex:0 0 auto;transition:transform .2s}
 .hb-tav[open] .hb-tav__chev{transform:rotate(180deg)}
-.hb-tav__body{border-top:1px solid color-mix(in srgb,var(--gold) 30%,var(--line));padding:22px 24px}
+/* Fill the panel. The body was one left-aligned column and .hb-promo__p caps the copy at 54ch —
+   a good measure for readability, but inside a ~1100px panel it left the whole right half empty,
+   which reads as a broken card rather than as generous margin.
+   The answer is NOT to widen the paragraphs: 1100px of text is ~140ch and unreadable. Use the
+   width instead — two columns of copy, with the heading and the button row spanning both, so the
+   line length stays right AND the panel is full. Single column below 860px, where one column of
+   54ch already fills it. */
+.hb-tav__body{border-top:1px solid color-mix(in srgb,var(--gold) 30%,var(--line));padding:22px 24px;
+  display:grid;grid-template-columns:1fr;column-gap:32px;align-content:start}
+@media(min-width:860px){
+  .hb-tav__body{grid-template-columns:1fr 1fr}
+  .hb-tav__body > .hb-promo__h,
+  .hb-tav__body > .hb-promo__cta{grid-column:1 / -1}
+}
 
 
 /* membership band — the over-the-shoulder seer + join CTA */

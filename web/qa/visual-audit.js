@@ -717,9 +717,64 @@
         return /auto|scroll/.test(o) || /auto|scroll/.test(getComputedStyle(t.parentElement || t).overflowX);
       }).length;
       const headless = tabs.filter((t) => !t.querySelector("[class*='--head'], thead")).length;
+      // A SPLIT chart leaves its continuation without a header — that is the signature, and it is
+      // what made the referee table's bottom half unreadable. Many tables that EACH carry a header
+      // are many charts, which is the correct design for a per-item card board: /audit renders one
+      // .autbl per game and was reported as "one chart in 16 pieces". If a header is genuinely
+      // duplicated across a split, `repeated-column-header` catches that instead.
+      if (headless === 0) continue;
       add("chart-split-scrollers", scrollers > 1 ? "high" : "medium", panel,
         `one chart is rendered as ${tabs.length} separate ${cls} tables (${scrollers} of them scroll sideways independently, ${headless} have no header row) — cap by hiding rows inside the ONE table with the hb-moretbl pattern`);
       break;
+    }
+  }
+
+  // ---- 26. A panel whose content uses only part of its width --------------------
+  // The opposite of `content-escapes-card`: instead of overflowing, the content stops well short
+  // and the panel reads as half-empty. Usually a `max-width` in ch on the copy — correct for line
+  // length, wrong as the only rule in a 1100px panel, because nothing else uses the space.
+  // Reported on the homepage "Let's talk numbers" body: copy capped at 54ch inside a ~1100px card
+  // left the entire right half blank.
+  //
+  // The fix is never "widen the paragraph" — 1100px of text is ~140ch and unreadable. Fill the
+  // width with LAYOUT (columns, or copy beside art/CTA) and keep the measure.
+  if (vw >= 1000) {
+    for (const body of document.querySelectorAll("[class*='__body'],.hb-body,[class*='panel'] > div")) {
+      if (cap(findings, "panel-half-empty")) break;
+      if (!vis(body)) continue;
+      const br = rectOf(body);
+      if (br.width < 500 || !onScreenish(br)) continue;
+      const cs = getComputedStyle(body);
+      // Only single-column stacks: a grid/flex ROW is already using the width by design.
+      if (cs.display === "flex" && !/column/.test(cs.flexDirection)) continue;
+      if (cs.display === "grid" && (cs.gridTemplateColumns || "").trim().split(/\s+/).length > 1) continue;
+      const inner = br.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      if (inner < 400) continue;
+      const kids = [...body.children].filter((k) => vis(k) && directText(k).length > 0);
+      if (kids.length < 2) continue;                       // a lone element proves nothing
+      // Measure where the INK stops, not where the boxes stop. A block-level <h2> or a flex CTA
+      // row is full-width by definition even when its text ends a third of the way across, so
+      // comparing child widths reports 100% used on the very panel that looks half empty — this
+      // check silently passed its own regression test until it measured text rects instead.
+      const left = br.left + parseFloat(cs.paddingLeft);
+      let right = -Infinity;
+      const walk = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+      for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+        if (!n.textContent.trim()) continue;
+        const rng = document.createRange(); rng.selectNodeContents(n);
+        for (const q of rng.getClientRects()) if (q.width > 0) right = Math.max(right, q.right);
+      }
+      for (const k of body.querySelectorAll("img,svg,video,canvas,input,select")) {
+        if (!vis(k)) continue; const q = rectOf(k); if (q.width > 0) right = Math.max(right, q.right);
+      }
+      if (right === -Infinity) continue;
+      const used = right - left;
+      const frac = used / inner;
+      const spare = Math.round(inner - used);
+      if (frac < 0.65 && spare > 250) {
+        add("panel-half-empty", "medium", body,
+          `content uses ${Math.round(frac * 100)}% of this panel's width — ${spare}px sits empty at ${vw}px. Fill it with layout (two columns, or copy beside the CTA/art); do NOT just widen the text.`);
+      }
     }
   }
 

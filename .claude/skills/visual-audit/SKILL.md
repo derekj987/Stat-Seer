@@ -40,7 +40,9 @@ drifted past it) · `uncapped-long-list` (a long item list with no "show more" c
 `content-escapes-card` (a row's border box is narrower than the content it wraps — the last columns
 draw *outside* the card instead of scrolling; `overflow-x` on the flex column itself) ·
 `chart-split-scrollers` (one chart rendered as two tables, so each half scrolls sideways
-independently and the second half has no header).
+independently and the second half has no header) ·
+`panel-half-empty` (a panel's content stops well short of its width, so the card reads as broken —
+usually a `max-width` in `ch` on the copy with nothing else using the space).
 Console errors + network 4xx/5xx are collected separately (see step 4).
 
 ### 🚨 Never hand-edit an AUTO-GENERATED file
@@ -730,6 +732,69 @@ The five that were fixed, each with the general lesson:
 measurement — a rect comparison, a computed style, an ancestor query — not by reading the CSS. The
 same discipline found the real dock bug, which *looked* like the same false positive as the other
 `click-intercepted` hits until `overlapsDock` came back true with the element fully in view.
+
+### A panel that stops halfway across reads as broken, not as generous margin
+The mirror image of `content-escapes-card`. The homepage "Let's talk numbers" body was one
+left-aligned column with `max-width:54ch` on the copy — a correct measure for line length, and
+inside a ~1100px card it left **the entire right half empty**. Measured: content used **61% of the
+width, 335px sitting blank** at 1440px.
+
+**The fix is never "widen the paragraph."** 1100px of text is ~140ch and genuinely unreadable —
+that trades a layout bug for a typography one. Fill the width with LAYOUT and keep the measure:
+
+```css
+.thing__body{display:grid;grid-template-columns:1fr;column-gap:32px}
+@media(min-width:860px){
+  .thing__body{grid-template-columns:1fr 1fr}
+  .thing__body > .heading, .thing__body > .cta{grid-column:1 / -1}   /* span both */
+}
+```
+Two columns of copy, heading and button row spanning. Single column below the breakpoint, where
+one column of 54ch already fills the card.
+
+**Measure the INK, not the boxes — this is the part that matters.** The obvious check is "how wide
+are the children", and it is wrong: a block-level `<h2>` and a flex CTA row are full-width *by
+definition* even when their text ends a third of the way across. That check reported **100% used**
+on the very panel that looks half empty, and passed its own regression test. Walk the text nodes
+and take the rightmost client rect instead:
+
+```js
+const walk = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+let right = -Infinity;
+for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+  if (!n.textContent.trim()) continue;
+  const rng = document.createRange(); rng.selectNodeContents(n);
+  for (const q of rng.getClientRects()) if (q.width > 0) right = Math.max(right, q.right);
+}
+// then also max in any img/svg/input rects, and compare (right - contentLeft) / innerWidth
+```
+
+Only flag single-column stacks — a grid or flex ROW is already using its width on purpose.
+
+**Prove a new check fires before trusting a clean sweep.** Toggle the fix off in the page, re-run,
+confirm it reports, toggle back:
+```js
+el.style.display = 'block';        // the broken layout
+/* run probe -> expect a finding */
+el.style.display = '';             // the fix
+/* run probe -> expect none */
+```
+That two-way test is what caught the box-vs-ink mistake. A check added and never seen to fire is
+indistinguishable from a check that cannot fire.
+
+### Many tables ≠ one split chart: the signature is the MISSING header
+`chart-split-scrollers` reported `/audit` as "one chart rendered as 16 separate tables". It is not:
+the Pick Auditor draws one `.autbl` **per game card**, and each carries its own header. Sixteen
+charts, correctly.
+
+**A genuinely split chart leaves its continuation headerless** — that is what made the referee
+table's bottom half unreadable, and it is the discriminator. Only report when at least one table
+lacks a header row; a duplicated header across a split is `repeated-column-header`'s job instead.
+
+This is the second false positive from the same instinct — counting how many of a thing exist
+inside a container and calling that a split. The first was three separate panels on `/ncaaf/model`.
+Before flagging "one chart in N pieces", ask what makes the pieces *wrong* rather than merely
+plural.
 
 ### 🚨 A status indicator must READ the status, not assert it
 The chat widget's friend bubbles rendered `<span className="cw__bubav is-online">` — the online
