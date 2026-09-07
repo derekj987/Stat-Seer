@@ -10,4 +10,4 @@
 certifi==2026.7.22          # TLS cert bundle — see SSL_CERT_FILE handling in odds_client.py
 numpy==2.5.2                # cfb_power / cfb_ats rating fits
 pandas==3.0.5               # analysis scripts
-anthropic==1.0.0            # presser extraction (ingest/presser_collector.py)
+anthropic==1.3.0            # presser extraction (ingest/presser_collector.py)
