@@ -1407,6 +1407,11 @@ a.fauthor:hover{text-decoration:underline}
   text-decoration:none;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
 .flow__step.active{border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
 .flow__step:hover{border-color:var(--accent)}
+/* A step a sport has not built yet. Rendered as a dimmed non-link so the flow still reads as the
+   same three stages every sport has, without offering a click that 404s. :hover is excluded
+   deliberately — a hover affordance on something unclickable is a worse lie than the dimming. */
+.flow__step--soon{opacity:.45;cursor:default;border-style:dashed}
+.flow__step--soon:hover{border-color:var(--line)}
 .flow__n{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;
   background:var(--surface-2);font-size:13px;font-weight:800;color:var(--muted);flex:0 0 auto}
 .flow__step.active .flow__n{background:var(--accent);color:#fff}
@@ -3237,6 +3242,16 @@ a.snav__dfeat{display:block}
   align-items:baseline;border-top:1px solid var(--line);font-size:13px}
 /* passing table adds Home % / Road % → six stat columns instead of four */
 .pmtable--ha{min-width:1145px;max-width:1300px}
+/* MLB availability board. Five columns instead of football's nine — baseball's Stage A answers
+   "is he in, and where does he bat", not a stat line — but it reuses .pmrow--data so the cells,
+   gaps and header line up with the NFL and NCAAF boards rather than reading as a different table.
+   The player column keeps the 205px min from the football boards for the same reason: a name plus
+   "(SS, San Francisco Giants)" is long. */
+.pmtable--mlb{min-width:720px;max-width:980px}
+.pmtable--mlb .pmrow--data,
+.pmtable--mlb .pmrow--head{grid-template-columns:minmax(205px,1.7fr) 96px 96px minmax(0,1fr) 96px}
+.mlbin{color:var(--accent);font-weight:800}
+.mlbout{color:var(--muted);font-weight:700}
 .pmtable--ha .pmrow--data{grid-template-columns:minmax(205px,1.6fr) 74px repeat(6,minmax(0,1fr)) 104px}
 /* continuation row: a second market for the same player (e.g. a QB's passing-TD line under
    his passing-yards line). No top rule + tighter top padding so the two read as one block. */

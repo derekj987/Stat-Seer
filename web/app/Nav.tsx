@@ -24,12 +24,28 @@ export function WeekBadge({ week, note, tip, pin }: { week: number; note?: strin
 }
 
 /** The guided journey: analyze → read the context → find the best price. */
+/** Every sport lays out identically — Home / The Model / Context / Value Finder — so the routes
+ *  live in ONE table and the nav components read from it. Adding a sport is a row here.
+ *  MLB is live for The Model only; its Context and Value Finder routes exist in this table so the
+ *  flow renders the same three steps, and those pages say plainly what is not built yet rather
+ *  than the nav pretending they are missing. */
+export type Sport = "nfl" | "ncaaf" | "mlb";
+export const SPORT_PATHS: Record<Sport, { analyze: string; context: string; value: string }> = {
+  nfl:   { analyze: "/model",       context: "/considerations",       value: "/lines" },
+  ncaaf: { analyze: "/ncaaf/model", context: "/ncaaf/considerations", value: "/ncaaf/lines" },
+  // Empty string = not built yet. FlowSteps renders those as a dimmed, non-clickable step rather
+  // than a link to a 404 — the reader sees the same three-step flow every sport has, and sees
+  // honestly which parts of it exist for this one.
+  mlb:   { analyze: "/mlb/model",   context: "",                      value: "" },
+};
+
 export function FlowSteps({ active, base = "nfl" }: {
-  active: "analyze" | "context" | "value"; base?: "nfl" | "ncaaf";
+  active: "analyze" | "context" | "value"; base?: Sport;
 }) {
-  const hrefs = base === "ncaaf"
-    ? { analyze: "/ncaaf/model", context: "/ncaaf/considerations", value: "/ncaaf/lines" }
-    : { analyze: "/model", context: "/considerations", value: "/lines" };
+  // One table rather than a chain of ternaries — a fourth sport should be a row here, not another
+  // branch in every nav component. The three steps are the same everywhere by design: that
+  // sameness across sports IS the product.
+  const hrefs = SPORT_PATHS[base];
   const steps = [
     { key: "analyze", n: "1", label: "The Model", sub: "make your analysis", href: hrefs.analyze },
     { key: "context", n: "2", label: "Context", sub: "read the room", href: hrefs.context },
@@ -39,10 +55,17 @@ export function FlowSteps({ active, base = "nfl" }: {
     <nav className="flow" aria-label="How to use StatSeer">
       {steps.map((s, i) => (
         <span key={s.key} className="flow__item">
-          <a href={s.href} className={s.key === active ? "flow__step active" : "flow__step"}>
-            <span className="flow__n">{s.n}</span>
-            <span className="flow__l">{s.label}<span className="flow__sub">{s.sub}</span></span>
-          </a>
+          {s.href ? (
+            <a href={s.href} className={s.key === active ? "flow__step active" : "flow__step"}>
+              <span className="flow__n">{s.n}</span>
+              <span className="flow__l">{s.label}<span className="flow__sub">{s.sub}</span></span>
+            </a>
+          ) : (
+            <span className="flow__step flow__step--soon" aria-disabled="true">
+              <span className="flow__n">{s.n}</span>
+              <span className="flow__l">{s.label}<span className="flow__sub">not built yet</span></span>
+            </span>
+          )}
           {i < 2 && <span className="flow__arrow" aria-hidden="true">→</span>}
         </span>
       ))}
@@ -58,7 +81,7 @@ export function FlowSteps({ active, base = "nfl" }: {
 export const SPORTS = [
   { key: "nfl", label: "NFL", live: true, home: "/model" },
   { key: "ncaaf", label: "NCAAF", live: true, home: "/ncaaf/model" },
-  { key: "mlb", label: "MLB", live: false, home: "/mlb" },
+  { key: "mlb", label: "MLB", live: true, home: "/mlb/model" },
   { key: "nba", label: "NBA", live: false, home: "" },
   { key: "wnba", label: "WNBA", live: false, home: "" },
   { key: "soccer", label: "Soccer", live: false, home: "" },
@@ -309,10 +332,10 @@ export function MoreTable({ id, head, extra, noun, plr, cls, children }: {
 /** Sub-tabs inside The Model (Game Model · Player Model). Sits under the leftmost
  *  "The Model" flow step, so it left-aligns like the flow. */
 export function ModelSubnav({ active = "game", base = "nfl" }: {
-  active?: "game" | "player"; base?: "nfl" | "ncaaf";
+  active?: "game" | "player"; base?: Sport;
 }) {
-  const game = base === "ncaaf" ? "/ncaaf/model" : "/model";
-  const player = base === "ncaaf" ? "/ncaaf/model/players" : "/model/players";
+  const game = SPORT_PATHS[base].analyze;
+  const player = `${SPORT_PATHS[base].analyze}/players`;
   return (
     <nav className="subnav subnav--model" aria-label="The Model view">
       <a href={game} className={active === "game" ? "subnav__t active" : "subnav__t"}

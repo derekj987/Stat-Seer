@@ -234,8 +234,13 @@ def main(argv=None):
         posted = {p["id"] for p in r["lineup"]}
         for pid, f in sorted(features(hist[-WIN:], prev).items(),
                              key=lambda kv: -kv[1]["p_start"]):
+            # ONE card per matchup, not one per team. Keyed away @ home so both clubs' hitters
+            # land in the same card — the football boards show a game once, and MLB reading
+            # differently for no reason is exactly the inconsistency to avoid.
+            away = r["teamName"] if r["side"] == "away" else r["opp"]
+            home = r["opp"] if r["side"] == "away" else r["teamName"]
             out.append({
-                "game": f'{r["teamName"]} vs {r["opp"]}', "commence": r["commence"],
+                "game": f"{away} @ {home}", "commence": r["commence"],
                 "team": r["teamName"], "player": f["name"], "pos": f["pos"],
                 # If the lineup is already posted this is no longer a projection — say so rather
                 # than publishing a probability next to a known fact.
