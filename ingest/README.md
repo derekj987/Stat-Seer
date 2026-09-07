@@ -218,6 +218,7 @@ Every file is idempotent, so re-running one is safe if you are ever unsure.
 |---|---|---|
 | `cfb_depth_snapshots.sql` | Weekly NCAAF depth-chart snapshots | ✅ 23,676 rows |
 | `cfb_tailgate_buzz.sql` | CFB Fan Stock sentiment | ✅ 69 rows |
+| `mlb_snapshots.sql` | `mlb_odds_snapshots` + `mlb_prop_snapshots` (append-only) | ❌ **NOT RUN** — capture is blocked until it is |
 
 ---
 

@@ -1,0 +1,47 @@
+name: Capture MLB odds + props
+
+# MLB game lines and player props -> Supabase mlb_odds_snapshots / mlb_prop_snapshots.
+#
+# WHY. A book's number moves through the day and a snapshot of that movement exists only if taken
+# at the time. Historical odds are purchasable on the current plan, so this is not the absolute
+# cliff that practice trajectory was — but the live series is free, and an archive is not a
+# substitute for knowing what we saw when we saw it. There are ~3 weeks of the 2026 regular season
+# left, so this starts now rather than in spring.
+#
+# CADENCE. Baseball is daily, and props post roughly a day out and move until first pitch — unlike
+# football's weekly rhythm. Every 6 hours through the season catches morning posts, the afternoon
+# drift, and evening moves. All times UTC.
+#
+# COST. Measured, not estimated: ~18 credits per game per sweep plus 3 for the game lines. A
+# 15-game slate is ~273 a sweep, ~1,100 a day, ~33k a month — against ~5,000,000 remaining. Charged
+# per market RETURNED, so requesting markets a book does not carry is free, and a slate with no
+# props posted costs nothing.
+#
+# The season window is Mar–Oct. Off-season runs would find no games in the window and exit 0
+# without spending anything, but the cron is scoped anyway so the Actions log stays readable.
+
+on:
+  schedule:
+    - cron: "0 */6 * 3-10 *"   # every 6h, March–October (regular season + playoffs)
+  workflow_dispatch: {}         # manual "Run workflow"
+
+concurrency:
+  group: capture-mlb
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi -c requirements.txt
+      - name: Capture MLB -> Supabase
+        env:
+          ODDS_API_KEY:         ${{ secrets.ODDS_API_KEY }}
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python mlb_capture.py --supabase --within-days 2 --max-events 20
