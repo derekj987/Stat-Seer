@@ -279,9 +279,15 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                                   title={r.matchup === "toss"
                                     ? `Context, not a pick: this opponent handled this about like an average defence last season. Nothing to read into either way.`
                                     : `Context, not a pick: this opponent gave up ${r.matchup === "good" ? "more" : "less"} than an average defence last season. ${MATCHUP_SIZE[base]} Measured on how much a player beats his OWN baseline — real, small, and deliberately NOT built into our projection.`}>
-                                  {r.matchup === "good" ? `▲ soft ${defenceLabel(r.market, r.pos)}`
-                                    : r.matchup === "bad" ? `▼ tough ${defenceLabel(r.market, r.pos)}`
-                                    : `= average ${defenceLabel(r.market, r.pos)}`}
+                                  {/* NO ARROW. The row already carries a ▲/▼ on the "% over" cell,
+                                      which is a claim about the PLAYER. A second arrow on a pill
+                                      about the OPPONENT put a ▼ and a ▲ side by side meaning
+                                      different things — the same contradiction the wording fixed,
+                                      re-introduced by the glyph. "tough"/"soft" plus the pill's
+                                      red/green already say it. */}
+                                  {r.matchup === "good" ? `soft ${defenceLabel(r.market, r.pos)}`
+                                    : r.matchup === "bad" ? `tough ${defenceLabel(r.market, r.pos)}`
+                                    : `average ${defenceLabel(r.market, r.pos)}`}
                                 </span>
                               )}</>}</span>
                             {/* Shown on EVERY row (not blanked on continuations) — it's what

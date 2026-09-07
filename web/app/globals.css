@@ -3228,11 +3228,16 @@ a.snav__dfeat{display:block}
 .pmtable--data{max-width:880px;min-width:760px}
 /* player flexes, team is compact, the four stat cols are equal width with an even gap —
    identical on every row incl. the header, so columns line up on phone and desktop alike. */
-.pmrow--data{display:grid;grid-template-columns:minmax(150px,1.6fr) 74px repeat(4,minmax(0,1fr)) 104px;gap:16px;
+/* Player column min raised 150 -> 205px. Measured: the longest line on the NCAAF board,
+   "Ashton Daniels (QB1, Florida St)", is 223px of text and the column resolved to 158px, so
+   an already-abbreviated name still wrapped to two lines. The state word now shortens too
+   (Florida St -> Fla St, see lib/ncaafAbbrev), and the column has room for what is left.
+   The tables already scroll horizontally, so the extra width costs nothing but scroll. */
+.pmrow--data{display:grid;grid-template-columns:minmax(205px,1.6fr) 74px repeat(4,minmax(0,1fr)) 104px;gap:16px;
   align-items:baseline;border-top:1px solid var(--line);font-size:13px}
 /* passing table adds Home % / Road % → six stat columns instead of four */
-.pmtable--ha{min-width:1090px;max-width:1240px}
-.pmtable--ha .pmrow--data{grid-template-columns:minmax(150px,1.6fr) 74px repeat(6,minmax(0,1fr)) 104px}
+.pmtable--ha{min-width:1145px;max-width:1300px}
+.pmtable--ha .pmrow--data{grid-template-columns:minmax(205px,1.6fr) 74px repeat(6,minmax(0,1fr)) 104px}
 /* continuation row: a second market for the same player (e.g. a QB's passing-TD line under
    his passing-yards line). No top rule + tighter top padding so the two read as one block. */
 .pmrow--cont{border-top:0}
