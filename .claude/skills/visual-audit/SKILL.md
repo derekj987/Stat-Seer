@@ -423,6 +423,41 @@ Grep for the shape after any CSS fix that "didn't take":
 grep -n "^\.block" web/app/globals.css   # is the --modifier line number BELOW the base's?
 ```
 
+### When a guard blocks YOUR fix, check whether the fix was worth making
+A repair for the 14,007 mis-stamped `prop_snapshots` rows was refused by the database:
+
+```
+ERROR: P0001: append-only table: UPDATE on prop_snapshots is not permitted
+CONTEXT: PL/pgSQL function block_mutation() line 3 at RAISE
+```
+
+The instinct is to look for a way around it — disable the trigger, grant UPDATE, re-enable. Resist
+it. **A guarantee is worth exactly as much as the number of times it has been bypassed**, and "we
+were sure this time" is how one dies. The append-only tables (`prediction_ledger`,
+`practice_reports`, `pressers`, `odds_snapshots`, `prop_snapshots`) exist so captured market data
+and published predictions cannot be edited after the fact — which is the entire trust premise.
+
+Then the second half, which is the actual lesson: **the block bought a second look, and the second
+look said the repair was pointless.**
+
+| 2026 prop rows | rows | keys | keys with >1 observation |
+|---|---|---|---|
+| legacy (`snapshot_at` = kickoff) | 14,007 | 13,295 | **5%** |
+| healthy (post-fix) | 19,743 | 10,431 | **89%** |
+
+CLV needs a *series*. The legacy rows have one observation per key because the dedupe collapsed
+them; relabelling their timestamps would have given accurate times to data with no movement in it.
+I had told Derek those rows would "become usable for CLV" — they would not, and I only checked
+because the trigger made me.
+
+**The rule: when an integrity guard refuses a change, treat it as a review, not an obstacle.**
+Re-derive what the change buys before deciding how to get past it. Twice now the answer has been
+"less than I claimed".
+
+Read-side resolution here, costing nothing: `collected_at` held the true capture time on every row
+all along, so anything needing a real capture time reads that. `snapshot_at` stays the shared sweep
+key that `the_board.py` groups on.
+
 ### A fallback that becomes an identity is a bug, not a default
 `handle_new_user()` names a new profile from the signup metadata and falls back to
 `'member_' || substr(id::text,1,8)`. The email form collects a username, so it never fires. **Google

@@ -221,6 +221,41 @@ Every file is idempotent, so re-running one is safe if you are ever unsure.
 
 ---
 
+## Deliberately NOT repaired: the legacy prop_snapshot timestamps
+
+A repair was written for the 14,007 prop rows whose `snapshot_at` holds the game's kickoff time
+(the props_client fallback bug). It was never run, and should not be. Two reasons, in order:
+
+**1. The database refused it, correctly.** `prop_snapshots` is append-only — `block_mutation()`
+plus an absent UPDATE grant, belt and braces, the same protection as `prediction_ledger`:
+
+    ERROR: P0001: append-only table: UPDATE on prop_snapshots is not permitted
+
+That guard exists so captured market data cannot be edited after the fact. A guarantee is worth
+exactly as much as the number of times it has been bypassed, and "we were sure this time" is how
+such guarantees die.
+
+**2. The repair bought almost nothing anyway** — which only became clear because the block forced
+a second look. Measured on the 2026 season:
+
+| | rows | keys | keys with >1 observation |
+|---|---|---|---|
+| legacy (snapshot_at = kickoff) | 14,007 | 13,295 | **5%** |
+| healthy (post-fix) | 19,743 | 10,431 | **89%** |
+
+CLV and line-movement need a *series* — at least two observations of the same
+(game, book, market, player, side, line). The legacy rows have one, because the dedupe key starts
+with `snapshot_at` and every capture of a game collapsed onto the same value. Relabelling their
+timestamps would have given accurate times to a set with no movement in it. The history is gone;
+correcting the labels does not bring it back.
+
+**What to do instead:** anywhere a true capture time is needed, read `collected_at`, which was
+correct on every row all along. `snapshot_at` remains the shared sweep key, which is what
+`the_board.py` groups on.
+
+The fix that mattered was the code, and it is working: three sweeps since it shipped produced more
+rows than the entire prior season, at 89% multi-observation against 5%.
+
 ## ⚠️ `push_subscriptions.sql` has never been run
 
 The table does not exist (`PGRST205`), but the app is fully wired for Web Push —
