@@ -611,8 +611,13 @@ CFB_MATCHUP_LO, CFB_MATCHUP_HI = 0.94, 1.06
 # our market -> the defensive category that matters for it
 MARKET_GRP = {"pass_yds": "passing", "pass_tds": "passing",
               "rush_yds": "rushing", "rec_yds": "receiving", "receptions": "receiving"}
-# anytime TD spans both, so it follows the player's depth-chart position instead
-POS_GRP = {"QB": "passing", "RB": "rushing", "FB": "rushing", "WR": "receiving", "TE": "receiving"}
+# anytime TD spans both, so it follows the player's depth-chart position instead.
+# QB is "rushing", NOT "passing": a quarterback's ANYTIME touchdown is one he runs in himself --
+# throwing one does not count. Judging that by the opponent's pass defence was the wrong
+# denominator, and it showed on the board as a QB carrying the same tag on his rushing-TD prop as
+# on his passing props. Kevin Jennings vs Florida State was tagged off FSU's pass defence on all
+# three of his markets, including the one that is purely a rushing bet.
+POS_GRP = {"QB": "rushing", "RB": "rushing", "FB": "rushing", "WR": "receiving", "TE": "receiving"}
 
 
 def defence_by_category(payloads, meta):

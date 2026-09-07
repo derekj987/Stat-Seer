@@ -17,6 +17,7 @@ import { weekProps } from "@/lib/props";
 import { cfbWeekProps } from "@/lib/cfbProps";
 import { etToday, groupByGameDay } from "@/lib/gameDays";
 import { DayHeader } from "./DayHeader";
+import { abbrevTeam } from "@/lib/ncaafAbbrev";
 
 export interface PlayerCat {
   key: string;
@@ -46,6 +47,23 @@ const MATCHUP_SIZE: Record<"nfl" | "ncaaf", string> = {
   nfl: "Worth about +5.6 yards for a running back, +3.6 for a tight end and +1.0 for a receiver.",
   ncaaf: "Worth about 10.8 yards on passing, 5.4 on rushing and 1.8 on receiving.",
 };
+
+// WHICH DEFENCE the tag is about. It was labelled "good/bad matchup" under the player's name,
+// which reads as a verdict on HIM — and therefore as a contradiction whenever our projection went
+// over on the same row. It never was that: it is one fact about the OPPONENT's defence last
+// season, and it is deliberately not an input to the projection. So the label now names the thing
+// it describes, and the two numbers stop looking like they disagree.
+// Mirrors MARKET_GRP / POS_GRP in cfb_player_proj.py — if those change, change these together or
+// the pill will describe a different defence than the one it was computed from.
+const MARKET_D: Record<string, string> = {
+  pass_yds: "pass D", pass_tds: "pass D",
+  rush_yds: "run D", rec_yds: "pass D", receptions: "pass D",
+};
+const POS_D: Record<string, string> = {
+  QB: "run D", RB: "run D", FB: "run D", WR: "pass D", TE: "pass D",
+};
+const defenceLabel = (market: string, pos?: string | null) =>
+  MARKET_D[market] ?? POS_D[pos ?? ""] ?? "defence";
 
 export default async function PlayerModelView({ base, cat, week }: { base: "nfl" | "ncaaf"; cat: string; week: number }) {
   const active = playerCatByKey(cat);
@@ -88,6 +106,14 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
   }
   // Lead with the soonest game so today's matchups are up top (games with no kickoff sort last).
   games.sort((a, b) => (gameKick[a] ?? "9999").localeCompare(gameKick[b] ?? "9999"));
+  // College names are long enough to wrap the player cell and the game header ("Florida State"
+  // pushed "(QB1, Florida State)" onto two lines). lib/ncaafAbbrev already shortens them for the
+  // NCAAF boards; this view had simply never used it.
+  // DISPLAY ONLY — `r.game` is also the React key, the moreId, and the PropAdd payload, so the
+  // abbreviation is applied where it is rendered and nowhere else. NFL rows already carry short
+  // codes (NE, SEA), so they are left untouched.
+  const shortTeam = (t: string) => (base === "ncaaf" ? abbrevTeam(t) : t);
+  const shortGame = (g: string) => g.split(" @ ").map(shortTeam).join(" @ ");
   const { today: todayEt, tomorrow: tomorrowEt } = etToday();
   const LEAD = 4;   // rows shown before "see more"
   // Per-row unit — the passing category mixes markets (yards + TDs); anytime-TD is a %.
@@ -166,7 +192,7 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                 <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
                 {grp.items.map((g) => (
               <details className="pmgame" key={g}>
-                <summary className="pmgame__h">{g}<span className="pmgame__chev" aria-hidden="true">▾</span></summary>
+                <summary className="pmgame__h">{shortGame(g)}<span className="pmgame__chev" aria-hidden="true">▾</span></summary>
                 <div className="pmgame__body">
                 <ScrollHint />
                 {sectionsFor(g).map((sec, si) => {
@@ -240,7 +266,7 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                         const slot = playerSlot(r.player, base) ?? r.pos;
                         return (
                           <div className={`pmrow pmrow--data${isMore ? " hb-row--more" : ""}${cont ? " pmrow--cont" : ""}`} role="row" key={`${r.player}-${r.market}`}>
-                            <span className="pmcell pmcell--player">{cont ? "" : <>{r.player}<span className="pmslot"> ({[slot, r.team].filter(Boolean).join(", ")})</span>
+                            <span className="pmcell pmcell--player">{cont ? "" : <>{r.player}<span className="pmslot"> ({[slot, shortTeam(r.team)].filter(Boolean).join(", ")})</span>
                               {/* Matchup, not "spot". The old pill was built on envDelta — the change
                                   in a team's implied total vs the player's prior-season norm — which
                                   measured corr +0.0053 against how much a player beat his OWN
@@ -253,8 +279,9 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                                   title={r.matchup === "toss"
                                     ? `Context, not a pick: this opponent handled this about like an average defence last season. Nothing to read into either way.`
                                     : `Context, not a pick: this opponent gave up ${r.matchup === "good" ? "more" : "less"} than an average defence last season. ${MATCHUP_SIZE[base]} Measured on how much a player beats his OWN baseline — real, small, and deliberately NOT built into our projection.`}>
-                                  {r.matchup === "good" ? "▲ good matchup"
-                                    : r.matchup === "bad" ? "▼ bad matchup" : "= toss-up matchup"}
+                                  {r.matchup === "good" ? `▲ soft ${defenceLabel(r.market, r.pos)}`
+                                    : r.matchup === "bad" ? `▼ tough ${defenceLabel(r.market, r.pos)}`
+                                    : `= average ${defenceLabel(r.market, r.pos)}`}
                                 </span>
                               )}</>}</span>
                             {/* Shown on EVERY row (not blanked on continuations) — it's what
