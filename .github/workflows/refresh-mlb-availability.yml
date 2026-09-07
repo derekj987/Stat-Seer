@@ -1,0 +1,75 @@
+name: Refresh MLB availability
+
+# Rebuilds web/lib/mlbAvailability.ts (the /mlb/model board), then commits it — Vercel auto-deploys.
+#
+# WHAT IT REBUILDS. Stage A: P(in tonight's starting lineup) + projected batting slot, for every
+# candidate on the upcoming slate. Features come from each team's prior 30 games, so the file is
+# stale the moment a night of baseball is played — unlike football's weekly rhythm, this genuinely
+# needs a daily run.
+#
+# CADENCE. 15:00 UTC = 11am ET, which is after the previous night's games have all gone Final (the
+# west-coast late game ends ~06:00 UTC) and before lineups start posting for the evening slate
+# (~3h before first pitch, so ~20:00 UTC for a 7pm ET game). That window is exactly when the board
+# is most useful: last night is fully counted, tonight is still a projection.
+#
+# COST. None. statsapi.mlb.com is public and keyless, and completed days are cached on disk — but
+# data/ is gitignored, so a fresh runner refetches the season each run (~180 calls, a couple of
+# minutes). Cached across runs below to keep it quick; the key is pinned to the season so a new
+# year invalidates it naturally.
+#
+# Mar–Oct only. Off-season the script would find no upcoming games and refuse to write, but the
+# cron is scoped so the Actions log stays readable. All times UTC.
+
+on:
+  schedule:
+    - cron: "0 15 * 3-10 *"   # daily 11am ET, March–October
+  workflow_dispatch: {}        # manual "Run workflow"
+
+concurrency:
+  group: refresh-mlb-availability
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write   # commit the regenerated board data
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so the rebase-before-push works cleanly
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi -c requirements.txt
+
+      # Completed days never change, so cache them rather than refetching ~180 dates every run.
+      - name: Cache MLB lineup days
+        uses: actions/cache@v4
+        with:
+          path: data/mlb_lineups
+          key: mlb-lineups-2026-${{ github.run_id }}
+          restore-keys: |
+            mlb-lineups-2026-
+
+      - name: Rebuild MLB availability
+        run: python mlb_availability.py
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- web/lib/mlbAvailability.ts; then
+            echo "No change — nothing to commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/lib/mlbAvailability.ts
+          git commit -m "chore: refresh MLB availability (auto)"
+          # Several bots push this branch; retry rebase+push a few times before failing.
+          for i in 1 2 3 4 5; do
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || git rebase --abort || true
+            if git push; then echo "pushed on attempt $i"; exit 0; fi
+            echo "push attempt $i lost the race; retrying..."; sleep $((RANDOM % 5 + 2))
+          done
+          echo "push still rejected after 5 attempts"; exit 1
