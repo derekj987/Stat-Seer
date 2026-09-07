@@ -208,13 +208,21 @@ def main(argv=None):
         if args.max_events:
             events = events[:args.max_events]
         print(f"LIVE  {len(events)} event(s) to query  markets={args.markets}")
+        # ONE capture timestamp for the whole sweep, used whenever the API omits bookmaker
+        # `last_update`. This used to fall back to the game's KICKOFF time, which was wrong twice
+        # over: it stamped rows with a capture time in the future, and because snapshot_at is the
+        # first column of the dedupe key, every later capture of the same game collapsed onto the
+        # same key. Price moves at an unchanged line were silently dropped (price_american is not
+        # in the key), so 2026 kept ~14k prop rows where the game-line table kept 648k.
+        # A snapshot time answers "when did we LOOK", never "when does the game start".
+        run_captured_at = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
         for e in events:
             status, data, credit, remaining = fetch_event_props(key, e["id"], args.markets, args.regions)
             total_credits += int(credit) if credit and credit.isdigit() else 0
             if status != 200:
                 skipped.append(f"{e.get('away_team')}@{e.get('home_team')}: HTTP {status}")
                 continue
-            rows, skip = parse_event_props(data, event_snapshot_at(data) or e["commence_time"],
+            rows, skip = parse_event_props(data, event_snapshot_at(data) or run_captured_at,
                                            args.reason, week_map)
             if skip:
                 skipped.append(skip)
@@ -236,6 +244,21 @@ def main(argv=None):
               f"line={r['line']} price={r['price_american']} @ {r['book']}")
     if skipped:
         print(f"  skipped ({len(skipped)}): {skipped[:6]}")
+
+    # A capture time in the future is impossible, so it means snapshot_at got something that is
+    # not a capture time -- which is exactly how the kickoff-time fallback went unnoticed for a
+    # whole season while silently deduping away every price move. Refuse to write rather than
+    # append more rows that look fine and quietly corrupt CLV. Small clock skew is tolerated.
+    now = datetime.now(timezone.utc)
+    future = [r for r in all_rows
+              if datetime.fromisoformat(r["snapshot_at"].replace("Z", "+00:00")) > now + timedelta(minutes=5)]
+    if future:
+        bad = future[0]
+        print(f"ERROR: {len(future)} of {len(all_rows)} rows have snapshot_at in the FUTURE "
+              f"(e.g. {bad['snapshot_at']} for a game at {bad['commence_time']}). "
+              f"snapshot_at must be when we LOOKED, not when the game starts. Refusing to write.",
+              file=sys.stderr)
+        return 1
 
     if not args.write:
         print("\nDRY RUN — nothing written. Add --write to insert into prop_snapshots.")
