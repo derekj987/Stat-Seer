@@ -29,17 +29,19 @@ export const revalidate = 300;
 const BRIER = { model: 0.16102, persistence: 0.22894, gain: 29.7 };
 // Held out over 925 starts; see mlb_strikeouts.py for the full ablation.
 const MAE = { model: 1.7644, base: 1.8213 };
+// Tonight's starters first; the rest of the two-day window folds away.
+const K_CAP = 12;
 
 const pct = (p: number) => `${Math.round(p * 100)}%`;
 
 /** One player row. Reuses the player-model cell classes so the MLB board's columns line up with
  *  the football boards' rather than inventing a second table language. */
-function Row({ r, cont }: { r: MlbAvail; cont: boolean }) {
+function Row({ r, cont, more }: { r: MlbAvail; cont: boolean; more?: boolean }) {
   // Once a lineup is posted this is a FACT, not a projection. Publishing "83%" beside a known
   // answer would be the same failure as an arrow that contradicts the number next to it.
   const known = r.lineupPosted;
   return (
-    <div className="pmrow pmrow--data" role="row">
+    <div className={`pmrow pmrow--data${more ? " hb-row--more" : ""}`} role="row">
       <span className="pmcell pmcell--player">
         {cont ? "" : <>{r.player}<span className="pmslot"> ({r.pos ?? "—"}, {r.team})</span></>}
       </span>
@@ -116,11 +118,17 @@ export default async function Page() {
               <div key={grp.key}>
                 <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
                 {grp.items.map((g) => {
-                  const rows = byGame[g].slice(0, 14);
+                  const rows = byGame[g].slice(0, 18);
+                  // A lineup IS nine. Show that many and fold the rest of the candidate pool
+                  // behind the standard control — an 18-row wall per game buried every card
+                  // below it, and the probe now flags exactly this.
+                  const CAP = 9;
+                  const moreId = `mlb-lu-${g.replace(/[^a-z0-9]/gi, "")}`;
                   return (
                     <details className="pmgame" key={g} open>
                       <summary className="pmgame__h">{g}<span className="pmgame__chev" aria-hidden="true">▾</span></summary>
-                      <div className="pmgame__body">
+                      <div className="pmgame__body hb-moretbl">
+                        <input type="checkbox" id={moreId} className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
                         <div className="pmscroll">
                           <div className="pmtable pmtable--mlb" role="table">
                             <div className="pmrow pmrow--head" role="row">
@@ -128,11 +136,18 @@ export default async function Page() {
                               <span>batting slot</span><span>recent</span>
                             </div>
                             {rows.map((r, i) => (
-                              <Row key={`${r.player}-${r.team}`} r={r}
+                              <Row key={`${r.player}-${r.team}`} r={r} more={i >= CAP}
                                 cont={i > 0 && rows[i - 1].player === r.player} />
                             ))}
                           </div>
                         </div>
+                        {rows.length > CAP && (
+                          <label htmlFor={moreId} className="hb-moretbl__sum">
+                            <span className="hb-more__chev" aria-hidden="true">▸</span>
+                            <span className="hb-moretbl__more">Show {rows.length - CAP} more candidate{rows.length - CAP === 1 ? "" : "s"}</span>
+                            <span className="hb-moretbl__less">Show fewer</span>
+                          </label>
+                        )}
                       </div>
                     </details>
                   );
@@ -169,16 +184,19 @@ export default async function Page() {
           {MLB_K.length === 0 ? (
             <p className="foot">No probable starters posted yet for the coming slate.</p>
           ) : (
+            <div className="hb-moretbl">
+            <input type="checkbox" id="mlb-k-more" className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
             <div className="pmscroll">
               <div className="pmtable pmtable--mlbk" role="table">
                 <div className="pmrow pmrow--head" role="row">
                   <span>pitcher</span><span>opponent</span><span>book line</span>
                   <span>our proj</span><span>K rate</span><span>starts</span>
                 </div>
-                {MLB_K.map((r) => {
+                {MLB_K.map((r, i) => {
                   const bk = lines.get(norm(r.pitcher));
                   return (
-                    <div className="pmrow pmrow--data" role="row" key={`${r.pitcher}-${r.game}`}>
+                    <div className={`pmrow pmrow--data${i >= K_CAP ? " hb-row--more" : ""}`}
+                      role="row" key={`${r.pitcher}-${r.game}`}>
                       <span className="pmcell pmcell--player">
                         {r.pitcher}<span className="pmslot"> ({r.team})</span>
                       </span>
@@ -191,6 +209,14 @@ export default async function Page() {
                   );
                 })}
               </div>
+            </div>
+            {MLB_K.length > K_CAP && (
+              <label htmlFor="mlb-k-more" className="hb-moretbl__sum">
+                <span className="hb-more__chev" aria-hidden="true">▸</span>
+                <span className="hb-moretbl__more">Show {MLB_K.length - K_CAP} more starter{MLB_K.length - K_CAP === 1 ? "" : "s"}</span>
+                <span className="hb-moretbl__less">Show fewer</span>
+              </label>
+            )}
             </div>
           )}
         </div>

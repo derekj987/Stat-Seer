@@ -746,6 +746,39 @@ Two findings from that first live pass:
   and breakpoint are one arithmetic chain (see the rails section). Shortening the label is the safe
   change, and it is Derek's call.
 
+### 🚨 A check bound to a CLASS NAME only finds the boards you already thought of
+Derek: *"I'm already noticing the MLB sections have no dropdowns. Would this be caught in our audit
+skill?"* The answer was no, and the reason is the shape of the check, not the threshold.
+
+`uncapped-long-list` selected `.propq__list, [class*='__list']`. Football's boards happen to use
+that naming; the MLB panels are tables of `.pmrow--data`, so **210 and 53 uncapped rows sailed
+through a probe reporting zero findings**. A check written against the markup you had is a check
+that goes quiet exactly when you build something new.
+
+**Rewritten structurally.** A "long list" is any container whose children are mostly one repeated
+class — that is what a row list IS, whatever it is called:
+
+```js
+const counts = new Map();
+for (const k of kids) { const c = k.getAttribute("class") || k.tagName;
+  counts.set(c, (counts.get(c) || 0) + 1); }
+const top = Math.max(...counts.values());
+if (top / kids.length >= 0.7 && top > 8) longLists.add(el);   // header may differ
+```
+
+Two mistakes on the way there, both worth keeping:
+
+1. **The signature must be the MODAL child class, not `kids[0]`.** The first child of a board is
+   the HEADER row, whose class differs from every data row beneath it — so a 54-row table scored
+   1/54 and passed. The fixed check still reported clean on a page with 53 uncapped rows on it.
+2. **"Is it capped?" must walk ANCESTORS, not just `parentElement`.** The `hb-moretbl` checkbox
+   usually sits a level or two above the table (checkbox wraps scroller wraps table), so a
+   correctly-capped board was still flagged. Walk up ~4 levels rather than assuming one shape.
+
+**Test any new check in both directions before believing a clean sweep** — cap the board, confirm
+silence; strip the control with `document.querySelectorAll('.hb-moretbl__chk').forEach(c=>c.remove())`,
+confirm it returns. Both of the above passed a one-way test.
+
 ### ⚠️ A probe that cries wolf buries the real bug
 One audit produced **17 findings across 5 pages; 16 were false positives** — and the one real bug
 (the dock above) was sitting in the middle of them. Tuning the checks was most of the work, and it

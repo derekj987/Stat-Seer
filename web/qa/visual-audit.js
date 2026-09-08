@@ -564,18 +564,49 @@
   // Boards cap a long list and hide the tail behind .hb-showmore. An uncapped list runs the card to
   // full length and buries everything below it. Player-prop markets cap at 3 PLAYERS (not rows) —
   // counted in players because a player usually occupies two rows, his Over and his Under.
-  for (const list of document.querySelectorAll(".propq__list, [class*='__list']")) {
+  // STRUCTURAL, not selector-bound. This used to match only `[class*='__list']`, which meant it
+  // caught .propq__list and missed every board built as a table of .pmrow--data — the MLB lineup
+  // and strikeout panels shipped 210 and 53 uncapped rows and this check said nothing. Derek
+  // spotted it by eye, which is exactly the job the probe is supposed to take over.
+  // A "long list" is now ANY container holding many sibling elements that share a class: that is
+  // what a repeated row IS, whatever the class happens to be called.
+  const longLists = new Set();
+  for (const el of document.querySelectorAll("div,ul,ol,tbody,section")) {
+    const kids = [...el.children].filter(vis);
+    if (kids.length <= 8) continue;
+    // The signature is the MOST COMMON child class, not the first child's. Taking kids[0] read the
+    // HEADER row of a table — whose class differs from every data row beneath it — so a 54-row
+    // board scored 1/54 and passed. That is how this check reported clean on a page with 53
+    // uncapped rows on it.
+    const counts = new Map();
+    for (const k of kids) {
+      const c = k.getAttribute("class") || k.tagName;
+      counts.set(c, (counts.get(c) || 0) + 1);
+    }
+    const top = Math.max(...counts.values());
+    // A header or footer row is allowed to differ; 70% of children sharing one class still means
+    // "this is a list of rows".
+    if (top / kids.length >= 0.7 && top > 8) longLists.add(el);
+  }
+  // Keep only the INNERMOST container of each nest, so one long table is not reported once per
+  // ancestor as well.
+  for (const list of longLists) {
     if (cap(findings, "uncapped-long-list")) break;
-    if (!vis(list)) continue;
+    if ([...longLists].some((o) => o !== list && list.contains(o))) continue;
     const items = [...list.children].filter(vis);
-    if (items.length <= 8) continue;                    // short lists need no control
     // A horizontally-scrolling picker is not a "long list" — the week nav (18 weeks), the sport
     // strip and the category pills are meant to be swiped, and a "show more" on them would be
     // absurd. Skip a list that is inside a <nav> or that scrolls sideways on purpose.
     if (list.closest("nav") || /auto|scroll/.test(getComputedStyle(list).overflowX)) continue;
-    // A dropdown anywhere in this list's own block counts as capped.
-    const block = list.parentElement;
-    if (block && block.querySelector(".hb-showmore, .hb-more, .hb-moretbl__chk")) continue;
+    // A dropdown ABOVE this list counts as capped. Checking only list.parentElement was too
+    // narrow: the hb-moretbl checkbox usually sits a level or two up (the scroller wraps the
+    // table, the checkbox wraps the scroller), so a correctly-capped board still reported
+    // uncapped. Walk up a few levels instead of assuming one shape of markup.
+    let capped = false;
+    for (let a = list.parentElement, d = 0; a && d < 4 && !capped; a = a.parentElement, d++) {
+      if (a.querySelector(".hb-showmore, .hb-more, .hb-moretbl__chk")) capped = true;
+    }
+    if (capped) continue;
     add("uncapped-long-list", "low", list,
       `${items.length} rows rendered with no "show more" control — should this cap behind the standard dropdown?`);
   }
