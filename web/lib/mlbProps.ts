@@ -84,9 +84,13 @@ export const strikeoutLines = () => propLines("pitcher_strikeouts");
 
 /** {normalised player -> de-vigged book probability of the OVER}.
  *
- *  For a 0.5-line market ("will he record a hit") the LINE carries no information — it is 0.5 on
- *  every row. What the book is actually saying lives in the PRICE, so the board must compare our
- *  percentage against theirs, not against "0.5". Same shape as the football props board.
+ *  For the 0.5 line ("will he record a hit") the information lives in the PRICE, not the number,
+ *  so the board compares our percentage against theirs rather than against "0.5". Same shape as
+ *  the football props board.
+ *
+ *  This comment used to claim the line "is 0.5 on every row". It is not — the same market carries
+ *  a 1.5 line too, and believing that sentence is what put P(2+ hits) in a column labelled as the
+ *  chance of a hit. Filter on the line explicitly; never assume a market has only one.
  *
  *  De-vigged against the Under so the two sides sum to 1 — that is the Pick Auditor's arithmetic,
  *  and it is arithmetic, never an edge claim. */
@@ -94,11 +98,21 @@ export async function propBookProb(market: string): Promise<Map<string, number>>
   const rows = await pgAll(
     `?market=eq.${market}&select=player,side,line,price_american,book,snapshot_at&order=snapshot_at.desc`,
   );
-  // newest price per (player, book, side)
+  // 🚨 THE LINE IS PART OF THE QUESTION. `batter_hits` carries BOTH the 0.5 line ("will he record
+  // a hit") and the 1.5 line ("will he get two"), 399 of 5,845 rows at 1.5. Keying only on
+  // (player, book, side) let whichever line a book happened to post most recently win — so Yandy
+  // Diaz showed 36% against our 70%, because 36% was his de-vigged P(2+ hits) being compared with
+  // our P(1+ hit). Derek caught it by eye: his team-mates read 64-65% and he read 36%.
+  //
+  // Two failures in one: the wrong QUESTION was displayed, and an Over 1.5 could be paired with an
+  // Under 0.5 from the same book (Chandler Simpson had all four) and "de-vigged" into nonsense.
+  // Key on the line, and keep only the line this board is actually about.
+  const WANT_LINE = 0.5;
   const latest = new Map<string, number>();
   for (const r of rows) {
     if (!r.player || r.price_american === null || !r.side) continue;
-    const k = `${norm(r.player)}|${r.book}|${r.side.toLowerCase()}`;
+    if (Number(r.line) !== WANT_LINE) continue;
+    const k = `${norm(r.player)}|${r.book}|${Number(r.line)}|${r.side.toLowerCase()}`;
     if (!latest.has(k)) latest.set(k, Number(r.price_american));
   }
   // 🚨 NEVER mix a de-vigged price with a raw one in the same median. The hold on these props is
@@ -112,9 +126,10 @@ export async function propBookProb(market: string): Promise<Map<string, number>>
   const twoSided = new Map<string, number[]>();
   const oneSided = new Map<string, number[]>();
   for (const [k, over] of latest) {
-    const [p, book, side] = k.split("|");
+    const [p, book, line, side] = k.split("|");
     if (side !== "over" && side !== "yes") continue;
-    const under = latest.get(`${p}|${book}|under`) ?? latest.get(`${p}|${book}|no`);
+    // Same player, same book, SAME LINE — never across lines.
+    const under = latest.get(`${p}|${book}|${line}|under`) ?? latest.get(`${p}|${book}|${line}|no`);
     if (under === undefined) (oneSided.get(p) ?? oneSided.set(p, []).get(p)!).push(implied(over));
     else (twoSided.get(p) ?? twoSided.set(p, []).get(p)!).push(deVig(over, under));
   }
@@ -122,9 +137,9 @@ export async function propBookProb(market: string): Promise<Map<string, number>>
   // price can be brought onto the same footing instead of being dropped or trusted raw.
   const holds: number[] = [];
   for (const [k, over] of latest) {
-    const [p, book, side] = k.split("|");
+    const [p, book, line, side] = k.split("|");
     if (side !== "over" && side !== "yes") continue;
-    const under = latest.get(`${p}|${book}|under`) ?? latest.get(`${p}|${book}|no`);
+    const under = latest.get(`${p}|${book}|${line}|under`) ?? latest.get(`${p}|${book}|${line}|no`);
     if (under !== undefined) holds.push(implied(over) + implied(under) - 1);
   }
   holds.sort((a, b) => a - b);

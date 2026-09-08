@@ -300,6 +300,40 @@ right (we say home by >1 ⇒ actual averages +1.19; away by >1 ⇒ −1.10). The
 *timid*, not too bold, which is the 0.0% team-quality finding seen from the other side. Shrinking
 on the strength of the screenshot would have made a correct model worse to fix a broken column.
 
+### 🚨 A market can carry MORE THAN ONE LINE — key on it, or you publish the wrong question
+Derek, reading the board: *"Is that Yandy Diaz number really accurate? The book has him at 36% and
+we have him at 70%."* It was not accurate, and the tell was in the same screenshot: his two
+team-mates read **64%** and **65%** while he read **36%** — a complement, which is what a
+mismatched side or line looks like.
+
+`batter_hits` carries **both** the 0.5 line ("will he record a hit") and the 1.5 line ("will he get
+two") — 399 of 5,845 rows at 1.5. `propBookProb` keyed on `(player, book, side)` and took the
+newest, so whichever line a book had posted most recently won. Díaz's newest quotes were 1.5
+(`Over +160 / Under −220`), which de-vigs to 36%: **his P(2+ hits), displayed in a column labelled
+as the chance of a hit, next to our P(1+).**
+
+Two failures from one missing field. The second is worse and was invisible: an `Over 1.5` could be
+paired with an `Under 0.5` from the same book (Chandler Simpson had all four rows) and "de-vigged"
+into a number that means nothing at all.
+
+```js
+const k = `${player}|${book}|${Number(line)}|${side}`;   // the LINE is part of the identity
+if (Number(r.line) !== WANT_LINE) continue;              // and keep only the one this board asks
+```
+
+**The comment above that function had asserted the opposite** — *"the LINE carries no information —
+it is 0.5 on every row"* — and that sentence is exactly what stopped anyone checking. A comment
+stating a data invariant is a claim; verify it against the data before trusting it:
+```sql
+select market, line, count(*) from mlb_prop_snapshots group by 1,2 order by 1,2;
+```
+After the fix Díaz reads **book 73% vs our 70%** — the market slightly above us, which is what a
+leadoff hitter should look like. Board-wide the mean gap fell from +5.4pp to +3.3pp.
+
+**Generalise: whenever a board joins to market data, list every dimension that identifies a quote**
+— market, line, side, book, and period where one exists — and confirm each is in the key. A missing
+dimension does not error; it silently answers a different question.
+
 ### 🚨 Never mix a DE-VIGGED price with a RAW one in the same average
 Derek: *"our model % is almost always over the book %. That does not seem right."* Chasing it found
 a real defect in the **book** column, not the model.
@@ -1063,6 +1097,41 @@ cell wrap fixed desktop and silently lost on a phone: the mobile rule
 the file, so a two-class fix at equal specificity loses. Three classes
 (`.pmtable--mlbg .pmrow--data .pmcell--team`) holds regardless of order. **Re-run at mobile after
 any cell-level text fix** — this one reported clean at 1440 and 12 findings at 375.
+
+### ⚠️ A translucent background must be COMPOSITED before measuring contrast
+`effectiveBg` returned any background with `alpha > 0.1` as if it were opaque, using its raw RGB.
+The app's badges are `color-mix(in srgb, <the text colour> 13%, transparent)` — so the probe read
+the pill's own text colour as its background and scored **contrast 1.00** on `.pmmatch--good` /
+`--bad` ("soft pass D", "tough run D"): perfectly legible text reported as invisible, and it fired
+only at mobile, which made it look like a responsive bug.
+
+Collect the layers and alpha-blend down to the first opaque one:
+```js
+if (c && c.a > 0.01) { layers.push(c); if (c.a >= 0.99) break; }
+let out = layers.pop();                       // opaque base
+while (layers.length) { const t = layers.pop();
+  out = { r: t.r*t.a + out.r*(1-t.a), g: t.g*t.a + out.g*(1-t.a), b: t.b*t.a + out.b*(1-t.a) }; }
+```
+Two-way tested — and the negative test took two attempts, which is itself the lesson: a synthetic
+invisible-text element placed at `left:40px` did NOT fire, because it overlapped the rail's icons
+and `effectiveBg` bails on imagery. **When a check fails to fire on a deliberate break, suspect the
+placement of your test before concluding the check is broken.** Placed mid-viewport it reported
+`contrast 1.00 ("INVISIBLE TEST TEXT")`, and 0 again on removal.
+
+### 🚨 "Did it render?" is a CONTENT question, not a height question
+The splice guard added one pass earlier tested `live.getBoundingClientRect().height <= 40`. A
+Suspense shell is not short: `/considerations` rendered a **692px** live `main` containing the
+single word "Loading…", sailed past the height check, and the probe audited an empty shell and
+reported clean — the exact false pass the guard existed to prevent, reintroduced by a lazy test.
+
+Count board rows in the live tree against the hidden copy, and splice only when the hidden one has
+more:
+```js
+const CONTENT = '.pmrow--data, .hb-form tbody tr, .impgame, .aurow, .propgame, .refrow, .augame';
+if (hid && hid.querySelectorAll(CONTENT).length > live.querySelectorAll(CONTENT).length) { /* splice */ }
+```
+Report `dataRows` with every page result. **A page reporting zero rows was not audited**, whatever
+its finding count says — treat it as unverified and say so, rather than counting it as clean.
 
 ### ⚠️ `checkVisibility()` makes an unrendered page look PERFECT
 The most dangerous false pass in this file, because it reports zero and zero looks like success.

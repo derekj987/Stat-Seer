@@ -85,17 +85,35 @@
         if (over) return null;                  // real backdrop is imagery — can't assess
       }
     }
+    // 🚨 A TRANSLUCENT background must be COMPOSITED, not treated as opaque. This used to return
+    // any background with alpha > 0.1 as-is, using its raw rgb — so `color-mix(in srgb, #0a7d3c
+    // 13%, transparent)` (the .pmmatch pills, and the same pattern on several badges) reported the
+    // pill's own text colour as its background and scored contrast 1.00: "invisible text" that is
+    // perfectly legible. Collect the layers, then alpha-blend down to the first opaque one.
     let n = el;
+    const layers = [];
     while (n && n.nodeType === 1) {
       const cs = getComputedStyle(n);
       // Over a background-image / gradient we can't read the pixels behind the text, so a solid-color
       // contrast check would be bogus (nav name over the hero image, a card over a photo). Bail out.
       if (cs.backgroundImage && cs.backgroundImage !== "none") return null;
       const c = parseRGB(cs.backgroundColor);
-      if (c && c.a > 0.1) return c;
+      if (c && c.a > 0.01) {
+        layers.push(c);
+        if (c.a >= 0.99) break;                 // reached something opaque
+      }
       n = n.parentElement;
     }
-    return null; // no opaque background anywhere up the chain → text likely sits over imagery; skip
+    if (!layers.length || layers[layers.length - 1].a < 0.99) return null;
+    let out = layers.pop();                     // the opaque base
+    while (layers.length) {                     // then paint each translucent layer over it
+      const t = layers.pop();
+      out = { r: t.r * t.a + out.r * (1 - t.a),
+              g: t.g * t.a + out.g * (1 - t.a),
+              b: t.b * t.a + out.b * (1 - t.a), a: 1 };
+    }
+    return out;
+    // (falls through to null above when no opaque background exists → text likely over imagery)
   }
   const contrast = (c1, c2) => {
     const l1 = lum(c1.r, c1.g, c1.b), l2 = lum(c2.r, c2.g, c2.b);

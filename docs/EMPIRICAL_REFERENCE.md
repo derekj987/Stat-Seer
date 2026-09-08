@@ -819,3 +819,21 @@ probability when a book posted only one side (270 of 1,122 quotes), then took a 
 — mixing ~56.7% de-vigged values with ~60.5% raw ones in a single column. Two-sided quotes now win
 outright; a one-sided price is brought onto the same footing with the hold measured from that
 snapshot.
+
+### 12g. The board was comparing P(2+ hits) against P(1+ hit)
+
+`batter_hits` carries **two lines**: 0.5 ("will he record a hit") and 1.5 ("will he get two") —
+399 of 5,845 captured rows at 1.5. `propBookProb` keyed on `(player, book, side)` only, so the most
+recently posted line won per book. Yandy Díaz's newest quotes were the 1.5 line
+(`Over +160 / Under −220`), de-vigging to **36%** — his chance of a *second* hit, shown in a column
+labelled as the chance of a hit, beside our 70%.
+
+Caught by eye: his team-mates read 64% and 65% and he read 36%, which is the complement pattern a
+mismatched line or side produces. A second, quieter failure came from the same key: an `Over 1.5`
+could be paired with an `Under 0.5` from the same book and "de-vigged" into a meaningless number.
+
+Fixed by keying on the line and filtering to the one the board asks about. Díaz now reads
+**book 73% vs our 70%**; board-wide mean gap **+5.4pp → +3.3pp**, over-rate 78.8% → 75.0%.
+
+The function's own comment had asserted *"the LINE carries no information — it is 0.5 on every
+row"*, which is why nobody checked. **A comment stating a data invariant is a claim, not a fact.**

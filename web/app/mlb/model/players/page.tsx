@@ -166,13 +166,13 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
           <Honest cat={cat} />
           {cat !== "pitching" && (
             <p className="ctxsec__legend">
-              Only players a sportsbook has priced. <b>Lineup #</b> is where he bats, which sets how
+              Only players a sportsbook has priced. <b>Lineup</b> is where he bats, which sets how
               many times he comes up.
               <Tip label="About the vs-him column" text={<>
-                <b>Lineup #</b> is the volume term: leading off is about 4.5 plate appearances,
+                <b>Lineup</b> is the volume term: leading off is about 4.5 plate appearances,
                 batting ninth about 3.4. That difference is most of the gap between two similar
                 hitters.<br /><br />
-                <b>vs him</b> is this batter&apos;s career line against tonight&apos;s starter, with
+                <b>vs opp pitcher</b> is this batter&apos;s career line against tonight&apos;s starter, with
                 the sample in brackets. <b>Read the sample, not the average.</b> Measured across a
                 full 15-game slate, 171 batter-pitcher pairs:<br /><br />
                 • <b>51%</b> have never faced each other at all<br />
@@ -208,7 +208,7 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
                               <span>player</span>
                               {cat === "pitching"
                                 ? <><span>opponent</span><span>book line</span><span>our proj</span><span>K rate</span><span>starts</span></>
-                                : <><span>lineup #</span><span>opposing pitcher</span><span>vs him</span><span>book %</span><span>our %</span><span>his rate</span></>}
+                                : <><span>lineup</span><span>opposing pitcher</span><span>vs opp pitcher</span><span>book %</span><span>our %</span><span>his rate</span></>}
                             </div>
                             {rs.map((r, i) => (
                               <div className={`pmrow pmrow--data${i >= CAP ? " hb-row--more" : ""}`}
