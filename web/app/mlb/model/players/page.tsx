@@ -49,16 +49,27 @@ function Honest({ cat }: { cat: CatKey }) {
   const s = cat === "hits" ? MLB_PROP_SCORES.hits : MLB_PROP_SCORES.hr;
   const what = cat === "hits" ? "records a hit" : "hits a home run";
   return (
+    <>
     <p className="ctxsec__d">
       The chance this batter <b>{what}</b> tonight: his own rate per plate appearance, shrunk toward
-      league, nudged by the opposing pitching staff, and raised to the <b>plate appearances his
-      batting slot gets</b> — leading off is 4.5, batting ninth is 3.4.{" "}
+      league, nudged by the opposing pitching staff, and spread across the <b>plate appearances his
+      batting slot gets</b> — leading off is 4.5 on average, batting ninth 3.4.{" "}
       <b>Be clear about what this is worth.</b> Against simply knowing how often he does it, the
       model gains <b>{s.gain}%</b>. That is small, and it is the honest number: what separates a hit
-      from an out is mostly where the ball lands, which does not carry between games. The
-      probability is <b>well calibrated</b>, so it is a fair figure to price a book line against —
-      not a claim that we know something the market doesn&apos;t.
+      from an out is mostly where the ball lands, which does not carry between games.
     </p>
+    {/* Publish the calibration rather than asserting it. This block used to read "the probability
+        is well calibrated" — a claim nobody had measured. When it was finally measured it was
+        wrong by 2.1pp, so the sentence was a statement of hope. Now it prints the number. */}
+    <p className="ctxsec__d">
+      <b>How well calibrated is it, exactly?</b> Over the held-out games these probabilities average{" "}
+      <b>{(s.pred * 100).toFixed(1)}%</b> against a real rate of <b>{(s.act * 100).toFixed(1)}%</b> —
+      so we run about <b>{((s.pred - s.act) * 100).toFixed(1)} points too high</b> and you should
+      read these as slightly optimistic. We know why: the model treats a batter&apos;s plate
+      appearances as independent, and four trips against the same pitcher on the same night are not
+      independent. We would rather publish the gap than quietly scale the numbers until it closes.
+    </p>
+    </>
   );
 }
 
@@ -171,7 +182,7 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
                         <input type="checkbox" id={moreId} className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
                         <div className="pmscroll">
                           <div className={`pmtable ${cat === "pitching" ? "pmtable--mlbk" : "pmtable--mlbp"}`} role="table">
-                            <div className="pmrow pmrow--head" role="row">
+                            <div className="pmrow pmrow--head pmrow--data" role="row">
                               <span>player</span>
                               {cat === "pitching"
                                 ? <><span>opponent</span><span>book line</span><span>our proj</span><span>K rate</span><span>starts</span></>

@@ -602,13 +602,53 @@
     // narrow: the hb-moretbl checkbox usually sits a level or two up (the scroller wraps the
     // table, the checkbox wraps the scroller), so a correctly-capped board still reported
     // uncapped. Walk up a few levels instead of assuming one shape of markup.
+    //
+    // MUST test the ancestor ITSELF as well as its descendants. querySelector only looks DOWN, so
+    // an ancestor that IS the control never matched its own selector -- and `<details
+    // class="hb-showmore">` wrapping the table is the single most common capped shape in this app.
+    // That one missing `matches()` reported three correctly-capped boards as uncapped (/props,
+    // /audit, and both tables on /ncaaf/model) while staying silent on anything genuinely broken.
     let capped = false;
+    const CAPSEL = ".hb-showmore, .hb-more, .hb-moretbl__chk";
     for (let a = list.parentElement, d = 0; a && d < 4 && !capped; a = a.parentElement, d++) {
-      if (a.querySelector(".hb-showmore, .hb-more, .hb-moretbl__chk")) capped = true;
+      if (a.matches?.(CAPSEL) || a.querySelector(CAPSEL)) capped = true;
     }
     if (capped) continue;
     add("uncapped-long-list", "low", list,
       `${items.length} rows rendered with no "show more" control — should this cap behind the standard dropdown?`);
+  }
+
+  // ---- 20b. A chart's column HEADER must line up with the data underneath ------
+  // Derek: "the chart headers are misaligned on the data they are representing." Every MLB board
+  // had it. The cause is one missing class: .pmrow{display:flex} is the base and .pmrow--data adds
+  // display:grid, so a header written as `pmrow pmrow--head` (without --data) stays FLEX. The grid
+  // template is still declared on it and still computes -- getComputedStyle happily returns
+  // "minmax(210px, 1.7fr) ..." on a flex box -- so reading the CSS proves nothing. Only the
+  // rendered geometry tells the truth.
+  //
+  // This is the reason the check compares LEFT EDGES rather than styles: it is agnostic about why
+  // a header drifted (wrong display, a column-count mismatch, a stray colspan) and catches all of
+  // them. Tolerance is 2px for sub-pixel rounding.
+  for (const tbl of document.querySelectorAll('[role="table"], table')) {
+    if (!vis(tbl)) continue;
+    const head = tbl.querySelector('[class*="--head"], thead tr');
+    const rows = [...tbl.querySelectorAll('[class*="--data"], tbody tr')].filter(
+      (r) => r !== head && vis(r) && !r.classList.contains("hb-row--more"));
+    if (!head || !vis(head) || !rows.length) continue;
+    const cells = (r) => [...r.children].filter((c) => c.getBoundingClientRect().width > 0 ||
+                                                       c.getBoundingClientRect().height > 0);
+    const hc = cells(head), dc = cells(rows[0]);
+    // Different cell COUNTS is a different bug (a column budget that doesn't cover every column);
+    // don't double-report it here.
+    if (hc.length !== dc.length || hc.length < 2) continue;
+    const off = hc.map((c, i) =>
+      Math.round(c.getBoundingClientRect().left - dc[i].getBoundingClientRect().left));
+    const worst = Math.max(...off.map(Math.abs));
+    if (worst <= 2) continue;
+    add("chart-header-misaligned", "high", tbl,
+      `column header does not line up with its data — worst offset ${worst}px ` +
+      `(header display:${getComputedStyle(head).display}, data display:${getComputedStyle(rows[0]).display})`,
+      { offsets: off });
   }
 
   // ---- 21. A split grouped list must not open on a blank label ----------------

@@ -42,7 +42,10 @@ draw *outside* the card instead of scrolling; `overflow-x` on the flex column it
 `chart-split-scrollers` (one chart rendered as two tables, so each half scrolls sideways
 independently and the second half has no header) ·
 `panel-half-empty` (a panel's content stops well short of its width, so the card reads as broken —
-usually a `max-width` in `ch` on the copy with nothing else using the space).
+usually a `max-width` in `ch` on the copy with nothing else using the space) ·
+`chart-header-misaligned` (a chart's column header does not sit over the data it labels — compares
+the header cells' LEFT EDGES against the first data row's, so it catches a wrong `display`, a
+column-count mismatch and a stray colspan alike).
 Console errors + network 4xx/5xx are collected separately (see step 4).
 
 ### 🚨 Never hand-edit an AUTO-GENERATED file
@@ -159,6 +162,46 @@ projection's league anchor had seen the future; and `validate()` scored the base
 second is the more dangerous shape because it flatters **the thing the model must beat**, so it
 understates the model and you will not go looking. Capture a baseline at prediction time, inside the
 loop, next to the prediction.
+
+### 🚨 A Brier score is NOT a calibration check
+The MLB hits board read **78.7% over the book's de-vigged probability, mean +4.9pp** on 630 rows.
+The model's published score said it was fine — Brier 0.2364 against 0.2406 for the batter's own
+rate, +1.8%. Both statements were true at once, because **a Brier score can improve while every
+number on the board sits above the truth.** Only the calibration says so:
+
+| market | predicted | realized | bias |
+|---|---|---|---|
+| hit | 0.627 | 0.606 | **+2.1pp** |
+| home run | 0.119 | 0.110 | +1.0pp |
+| stolen base | 0.070 | 0.065 | +0.5pp |
+
+Every market high, in every probability bucket. So `validate()` now prints mean-predicted against
+mean-realized, plus a bucket table, next to every Brier it reports. **Any board publishing a
+probability owes this table** — the whole trust premise is calibration anyone can check, and a
+Brier number alone does not let them check it.
+
+**The mechanism was Jensen's inequality, and it is worth knowing by name because it recurs.**
+`P(≥1) = 1 - (1-q)^PA` is CONCAVE in PA, so `E[1-(1-q)^PA] < 1-(1-q)^E[PA]`: feeding it the *mean*
+plate appearances for a batting slot overstates the answer versus averaging over the real spread.
+A leadoff hitter does not take 4.49 plate appearances; he takes 3, 4 or 5, and sometimes 1 because
+he was lifted — and the short games cost more than the long ones give back.
+
+**Whenever a mean is fed into a non-linear function, the result is biased**, and the sign is
+predictable: concave ⇒ overstated, convex ⇒ understated. Average the function over the
+distribution instead. Fixing it moved hits from +2.1pp to +1.4pp and improved Brier as well
+(0.23639 → 0.23612), which is the shape of a real fix — a correction that only moved the
+calibration would be suspect.
+
+**Do not close the rest by scaling.** The residual +1.4pp is within-game correlation: four trips
+against one starting pitcher on one night are not independent trials, and an independence model
+cannot express that. Multiplying the output until the gap vanishes fits the answer, not the
+mechanism, and the board would then be lying twice — once about the number, once about why.
+The remaining gap is published on the page instead.
+
+**Related check — a UI must never ASSERT calibration.** The board's copy read "the probability is
+well calibrated." Nobody had measured it; when someone did, it was 2.1pp out. Same failure family
+as the hardcoded `is-online` class: the page stated a fact it never checked. It now prints the two
+numbers and the gap.
 
 ### A week-scoped board must be able to say WHICH week its data is for
 `/ncaaf/model/players` rendered week 1's games on every week of the season. The generated data set
@@ -814,6 +857,76 @@ Two mistakes on the way there, both worth keeping:
 silence; strip the control with `document.querySelectorAll('.hb-moretbl__chk').forEach(c=>c.remove())`,
 confirm it returns. Both of the above passed a one-way test.
 
+### 🚨 A chart header must carry the class that makes it a GRID
+Derek: *"the chart headers are misaligned on the data they are representing."* Every MLB board had
+it, from one missing class. `.pmrow{display:flex}` is the base and **`.pmrow--data` is what adds
+`display:grid`**, so a header written as `pmrow pmrow--head` stays FLEX and packs its labels to the
+left while the numbers below sit on grid tracks. Measured on `/mlb/model`: header cells at
+[316, 364, 494, 596, 674, 749], data at [316, 542, 718, 834, 938, 1050].
+
+The house convention is in `PlayerModelView.tsx`: `className="pmrow pmrow--head pmrow--data"`. All
+three MLB boards omitted the third class. `.pmrow--head.pmrow--data{border-bottom:0}` exists
+precisely because the header is expected to carry both.
+
+**Reading the CSS cannot find this, which is the part worth remembering.**
+`getComputedStyle(head).gridTemplateColumns` cheerfully returns
+`"minmax(210px, 1.7fr) 100px …"` on a flex container — the property is declared, it computes, it is
+simply not in effect. Only the rendered geometry tells the truth. So `chart-header-misaligned`
+compares **left edges**, header cell against data cell:
+
+```js
+const off = headCells.map((c, i) =>
+  Math.round(c.getBoundingClientRect().left - dataCells[i].getBoundingClientRect().left));
+if (Math.max(...off.map(Math.abs)) > 2) /* finding */;
+```
+Edge-comparison is deliberately agnostic about the cause, so it also catches a stray colspan or a
+column budget that covers only some columns. Skip when the cell COUNTS differ — that is a different
+bug and gets its own report. Two-way tested: 0 findings as shipped, 3 after
+`document.querySelectorAll('.pmrow--head').forEach(e => e.classList.remove('pmrow--data'))`, 0 on
+restore.
+
+**The column budget is arithmetic — do it, don't guess it.** The same board then reported
+`content-escapes-card` and 12 × `chart-truncated-with-space` at once, which sounds like two bugs and
+was one: tracks 738 + gaps (5×14) + padding (2×16) = **840 against an 825px card**, while the
+pitchers column sat at 160px needing 202px with 87px unused further right. Sum the tracks, the gaps
+AND the padding, and compare against the real container width before choosing `min-width`.
+
+**And a wrap fix must beat the mobile block on SPECIFICITY, not source order.** Letting the long
+cell wrap fixed desktop and silently lost on a phone: the mobile rule
+`.pmrow--data .pmcell--team{white-space:nowrap;text-overflow:ellipsis}` is (0,2,0) and sits later in
+the file, so a two-class fix at equal specificity loses. Three classes
+(`.pmtable--mlbg .pmrow--data .pmcell--team`) holds regardless of order. **Re-run at mobile after
+any cell-level text fix** — this one reported clean at 1440 and 12 findings at 375.
+
+### ⚠️ `checkVisibility()` makes an unrendered page look PERFECT
+The most dangerous false pass in this file, because it reports zero and zero looks like success.
+`/mlb/model` returned **0 findings at both desktop and mobile** while the page showed `Loading…`:
+the real markup was sitting in React's hidden `<div hidden id="S:0">` streaming placeholder, every
+element measured invisible, and the probe correctly skipped all of it. Splicing `#S:0` into the live
+tree (the snippet in the section above) and re-running gave **22 findings on the same page**.
+
+**A zero is only meaningful if the board was actually measured.** Assert the content is there before
+believing a clean sweep — and note the splice is per-page, so doing it on three pages of a matrix
+and forgetting the fourth produces one page that reports clean for the wrong reason:
+```js
+document.querySelectorAll('.pmrow--data, .hb-form tbody tr').length   // > 0 before trusting a 0
+```
+
+### ⚠️ `querySelector` looks DOWN — an ancestor never matches itself
+`uncapped-long-list` walks up four ancestors asking whether a cap control is present, using
+`a.querySelector(".hb-showmore, .hb-more, .hb-moretbl__chk")`. But the most common capped shape in
+this app is `<details class="hb-showmore">` **wrapping** the table — so the ancestor IS the control,
+and `querySelector` (descendants only) never saw it. Three correctly-capped boards were reported as
+uncapped (`/props`, `/audit`, and both tables on `/ncaaf/model`) while the check stayed silent on
+anything genuinely broken.
+
+```js
+if (a.matches?.(CAPSEL) || a.querySelector(CAPSEL)) capped = true;   // self OR descendants
+```
+Whenever a check walks ancestors looking for a marker, ask whether the marker can BE the ancestor.
+This is the second false-positive cluster from this one check; both times the symptom was the same —
+a finding repeating across pages that all looked fine.
+
 ### ⚠️ A probe that cries wolf buries the real bug
 One audit produced **17 findings across 5 pages; 16 were false positives** — and the one real bug
 (the dock above) was sitting in the middle of them. Tuning the checks was most of the work, and it
@@ -1284,8 +1397,13 @@ that never hold long text. Do this at 320–375px width; overflow appears at the
    - **Expand collapsibles first** (some bugs — `split-group`, mid-list collapse controls, hidden
      overflow rows — only show when expanded): before the probe, run
      `document.querySelectorAll('details:not([open])').forEach(d=>{try{d.open=true}catch{}}); document.querySelectorAll('.hb-moretbl__chk').forEach(c=>{c.checked=true});`
+   - **Splice `#S:0` on EVERY page, not just the ones that look broken** (snippet above). A page
+     still showing `Loading…` reports **zero findings** because every element measures invisible —
+     `/mlb/model` returned a clean sweep at both viewports and had 22 findings once spliced.
    - `navigate` to the URL, then in `javascript_tool`:
      `await new Promise(r=>setTimeout(r,1500)); JSON.parse(eval(await (await fetch('/__ss_audit.js?v='+Date.now())).text()))`
+   - **Sanity-check the count before trusting a 0**: `document.querySelectorAll('.pmrow--data, .hb-form tbody tr').length`
+     must be non-zero on any board page. A zero-finding sweep of an empty DOM is not a pass.
    - Sizes: `resize_window {width:1440,height:900}` (desktop, exercises the rail gutter),
      `resize_window {preset:"mobile"}` (overflow hides here). Themes: add `colorScheme:"dark"` /
      `"light"`. Reset with `resize_window {preset:"desktop"}` when done.

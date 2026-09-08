@@ -30,6 +30,9 @@ const S = MLB_GAME_SCORES;
 const BRIER = { model: 0.16102, persistence: 0.22894, gain: 29.7 };
 // A lineup IS nine. The rest of the candidate pool folds away behind the standard control.
 const LU_CAP = 9;
+// Games shown per day before the dropdown. A full MLB day is 15, which runs the card well past a
+// screen; 8 keeps the day readable and the rest is one click away.
+const GAME_CAP = 8;
 
 const pct = (p: number) => `${Math.round(p * 100)}%`;
 
@@ -108,40 +111,61 @@ export default async function Page() {
           {MLB_GAMES.length === 0 ? (
             <p className="foot">No upcoming games projected yet. The board fills as probable starters post.</p>
           ) : (
-            groupByGameDay(keys, (k) => kick.get(k) ?? null, todayEt, tomorrowEt).map((grp) => (
+            groupByGameDay(keys, (k) => kick.get(k) ?? null, todayEt, tomorrowEt).map((grp) => {
+              // Cap INSIDE the one table, never by slicing it into two — a second table would
+              // scroll sideways independently of the first and its continuation would have no
+              // header. The hidden rows get hb-row--more and the checkbox reveals them in place.
+              const moreId = `mlb-gm-${grp.key.replace(/[^a-z0-9]/gi, "")}`;
+              const hidden = Math.max(0, grp.items.length - GAME_CAP);
+              return (
               <div key={grp.key}>
                 <DayHeader label={grp.label} tone={grp.tone} count={grp.total ?? grp.items.length} />
-                <div className="pmscroll">
-                  <div className="pmtable pmtable--mlbg" role="table">
-                    <div className="pmrow pmrow--head" role="row">
-                      <span>game</span><span>starting pitchers</span><span>market total</span>
-                      <span>our total</span><span>our runs</span><span>run line</span>
+                <div className="hb-moretbl">
+                  <input type="checkbox" id={moreId} className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
+                  <div className="pmscroll">
+                    <div className="pmtable pmtable--mlbg" role="table">
+                      {/* pmrow--data is what carries display:grid — a header with only
+                          pmrow--head stays display:flex and its labels pack left, out of line
+                          with the numbers underneath. Match PlayerModelView.tsx. */}
+                      <div className="pmrow pmrow--head pmrow--data" role="row">
+                        <span>game</span><span>starting pitchers</span><span>market total</span>
+                        <span>our total</span><span>our runs</span><span>run line</span>
+                      </div>
+                      {grp.items.map((k, i) => {
+                        const g = byKey.get(k)!;
+                        const m = mkt.get(`${etDayKey(g.commence)}|${g.game}`);
+                        const mt = m?.total?.consensus ?? null;
+                        const rl = m?.spread?.consensus ?? null;
+                        const sp = [g.awaySpName, g.homeSpName].filter(Boolean).join(" / ");
+                        return (
+                          <div className={`pmrow pmrow--data${i >= GAME_CAP ? " hb-row--more" : ""}`}
+                            role="row" key={k}>
+                            <span className="pmcell pmcell--player">{g.game}</span>
+                            <span className="pmcell pmcell--team">{sp || "not posted"}</span>
+                            <span className="pmcell">{mt !== null ? mt.toFixed(1) : "—"}</span>
+                            <span className="pmcell"><b className="pmproj">{g.total.toFixed(1)}</b></span>
+                            <span className="pmcell pmcell--hist">
+                              {g.awayRuns.toFixed(1)} @ {g.homeRuns.toFixed(1)}
+                            </span>
+                            <span className="pmcell pmcell--hist">
+                              {rl !== null ? (rl > 0 ? `+${rl}` : `${rl}`) : "—"}
+                            </span>
+                          </div>
+                        );
+                      })}
                     </div>
-                    {grp.items.map((k) => {
-                      const g = byKey.get(k)!;
-                      const m = mkt.get(`${etDayKey(g.commence)}|${g.game}`);
-                      const mt = m?.total?.consensus ?? null;
-                      const rl = m?.spread?.consensus ?? null;
-                      const sp = [g.awaySpName, g.homeSpName].filter(Boolean).join(" / ");
-                      return (
-                        <div className="pmrow pmrow--data" role="row" key={k}>
-                          <span className="pmcell pmcell--player">{g.game}</span>
-                          <span className="pmcell pmcell--team">{sp || "not posted"}</span>
-                          <span className="pmcell">{mt !== null ? mt.toFixed(1) : "—"}</span>
-                          <span className="pmcell"><b className="pmproj">{g.total.toFixed(1)}</b></span>
-                          <span className="pmcell pmcell--hist">
-                            {g.awayRuns.toFixed(1)} @ {g.homeRuns.toFixed(1)}
-                          </span>
-                          <span className="pmcell pmcell--hist">
-                            {rl !== null ? (rl > 0 ? `+${rl}` : `${rl}`) : "—"}
-                          </span>
-                        </div>
-                      );
-                    })}
                   </div>
+                  {hidden > 0 && (
+                    <label htmlFor={moreId} className="hb-moretbl__sum">
+                      <span className="hb-more__chev" aria-hidden="true">▸</span>
+                      <span className="hb-moretbl__more">Show {hidden} more game{hidden === 1 ? "" : "s"}</span>
+                      <span className="hb-moretbl__less">Show fewer</span>
+                    </label>
+                  )}
                 </div>
               </div>
-            ))
+              );
+            })
           )}
         </div>
       </details>
@@ -195,7 +219,7 @@ export default async function Page() {
                         <input type="checkbox" id={moreId} className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
                         <div className="pmscroll">
                           <div className="pmtable pmtable--mlb" role="table">
-                            <div className="pmrow pmrow--head" role="row">
+                            <div className="pmrow pmrow--head pmrow--data" role="row">
                               <span>player</span><span>status</span><span>start %</span>
                               <span>batting slot</span><span>recent</span>
                             </div>

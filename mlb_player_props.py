@@ -63,13 +63,54 @@ SEASON = 2026
 
 # Mean plate appearances by batting slot, measured on 37,433 slot-joined batter-games. This IS the
 # volume term: a full extra plate appearance separates leadoff from the nine-hole.
+#
+# The mean is what the BOARD shows a reader. It is deliberately NOT what the probability is
+# computed from -- see SLOT_PA_DIST.
 SLOT_PA = {1: 4.49, 2: 4.41, 3: 4.30, 4: 4.19, 5: 4.05, 6: 3.89, 7: 3.76, 8: 3.60, 9: 3.44}
+
+# The DISTRIBUTION of plate appearances by slot, filled in from the logs at run time.
+#
+# 🚨 Plugging the mean into P(>=1) overstates it, always. P(>=1) = 1 - (1-q)^PA is CONCAVE in PA,
+# so by Jensen's inequality E[1-(1-q)^PA] < 1-(1-q)^E[PA]: averaging the probability over the real
+# spread of plate appearances gives a SMALLER number than evaluating it once at the average. A
+# leadoff hitter does not get 4.49 plate appearances; he gets 3, 4 or 5, and occasionally 1 because
+# he was lifted -- and the short games hurt P(>=1) more than the long ones help it.
+#
+# Caught by the board, not by the Brier score: the hits tab read 78.7% over the book's de-vigged
+# number. Brier improved either way, which is exactly why a Brier score is not a calibration check.
+# Measured bias before the fix, held out: hits predicted 0.627 vs realized 0.606 (+2.1pp), home
+# runs +1.0pp, stolen bases +0.5pp -- every market high, in every bucket.
+SLOT_PA_DIST: dict[int, list[tuple[int, float]]] = {}
+
+
+def slot_pa_dist(logs, slots):
+    """Empirical P(plate appearances = k) per batting slot. Built from the same logs the rates come
+    from, so it moves with the data instead of being another hardcoded table."""
+    by = collections.defaultdict(collections.Counter)
+    for r in logs:
+        s = slots.get((r["date"], r["pid"]))
+        if s in SLOT_PA:
+            by[s][min(r["pa"], 7)] += 1
+    out = {}
+    for s, c in by.items():
+        n = sum(c.values())
+        out[s] = sorted((k, v / n) for k, v in c.items())
+    return out
 
 # Held-out Brier, for the copy on the board. Kept here so the page cannot drift from what was
 # measured -- a number in JSX is a number nobody re-checks.
+#
+# `pred` and `act` are the held-out mean predicted probability against the mean realized rate: the
+# calibration, published because it is not yet perfect. After the Jensen fix (see SLOT_PA_DIST)
+# hits went from +2.1pp high to +1.4pp and home runs from +1.0pp to +0.9pp. What is left is almost
+# certainly within-game correlation -- plate appearances against one starting pitcher on one night
+# are not independent trials, and an independence model cannot express that. It is NOT closed by
+# scaling the output until it matches; that would be fitting the answer rather than the mechanism.
 SCORES = {
-    "hits": {"model": 0.23639, "own": 0.24060, "base": 0.615, "gain": 1.8},
-    "hr":   {"model": 0.09666, "own": 0.09771, "base": 0.124, "gain": 1.1},
+    "hits": {"model": 0.23612, "own": 0.24060, "base": 0.615, "gain": 1.9,
+             "pred": 0.620, "act": 0.606},
+    "hr":   {"model": 0.09665, "own": 0.09771, "base": 0.124, "gain": 1.1,
+             "pred": 0.119, "act": 0.110},
 }
 
 
@@ -125,7 +166,12 @@ class Rates:
             return None
         p = (self.bs[pid] + K_BAT * self.lg) / (self.bpa[pid] + K_BAT)
         of = ((self.os_[opp] + K_OPP * self.lg) / (self.opa[opp] + K_OPP)) / self.lg
-        return round(1 - (1 - min(0.95, p * of)) ** SLOT_PA[slot], 4)
+        q = 1 - min(0.95, p * of)
+        # Average the probability over the PA distribution, never evaluate it at the mean PA.
+        dist = SLOT_PA_DIST.get(slot)
+        if not dist:
+            return round(1 - q ** SLOT_PA[slot], 4)
+        return round(sum(w * (1 - q ** k) for k, w in dist), 4)
 
     def rate(self, pid):
         return round(self.bs[pid] / self.bpa[pid], 4) if self.bpa[pid] else None
@@ -152,6 +198,18 @@ def validate(logs, slots):
         own = br(lambda x: x["own"] if x["own"] is not None else base)
         mod = br(lambda x: x["p"])
         print(f"{label:<12}{base:>8.3f}{own:>11.5f}{mod:>10.5f}{(own-mod)/own*100:>7.1f}%")
+        # CALIBRATION, not just Brier. A Brier score can improve while the whole board sits above
+        # the truth, and the board is where that shows: the hits tab reads 78.7% over the book's
+        # de-vigged number, mean +4.9pp. Brier alone cannot tell "our level is wrong" from "the
+        # market disagrees with us" -- the mean predicted against the mean realized can.
+        pm, ym = statistics.mean(x["p"] for x in te), statistics.mean(x["y"] for x in te)
+        print(f"{'':<12}predicted {pm:.3f} vs realized {ym:.3f}  ({pm - ym:+.3f})  n={len(te):,}")
+        for lo in (0.0, 0.2, 0.4, 0.6, 0.8):
+            b = [x for x in te if lo <= x["p"] < lo + 0.2]
+            if len(b) >= 50:
+                print(f"{'':<14}p {lo:.1f}-{lo+0.2:.1f}  predicted "
+                      f"{statistics.mean(x['p'] for x in b):.3f}  actual "
+                      f"{statistics.mean(x['y'] for x in b):.3f}  n={len(b):,}")
 
 
 def main(argv=None):
@@ -175,6 +233,10 @@ def main(argv=None):
     for r in lineups:
         for i, p in enumerate(r["lineup"], 1):
             slots[(r["date"], p["id"])] = i
+    # Must be filled before ANY call to Rates.prob -- validation and export alike, or the two
+    # disagree and the published number is not the one that was scored.
+    SLOT_PA_DIST.update(slot_pa_dist(logs, slots))
+    print(f"PA distribution built for {len(SLOT_PA_DIST)} batting slots")
     if args.validate:
         validate(logs, slots)
         return 0

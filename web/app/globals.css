@@ -3262,11 +3262,21 @@ a.snav__dfeat{display:block}
 .pmtable--mlbk .pmrow--head{grid-template-columns:minmax(190px,1.6fr) minmax(150px,1.2fr) 90px 90px 84px 78px}
 /* Game model board — six columns. A chart rather than the football boards' cards because MLB
    plays fifteen games a NIGHT against football's sixteen a week, so cards become four screens of
-   scrolling. Column minimums total ~600 + gaps; min-width is sized to that rather than guessed,
-   which is what stopped .pmtable--mlbp forcing a scrollbar it did not need. */
-.pmtable--mlbg{min-width:800px;max-width:1080px}
+   scrolling.
+   The budget is arithmetic, not a guess, and the first version got it wrong in both directions:
+   tracks 738 + gaps (5x14) + padding (2x16) = 840 against an 825px card, so every row drew 9px
+   outside it — while the pitchers column sat at 160px needing 202px with 87px unused further
+   right. Sized to fit the card instead: 200+150+86+80+92+76 = 684 + 70 + 32 = 786. */
+.pmtable--mlbg{min-width:786px;max-width:1080px}
 .pmtable--mlbg .pmrow--data,
-.pmtable--mlbg .pmrow--head{grid-template-columns:minmax(210px,1.7fr) minmax(160px,1.3fr) 100px 88px 96px 84px}
+.pmtable--mlbg .pmrow--head{grid-template-columns:minmax(200px,1.7fr) minmax(150px,1.3fr) 86px 80px 92px 76px}
+/* Two names joined by a slash is the one cell here that genuinely needs two lines. Letting it wrap
+   is what removes the truncation — widening it instead would push the table back over the card.
+   Written with THREE classes (0,3,0) on purpose: the mobile block further down sets
+   `.pmrow--data .pmcell--team{white-space:nowrap;text-overflow:ellipsis}` at (0,2,0), and at equal
+   specificity the later rule wins — so a two-class version of this fixed desktop and silently lost
+   on a phone. Specificity, not source order, is what makes it hold. */
+.pmtable--mlbg .pmrow--data .pmcell--team{white-space:normal;line-height:1.25;text-overflow:clip}
 .mlbin{color:var(--accent);font-weight:800}
 .mlbout{color:var(--muted);font-weight:700}
 .pmtable--ha .pmrow--data{grid-template-columns:minmax(205px,1.6fr) 74px repeat(6,minmax(0,1fr)) 104px}
