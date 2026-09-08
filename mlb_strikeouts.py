@@ -224,8 +224,12 @@ def main(argv=None):
                     p = st.project(pp["id"], g["teams"][other]["team"]["id"])
                     if not p:
                         continue
+                    away_n = g["teams"]["away"]["team"]["name"]
+                    home_n = g["teams"]["home"]["team"]["name"]
                     out.append({
-                        "game": f'{g["teams"]["away"]["team"]["name"]} @ {g["teams"]["home"]["team"]["name"]}',
+                        # Series-safe key — see mlb_player_props for why the matchup alone isn't one.
+                        "gameKey": f'{(g.get("gameDate") or "")[:10]}|{away_n} @ {home_n}',
+                        "game": f"{away_n} @ {home_n}",
                         "commence": g.get("gameDate"),
                         "pitcher": pp["fullName"], "team": g["teams"][side]["team"]["name"],
                         "opp": g["teams"][other]["team"]["name"], **p})
@@ -238,7 +242,7 @@ def main(argv=None):
               f" ({(mae_base-mae_model)/mae_base*100:+.1f}%). NOT yet tested against the closing line.\n"
               f"// Generated {_dt.datetime.now(_dt.timezone.utc).isoformat(timespec='seconds')}\n")
     ts = (header +
-          "export type MlbK = { game: string; commence: string; pitcher: string; team: string;\n"
+          "export type MlbK = { gameKey: string; game: string; commence: string; pitcher: string; team: string;\n"
           "  opp: string; proj: number; bf: number; kRate: number; oppFactor: number;\n"
           "  starts: number; seasonMean: number };\n\n"
           f"export const MLB_K: MlbK[] = {json.dumps(out, ensure_ascii=False)};\n")

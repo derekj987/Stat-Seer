@@ -3252,6 +3252,11 @@ a.snav__dfeat{display:block}
 .pmtable--mlb .pmrow--head{grid-template-columns:minmax(205px,1.7fr) 96px 96px minmax(0,1fr) 96px}
 /* Strikeouts board — six columns. Same .pmrow--data language as every other board so book line
    and our projection sit in the same relationship a reader already knows from football. */
+/* min-width was 840 while the column minimums only need ~586 + gaps, so the table forced a
+   scrollbar inside a container that could have held it. Sized to the content instead. */
+.pmtable--mlbp{min-width:760px;max-width:1080px}
+.pmtable--mlbp .pmrow--data,
+.pmtable--mlbp .pmrow--head{grid-template-columns:minmax(200px,1.6fr) 84px 60px 78px 84px minmax(0,1fr)}
 .pmtable--mlbk{min-width:820px;max-width:1060px}
 .pmtable--mlbk .pmrow--data,
 .pmtable--mlbk .pmrow--head{grid-template-columns:minmax(190px,1.6fr) minmax(150px,1.2fr) 90px 90px 84px 78px}

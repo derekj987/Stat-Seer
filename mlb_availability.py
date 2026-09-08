@@ -240,6 +240,9 @@ def main(argv=None):
             away = r["teamName"] if r["side"] == "away" else r["opp"]
             home = r["opp"] if r["side"] == "away" else r["teamName"]
             out.append({
+                # Series: the same matchup recurs on consecutive nights, so the date is part of
+                # the identity. Without it a three-game set renders as one card.
+                "gameKey": f'{(r["commence"] or "")[:10]}|{away} @ {home}',
                 "game": f"{away} @ {home}", "commence": r["commence"],
                 "team": r["teamName"], "player": f["name"], "pos": f["pos"],
                 # If the lineup is already posted this is no longer a projection — say so rather
@@ -255,7 +258,7 @@ def main(argv=None):
               f"// Held-out Brier {m:.5f} vs {p:.5f} for persistence ({(p-m)/p*100:+.1f}%).\n"
               f"// Generated {_dt.datetime.now(_dt.timezone.utc).isoformat(timespec='seconds')}\n")
     ts = (header +
-          "export type MlbAvail = { game: string; commence: string; team: string; player: string;\n"
+          "export type MlbAvail = { gameKey: string; game: string; commence: string; team: string; player: string;\n"
           "  pos: string | null; posted: boolean; lineupPosted: boolean; pStart: number;\n"
           "  slot: number; starts: number; of: number };\n\n"
           f"export const MLB_AVAIL: MlbAvail[] = {json.dumps(out, ensure_ascii=False)};\n")

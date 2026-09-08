@@ -1,4 +1,4 @@
-import { Brand, FlowSteps } from "../../Nav";
+import { Brand, FlowSteps, ModelSubnav } from "../../Nav";
 import PinButton from "../../PinButton";
 import { DayHeader } from "../../DayHeader";
 import { etToday, groupByGameDay } from "@/lib/gameDays";
@@ -68,10 +68,13 @@ export default async function Page() {
   const games: string[] = [];
   const byGame: Record<string, MlbAvail[]> = {};
   const kick: Record<string, string> = {};
+  // gameKey = date + matchup. Baseball plays series; a matchup-only key merged consecutive
+  // nights into one card.
+  const label: Record<string, string> = {};
   for (const r of MLB_AVAIL) {
-    if (!byGame[r.game]) { byGame[r.game] = []; games.push(r.game); }
-    byGame[r.game].push(r);
-    if (!kick[r.game] || r.commence < kick[r.game]) kick[r.game] = r.commence;
+    if (!byGame[r.gameKey]) { byGame[r.gameKey] = []; games.push(r.gameKey); label[r.gameKey] = r.game; }
+    byGame[r.gameKey].push(r);
+    if (!kick[r.gameKey] || r.commence < kick[r.gameKey]) kick[r.gameKey] = r.commence;
   }
   games.sort((a, b) => (kick[a] ?? "9999").localeCompare(kick[b] ?? "9999"));
 
@@ -81,9 +84,8 @@ export default async function Page() {
         <Brand sub={<><span className="brand__sport">MLB</span> · The Model</>} />
       </header>
       <FlowSteps active="analyze" base="mlb" />
-      {/* NO ModelSubnav here. Football splits The Model into Game and Player views because both
-          exist; MLB has one board, and a two-tab switcher whose second tab 404s is worse than no
-          switcher. It comes back the moment there is a second view to switch to. */}
+      {/* Both views exist now, so the switcher is back — same as NFL and NCAAF. */}
+      <div className="subnavrow"><ModelSubnav active="game" base="mlb" /></div>
 
       <details className="hb-panel hb-panel--card" data-embedchart="mlb-availability" open>
         <summary className="hb-bar">
@@ -126,7 +128,7 @@ export default async function Page() {
                   const moreId = `mlb-lu-${g.replace(/[^a-z0-9]/gi, "")}`;
                   return (
                     <details className="pmgame" key={g} open>
-                      <summary className="pmgame__h">{g}<span className="pmgame__chev" aria-hidden="true">▾</span></summary>
+                      <summary className="pmgame__h">{label[g]}<span className="pmgame__chev" aria-hidden="true">▾</span></summary>
                       <div className="pmgame__body hb-moretbl">
                         <input type="checkbox" id={moreId} className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
                         <div className="pmscroll">

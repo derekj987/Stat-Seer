@@ -1,3 +1,4 @@
+import { deVig, impliedProb as implied } from "@/lib/fairValue";
 // MLB captured props — the consensus book line per pitcher, for the strikeouts board.
 // Server-side only (Supabase service key). Mirrors lib/props.ts, including its paging.
 
@@ -6,6 +7,7 @@ interface Row {
   player: string | null;
   side: string | null;
   line: number | string | null;
+  price_american: number | null;
   book: string;
   market: string;
 }
@@ -42,9 +44,9 @@ async function pgAll(query: string): Promise<Row[]> {
 /** {normalised pitcher name -> consensus strikeout line}. The MEDIAN across books, not any single
  *  one — the same choice the NFL game board makes, and the reason the football copy says "the
  *  median across the sportsbooks we track, not any single book". */
-export async function strikeoutLines(): Promise<Map<string, { line: number; books: number }>> {
+export async function propLines(market: string): Promise<Map<string, { line: number; books: number }>> {
   const rows = await pgAll(
-    "?market=eq.pitcher_strikeouts&select=player,line,book,snapshot_at&order=snapshot_at.desc",
+    `?market=eq.${market}&select=player,side,line,price_american,book,snapshot_at&order=snapshot_at.desc`,
   );
   // Latest snapshot per (player, book), then the median of those.
   const latest = new Map<string, number>();
@@ -76,3 +78,42 @@ export async function strikeoutLines(): Promise<Map<string, { line: number; book
 export const norm = (s: string) =>
   s.normalize("NFD").replace(/[̀-ͯ]/g, "")
     .toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+/** Kept as a named wrapper because the strikeouts panel reads better for it. */
+export const strikeoutLines = () => propLines("pitcher_strikeouts");
+
+/** {normalised player -> de-vigged book probability of the OVER}.
+ *
+ *  For a 0.5-line market ("will he record a hit") the LINE carries no information — it is 0.5 on
+ *  every row. What the book is actually saying lives in the PRICE, so the board must compare our
+ *  percentage against theirs, not against "0.5". Same shape as the football props board.
+ *
+ *  De-vigged against the Under so the two sides sum to 1 — that is the Pick Auditor's arithmetic,
+ *  and it is arithmetic, never an edge claim. */
+export async function propBookProb(market: string): Promise<Map<string, number>> {
+  const rows = await pgAll(
+    `?market=eq.${market}&select=player,side,line,price_american,book,snapshot_at&order=snapshot_at.desc`,
+  );
+  // newest price per (player, book, side)
+  const latest = new Map<string, number>();
+  for (const r of rows) {
+    if (!r.player || r.price_american === null || !r.side) continue;
+    const k = `${norm(r.player)}|${r.book}|${r.side.toLowerCase()}`;
+    if (!latest.has(k)) latest.set(k, Number(r.price_american));
+  }
+  const byPlayer = new Map<string, number[]>();
+  for (const [k, over] of latest) {
+    const [p, book, side] = k.split("|");
+    if (side !== "over" && side !== "yes") continue;
+    const under = latest.get(`${p}|${book}|under`) ?? latest.get(`${p}|${book}|no`);
+    const fair = under === undefined ? implied(over) : deVig(over, under);
+    (byPlayer.get(p) ?? byPlayer.set(p, []).get(p)!).push(fair);
+  }
+  const out = new Map<string, number>();
+  for (const [p, xs] of byPlayer) {
+    xs.sort((a, b) => a - b);
+    const mid = Math.floor(xs.length / 2);
+    out.set(p, xs.length % 2 ? xs[mid] : (xs[mid - 1] + xs[mid]) / 2);
+  }
+  return out;
+}
