@@ -3260,6 +3260,13 @@ a.snav__dfeat{display:block}
 .pmtable--mlbk{min-width:820px;max-width:1060px}
 .pmtable--mlbk .pmrow--data,
 .pmtable--mlbk .pmrow--head{grid-template-columns:minmax(190px,1.6fr) minmax(150px,1.2fr) 90px 90px 84px 78px}
+/* Game model board — six columns. A chart rather than the football boards' cards because MLB
+   plays fifteen games a NIGHT against football's sixteen a week, so cards become four screens of
+   scrolling. Column minimums total ~600 + gaps; min-width is sized to that rather than guessed,
+   which is what stopped .pmtable--mlbp forcing a scrollbar it did not need. */
+.pmtable--mlbg{min-width:800px;max-width:1080px}
+.pmtable--mlbg .pmrow--data,
+.pmtable--mlbg .pmrow--head{grid-template-columns:minmax(210px,1.7fr) minmax(160px,1.3fr) 100px 88px 96px 84px}
 .mlbin{color:var(--accent);font-weight:800}
 .mlbout{color:var(--muted);font-weight:700}
 .pmtable--ha .pmrow--data{grid-template-columns:minmax(205px,1.6fr) 74px repeat(6,minmax(0,1fr)) 104px}

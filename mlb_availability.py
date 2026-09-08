@@ -240,9 +240,12 @@ def main(argv=None):
             away = r["teamName"] if r["side"] == "away" else r["opp"]
             home = r["opp"] if r["side"] == "away" else r["teamName"]
             out.append({
-                # Series: the same matchup recurs on consecutive nights, so the date is part of
-                # the identity. Without it a three-game set renders as one card.
-                "gameKey": f'{(r["commence"] or "")[:10]}|{away} @ {home}',
+                # StatsAPI's own game id. Baseball plays series, so a matchup string is not a
+                # unique game; a DATE + matchup is not one either, because the date has to come
+                # from the UTC timestamp and a 9:40pm Pacific first pitch is already tomorrow in
+                # UTC — which collided tonight's west-coast games with tomorrow's game of the
+                # same series. gamePk is unique by construction and survives doubleheaders.
+                "gameKey": str(r["gamePk"]),
                 "game": f"{away} @ {home}", "commence": r["commence"],
                 "team": r["teamName"], "player": f["name"], "pos": f["pos"],
                 # If the lineup is already posted this is no longer a projection — say so rather

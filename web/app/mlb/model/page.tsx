@@ -1,82 +1,65 @@
 import { Brand, FlowSteps, ModelSubnav } from "../../Nav";
 import PinButton from "../../PinButton";
 import { DayHeader } from "../../DayHeader";
-import { etToday, groupByGameDay } from "@/lib/gameDays";
+import { etToday, etDayKey, groupByGameDay } from "@/lib/gameDays";
+import { MLB_GAMES, MLB_GAME_SCORES } from "@/lib/mlbGameModel";
 import { MLB_AVAIL, type MlbAvail } from "@/lib/mlbAvailability";
-import { MLB_K } from "@/lib/mlbStrikeouts";
-import { strikeoutLines, norm } from "@/lib/mlbProps";
+import { mlbBoard } from "@/lib/mlbBoard";
 
-// MLB · The Model.
+// MLB · Game Model — the spreads/totals half of the section, beside Player Props.
 //
-// Deliberately NOT a game-line board yet. NFL and NCAAF publish a spread and total here because
-// those models exist and are graded; MLB has neither, and shipping an empty spread column that
-// implies otherwise is exactly the "appearance of rigor" this project is built against. What MLB
-// has today is Stage A — who is in tonight's lineup and where they bat — and that IS a measured,
-// published model, so it gets the board and says what it scores.
+// A CHART rather than the football boards' cards, and that is a data decision, not a style one:
+// baseball plays fifteen games a night against football's sixteen a WEEK, so a card layout that
+// reads well on Sunday becomes four screens of scrolling on a Tuesday. Everything else is kept
+// identical to NFL/NCAAF on purpose — same masthead, FlowSteps, ModelSubnav, day grouping, hb-panel
+// shells and pm* table classes. Every sport reading the same way is the product.
 //
-// Layout is the NFL/NCAAF layout on purpose: same masthead, same FlowSteps, same ModelSubnav, same
-// day grouping and hb-panel shells. Every sport reading identically is the product, not a
-// convenience.
+// NO SIDE PICK AND NO RUN LINE. The run line is a fixed +/-1.5 and the total model is worth 0.8%;
+// turning that into a pick on a side would be inventing precision this model does not have. The
+// market's run line appears as context and stops there.
 
 export const metadata = {
-  title: "StatSeer — MLB Model",
+  title: "StatSeer — MLB Game Model",
   description:
-    "Line-blind MLB analysis: who starts tonight and where they bat, published as a probability and graded against a real baseline.",
+    "Line-blind MLB run projections published beside the market's total, grouped by day and graded after.",
 };
 export const revalidate = 300;
 
+const S = MLB_GAME_SCORES;
 // Measured on 2026: 30 teams, 4,464 completed team-games, 21,304 held-out candidate rows.
 const BRIER = { model: 0.16102, persistence: 0.22894, gain: 29.7 };
-// Held out over 925 starts; see mlb_strikeouts.py for the full ablation.
-const MAE = { model: 1.7644, base: 1.8213 };
-// Tonight's starters first; the rest of the two-day window folds away.
-const K_CAP = 12;
+// A lineup IS nine. The rest of the candidate pool folds away behind the standard control.
+const LU_CAP = 9;
 
 const pct = (p: number) => `${Math.round(p * 100)}%`;
 
-/** One player row. Reuses the player-model cell classes so the MLB board's columns line up with
- *  the football boards' rather than inventing a second table language. */
-function Row({ r, cont, more }: { r: MlbAvail; cont: boolean; more?: boolean }) {
-  // Once a lineup is posted this is a FACT, not a projection. Publishing "83%" beside a known
-  // answer would be the same failure as an arrow that contradicts the number next to it.
-  const known = r.lineupPosted;
-  return (
-    <div className={`pmrow pmrow--data${more ? " hb-row--more" : ""}`} role="row">
-      <span className="pmcell pmcell--player">
-        {cont ? "" : <>{r.player}<span className="pmslot"> ({r.pos ?? "—"}, {r.team})</span></>}
-      </span>
-      <span className="pmcell pmcell--team">{known ? "in the lineup" : "projected"}</span>
-      <span className="pmcell">
-        {known
-          ? <b className={r.posted ? "mlbin" : "mlbout"}>{r.posted ? "Starting" : "Not starting"}</b>
-          : <b className="pmproj">{pct(r.pStart)}</b>}
-      </span>
-      <span className="pmcell">{r.slot.toFixed(1)}</span>
-      <span className="pmcell pmcell--hist">{r.starts}/{r.of} gm</span>
-    </div>
-  );
-}
-
 export default async function Page() {
-  // Consensus book line per pitcher, read server-side. The board shows OUR number beside
-  // THEIRS the way the football boards do — the projection is line-blind, the comparison is not.
-  const lines = await strikeoutLines();
   const { today: todayEt, tomorrow: tomorrowEt } = etToday();
 
-  // One row per player per game; group by game, then by day — the same shape as the football
-  // player board so a reader moving between sports does not have to relearn anything.
-  const games: string[] = [];
-  const byGame: Record<string, MlbAvail[]> = {};
-  const kick: Record<string, string> = {};
-  // gameKey = date + matchup. Baseball plays series; a matchup-only key merged consecutive
-  // nights into one card.
-  const label: Record<string, string> = {};
+  // Market numbers. A failure here must not take the model board down with it — the projections
+  // are static and the odds are a network read, so the board degrades to "—" in the market column
+  // rather than to an error page.
+  const { board } = await mlbBoard().catch(() => ({ board: [] as Awaited<ReturnType<typeof mlbBoard>>["board"] }));
+  // Joined on the EASTERN day plus the matchup. Not the UTC day: a 9:40pm Pacific first pitch is
+  // already tomorrow in UTC, which is precisely the collision that made the model's own game keys
+  // wrong. Both sides derive the ET day from the same real timestamp, so this holds.
+  const mkt = new Map(board.map((g) => [`${etDayKey(g.commence)}|${g.matchup}`, g]));
+
+  const keys = MLB_GAMES.map((g) => g.gameKey);
+  const byKey = new Map(MLB_GAMES.map((g) => [g.gameKey, g]));
+  const kick = new Map(MLB_GAMES.map((g) => [g.gameKey, g.commence]));
+
+  // Lineups, grouped by game underneath the chart.
+  const luGames: string[] = [];
+  const luByGame: Record<string, MlbAvail[]> = {};
+  const luLabel: Record<string, string> = {};
+  const luKick: Record<string, string> = {};
   for (const r of MLB_AVAIL) {
-    if (!byGame[r.gameKey]) { byGame[r.gameKey] = []; games.push(r.gameKey); label[r.gameKey] = r.game; }
-    byGame[r.gameKey].push(r);
-    if (!kick[r.gameKey] || r.commence < kick[r.gameKey]) kick[r.gameKey] = r.commence;
+    if (!luByGame[r.gameKey]) { luByGame[r.gameKey] = []; luGames.push(r.gameKey); luLabel[r.gameKey] = r.game; }
+    luByGame[r.gameKey].push(r);
+    if (!luKick[r.gameKey] || r.commence < luKick[r.gameKey]) luKick[r.gameKey] = r.commence;
   }
-  games.sort((a, b) => (kick[a] ?? "9999").localeCompare(kick[b] ?? "9999"));
+  luGames.sort((a, b) => (luKick[a] ?? "9999").localeCompare(luKick[b] ?? "9999"));
 
   return (
     <main className="wrap">
@@ -84,69 +67,167 @@ export default async function Page() {
         <Brand sub={<><span className="brand__sport">MLB</span> · The Model</>} />
       </header>
       <FlowSteps active="analyze" base="mlb" />
-      {/* Both views exist now, so the switcher is back — same as NFL and NCAAF. */}
       <div className="subnavrow"><ModelSubnav active="game" base="mlb" /></div>
 
-      <details className="hb-panel hb-panel--card" data-embedchart="mlb-availability" open>
+      <details className="hb-panel hb-panel--card" data-embedchart="mlb-game-model" open>
         <summary className="hb-bar">
-          <span className="hb-bar__title hb-bar__title--gold">Tonight&apos;s lineups</span>
-          <span className="hb-bar__count">{games.length} game{games.length === 1 ? "" : "s"}</span>
-          <PinButton size="sm" pin={{ id: "/mlb/model", kind: "model", label: "MLB · Lineups", detail: "Stage A", href: "/mlb/model" }} />
+          <span className="hb-bar__title hb-bar__title--gold">Runs crunched</span>
+          <span className="hb-bar__count">{MLB_GAMES.length} game{MLB_GAMES.length === 1 ? "" : "s"}</span>
+          <PinButton size="sm" pin={{ id: "/mlb/model", kind: "model", label: "MLB · Game Model", detail: "runs + totals", href: "/mlb/model" }} />
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
           <p className="ctxsec__d">
-            Whether a hitter is in tonight&apos;s lineup, and where he bats. Every prop is
-            conditioned on him playing, and in baseball that changes daily —{" "}
-            <b>about two of nine slots turn over every night</b>. Batting slot matters on its own:
-            leadoff sees roughly <b>4.6</b> plate appearances a night and the nine-hole about{" "}
-            <b>3.9</b>, which is most of the gap between two otherwise similar hitters.
+            The market&apos;s <b>total</b> for each game — the consensus across the books we track —
+            with our <b>line-blind</b> projection beside it. Ours is each side&apos;s offence against
+            the other&apos;s defence, then adjusted for the <b>starting pitcher</b>, who is the one
+            input that moved the number.
           </p>
           <p className="ctxsec__d">
-            Published as a probability and graded against a real baseline. On{" "}
-            <b>21,304 held-out player-games</b> this scores a Brier of <b>{BRIER.model.toFixed(3)}</b>{" "}
-            against <b>{BRIER.persistence.toFixed(3)}</b> for simply repeating last night&apos;s
-            lineup — <b>{BRIER.gain}% better</b>. Once a lineup actually posts, the row shows the
-            lineup rather than our estimate.
+            <b>Read this one with your eyes open.</b> Over <b>{S.n} held-out games</b> it lands{" "}
+            <b>{S.gain}%</b> closer than assuming the league average of <b>{S.meanTotal}</b> runs
+            every time. That is small, and it is the sport rather than the model: a single baseball
+            game averages {S.meanTotal} runs with a standard deviation of <b>{S.sd}</b>, so the
+            variance swamps the difference between two clubs. Team quality on its own measured{" "}
+            <b>0.0%</b> — worth nothing at all. It is published because it is line-blind and graded,
+            not because we think we have found something.
+          </p>
+          {/* State the lean rather than letting a reader find it. A board where almost every row
+              points the same way is normally OUR bug, so the burden is on us to show it isn't. */}
+          <p className="ctxsec__d">
+            <b>Our totals currently sit above the market&apos;s on most games</b>, and you should
+            know why before reading anything into it. Against <i>what actually happened</i> our
+            projections are unbiased — mean error <b>{S.resid >= 0 ? "+" : ""}{S.resid.toFixed(2)}</b>{" "}
+            runs across those {S.n} games. The gap is that the market is pricing this stretch of the
+            season below what the season has so far produced. Which of the two is right is a
+            question about beating a closing line, and that needs price history we do not have yet:
+            we only began recording MLB odds on <b>7 September</b>. Until then this is a difference
+            to notice, <b>not an edge to act on</b>.
           </p>
 
-          {games.length === 0 ? (
-            <p className="foot">
-              No games in the window. Lineups post about three hours before first pitch; this board
-              fills as tonight&apos;s slate approaches.
-            </p>
+          {MLB_GAMES.length === 0 ? (
+            <p className="foot">No upcoming games projected yet. The board fills as probable starters post.</p>
           ) : (
-            groupByGameDay(games, (g) => kick[g] ?? null, todayEt, tomorrowEt).map((grp) => (
+            groupByGameDay(keys, (k) => kick.get(k) ?? null, todayEt, tomorrowEt).map((grp) => (
               <div key={grp.key}>
-                <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
+                <DayHeader label={grp.label} tone={grp.tone} count={grp.total ?? grp.items.length} />
+                <div className="pmscroll">
+                  <div className="pmtable pmtable--mlbg" role="table">
+                    <div className="pmrow pmrow--head" role="row">
+                      <span>game</span><span>starting pitchers</span><span>market total</span>
+                      <span>our total</span><span>our runs</span><span>run line</span>
+                    </div>
+                    {grp.items.map((k) => {
+                      const g = byKey.get(k)!;
+                      const m = mkt.get(`${etDayKey(g.commence)}|${g.game}`);
+                      const mt = m?.total?.consensus ?? null;
+                      const rl = m?.spread?.consensus ?? null;
+                      const sp = [g.awaySpName, g.homeSpName].filter(Boolean).join(" / ");
+                      return (
+                        <div className="pmrow pmrow--data" role="row" key={k}>
+                          <span className="pmcell pmcell--player">{g.game}</span>
+                          <span className="pmcell pmcell--team">{sp || "not posted"}</span>
+                          <span className="pmcell">{mt !== null ? mt.toFixed(1) : "—"}</span>
+                          <span className="pmcell"><b className="pmproj">{g.total.toFixed(1)}</b></span>
+                          <span className="pmcell pmcell--hist">
+                            {g.awayRuns.toFixed(1)} @ {g.homeRuns.toFixed(1)}
+                          </span>
+                          <span className="pmcell pmcell--hist">
+                            {rl !== null ? (rl > 0 ? `+${rl}` : `${rl}`) : "—"}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </details>
+
+      <details className="hb-panel hb-panel--card" data-embedchart="mlb-availability">
+        <summary className="hb-bar">
+          <span className="hb-bar__title hb-bar__title--gold">Who&apos;s playing tonight</span>
+          <span className="hb-bar__count">{luGames.length} game{luGames.length === 1 ? "" : "s"}</span>
+          <PinButton size="sm" pin={{ id: "/mlb/model#lineups", kind: "model", label: "MLB · Lineups", detail: "who starts tonight", href: "/mlb/model" }} />
+          <span className="hb-bar__chev" aria-hidden="true">▾</span>
+        </summary>
+        <div className="hb-body">
+          {/* Derek read this board twice and asked both times what it was for. The answer was
+              never on the page, so it is now: what the number means, and why baseball needs it
+              when football does not. */}
+          <p className="ctxsec__d">
+            <b>Baseball lineups are not fixed, and they post late.</b> A football team&apos;s
+            starting eleven is the same most weeks. A baseball manager rests people constantly —{" "}
+            <b>about two of the nine slots turn over every night</b> — and the lineup card is only
+            published <b>three hours or so before first pitch</b>. So at lunchtime nobody yet knows
+            who is actually playing tonight. This board is our estimate in the meantime.
+          </p>
+          <p className="ctxsec__d">
+            <b>Start %</b> is the chance a player is in tonight&apos;s lineup. It matters because
+            most books void a prop if he never plays — it is about whether your bet <i>happens</i>,
+            not whether it wins. <b>Batting slot</b> is where he is likely to hit, which decides how
+            many times he comes to the plate: leading off is about <b>4.5</b> chances, batting ninth
+            about <b>3.4</b>. Those same two numbers feed every projection on the{" "}
+            <a href="/mlb/model/players">Player Props</a> board.
+          </p>
+          <p className="ctxsec__d">
+            Published as a probability and graded against a real baseline. Over{" "}
+            <b>21,304 held-out player-games</b> it scores a Brier of <b>{BRIER.model.toFixed(3)}</b>{" "}
+            against <b>{BRIER.persistence.toFixed(3)}</b> for simply repeating last night&apos;s
+            lineup — <b>{BRIER.gain}% better</b>, and comfortably the strongest model on this page.
+            Once a lineup actually posts, the row shows the lineup instead of our estimate.
+          </p>
+          {luGames.length === 0 ? (
+            <p className="foot">No games in the window. This board fills as tonight&apos;s slate approaches.</p>
+          ) : (
+            groupByGameDay(luGames, (g) => luKick[g] ?? null, todayEt, tomorrowEt).map((grp) => (
+              <div key={grp.key}>
+                <DayHeader label={grp.label} tone={grp.tone} count={grp.total ?? grp.items.length} />
                 {grp.items.map((g) => {
-                  const rows = byGame[g].slice(0, 18);
-                  // A lineup IS nine. Show that many and fold the rest of the candidate pool
-                  // behind the standard control — an 18-row wall per game buried every card
-                  // below it, and the probe now flags exactly this.
-                  const CAP = 9;
+                  const rows = luByGame[g].slice(0, 18);
                   const moreId = `mlb-lu-${g.replace(/[^a-z0-9]/gi, "")}`;
                   return (
-                    <details className="pmgame" key={g} open>
-                      <summary className="pmgame__h">{label[g]}<span className="pmgame__chev" aria-hidden="true">▾</span></summary>
+                    <details className="pmgame" key={g}>
+                      <summary className="pmgame__h">{luLabel[g]}<span className="pmgame__chev" aria-hidden="true">▾</span></summary>
                       <div className="pmgame__body hb-moretbl">
                         <input type="checkbox" id={moreId} className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
                         <div className="pmscroll">
                           <div className="pmtable pmtable--mlb" role="table">
                             <div className="pmrow pmrow--head" role="row">
-                              <span>player</span><span>status</span><span>starts?</span>
+                              <span>player</span><span>status</span><span>start %</span>
                               <span>batting slot</span><span>recent</span>
                             </div>
-                            {rows.map((r, i) => (
-                              <Row key={`${r.player}-${r.team}`} r={r} more={i >= CAP}
-                                cont={i > 0 && rows[i - 1].player === r.player} />
-                            ))}
+                            {rows.map((r, i) => {
+                              // Once a lineup is posted this is a FACT. Publishing "83%" beside a
+                              // known answer is the same failure as an arrow that contradicts the
+                              // number next to it.
+                              const known = r.lineupPosted;
+                              const cont = i > 0 && rows[i - 1].player === r.player;
+                              return (
+                                <div className={`pmrow pmrow--data${i >= LU_CAP ? " hb-row--more" : ""}`}
+                                  role="row" key={`${r.player}-${r.team}`}>
+                                  <span className="pmcell pmcell--player">
+                                    {cont ? "" : <>{r.player}<span className="pmslot"> ({r.pos ?? "—"}, {r.team})</span></>}
+                                  </span>
+                                  <span className="pmcell pmcell--team">{known ? "in the lineup" : "projected"}</span>
+                                  <span className="pmcell">
+                                    {known
+                                      ? <b className={r.posted ? "mlbin" : "mlbout"}>{r.posted ? "Starting" : "Not starting"}</b>
+                                      : <b className="pmproj">{pct(r.pStart)}</b>}
+                                  </span>
+                                  <span className="pmcell">{r.slot.toFixed(1)}</span>
+                                  <span className="pmcell pmcell--hist">{r.starts}/{r.of} gm</span>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
-                        {rows.length > CAP && (
+                        {rows.length > LU_CAP && (
                           <label htmlFor={moreId} className="hb-moretbl__sum">
                             <span className="hb-more__chev" aria-hidden="true">▸</span>
-                            <span className="hb-moretbl__more">Show {rows.length - CAP} more candidate{rows.length - CAP === 1 ? "" : "s"}</span>
+                            <span className="hb-moretbl__more">Show {rows.length - LU_CAP} more candidate{rows.length - LU_CAP === 1 ? "" : "s"}</span>
                             <span className="hb-moretbl__less">Show fewer</span>
                           </label>
                         )}
@@ -160,84 +241,24 @@ export default async function Page() {
         </div>
       </details>
 
-      <details className="hb-panel hb-panel--card" data-embedchart="mlb-strikeouts" open>
-        <summary className="hb-bar">
-          <span className="hb-bar__title hb-bar__title--gold">Projected strikeouts</span>
-          <span className="hb-bar__count">{MLB_K.length} starters</span>
-          <PinButton size="sm" pin={{ id: "/mlb/model#k", kind: "model", label: "MLB · Strikeouts", detail: "starting pitchers", href: "/mlb/model" }} />
-          <span className="hb-bar__chev" aria-hidden="true">▾</span>
-        </summary>
-        <div className="hb-body">
-          <p className="ctxsec__d">
-            Our line-blind read on tonight&apos;s starters: <b>batters faced</b> multiplied by the
-            pitcher&apos;s <b>strikeout rate</b>, adjusted for how often the opposing lineup strikes
-            out. Volume then rate — the same shape as the football boards, because strikeout rate is
-            the most persistent skill in baseball and hits are mostly not.
-          </p>
-          <p className="ctxsec__d">
-            Held out over <b>925 starts</b>, this lands <b>{(MAE.base - MAE.model).toFixed(3)}</b>{" "}
-            strikeouts closer than the pitcher&apos;s own season average
-            ({((MAE.base - MAE.model) / MAE.base * 100).toFixed(1)}% better).{" "}
-            <b>That is measured against what actually happened, not against the market.</b> Whether
-            it beats a closing line is untested — we only began recording MLB prop prices on
-            7 September, and that test needs history. The book number is shown beside ours so you
-            can see the gap, not because we are claiming it.
-          </p>
-          {MLB_K.length === 0 ? (
-            <p className="foot">No probable starters posted yet for the coming slate.</p>
-          ) : (
-            <div className="hb-moretbl">
-            <input type="checkbox" id="mlb-k-more" className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
-            <div className="pmscroll">
-              <div className="pmtable pmtable--mlbk" role="table">
-                <div className="pmrow pmrow--head" role="row">
-                  <span>pitcher</span><span>opponent</span><span>book line</span>
-                  <span>our proj</span><span>K rate</span><span>starts</span>
-                </div>
-                {MLB_K.map((r, i) => {
-                  const bk = lines.get(norm(r.pitcher));
-                  return (
-                    <div className={`pmrow pmrow--data${i >= K_CAP ? " hb-row--more" : ""}`}
-                      role="row" key={`${r.pitcher}-${r.game}`}>
-                      <span className="pmcell pmcell--player">
-                        {r.pitcher}<span className="pmslot"> ({r.team})</span>
-                      </span>
-                      <span className="pmcell pmcell--team">{r.opp}</span>
-                      <span className="pmcell">{bk ? bk.line.toFixed(1) : "—"}</span>
-                      <span className="pmcell"><b className="pmproj">{r.proj.toFixed(1)}</b></span>
-                      <span className="pmcell">{(r.kRate * 100).toFixed(1)}%</span>
-                      <span className="pmcell pmcell--hist">{r.starts} gm</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            {MLB_K.length > K_CAP && (
-              <label htmlFor="mlb-k-more" className="hb-moretbl__sum">
-                <span className="hb-more__chev" aria-hidden="true">▸</span>
-                <span className="hb-moretbl__more">Show {MLB_K.length - K_CAP} more starter{MLB_K.length - K_CAP === 1 ? "" : "s"}</span>
-                <span className="hb-moretbl__less">Show fewer</span>
-              </label>
-            )}
-            </div>
-          )}
-        </div>
-      </details>
-
-      {/* Say plainly what is not here. A sport's board looking identical to a finished one while
-          quietly missing its model is the failure mode this section exists to avoid. */}
+      {/* Say plainly what is not here. A board that looks finished while quietly missing its model
+          is the failure mode this section exists to avoid. */}
       <section className="calib">
-        <h2 className="calib__h">What isn&apos;t built yet</h2>
+        <h2 className="calib__h">What we don&apos;t publish</h2>
         <p className="foot">
-          There is <b>no MLB game model</b> — no run line, no total. Odds are being captured now so
-          one can be built and graded against a real market, the same way the football boards were.
-          Until a number clears that bar it does not go on this page.
+          <b>No side pick and no run-line call.</b> Baseball&apos;s run line is a fixed ±1.5 and our
+          total is worth {S.gain}% — turning that into a pick on a side would be inventing precision
+          the model does not have. The market&apos;s run line is shown as context, nothing more.
         </p>
         <p className="foot">
-          On props, only <b>strikeouts</b> is modelled so far. Hits, total bases and
-          hits+runs+RBIs are captured but not projected — those outcomes are driven largely by where
-          a batted ball happens to land, which does not carry from game to game the way a strikeout
-          rate does. We would rather publish one number we can defend than five we cannot.
+          <b>No home-field adjustment.</b> Measured across 2,165 games it came to <b>+0.06 runs</b>{" "}
+          — indistinguishable from zero, and far smaller than football&apos;s. A number that small
+          does not belong in a model.
+        </p>
+        <p className="foot">
+          <b>Not yet tested against a closing line.</b> Everything above is measured against what
+          actually happened. We only began recording MLB prices on 7 September, and beating the
+          market is a separate question that needs history we do not have yet.
         </p>
       </section>
     </main>

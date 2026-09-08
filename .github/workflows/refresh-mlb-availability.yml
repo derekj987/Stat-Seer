@@ -1,11 +1,20 @@
-name: Refresh MLB availability
+name: Refresh MLB models
 
-# Rebuilds web/lib/mlbAvailability.ts (the /mlb/model board), then commits it — Vercel auto-deploys.
+# Rebuilds all four MLB data files, then commits them — Vercel auto-deploys.
 #
-# WHAT IT REBUILDS. Stage A: P(in tonight's starting lineup) + projected batting slot, for every
-# candidate on the upcoming slate. Features come from each team's prior 30 games, so the file is
-# stale the moment a night of baseball is played — unlike football's weekly rhythm, this genuinely
-# needs a daily run.
+# WHAT IT REBUILDS.
+#   mlbAvailability.ts  Stage A: P(in tonight's starting lineup) + projected batting slot.
+#   mlbGameModel.ts     projected runs and totals for the upcoming slate (/mlb/model).
+#   mlbStrikeouts.ts    projected strikeouts for tonight's starters.
+#   mlbPlayerProps.ts   calibrated hit / home-run probabilities (/mlb/model/players).
+#
+# All four project the UPCOMING slate off each team's PRIOR games, so every one of them is stale
+# the moment a night of baseball is played — unlike football's weekly rhythm, this genuinely needs
+# a daily run. Availability was scheduled first and the other three were added once they shipped;
+# they share the same cached lineup days, so running them together costs almost nothing extra.
+#
+# The file keeps its original name so the existing schedule and run history carry over — GitHub
+# keys a workflow on its path, and renaming the file would silently start a new one.
 #
 # CADENCE. 15:00 UTC = 11am ET, which is after the previous night's games have all gone Final (the
 # west-coast late game ends ~06:00 UTC) and before lineups start posting for the evening slate
@@ -53,19 +62,31 @@ jobs:
           restore-keys: |
             mlb-lineups-2026-
 
+      # Each script validates before it writes and refuses to emit an empty slate, so a bad day
+      # leaves the previous file in place rather than blanking a board.
       - name: Rebuild MLB availability
         run: python mlb_availability.py
+      - name: Rebuild MLB game model
+        run: python mlb_game_model.py
+      - name: Rebuild MLB pitcher strikeouts
+        run: python mlb_strikeouts.py
+      - name: Rebuild MLB player props
+        run: python mlb_player_props.py
 
       - name: Commit if changed
+        env:
+          FILES: >-
+            web/lib/mlbAvailability.ts web/lib/mlbGameModel.ts
+            web/lib/mlbStrikeouts.ts web/lib/mlbPlayerProps.ts
         run: |
-          if git diff --quiet -- web/lib/mlbAvailability.ts; then
+          if git diff --quiet -- $FILES; then
             echo "No change — nothing to commit."
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add web/lib/mlbAvailability.ts
-          git commit -m "chore: refresh MLB availability (auto)"
+          git add $FILES
+          git commit -m "chore: refresh MLB models (auto)"
           # Several bots push this branch; retry rebase+push a few times before failing.
           for i in 1 2 3 4 5; do
             git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || git rebase --abort || true

@@ -214,8 +214,10 @@ def main(argv=None):
                 # nights, so a matchup string alone is NOT a unique game — Cleveland @ Baltimore
                 # collapsed Sep 8 and Sep 9 into one card with every player listed twice. Football
                 # never does this, which is why the football boards key on the matchup and get away
-                # with it. Key on the DATE too; keep the matchup for display.
-                "gameKey": f'{(r["commence"] or "")[:10]}|{away} @ {home}',
+                # with it. Date + matchup was the first fix and was still wrong: the date came from
+                # the UTC timestamp, so a west-coast night game carried tomorrow's date and
+                # collided with the next game of its own series. Key on StatsAPI's gamePk.
+                "gameKey": str(r["gamePk"]),
                 "game": f"{away} @ {home}", "commence": r["commence"],
                 "player": f["name"], "team": r["teamName"], "opp": r["opp"],
                 "pos": f["pos"], "pStart": f["p_start"], "slot": f["slot"],

@@ -125,6 +125,41 @@ The NCAAF game model does NOT have this bug — it already centres on the median
 market (`debias = statistics.median(_resid)`, `total_debias` likewise in `cfb_export.py`), added for
 exactly this reason. Game margins and totals are near-symmetric anyway, so mean ≈ median there.
 
+**A one-sided board is a SYMPTOM, and it has two possible causes. Measure which before you fix it.**
+The MLB game model board came up **13 of 15 over the market, median +0.7 runs** — the exact
+signature above. The obvious diagnosis was ours: the league anchor was a full-season mean of 8.96
+while the market priced that night at 8.20, so the level looked stale. A trailing-window league mean
+was written to fix it.
+
+**The sweep said no.** Model MAE by window on the train split: 150 → 3.5328, 300 → 3.5506,
+450 → 3.5489, 600 → 3.5468, 900 → 3.5446, expanding → 3.5444. A 0.3% spread across a 9× range, and
+**not monotonic** — which is what noise looks like, and the tell that a knob is not a lever. Against
+actual runs the mean signed error was **+0.01**: unbiased. The lean was entirely against the
+*market*, not against reality.
+
+So the two causes are:
+- **Our level is wrong** — the projection disagrees with what happens. Shows up as a non-zero mean
+  residual vs OUTCOMES. This is a bug and must be fixed before publishing.
+- **The market disagrees with us** — the projection matches outcomes and the market is elsewhere.
+  This is not a bug, and "fixing" it by pulling toward the market destroys the line-blindness that
+  makes the board worth anything.
+
+```python
+resid = statistics.mean(r["proj"] - r["actual"] for r in held_out)   # ~0 => not our bug
+over  = sum(1 for r in board if r["proj"] > r["market"]) / len(board) # lean vs MARKET
+```
+**Never diagnose a lean from the market column alone** — that column cannot tell the two apart. And
+when it turns out to be the second case, say so ON the board: a reader who notices that almost every
+row points one way will assume the first case unless you show them the residual.
+
+**Two leaks found while chasing this, both worth grepping for elsewhere.** `State.lg` was
+`mean(g["total"] for g in games)/2` over the WHOLE list, held-out games included, so every
+projection's league anchor had seen the future; and `validate()` scored the baseline as `2 * st.lg`
+*after* the walk-forward loop, giving the baseline a final-state number the model never had. The
+second is the more dangerous shape because it flatters **the thing the model must beat**, so it
+understates the model and you will not go looking. Capture a baseline at prediction time, inside the
+loop, next to the prediction.
+
 ### A week-scoped board must be able to say WHICH week its data is for
 `/ncaaf/model/players` rendered week 1's games on every week of the season. The generated data set
 carried `season` and `prior` but **no week**, so the view gated on `projections.length > 0` — true

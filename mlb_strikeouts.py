@@ -227,8 +227,10 @@ def main(argv=None):
                     away_n = g["teams"]["away"]["team"]["name"]
                     home_n = g["teams"]["home"]["team"]["name"]
                     out.append({
-                        # Series-safe key — see mlb_player_props for why the matchup alone isn't one.
-                        "gameKey": f'{(g.get("gameDate") or "")[:10]}|{away_n} @ {home_n}',
+                        # Series-safe key — see mlb_player_props for why neither the matchup nor
+                        # the UTC date + matchup is one. Same gamePk the other exporters use, so
+                        # a pitcher and his hitters land in the same card on /mlb/model/players.
+                        "gameKey": str(g["gamePk"]),
                         "game": f"{away_n} @ {home_n}",
                         "commence": g.get("gameDate"),
                         "pitcher": pp["fullName"], "team": g["teams"][side]["team"]["name"],
