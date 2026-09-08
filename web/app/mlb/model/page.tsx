@@ -111,8 +111,10 @@ export default async function Page() {
               and our spreads below it. Neither is us running hot: against real results our total
               averages <b>{S.resid >= 0 ? "+" : ""}{S.resid.toFixed(2)}</b> runs of error and has
               been <i>too low</i> in four of six months, while the market prices this stretch about
-              0.8 runs under what the season has produced. Our margins average <b>0.6</b> runs
-              against real margins of <b>3.6</b> — the model is timid, not bold.<br /><br />
+              0.8 runs under what the season has produced. Our margins average{" "}
+              <b>{S.marMean.toFixed(1)}</b> runs against real margins of <b>{S.marActual.toFixed(1)}</b>{" "}
+              — the model is timid, not bold, and beats a coin flip on the side by{" "}
+              <b>{S.marGain}%</b>.<br /><br />
               <b>No pick.</b> Whether we or the market are right is a closing-line question, and we
               only began recording MLB odds on <b>7 September</b>. A gap here is a difference to
               notice, not an edge to act on.
@@ -285,9 +287,9 @@ export default async function Page() {
         <h2 className="calib__h">
           What we don&apos;t publish
           <Tip label="What we don't publish, and why" text={<>
-            <b>No side pick.</b> Our total is worth {S.gain}% and our margins average 0.6 runs
-            against real margins of 3.6. Turning either into a pick would be inventing precision the
-            model does not have.<br /><br />
+            <b>No side pick.</b> Our total is worth {S.gain}% and our margins average{" "}
+            {S.marMean.toFixed(1)} runs against real margins of {S.marActual.toFixed(1)}. Turning
+            either into a pick would be inventing precision the model does not have.<br /><br />
             <b>No run line.</b> It is a fixed ±1.5 on every game, so a column of it says nothing
             about who is favoured by how much.<br /><br />
             <b>No home-field adjustment.</b> Measured across 2,165 games at <b>+0.06 runs</b> —

@@ -213,6 +213,40 @@ Two-way tested: 0 findings as shipped, 1 after re-applying the old rules via an 
 ancestor is one refactor away from this bug, and the failure is invisible until someone clicks. When
 you move a component into a new container, re-check what positions it.
 
+**Fixing one instance is not the job — sweep every instance, both viewports.** The bug was reported
+on `/model`; it was latent everywhere, because the cause is CSS shared by every Tip. Enumerate the
+consumers from source, then visit all of them:
+```bash
+grep -rln 'from "\(\.\.*/\)*Tip"\|<Tip ' web/app --include=*.tsx
+```
+Swept after the fix: **22 Tips across 13 pages at 1440 and 375, zero bad** — `/`, `/model`,
+`/model/players`, `/props`, `/lines`, `/considerations`, `/context`, `/local-intelligence`,
+`/ncaaf/model`, `/ncaaf/model/players`, `/ncaaf/lines`, `/ncaaf/considerations`,
+`/ncaaf/local-intelligence`, `/mlb/model`. A per-page assertion worth reusing:
+```js
+tips.filter(t => !anchored(t) || !fitsViewport(t) || distanceFromTrigger(t) > 500)   // must be []
+```
+
+### 🚨 The `#S:0` splice DISTORTS geometry on a page that already rendered
+The splice is for pages stuck on `Loading…`. Applied to a page whose live tree is fine, it moves
+content out of its real container and the measurements go wrong — and they go wrong in the
+direction that invents bugs.
+
+Measured on `/context` at 375px: before the splice `documentElement.scrollWidth` was **375**
+(clean); after, **452**, with the fixed phone dock shifted 77px and its icons reported 87px past the
+viewport. That reads exactly like a phone horizontal-overflow bug, and it does not exist. Two other
+checks fired downstream of it (`popover-unanchored`, because the bubble is sized from the inflated
+viewport).
+
+**Splice conditionally, never unconditionally:**
+```js
+const live = document.querySelector('.siteshift main.wrap');
+if (!live || live.getBoundingClientRect().height <= 40) { /* only now splice #S:0 */ }
+```
+Report whether you spliced alongside every finding, and **re-verify any overflow or geometry
+finding on a page you spliced** by re-measuring without it. The rule of thumb: a splice is evidence
+the page did not render, so treat every measurement on that page as provisional.
+
 ### Long copy belongs in the scroll, not on the board
 Derek: *"Most of the information on this page is too wordy."* The MLB game panel had **five
 paragraphs of caveat above the chart**. Every sentence was true and measured, and stacked over a

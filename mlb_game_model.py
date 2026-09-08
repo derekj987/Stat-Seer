@@ -9,7 +9,10 @@ THE MODEL.
     runs(A) = league x (A offence / league) x (B defence / league) x (B's starter factor)
     total   = runs(A) + runs(B)
 
-Everything shrunk toward league and computed from games STRICTLY BEFORE the one being predicted.
+Everything is computed from games STRICTLY BEFORE the one being predicted. Each club is shrunk
+toward its OWN prior-season rate (rescaled into this season's run environment), not toward the
+league mean -- so a team starts the year as itself rather than as average. That is worth +0.34% on
+margin MAE and nothing on totals; see PRIOR_REGRESS for the twelve-configuration sweep.
 
 WHAT IT IS WORTH -- and this is the headline, not a footnote. Measured on 554 held-out games,
 constants swept on the first 70% of dates:
@@ -18,18 +21,25 @@ constants swept on the first 70% of dates:
     league mean total (causal, 8.96)       3.5634            --
     team offence x defence, shrunk         3.5611         -0.0%
     + starting pitcher                     3.5317         +0.9%
+    + prior-season team prior              3.5355         +0.8%   <- ships
+
+MARGINS are the other half, and the reason the prior is in at all. Against a coin flip (predicting
+a zero margin every game): 3.3490 -> 3.3377 MAE, +2.35% -> +2.68%, and mean |margin| 0.71 -> 0.79.
+Our margins still average well under real ones (3.43), which is the honest shape of a model whose
+team-quality term is worth almost nothing: it rarely makes anyone a big favourite.
 
 (An exploratory pass scored +1.2%; this script's own --validate says +0.9%, and the smaller number
 is the one that ships. A figure you cannot reproduce by running the code is not a measurement.)
 
-Mean signed error against actual totals is +0.01 runs -- unbiased. That matters because the board
+Mean signed error against actual totals is +0.02 runs -- unbiased. That matters because the board
 leans OVER the market's total on 13 of 15 games, median +0.7 runs: the market is pricing this
 slate at 8.20 against a season that has realized 8.96. Which of the two is right is not knowable
 yet -- MLB odds capture began 7 September -- so the board publishes both numbers and no pick.
 
 TEAM QUALITY ALONE IS WORTH NOTHING. Offence x defence lands exactly on the league mean, and the
 shrinkage sweep chose k=150 against ~140 games per team -- the optimiser's way of saying "ignore
-the teams". Only the starting pitcher adds anything, and it adds 0.9%.
+the teams". Only the starting pitcher adds anything, and it adds 0.9%; the prior-season prior
+then trades a tenth of that back for a better margin.
 
 That is not a modelling failure, it is the sport. A single MLB game has a mean total of 8.96 runs
 with a standard deviation of 4.53. Game-to-game variance swamps every team-quality difference
@@ -42,7 +52,7 @@ proportionally than football's. It is not in the model because it is not disting
 SO WHAT IS THIS FOR. The same thing the football game boards are for: a line-blind number,
 published before the game, graded afterwards. It is the trust engine, not the edge. The edge, if
 there is one, is in Value Finder, where the arithmetic works regardless of how noisy the sport is.
-A run line is NOT published: the run line is a fixed +/-1.5 and turning a 0.9% total improvement
+A run line is NOT published: the run line is a fixed +/-1.5 and turning a 0.8% total improvement
 into a side pick would be inventing precision this model does not have.
 
 Stdlib only. statsapi.mlb.com is public and keyless.
@@ -74,12 +84,49 @@ MIN_TEAM_GAMES, MIN_SP_OUTS = 20, 60
 LG_WIN, LG_MIN = 4000, 200
 SEASON = 2026
 
+# PRIOR-SEASON TEAM PRIOR. Each club is shrunk toward its OWN last-season rate rather than toward
+# the league mean, so a team starts the year as itself instead of as average and is still partly
+# itself in September (K_TEAM=150 against ~140 games played is a heavy pull).
+#
+# MEASURED, chosen on TRAIN and reported on TEST across 12 configurations
+# (regress x K = {0.35,0.5,0.65} x {150,300,600,1200}):
+#
+#     margin MAE   3.3178 -> 3.3064   (+0.34%)     gain vs a zero margin: +2.29% -> +2.62%
+#     total  MAE   3.5569 -> 3.5577   (-0.02%, i.e. unchanged)
+#     mean |margin| 0.72 -> 0.80      (less timid, which was the point)
+#
+# Small, but all twelve configurations beat the baseline on test margin and the train split agreed,
+# so the SIGN is trustworthy even though the size is not exciting.
+#
+# Discipline note kept deliberately: selecting on the TEST split instead would have chosen
+# regress=0.5/K=1200 and reported +2.90% -- nearly double. That gap is the cost of choosing on the
+# data you report, and it is why these two constants come from the train split.
+#
+# Still untested against a closing line. MLB price capture began 2026-09-07; beating the market is
+# a separate question that needs history we do not have.
+PRIOR_SEASON = SEASON - 1
+PRIOR_REGRESS = 0.65                   # pull last season toward league before using it as a prior
+MIN_PRIOR_GAMES = 50                   # below this a club has no usable prior; fall back to league
+CACHE_PRIOR = os.path.join("data", f"mlb_team_runs_{PRIOR_SEASON}.json")
+
 # Held out over 554 games, straight from this script's own --validate. Kept here so the board
-# cannot drift from what was measured. `resid` is the mean signed error against ACTUAL totals:
-# +0.01 runs, i.e. unbiased. It is published because the board leans over the MARKET on 13 of 15
-# games, and this is the number that says that lean is not the model drifting high.
-SCORES = {"model": 3.5317, "base": 3.5634, "gain": 0.9, "sd": 4.52, "meanTotal": 8.96,
-          "n": 554, "resid": 0.01}
+# cannot drift from what was measured. `resid` is the mean signed error against ACTUAL totals --
+# published because the board leans over the MARKET, and this is the number that says that lean is
+# not the model drifting high.
+#
+# WITH the prior-season prior (ships) vs WITHOUT it (run with PRIOR_REGRESS = 1.0, which collapses
+# the prior to the league mean and reproduces the old model exactly):
+#
+#                        total MAE   total gain   margin MAE   margin gain   mean |margin|
+#     league prior only     3.5317        +0.9%       3.3490        +2.35%            0.71
+#     + 2025 team prior     3.5355        +0.8%       3.3377        +2.68%            0.79
+#
+# The trade is explicit: a tenth of a point of total accuracy for a third of a point of margin, and
+# a model that is meaningfully less timid. Margins are where the prior was expected to help and
+# where it does.
+SCORES = {"model": 3.5355, "base": 3.5634, "gain": 0.8, "sd": 4.52, "meanTotal": 8.96,
+          "n": 554, "resid": 0.02,
+          "marModel": 3.3377, "marBase": 3.4296, "marGain": 2.7, "marMean": 0.79, "marActual": 3.43}
 
 
 def _outs(ip):
@@ -115,6 +162,66 @@ def team_runs(refresh=False):
     os.makedirs(os.path.dirname(CACHE_T), exist_ok=True)
     json.dump(rows, open(CACHE_T, "w", encoding="utf-8"), ensure_ascii=False)
     return rows
+
+
+def prior_team_runs(refresh=False):
+    """Last season's team game logs. A completed season is immutable, so this caches forever and
+    costs 30 calls on a cold runner."""
+    if not refresh and os.path.exists(CACHE_PRIOR):
+        try:
+            return json.load(open(CACHE_PRIOR, encoding="utf-8"))
+        except Exception:
+            pass
+    teams = (av._get(f"{API}/teams?sportId=1") or {}).get("teams", [])
+
+    def one(t):
+        j = av._get(f"{API}/teams/{t['id']}/stats?stats=gameLog&group=hitting"
+                    f"&season={PRIOR_SEASON}")
+        out = []
+        for blk in (j or {}).get("stats", []):
+            for s in blk.get("splits", []):
+                out.append({"team": t["id"], "gamePk": (s.get("game") or {}).get("gamePk"),
+                            "runs": s["stat"].get("runs", 0)})
+        return out
+    rows = []
+    with ThreadPoolExecutor(max_workers=10) as ex:
+        for got in ex.map(one, teams):
+            rows += got
+    os.makedirs(os.path.dirname(CACHE_PRIOR), exist_ok=True)
+    json.dump(rows, open(CACHE_PRIOR, "w", encoding="utf-8"))
+    return rows
+
+
+def prior_rates(rows):
+    """Last season's runs scored / allowed per team per game, each pulled PRIOR_REGRESS of the way
+    toward that season's league mean. Returns (off, dfn, league) — league is needed to rescale into
+    THIS season's run environment, since the two years do not score alike.
+
+    Returns empty maps when the prior season is unavailable, and the model then falls back to the
+    league mean exactly as it did before. An empty result is a claim, so it says so out loud."""
+    by = collections.defaultdict(list)
+    for r in rows:
+        by[r["gamePk"]].append(r)
+    rs = collections.Counter(); ra = collections.Counter(); n = collections.Counter()
+    for _pk, v in by.items():
+        if len(v) != 2:
+            continue
+        a, b = v
+        rs[a["team"]] += a["runs"]; ra[a["team"]] += b["runs"]; n[a["team"]] += 1
+        rs[b["team"]] += b["runs"]; ra[b["team"]] += a["runs"]; n[b["team"]] += 1
+    if not n:
+        print(f"WARNING: no {PRIOR_SEASON} team games parsed — falling back to the league prior",
+              file=sys.stderr)
+        return {}, {}, 0.0
+    lg = sum(rs.values()) / sum(n.values())
+    off, dfn = {}, {}
+    for t in n:
+        if n[t] < MIN_PRIOR_GAMES:
+            continue
+        off[t] = (1 - PRIOR_REGRESS) * (rs[t] / n[t]) + PRIOR_REGRESS * lg
+        dfn[t] = (1 - PRIOR_REGRESS) * (ra[t] / n[t]) + PRIOR_REGRESS * lg
+    print(f"{PRIOR_SEASON} prior: {len(off)} teams, league {lg:.3f} runs/team/game")
+    return off, dfn, lg
 
 
 def sp_runs(ids, refresh=False):
@@ -167,7 +274,7 @@ def pair_games(rows, starters):
 
 
 class State:
-    def __init__(self, games):
+    def __init__(self, games, poff=None, pdfn=None, plg=0.0):
         # The league run environment, per team per game, accumulated from games ALREADY PLAYED.
         #
         # It used to be statistics.mean(g["total"] for g in games) / 2 -- the mean over the whole
@@ -185,6 +292,12 @@ class State:
         # leak was worth doing on its own; it did not explain the lean and is not claimed to.
         self._recent = collections.deque(maxlen=LG_WIN)
         self._prior = statistics.mean(g["total"] for g in games[:200]) / 2 if games else 4.5
+        # Last season's per-team rates, and the league mean they were measured against. Both are
+        # needed: the rate has to be rescaled into THIS season's run environment before it can be
+        # used as a target. Empty => shrink toward the league mean, the old behaviour.
+        self._poff = poff or {}
+        self._pdfn = pdfn or {}
+        self._plg = plg
         self.rs = collections.defaultdict(int); self.ra = collections.defaultdict(int)
         self.n = collections.defaultdict(int)
         self.er = collections.defaultdict(int); self.outs = collections.defaultdict(int)
@@ -202,8 +315,20 @@ class State:
     def lg_rpo(self):
         return self.tot_er / self.tot_outs if self.tot_outs else 0.0
 
-    def off(self, t): return (self.rs[t] + K_TEAM * self.lg) / (self.n[t] + K_TEAM)
-    def dfn(self, t): return (self.ra[t] + K_TEAM * self.lg) / (self.n[t] + K_TEAM)
+    def _target(self, tbl, t):
+        """What this club is shrunk TOWARD: its own prior-season rate, rescaled into this season's
+        run environment, or the league mean when there is no usable prior (an expansion club, a
+        missing fetch, a team with too few games last year)."""
+        v = tbl.get(t)
+        if v is None or not self._plg:
+            return self.lg
+        return v * (self.lg / self._plg)
+
+    def off(self, t):
+        return (self.rs[t] + K_TEAM * self._target(self._poff, t)) / (self.n[t] + K_TEAM)
+
+    def dfn(self, t):
+        return (self.ra[t] + K_TEAM * self._target(self._pdfn, t)) / (self.n[t] + K_TEAM)
 
     def sp_factor(self, pid):
         """>1 = this starter gives up more than league; <1 = suppresses runs. 1.0 when unknown,
@@ -235,8 +360,8 @@ class State:
                 self.tot_er += e["er"]; self.tot_outs += e["outs"]
 
 
-def validate(games, spby):
-    st = State(games)
+def validate(games, spby, prior=None):
+    st = State(games, *(prior or ()))
     rows = []
     for g in games:
         p = st.project(g["home"], g["away"], g["hsp"], g["asp"])
@@ -245,7 +370,9 @@ def validate(games, spby):
             # league mean let the baseline see games it was being tested on -- a small leak, but
             # it flattered the thing the model has to beat, which is the wrong direction to be
             # wrong in.
-            rows.append({"date": g["date"], "y": g["total"], "p": p["total"], "b": 2 * st.lg})
+            rows.append({"date": g["date"], "y": g["total"], "p": p["total"], "b": 2 * st.lg,
+                         "yM": g["hr"] - g["ar"],
+                         "pM": p["homeRuns"] - p["awayRuns"]})
         st.advance(g, spby)
     dates = sorted({r["date"] for r in rows})
     cut = dates[int(len(dates) * 0.70)]
@@ -263,7 +390,16 @@ def validate(games, spby):
     print(f"  projected over the actual total on {over/len(te)*100:.1f}% of held-out games "
           f"(want ~50%); mean residual {statistics.mean(r['p']-r['y'] for r in te):+.2f} runs")
     print(f"  (mean total {2*st.lg:.2f}, single-game SD "
-          f"{statistics.pstdev([r['y'] for r in rows]):.2f} — the variance is the story)")
+          f"{statistics.pstdev([r['y'] for r in rows]):.2f} - the variance is the story)")
+    # MARGINS get their own block, because the prior-season prior was added FOR the margin and a
+    # report that only shows totals cannot say whether it earned its place. Baseline is predicting
+    # a zero margin, i.e. every game a coin flip -- the honest null for a sport this noisy.
+    mm = lambda f: statistics.mean(abs(f(r) - r["yM"]) for r in te)
+    m0, mmod = mm(lambda r: 0), mm(lambda r: r["pM"])
+    print(f"  margin: MAE {mmod:.4f} vs {m0:.4f} for a coin flip -> {(m0-mmod)/m0*100:+.2f}%")
+    print(f"          mean |ours| {statistics.mean(abs(r['pM']) for r in te):.2f} vs "
+          f"|actual| {statistics.mean(abs(r['yM']) for r in te):.2f} "
+          f"(SD {statistics.pstdev([r['yM'] for r in rows]):.2f})")
     return base, mod
 
 
@@ -285,18 +421,22 @@ def main(argv=None):
     for r in sp:
         spby[(r["date"], r["pid"])].append(r)
     games = pair_games(rows, starters)
+    # Each club is shrunk toward its OWN last-season rate rather than the league mean. Built once
+    # and passed to every State so validation and the export cannot disagree — a model scored with
+    # one prior and published with another is not the model that was measured.
+    prior = prior_rates(prior_team_runs(refresh=args.refresh))
     print(f"{len(games):,} completed games, {len(sp):,} starts")
     if len(games) < 300:
         print("WARNING: too little history — refusing to write", file=sys.stderr)
         return 1
     if args.validate:
-        validate(games, spby)
+        validate(games, spby, prior)
         return 0
 
-    st = State(games)
+    st = State(games, *prior)
     for g in games:
         st.advance(g, spby)
-    base, mod = validate(games, spby)
+    base, mod = validate(games, spby, prior)
 
     name = {r["team"]: r["name"] for r in rows}
     # Club abbreviations for the board: a pitcher's name means little without the club beside it,

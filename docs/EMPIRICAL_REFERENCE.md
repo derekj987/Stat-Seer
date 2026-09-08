@@ -738,7 +738,7 @@ Direction is right (we say home by >1 ⇒ actual averages +1.19; away by >1 ⇒ 
 sweep chosen on train picked **1.0 — no shrinking**. Reported because the board *looked* like it
 made too many favourites; it did not, and the cause was a display column (below).
 
-### 12c. Prior-season team prior — real but small
+### 12c. Prior-season team prior — real but small (SHIPPED 2026-09-08)
 
 Question: does shrinking each team toward its own **2025** rate, instead of toward the league mean,
 make the model less timid? Twelve configurations (regress ∈ {0.35, 0.5, 0.65} × K ∈ {150, 300, 600,
@@ -758,6 +758,19 @@ enough price history accumulates (capture began 2026-09-07).
 Discipline note: selecting on the test split instead would have picked regress=0.5/K=1200 and
 reported **+2.90%** — nearly double. The gap between those two numbers is the cost of choosing on
 the data you report.
+
+**Now wired in** at `PRIOR_REGRESS = 0.65`, `K_TEAM = 150`. Reproducible from the shipped script,
+which reports margins alongside totals; run it with `PRIOR_REGRESS = 1.0` to collapse the prior back
+to the league mean and recover the old model exactly:
+
+| | total MAE | total gain | margin MAE | margin gain | mean abs margin |
+|---|---|---|---|---|---|
+| league prior only | 3.5317 | +0.9% | 3.3490 | +2.35% | 0.71 |
+| **+ 2025 team prior** | 3.5355 | +0.8% | **3.3377** | **+2.68%** | **0.79** |
+
+The trade is explicit: a tenth of a point of total accuracy for a third of a point of margin, and a
+model that is less timid. Board effect — our mean absolute spread is 1.07 against the market's 1.01,
+and we still call fewer home favourites than the market does (13 of 19 vs 16).
 
 ### 12d. The run line is not a spread
 
