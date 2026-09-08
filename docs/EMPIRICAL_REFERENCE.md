@@ -778,3 +778,44 @@ MLB's run line is a fixed ±1.5 on every game (confirmed against the raw capture
 values present). A "consensus spread" column therefore prints −1.5 on nearly every row and, where
 books disagree on the favourite, a median of **0** — not a real line. The market's side is read from
 the **moneyline** instead: de-vig the pair, then `margin ≈ SD × probit(p)` with SD = 4.63.
+
+### 12e. Batter vs pitcher (BvP) — measured, and deliberately not modelled
+
+Career batter-vs-pitcher history, measured on a full 15-game slate (171 distinct pairs,
+StatsAPI `vsPlayerTotal`):
+
+| career AB vs tonight's starter | pairs |
+|---|---|
+| **0 — never faced** | **51.5%** |
+| 1–4 | 20.5% |
+| 5–9 | 17.0% |
+| 10–19 | 9.9% |
+| 20+ | 1.2% |
+
+**Median 0.** 16% of all pairs read `.000` or `≥.500` on six at-bats or fewer — figures that look
+authoritative and are noise. It is published as CONTEXT with the sample printed beside it, and is
+not an input to any probability. It also could not fix a board-level lean even if it were: a
+per-matchup adjustment averages to nothing across a slate.
+
+### 12f. The board's "book %" column, and why our number sits above it
+
+Measured on `batter_hits`, 1,122 (player, book) quotes in one snapshot:
+
+| | mean |
+|---|---|
+| our probability | 61.9% |
+| raw implied Over | 60.5% |
+| de-vigged book (the column) | 56.7% |
+| **realized 1+ hit rate (held out)** | **60.6%** |
+| mean hold on the market | **6.77%** |
+
+Our number sits on the rate batters actually achieve; the book column sits ~4 points below it
+because the hold has been removed. **On a 6.8%-hold market a board comparing "our fair" against
+"book fair" will always look like it leans over.** That is arithmetic, not a signal, and it is why
+the lean cannot be read as a model error without the realized base rate beside it.
+
+Defect found and fixed in the same pass: `propBookProb` fell back to the **raw** implied
+probability when a book posted only one side (270 of 1,122 quotes), then took a median across books
+— mixing ~56.7% de-vigged values with ~60.5% raw ones in a single column. Two-sided quotes now win
+outright; a one-sided price is brought onto the same footing with the hold measured from that
+snapshot.

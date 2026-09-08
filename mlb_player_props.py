@@ -83,6 +83,57 @@ SLOT_PA = {1: 4.49, 2: 4.41, 3: 4.30, 4: 4.19, 5: 4.05, 6: 3.89, 7: 3.76, 8: 3.6
 SLOT_PA_DIST: dict[int, list[tuple[int, float]]] = {}
 
 
+CACHE_BVP = os.path.join("data", "mlb_bvp.json")
+
+
+def batter_vs_pitcher(pairs, refresh=False):
+    """Career at-bats and hits for each (batter, opposing starter) pair on the slate.
+
+    CONTEXT ONLY -- deliberately NOT an input to the probability. Measured on a real 15-game slate,
+    171 distinct pairs:
+
+        career AB vs tonight's starter     pairs
+        0 (never faced him)                51.5%
+        1-4                                20.5%
+        5-9                                17.0%
+        10-19                               9.9%
+        20+                                 1.2%
+
+    The MEDIAN is zero. Half the board would show nothing, and 16% of all pairs read .000 or .500+
+    on six at-bats or fewer -- numbers that look authoritative and are noise. A career line like
+    "0 for 4" is not evidence a hitter is due or cooked; it is four at-bats.
+
+    It is shown because a bettor genuinely wants to see who is pitching and what the history is,
+    and because hiding it invites someone to look it up elsewhere and trust it MORE. The sample
+    size is printed beside it for the same reason.
+    """
+    cache = {}
+    if not refresh and os.path.exists(CACHE_BVP):
+        try:
+            cache = json.load(open(CACHE_BVP, encoding="utf-8"))
+        except Exception:
+            cache = {}
+    todo = [t for t in pairs if f"{t[0]}-{t[1]}" not in cache]
+
+    def one(t):
+        bat, sp = t
+        j = av._get(f"{API}/people/{bat}/stats?stats=vsPlayerTotal"
+                    f"&opposingPlayerId={sp}&group=hitting")
+        for blk in (j or {}).get("stats", []):
+            for spl in blk.get("splits", []):
+                st = spl["stat"]
+                return (f"{bat}-{sp}", [st.get("atBats", 0), st.get("hits", 0)])
+        return (f"{bat}-{sp}", [0, 0])
+    if todo:
+        with ThreadPoolExecutor(max_workers=10) as ex:
+            for k, v in ex.map(one, todo):
+                cache[k] = v
+        os.makedirs(os.path.dirname(CACHE_BVP), exist_ok=True)
+        json.dump(cache, open(CACHE_BVP, "w", encoding="utf-8"))
+    print(f"batter-vs-pitcher: {len(pairs)} pairs ({len(todo)} fetched, rest cached)")
+    return cache
+
+
 def slot_pa_dist(logs, slots):
     """Empirical P(plate appearances = k) per batting slot. Built from the same logs the rates come
     from, so it moves with the data instead of being another hardcoded table."""
@@ -254,6 +305,32 @@ def main(argv=None):
 
     now = _dt.datetime.now(_dt.timezone.utc).isoformat()
     clubs = {r["teamName"] for t in bt for r in bt[t]}
+
+    # Opposing STARTER for each team-slate, and the career batter-vs-pitcher line for every pair we
+    # are about to publish. Context, not an input -- see batter_vs_pitcher's docstring for why.
+    sp_by = {(r["gamePk"], r["team"]): r.get("sp") for r in lineups if r.get("sp")}
+    spname = {r.get("sp"): r.get("spName") for r in lineups if r.get("sp")}
+    opp_sp = {}
+    for r in lineups:
+        other = next((x for x in lineups
+                      if x["gamePk"] == r["gamePk"] and x["team"] != r["team"]), None)
+        if other:
+            opp_sp[(r["gamePk"], r["team"])] = sp_by.get((other["gamePk"], other["team"]))
+    pairs = set()
+    for r in lineups:
+        if r["final"] or (r.get("commence") or "") < now:
+            continue
+        osp = opp_sp.get((r["gamePk"], r["team"]))
+        if not osp:
+            continue
+        for pl in (r.get("lineup") or []):
+            pairs.add((pl["id"], osp))
+        hist_ = bt.get(r["team"], [])
+        if hist_:
+            for pl in hist_[-1]["lineup"]:
+                pairs.add((pl["id"], osp))
+    bvp = batter_vs_pitcher(sorted(pairs), refresh=args.refresh) if pairs else {}
+
     rows = []
     for r in lineups:
         if r["final"] or (r.get("commence") or "") < now or r["opp"] not in clubs:
@@ -266,6 +343,7 @@ def main(argv=None):
         opp_id = next((x["team"] for t in bt for x in bt[t] if x["teamName"] == r["opp"]), None)
         away = r["teamName"] if r["side"] == "away" else r["opp"]
         home = r["opp"] if r["side"] == "away" else r["teamName"]
+        osp_id = opp_sp.get((r["gamePk"], r["team"]))
         for pid, f in av.features(hist[-av.WIN:], prev).items():
             slot = round(f["slot"])
             ph, phr = RH.prob(pid, opp_id, slot), RHR.prob(pid, opp_id, slot)
@@ -287,6 +365,9 @@ def main(argv=None):
                 "pHit": ph, "pHr": phr,
                 "hitRate": RH.rate(pid), "hrRate": RHR.rate(pid),
                 "pa": SLOT_PA.get(slot),
+                "oppSp": spname.get(osp_id),
+                "bvpAb": (bvp.get(f"{pid}-{osp_id}") or [0, 0])[0],
+                "bvpH": (bvp.get(f"{pid}-{osp_id}") or [0, 0])[1],
             })
     rows.sort(key=lambda x: (x["commence"], x["gameKey"], -(x["pHit"] or 0)))
     header = (f"// AUTO-GENERATED by mlb_player_props.py -- do not edit by hand.\n"
@@ -299,7 +380,8 @@ def main(argv=None):
           "export type MlbProp = { gameKey: string; game: string; commence: string; player: string; team: string;\n"
           "  opp: string; pos: string | null; pStart: number; slot: number; posted: boolean;\n"
           "  lineupPosted: boolean; pHit: number | null; pHr: number | null;\n"
-          "  hitRate: number | null; hrRate: number | null; pa: number | null };\n\n"
+          "  hitRate: number | null; hrRate: number | null; pa: number | null;\n"
+          "  oppSp: string | null; bvpAb: number; bvpH: number };\n\n"
           f"export const MLB_PROPS: MlbProp[] = {json.dumps(rows, ensure_ascii=False)};\n"
           f"export const MLB_PROP_SCORES = {json.dumps(SCORES)};\n")
     os.makedirs(os.path.dirname(args.out), exist_ok=True)

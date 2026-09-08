@@ -1,6 +1,7 @@
 import { Brand, FlowSteps, ModelSubnav } from "../../../Nav";
 import PinButton from "../../../PinButton";
 import { DayHeader } from "../../../DayHeader";
+import Tip from "../../../Tip";
 import { etToday, groupByGameDay } from "@/lib/gameDays";
 import { MLB_PROPS, MLB_PROP_SCORES, type MlbProp } from "@/lib/mlbPlayerProps";
 import { MLB_K } from "@/lib/mlbStrikeouts";
@@ -89,7 +90,8 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
   type Row = {
     gameKey: string; game: string; commence: string; player: string; team: string; opp: string;
     ours: number | null; oursPct: boolean; book: number | null;
-    slot: number | null; pStart: number | null; lineupPosted: boolean; posted: boolean;
+    slot: number | null; lineupPosted: boolean; posted: boolean;
+    oppSp: string | null; bvpAb: number; bvpH: number;
     hist: string;
   };
   let rows: Row[];
@@ -97,16 +99,21 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
     rows = MLB_K.map((r) => ({
       gameKey: r.gameKey, game: r.game, commence: r.commence, player: r.pitcher, team: r.team, opp: r.opp,
       ours: r.proj, oursPct: false, book: lines.get(norm(r.pitcher))?.line ?? null,
-      slot: null, pStart: null, lineupPosted: true, posted: true,
+      slot: null, lineupPosted: true, posted: true, oppSp: null, bvpAb: 0, bvpH: 0,
       hist: `${(r.kRate * 100).toFixed(1)}% K rate · ${r.starts} starts`,
     }));
   } else {
     const pick = (p: MlbProp) => (cat === "hits" ? p.pHit : p.pHr);
     const rate = (p: MlbProp) => (cat === "hits" ? p.hitRate : p.hrRate);
-    rows = MLB_PROPS.filter((p) => pick(p) !== null).map((p) => ({
+    // ONLY players the sportsbook lists. A row a reader cannot actually bet costs them time and
+    // makes the board look padded — and half of MLB_PROPS is the candidate pool behind a lineup,
+    // not a priced player. Coverage is decided by the EXISTENCE of a posted prop, never its value,
+    // so this does not touch line-blindness.
+    rows = MLB_PROPS.filter((p) => pick(p) !== null && bookProb.has(norm(p.player))).map((p) => ({
       gameKey: p.gameKey, game: p.game, commence: p.commence, player: p.player, team: p.team, opp: p.opp,
       ours: pick(p), oursPct: true, book: bookProb.get(norm(p.player)) ?? null,
-      slot: p.slot, pStart: p.pStart, lineupPosted: p.lineupPosted, posted: p.posted,
+      slot: p.slot, lineupPosted: p.lineupPosted, posted: p.posted,
+      oppSp: p.oppSp, bvpAb: p.bvpAb, bvpH: p.bvpH,
       hist: rate(p) !== null
         ? `${(rate(p)! * 100).toFixed(1)}% per PA · ${p.pa?.toFixed(1) ?? "—"} PA`
         : "—",
@@ -127,7 +134,8 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
     if (!kick[r.gameKey] || r.commence < kick[r.gameKey]) kick[r.gameKey] = r.commence;
   }
   games.sort((a, b) => (kick[a] ?? "9999").localeCompare(kick[b] ?? "9999"));
-  const CAP = 8;
+  // Four rows then the standard dropdown — enough to read the card without scrolling past it.
+  const CAP = 4;
 
   return (
     <main className="wrap">
@@ -157,12 +165,26 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
         <div className="hb-body">
           <Honest cat={cat} />
           {cat !== "pitching" && (
-            <p className="ctxsec__d">
-              <b>Will he even play?</b> Baseball lineups are not fixed the way a football starting
-              line-up is — managers rest people constantly, and lineups only post about three hours
-              before first pitch. The <b>start %</b> column is the chance he is in tonight&apos;s
-              lineup at all (most books void a prop if he isn&apos;t), and <b>slot</b> is where he
-              is likely to bat, which decides how many times he comes up.
+            <p className="ctxsec__legend">
+              Only players a sportsbook has priced. <b>Lineup #</b> is where he bats, which sets how
+              many times he comes up.
+              <Tip label="About the vs-him column" text={<>
+                <b>Lineup #</b> is the volume term: leading off is about 4.5 plate appearances,
+                batting ninth about 3.4. That difference is most of the gap between two similar
+                hitters.<br /><br />
+                <b>vs him</b> is this batter&apos;s career line against tonight&apos;s starter, with
+                the sample in brackets. <b>Read the sample, not the average.</b> Measured across a
+                full 15-game slate, 171 batter-pitcher pairs:<br /><br />
+                • <b>51%</b> have never faced each other at all<br />
+                • another <b>21%</b> have 1–4 at-bats<br />
+                • only <b>11%</b> reach 10 at-bats, and <b>1%</b> reach 20<br /><br />
+                So a career line here is usually a handful of swings. It is shown because you want
+                to know who is pitching and what has happened before, and because leaving it out
+                invites looking it up somewhere that presents it with more confidence than it
+                deserves. It is <b>not</b> an input to our number: a matchup adjustment built on
+                three at-bats is noise, and it could not move the board&apos;s level anyway — a
+                per-matchup nudge averages to nothing across the slate.
+              </>} />
             </p>
           )}
 
@@ -186,7 +208,7 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
                               <span>player</span>
                               {cat === "pitching"
                                 ? <><span>opponent</span><span>book line</span><span>our proj</span><span>K rate</span><span>starts</span></>
-                                : <><span>start %</span><span>slot</span><span>book %</span><span>our %</span><span>his rate</span></>}
+                                : <><span>lineup #</span><span>opposing pitcher</span><span>vs him</span><span>book %</span><span>our %</span><span>his rate</span></>}
                             </div>
                             {rs.map((r, i) => (
                               <div className={`pmrow pmrow--data${i >= CAP ? " hb-row--more" : ""}`}
@@ -204,15 +226,19 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
                                   </>
                                 ) : (
                                   <>
-                                    {/* Once the lineup posts this is a fact, so show the fact. */}
-                                    <span className="pmcell">
-                                      {r.lineupPosted
-                                        ? <b className={r.posted ? "mlbin" : "mlbout"}>{r.posted ? "in" : "out"}</b>
-                                        : pct(r.pStart!)}
-                                    </span>
                                     <span className="pmcell">{r.slot!.toFixed(0)}</span>
-                                    <span className="pmcell">{r.book !== null ? pct(r.book) : "—"}</span>
-                                    <span className="pmcell"><b className="pmproj">{pct(r.ours!)}</b></span>
+                                    <span className="pmcell pmcell--team">{r.oppSp ?? "not posted"}</span>
+                                    {/* Career vs THIS pitcher, with the sample beside it. The
+                                        sample is the point: the median pair on a slate has never
+                                        faced each other, so a bare ".000" would read as a read. */}
+                                    <span className="pmcell pmcell--hist">
+                                      {r.bvpAb > 0
+                                        ? <>{(r.bvpH / r.bvpAb).toFixed(3).replace(/^0/, "")}{" "}
+                                            <span className="pmslot">({r.bvpH}/{r.bvpAb})</span></>
+                                        : <span className="pmslot">never faced</span>}
+                                    </span>
+                                    <span className="pmcell pmcell--mkt">{r.book !== null ? pct(r.book) : "—"}</span>
+                                    <span className="pmcell pmcell--proj">{pct(r.ours!)}</span>
                                     <span className="pmcell pmcell--hist">{r.hist}</span>
                                   </>
                                 )}

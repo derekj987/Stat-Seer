@@ -3257,9 +3257,22 @@ a.snav__dfeat{display:block}
    and our projection sit in the same relationship a reader already knows from football. */
 /* min-width was 840 while the column minimums only need ~586 + gaps, so the table forced a
    scrollbar inside a container that could have held it. Sized to the content instead. */
-.pmtable--mlbp{min-width:760px;max-width:1080px}
+/* Batting props — SEVEN columns: player, lineup #, opposing pitcher, career vs him, then the
+   market pair (book %) and ours (our %), then his own rate.
+   Sized to the SCROLLER, from measured values rather than assumed ones — the first two passes got
+   this wrong by guessing. Measured: the scroller is 795px at 1440 with both rails, the row gap is
+   16px (not 14) and the row padding 16px a side. So the track budget is
+   795 - 32 padding - (6 x 16) gaps = 667:
+       165 + 44 + 120 + 92 + 58 + 58 + 130 = 667.
+   Guessing 924px put a scrollbar on every table on a wide screen (12 x table-overflows-container).
+   Read gap and padding off the rendered row before doing this arithmetic. */
+.pmtable--mlbp{min-width:795px;max-width:1120px}
 .pmtable--mlbp .pmrow--data,
-.pmtable--mlbp .pmrow--head{grid-template-columns:minmax(200px,1.6fr) 84px 60px 78px 84px minmax(0,1fr)}
+.pmtable--mlbp .pmrow--head{grid-template-columns:minmax(165px,1.4fr) 44px minmax(120px,1.1fr) 92px 58px 58px minmax(130px,1fr)}
+/* The pitcher's name and the "3/12" sample both wrap rather than ellipsize — a truncated name is
+   useless and a truncated sample is misleading. */
+.pmtable--mlbp .pmrow--data .pmcell--team,
+.pmtable--mlbp .pmrow--data .pmcell--hist{white-space:normal;line-height:1.25;text-overflow:clip}
 .pmtable--mlbk{min-width:820px;max-width:1060px}
 .pmtable--mlbk .pmrow--data,
 .pmtable--mlbk .pmrow--head{grid-template-columns:minmax(190px,1.6fr) minmax(150px,1.2fr) 90px 90px 84px 78px}

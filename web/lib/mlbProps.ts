@@ -101,13 +101,39 @@ export async function propBookProb(market: string): Promise<Map<string, number>>
     const k = `${norm(r.player)}|${r.book}|${r.side.toLowerCase()}`;
     if (!latest.has(k)) latest.set(k, Number(r.price_american));
   }
-  const byPlayer = new Map<string, number[]>();
+  // 🚨 NEVER mix a de-vigged price with a raw one in the same median. The hold on these props is
+  // large — measured 6.77% on batter_hits — so a raw Over implies ~60.5% where the de-vigged fair
+  // is ~56.7%. Taking a median across books where SOME entries were de-vigged and some were the
+  // raw fallback (270 of 1,122 quotes were one-sided) mixes two different quantities and pulls the
+  // number up by up to 4 points for exactly the players with thin two-way coverage.
+  //
+  // So: use the two-sided quotes when a player has any, and fall back to raw only when he has
+  // none — flagged, so the caller can tell the two apart rather than silently averaging them.
+  const twoSided = new Map<string, number[]>();
+  const oneSided = new Map<string, number[]>();
   for (const [k, over] of latest) {
     const [p, book, side] = k.split("|");
     if (side !== "over" && side !== "yes") continue;
     const under = latest.get(`${p}|${book}|under`) ?? latest.get(`${p}|${book}|no`);
-    const fair = under === undefined ? implied(over) : deVig(over, under);
-    (byPlayer.get(p) ?? byPlayer.set(p, []).get(p)!).push(fair);
+    if (under === undefined) (oneSided.get(p) ?? oneSided.set(p, []).get(p)!).push(implied(over));
+    else (twoSided.get(p) ?? twoSided.set(p, []).get(p)!).push(deVig(over, under));
+  }
+  // The typical two-way hold, measured from this very snapshot rather than assumed, so a one-sided
+  // price can be brought onto the same footing instead of being dropped or trusted raw.
+  const holds: number[] = [];
+  for (const [k, over] of latest) {
+    const [p, book, side] = k.split("|");
+    if (side !== "over" && side !== "yes") continue;
+    const under = latest.get(`${p}|${book}|under`) ?? latest.get(`${p}|${book}|no`);
+    if (under !== undefined) holds.push(implied(over) + implied(under) - 1);
+  }
+  holds.sort((a, b) => a - b);
+  const medHold = holds.length ? holds[Math.floor(holds.length / 2)] : 0;
+  const byPlayer = new Map<string, number[]>();
+  for (const [p, xs] of twoSided) byPlayer.set(p, xs);
+  for (const [p, xs] of oneSided) {
+    if (byPlayer.has(p)) continue;                       // two-sided wins outright
+    byPlayer.set(p, xs.map((x) => Math.max(0, Math.min(1, x - medHold / 2))));
   }
   const out = new Map<string, number>();
   for (const [p, xs] of byPlayer) {

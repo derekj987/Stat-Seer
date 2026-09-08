@@ -300,6 +300,35 @@ right (we say home by >1 ⇒ actual averages +1.19; away by >1 ⇒ −1.10). The
 *timid*, not too bold, which is the 0.0% team-quality finding seen from the other side. Shrinking
 on the strength of the screenshot would have made a correct model worse to fix a broken column.
 
+### 🚨 Never mix a DE-VIGGED price with a RAW one in the same average
+Derek: *"our model % is almost always over the book %. That does not seem right."* Chasing it found
+a real defect in the **book** column, not the model.
+
+`propBookProb` de-vigs each book's two-sided quote, then takes the median across books — but when a
+book posted only the Over it fell back to the **raw** implied probability. Measured on
+`batter_hits`: **852 two-sided quotes and 270 one-sided**, with a mean hold of **6.77%**. So the
+median mixed values around **56.7%** (de-vigged) with values around **60.5%** (raw) — up to four
+points apart, and worst exactly for the players with thin two-way coverage.
+
+**Two different quantities must never be averaged into one column.** Prefer the two-sided quotes
+when a player has any; fall back only when he has none, and then bring the raw price onto the same
+footing using the hold measured from that same snapshot rather than an assumed one.
+
+**And the bigger lesson: a gap between "our fair %" and "book fair %" is mostly the VIG until
+proven otherwise.** The numbers that settled it:
+
+| | mean |
+|---|---|
+| our probability | 61.9% |
+| raw implied Over | 60.5% |
+| de-vigged book (the column) | 56.7% |
+| **realized 1+ hit rate** | **60.6%** |
+
+Our number sits on the rate batters actually achieve; the book column sits ~4 points below it
+because a 6.77% hold has been removed. On a market with that much juice a board will *always* look
+like it leans over, and that is arithmetic, not a signal. Before treating a one-sided board as a
+model bug, put the realized base rate in the table — it tells you which column moved.
+
 ### 🚨 A Brier score is NOT a calibration check
 The MLB hits board read **78.7% over the book's de-vigged probability, mean +4.9pp** on 630 rows.
 The model's published score said it was fine — Brier 0.2364 against 0.2406 for the batter's own
@@ -1508,6 +1537,26 @@ diehard — `Tanner Bibee (CLE) / Brandon Young (BAL)`, abbreviations from the s
 
 **Cap a chart at what fits without scrolling** — 4 games per day here, not 8. The right number is
 "how many rows sit above the fold on the card", not a round number.
+
+**MEASURE the gap and the padding before doing column arithmetic — do not assume them.** The
+seven-column props table was sized wrong twice: first by guessing 924px against an ~825px card
+(12 × `table-overflows-container`), then by assuming a 14px gap when the rendered row uses **16px**,
+and by sizing to the card (825) rather than the **scroller** (795). Read the real numbers off the
+page first:
+```js
+const row = table.querySelector('[class*="--head"]');
+getComputedStyle(row).columnGap;                    // 16px, not the 14 you remember
+getComputedStyle(row).padding;                      // 10px 16px
+table.closest('.pmscroll').getBoundingClientRect().width;   // 795, not the card's 825
+// budget = scrollerW - 2*padX - (cols-1)*gap
+```
+Then confirm `scroller.scrollWidth <= scroller.clientWidth` at 1440 rather than trusting the sum.
+
+**A column that is nearly always empty is worth reporting before it ships.** The batter-vs-pitcher
+column reads "never faced" on **61%** of rows, because the median pair on an MLB slate has zero
+career at-bats against tonight's starter. That is not a reason to drop it — a reader wants to see
+it — but it IS a reason to print the sample beside the average and to keep it out of the model.
+Measure a proposed column's fill rate before building it into a layout.
 
 ### ⚠️ Chart changes ALWAYS get an alignment pass
 Standing rule from Derek: **any time a chart/table/board is changed, re-check alignment before
