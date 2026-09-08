@@ -2406,6 +2406,8 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .calib{margin-top:26px;padding-top:18px;border-top:1px solid var(--line)}
 /* inline-flex so a Tip scroll can sit beside the heading without dropping to its own line */
 .calib__h{font-size:16px;margin:0 0 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+/* when the whole section IS the heading + its scroll, the trailing margin has nothing to separate */
+.calib__h:last-child{margin-bottom:0}
 .calib__table{display:flex;flex-direction:column;gap:2px;max-width:440px}
 .calib__row{display:grid;grid-template-columns:1fr 1fr auto 1fr;gap:12px;
   padding:7px 10px;font-size:13px;font-family:var(--font-mono);

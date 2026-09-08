@@ -299,10 +299,6 @@ export default async function Page() {
             not have yet.
           </>} />
         </h2>
-        <p className="foot">
-          No side pick, no run line, no home-field adjustment, and no claim to beat the market —
-          each for a measured reason.
-        </p>
       </section>
     </main>
   );
