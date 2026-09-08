@@ -3250,6 +3250,11 @@ a.snav__dfeat{display:block}
 .pmtable--mlb{min-width:720px;max-width:980px}
 .pmtable--mlb .pmrow--data,
 .pmtable--mlb .pmrow--head{grid-template-columns:minmax(205px,1.7fr) 96px 96px minmax(0,1fr) 96px}
+/* Strikeouts board — six columns. Same .pmrow--data language as every other board so book line
+   and our projection sit in the same relationship a reader already knows from football. */
+.pmtable--mlbk{min-width:820px;max-width:1060px}
+.pmtable--mlbk .pmrow--data,
+.pmtable--mlbk .pmrow--head{grid-template-columns:minmax(190px,1.6fr) minmax(150px,1.2fr) 90px 90px 84px 78px}
 .mlbin{color:var(--accent);font-weight:800}
 .mlbout{color:var(--muted);font-weight:700}
 .pmtable--ha .pmrow--data{grid-template-columns:minmax(205px,1.6fr) 74px repeat(6,minmax(0,1fr)) 104px}

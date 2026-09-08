@@ -3,6 +3,8 @@ import PinButton from "../../PinButton";
 import { DayHeader } from "../../DayHeader";
 import { etToday, groupByGameDay } from "@/lib/gameDays";
 import { MLB_AVAIL, type MlbAvail } from "@/lib/mlbAvailability";
+import { MLB_K } from "@/lib/mlbStrikeouts";
+import { strikeoutLines, norm } from "@/lib/mlbProps";
 
 // MLB · The Model.
 //
@@ -25,6 +27,8 @@ export const revalidate = 300;
 
 // Measured on 2026: 30 teams, 4,464 completed team-games, 21,304 held-out candidate rows.
 const BRIER = { model: 0.16102, persistence: 0.22894, gain: 29.7 };
+// Held out over 925 starts; see mlb_strikeouts.py for the full ablation.
+const MAE = { model: 1.7644, base: 1.8213 };
 
 const pct = (p: number) => `${Math.round(p * 100)}%`;
 
@@ -51,7 +55,10 @@ function Row({ r, cont }: { r: MlbAvail; cont: boolean }) {
   );
 }
 
-export default function Page() {
+export default async function Page() {
+  // Consensus book line per pitcher, read server-side. The board shows OUR number beside
+  // THEIRS the way the football boards do — the projection is line-blind, the comparison is not.
+  const lines = await strikeoutLines();
   const { today: todayEt, tomorrow: tomorrowEt } = etToday();
 
   // One row per player per game; group by game, then by day — the same shape as the football
@@ -136,20 +143,73 @@ export default function Page() {
         </div>
       </details>
 
+      <details className="hb-panel hb-panel--card" data-embedchart="mlb-strikeouts" open>
+        <summary className="hb-bar">
+          <span className="hb-bar__title hb-bar__title--gold">Projected strikeouts</span>
+          <span className="hb-bar__count">{MLB_K.length} starters</span>
+          <PinButton size="sm" pin={{ id: "/mlb/model#k", kind: "model", label: "MLB · Strikeouts", detail: "starting pitchers", href: "/mlb/model" }} />
+          <span className="hb-bar__chev" aria-hidden="true">▾</span>
+        </summary>
+        <div className="hb-body">
+          <p className="ctxsec__d">
+            Our line-blind read on tonight&apos;s starters: <b>batters faced</b> multiplied by the
+            pitcher&apos;s <b>strikeout rate</b>, adjusted for how often the opposing lineup strikes
+            out. Volume then rate — the same shape as the football boards, because strikeout rate is
+            the most persistent skill in baseball and hits are mostly not.
+          </p>
+          <p className="ctxsec__d">
+            Held out over <b>925 starts</b>, this lands <b>{(MAE.base - MAE.model).toFixed(3)}</b>{" "}
+            strikeouts closer than the pitcher&apos;s own season average
+            ({((MAE.base - MAE.model) / MAE.base * 100).toFixed(1)}% better).{" "}
+            <b>That is measured against what actually happened, not against the market.</b> Whether
+            it beats a closing line is untested — we only began recording MLB prop prices on
+            7 September, and that test needs history. The book number is shown beside ours so you
+            can see the gap, not because we are claiming it.
+          </p>
+          {MLB_K.length === 0 ? (
+            <p className="foot">No probable starters posted yet for the coming slate.</p>
+          ) : (
+            <div className="pmscroll">
+              <div className="pmtable pmtable--mlbk" role="table">
+                <div className="pmrow pmrow--head" role="row">
+                  <span>pitcher</span><span>opponent</span><span>book line</span>
+                  <span>our proj</span><span>K rate</span><span>starts</span>
+                </div>
+                {MLB_K.map((r) => {
+                  const bk = lines.get(norm(r.pitcher));
+                  return (
+                    <div className="pmrow pmrow--data" role="row" key={`${r.pitcher}-${r.game}`}>
+                      <span className="pmcell pmcell--player">
+                        {r.pitcher}<span className="pmslot"> ({r.team})</span>
+                      </span>
+                      <span className="pmcell pmcell--team">{r.opp}</span>
+                      <span className="pmcell">{bk ? bk.line.toFixed(1) : "—"}</span>
+                      <span className="pmcell"><b className="pmproj">{r.proj.toFixed(1)}</b></span>
+                      <span className="pmcell">{(r.kRate * 100).toFixed(1)}%</span>
+                      <span className="pmcell pmcell--hist">{r.starts} gm</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </details>
+
       {/* Say plainly what is not here. A sport's board looking identical to a finished one while
           quietly missing its model is the failure mode this section exists to avoid. */}
       <section className="calib">
         <h2 className="calib__h">What isn&apos;t built yet</h2>
         <p className="foot">
-          There is <b>no MLB game model</b> — no run line, no total — and no prop projections. Odds
-          and props are being captured now so those can be built and graded against a real market,
-          the same way the football boards were. Until a number clears that bar it does not go on
-          this page.
+          There is <b>no MLB game model</b> — no run line, no total. Odds are being captured now so
+          one can be built and graded against a real market, the same way the football boards were.
+          Until a number clears that bar it does not go on this page.
         </p>
         <p className="foot">
-          The one to expect first is <b>pitcher strikeouts</b>: strikeout rate is the most
-          persistent skill in baseball, and batters faced is a volume question — the same shape as
-          the football work.
+          On props, only <b>strikeouts</b> is modelled so far. Hits, total bases and
+          hits+runs+RBIs are captured but not projected — those outcomes are driven largely by where
+          a batted ball happens to land, which does not carry from game to game the way a strikeout
+          rate does. We would rather publish one number we can defend than five we cannot.
         </p>
       </section>
     </main>
