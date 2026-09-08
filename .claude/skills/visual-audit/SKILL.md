@@ -163,6 +163,46 @@ second is the more dangerous shape because it flatters **the thing the model mus
 understates the model and you will not go looking. Capture a baseline at prediction time, inside the
 loop, next to the prediction.
 
+### 🚨 A column whose value is the SAME on every row is telling you nothing
+Derek: *"I'm seeing too many favorites and too many overs."* The favourites half was not the model
+at all — it was a column that could only ever print one number.
+
+The MLB board carried a "run line" column fed by football's `spread.consensus`. **Baseball's run
+line is a fixed ±1.5 on every single game**, so the column printed `-1.5` down almost every row,
+`+1.5` occasionally, and once `0` — which is not a real baseball line, and was the tell: it is the
+median of `[-1.5, +1.5]` from books that disagreed about which side was favoured. A board of `-1.5`s
+reads as "we make everyone a big favourite" when it actually says nothing at all.
+
+**Check every board column for degenerate variance before trusting what it appears to claim:**
+```js
+const vals = rows.map(r => r[colIndex]);
+new Set(vals).size   // 1-2 distinct values across 15 rows = the column carries no information
+```
+
+**The general rule: a football concept does not transfer to another sport just because the code
+compiles.** `lib/mlbBoard.ts` already documented that football KEY NUMBERS don't carry to MLB; the
+spread's POINT was the same problem one field over and got shipped anyway. When reusing a board
+engine across sports, list what each column MEANS in the new sport, not just whether it renders.
+
+In baseball the size of a favourite lives in the moneyline, so `marketMargin()` de-vigs the two
+prices to a fair home win probability and converts it to runs through the measured margin spread:
+`margin ≈ SD × probit(p)`, SD = 4.63 measured over 1,859 games. That makes the market column
+directly comparable to our own expected margin — probability-to-runs on one side, runs on the
+other, same units, same sign convention.
+
+**And measure the complaint before believing its diagnosis.** "Too many favourites" sounds like an
+overconfident model, so the obvious move is to shrink the margins. Measured, the opposite was true:
+
+| | ours | actual |
+|---|---|---|
+| mean abs margin | **0.61** | **3.60** |
+| sd | 0.80 | 4.63 |
+
+A shrink sweep chosen on the train split picked **1.0 — no shrinking at all**, and the direction was
+right (we say home by >1 ⇒ actual averages +1.19; away by >1 ⇒ −1.10). The model was far too
+*timid*, not too bold, which is the 0.0% team-quality finding seen from the other side. Shrinking
+on the strength of the screenshot would have made a correct model worse to fix a broken column.
+
 ### 🚨 A Brier score is NOT a calibration check
 The MLB hits board read **78.7% over the book's de-vigged probability, mean +4.9pp** on 630 rows.
 The model's published score said it was fine — Brier 0.2364 against 0.2406 for the batter's own
@@ -1337,6 +1377,40 @@ Two distinct causes — tell them apart before assuming you broke something:
    `git log -S'.theRule{' --oneline -- web/app/globals.css` and `git show HEAD~N:web/app/globals.css |
    grep '^.theRule{'` — if the rule is byte-identical to before your change, you exposed it, you
    didn't cause it. Say which it was.
+
+### Column ORDER, PAIRING and COLOUR are part of whether a chart is readable
+Three standing rules, all from the same review of the MLB board, all cheap to check on any chart
+that puts our number next to the market's:
+
+- **Pair the market columns, then pair ours.** `market spread · market total · our spread · our
+  total`, never interleaved and never separated by something else. Each pair is one comparison and
+  should read as one block. This is the football boards' order (`Game / Market Spread / Market O/U /
+  Model Spread / Model O/U`) — a sport reading differently for no reason is the inconsistency to
+  avoid.
+- **Give the compared columns EQUAL width.** Two numbers a reader is meant to weigh against each
+  other should not be drawn at different sizes; `repeat(4, 77px)` rather than four hand-picked
+  widths.
+- **Colour by WHOSE claim it is, app-wide**: `--model` blue for anything we computed
+  (`.pmcell--proj`), `--mkt` maroon for the market (`.pmcell--mkt`), green for a book price. Verify
+  the computed value, not the class name:
+  ```js
+  getComputedStyle(document.querySelector('.pmcell--proj')).color   // want rgb(30, 91, 196)
+  ```
+  Colouring the words "market" and "ours" in the blurb with the same two colours (`.lgnd--mkt` /
+  `.lgnd--model`) teaches the key once, in prose, without a separate legend.
+
+**Drop a column rather than explain it.** The board also carried "our runs" (`3.9 @ 4.2`) — the two
+halves of a total the very next column already showed. Derek: *"I do not know what the 'our runs'
+row is. I do not think we need that one."* A column that needs a sentence to justify it is usually a
+column that should not be there; the spread and the total between them already say everything the
+split did.
+
+**Identify people by the club beside the name.** Pitcher names alone are unreadable to anyone but a
+diehard — `Tanner Bibee (CLE) / Brandon Young (BAL)`, abbreviations from the source's own
+`abbreviation` field, never hand-mapped.
+
+**Cap a chart at what fits without scrolling** — 4 games per day here, not 8. The right number is
+"how many rows sit above the fold on the card", not a round number.
 
 ### ⚠️ Chart changes ALWAYS get an alignment pass
 Standing rule from Derek: **any time a chart/table/board is changed, re-check alignment before

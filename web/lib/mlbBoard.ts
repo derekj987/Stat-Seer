@@ -12,6 +12,56 @@
 // table is a measurable thing — but it has not been measured, and inventing costs here would be
 // the "appearance of rigor" this project exists against.
 import { buildBoard, type Game, type OddsRow } from "@/lib/board";
+import { deVig } from "@/lib/fairValue";
+
+/** Single-game margin SD, measured over 1,859 completed 2026 games (see mlb_game_model.py). */
+const MARGIN_SD = 4.63;
+
+/** Inverse standard normal (Acklam's rational approximation, ~4.5e-4 max error) — plenty for a
+ *  number rendered to one decimal place. */
+function probit(p: number): number {
+  if (p <= 0 || p >= 1) return 0;
+  const a = [-39.69683028665376, 220.9460984245205, -275.9285104469687,
+             138.3577518672690, -30.66479806614716, 2.506628277459239];
+  const b = [-54.47609879822406, 161.5858368580409, -155.6989798598866,
+             66.80131188771972, -13.28068155288572];
+  const c = [-0.007784894002430293, -0.3223964580411365, -2.400758277161838,
+             -2.549732539343734, 4.374664141464968, 2.938163982698783];
+  const d = [0.007784695709041462, 0.3224671290700398, 2.445134137142996, 3.754408661907416];
+  const pl = 0.02425;
+  let q: number, r: number;
+  if (p < pl) {
+    q = Math.sqrt(-2 * Math.log(p));
+    return (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+           ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+  }
+  if (p > 1 - pl) return -probit(1 - p);
+  q = p - 0.5; r = q * q;
+  return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q /
+         (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
+}
+
+/** The market's expected margin, in RUNS, positive = home favoured.
+ *
+ *  WHY THIS EXISTS. Football's consensus spread does not transfer to baseball: the MLB run line is
+ *  a fixed +/-1.5 on every single game, so a "market spread" column can only ever print -1.5, +1.5
+ *  or -- when books disagree about which side is favoured -- a median of 0, which is not a real
+ *  line at all. Derek read a board of -1.5s as "too many favourites", and he was right that the
+ *  column was saying something false; it was saying nothing.
+ *
+ *  In baseball the size of a favourite lives in the MONEYLINE, so that is what we read. De-vig the
+ *  two prices to a fair home win probability, then convert to runs through the measured margin
+ *  distribution: P(home wins) = P(margin > 0), so margin ~= SD * probit(p).
+ *
+ *  Approximation stated plainly: real margins are integers and can never be 0 (no ties), so a
+ *  normal is not exactly right. It is close enough for a one-decimal display number and it is
+ *  honest about direction and size, which -1.5 on every row was not. */
+export function marketMargin(g: Game): number | null {
+  const home = g.ml?.[g.home], away = g.ml?.[g.away];
+  const p = home?.fairProb ?? (home && away ? deVig(home.price, away.price) : null);
+  if (p == null || !isFinite(p) || p <= 0 || p >= 1) return null;
+  return Math.round(MARGIN_SD * probit(p) * 10) / 10;
+}
 
 /** PostgREST read, PAGED. `limit=` does not raise the 1000-row ceiling — a response sitting
  *  exactly at the cap is indistinguishable from a complete one, and one snapshot of a 15-game

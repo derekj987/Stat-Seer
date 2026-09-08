@@ -651,6 +651,38 @@
       { offsets: off });
   }
 
+  // ---- 20c. A data column whose value never changes is telling the reader nothing ----
+  // The MLB board carried a "run line" column fed by football's consensus-spread logic. Baseball's
+  // run line is a fixed +/-1.5 on EVERY game, so the column printed -1.5 down almost every row and
+  // read as "we make everyone a big favourite" while actually carrying no information at all.
+  //
+  // Deliberately narrow, because plenty of columns repeat legitimately (a status column that says
+  // "projected" for every row is fine, and so is a short board): only NUMERIC columns, only on
+  // boards with enough rows to judge, and only when nearly every value is identical.
+  for (const tbl of document.querySelectorAll('[role="table"], table')) {
+    if (!vis(tbl)) continue;
+    const head = tbl.querySelector('[class*="--head"], thead tr');
+    const rows = [...tbl.querySelectorAll('[class*="--data"], tbody tr')].filter(
+      (r) => r !== head && vis(r));
+    if (rows.length < 8) continue;
+    const width = Math.max(...rows.map((r) => r.children.length));
+    for (let c = 0; c < width; c++) {
+      const vals = rows.map((r) => (r.children[c]?.textContent || "").trim())
+        .filter((t) => t && t !== "—");
+      if (vals.length < 8) continue;
+      // Numeric only. A repeated WORD is usually a legitimate status; a repeated NUMBER in a
+      // column of prices or lines is a column that cannot be doing its job.
+      if (!vals.every((v) => /^[+\-−]?\d+(\.\d+)?%?$/.test(v))) continue;
+      const uniq = new Set(vals);
+      if (uniq.size > 2) continue;
+      const label = head ? (head.children[c]?.textContent || "").trim() : `column ${c + 1}`;
+      add("column-no-variance", "medium", tbl,
+        `"${label}" holds only ${uniq.size} distinct value(s) across ${vals.length} rows ` +
+        `(${[...uniq].join(", ")}) — the column may not carry the information it appears to`);
+      if (cap(findings, "column-no-variance")) break;
+    }
+  }
+
   // ---- 21. A split grouped list must not open on a blank label ----------------
   // Grouped lists blank a repeated leading label (a player's second row). If such a list is later
   // SPLIT across a "show more" boundary, the first hidden row inherits the blank and the dropdown

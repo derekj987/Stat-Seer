@@ -3267,9 +3267,12 @@ a.snav__dfeat{display:block}
    tracks 738 + gaps (5x14) + padding (2x16) = 840 against an 825px card, so every row drew 9px
    outside it — while the pitchers column sat at 160px needing 202px with 87px unused further
    right. Sized to fit the card instead: 200+150+86+80+92+76 = 684 + 70 + 32 = 786. */
-.pmtable--mlbg{min-width:786px;max-width:1080px}
+.pmtable--mlbg{min-width:778px;max-width:1080px}
+/* The last four are the MARKET pair then the OURS pair, at equal widths on purpose: two numbers a
+   reader is meant to compare should not be drawn at different sizes.
+   Budget: 200+170+77+77+77+77 = 678 + 70 gaps + 32 padding = 780. */
 .pmtable--mlbg .pmrow--data,
-.pmtable--mlbg .pmrow--head{grid-template-columns:minmax(200px,1.7fr) minmax(150px,1.3fr) 86px 80px 92px 76px}
+.pmtable--mlbg .pmrow--head{grid-template-columns:minmax(200px,1.6fr) minmax(170px,1.3fr) repeat(4,77px)}
 /* Two names joined by a slash is the one cell here that genuinely needs two lines. Letting it wrap
    is what removes the truncation — widening it instead would push the table back over the card.
    Written with THREE classes (0,3,0) on purpose: the mobile block further down sets
@@ -3322,6 +3325,15 @@ a.snav__dfeat{display:block}
 .pmrow--data .pmcell--player{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;font-weight:600}
 .pmcell--num{font-family:var(--font-mono);color:var(--muted);text-align:left}
 .pmcell--proj{color:var(--model);font-weight:700}
+/* The market's numbers, in the market maroon. Paired with .pmcell--proj's model blue this is the
+   app-wide convention (model = blue, market = maroon, book = green), so a reader moving between the
+   NFL, NCAAF and MLB boards reads the same colour as the same kind of claim. */
+.pmcell--mkt{color:var(--mkt);font-family:var(--font-mono);font-weight:600}
+/* Inline legend: colours a word in the blurb with the same colour its column uses, so "market" and
+   "ours" are learned once from the prose instead of needing a separate key. */
+.lgnd{font-weight:700}
+.lgnd--mkt{color:var(--mkt)}
+.lgnd--model{color:var(--model)}
 /* A projection built on very little of the player's own history. We publish it (hiding it blanked
    well-calibrated rows — see PlayerModelView), but mark it so a thin number does not read with the
    same authority as a 17-game one. Dotted underline only: no colour change, because recolouring it

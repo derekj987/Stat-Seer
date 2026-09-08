@@ -4,7 +4,7 @@ import { DayHeader } from "../../DayHeader";
 import { etToday, etDayKey, groupByGameDay } from "@/lib/gameDays";
 import { MLB_GAMES, MLB_GAME_SCORES } from "@/lib/mlbGameModel";
 import { MLB_AVAIL, type MlbAvail } from "@/lib/mlbAvailability";
-import { mlbBoard } from "@/lib/mlbBoard";
+import { mlbBoard, marketMargin } from "@/lib/mlbBoard";
 
 // MLB · Game Model — the spreads/totals half of the section, beside Player Props.
 //
@@ -31,10 +31,13 @@ const BRIER = { model: 0.16102, persistence: 0.22894, gain: 29.7 };
 // A lineup IS nine. The rest of the candidate pool folds away behind the standard control.
 const LU_CAP = 9;
 // Games shown per day before the dropdown. A full MLB day is 15, which runs the card well past a
-// screen; 8 keeps the day readable and the rest is one click away.
-const GAME_CAP = 8;
+// screen.
+const GAME_CAP = 4;
 
 const pct = (p: number) => `${Math.round(p * 100)}%`;
+/** A margin needs its sign shown even when positive — "+0.3" and "0.3" read differently when the
+ *  column above is the market's number with the same convention. */
+const signed = (x: number) => `${x > 0 ? "+" : x < 0 ? "−" : ""}${Math.abs(x).toFixed(1)}`;
 
 export default async function Page() {
   const { today: todayEt, tomorrow: tomorrowEt } = etToday();
@@ -81,10 +84,20 @@ export default async function Page() {
         </summary>
         <div className="hb-body">
           <p className="ctxsec__d">
-            The market&apos;s <b>total</b> for each game — the consensus across the books we track —
-            with our <b>line-blind</b> projection beside it. Ours is each side&apos;s offence against
-            the other&apos;s defence, then adjusted for the <b>starting pitcher</b>, who is the one
-            input that moved the number.
+            The <span className="lgnd lgnd--mkt">market&apos;s</span> spread and total for each game,
+            then <span className="lgnd lgnd--model">ours</span> beside them. Ours is each
+            side&apos;s offence against the other&apos;s defence, adjusted for the{" "}
+            <b>starting pitcher</b> — computed <b>line-blind</b>, without looking at the two columns
+            to its left. Both spreads are <b>runs, home team&apos;s side</b>: −0.6 means the home
+            club is favoured by six tenths of a run.
+          </p>
+          <p className="ctxsec__d">
+            <b>Why a spread in runs and not a run line?</b> Baseball&apos;s run line is a fixed
+            ±1.5 on every game, so a run-line column says the same thing about all fifteen games and
+            tells you nothing about who is favoured <i>by how much</i> — it just made every row look
+            like a big favourite. In baseball that information lives in the moneyline instead, so we
+            take the market&apos;s two prices, strip the vig, and convert the fair win probability
+            into runs using the measured spread of real margins.
           </p>
           <p className="ctxsec__d">
             <b>Read this one with your eyes open.</b> Over <b>{S.n} held-out games</b> it lands{" "}
@@ -98,14 +111,22 @@ export default async function Page() {
           {/* State the lean rather than letting a reader find it. A board where almost every row
               points the same way is normally OUR bug, so the burden is on us to show it isn't. */}
           <p className="ctxsec__d">
-            <b>Our totals currently sit above the market&apos;s on most games</b>, and you should
-            know why before reading anything into it. Against <i>what actually happened</i> our
-            projections are unbiased — mean error <b>{S.resid >= 0 ? "+" : ""}{S.resid.toFixed(2)}</b>{" "}
-            runs across those {S.n} games. The gap is that the market is pricing this stretch of the
-            season below what the season has so far produced. Which of the two is right is a
-            question about beating a closing line, and that needs price history we do not have yet:
-            we only began recording MLB odds on <b>7 September</b>. Until then this is a difference
-            to notice, <b>not an edge to act on</b>.
+            <b>Our totals sit above the market&apos;s on most games, and our spreads sit below
+            it.</b> Both are worth knowing before you read anything into a row. On totals we are not
+            running hot: against <i>what actually happened</i> our number has been <b>too low</b> in
+            four of the season&apos;s six months, and across all {S.n} held-out games our average
+            error is <b>{S.resid >= 0 ? "+" : ""}{S.resid.toFixed(2)}</b> runs. The market is
+            pricing this stretch about <b>0.8 runs below</b> what the season has actually produced,
+            which is most of the gap you can see. On spreads we are the timid one — our
+            average margin is <b>0.6 runs</b> against real margins averaging <b>3.6</b> — which is
+            the same finding as the 0.0% above, seen from the other side: the model barely
+            distinguishes between two clubs, so it rarely makes anyone a big favourite.
+          </p>
+          <p className="ctxsec__d">
+            Which of us is right is a question about beating a closing line, and that needs price
+            history we do not have yet — we only began recording MLB odds on <b>7 September</b>.
+            Until then a gap in either column is a difference to notice, <b>not an edge to act
+            on</b>.
           </p>
 
           {MLB_GAMES.length === 0 ? (
@@ -126,30 +147,35 @@ export default async function Page() {
                     <div className="pmtable pmtable--mlbg" role="table">
                       {/* pmrow--data is what carries display:grid — a header with only
                           pmrow--head stays display:flex and its labels pack left, out of line
-                          with the numbers underneath. Match PlayerModelView.tsx. */}
+                          with the numbers underneath. Match PlayerModelView.tsx.
+                          Column ORDER is the football boards' order: the two MARKET numbers
+                          together, then the two OURS together, so each pair reads as a pair. */}
                       <div className="pmrow pmrow--head pmrow--data" role="row">
-                        <span>game</span><span>starting pitchers</span><span>market total</span>
-                        <span>our total</span><span>our runs</span><span>run line</span>
+                        <span>game</span><span>starting pitchers</span>
+                        <span>market spread</span><span>market total</span>
+                        <span>our spread</span><span>our total</span>
                       </div>
                       {grp.items.map((k, i) => {
                         const g = byKey.get(k)!;
                         const m = mkt.get(`${etDayKey(g.commence)}|${g.game}`);
                         const mt = m?.total?.consensus ?? null;
-                        const rl = m?.spread?.consensus ?? null;
-                        const sp = [g.awaySpName, g.homeSpName].filter(Boolean).join(" / ");
+                        const ms = m ? marketMargin(m) : null;
+                        // Home minus away, the same sign convention as the market column, so a
+                        // reader compares two numbers that mean the same thing.
+                        const os = g.homeRuns - g.awayRuns;
+                        const sp = [
+                          g.awaySpName && `${g.awaySpName} (${g.awayAbbr})`,
+                          g.homeSpName && `${g.homeSpName} (${g.homeAbbr})`,
+                        ].filter(Boolean).join(" / ");
                         return (
                           <div className={`pmrow pmrow--data${i >= GAME_CAP ? " hb-row--more" : ""}`}
                             role="row" key={k}>
                             <span className="pmcell pmcell--player">{g.game}</span>
                             <span className="pmcell pmcell--team">{sp || "not posted"}</span>
-                            <span className="pmcell">{mt !== null ? mt.toFixed(1) : "—"}</span>
-                            <span className="pmcell"><b className="pmproj">{g.total.toFixed(1)}</b></span>
-                            <span className="pmcell pmcell--hist">
-                              {g.awayRuns.toFixed(1)} @ {g.homeRuns.toFixed(1)}
-                            </span>
-                            <span className="pmcell pmcell--hist">
-                              {rl !== null ? (rl > 0 ? `+${rl}` : `${rl}`) : "—"}
-                            </span>
+                            <span className="pmcell pmcell--mkt">{ms !== null ? signed(ms) : "—"}</span>
+                            <span className="pmcell pmcell--mkt">{mt !== null ? mt.toFixed(1) : "—"}</span>
+                            <span className="pmcell pmcell--proj">{signed(os)}</span>
+                            <span className="pmcell pmcell--proj">{g.total.toFixed(1)}</span>
                           </div>
                         );
                       })}

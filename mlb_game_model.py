@@ -299,6 +299,10 @@ def main(argv=None):
     base, mod = validate(games, spby)
 
     name = {r["team"]: r["name"] for r in rows}
+    # Club abbreviations for the board: a pitcher's name means little without the club beside it,
+    # and the full club name does not fit in a chart cell.
+    abbr = {t["id"]: t.get("abbreviation") or ""
+            for t in (av._get(f"{API}/teams?sportId=1") or {}).get("teams", [])}
     now = _dt.datetime.now(_dt.timezone.utc).isoformat()
     out = []
     seen = set()
@@ -325,6 +329,7 @@ def main(argv=None):
             "game": f"{name.get(away_id)} @ {name.get(home_id)}",
             "commence": r["commence"], "eventDate": (r["commence"] or "")[:10],
             "home": name.get(home_id), "away": name.get(away_id),
+            "homeAbbr": abbr.get(home_id, ""), "awayAbbr": abbr.get(away_id, ""),
             "homeSpName": next((x["spName"] for x in lineups
                                 if x["gamePk"] == r["gamePk"] and x["team"] == home_id), None),
             "awaySpName": next((x["spName"] for x in lineups
@@ -339,7 +344,8 @@ def main(argv=None):
               f"// Generated {_dt.datetime.now(_dt.timezone.utc).isoformat(timespec='seconds')}\n")
     ts = (header +
           "export type MlbGame = { gameKey: string; game: string; commence: string;\n"
-          "  eventDate: string; home: string; away: string; homeSpName: string | null;\n"
+          "  eventDate: string; home: string; away: string;\n"
+          "  homeAbbr: string; awayAbbr: string; homeSpName: string | null;\n"
           "  awaySpName: string | null; homeSpFactor: number; awaySpFactor: number;\n"
           "  homeRuns: number; awayRuns: number; total: number };\n\n"
           f"export const MLB_GAMES: MlbGame[] = {json.dumps(out, ensure_ascii=False)};\n"
