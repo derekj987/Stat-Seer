@@ -45,7 +45,11 @@ independently and the second half has no header) ·
 usually a `max-width` in `ch` on the copy with nothing else using the space) ·
 `chart-header-misaligned` (a chart's column header does not sit over the data it labels — compares
 the header cells' LEFT EDGES against the first data row's, so it catches a wrong `display`, a
-column-count mismatch and a stray colspan alike).
+column-count mismatch and a stray colspan alike) ·
+`column-no-variance` (a numeric column holding one or two distinct values across 8+ rows — a column
+that cannot be carrying the information it appears to) ·
+`popover-unanchored` (a Tip/tooltip bubble with no positioned ancestor, or one that opens far from
+the control that triggers it — the "the scroll doesn't work any more" family).
 Console errors + network 4xx/5xx are collected separately (see step 4).
 
 ### 🚨 Never hand-edit an AUTO-GENERATED file
@@ -162,6 +166,65 @@ projection's league anchor had seen the future; and `validate()` scored the base
 second is the more dangerous shape because it flatters **the thing the model must beat**, so it
 understates the model and you will not go looking. Capture a baseline at prediction time, inside the
 loop, next to the prediction.
+
+### 🚨 `position:absolute` with no positioned ancestor falls through to the PAGE
+The scroll "?" (`Tip`) on `/model` silently stopped working. `.tip` was `position:static` on
+purpose, so the bubble could anchor to a positioned ROW above it (`.tblhelp` / `.pmcat__legend`) and
+span that row's width. That holds only while every Tip happens to sit inside such a row — and when
+the Model page's Tip moved into `WeekBadge`'s aside, which is not positioned, `absolute` walked all
+the way up to the **initial containing block**. Measured: the bubble rendered **1425px wide at
+left:0**, 143px from the seal, somewhere down the page. Nothing threw. The control just did nothing
+when clicked.
+
+**The rule: a popover anchors to its own trigger's wrapper, never to whatever happens to be
+above it.** `.tip{position:relative}` cannot be broken by where the Tip is placed. Then the bubble
+needs its own width, because anchored to a 22px icon `left:0;right:0` would collapse it:
+```css
+.tip{position:relative}
+.tip__bubble{position:absolute;left:50%;transform:translateX(-50%);top:calc(100% + 8px);
+  width:max-content;max-width:min(460px,calc(100vw - 32px))}
+```
+
+**Centring cannot be clamped, so phones need a different anchor.** At 375px the same bubbles landed
+at **left −123px** and past the right edge, because a seal near either edge throws a centred bubble
+off-screen. Below 640px it becomes a viewport-anchored bottom sheet (`position:fixed;left:12px;
+right:12px;bottom:12px`), which always fits. Watch the trap the rails section already documents:
+`fixed` is re-captured by any ancestor with `transform`/`filter`/`perspective`/`contain`, so verify
+with `getComputedStyle(bubble).position === "fixed"` rather than assuming.
+
+**A CLOSED popover still occupies layout.** `visibility:hidden` does not remove a box, so the
+off-screen hidden bubble was adding **5px of horizontal page overflow** — a `page-overflow-x`
+finding whose cause was an invisible element. `position:fixed` contributes nothing to the document's
+scroll width, which fixed that too.
+
+Detection is `popover-unanchored`, and it measures the OPENED bubble rather than reading CSS —
+force it visible, take both rects, restore:
+```js
+let anchored = false;
+for (let a = bubble.parentElement; a; a = a.parentElement)
+  if (getComputedStyle(a).position !== "static") { anchored = true; break; }
+const dx = Math.abs(bubbleCentreX - triggerCentreX);   // > 500px = it is not beside its control
+```
+Two-way tested: 0 findings as shipped, 1 after re-applying the old rules via an injected
+`<style>`, 0 on removal — and the finding reproduced the exact numbers ("1425px wide at left 0px,
+143px from the control").
+
+**Generalise past this component.** Any absolutely-positioned child that assumes a positioned
+ancestor is one refactor away from this bug, and the failure is invisible until someone clicks. When
+you move a component into a new container, re-check what positions it.
+
+### Long copy belongs in the scroll, not on the board
+Derek: *"Most of the information on this page is too wordy."* The MLB game panel had **five
+paragraphs of caveat above the chart**. Every sentence was true and measured, and stacked over a
+board they are a wall nobody reads — which is worse for honesty than one line plus a click, because
+unread caveats protect nobody.
+
+The house pattern is one `.ctxsec__legend` line naming the columns, with a `<Tip>` scroll carrying
+the detail. Keep the measured numbers *in* the Tip — condensing must not mean deleting the gain, the
+calibration or the "no pick" statement. Check after any copy pass:
+```js
+document.querySelectorAll('.hb-body .ctxsec__d').length   // long body paragraphs left on the board
+```
 
 ### 🚨 A column whose value is the SAME on every row is telling you nothing
 Derek: *"I'm seeing too many favorites and too many overs."* The favourites half was not the model

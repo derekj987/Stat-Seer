@@ -1,6 +1,7 @@
 import { Brand, FlowSteps, ModelSubnav } from "../../Nav";
 import PinButton from "../../PinButton";
 import { DayHeader } from "../../DayHeader";
+import Tip from "../../Tip";
 import { etToday, etDayKey, groupByGameDay } from "@/lib/gameDays";
 import { MLB_GAMES, MLB_GAME_SCORES } from "@/lib/mlbGameModel";
 import { MLB_AVAIL, type MlbAvail } from "@/lib/mlbAvailability";
@@ -14,9 +15,14 @@ import { mlbBoard, marketMargin } from "@/lib/mlbBoard";
 // identical to NFL/NCAAF on purpose — same masthead, FlowSteps, ModelSubnav, day grouping, hb-panel
 // shells and pm* table classes. Every sport reading the same way is the product.
 //
-// NO SIDE PICK AND NO RUN LINE. The run line is a fixed +/-1.5 and the total model is worth 0.8%;
-// turning that into a pick on a side would be inventing precision this model does not have. The
-// market's run line appears as context and stops there.
+// NO SIDE PICK. Both spreads are expected MARGINS in runs, never a bet. The posted run line is
+// deliberately absent: it is a fixed +/-1.5 on every game, so a run-line column printed -1.5 down
+// almost every row and read as "we make everyone a favourite" while carrying no information at all.
+// The market's side is read from the moneyline instead (marketMargin in lib/mlbBoard.ts).
+//
+// COPY LIVES IN THE SCROLL. One legend line on the board; the caveats, the measured gain and the
+// calibration go in the Tip. Paragraphs of hedging stacked above a chart are a wall nobody reads,
+// which is worse for honesty than one line plus a click.
 
 export const metadata = {
   title: "StatSeer — MLB Game Model",
@@ -83,50 +89,34 @@ export default async function Page() {
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
-          <p className="ctxsec__d">
-            The <span className="lgnd lgnd--mkt">market&apos;s</span> spread and total for each game,
-            then <span className="lgnd lgnd--model">ours</span> beside them. Ours is each
-            side&apos;s offence against the other&apos;s defence, adjusted for the{" "}
-            <b>starting pitcher</b> — computed <b>line-blind</b>, without looking at the two columns
-            to its left. Both spreads are <b>runs, home team&apos;s side</b>: −0.6 means the home
-            club is favoured by six tenths of a run.
-          </p>
-          <p className="ctxsec__d">
-            <b>Why a spread in runs and not a run line?</b> Baseball&apos;s run line is a fixed
-            ±1.5 on every game, so a run-line column says the same thing about all fifteen games and
-            tells you nothing about who is favoured <i>by how much</i> — it just made every row look
-            like a big favourite. In baseball that information lives in the moneyline instead, so we
-            take the market&apos;s two prices, strip the vig, and convert the fair win probability
-            into runs using the measured spread of real margins.
-          </p>
-          <p className="ctxsec__d">
-            <b>Read this one with your eyes open.</b> Over <b>{S.n} held-out games</b> it lands{" "}
-            <b>{S.gain}%</b> closer than assuming the league average of <b>{S.meanTotal}</b> runs
-            every time. That is small, and it is the sport rather than the model: a single baseball
-            game averages {S.meanTotal} runs with a standard deviation of <b>{S.sd}</b>, so the
-            variance swamps the difference between two clubs. Team quality on its own measured{" "}
-            <b>0.0%</b> — worth nothing at all. It is published because it is line-blind and graded,
-            not because we think we have found something.
-          </p>
-          {/* State the lean rather than letting a reader find it. A board where almost every row
-              points the same way is normally OUR bug, so the burden is on us to show it isn't. */}
-          <p className="ctxsec__d">
-            <b>Our totals sit above the market&apos;s on most games, and our spreads sit below
-            it.</b> Both are worth knowing before you read anything into a row. On totals we are not
-            running hot: against <i>what actually happened</i> our number has been <b>too low</b> in
-            four of the season&apos;s six months, and across all {S.n} held-out games our average
-            error is <b>{S.resid >= 0 ? "+" : ""}{S.resid.toFixed(2)}</b> runs. The market is
-            pricing this stretch about <b>0.8 runs below</b> what the season has actually produced,
-            which is most of the gap you can see. On spreads we are the timid one — our
-            average margin is <b>0.6 runs</b> against real margins averaging <b>3.6</b> — which is
-            the same finding as the 0.0% above, seen from the other side: the model barely
-            distinguishes between two clubs, so it rarely makes anyone a big favourite.
-          </p>
-          <p className="ctxsec__d">
-            Which of us is right is a question about beating a closing line, and that needs price
-            history we do not have yet — we only began recording MLB odds on <b>7 September</b>.
-            Until then a gap in either column is a difference to notice, <b>not an edge to act
-            on</b>.
+          {/* One line on the board, everything else behind the scroll. Five paragraphs of caveat
+              above a chart is not honesty, it is a wall nobody reads — the numbers still have to
+              be one click away, which is what the Tip is for. */}
+          <p className="ctxsec__legend">
+            <span className="lgnd lgnd--mkt">Market</span> spread and total, then{" "}
+            <span className="lgnd lgnd--model">ours</span>. Spreads are runs, home side:{" "}
+            <b>−0.6</b> = home favoured by 0.6.
+            <Tip label="About the MLB game model" text={<>
+              <b>How it works.</b> Each side&apos;s offence against the other&apos;s defence,
+              adjusted for the starting pitcher. Line-blind — it never sees the market columns.<br /><br />
+              <b>Why runs, not a run line?</b> Baseball&apos;s run line is a fixed ±1.5 on every
+              game, so it says nothing about who is favoured by how much. In baseball that lives in
+              the moneyline, so we strip the vig off the two prices and convert the fair win
+              probability into runs.<br /><br />
+              <b>What it is worth.</b> Over {S.n} held-out games, <b>{S.gain}%</b> closer than
+              assuming {S.meanTotal} runs every time. That is small because of the sport: one game
+              averages {S.meanTotal} runs with an SD of <b>{S.sd}</b>. Team quality alone measured{" "}
+              <b>0.0%</b> — only the starting pitcher moved the number.<br /><br />
+              <b>The gaps you can see.</b> Our totals sit above the market&apos;s on most games,
+              and our spreads below it. Neither is us running hot: against real results our total
+              averages <b>{S.resid >= 0 ? "+" : ""}{S.resid.toFixed(2)}</b> runs of error and has
+              been <i>too low</i> in four of six months, while the market prices this stretch about
+              0.8 runs under what the season has produced. Our margins average <b>0.6</b> runs
+              against real margins of <b>3.6</b> — the model is timid, not bold.<br /><br />
+              <b>No pick.</b> Whether we or the market are right is a closing-line question, and we
+              only began recording MLB odds on <b>7 September</b>. A gap here is a difference to
+              notice, not an edge to act on.
+            </>} />
           </p>
 
           {MLB_GAMES.length === 0 ? (
@@ -204,30 +194,28 @@ export default async function Page() {
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
-          {/* Derek read this board twice and asked both times what it was for. The answer was
-              never on the page, so it is now: what the number means, and why baseball needs it
-              when football does not. */}
-          <p className="ctxsec__d">
-            <b>Baseball lineups are not fixed, and they post late.</b> A football team&apos;s
-            starting eleven is the same most weeks. A baseball manager rests people constantly —{" "}
-            <b>about two of the nine slots turn over every night</b> — and the lineup card is only
-            published <b>three hours or so before first pitch</b>. So at lunchtime nobody yet knows
-            who is actually playing tonight. This board is our estimate in the meantime.
-          </p>
-          <p className="ctxsec__d">
-            <b>Start %</b> is the chance a player is in tonight&apos;s lineup. It matters because
-            most books void a prop if he never plays — it is about whether your bet <i>happens</i>,
-            not whether it wins. <b>Batting slot</b> is where he is likely to hit, which decides how
-            many times he comes to the plate: leading off is about <b>4.5</b> chances, batting ninth
-            about <b>3.4</b>. Those same two numbers feed every projection on the{" "}
-            <a href="/mlb/model/players">Player Props</a> board.
-          </p>
-          <p className="ctxsec__d">
-            Published as a probability and graded against a real baseline. Over{" "}
-            <b>21,304 held-out player-games</b> it scores a Brier of <b>{BRIER.model.toFixed(3)}</b>{" "}
-            against <b>{BRIER.persistence.toFixed(3)}</b> for simply repeating last night&apos;s
-            lineup — <b>{BRIER.gain}% better</b>, and comfortably the strongest model on this page.
-            Once a lineup actually posts, the row shows the lineup instead of our estimate.
+          {/* Derek read this board twice and asked both times what it was for, so the answer has to
+              be ON the page — but as one line plus a scroll, not the three paragraphs it was. */}
+          <p className="ctxsec__legend">
+            Our estimate of who starts tonight, until the real lineup posts.{" "}
+            <b>Start %</b> = chance he plays. <b>Slot</b> = where he bats.
+            <Tip label="About tonight's lineups" text={<>
+              <b>Why this exists.</b> A football team&apos;s starting eleven is the same most weeks.
+              A baseball manager rests people constantly — about two of the nine slots turn over
+              every night — and the lineup card only posts about three hours before first pitch. So
+              at lunchtime nobody knows who is playing.<br /><br />
+              <b>Start %</b> is the chance he is in tonight&apos;s lineup. Most books void a prop if
+              he never plays, so it is about whether your bet <i>happens</i>, not whether it
+              wins.<br /><br />
+              <b>Batting slot</b> decides how many times he comes to the plate — leading off is
+              about 4.5 chances, batting ninth about 3.4. Both numbers feed every projection on the{" "}
+              <a href="/mlb/model/players">Player Props</a> board.<br /><br />
+              <b>What it is worth.</b> Over 21,304 held-out player-games it scores a Brier of{" "}
+              <b>{BRIER.model.toFixed(3)}</b> against <b>{BRIER.persistence.toFixed(3)}</b> for
+              simply repeating last night&apos;s lineup — <b>{BRIER.gain}% better</b>, and
+              comfortably the strongest model on this page. Once a lineup posts, the row shows the
+              lineup instead of our estimate.
+            </>} />
           </p>
           {luGames.length === 0 ? (
             <p className="foot">No games in the window. This board fills as tonight&apos;s slate approaches.</p>
@@ -294,21 +282,24 @@ export default async function Page() {
       {/* Say plainly what is not here. A board that looks finished while quietly missing its model
           is the failure mode this section exists to avoid. */}
       <section className="calib">
-        <h2 className="calib__h">What we don&apos;t publish</h2>
+        <h2 className="calib__h">
+          What we don&apos;t publish
+          <Tip label="What we don't publish, and why" text={<>
+            <b>No side pick.</b> Our total is worth {S.gain}% and our margins average 0.6 runs
+            against real margins of 3.6. Turning either into a pick would be inventing precision the
+            model does not have.<br /><br />
+            <b>No run line.</b> It is a fixed ±1.5 on every game, so a column of it says nothing
+            about who is favoured by how much.<br /><br />
+            <b>No home-field adjustment.</b> Measured across 2,165 games at <b>+0.06 runs</b> —
+            indistinguishable from zero, and far smaller than football&apos;s.<br /><br />
+            <b>No closing-line claim.</b> Everything here is measured against what actually
+            happened. MLB price capture began 7 September; beating the market needs history we do
+            not have yet.
+          </>} />
+        </h2>
         <p className="foot">
-          <b>No side pick and no run-line call.</b> Baseball&apos;s run line is a fixed ±1.5 and our
-          total is worth {S.gain}% — turning that into a pick on a side would be inventing precision
-          the model does not have. The market&apos;s run line is shown as context, nothing more.
-        </p>
-        <p className="foot">
-          <b>No home-field adjustment.</b> Measured across 2,165 games it came to <b>+0.06 runs</b>{" "}
-          — indistinguishable from zero, and far smaller than football&apos;s. A number that small
-          does not belong in a model.
-        </p>
-        <p className="foot">
-          <b>Not yet tested against a closing line.</b> Everything above is measured against what
-          actually happened. We only began recording MLB prices on 7 September, and beating the
-          market is a separate question that needs history we do not have yet.
+          No side pick, no run line, no home-field adjustment, and no claim to beat the market —
+          each for a measured reason.
         </p>
       </section>
     </main>

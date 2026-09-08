@@ -2404,7 +2404,8 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
   background:var(--offc-soft);color:var(--offc-ink);font-size:11px;font-weight:700;
   letter-spacing:.02em;vertical-align:baseline}
 .calib{margin-top:26px;padding-top:18px;border-top:1px solid var(--line)}
-.calib__h{font-size:16px;margin:0 0 10px}
+/* inline-flex so a Tip scroll can sit beside the heading without dropping to its own line */
+.calib__h{font-size:16px;margin:0 0 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .calib__table{display:flex;flex-direction:column;gap:2px;max-width:440px}
 .calib__row{display:grid;grid-template-columns:1fr 1fr auto 1fr;gap:12px;
   padding:7px 10px;font-size:13px;font-family:var(--font-mono);
@@ -3490,14 +3491,25 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
    Pure CSS: hover on desktop, focus (tap) on phones. The bubble is absolutely positioned
    to the .tblhelp legend row (left:0/right:0), so it spans that row's full width and can
    never clip or run off-screen. No JS/hydration involved. */
-.tip{position:static;display:inline-flex;align-items:center;flex:0 0 auto}
+/* 🚨 position:relative, NOT static. This was `static` so the bubble could anchor to a positioned
+   ROW above it (.tblhelp / .pmcat__legend) and span that row's full width. That works only for as
+   long as every Tip happens to sit inside one of those rows — and when the Model page's Tip moved
+   into WeekBadge's aside, which is not positioned, `absolute` fell all the way through to the
+   INITIAL CONTAINING BLOCK. The bubble then rendered 1425px wide at left:0, somewhere down the
+   page, nowhere near the scroll you clicked. Nothing errored; the control just stopped working.
+   Anchoring to .tip itself means the bubble cannot be broken by where the Tip is placed. */
+.tip{position:relative;display:inline-flex;align-items:center;flex:0 0 auto}
 .tip__chk{position:absolute;width:1px;height:1px;opacity:0;margin:0;pointer-events:none}
 .tip__seal{display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;
   padding:0;border:0;background:none;line-height:0;user-select:none;border-radius:5px;
   -webkit-tap-highlight-color:transparent;transition:transform .12s ease,filter .12s ease}
 .tip:has(.tip__chk:checked) .tip__seal{transform:translateY(-1px) scale(1.1);filter:drop-shadow(0 1px 3px rgba(0,0,0,.3))}
 .tip__icon{width:22px;height:22px;object-fit:contain;display:block}
-.tip__bubble{position:absolute;left:0;right:0;top:calc(100% + 8px);z-index:60;
+/* Centred under the seal and sized to its own content, clamped so it can never exceed the
+   viewport. `left:0;right:0` used to stretch it across the anchoring row; anchored to .tip that
+   would collapse it to the icon's 22px, so it needs an explicit width. */
+.tip__bubble{position:absolute;left:50%;transform:translateX(-50%);top:calc(100% + 8px);z-index:60;
+  width:max-content;max-width:min(460px,calc(100vw - 32px));
   background:var(--surface);border:1px solid var(--gold);border-radius:10px;padding:11px 13px;
   font-size:12.5px;line-height:1.5;color:var(--ink);font-style:normal;font-weight:400;letter-spacing:0;
   text-transform:none;text-align:left;box-shadow:0 12px 32px rgba(0,0,0,.32);
@@ -3510,6 +3522,21 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .tip__seal:hover{transform:translateY(-1px) scale(1.1);filter:drop-shadow(0 1px 3px rgba(0,0,0,.3))}
   .tip:hover .tip__bubble{opacity:1;visibility:visible;pointer-events:auto}
 }
+/* On a phone, centring on the seal cannot be clamped: a scroll near either edge throws the bubble
+   past the viewport (measured -123px off the left, and 5px of page overflow from the CLOSED bubble,
+   because visibility:hidden still occupies layout). Anchor it to the viewport instead — a bottom
+   sheet always fits, and position:fixed contributes nothing to the document's scroll width.
+   NOTE: fixed is re-trapped by any ancestor with transform/filter/perspective/contain; verify with
+   getBoundingClientRect() rather than assuming, as the rails section warns. */
+@media (max-width:640px){
+  .tip__bubble{position:fixed;left:12px;right:12px;bottom:12px;top:auto;transform:none;
+    width:auto;max-width:none;max-height:62vh;overflow-y:auto;overflow-x:hidden}
+}
+/* One-line legend above a chart, with the scroll on the end. The long explanation belongs in the
+   Tip, not on the page: paragraphs of caveat stacked over a board are a wall nobody reads. */
+.ctxsec__legend{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:0 0 12px;
+  font-size:13px;line-height:1.5;color:var(--muted)}
+.ctxsec__legend b{color:var(--ink)}
 .pmcat__legend{position:relative;display:flex;align-items:center;gap:8px;margin:0 0 12px}
 .pmcat__legendlabel{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
 /* generic "what am I looking at?" legend used above subpage tables */

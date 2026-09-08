@@ -683,6 +683,54 @@
     }
   }
 
+  // ---- 20d. A popover must be anchored to something, and land near its trigger ----
+  // The scroll "?" (Tip) reveals an absolutely-positioned bubble. `.tip` was position:static so the
+  // bubble could stretch across a positioned ROW above it — which worked only while every Tip
+  // happened to sit inside such a row. When the Model page's Tip moved into WeekBadge's aside,
+  // which is not positioned, `absolute` fell through to the INITIAL CONTAINING BLOCK: the bubble
+  // rendered 1425px wide at left:0, far from the scroll, and the control simply stopped working.
+  //
+  // Nothing threw and nothing looked wrong until you clicked, which is why this needs a probe.
+  // Measure the OPENED bubble against its trigger rather than reading CSS: force it visible, take
+  // both rects, restore. Works for any popover following the same trigger/bubble shape.
+  const POPOVERS = [
+    { root: ".tip", trigger: ".tip__icon, .tip__seal", bubble: ".tip__bubble", chk: ".tip__chk" },
+  ];
+  for (const spec of POPOVERS) {
+    for (const root of document.querySelectorAll(spec.root)) {
+      const trig = root.querySelector(spec.trigger);
+      const bub = root.querySelector(spec.bubble);
+      if (!trig || !bub || !vis(trig)) continue;
+      const chk = spec.chk ? root.querySelector(spec.chk) : null;
+      const was = chk ? chk.checked : null;
+      const forced = bub.style.cssText;
+      if (chk) chk.checked = true;
+      // Belt and braces: some popovers reveal via :hover, which cannot be simulated here.
+      bub.style.opacity = "1"; bub.style.visibility = "visible";
+      const br = bub.getBoundingClientRect(), tr = trig.getBoundingClientRect();
+      // Which ancestor actually positions it? null = the initial containing block = the bug.
+      let anchored = false;
+      for (let a = bub.parentElement; a; a = a.parentElement) {
+        if (getComputedStyle(a).position !== "static") { anchored = true; break; }
+      }
+      const dx = Math.round(Math.abs((br.left + br.width / 2) - (tr.left + tr.width / 2)));
+      const docW = document.documentElement.clientWidth;
+      bub.style.cssText = forced;
+      if (chk) chk.checked = was;
+      if (!anchored) {
+        add("popover-unanchored", "high", root,
+          `${spec.root} bubble has NO positioned ancestor — it is laid out against the page, ` +
+          `${Math.round(br.width)}px wide at left ${Math.round(br.left)}px, ` +
+          `${dx}px from the control that opens it`);
+      } else if (dx > 500 || br.width > docW - 8) {
+        add("popover-unanchored", "medium", root,
+          `${spec.root} bubble opens ${dx}px from its trigger (width ${Math.round(br.width)}px) — ` +
+          `it should appear beside the control, not across the page`);
+      }
+      if (cap(findings, "popover-unanchored")) break;
+    }
+  }
+
   // ---- 21. A split grouped list must not open on a blank label ----------------
   // Grouped lists blank a repeated leading label (a player's second row). If such a list is later
   // SPLIT across a "show more" boundary, the first hidden row inherits the blank and the dropdown

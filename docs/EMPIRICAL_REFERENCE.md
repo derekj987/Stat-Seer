@@ -701,3 +701,67 @@ products — and every one happened while explicitly trying to avoid them.
 
 Four of seven were caught by automated checks rather than review. **Build the
 checks into the pipeline, not the review process.**
+
+---
+
+## §12. MLB game model — what the run projection is worth (2026)
+
+All figures walk-forward, constants swept on the first 70% of dates, scored on the rest.
+Reproduce with `python mlb_game_model.py --validate`. **Current-season data only** — nothing is
+blended from 2025 (see the prior-season test below).
+
+### 12a. Totals
+
+| model | MAE (runs) | vs baseline |
+|---|---|---|
+| league mean total, causal (8.96) | 3.5634 | — |
+| team offence × defence, shrunk | 3.5611 | **−0.0%** |
+| + starting pitcher | 3.5317 | **+0.9%** |
+
+**Team quality on its own is worth nothing.** The shrinkage sweep chose k=150 against ~140 games
+per team — the optimiser's way of saying "ignore the teams". Only the starting pitcher moves the
+number. That is the sport, not the model: mean total 8.96, single-game **SD 4.52**, so variance
+swamps every team-quality difference there is.
+
+Mean signed error against actual totals is **+0.01 runs** (unbiased), though it is *too low* in four
+of the season's six months. Home-field advantage measured **+0.06 runs** over 2,165 games —
+indistinguishable from zero, and excluded.
+
+### 12b. Margins — the model is far too TIMID, not too bold
+
+| | ours | actual |
+|---|---|---|
+| mean abs margin | **0.61** | **3.60** |
+| sd | 0.80 | 4.63 |
+
+Direction is right (we say home by >1 ⇒ actual averages +1.19; away by >1 ⇒ −1.10), and a shrink
+sweep chosen on train picked **1.0 — no shrinking**. Reported because the board *looked* like it
+made too many favourites; it did not, and the cause was a display column (below).
+
+### 12c. Prior-season team prior — real but small
+
+Question: does shrinking each team toward its own **2025** rate, instead of toward the league mean,
+make the model less timid? Twelve configurations (regress ∈ {0.35, 0.5, 0.65} × K ∈ {150, 300, 600,
+1200}), **chosen on train, reported on test**:
+
+| | test margin MAE | margin gain vs zero | test total MAE |
+|---|---|---|---|
+| baseline (league prior, K=150) | 3.3178 | +2.29% | 3.5569 |
+| prior regress=0.65, K=150 | **3.3064** | **+2.62%** | 3.5577 |
+
+**+0.34% on margin MAE, totals unchanged**, mean abs margin 0.72 → 0.80. All twelve configurations
+beat the baseline on test margin, and train agreed — so the sign is trustworthy even though the size
+is small. Passes the standing bar (observable, mechanism stated in advance, improves out of sample)
+**against actual results**; it has NOT been tested against a closing line, which MLB cannot do until
+enough price history accumulates (capture began 2026-09-07).
+
+Discipline note: selecting on the test split instead would have picked regress=0.5/K=1200 and
+reported **+2.90%** — nearly double. The gap between those two numbers is the cost of choosing on
+the data you report.
+
+### 12d. The run line is not a spread
+
+MLB's run line is a fixed ±1.5 on every game (confirmed against the raw capture: the only two
+values present). A "consensus spread" column therefore prints −1.5 on nearly every row and, where
+books disagree on the favourite, a median of **0** — not a real line. The market's side is read from
+the **moneyline** instead: de-vig the pair, then `margin ≈ SD × probit(p)` with SD = 4.63.
