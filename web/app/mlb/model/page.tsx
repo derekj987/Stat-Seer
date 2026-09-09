@@ -280,7 +280,7 @@ export default async function Page() {
                                 <div className={`pmrow pmrow--data${i >= LU_CAP ? " hb-row--more" : ""}`}
                                   role="row" key={`${r.player}-${r.team}`}>
                                   <span className="pmcell pmcell--player">
-                                    {cont ? "" : <>{r.player}<span className="pmslot"> ({r.pos ?? "—"}, {r.team})</span></>}
+                                    {cont ? "" : <>{r.player}<span className="pmslot"> ({r.pos ?? "—"}, {r.teamAbbr || r.team})</span></>}
                                   </span>
                                   <span className="pmcell pmcell--team">{known ? "in the lineup" : "projected"}</span>
                                   <span className="pmcell">

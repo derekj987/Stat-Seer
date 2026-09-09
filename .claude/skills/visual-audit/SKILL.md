@@ -37,6 +37,9 @@ drifted past it) · `uncapped-long-list` (a long item list with no "show more" c
 `orphaned-continuation` (a grouped list whose first row has a blank leading label) ·
 `all-cards-collapsed` (every per-game card on a board is closed, so nothing reads without a click) ·
 `repeated-column-header` (the column row reappears mid-board, chopping one chart into several) ·
+`chart-rows-uneven` (data rows in one chart differ in height because a cell wraps) ·
+`card-property-as-column` (a column constant within each card but varying between cards — game-level
+data rendered once per row) ·
 `content-escapes-card` (a row's border box is narrower than the content it wraps — the last columns
 draw *outside* the card instead of scrolling; `overflow-x` on the flex column itself) ·
 `chart-split-scrollers` (one chart rendered as two tables, so each half scrolls sideways
@@ -1190,6 +1193,18 @@ and forgetting the fourth produces one page that reports clean for the wrong rea
 document.querySelectorAll('.pmrow--data, .hb-form tbody tr').length   // > 0 before trusting a 0
 ```
 
+**The same trap catches ad-hoc measuring, not just the probe.** A one-off `javascript_tool` snippet
+that reads widths on `/mlb/model/players` came back with *every* number zero — header widths, row
+heights, table width — because `document.querySelector` had handed back the copy inside `#S:0`. The
+tell is a set of impossible zeros, and the fix is the same splice; do it before measuring, then
+sanity-check one width against the screenshot. Also note the splice must be paired with removing the
+live placeholder `<main>`, or the page renders two boards and the outer widths are wrong.
+
+**Measuring cell-by-cell will hang the bridge.** Cloning ~5,000 cells into the document to read their
+natural widths returned `javascript_tool failed: Internal error` twice. Append clones into one
+reused off-screen container, measure one column at a time, and return a `JSON.stringify` string
+rather than a large object graph.
+
 ### ⚠️ `querySelector` looks DOWN — an ancestor never matches itself
 `uncapped-long-list` walks up four ancestors asking whether a cap control is present, using
 `a.querySelector(".hb-showmore, .hb-more, .hb-moretbl__chk")`. But the most common capped shape in
@@ -1595,6 +1610,67 @@ sum to 100%**. `.hb-form--psnap` declared four widths for a five-column table, s
 outside the budget: the table overflowed its wrapper, a scrollbar appeared, and the Player column
 scrolled out of view. After adding or removing a column, always re-check the width rules — count the
 `<th>`s and count the `nth-child` rules, and make sure they match.
+
+### 🚨 Even rows: budget for the widest DATA value, then fix the height
+`chart-rows-uneven` + `card-property-as-column`. Derek asked twice for "evenly space the rows and
+columns", and the first two attempts each made it **worse**. A row is its own grid, so it sizes to
+its own tallest cell: one cell that wraps makes that one row taller and the board reads as broken.
+
+Three things that do NOT fix it, in the order they were tried:
+
+1. **`min-height`.** It is a floor. It lifts the short rows and leaves the tall ones exactly as tall.
+   Measured: heights were `57, 62` before adding it and `62, 71, 82, 88` after — more varied, not
+   less, because it was applied together with the next mistake.
+2. **Narrowing a column to buy width elsewhere.** Every pixel taken from column A is a pixel that
+   makes A's own cells wrap. That pass went from two distinct row heights to four.
+3. **Budgeting from the measured HEADER widths.** A header that fits over a column whose *values*
+   wrap still gives ragged rows. **Measure the widest DATA value, not the label.** Clone the cell
+   into a `white-space:nowrap; display:inline-block` probe and read its width; the header is a
+   separate, smaller constraint, and it is fine to let a long header wrap to two lines on purpose
+   when its data is a single digit (`HR vs opp pitcher` is 152px of label over one character).
+
+What works, in this order:
+
+```
+budget = scroller - row padding - (ncols - 1) x gap        // MEASURE all three; do not assume
+```
+give each column its widest data value on one line, then `height:<fixed>px; align-items:center` on
+the data rows — and because a fixed height *clips* whatever overflows it, give the one column that
+can still legitimately need two lines a tighter `line-height` so two lines fit inside the same box.
+Verify with `new Set(rowHeights).size === 1` **and** zero cells where `scrollHeight > clientHeight`.
+Measured on `/mlb/model/players`: 636 rows, one distinct height (56px), 0 clipped, 0 overflow.
+
+**And before budgeting at all, ask whether a column should exist.** The HR board's `ballpark` column
+was the actual cause: the park is a property of the GAME, so it printed one identical long string
+down every row of a card, and its wrapping is what made the rows uneven. Moving it into the card
+header said the same thing once and freed ~180px — which is what made every other column fit. The
+tell is *constant within each card, different between cards*; `column-no-variance` will not catch it
+because board-wide the column varies perfectly well.
+
+**A card header that gains a subtitle needs its own mobile pass.** The park moved into
+`.pmgame__h`, which is a flex bar with the chevron on `margin-left:auto`; at 375px the matchup alone
+filled it and the park silently ellipsized away 81px of itself. It now drops to its own line under
+`max-width:560px` (`flex-wrap` plus `order:3`). Check `scrollWidth - clientWidth` on any new header
+text at mobile — an ellipsis in a header is a truncation the desktop pass will never show you.
+
+### MLB boards: abbreviate the team, and say what the tag MEANS
+Derek's standing asks for the MLB section, all of which have bitten more than once:
+
+- **Teams are abbreviated everywhere** — `Pete Alonso (BAL)`, `Bal`, `Cle`, never the full club
+  name. The abbreviation comes from `mlb_availability.team_abbrs()` (id→abbr and name→abbr, process
+  cached) and rides on the export rows as `teamAbbr` / `oppAbbr`; all three exporters
+  (`mlb_availability`, `mlb_strikeouts`, `mlb_player_props`) carry it, so a new board reads it
+  rather than re-deriving it. When you add a board, grep the exporter for `teamAbbr` before writing
+  a name-to-abbr map of your own.
+- **A market spread must name WHO it favours**: `−1.5 (BAL)`, not a bare `−1.5`. Derek: *"who is
+  that spread for?"*
+- **Never publish a raw factor as if it were a reading.** `1.01 neutral` meant nothing to a reader.
+  A park factor is shown as a worded verdict — `Favorable for HRs` / `Neutral for HRs` / `Tough for
+  HRs` (`parkTag()`, cut at 1.05 / 0.95) — and the number itself goes in the Tip if anywhere. The
+  same rule is why the strikeout cards carry no park at all: an HR factor above a pitching board
+  would be a number that looks like information and isn't.
+- **Completed games come off the board** (`commence > now` at render time), and each game shows its
+  ET start in parentheses.
 
 ### Full-bleed elements and gutters
 A hero/banner escapes its container with negative margins plus an over-100% width

@@ -590,6 +590,7 @@ def main(argv=None):
     # Ballpark: the FACTOR is keyed on the home club (a park's identity, present on every cached
     # day); the display NAME comes off the upcoming slate, which is always fetched fresh.
     parks = park_hr_factors(logs, lineups)
+    abbr = av.team_abbrs()
     venue_of = {r["gamePk"]: r.get("venue") for r in lineups if r.get("venue")}
     homeclub_of = {r["gamePk"]: r.get("homeTeam") for r in lineups if r.get("homeTeam")}
 
@@ -622,6 +623,9 @@ def main(argv=None):
                 "gameKey": str(r["gamePk"]),
                 "game": f"{away} @ {home}", "commence": r["commence"],
                 "player": f["name"], "team": r["teamName"], "opp": r["opp"],
+                # Abbreviations for the board — a full club name beside every player wrapped the
+                # name column onto three lines.
+                "teamAbbr": abbr.get(r["team"], ""), "oppAbbr": abbr.get(r["opp"], ""),
                 "pos": f["pos"], "pStart": f["p_start"], "slot": f["slot"],
                 "posted": bool(posted) and pid in posted, "lineupPosted": bool(posted),
                 "pHit": ph, "pHr": phr,
@@ -646,7 +650,8 @@ def main(argv=None):
               f"// Generated {_dt.datetime.now(_dt.timezone.utc).isoformat(timespec='seconds')}\n")
     ts = (header +
           "export type MlbProp = { gameKey: string; game: string; commence: string; player: string; team: string;\n"
-          "  opp: string; pos: string | null; pStart: number; slot: number; posted: boolean;\n"
+          "  opp: string; teamAbbr: string; oppAbbr: string;\n"
+          "  pos: string | null; pStart: number; slot: number; posted: boolean;\n"
           "  lineupPosted: boolean; pHit: number | null; pHr: number | null;\n"
           "  hitRate: number | null; hrRate: number | null; pa: number | null;\n"
           "  oppSp: string | null; bvpAb: number; bvpH: number; bvpHr: number;\n"

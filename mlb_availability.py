@@ -80,6 +80,26 @@ def _get(url, tries=3):
     return None
 
 
+_ABBR_CACHE = {}
+
+
+def team_abbrs():
+    """{team id -> "BAL", team name -> "BAL"}. One keyless call, cached for the process.
+
+    Full club names are too long for a table cell: "(Baltimore Orioles)" beside every player wrapped
+    the name column onto three lines. StatsAPI already carries the official abbreviation, so use it
+    rather than truncating names by hand.
+    """
+    if _ABBR_CACHE:
+        return _ABBR_CACHE
+    for t in (_get(f"{API}/teams?sportId=1") or {}).get("teams", []):
+        ab = t.get("abbreviation") or ""
+        if ab:
+            _ABBR_CACHE[t["id"]] = ab
+            _ABBR_CACHE[t["name"]] = ab
+    return _ABBR_CACHE
+
+
 def fetch_day(dstr):
     """One date -> [team-game dicts]. Cached on disk: a completed day never changes, and the
     season is ~180 calls, so a refetch on every run is pure waste."""
@@ -231,6 +251,7 @@ def main(argv=None):
     upcoming = [r for r in rows
                 if not r["final"] and (r.get("commence") or "") >= now_iso
                 and r["opp"] in real_clubs]
+    abbr = team_abbrs()
     out = []
     for r in upcoming:
         hist = bt.get(r["team"], [])
@@ -253,7 +274,8 @@ def main(argv=None):
                 # same series. gamePk is unique by construction and survives doubleheaders.
                 "gameKey": str(r["gamePk"]),
                 "game": f"{away} @ {home}", "commence": r["commence"],
-                "team": r["teamName"], "player": f["name"], "pos": f["pos"],
+                "team": r["teamName"], "teamAbbr": abbr.get(r["team"], ""),
+                "player": f["name"], "pos": f["pos"],
                 # If the lineup is already posted this is no longer a projection — say so rather
                 # than publishing a probability next to a known fact.
                 "posted": bool(posted) and pid in posted,
@@ -267,7 +289,8 @@ def main(argv=None):
               f"// Held-out Brier {m:.5f} vs {p:.5f} for persistence ({(p-m)/p*100:+.1f}%).\n"
               f"// Generated {_dt.datetime.now(_dt.timezone.utc).isoformat(timespec='seconds')}\n")
     ts = (header +
-          "export type MlbAvail = { gameKey: string; game: string; commence: string; team: string; player: string;\n"
+          "export type MlbAvail = { gameKey: string; game: string; commence: string;\n"
+          "  team: string; teamAbbr: string; player: string;\n"
           "  pos: string | null; posted: boolean; lineupPosted: boolean; pStart: number;\n"
           "  slot: number; starts: number; of: number };\n\n"
           f"export const MLB_AVAIL: MlbAvail[] = {json.dumps(out, ensure_ascii=False)};\n")

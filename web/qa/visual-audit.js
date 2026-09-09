@@ -714,6 +714,77 @@
     if (cap(findings, "column-no-variance")) break;
   }
 
+  // ---- 20c1. Data rows in one chart must all be the same height ----------------
+  // Derek, twice: "evenly space the rows and columns." A row is its own grid, so it sizes to its
+  // own tallest cell -- one cell that wraps makes that single row taller than its neighbours and
+  // the whole board reads as broken alignment. Measured on /mlb/model/players before the fix:
+  // 42px for most rows and 62px for the two players whose name needed a second line.
+  //
+  // The fix that does NOT work is `min-height`: it sets a floor, so it lifts the short rows and
+  // leaves the tall ones exactly as tall. Narrowing a column to buy width elsewhere makes it worse,
+  // because more cells wrap (that attempt went from two distinct heights to four). What works is a
+  // FIXED height plus a column budget that holds each column's widest DATA value on one line -- and
+  // then a tighter line-height on the one column that can still legitimately need two lines, so
+  // those two lines fit inside the same fixed box instead of being clipped by it.
+  for (const tbl of document.querySelectorAll('[role="table"], table')) {
+    if (!vis(tbl)) continue;
+    const head = tbl.querySelector('[class*="--head"], thead tr');
+    const rows = [...tbl.querySelectorAll('[class*="--data"], tbody tr')].filter(
+      (r) => r !== head && vis(r) && !r.classList.contains("hb-row--more"));
+    if (rows.length < 3) continue;
+    const hs = rows.map((r) => Math.round(r.getBoundingClientRect().height));
+    const spread = Math.max(...hs) - Math.min(...hs);
+    if (spread <= 2) continue;
+    add("chart-rows-uneven", "medium", tbl,
+      `data rows differ in height by ${spread}px (${[...new Set(hs)].sort((a, b) => a - b).join(", ")}) ` +
+      `— a cell is wrapping; budget the column for its widest value and set a fixed row height, ` +
+      `not min-height`, { heights: [...new Set(hs)] });
+    if (cap(findings, "chart-rows-uneven")) break;
+  }
+
+  // ---- 20c1b. A property of the CARD does not belong in a per-row column --------
+  // The MLB home-run board carried a "ballpark" column. Every player in a card plays in the same
+  // park, so the column printed one identical string down the whole card -- and because that string
+  // is long, its wrapping was the direct cause of the uneven rows above. Moving it to the card
+  // header said the same thing once and freed ~180px of column budget, which is what let every
+  // remaining column fit on one line.
+  //
+  // Distinct from column-no-variance, which judges board-wide: this fires precisely when a column is
+  // constant WITHIN each card but varies BETWEEN cards, which is the signature of game-level data
+  // rendered per row. Text columns count here (the run-line case was numeric; this one is a venue).
+  const cards = [...document.querySelectorAll(".pmgame, [class*='__card']")].filter(vis);
+  if (cards.length >= 2) {
+    const perCol = new Map();  // label -> { constantCards, cardVals:Set }
+    for (const card of cards) {
+      const tbl = card.querySelector('[role="table"], table');
+      if (!tbl) continue;
+      const head = tbl.querySelector('[class*="--head"], thead tr');
+      const rows = [...tbl.querySelectorAll('[class*="--data"], tbody tr')].filter(
+        (r) => r !== head && vis(r));
+      if (rows.length < 3) continue;
+      for (let c = 0; c < (head?.children.length || 0); c++) {
+        const label = (head.children[c]?.textContent || "").trim();
+        if (!label) continue;
+        const vals = rows.map((r) => (r.children[c]?.textContent || "").trim()).filter(Boolean);
+        if (vals.length < 3) continue;
+        const cur = perCol.get(label) || { constant: 0, seen: 0, cardVals: new Set(), el: tbl };
+        cur.seen++;
+        if (new Set(vals).size === 1) { cur.constant++; cur.cardVals.add(vals[0]); }
+        perCol.set(label, cur);
+      }
+    }
+    for (const [label, info] of perCol) {
+      // Constant in every card it appears in, and NOT the same value in all of them (that would be
+      // column-no-variance's job), across enough cards to mean something.
+      if (info.seen < 3 || info.constant !== info.seen || info.cardVals.size < 2) continue;
+      add("card-property-as-column", "medium", info.el,
+        `"${label}" is identical in all ${info.seen} cards' rows but differs between cards — ` +
+        `it describes the GAME, not the row; say it once in the card header and give the width back ` +
+        `to the columns whose data is long`, { values: [...info.cardVals].slice(0, 4) });
+      if (cap(findings, "card-property-as-column")) break;
+    }
+  }
+
   // ---- 20c2. A board must not be buried under paragraphs of prose --------------
   // Written as a rule in the skill and then NOT applied to the next board built, which is exactly
   // why it needs to be a check. /mlb/model/players carried three stacked paragraphs of caveat above

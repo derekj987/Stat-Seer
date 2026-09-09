@@ -54,6 +54,8 @@ import sys
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
+import mlb_availability as av
+
 API = "https://statsapi.mlb.com/api/v1"
 CACHE = os.path.join("data", "mlb_pitcher_logs.json")
 MIN_PRIOR = 5                 # starts a pitcher needs before he is projected at all
@@ -207,6 +209,7 @@ def main(argv=None):
     for r in logs:
         st.add(r)
 
+    abbr = av.team_abbrs()
     out = []
     today = _dt.date.today()
     for i in range(args.days + 1):
@@ -234,7 +237,11 @@ def main(argv=None):
                         "game": f"{away_n} @ {home_n}",
                         "commence": g.get("gameDate"),
                         "pitcher": pp["fullName"], "team": g["teams"][side]["team"]["name"],
-                        "opp": g["teams"][other]["team"]["name"], **p})
+                        "opp": g["teams"][other]["team"]["name"],
+                        # Abbreviations for the board: "(Baltimore Orioles)" in every row wrapped
+                        # the name column onto three lines. StatsAPI supplies the official code.
+                        "teamAbbr": abbr.get(g["teams"][side]["team"]["id"], ""),
+                        "oppAbbr": abbr.get(g["teams"][other]["team"]["id"], ""), **p})
     te = validate(logs)
     mae_model = statistics.mean(abs(r["proj"] - r["y"]) for r in te)
     mae_base = statistics.mean(abs(r["seasonMean"] - r["y"]) for r in te)
@@ -244,7 +251,8 @@ def main(argv=None):
               f" ({(mae_base-mae_model)/mae_base*100:+.1f}%). NOT yet tested against the closing line.\n"
               f"// Generated {_dt.datetime.now(_dt.timezone.utc).isoformat(timespec='seconds')}\n")
     ts = (header +
-          "export type MlbK = { gameKey: string; game: string; commence: string; pitcher: string; team: string;\n"
+          "export type MlbK = { gameKey: string; game: string; commence: string; pitcher: string;\n"
+          "  team: string; teamAbbr: string; oppAbbr: string;\n"
           "  opp: string; proj: number; bf: number; kRate: number; oppFactor: number;\n"
           "  starts: number; seasonMean: number };\n\n"
           f"export const MLB_K: MlbK[] = {json.dumps(out, ensure_ascii=False)};\n")

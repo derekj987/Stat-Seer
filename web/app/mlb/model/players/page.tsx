@@ -39,11 +39,12 @@ const pct = (p: number) => `${(p * 100).toFixed(0)}%`;
  *  on and costs a column's worth of width to say nothing. */
 const shortPark = (v: string) => (v.includes(" at ") ? v.split(" at ").slice(1).join(" at ") : v);
 
-/** The park's measured home-run factor, in words. Thresholds are ±5% because the factor is already
- *  shrunk toward neutral (the measured range across 30 parks is 0.89–1.12) — ±10% would call every
- *  park neutral and say nothing. */
+/** The park's measured home-run factor, in WORDS. The number itself ("1.01") meant nothing to a
+ *  reader without knowing the scale, so it lives in the scroll instead and the cell says what it
+ *  implies. Thresholds are ±5% because the factor is already shrunk toward neutral (the measured
+ *  range across 30 parks is 0.89–1.12) — ±10% would call every park neutral and say nothing. */
 const parkTag = (f: number) =>
-  `${f.toFixed(2)} ${f >= 1.05 ? "HR-friendly" : f <= 0.95 ? "HR-suppressing" : "neutral"}`;
+  f >= 1.05 ? "Favorable for HRs" : f <= 0.95 ? "Tough for HRs" : "Neutral for HRs";
 
 /** How good the number on this tab actually is, in one sentence, in the reader's terms. */
 /** One legend line on the board; everything that qualifies it goes in the scroll.
@@ -94,7 +95,7 @@ function Honest({ cat }: { cat: CatKey }) {
         batter-pitcher pairs: <b>51%</b> had never faced each other, another <b>21%</b> had 1–4
         at-bats, only <b>11%</b> reached 10. It is context, not an input: a matchup adjustment built
         on three at-bats is noise.<br /><br />
-        <b>Ballpark</b> carries its measured home-run factor — each club’s own rate at home
+        <b>Ballpark</b> is tagged from its measured home-run factor — each club’s own rate at home
         against its own rate on the road, so it reflects the PARK rather than whoever bats there,
         shrunk toward neutral because one season of one park is a thin sample. Across all 30 the
         range is <b>0.89 to 1.12</b>: real, and smaller than park reputations suggest.<br /><br />
@@ -124,6 +125,7 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
     gameKey: string; game: string; commence: string; player: string; team: string; opp: string;
     ours: number | null; oursPct: boolean; book: number | null;
     slot: number | null; lineupPosted: boolean; posted: boolean;
+    teamAbbr: string; oppAbbr: string;
     oppSp: string | null; bvpAb: number; bvpH: number; bvpHr: number;
     park: string | null; parkHr: number | null;
     hist: string; hist2: string;
@@ -133,6 +135,7 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
     rows = MLB_K.map((r) => ({
       gameKey: r.gameKey, game: r.game, commence: r.commence, player: r.pitcher, team: r.team, opp: r.opp,
       ours: r.proj, oursPct: false, book: lines.get(norm(r.pitcher))?.line ?? null,
+      teamAbbr: r.teamAbbr || r.team, oppAbbr: r.oppAbbr || r.opp,
       slot: null, lineupPosted: true, posted: true, oppSp: null, bvpAb: 0, bvpH: 0, bvpHr: 0,
       park: null, parkHr: null,
       // Two headers ("K rate", "starts") need two CELLS. Both used to be crammed into one, which
@@ -150,6 +153,7 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
       gameKey: p.gameKey, game: p.game, commence: p.commence, player: p.player, team: p.team, opp: p.opp,
       ours: pick(p), oursPct: true, book: bookProb.get(norm(p.player)) ?? null,
       slot: p.slot, lineupPosted: p.lineupPosted, posted: p.posted,
+      teamAbbr: p.teamAbbr || p.team, oppAbbr: p.oppAbbr || p.opp,
       oppSp: p.oppSp, bvpAb: p.bvpAb, bvpH: p.bvpH, bvpHr: p.bvpHr,
       park: p.park, parkHr: p.parkHr,
       hist: rate(p) !== null
@@ -215,7 +219,17 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
                   const moreId = `mlbp-${cat}-${g.replace(/[^a-z0-9]/gi, "")}`;
                   return (
                     <details className="pmgame" key={g} open>
-                      <summary className="pmgame__h">{label[g]}<span className="pmgame__chev" aria-hidden="true">▾</span></summary>
+                      {/* Park belongs on the CARD, not on every row: it is a property of the
+                          game, so as a column it repeated the same string down the whole card
+                          and its wrapping was what made the rows uneven heights. */}
+                      <summary className="pmgame__h">{label[g]}
+                        {rs[0]?.park && (
+                          <span className="pmgame__park">
+                            {shortPark(rs[0].park!)}
+                            {rs[0].parkHr !== null && <> · {parkTag(rs[0].parkHr!)}</>}
+                          </span>
+                        )}
+                        <span className="pmgame__chev" aria-hidden="true">▾</span></summary>
                       <div className="pmgame__body hb-moretbl">
                         <input type="checkbox" id={moreId} className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
                         <div className="pmscroll">
@@ -224,19 +238,19 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
                               <span>player</span>
                               {cat === "pitching"
                                 ? <><span>opponent</span><span>book line</span><span>our proj</span><span>K rate</span><span>starts</span></>
-                                : <><span>opp pitcher</span><span>avg vs him</span><span>AB</span>
-                                    {cat === "hr" && <span>HR vs him</span>}
-                                    <span>ballpark</span><span>book %</span><span>our %</span></>}
+                                : <><span>opp pitcher</span><span>avg vs opp pitcher</span><span>AB</span>
+                                    {cat === "hr" && <span>HR vs opp pitcher</span>}
+                                    <span>book %</span><span>our %</span></>}
                             </div>
                             {rs.map((r, i) => (
                               <div className={`pmrow pmrow--data${i >= CAP ? " hb-row--more" : ""}`}
                                 role="row" key={`${r.player}-${r.game}`}>
                                 <span className="pmcell pmcell--player">
-                                  {r.player}<span className="pmslot"> ({r.team})</span>
+                                  {r.player}<span className="pmslot"> ({r.teamAbbr || r.team})</span>
                                 </span>
                                 {cat === "pitching" ? (
                                   <>
-                                    <span className="pmcell pmcell--team">{r.opp}</span>
+                                    <span className="pmcell pmcell--team">{r.oppAbbr}</span>
                                     <span className="pmcell">{r.book !== null ? r.book.toFixed(1) : "—"}</span>
                                     <span className="pmcell"><b className="pmproj">{r.ours!.toFixed(1)}</b></span>
                                     <span className="pmcell">{r.hist}</span>
@@ -268,15 +282,6 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
                                         {r.bvpAb > 0 ? r.bvpHr : <span className="pmslot">—</span>}
                                       </span>
                                     )}
-                                    {/* Ballpark, with its MEASURED home-run factor. Computed from
-                                        each club's own home-versus-road rate so it is not just
-                                        "whoever bats here" — see park_hr_factors. */}
-                                    <span className="pmcell pmcell--hist">
-                                      {r.park ? <>{shortPark(r.park)}
-                                        {r.parkHr !== null && (
-                                          <span className="pmslot"> {parkTag(r.parkHr)}</span>
-                                        )}</> : <span className="pmslot">—</span>}
-                                    </span>
                                     <span className="pmcell pmcell--mkt">{r.book !== null ? pct(r.book) : "—"}</span>
                                     <span className="pmcell pmcell--proj">{pct(r.ours!)}</span>
                                   </>
