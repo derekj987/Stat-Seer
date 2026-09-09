@@ -103,8 +103,12 @@ function QuoteList({ quotes, market, marketLabel, game, has, toggle }: {
   );
 }
 
-function PropGameCard({ g, open, has, toggle }: {
-  g: PropGame; open?: boolean; has: (id: string) => boolean; toggle: (l: Leg) => void;
+// Game cards shown per day before the dropdown. A full Sunday is 13-16 cards, which ran the board
+// several screens deep; /model caps its equivalent, so this now matches.
+const DAY_CAP = 6;
+
+function PropGameCard({ g, open, has, toggle, cls }: {
+  g: PropGame; open?: boolean; has: (id: string) => boolean; toggle: (l: Leg) => void; cls?: string;
 }) {
   const nPlayers = new Set(g.markets.flatMap((m) => m.quotes.map((q) => q.player))).size;
   // Open by DEFAULT. The 3-player cap per market is only useful if you can SEE those 3 players
@@ -112,7 +116,7 @@ function PropGameCard({ g, open, has, toggle }: {
   // a single price, which is the whole thing the cap was meant to fix. The card still collapses on
   // click for anyone who wants to skim matchups.
   return (
-    <details className="propgame" open={open ?? true}>
+    <details className={`propgame${cls ? ` ${cls}` : ""}`} open={open ?? true}>
       <summary className="propgame__head">
         <span className="matchup">{g.away}<span className="at">@</span>{g.home}</span>
         {g.commence && <time className="propgame__kick">{kickET(g.commence)}</time>}
@@ -169,11 +173,26 @@ export default function PropsView({ games, embedded, today, tomorrow }: { games:
       <p className="hint">{games.length} games · {players} players · best price on each, shopped across books.</p>
       <section className="propdays">
         {groupByGameDay(games, (g) => g.commence, today, tomorrow).map((grp) => (
-          <div className="propday" key={grp.key}>
+          <div className="propday hb-moretbl" key={grp.key}>
             <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
+            {/* Cap the day's cards behind the standard dropdown. A Sunday slate is 13-16 games and
+                every one of them is a full card; the checkbox hides the tail IN PLACE rather than
+                slicing the list into two grids, which would strand the control mid-board. */}
+            <input type="checkbox" id={`pd-${grp.key}`} className="hb-moretbl__chk"
+              aria-hidden="true" tabIndex={-1} />
             <div className="propstack">
-              {grp.items.map((g) => <PropGameCard key={g.eventId} g={g} has={has} toggle={toggle} />)}
+              {grp.items.map((g, i) => (
+                <PropGameCard key={g.eventId} g={g} has={has} toggle={toggle}
+                  cls={i >= DAY_CAP ? "hb-row--more" : undefined} />
+              ))}
             </div>
+            {grp.items.length > DAY_CAP && (
+              <label htmlFor={`pd-${grp.key}`} className="hb-moretbl__sum">
+                <span className="hb-more__chev" aria-hidden="true">▸</span>
+                <span className="hb-moretbl__more">Show {grp.items.length - DAY_CAP} more game{grp.items.length - DAY_CAP === 1 ? "" : "s"}</span>
+                <span className="hb-moretbl__less">Show fewer</span>
+              </label>
+            )}
           </div>
         ))}
       </section>

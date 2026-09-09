@@ -3276,7 +3276,9 @@ a.snav__dfeat{display:block}
    useless and a truncated sample is misleading. */
 .pmtable--mlbp .pmrow--data .pmcell--team,
 .pmtable--mlbp .pmrow--data .pmcell--hist{white-space:normal;line-height:1.25;text-overflow:clip}
-.pmtable--mlbk{min-width:820px;max-width:1060px}
+/* Strikeouts board. min-width was 820 against a 795px scroller, so every table carried a
+   scrollbar it did not need. Tracks 190+150+90+90+84+78 = 682 + 5 gaps x16 (80) + padding 32 = 794. */
+.pmtable--mlbk{min-width:794px;max-width:1060px}
 .pmtable--mlbk .pmrow--data,
 .pmtable--mlbk .pmrow--head{grid-template-columns:minmax(190px,1.6fr) minmax(150px,1.2fr) 90px 90px 84px 78px}
 /* Game model board — six columns. A chart rather than the football boards' cards because MLB

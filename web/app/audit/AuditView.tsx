@@ -114,13 +114,16 @@ const pkFmt = new Intl.DateTimeFormat("en-US", {
 });
 const kickET = (iso: string) => pkFmt.format(new Date(iso)) + " ET";
 
-function AuditGame({ g, open, has, toggle }: {
-  g: PropGame; open?: boolean; has: (id: string) => boolean; toggle: (l: Leg) => void;
+// Game cards shown per day before the dropdown, matching /props and /model.
+const DAY_CAP = 6;
+
+function AuditGame({ g, open, has, toggle, cls }: {
+  g: PropGame; open?: boolean; has: (id: string) => boolean; toggle: (l: Leg) => void; cls?: string;
 }) {
   // Count how many priced sides in this game we could actually audit (two-sided → have a fair number).
   const audited = g.markets.reduce((n, m) => n + m.quotes.filter((q) => q.fairProb != null).length, 0);
   return (
-    <details className="augame" open={open}>
+    <details className={`augame${cls ? ` ${cls}` : ""}`} open={open}>
       <summary className="augame__h">
         <span className="matchup">{g.away}<span className="at">@</span>{g.home}</span>
         {g.commence && <time className="augame__kick">{kickET(g.commence)}</time>}
@@ -175,11 +178,25 @@ export default function AuditView({ games, today, tomorrow }: { games: PropGame[
       ) : (
         <section className="audays">
           {days.map((grp, gi) => (
-            <div className="auday" key={grp.key}>
+            <div className="auday hb-moretbl" key={grp.key}>
               <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
-              {grp.items.map((g, i) => (
-                <AuditGame key={g.eventId} g={g} open={gi === 0 && i === 0} has={has} toggle={toggle} />
-              ))}
+              {/* Cap the day's cards in place behind the standard control, rather than slicing the
+                  list — a slice strands the dropdown mid-board. */}
+              <input type="checkbox" id={`ad-${grp.key}`} className="hb-moretbl__chk"
+                aria-hidden="true" tabIndex={-1} />
+              <div>
+                {grp.items.map((g, i) => (
+                  <AuditGame key={g.eventId} g={g} open={gi === 0 && i === 0} has={has} toggle={toggle}
+                    cls={i >= DAY_CAP ? "hb-row--more" : undefined} />
+                ))}
+              </div>
+              {grp.items.length > DAY_CAP && (
+                <label htmlFor={`ad-${grp.key}`} className="hb-moretbl__sum">
+                  <span className="hb-more__chev" aria-hidden="true">▸</span>
+                  <span className="hb-moretbl__more">Show {grp.items.length - DAY_CAP} more game{grp.items.length - DAY_CAP === 1 ? "" : "s"}</span>
+                  <span className="hb-moretbl__less">Show fewer</span>
+                </label>
+              )}
             </div>
           ))}
         </section>

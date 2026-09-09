@@ -36,41 +36,61 @@ const CATS: { key: CatKey; label: string }[] = [
 const pct = (p: number) => `${(p * 100).toFixed(0)}%`;
 
 /** How good the number on this tab actually is, in one sentence, in the reader's terms. */
+/** One legend line on the board; everything that qualifies it goes in the scroll.
+ *
+ *  This used to be three stacked paragraphs of caveat above the chart. Every sentence was measured
+ *  and true, and together they were a wall nobody reads — which protects nobody. The numbers still
+ *  have to be one click away, never deleted: the gain, the calibration and the not-modelled
+ *  markets all live in the Tip. */
 function Honest({ cat }: { cat: CatKey }) {
   if (cat === "pitching") {
     return (
-      <p className="ctxsec__d">
-        Batters faced × strikeout rate, adjusted for how often the opposing lineup strikes out.
-        Over <b>925 held-out starts</b> this lands <b>0.06 strikeouts closer</b> than the
-        pitcher&apos;s own season average — <b>+3.1%</b>. The strongest of the prop models here,
-        because strikeout rate is the most persistent skill in baseball.
+      <p className="ctxsec__legend">
+        Projected strikeouts for tonight&apos;s starters, beside the book&apos;s line.
+        <Tip label="About the pitching model" text={<>
+          <b>How it works.</b> Batters faced × his strikeout rate, adjusted for how often the
+          opposing lineup strikes out. Volume first, then rate.<br /><br />
+          <b>What it is worth.</b> Over <b>925 held-out starts</b> it lands <b>0.06 strikeouts
+          closer</b> than the pitcher&apos;s own season average — <b>+3.1%</b>. The strongest of the
+          prop models here, because strikeout rate is the most persistent skill in
+          baseball.<br /><br />
+          <b>Measured against results, not the market.</b> Whether it beats a closing line is
+          untested — MLB prop capture began 7 September and that needs history.
+        </>} />
       </p>
     );
   }
   const s = cat === "hits" ? MLB_PROP_SCORES.hits : MLB_PROP_SCORES.hr;
   const what = cat === "hits" ? "records a hit" : "hits a home run";
   return (
-    <>
-    <p className="ctxsec__d">
-      The chance this batter <b>{what}</b> tonight: his own rate per plate appearance, shrunk toward
-      league, nudged by the opposing pitching staff, and spread across the <b>plate appearances his
-      batting slot gets</b> — leading off is 4.5 on average, batting ninth 3.4.{" "}
-      <b>Be clear about what this is worth.</b> Against simply knowing how often he does it, the
-      model gains <b>{s.gain}%</b>. That is small, and it is the honest number: what separates a hit
-      from an out is mostly where the ball lands, which does not carry between games.
+    <p className="ctxsec__legend">
+      The chance this batter <b>{what}</b> tonight. Only players a sportsbook has priced.{" "}
+      <b>Lineup</b> is where he bats, which sets how many times he comes up.
+      <Tip label={`About the ${cat === "hits" ? "hits" : "home runs"} model`} text={<>
+        <b>How it works.</b> His own rate per plate appearance, shrunk toward league, nudged by the
+        opposing pitching staff, and spread across the plate appearances his batting slot gets —
+        leading off is about <b>4.5</b>, batting ninth <b>3.4</b>. That difference is most of the
+        gap between two similar hitters.<br /><br />
+        <b>What it is worth.</b> Against simply knowing how often he does it, the model gains{" "}
+        <b>{s.gain}%</b>. That is small and it is the honest number: what separates a hit from an out
+        is mostly where the ball lands, which does not carry between games.<br /><br />
+        <b>How well calibrated, exactly?</b> Over the held-out games these average{" "}
+        <b>{(s.pred * 100).toFixed(1)}%</b> against a real rate of <b>{(s.act * 100).toFixed(1)}%</b>{" "}
+        — about <b>{((s.pred - s.act) * 100).toFixed(1)} points too high</b>, so read them as
+        slightly optimistic. We know why: the model treats a batter&apos;s plate appearances as
+        independent, and four trips against the same pitcher on one night are not. We would rather
+        publish the gap than quietly scale the numbers until it closes.<br /><br />
+        <b>vs opp pitcher</b> is his career line against tonight&apos;s starter, with the sample in
+        brackets — <b>read the sample, not the average</b>. Across a full 15-game slate, 171
+        batter-pitcher pairs: <b>51%</b> had never faced each other, another <b>21%</b> had 1–4
+        at-bats, only <b>11%</b> reached 10. It is context, not an input: a matchup adjustment built
+        on three at-bats is noise.<br /><br />
+        <b>Not modelled.</b> Stolen bases measured <b>0.0%</b> better than the base rate — no signal
+        — so no projection ships. Total bases is absent because ≥1 total base is nearly the same
+        event as ≥1 hit, and this model is the wrong shape for it. A missing number is a decision,
+        not an omission.
+      </>} />
     </p>
-    {/* Publish the calibration rather than asserting it. This block used to read "the probability
-        is well calibrated" — a claim nobody had measured. When it was finally measured it was
-        wrong by 2.1pp, so the sentence was a statement of hope. Now it prints the number. */}
-    <p className="ctxsec__d">
-      <b>How well calibrated is it, exactly?</b> Over the held-out games these probabilities average{" "}
-      <b>{(s.pred * 100).toFixed(1)}%</b> against a real rate of <b>{(s.act * 100).toFixed(1)}%</b> —
-      so we run about <b>{((s.pred - s.act) * 100).toFixed(1)} points too high</b> and you should
-      read these as slightly optimistic. We know why: the model treats a batter&apos;s plate
-      appearances as independent, and four trips against the same pitcher on the same night are not
-      independent. We would rather publish the gap than quietly scale the numbers until it closes.
-    </p>
-    </>
   );
 }
 
@@ -92,7 +112,7 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
     ours: number | null; oursPct: boolean; book: number | null;
     slot: number | null; lineupPosted: boolean; posted: boolean;
     oppSp: string | null; bvpAb: number; bvpH: number;
-    hist: string;
+    hist: string; hist2: string;
   };
   let rows: Row[];
   if (cat === "pitching") {
@@ -100,7 +120,9 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
       gameKey: r.gameKey, game: r.game, commence: r.commence, player: r.pitcher, team: r.team, opp: r.opp,
       ours: r.proj, oursPct: false, book: lines.get(norm(r.pitcher))?.line ?? null,
       slot: null, lineupPosted: true, posted: true, oppSp: null, bvpAb: 0, bvpH: 0,
-      hist: `${(r.kRate * 100).toFixed(1)}% K rate · ${r.starts} starts`,
+      // Two headers ("K rate", "starts") need two CELLS. Both used to be crammed into one, which
+      // ellipsized it while the empty sixth column sat on 112px of unused width.
+      hist: `${(r.kRate * 100).toFixed(1)}%`, hist2: `${r.starts} gm`,
     }));
   } else {
     const pick = (p: MlbProp) => (cat === "hits" ? p.pHit : p.pHr);
@@ -117,6 +139,7 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
       hist: rate(p) !== null
         ? `${(rate(p)! * 100).toFixed(1)}% per PA · ${p.pa?.toFixed(1) ?? "—"} PA`
         : "—",
+      hist2: "",
     }));
   }
   rows.sort((a, b) => (b.ours ?? 0) - (a.ours ?? 0));
@@ -164,29 +187,6 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
         </summary>
         <div className="hb-body">
           <Honest cat={cat} />
-          {cat !== "pitching" && (
-            <p className="ctxsec__legend">
-              Only players a sportsbook has priced. <b>Lineup</b> is where he bats, which sets how
-              many times he comes up.
-              <Tip label="About the vs-him column" text={<>
-                <b>Lineup</b> is the volume term: leading off is about 4.5 plate appearances,
-                batting ninth about 3.4. That difference is most of the gap between two similar
-                hitters.<br /><br />
-                <b>vs opp pitcher</b> is this batter&apos;s career line against tonight&apos;s starter, with
-                the sample in brackets. <b>Read the sample, not the average.</b> Measured across a
-                full 15-game slate, 171 batter-pitcher pairs:<br /><br />
-                • <b>51%</b> have never faced each other at all<br />
-                • another <b>21%</b> have 1–4 at-bats<br />
-                • only <b>11%</b> reach 10 at-bats, and <b>1%</b> reach 20<br /><br />
-                So a career line here is usually a handful of swings. It is shown because you want
-                to know who is pitching and what has happened before, and because leaving it out
-                invites looking it up somewhere that presents it with more confidence than it
-                deserves. It is <b>not</b> an input to our number: a matchup adjustment built on
-                three at-bats is noise, and it could not move the board&apos;s level anyway — a
-                per-matchup nudge averages to nothing across the slate.
-              </>} />
-            </p>
-          )}
 
           {games.length === 0 ? (
             <p className="foot">Nothing posted for the coming slate yet.</p>
@@ -221,8 +221,8 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
                                     <span className="pmcell pmcell--team">{r.opp}</span>
                                     <span className="pmcell">{r.book !== null ? r.book.toFixed(1) : "—"}</span>
                                     <span className="pmcell"><b className="pmproj">{r.ours!.toFixed(1)}</b></span>
-                                    <span className="pmcell pmcell--hist">{r.hist}</span>
-                                    <span className="pmcell pmcell--hist" />
+                                    <span className="pmcell">{r.hist}</span>
+                                    <span className="pmcell pmcell--hist">{r.hist2}</span>
                                   </>
                                 ) : (
                                   <>
@@ -263,16 +263,6 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
         </div>
       </details>
 
-      <section className="calib">
-        <h2 className="calib__h">Not modelled, and why</h2>
-        <p className="foot">
-          <b>Stolen bases</b> measured <b>0.0%</b> better than the base rate over the same held-out
-          games — no signal at all — so there is no projection here. <b>Total bases</b> is absent
-          because at least one total base is nearly the same event as at least one hit, and the
-          model we use for the others is the wrong shape for it. A missing number is a decision, not
-          an omission.
-        </p>
-      </section>
     </main>
   );
 }

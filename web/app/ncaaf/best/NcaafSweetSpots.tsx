@@ -18,6 +18,9 @@ const nearKey = (n: number): number | null => {
 };
 const gk = (g: NcaafCardGame) => `${g.away}-${g.home}`.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
 
+// Cards shown per day before the dropdown, matching /props and /audit.
+const DAY_CAP = 6;
+
 function Chip({ item, has, toggle }: { item: SlipItem; has: (id: string) => boolean; toggle: (i: SlipItem) => void }) {
   const on = has(item.id);
   return (
@@ -47,10 +50,14 @@ export default function NcaafSweetSpots({ games, keyNums, week, today, tomorrow 
       </h2>
       <div className="daygrid">
       {groupByGameDay(plays, (pl) => pl.g.commence, today, tomorrow).map((grp) => (
-        <div className="daygrid__day" key={grp.key} style={dayBasis(grp.items.length, 3, 248, 12)}>
+        <div className="daygrid__day hb-moretbl" key={grp.key} style={dayBasis(grp.items.length, 3, 248, 12)}>
           <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} noun="line" />
+          {/* Cap the day's cards in place behind the standard control — a busy Saturday runs to 19
+              of these and every one is a full card. */}
+          <input type="checkbox" id={`ncb-${grp.key}`} className="hb-moretbl__chk"
+            aria-hidden="true" tabIndex={-1} />
           <div className="ncss-grid">
-        {grp.items.map(({ g, key }) => {
+        {grp.items.map(({ g, key }, ci) => {
           const ms = g.marketSpread!;
           const dog = ms.fav === g.home ? g.away : g.home;
           const mk = `${abbrevTeam(g.away)} @ ${abbrevTeam(g.home)}`;
@@ -58,7 +65,7 @@ export default function NcaafSweetSpots({ games, keyNums, week, today, tomorrow 
           const favItem: SlipItem = { id: `ncsp-${k}-f`, kind: "line", title: `${abbrevTeam(ms.fav)} ${ms.num}`, detail: mk, price: -110 };
           const dogItem: SlipItem = { id: `ncsp-${k}-d`, kind: "line", title: `${abbrevTeam(dog)} +${Math.abs(ms.num)}`, detail: mk, price: -110 };
           return (
-            <article className="ncss" key={k}>
+            <article className={`ncss${ci >= DAY_CAP ? " hb-row--more" : ""}`} key={k}>
               <header className="ncss__hd">
                 <span className="ncss__g">{mk}</span>
                 <span className="ncss__badge">KEY {key}</span>
@@ -76,6 +83,13 @@ export default function NcaafSweetSpots({ games, keyNums, week, today, tomorrow 
           );
         })}
           </div>
+          {grp.items.length > DAY_CAP && (
+            <label htmlFor={`ncb-${grp.key}`} className="hb-moretbl__sum">
+              <span className="hb-more__chev" aria-hidden="true">▸</span>
+              <span className="hb-moretbl__more">Show {grp.items.length - DAY_CAP} more line{grp.items.length - DAY_CAP === 1 ? "" : "s"}</span>
+              <span className="hb-moretbl__less">Show fewer</span>
+            </label>
+          )}
         </div>
       ))}
       </div>

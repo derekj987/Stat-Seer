@@ -49,7 +49,9 @@ column-count mismatch and a stray colspan alike) ·
 `column-no-variance` (a numeric column holding one or two distinct values across 8+ rows — a column
 that cannot be carrying the information it appears to) ·
 `popover-unanchored` (a Tip/tooltip bubble with no positioned ancestor, or one that opens far from
-the control that triggers it — the "the scroll doesn't work any more" family).
+the control that triggers it — the "the scroll doesn't work any more" family) ·
+`prose-above-board` (paragraphs of copy stacked above a chart instead of being routed into a Tip
+scroll — the "too wordy" family).
 Console errors + network 4xx/5xx are collected separately (see step 4).
 
 ### 🚨 Never hand-edit an AUTO-GENERATED file
@@ -255,10 +257,24 @@ unread caveats protect nobody.
 
 The house pattern is one `.ctxsec__legend` line naming the columns, with a `<Tip>` scroll carrying
 the detail. Keep the measured numbers *in* the Tip — condensing must not mean deleting the gain, the
-calibration or the "no pick" statement. Check after any copy pass:
-```js
-document.querySelectorAll('.hb-body .ctxsec__d').length   // long body paragraphs left on the board
-```
+calibration or the "no pick" statement.
+
+**⚠️ Writing that rule down did not work.** The very next board built — `/mlb/model/players` —
+shipped three stacked paragraphs plus a "Not modelled, and why" section, and Derek had to ask again.
+A rule in this file only fires if someone re-reads this file; a probe check fires every audit. So it
+is now `prose-above-board`: it sums the visible prose ABOVE the first board in each panel and flags
+anything past ~420 characters, with the severity lowered when a Tip already exists (meaning the
+pattern is understood and the split is just incomplete).
+
+Two things that check had to get right, both found by running it:
+- **Exclude the Tip's own bubble text.** It lives inside the legend `<p>`, so `textContent` includes
+  every word correctly moved into the scroll — it reported **1,661 characters** on a panel whose
+  visible copy is one line. Clone the node and strip `.tip, .tip__bubble` before counting.
+- **Count characters, not paragraphs.** One long paragraph is the same wall as three short ones.
+
+**When you write a house rule, ask whether it can be a check instead.** Every rule in this file that
+became a probe check has stayed fixed; the ones that stayed prose have all been re-broken at least
+once.
 
 ### 🚨 A column whose value is the SAME on every row is telling you nothing
 Derek: *"I'm seeing too many favorites and too many overs."* The favourites half was not the model

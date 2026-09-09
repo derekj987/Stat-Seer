@@ -701,6 +701,42 @@
     }
   }
 
+  // ---- 20c2. A board must not be buried under paragraphs of prose --------------
+  // Written as a rule in the skill and then NOT applied to the next board built, which is exactly
+  // why it needs to be a check. /mlb/model/players carried three stacked paragraphs of caveat above
+  // the chart — every sentence measured and true, and together a wall nobody reads.
+  //
+  // The house pattern is one .ctxsec__legend line naming the columns with a <Tip> scroll carrying
+  // the detail. So: flag a panel body whose PROSE (before the first board) runs long. Counted in
+  // characters rather than paragraphs, because one long paragraph is the same problem as three
+  // short ones.
+  const PROSE_CHARS = 420;
+  for (const body of document.querySelectorAll(".hb-body, .ctxsec, .pmcat")) {
+    if (!vis(body)) continue;
+    const board = body.querySelector('[role="table"], table, .pmscroll, .propstack, .daygrid');
+    let chars = 0, paras = 0;
+    for (const p of body.querySelectorAll("p")) {
+      if (!vis(p)) continue;
+      if (board && (board.contains(p) || board.compareDocumentPosition(p) & Node.DOCUMENT_POSITION_FOLLOWING)) continue;
+      // The Tip's bubble lives INSIDE the legend paragraph, so p.textContent includes every word
+      // of the explanation that was correctly moved into the scroll. Counting it reported 1,661
+      // characters on a panel whose visible copy is one line — the check flagging the fix.
+      const clone = p.cloneNode(true);
+      clone.querySelectorAll(".tip, .tip__bubble").forEach((n) => n.remove());
+      const t = (clone.textContent || "").trim();
+      if (t.length < 40) continue;               // a one-line legend is the CORRECT shape
+      chars += t.length; paras++;
+    }
+    if (chars <= PROSE_CHARS) continue;
+    // A panel that already routes its detail through a scroll has done the right thing.
+    const hasTip = !!body.querySelector(".tip");
+    add("prose-above-board", hasTip ? "low" : "medium", body,
+      `${paras} paragraph(s), ${chars} characters of copy sit above this board` +
+      (hasTip ? " (a Tip exists — move the rest into it)"
+              : " — move the detail into a Tip scroll and leave one legend line"));
+    if (cap(findings, "prose-above-board")) break;
+  }
+
   // ---- 20d. A popover must be anchored to something, and land near its trigger ----
   // The scroll "?" (Tip) reveals an absolutely-positioned bubble. `.tip` was position:static so the
   // bubble could stretch across a positioned ROW above it — which worked only while every Tip
