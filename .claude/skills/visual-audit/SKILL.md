@@ -815,8 +815,27 @@ causes seen so far:
 
 - **TLS**: `UNABLE_TO_VERIFY_LEAF_SIGNATURE` in `preview_logs` — Node can't verify Supabase's chain.
   Fix in `.claude/launch.json`: `"env": {"NODE_OPTIONS": "--use-system-ca"}`.
-- **401s from the anon lockdown**: the signed-out QA preview hits tables `anon` can no longer read,
-  a client component throws, and hydration never completes. Expected locally; not a product bug.
+- **401s from the anon lockdown**: the signed-out QA preview hits tables `anon` can no longer read.
+  ⚠️ This was long recorded here as the CAUSE of the stall. **It is not — tested and disproved.**
+  Setting `NEXT_PUBLIC_QA_PREVIEW=0` and restarting the dev server reproduces the stall exactly
+  (live `main` reads "Loading…", 2 `main.wrap`, 1 pending `<template id="P:…">`), so the 401s are
+  noise that happens to co-occur. Do not repeat the claim.
+
+**What the stall actually is, measured.** The server is NOT slow and the HTML is NOT truncated:
+
+| | |
+|---|---|
+| `/lines` server render (curl) | **0.59s**, 101KB, `</html>` present, 32 matchups in the markup |
+| browser TTFB / response end | **105ms / 113ms** |
+| state 50s later | live `main` = "Loading…", real content in a `[hidden]` div |
+| React hydrated? | **yes** (`__reactFiber$` keys present) |
+| inline scripts run? | **yes** |
+| CSP | Report-Only, `unsafe-inline` allowed — not blocking |
+
+So React hydrates, the document completes in a tenth of a second, and the route's Suspense boundary
+still never resolves. Cause still unidentified; it is a `next dev` streaming behaviour in this
+preview, NOT a page or query problem. Do not "optimise" a page because it shows Loading… here —
+time the SERVER first (`curl -w "%{time_total}"`), and only chase it if the server is actually slow.
 
 **The fix that makes a whole audit possible: splice `#S:0` into place yourself.** The server
 finished — the complete, correct markup is sitting inside that hidden div; only the client-side swap
