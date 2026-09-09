@@ -9,8 +9,19 @@ penalty tendency), never fused into a pick.
     python publish_ref_assignments.py --season 2025 --no-fetch   # dry test on history
     python publish_ref_assignments.py --write                    # upsert current season
 
-Caveat: if nflverse turns out to fill `referee` only post-game, we swap the source
-to a game-week assignments scrape — the table + UI stay the same.
+That caveat came true, so the source is now ESPN, with nflverse as the backfill:
+
+  * MEASURED: nflverse fills `referee` only for games that have been PLAYED. 272 of 272 games
+    carry a crew for 2023, 2024 and 2025 — all complete — and 0 of 272 for 2026. A crew known
+    only after kickoff is worthless as pre-game context, and this job had been running daily
+    and writing nothing while reporting success.
+  * ESPN publishes the assigned crew BEFORE kickoff, in the game summary's
+    `gameInfo.officials`. Verified on 2026 Week 1 NE @ SEA hours before kick: Adrian Hill.
+  * nflverse is still read for COMPLETED seasons, because it is the cleaner source of the
+    history that REF_STATS' penalty tendencies are computed from.
+
+Take the official whose position is "Referee" — the crew chief REF_STATS is keyed on. The array
+is not ordered by seniority; on the game checked, `officials[0]` was a Field Judge.
 """
 import argparse
 import json
@@ -46,6 +57,50 @@ def fetch_games():
     return pd.read_csv(GAMES_LOCAL, low_memory=False)
 
 
+ESPN_BOARD = ("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
+              "?year=%d&seasontype=2&week=%d")
+ESPN_SUMMARY = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=%s"
+# ESPN abbreviates two clubs differently from nflverse (which is what ref_assignments stores).
+ESPN_ALIAS = {"LAR": "LA", "WSH": "WAS"}
+
+
+def _espn_json(url):
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=45) as r:
+            return json.loads(r.read().decode())
+    except Exception as e:  # noqa: BLE001 — ESPN is a best-effort supplement, never fatal
+        print(f"  ESPN unavailable ({e})", file=sys.stderr)
+        return None
+
+
+def fetch_espn_crews(season, weeks=range(1, 19)):
+    """[{season, week, home_team, away_team, referee}] for games ESPN has assigned a crew to."""
+    out = []
+    for wk in weeks:
+        board = _espn_json(ESPN_BOARD % (season, wk))
+        if not board:
+            continue
+        for ev in board.get("events", []) or []:
+            comps = (ev.get("competitions") or [{}])[0].get("competitors") or []
+            home = next((c for c in comps if c.get("homeAway") == "home"), {})
+            away = next((c for c in comps if c.get("homeAway") == "away"), {})
+            ha = (home.get("team") or {}).get("abbreviation")
+            aa = (away.get("team") or {}).get("abbreviation")
+            if not ha or not aa or not ev.get("id"):
+                continue
+            summary = _espn_json(ESPN_SUMMARY % ev["id"])
+            officials = ((summary or {}).get("gameInfo") or {}).get("officials") or []
+            ref = next((o.get("fullName") for o in officials
+                        if ((o.get("position") or {}).get("name") == "Referee")), None)
+            if not ref:
+                continue
+            out.append({"season": int(season), "week": int(wk),
+                        "home_team": ESPN_ALIAS.get(ha, ha),
+                        "away_team": ESPN_ALIAS.get(aa, aa), "referee": ref})
+    return out
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--season", type=int, default=2026)
@@ -68,6 +123,15 @@ def main(argv=None):
     s = g[(g.season == args.season) & (g.game_type == "REG") & g.referee.notna()]
     rows = [{"season": int(r.season), "week": int(r.week), "home_team": r.home_team,
              "away_team": r.away_team, "referee": r.referee} for _, r in s.iterrows()]
+    print(f"{args.season}: {len(rows)} games with a crew from nflverse (played games only)")
+
+    # Anything nflverse has not filled is either unplayed or missing — ask ESPN, which assigns
+    # pre-game. Keyed on (week, home_team) so an ESPN row never overwrites a played-game record.
+    have = {(r["week"], r["home_team"]) for r in rows}
+    espn_rows = fetch_espn_crews(args.season)
+    added = [r for r in espn_rows if (r["week"], r["home_team"]) not in have]
+    rows += added
+    print(f"{args.season}: +{len(added)} pre-game crews from ESPN")
 
     print(f"{args.season}: {len(rows)} games with an assigned crew")
     for r in rows[:5]:

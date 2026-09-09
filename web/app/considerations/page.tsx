@@ -4,7 +4,7 @@ import { weekRefs } from "@/lib/refAssignments";
 import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
 import { GAME_WEATHER, WEATHER_WEEK, WEATHER_UPDATED, type GameWeather } from "@/lib/weatherData";
 import { INCENTIVE_WATCH } from "@/lib/incentiveWatch";
-import { TEAM_RATINGS } from "@/lib/teamRatings";
+import { TEAM_RATINGS, RATINGS_SEASON, RATINGS_IS_PRIOR } from "@/lib/teamRatings";
 import { COACH_TENDENCIES } from "@/lib/coachTendencies";
 import { CONTENTION } from "@/lib/contention";
 import { Brand, FlowSteps, ContextSubnav, WeekBadge } from "../Nav";
@@ -132,7 +132,10 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
     const neutral = mp?.neutral;
     // Players in this game who are close to a contract incentive (live context, not a pick).
     const incs = INCENTIVE_WATCH.filter((i) => i.team === g.home || i.team === g.away);
-    // Current-season team ratings (points/gm + league rank). Empty until the season runs.
+    // Team ratings (points/gm + league rank). These fall back to the PRIOR season until this one
+    // has a played game — before that the row read "Off/def ratings arrive with the season", which
+    // is honest and useless on exactly the Week 1 board a reader is looking at. Labelled below so
+    // a prior-season number is never mistaken for a current one.
     const ra = TEAM_RATINGS[g.away], rh = TEAM_RATINGS[g.home];
     const hasRatings = Boolean(ra && rh);
     return (
@@ -156,11 +159,11 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
           {hasRatings ? (
             <>
               <div className="cxrow">
-                <dt className="cxrow__k">Offense</dt>
+                <dt className="cxrow__k">Offense{RATINGS_IS_PRIOR ? <span className="cxinc__prog"> {RATINGS_SEASON}</span> : null}</dt>
                 <dd className="cxrow__v">{g.away} <b>{ra!.off}</b> <span className="cxrank">({ord(ra!.offRank)})</span> · {g.home} <b>{rh!.off}</b> <span className="cxrank">({ord(rh!.offRank)})</span> <span className="cxinc__prog">pts/gm</span></dd>
               </div>
               <div className="cxrow">
-                <dt className="cxrow__k">Defense</dt>
+                <dt className="cxrow__k">Defense{RATINGS_IS_PRIOR ? <span className="cxinc__prog"> {RATINGS_SEASON}</span> : null}</dt>
                 <dd className="cxrow__v">{g.away} <b>{ra!.def}</b> <span className="cxrank">({ord(ra!.defRank)})</span> · {g.home} <b>{rh!.def}</b> <span className="cxrank">({ord(rh!.defRank)})</span> <span className="cxinc__prog">pts/gm allowed</span></dd>
               </div>
             </>

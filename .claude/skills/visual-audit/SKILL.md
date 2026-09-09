@@ -569,6 +569,40 @@ there: 0-for-4 is genuinely weak evidence and a line-blind model is allowed to d
 that gap on purpose would mean reading the number we are supposed to be blind to. Fix the mechanism,
 then publish whatever it says.
 
+### 🚨 A context row that says "arriving soon" for a whole week is a bug, not a caveat
+Derek: *"we also need to get the referee crew data into the context. Also the ratings. Is that
+weather current?"* Three rows on the same card, three different answers — and only one of them was
+what it appeared to be.
+
+| row | state | cause |
+|---|---|---|
+| Weather | **current** | `WEATHER_UPDATED` 1½ hours old, refreshed every 8h. Working as designed. |
+| Ratings | **empty all week** | built from CURRENT-season points per game, and no 2026 game had been played |
+| Referee | **empty for ever** | source cannot supply a crew before kickoff |
+
+**Ratings: a current-season statistic needs a prior-season fallback, labelled.** "Off/def ratings
+arrive with the season" is honest and useless on exactly the Week 1 board a reader is looking at.
+Last season's scoring rate is the same kind of estimate the player projections already publish for
+Week 1 — a prior-season baseline. It now falls back and stamps `RATINGS_IS_PRIOR` so the card can
+print "Offense 2025" rather than implying it is current, and stops the moment a real game is played.
+
+**Referee: the source could never do the job, and the script had already said so.** Its docstring
+read *"if nflverse turns out to fill `referee` only post-game, we swap the source."* It does.
+Measured: **272 of 272 games carry a referee for 2023, 2024 and 2025 — all played — and 0 of 272
+for 2026.** So a daily workflow had been running for months, writing nothing, and reporting
+success. ESPN publishes the assigned crew pre-game in `gameInfo.officials`; take the official whose
+`position.name` is `"Referee"`, because the array is not ordered by seniority — `officials[0]` was
+a Field Judge on the game checked.
+
+**The general rule: a placeholder that never resolves is indistinguishable from a working feature
+that is waiting.** Both look like "coming soon". For every "arrives with the season" string on a
+page, ask what event makes it resolve and whether that event can actually happen — then check the
+row count in the table behind it.
+```bash
+# every scheduled writer should be provably writing something
+select count(*) from ref_assignments where season = 2026;   -- 0 after months of daily runs
+```
+
 ### 🚨 A parser that matches nothing reports success
 `current_ranks()` returned **zero entries** and disabled the entire role correction, while the run
 printed its normal output and exited 0. The cause: nflverse names those columns `pos_abb` and
@@ -751,6 +785,47 @@ mismatches = [r for r in rows if depth.get(nkey(r["player"]), {}).get("team") no
 Watch the parser: `ncaafDepth.ts` is double-quoted JSON, `depthChart.ts` is single-quoted TS object
 literal. A regex written for one silently matches **nothing** in the other and reports a clean zero
 — which is a false pass, not a pass. Assert the entry count before trusting the result.
+
+### 🚨 The market number on a board must be a number someone will actually take
+Derek, twice in one session: *"Sam Darnold is listed at 228.5 on FanDuel. We have him at 230.5.
+Where did we get that?"* and *"A.J. Brown listed at 61.5 and in FanDuel he is 64.5."* Three
+separate faults stacked into those numbers, and each is worth checking on any board that shows a
+market line.
+
+**1. A dedupe key containing the LINE never expires a line.** `fetch_props` kept the newest row per
+`(event, market, player, side, LINE, book)`. Because the line is in the key, a line a book has
+moved off stays "current" for ever. Darnold carried **22 distinct lines from 197.5 to 258.5**;
+A.J. Brown had a Fanatics quote from **17 August** sitting beside everyone else's from that
+afternoon. Take the newest CAPTURE, not the newest row per key:
+```python
+len({r["line"] for r in rows_for_one_player_market})   # > 3 on a single market = you are pooling history
+```
+Use `collected_at` for that, never `snapshot_at` — the latter is the sweep key and equals kickoff
+on legacy rows, so `max()` picks the latest GAME rather than the latest capture. That trap has now
+cost two separate investigations.
+
+**And a capture window is a WINDOW.** A sweep writes in batches, each with its own `collected_at`,
+so matching the maximum exactly kept only the final batch and cut the slate from 16,901 quotes to
+3,753. A filter can be too sharp as easily as too blunt — check the row count after adding one.
+
+**2. An alternate ladder is one opinion, not seven.** Bovada posts seven rungs on a passing-yards
+market (197.5 → 257.5, both sides). Pooled with books that post a single line, that let one book
+cast seven votes and dragged the median away from the screen. Collapse each book to its MAIN line —
+the rung whose two sides are closest to even money, since an alternate is priced away from even by
+construction (257.5 was +175/−240, implying 36%).
+
+**3. A median is not a bettable number.** Books at 64.5 and 65.5 median to **65.0**, which is not a
+line any receiving-yards market posts. Derek's rule: *"we need to match FanDuel"* / *"the books will
+always be the most accurate."* So print FanDuel's line where FanDuel posts one, and otherwise snap
+the median to the nearest line a book actually offers. Name the source on the row — a column headed
+"BOOK LINE" that shows a consensus nobody quotes is a small lie that a reader WILL check.
+
+Standing check on any board with a market column — compare a few rows against the book by eye,
+and assert the shape mechanically:
+```python
+# every displayed line must be one a book actually posted in the newest capture
+assert all(row["book"] in posted_lines[(row["player"], row["market"])] for row in board)
+```
 
 ### 🚨 A board must say who is NOT PLAYING, and it must say it live
 Derek, on the Week 1 board: *"I believe Henderson or Stevenson is out tonight. Bettors rely on
