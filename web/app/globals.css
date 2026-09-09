@@ -3278,7 +3278,13 @@ a.snav__dfeat{display:block}
        | book % 66 (needs 64) | our % 56 (needs 53) | his rate 62  =  667 */
 .pmtable--mlbp{min-width:795px;max-width:1120px}
 .pmtable--mlbp .pmrow--data,
-.pmtable--mlbp .pmrow--head{grid-template-columns:minmax(145px,1.3fr) 60px minmax(152px,1.2fr) 126px 66px 56px minmax(62px,1fr)}
+/* EIGHT columns: the at-bat count is its own, because ".600" means nothing until you know it is
+   3 of 5. Eight columns means SEVEN gaps, so the track budget drops:
+   795 - 32 padding - (7 x 16) gaps = 651. Allocated from the measured header widths so none of
+   them wraps — "opposing pitcher" shortened to "opp pitcher" (151px of text down to 105) to buy
+   the room, which costs nothing since the next column already says "vs opp pitcher".
+       128 + 58 + 108 + 126 + 40 + 66 + 56 + 69 = 651 */
+.pmtable--mlbp .pmrow--head{grid-template-columns:minmax(128px,1.3fr) 58px minmax(108px,1.1fr) 126px 40px 66px 56px minmax(69px,1fr)}
 /* The pitcher's name and the "3/12" sample both wrap rather than ellipsize — a truncated name is
    useless and a truncated sample is misleading. */
 .pmtable--mlbp .pmrow--data .pmcell--team,

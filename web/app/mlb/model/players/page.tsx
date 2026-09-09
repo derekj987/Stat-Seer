@@ -80,8 +80,8 @@ function Honest({ cat }: { cat: CatKey }) {
         slightly optimistic. We know why: the model treats a batter&apos;s plate appearances as
         independent, and four trips against the same pitcher on one night are not. We would rather
         publish the gap than quietly scale the numbers until it closes.<br /><br />
-        <b>vs opp pitcher</b> is his career line against tonight&apos;s starter, with the sample in
-        brackets — <b>read the sample, not the average</b>. Across a full 15-game slate, 171
+        <b>vs opp pitcher</b> is his career average against tonight&apos;s starter and <b>AB</b> is
+        how many at-bats that average is built on — <b>read the AB column first</b>. Across a full 15-game slate, 171
         batter-pitcher pairs: <b>51%</b> had never faced each other, another <b>21%</b> had 1–4
         at-bats, only <b>11%</b> reached 10. It is context, not an input: a matchup adjustment built
         on three at-bats is noise.<br /><br />
@@ -208,7 +208,7 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
                               <span>player</span>
                               {cat === "pitching"
                                 ? <><span>opponent</span><span>book line</span><span>our proj</span><span>K rate</span><span>starts</span></>
-                                : <><span>lineup</span><span>opposing pitcher</span><span>vs opp pitcher</span><span>book %</span><span>our %</span><span>his rate</span></>}
+                                : <><span>lineup</span><span>opp pitcher</span><span>vs opp pitcher</span><span>AB</span><span>book %</span><span>our %</span><span>his rate</span></>}
                             </div>
                             {rs.map((r, i) => (
                               <div className={`pmrow pmrow--data${i >= CAP ? " hb-row--more" : ""}`}
@@ -231,11 +231,17 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
                                     {/* Career vs THIS pitcher, with the sample beside it. The
                                         sample is the point: the median pair on a slate has never
                                         faced each other, so a bare ".000" would read as a read. */}
+                                    {/* Average and the at-bat count are two different questions —
+                                        ".600" means nothing until you know it is 3 of 5. The count
+                                        gets its own column so it reads as a number, not a footnote. */}
                                     <span className="pmcell pmcell--hist">
                                       {r.bvpAb > 0
                                         ? <>{(r.bvpH / r.bvpAb).toFixed(3).replace(/^0/, "")}{" "}
-                                            <span className="pmslot">({r.bvpH}/{r.bvpAb})</span></>
+                                            <span className="pmslot">({r.bvpH} h)</span></>
                                         : <span className="pmslot">never faced</span>}
+                                    </span>
+                                    <span className="pmcell">
+                                      {r.bvpAb > 0 ? r.bvpAb : <span className="pmslot">0</span>}
                                     </span>
                                     <span className="pmcell pmcell--mkt">{r.book !== null ? pct(r.book) : "—"}</span>
                                     <span className="pmcell pmcell--proj">{pct(r.ours!)}</span>

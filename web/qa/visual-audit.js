@@ -677,28 +677,41 @@
   // Deliberately narrow, because plenty of columns repeat legitimately (a status column that says
   // "projected" for every row is fine, and so is a short board): only NUMERIC columns, only on
   // boards with enough rows to judge, and only when nearly every value is identical.
+  // Judge each column across the WHOLE BOARD, not per table. A board split into one table per game
+  // makes a per-table test wrong: every batter in a card faces the SAME pitcher, so the new "AB"
+  // column (career at-bats against tonight's starter) reads 0 for all fifteen of them whenever that
+  // pitcher is new to the opponent — true, expected, and the very information the column exists to
+  // show. Board-wide it varies (0, 1, 3, 5, 10...), which is the question actually being asked.
+  // The run-line case this check was built for still fires: -1.5 on every row of every table.
+  const byLabel = new Map();   // label -> { vals:Set, n, el }
   for (const tbl of document.querySelectorAll('[role="table"], table')) {
     if (!vis(tbl)) continue;
     const head = tbl.querySelector('[class*="--head"], thead tr');
     const rows = [...tbl.querySelectorAll('[class*="--data"], tbody tr')].filter(
       (r) => r !== head && vis(r));
-    if (rows.length < 8) continue;
+    if (!rows.length) continue;
     const width = Math.max(...rows.map((r) => r.children.length));
     for (let c = 0; c < width; c++) {
+      const label = head ? (head.children[c]?.textContent || "").trim() : `column ${c + 1}`;
+      if (!label) continue;
       const vals = rows.map((r) => (r.children[c]?.textContent || "").trim())
         .filter((t) => t && t !== "—");
-      if (vals.length < 8) continue;
       // Numeric only. A repeated WORD is usually a legitimate status; a repeated NUMBER in a
       // column of prices or lines is a column that cannot be doing its job.
-      if (!vals.every((v) => /^[+\-−]?\d+(\.\d+)?%?$/.test(v))) continue;
-      const uniq = new Set(vals);
-      if (uniq.size > 2) continue;
-      const label = head ? (head.children[c]?.textContent || "").trim() : `column ${c + 1}`;
-      add("column-no-variance", "medium", tbl,
-        `"${label}" holds only ${uniq.size} distinct value(s) across ${vals.length} rows ` +
-        `(${[...uniq].join(", ")}) — the column may not carry the information it appears to`);
-      if (cap(findings, "column-no-variance")) break;
+      if (!vals.length || !vals.every((v) => /^[+\-−]?\d+(\.\d+)?%?$/.test(v))) continue;
+      const cur = byLabel.get(label) || { vals: new Set(), n: 0, el: tbl };
+      vals.forEach((v) => cur.vals.add(v));
+      cur.n += vals.length;
+      byLabel.set(label, cur);
     }
+  }
+  for (const [label, info] of byLabel) {
+    if (info.n < 8 || info.vals.size > 2) continue;
+    add("column-no-variance", "medium", info.el,
+      `"${label}" holds only ${info.vals.size} distinct value(s) across ${info.n} rows ` +
+      `board-wide (${[...info.vals].join(", ")}) — the column may not carry the information it ` +
+      `appears to`);
+    if (cap(findings, "column-no-variance")) break;
   }
 
   // ---- 20c2. A board must not be buried under paragraphs of prose --------------
