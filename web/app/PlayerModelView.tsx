@@ -14,7 +14,7 @@ import { projLean, leanCentres, hasProjSample, MIN_PROJ_GAMES } from "@/lib/proj
 import PropAdd, { type PricedSide } from "./PropAdd";
 import PinButton from "./PinButton";
 import { playerSlot, normName } from "@/lib/playerSlot";
-import { weekProps } from "@/lib/props";
+import { weekProps, fanduelLines } from "@/lib/props";
 import { cfbWeekProps } from "@/lib/cfbProps";
 import { etToday, groupByGameDay } from "@/lib/gameDays";
 import { DayHeader } from "./DayHeader";
@@ -77,12 +77,43 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
   // Live book market per (player, market, side) — so the ＋ chips add the real best price +
   // every book (byBook), exactly like Value Finder. Missing → PropAdd uses consensus.
   const priceIx = new Map<string, PricedSide>();
+  // FanDuel's CURRENT line per (player, market), read live. The `book` column baked into the
+  // projections file is only as fresh as the last export (twice daily), which is how a line that
+  // had moved to 228.5 was still being shown at 230.5. This overrides it on a 120s cache, so the
+  // column tracks the book between builds rather than only at them.
+  //
+  // It CANNOT come from weekProps: that collapses each player to the line most favourable to the
+  // bettor across books, which is the right answer for the ＋ chips and the wrong one for a column
+  // that is meant to show what FanDuel shows.
+  const liveLine = base === "ncaaf" ? new Map<string, number>() : await fanduelLines(week);
   try {
     const priced = base === "ncaaf" ? await cfbWeekProps(week) : await weekProps(week);
     for (const pg of priced) for (const m of pg.markets) for (const q of m.quotes) {
-      priceIx.set(`${normName(q.player)}|${m.market}|${q.side}`, { line: q.line, price: q.price, books: q.books, byBook: q.byBook });
+      // A book posts a LADDER of alternate lines on the same (player, market, side), so a plain
+      // set() keeps whichever arrived last — an arbitrary rung, not the main line. Prefer the
+      // quote FanDuel is on; failing that, the one priced closest to even money, since an
+      // alternate is priced away from even by construction.
+      const k = `${normName(q.player)}|${m.market}|${q.side}`;
+      const prev = priceIx.get(k);
+      const fd = (q.byBook as Record<string, number> | undefined)?.fanduel !== undefined;
+      const evenness = (x: PricedSide | undefined) =>
+        x ? Math.abs(x.price ?? 0) : Number.POSITIVE_INFINITY;
+      const prevFd = prev ? (prev.byBook as Record<string, number> | undefined)?.fanduel !== undefined : false;
+      if (!prev || (fd && !prevFd) || (fd === prevFd && Math.abs(q.price ?? 0) < evenness(prev))) {
+        priceIx.set(k, { line: q.line, price: q.price, books: q.books, byBook: q.byBook });
+      }
     }
   } catch { /* no market yet — chips fall back to consensus pricing */ }
+  // player+market key that matches the generated rows' market names ("rush_yds" -> "player_rush_yds")
+  // fanduelLines keys on the RAW player name the book posts; the board's rows carry the roster
+  // spelling, so normalise both sides before comparing.
+  const liveByKey = new Map<string, number>();
+  for (const [k, v] of liveLine) {
+    const [nm, mkt] = k.split("|");
+    liveByKey.set(`${normName(nm)}|${mkt}`, v);
+  }
+  const liveFor = (player: string, mkt: string): number | null =>
+    liveByKey.get(`${normName(player)}|player_${mkt}`) ?? null;
   const priceFor = (player: string, mkt: string, side: string): PricedSide | null =>
     priceIx.get(`${normName(player)}|player_${mkt}|${side}`) ?? null;
 
@@ -267,6 +298,10 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                         // No book line yet (line-blind projection ahead of the market) → show "—"
                         // for the book number and drop the over/under arrow (nothing to compare to).
                         const hasBook = r.book !== null;
+                        // The live line wins over the baked one whenever the market has moved
+                        // since the last export. Same source (FanDuel), fresher read.
+                        const live = liveFor(r.player, r.market);
+                        const shownLine = live ?? r.book;
                         // The lean comes from the player's own exceedance rate at this line, NOT
                         // from proj vs book — see projLean. `proj` is a mean and the line sits near
                         // the median, so the old comparison leaned OVER on 90-100% of continuous
@@ -341,9 +376,11 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                                 line). It is FanDuel's line wherever FanDuel posts one. */}
                             <span className="pmcell pmcell--num"
                               title={hasBook
-                                ? `${r.src ? BOOK_LABEL[r.src] ?? r.src : "The market"}'s posted line for ${r.player}, from our latest capture of the board.`
+                                ? (live !== null
+                                    ? `FanDuel's line for ${r.player}, read live and refreshed every 2 minutes.`
+                                    : `${r.src ? BOOK_LABEL[r.src] ?? r.src : "The market"}'s posted line for ${r.player}, from our latest capture of the board.`)
                                 : undefined}>
-                              {hasBook ? <>{r.book}{unitFor(r.market)}</> : "—"}
+                              {hasBook ? <>{shownLine}{unitFor(r.market)}</> : "—"}
                             </span>
                             {/* NO arrow here. The lean is not a claim about THIS number: `proj` is an
                                 average and the book's line sits near the median, so a projection can

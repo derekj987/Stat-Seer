@@ -52,6 +52,7 @@ interface PropRow {
   side: string; // Over / Under / Yes / No
   line: number | null;
   price_american: number;
+  collected_at?: string | null;
 }
 
 export interface Quote {
@@ -129,13 +130,40 @@ function collapseBest(quotes: Quote[]): Quote[] {
   return [...best.values()].sort((a, b) => a.player.localeCompare(b.player) || a.side.localeCompare(b.side));
 }
 
+/** Rows from the most recent capture of each event.
+ *
+ *  The dedupe below keys on (event, market, player, side, LINE, book) and keeps the newest row
+ *  per key. Because the LINE is part of that key, a line a book has moved off never expires — the
+ *  "current" set quietly accumulates every line ever posted. Derek caught the same defect on the
+ *  model board: Sam Darnold carried 22 distinct passing lines from 197.5 to 258.5, and A.J. Brown
+ *  had a Fanatics quote from 17 August sitting beside everyone else's from that afternoon.
+ *
+ *  `collected_at` is the true capture time. `snapshot_at` is the sweep key and equals kickoff on
+ *  legacy rows, so ordering or max()-ing on it picks the latest GAME, not the latest capture.
+ *  A sweep writes in batches with their own timestamps, so "newest capture" is a WINDOW. */
+const SWEEP_WINDOW_MS = 60 * 60 * 1000;
+function newestCapture(rows: PropRow[]): PropRow[] {
+  const newest = new Map<string, number>();
+  for (const r of rows) {
+    const t = Date.parse(r.collected_at ?? "");
+    if (!Number.isNaN(t) && t > (newest.get(r.event_id) ?? -Infinity)) newest.set(r.event_id, t);
+  }
+  if (!newest.size) return rows;                    // no usable collected_at — leave as-is
+  return rows.filter((r) => {
+    const t = Date.parse(r.collected_at ?? "");
+    const n = newest.get(r.event_id);
+    return Number.isNaN(t) || n === undefined || n - t <= SWEEP_WINDOW_MS;
+  });
+}
+
 export async function weekProps(week: number, season = 2026): Promise<PropGame[]> {
-  const rows = await pgAll(
+  const all = await pgAll(
     `?season=eq.${season}&week=eq.${week}&event_id=neq.test` + // exclude the dev test row
-      `&select=snapshot_at,event_id,commence_time,home_team,away_team,book,market,` +
+      `&select=snapshot_at,collected_at,event_id,commence_time,home_team,away_team,book,market,` +
       `player_name,side,line,price_american&order=snapshot_at.desc`
   );
-  if (!rows.length) return [];
+  if (!all.length) return [];
+  const rows = newestCapture(all);
 
   // Keep the latest snapshot per (event,market,player,side,line,book).
   const latest = new Map<string, PropRow>();
@@ -218,5 +246,39 @@ export async function weekProps(week: number, season = 2026): Promise<PropGame[]
     out.push(g);
   }
   out.sort((a, b) => a.commence.localeCompare(b.commence));
+  return out;
+}
+
+
+/** FanDuel's CURRENT line per `${normalised player}|${market}`, from the newest capture.
+ *
+ *  Separate from `weekProps` on purpose. That function's `collapseBest` picks the line most
+ *  FAVOURABLE to the bettor across books — the right answer for "what can I get", and the wrong
+ *  one for "what does my book show". The board's market column is the second question: Derek reads
+ *  it beside FanDuel and expects the same number. */
+export async function fanduelLines(week: number, season = 2026): Promise<Map<string, number>> {
+  const out = new Map<string, number>();
+  try {
+    const all = await pgAll(
+      `?season=eq.${season}&week=eq.${week}&event_id=neq.test&book=eq.fanduel` +
+        `&select=snapshot_at,collected_at,event_id,commence_time,home_team,away_team,book,market,` +
+        `player_name,side,line,price_american&order=snapshot_at.desc`
+    );
+    const rows = newestCapture(all);
+    // A book posts a ladder of alternates on one market; its MAIN line is the rung priced closest
+    // to even money, since an alternate is priced away from even by construction.
+    const best = new Map<string, { line: number; gap: number }>();
+    for (const r of rows) {
+      if (r.line === null || r.line === undefined) continue;
+      if (r.side !== "Over" && r.side !== "Yes") continue;
+      const k = `${r.player_name}|${r.market}`;
+      const gap = Math.abs(r.price_american ?? 0);
+      const prev = best.get(k);
+      if (!prev || gap < prev.gap) best.set(k, { line: r.line, gap });
+    }
+    for (const [k, v] of best) out.set(k, v.line);
+  } catch {
+    /* no market yet — the board falls back to the line baked into the projections file */
+  }
   return out;
 }
