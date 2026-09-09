@@ -742,6 +742,86 @@
     if (cap(findings, "chart-rows-uneven")) break;
   }
 
+  // ---- 20c1a. Column WIDTHS must be divided in proportion to what they hold -----
+  // Derek: "the rows and columns are not spaced evenly" — on a board whose row heights were all
+  // identical and which the probe had just reported clean. `chart-rows-uneven` measures HEIGHT; it
+  // says nothing about how the width is divided, so a board with two enormous name columns and
+  // four numeric ones crammed together at the right passed every check.
+  //
+  // The cause is worth naming because it is invisible at the width you design at: a grid mixing
+  // `fr` tracks with fixed `px` ones sends ALL the surplus on a wide screen to the fr columns. At
+  // the 795px min width the board looked right; at 1120px the player column had absorbed most of
+  // an extra 170px while "AB" and "our %" had absorbed none.
+  //
+  // So compare SLACK (allocated width minus the widest ink in that column), not width. A wide
+  // column is fine if it is wide because its content is; it is a bug when one column carries a big
+  // empty margin while another is squeezed under its own content.
+  // Judge each column across the WHOLE BOARD, not per table — the same correction
+  // column-no-variance needed. A board drawn as one table per game card puts every batter in a
+  // card against the SAME pitcher, so within one card that column's longest value is short and its
+  // slack looks enormous. Measured on the already-correct hits board: 12 false findings per pass.
+  // Group tables by their header signature, take the widest ink each column reaches anywhere on
+  // the board, and evaluate the group once.
+  const colGroups = new Map();   // header signature -> { head, tables[] }
+  for (const tbl of document.querySelectorAll('[role="table"], table')) {
+    if (!vis(tbl)) continue;
+    const head = tbl.querySelector('[class*="--head"], thead tr');
+    if (!head || !vis(head) || head.children.length < 3) continue;
+    const sig = [...head.children].map((c) => (c.textContent || "").trim()).join("|");
+    const g = colGroups.get(sig) || { head, tables: [], el: tbl };
+    g.tables.push(tbl);
+    colGroups.set(sig, g);
+  }
+  for (const [, g] of colGroups) {
+    const head = g.head;
+    const rows = [];
+    for (const t of g.tables) {
+      for (const r of t.querySelectorAll('[class*="--data"], tbody tr')) {
+        if (r === t.querySelector('[class*="--head"], thead tr')) continue;
+        if (!vis(r) || r.classList.contains("hb-row--more")) continue;
+        rows.push(r);
+      }
+    }
+    if (rows.length < 3) continue;
+    // Measure ink by cloning into ONE reused off-screen box, and only the few longest strings per
+    // column — cloning every cell of a 600-row board hangs the page (it did, twice).
+    const box = document.createElement("div");
+    box.style.cssText = "position:absolute;left:-9999px;top:0;visibility:hidden";
+    document.body.appendChild(box);
+    const ink = (cell) => {
+      const c = cell.cloneNode(true);
+      c.style.cssText = "white-space:nowrap;width:auto;display:inline-block";
+      box.appendChild(c);
+      const w = c.getBoundingClientRect().width;
+      c.remove();
+      return w;
+    };
+    const slack = [];
+    for (let c = 0; c < head.children.length; c++) {
+      const cand = rows.map((r) => r.children[c]).filter(Boolean)
+        .sort((a, b) => b.textContent.trim().length - a.textContent.trim().length).slice(0, 3);
+      let need = ink(head.children[c]);
+      for (const cell of cand) need = Math.max(need, ink(cell));
+      const alloc = head.children[c].getBoundingClientRect().width;
+      slack.push({ label: (head.children[c].textContent || "").trim(), alloc: Math.round(alloc),
+                   need: Math.ceil(need), slack: Math.round(alloc - need) });
+    }
+    box.remove();
+    if (slack.some((s) => s.alloc <= 0)) continue;
+    const worst = Math.max(...slack.map((s) => s.slack));
+    const tight = Math.min(...slack.map((s) => s.slack));
+    // Only report a real imbalance: one column sitting on a lot of empty width while another is
+    // at or under its own content. A uniformly generous board is not a bug.
+    if (worst - tight < 60 || worst < 40) continue;
+    const w = slack.find((s) => s.slack === worst), t = slack.find((s) => s.slack === tight);
+    add("chart-columns-lopsided", "medium", g.el,
+      `column widths are not divided in proportion to their content — "${w.label}" has ${worst}px ` +
+      `of empty width while "${t.label}" has ${tight}px (needs ${t.need}, has ${t.alloc}) ` +
+      `across ${rows.length} rows. A grid mixing fr tracks with fixed px sends all the surplus to ` +
+      `the fr ones; make every track an fr weighted by measured ink`, { slack });
+    if (cap(findings, "chart-columns-lopsided")) break;
+  }
+
   // ---- 20c1b. A property of the CARD does not belong in a per-row column --------
   // The MLB home-run board carried a "ballpark" column. Every player in a card plays in the same
   // park, so the column printed one identical string down the whole card -- and because that string

@@ -38,6 +38,8 @@ drifted past it) · `uncapped-long-list` (a long item list with no "show more" c
 `all-cards-collapsed` (every per-game card on a board is closed, so nothing reads without a click) ·
 `repeated-column-header` (the column row reappears mid-board, chopping one chart into several) ·
 `chart-rows-uneven` (data rows in one chart differ in height because a cell wraps) ·
+`chart-columns-lopsided` (one column sits on a pile of empty width while another is squeezed under
+its own content — the `fr`-mixed-with-`px` grid) ·
 `card-property-as-column` (a column constant within each card but varying between cards — game-level
 data rendered once per row) ·
 `content-escapes-card` (a row's border box is narrower than the content it wraps — the last columns
@@ -1176,6 +1178,19 @@ more:
 const CONTENT = '.pmrow--data, .hb-form tbody tr, .impgame, .aurow, .propgame, .refrow, .augame';
 if (hid && hid.querySelectorAll(CONTENT).length > live.querySelectorAll(CONTENT).length) { /* splice */ }
 ```
+
+**⚠️ That row-count guard has its own hole, and it fired on four pages in one pass.** A page with
+no board ROWS at all — `/dashboard`, `/bankroll`, `/lines` and `/context` on an empty week — scores
+`0 > 0`, so the splice never runs and the probe audits a "Loading…" shell that reports clean.
+`/dashboard` was a **692px** live `main` containing one word. Test the row count **or** the text:
+```js
+const txt = live ? live.textContent.replace(/\s+/g,' ').trim() : '';
+const stalled = !live || txt.length < 200 || /^Loading/.test(txt);
+if (hid && hid.children.length && (stalled || richer)) { /* splice */ }
+```
+After the fix those pages measured 4,039 / 4,389 / 5,042 / 1,254 characters and one produced a real
+finding. **Report the character count alongside `dataRows`** — on a page that legitimately has no
+rows, characters are the only evidence anything was measured at all.
 Report `dataRows` with every page result. **A page reporting zero rows was not audited**, whatever
 its finding count says — treat it as unverified and say so, rather than counting it as clean.
 
@@ -1646,6 +1661,38 @@ down every row of a card, and its wrapping is what made the rows uneven. Moving 
 header said the same thing once and freed ~180px — which is what made every other column fit. The
 tell is *constant within each card, different between cards*; `column-no-variance` will not catch it
 because board-wide the column varies perfectly well.
+
+### 🚨 Even COLUMNS: never mix `fr` tracks with fixed `px` ones
+`chart-columns-lopsided`. Derek, on a board the probe had just reported clean: *"the rows and
+columns are not spaced evenly."* He was right and the audit was useless, because **the check above
+measures HEIGHT.** Row heights were identical to the pixel; nothing in the probe looked at how the
+WIDTH was divided, so a board with two enormous name columns and four numeric ones crammed at the
+right passed everything. *When a rule mentions two things ("rows and columns"), check that you did
+not encode only the half that was easy to measure.*
+
+**The mechanism is invisible at the width you design at.** `grid-template-columns: minmax(250px,
+1.5fr) minmax(157px, 1.2fr) 110px 40px 66px 60px` is correct at the 795px minimum — every column
+lands on its budget. At 1120px the surplus 170px goes **entirely** to the two `fr` tracks, because
+that is what `fr` means. The player column swallows it and "AB", "book %", "our %" get none.
+
+**Every track is an `fr`, weighted by measured ink.** Then the ratio holds at every width:
+```css
+/* weights = each column's widest INK + an equal share of the slack */
+grid-template-columns: 262fr 126fr 143fr 32fr 66fr 54fr;   /* 610 ink, 73 spare, ~12 each */
+```
+Measured after: slack 12-13px on all six columns instead of 93px against −20px, and every header
+back on one line. Four MLB boards had the same shape (`--mlb`, `--mlbp`, `--mlbhr`, `--mlbk`).
+
+**Judge slack board-wide, not per table** — the same correction `column-no-variance` needed, and it
+bit again immediately: within one game card every batter faces the SAME pitcher, so that column's
+longest value is short and its slack looks enormous. Per-table, the check reported **12 findings on
+the board it had just been used to fix.** Group tables by header signature, take each column's
+widest ink anywhere on the board, evaluate once. Two-way tested afterwards: 0 on the fixed board,
+1 with the old rule re-injected, 0 on removal.
+
+**And run a new check across every board the same day you write it.** Sweeping this one found a
+genuine second bug nobody had reported: the `/mlb/model` lineups panel had "batting slot" sitting on
+71px of empty width while "player" was **20px short of its own longest name**.
 
 **A card header that gains a subtitle needs its own mobile pass.** The park moved into
 `.pmgame__h`, which is a flex bar with the chevron on `margin-left:auto`; at 375px the matchup alone
