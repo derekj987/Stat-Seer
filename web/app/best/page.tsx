@@ -6,6 +6,7 @@ import SavableRow from "./SavableRow";
 import PinButton from "../PinButton";
 import { etToday, groupByGameDay, dayBasis } from "@/lib/gameDays";
 import { DayHeader } from "../DayHeader";
+import Tip from "../Tip";
 
 export const revalidate = 120;
 const SEASON = 2026;
@@ -106,13 +107,22 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
           {keys.length > 0 && (
             <section className="ctxsec">
               <h2 className="ctxsec__h">Key numbers — what to do</h2>
+              {/* One line on the board, the detail in the scroll — the house pattern. 476
+                  characters stacked above a chart is a wall nobody reads, which protects nobody. */}
               <p className="ctxsec__d">
-                NFL games are decided by <b>3</b> or <b>7</b> far more than any other margin. So when a spread
-                or total sits right on one of those numbers, do one of two things: <b>take the side that already
-                has the number working for it</b> (the favorite laying fewer than 3, or the dog getting 3+), or
-                <b> buy the half-point</b> to move onto it. That half-point swings more games than any model edge
-                on a line — the biggest, cheapest edge in the app. Each card shows the number and exactly what
-                the half-point is worth.
+                Margins land on <b>3</b> and <b>7</b> more than any other number, so a line sitting on one is
+                worth acting on.{" "}
+                {/* Tip content uses <br /><br />, never <p>: this legend IS a <p>, and a nested <p>
+                    makes the parser close the outer one, so the "moved into the scroll" copy pops
+                    back out onto the page as siblings. It looked moved and was not. */}
+                <Tip label="How to play a key number" text={<>
+                  NFL games are decided by <b>3</b> or <b>7</b> far more than any other margin. So when a
+                  spread or total sits right on one of those numbers, do one of two things: <b>take the side
+                  that already has the number working for it</b> (the favorite laying fewer than 3, or the dog
+                  getting 3+), or <b>buy the half-point</b> to move onto it.<br /><br />
+                  That half-point swings more games than any model edge on a line — the biggest, cheapest edge
+                  in the app. Each card below shows the number and exactly what the half-point is worth.
+                </>} />
               </p>
               <div className="daygrid">
                 {groupByGameDay(keys, (k) => k.commence, today, tomorrow).map((grp) => (
@@ -126,16 +136,22 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
           )}
 
           <p className="ctxsec__lead">
-            <b>If you like these picks, place them on your slip.</b> Tap any row below to save it — StatSeer
-            lines up the single best sportsbook for each, and totals your ticket at the bottom of the screen.
+            <b>Tap any row to add it to your slip.</b>{" "}
+            <Tip label="How the slip works" text={<>
+              StatSeer lines up the single best sportsbook for each leg you save, and totals your ticket at
+              the bottom of the screen.
+            </>} />
           </p>
 
           <section className="ctxsec">
             <h2 className="ctxsec__h">Best prices this week</h2>
             <p className="ctxsec__d">
-              The biggest <b>shopping edges</b> — how much better the best book&apos;s price is than the market
-              average on the same bet. Placing at the named book captures the difference; it&apos;s the same
-              wager everyone else makes at a worse number.
+              The biggest <b>shopping edges</b> — how far the best book&apos;s price beats the market average.{" "}
+              <Tip label="What a shopping edge is" text={<>
+                Placing at the named book captures the difference. It is the same wager everyone else makes,
+                at a worse number — no prediction involved, which is why this is the part of the app that
+                does not depend on a model being right.
+              </>} />
             </p>
             <div className="pricetable" role="table" aria-label="Best prices">
               {groupByGameDay(topPrices, (p) => p.commence, today, tomorrow).map((grp) => (

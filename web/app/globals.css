@@ -1928,8 +1928,13 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .propq__player{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .propq__side{color:var(--muted);font-size:11px;font-family:var(--font-mono)}
 .propq__price{font-family:var(--font-mono);font-weight:600;color:var(--accent)}
+/* 96px cut "bovada / draftkings" (110px) with 0 of 1204 player cells clipped beside it — an
+   ellipsis while the row had width to spare. Measured book-list widths: median 47, p75 81, p90
+   139, max 301 ("betonlineag / betrivers / bovada / fanatics / fanduel"). 140px clears ~90% of
+   them; the long tail still ellipsizes on purpose, because a five-book list is not worth 300px of
+   a 493px row. */
 .propq__book{color:var(--muted);font-size:10.5px;font-family:var(--font-mono);
-  white-space:nowrap;max-width:96px;overflow:hidden;text-overflow:ellipsis}
+  white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis}
 /* Pick Auditor verdict icon on a prop price — a small superscript beside the number. */
 .propq__price{position:relative}
 .propq__audit{font-size:9px;line-height:1;margin-left:2px;top:-.4em}
@@ -3260,12 +3265,14 @@ a.snav__dfeat{display:block}
 /* Lineups. Found by chart-columns-lopsided the day that check was written: "batting slot" carried
    71px of empty width while "player" was 20px SHORT of its own longest name, because the two fr
    tracks took the surplus and the three fixed 96px ones took none. Pure fr, weighted by measured
-   ink plus an equal share of the slack (605 of ink against a 699 budget, ~19 each):
-       player 297 (ink 279) | status 102 (83) | start % 112 (93) | batting slot 100 (81)
-       | recent 88 (69)  =  699 = 795 - 32 padding - (4 x 16) gaps */
+   ink plus an equal share of the leftover — see the hits table comment for the shapes that do NOT
+   do that. Measured ink: player 279 | status 83 | start % 93 | batting slot 81 | recent 69 = 605,
+   plus 4 gaps x 16 = 669. */
 .pmtable--mlb{min-width:795px;max-width:1120px}
 .pmtable--mlb .pmrow--data,
-.pmtable--mlb .pmrow--head{grid-template-columns:297fr 102fr 112fr 100fr 88fr}
+.pmtable--mlb .pmrow--head{--pmx:max(0px,calc((100% - 669px) / 5));
+  grid-template-columns:calc(279px + var(--pmx)) calc(83px + var(--pmx)) calc(93px + var(--pmx))
+    calc(81px + var(--pmx)) calc(69px + var(--pmx))}
 /* Strikeouts board — six columns. Same .pmrow--data language as every other board so book line
    and our projection sit in the same relationship a reader already knows from football. */
 /* min-width was 840 while the column minimums only need ~586 + gaps, so the table forced a
@@ -3285,26 +3292,38 @@ a.snav__dfeat{display:block}
    made the rows uneven; it now sits in the card header once. Budget from the measured scroller,
    16px gaps, 16px row padding:
        795 - 32 - (5 x 16) = 683.
-   Tracks are PURE fr, and this is the point: a mix of `fr` and fixed px sends ALL the extra width
-   on a wide screen to the fr columns, so player and opp pitcher ballooned while the four numeric
-   columns stayed crammed at the right — Derek's "the rows and columns are not spaced evenly".
-   With every track an fr, the ratio holds at every width. The weights are each column's MEASURED
-   ink plus an equal share of the slack (610 of ink, 73 spare, ~12 each):
-       player 262 (ink 249) | opp pitcher 126 (114) | avg vs opp pitcher 143 (131)
-       | AB 32 (20) | book % 66 (54) | our % 54 (42)  =  683 */
+   EVENLY SPACED COLUMNS — each track is its measured ink plus an EQUAL share of whatever is left,
+   computed live so it holds at every table width. `--pmx` is that equal share; the subtracted
+   constant is the sum of the ink plus the gaps, and `100%` resolves against the row's content box.
+   Three earlier shapes all failed, each in its own way — this is why the calc is worth the ugliness:
+     - `minmax(Xpx,1.5fr) ... 110px 40px` (fr mixed with fixed px) sends ALL the surplus on a wide
+       screen to the fr tracks. Correct at the 795px minimum, badly lopsided at 1120.
+     - pure `262fr 126fr ...` holds the RATIO, so the widest column still takes the biggest share:
+       at ~1100px the player column had ~130px of empty width while AB had ~25.
+     - `minmax(ink,1fr)` is NOT "min plus equal extra". Equal flex factors make every flexible
+       track the same TOTAL width, so the three wide columns pinned to their min and the three
+       narrow ones absorbed the lot — measured slack 0 / 0 / 0 / 55 / 21 / 33.
+   Measured ink: player 249 | opp pitcher 114 | avg vs opp pitcher 131 | AB 20 | book % 54
+   | our % 42  =  610, plus 5 gaps x 16 = 690. */
 .pmtable--mlbp .pmrow--data,
-.pmtable--mlbp .pmrow--head{grid-template-columns:262fr 126fr 143fr 32fr 66fr 54fr}
+.pmtable--mlbp .pmrow--head{--pmx:max(0px,calc((100% - 690px) / 6));
+  grid-template-columns:calc(249px + var(--pmx)) calc(114px + var(--pmx)) calc(131px + var(--pmx))
+    calc(20px + var(--pmx)) calc(54px + var(--pmx)) calc(42px + var(--pmx))}
 /* HOME RUNS — seven columns, the same set plus "HR vs opp pitcher". Budget:
-       795 - 32 - (6 x 16) = 667  ->  219 + 114 + 105 + 28 + 92 + 58 + 51 = 667.
-   Pure fr for the same reason as the hits table above — see that comment; a fixed px column next
-   to an fr one is what made the board lopsided on a wide screen.
+       795 - 32 - (6 x 16) = 667.
+   Same `minmax(ink, 1fr)` pattern as the hits table above — read that comment for why the two
+   earlier shapes failed.
    Ink here sums to 736 against a 667 budget, so something must give, and it is the two long
    HEADERS rather than any data: "avg vs opp pitcher" and "HR vs opp pitcher" label a
-   three-decimal average and a single digit. Both wrap to two lines, identically, and every header
-   is bottom-aligned, so the header row reads as deliberate rather than cramped. */
+   three-decimal average and a single digit, so their mins are set from the DATA (95 / 60) and the
+   labels wrap to two lines. Both wrap identically and every header is bottom-aligned, so the
+   header row reads as deliberate rather than cramped.
+   Ink 249 + 114 + 95 + 20 + 60 + 54 + 42 = 634, plus 6 gaps x 16 = 730. */
 .pmtable--mlbhr{min-width:795px;max-width:1120px}
 .pmtable--mlbhr .pmrow--data,
-.pmtable--mlbhr .pmrow--head{grid-template-columns:219fr 114fr 105fr 28fr 92fr 58fr 51fr}
+.pmtable--mlbhr .pmrow--head{--pmx:max(0px,calc((100% - 730px) / 7));
+  grid-template-columns:calc(249px + var(--pmx)) calc(114px + var(--pmx)) calc(95px + var(--pmx))
+    calc(20px + var(--pmx)) calc(60px + var(--pmx)) calc(54px + var(--pmx)) calc(42px + var(--pmx))}
 /* EVEN ROWS. Each row is its own grid, so a row sizes to its own tallest cell: at natural height
    the board came out 42px for most rows and 62px for the two players whose name needs a second
    line, and rows that differ read as broken alignment. A FIXED height evens them — but a fixed
@@ -3319,13 +3338,15 @@ a.snav__dfeat{display:block}
 .pmtable--mlbhr .pmrow--head{align-items:end}
 /* Strikeouts board. min-width was 820 against a 795px scroller, so every table carried a
    scrollbar it did not need. Budget 795 - 32 padding - (5 x 16) gaps = 683.
-   Pure fr, weights = measured ink plus an equal share of the slack (480 of ink, 203 spare, ~34
-   each): player 232 (ink 199) | opponent 104 (70) | book line 100 (66) | our proj 91 (57)
-   | K rate 77 (43) | starts 79 (45) = 683. The player column had been 190 against 199 of ink,
+   Ink plus an equal share of the leftover — see the hits table comment for the three shapes that
+   do NOT do that. Measured ink: player 199 | opponent 70 | book line 66 | our proj 57 | K rate 43
+   | starts 45 = 480, plus 5 gaps x 16 = 560. The player column had been 190 against 199 of ink,
    which is why the longest pitcher name was the one cell on this board that could wrap. */
 .pmtable--mlbk{min-width:795px;max-width:1120px}
 .pmtable--mlbk .pmrow--data,
-.pmtable--mlbk .pmrow--head{grid-template-columns:232fr 104fr 100fr 91fr 77fr 79fr}
+.pmtable--mlbk .pmrow--head{--pmx:max(0px,calc((100% - 560px) / 6));
+  grid-template-columns:calc(199px + var(--pmx)) calc(70px + var(--pmx)) calc(66px + var(--pmx))
+    calc(57px + var(--pmx)) calc(43px + var(--pmx)) calc(45px + var(--pmx))}
 .pmtable--mlbk .pmrow--data{height:56px;align-items:center}
 .pmtable--mlbk .pmrow--head{align-items:end}
 .pmtable--mlbk .pmrow--data .pmcell--player{line-height:1.3;white-space:normal}
@@ -3336,12 +3357,26 @@ a.snav__dfeat{display:block}
    tracks 738 + gaps (5x14) + padding (2x16) = 840 against an 825px card, so every row drew 9px
    outside it — while the pitchers column sat at 160px needing 202px with 87px unused further
    right. Sized to fit the card instead: 200+150+86+80+92+76 = 684 + 70 + 32 = 786. */
-.pmtable--mlbg{min-width:778px;max-width:1080px}
-/* The last four are the MARKET pair then the OURS pair, at equal widths on purpose: two numbers a
-   reader is meant to compare should not be drawn at different sizes.
-   Budget: 200+170+77+77+77+77 = 678 + 70 gaps + 32 padding = 780. */
+.pmtable--mlbg{min-width:795px;max-width:1120px}
+/* Columns 3-6 are market spread, market total, our spread, our total. Two numbers a reader is
+   meant to compare must be drawn at the same size — but that means SPREAD equals SPREAD and TOTAL
+   equals TOTAL, not all four equal. Giving the totals the spreads' 88px cost 76px that the
+   pitchers column needed: at 375 it read 58px of idle width on "our total" against a pitchers
+   cell 60px short. Spreads 88 ("−0.2 (CLE)"), totals 50 ("10.4").
+   Everything else is the standard pattern (see .pmtable--mlbp): measured ink plus an equal share
+   of the leftover, so no column hoards the surplus on a wide screen.
+   Ink: game 150 ("CLE @ BAL (6:35p)") | starting pitchers 246 | spreads 2 x 88 | totals 2 x 50
+   = 672, plus 5 gaps x 16 = 752. Two pitcher names joined by a slash still wraps to two lines at
+   the 795px minimum, and the ROW's fixed height is what stops that wrap making the row taller
+   than its neighbours (measured 42 against 54 before). */
 .pmtable--mlbg .pmrow--data,
-.pmtable--mlbg .pmrow--head{grid-template-columns:minmax(200px,1.6fr) minmax(170px,1.3fr) repeat(4,77px)}
+.pmtable--mlbg .pmrow--head{--pmx:max(0px,calc((100% - 752px) / 6));
+  grid-template-columns:calc(150px + var(--pmx)) calc(246px + var(--pmx))
+    calc(88px + var(--pmx)) calc(50px + var(--pmx))
+    calc(88px + var(--pmx)) calc(50px + var(--pmx))}
+.pmtable--mlbg .pmrow--data{height:56px;align-items:center}
+.pmtable--mlbg .pmrow--head{align-items:end}
+.pmtable--mlbg .pmrow--data .pmcell--team{line-height:1.3}
 /* Two names joined by a slash is the one cell here that genuinely needs two lines. Letting it wrap
    is what removes the truncation — widening it instead would push the table back over the card.
    Written with THREE classes (0,3,0) on purpose: the mobile block further down sets

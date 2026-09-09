@@ -281,6 +281,19 @@ Three things that check had to get right, all found by running it:
   scoring" — has nothing to bury, and its `<summary>` already IS the click a scroll would add.
   Flagging it (655 characters) was the check overreaching, not a page defect. `if (!board) continue;`
 
+**🚨 A `<p>` cannot nest inside a `<p>` — so Tip content uses `<br /><br />`, never `<p>`.** The
+legend that carries a `<Tip>` IS a `<p>`. Writing the Tip's `text` as `<p>` elements makes the parser
+close the outer paragraph, and the copy you "moved into the scroll" pops back out as siblings on the
+page. It looked moved, it read as moved in the diff, and `prose-above-board` correctly reported the
+same 577 characters afterwards as before. The tell in the DOM is the Tip's paragraphs reporting
+`parentElement.className === "ctxsec"` instead of `tip__bubble`. Copy `PlayerModelView`'s Tips.
+
+Note the near-miss this caused: the first diagnosis was that the *check* was counting paragraphs
+inside the bubble, and a guard (`p.closest(".tip, .tip__bubble")`) was written for it. That guard is
+right in principle and is kept — but it was not the cause here, and shipping only the guard would
+have hidden a real page defect behind a silenced check. **When a check keeps reporting after a fix,
+confirm the fix actually landed in the DOM before adjusting the check.**
+
 **That last one is the general shape of a bad check: it fires on the ABSENCE of the thing it is
 about.** When a new check reports something, confirm the page actually has the structure the check
 presupposes before changing the page — twice now the honest fix has been to the probe.
@@ -1675,13 +1688,38 @@ not encode only the half that was easy to measure.*
 lands on its budget. At 1120px the surplus 170px goes **entirely** to the two `fr` tracks, because
 that is what `fr` means. The player column swallows it and "AB", "book %", "our %" get none.
 
-**Every track is an `fr`, weighted by measured ink.** Then the ratio holds at every width:
+**Two obvious repairs both fail, and each looks right until it is measured at a second width:**
+
+- **Pure `fr` weights** (`262fr 126fr 143fr …`) hold the RATIO, so the widest column still takes the
+  largest share of the surplus. At ~1100px the player column had ~130px of empty width against
+  ~25px on "AB". Better, still not even.
+- **`minmax(ink, 1fr)` is NOT "min plus equal extra".** Equal flex factors make every flexible track
+  the same TOTAL width, so the three wide columns pinned to their min and the three narrow ones
+  absorbed everything: measured slack **0 / 0 / 0 / 55 / 21 / 33**. This one reads as obviously
+  correct and is the trap worth remembering.
+
+**What works is a shared `calc()`**, because the leftover has to be divided *outside* the track
+sizing algorithm:
 ```css
-/* weights = each column's widest INK + an equal share of the slack */
-grid-template-columns: 262fr 126fr 143fr 32fr 66fr 54fr;   /* 610 ink, 73 spare, ~12 each */
+.thing .row{--pmx:max(0px,calc((100% - 690px) / 6));   /* 690 = sum of ink + sum of gaps */
+  grid-template-columns:calc(249px + var(--pmx)) calc(114px + var(--pmx)) /* …one per column */ }
 ```
-Measured after: slack 12-13px on all six columns instead of 93px against −20px, and every header
-back on one line. Four MLB boards had the same shape (`--mlb`, `--mlbp`, `--mlbhr`, `--mlbk`).
+`100%` resolves against the row's content box, so every column gets the same number of extra pixels
+at every width. Verified across widths: **slack 12px on all six columns at 1440, 40px on all six at
+1900** — even, not merely proportional. Five MLB boards had the mixed shape (`--mlb`, `--mlbp`,
+`--mlbhr`, `--mlbk`, `--mlbg`).
+
+**An equal share is the default, not the rule.** Where one column's content is genuinely much longer
+than its neighbours', give it more of the surplus (`/8` with a `3 * var(--pmx)` on that track) —
+"evenly spaced" means no column idle while another is squeezed, not identical slack regardless of
+content. And check what the equal-width constraints actually require: the game board pinned all four
+comparison columns to one width, but the rule is *spread equals spread* and *total equals total* —
+holding the totals at the spreads' 88px cost 76px that the pitchers column needed.
+
+**A cell that cannot fit gets a fixed ROW height, not a wider column.** Two pitcher names joined by
+a slash is 285px of ink that no honest budget fits at 1440; shortening to first-initial form got it
+to 234 and the row height does the rest. Where content genuinely must wrap, wrapping is fine — a
+*ragged* row is the defect, not a tall one.
 
 **Judge slack board-wide, not per table** — the same correction `column-no-variance` needed, and it
 bit again immediately: within one game card every batter faces the SAME pitcher, so that column's
@@ -1693,6 +1731,22 @@ widest ink anywhere on the board, evaluate once. Two-way tested afterwards: 0 on
 **And run a new check across every board the same day you write it.** Sweeping this one found a
 genuine second bug nobody had reported: the `/mlb/model` lineups panel had "batting slot" sitting on
 71px of empty width while "player" was **20px short of its own longest name**.
+
+**Three calibrations this check needed, all found by running it rather than by reasoning:**
+
+1. **Header requirement is its longest WORD; data requirement is the whole string.** That asymmetry
+   is the check. A label may wrap on purpose ("HR vs opp pitcher" over a single-digit column);
+   a value may not, because a wrapping value is what makes rows ragged. Measuring headers whole
+   reported −37px on two deliberately-wrapped labels; measuring data by word instead reported 149px
+   of "slack" on a column sized precisely so names never wrap — i.e. it flagged the fix.
+2. **The tight side is what makes it a defect, not the gap.** On a wide table every column's slack
+   scales up and so does the difference between them: the homepage's 4-row shopping table fired at
+   187px vs 107px with nothing squeezed at all. Require `tight <= 24px` as well as a large gap.
+3. **Judge board-wide** (above).
+
+**Run the sweep at a STRETCHED width, not just 1440.** This whole class of bug is invisible at the
+width a table was budgeted for — the mixed `fr`/`px` grids all measured perfectly at their 795px
+minimum. Add a 1900px pass whenever the finding is about how space is divided.
 
 **A card header that gains a subtitle needs its own mobile pass.** The park moved into
 `.pmgame__h`, which is a flex bar with the chevron on `margin-left:auto`; at 375px the matchup alone

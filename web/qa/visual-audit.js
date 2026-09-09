@@ -319,7 +319,13 @@
     if (!vis(el)) continue;
     const s = getComputedStyle(el);
     if (s.display !== "grid") continue;
-    const tracks = (s.gridTemplateColumns || "").trim().split(/\s+/).filter(Boolean).length;
+    // Count only tracks that actually occupy space. `auto-fit` COLLAPSES its empty tracks to 0px
+    // and the computed value still lists them — "493px 493px 0px 0px" is auto-fit working exactly
+    // as intended, with the two items filling the full width. Counting the zeros reported /props
+    // as "2 items in a 4-track grid, ~515px of empty tracks" on a row with no dead space at all,
+    // i.e. the check accused auto-fit of being auto-fill.
+    const trackList = (s.gridTemplateColumns || "").trim().split(/\s+/).filter(Boolean);
+    const tracks = trackList.filter((t) => parseFloat(t) > 0.5).length;
     if (tracks < 2) continue;
     const kids = [...el.children].filter((k) => vis(k));
     if (!kids.length || kids.length >= tracks) continue;
@@ -796,11 +802,32 @@
       c.remove();
       return w;
     };
+    // A HEADER may wrap — "HR vs opp pitcher" as a label over a single-digit column is a
+    // deliberate trade — so a header's requirement is its longest unbreakable WORD. Measuring
+    // headers whole reported the props board as −37px tight on exactly the two columns whose
+    // labels wrap on purpose.
+    //
+    // DATA is measured whole, and that asymmetry is the point. Applying the word rule to data as
+    // well made the correctly-budgeted board look broken the other way: the player column reports
+    // 149px of "slack" if you only require it to fit "Encarnacion-Strand" rather than the whole
+    // name, so a board budgeted so names never wrap gets flagged for the width that stops them
+    // wrapping. A column must hold its widest VALUE; it need only hold its label's widest word.
+    const need1 = (el) => {
+      const parts = (el.textContent || "").trim().split(/\s+/).filter(Boolean);
+      if (parts.length < 2) return ink(el);
+      let w = 0;
+      for (const p of parts) {
+        const probe = el.cloneNode(false);
+        probe.textContent = p;
+        w = Math.max(w, ink(probe));
+      }
+      return w;
+    };
     const slack = [];
     for (let c = 0; c < head.children.length; c++) {
       const cand = rows.map((r) => r.children[c]).filter(Boolean)
         .sort((a, b) => b.textContent.trim().length - a.textContent.trim().length).slice(0, 3);
-      let need = ink(head.children[c]);
+      let need = need1(head.children[c]);
       for (const cell of cand) need = Math.max(need, ink(cell));
       const alloc = head.children[c].getBoundingClientRect().width;
       slack.push({ label: (head.children[c].textContent || "").trim(), alloc: Math.round(alloc),
@@ -811,8 +838,11 @@
     const worst = Math.max(...slack.map((s) => s.slack));
     const tight = Math.min(...slack.map((s) => s.slack));
     // Only report a real imbalance: one column sitting on a lot of empty width while another is
-    // at or under its own content. A uniformly generous board is not a bug.
-    if (worst - tight < 60 || worst < 40) continue;
+    // AT OR UNDER its own content. A uniformly generous board is not a bug — and the gap alone
+    // cannot tell them apart, because on a wide table every column's slack scales up and so does
+    // the difference between them. The homepage's 4-row shopping table fired at 187px vs 107px
+    // with nothing squeezed at all. `tight` is what makes it a defect.
+    if (worst - tight < 60 || worst < 40 || tight > 24) continue;
     const w = slack.find((s) => s.slack === worst), t = slack.find((s) => s.slack === tight);
     add("chart-columns-lopsided", "medium", g.el,
       `column widths are not divided in proportion to their content — "${w.label}" has ${worst}px ` +
@@ -887,6 +917,12 @@
     for (const p of body.querySelectorAll("p")) {
       if (!vis(p)) continue;
       if (board && (board.contains(p) || board.compareDocumentPosition(p) & Node.DOCUMENT_POSITION_FOLLOWING)) continue;
+      // Skip paragraphs that ARE inside a Tip. Stripping the bubble from the clone below only
+      // handles a bubble nested in the legend paragraph; a Tip whose own content is written as
+      // <p> elements puts those paragraphs in the querySelectorAll("p") result in their own
+      // right, so /best reported 577 characters made up almost entirely of the two paragraphs
+      // that had just been moved INTO the scroll. Second time this check has flagged its own fix.
+      if (p.closest(".tip, .tip__bubble")) continue;
       // The Tip's bubble lives INSIDE the legend paragraph, so p.textContent includes every word
       // of the explanation that was correctly moved into the scroll. Counting it reported 1,661
       // characters on a panel whose visible copy is one line — the check flagging the fix.

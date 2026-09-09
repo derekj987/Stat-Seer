@@ -182,15 +182,29 @@ export default async function Page() {
                         // Home minus away, the same sign convention as the market column, so a
                         // reader compares two numbers that mean the same thing.
                         const os = g.homeRuns - g.awayRuns;
+                        // First initial plus surname. "Hunter Brown (HOU) / Cristopher Sánchez
+                        // (PHI)" is 285px of ink, and no honest budget fits that at 1440 — it was
+                        // the one cell on the site that had to wrap, and a wrapping cell is what
+                        // makes rows ragged. The club abbreviation already does the identifying.
+                        const shortSp = (n: string) => {
+                          const parts = n.trim().split(/\s+/);
+                          return parts.length < 2 ? n : `${parts[0][0]}. ${parts.slice(1).join(" ")}`;
+                        };
                         const sp = [
-                          g.awaySpName && `${g.awaySpName} (${g.awayAbbr})`,
-                          g.homeSpName && `${g.homeSpName} (${g.homeAbbr})`,
+                          g.awaySpName && `${shortSp(g.awaySpName)} (${g.awayAbbr})`,
+                          g.homeSpName && `${shortSp(g.homeSpName)} (${g.homeAbbr})`,
                         ].filter(Boolean).join(" / ");
                         return (
                           <div className={`pmrow pmrow--data${i >= GAME_CAP ? " hb-row--more" : ""}`}
                             role="row" key={k}>
+                            {/* Abbreviated, like every other MLB board. Full club names ran to
+                                376px of ink in a 318px column, so this cell wrapped and made its
+                                row 12px taller than its neighbours — the one uneven-row source
+                                left on the site. "CLE @ BAL" also matches the abbreviations the
+                                spread and pitcher columns beside it already use. */}
                             <span className="pmcell pmcell--player">
-                              {g.game}<span className="pmslot"> ({kickTime(g.commence)})</span>
+                              {g.awayAbbr} @ {g.homeAbbr}
+                              <span className="pmslot"> ({kickTime(g.commence)})</span>
                             </span>
                             <span className="pmcell pmcell--team">{sp || "not posted"}</span>
                             <span className="pmcell pmcell--mkt">
