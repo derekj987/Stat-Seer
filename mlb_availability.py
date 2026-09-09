@@ -107,6 +107,12 @@ def fetch_day(dstr):
                     "opp": g["teams"]["home" if side == "away" else "away"]["team"]["name"],
                     "commence": g.get("gameDate"),
                     "sp": pp.get("id"), "spName": pp.get("fullName"),
+                    # Ballpark. Only present on days fetched fresh — completed days are cached and
+                    # predate this field — which is fine: the BOARD only ever shows upcoming games,
+                    # and the park FACTOR is keyed on the home team (the park's identity) rather
+                    # than on this string, so history does not need it.
+                    "venue": (g.get("venue") or {}).get("name"),
+                    "homeTeam": g["teams"]["home"]["team"]["id"],
                     "lineup": [{"id": p["id"], "name": p["fullName"],
                                 "pos": (p.get("primaryPosition") or {}).get("abbreviation")}
                                for p in players],

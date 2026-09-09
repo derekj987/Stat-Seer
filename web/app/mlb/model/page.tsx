@@ -41,9 +41,20 @@ const LU_CAP = 9;
 const GAME_CAP = 4;
 
 const pct = (p: number) => `${Math.round(p * 100)}%`;
-/** A margin needs its sign shown even when positive — "+0.3" and "0.3" read differently when the
- *  column above is the market's number with the same convention. */
-const signed = (x: number) => `${x > 0 ? "+" : x < 0 ? "−" : ""}${Math.abs(x).toFixed(1)}`;
+/** A margin as a bettor reads it: how many runs, and WHO is getting them.
+ *
+ *  A bare "-1.3" was unreadable twice over. MLB posts no such number (the run line is a fixed
+ *  ±1.5; this is a margin derived from the moneyline), and nothing on the row said which club it
+ *  belonged to — so the reader could not tell a home favourite from an away one. The sign carried
+ *  the answer and the sign was invisible.
+ *
+ *  Our convention is home MINUS away, so POSITIVE = home favoured. The legend used to claim the
+ *  opposite ("-0.6 means the home club is favoured"), which contradicted every row on the board.
+ *  Naming the club removes the need to know the convention at all. */
+const spread = (x: number, homeAbbr: string, awayAbbr: string) => {
+  if (Math.abs(x) < 0.05) return "pick";
+  return `−${Math.abs(x).toFixed(1)} (${x > 0 ? homeAbbr : awayAbbr})`;
+};
 
 export default async function Page() {
   const { today: todayEt, tomorrow: tomorrowEt } = etToday();
@@ -94,15 +105,17 @@ export default async function Page() {
               be one click away, which is what the Tip is for. */}
           <p className="ctxsec__legend">
             <span className="lgnd lgnd--mkt">Market</span> spread and total, then{" "}
-            <span className="lgnd lgnd--model">ours</span>. Spreads are runs, home side:{" "}
-            <b>−0.6</b> = home favoured by 0.6.
+            <span className="lgnd lgnd--model">ours</span>. A spread reads{" "}
+            <b>−1.3 (TOR)</b> — Toronto favoured by 1.3 runs.
             <Tip label="About the MLB game model" text={<>
               <b>How it works.</b> Each side&apos;s offence against the other&apos;s defence,
               adjusted for the starting pitcher. Line-blind — it never sees the market columns.<br /><br />
               <b>Why runs, not a run line?</b> Baseball&apos;s run line is a fixed ±1.5 on every
               game, so it says nothing about who is favoured by how much. In baseball that lives in
               the moneyline, so we strip the vig off the two prices and convert the fair win
-              probability into runs.<br /><br />
+              probability into runs. <b>These are not posted lines</b> — you will not find −1.3 at a
+              sportsbook; it is the market&apos;s own price expressed in runs so it can sit beside
+              ours.<br /><br />
               <b>What it is worth.</b> Over {S.n} held-out games, <b>{S.gain}%</b> closer than
               assuming {S.meanTotal} runs every time. That is small because of the sport: one game
               averages {S.meanTotal} runs with an SD of <b>{S.sd}</b>. Team quality alone measured{" "}
@@ -164,9 +177,11 @@ export default async function Page() {
                             role="row" key={k}>
                             <span className="pmcell pmcell--player">{g.game}</span>
                             <span className="pmcell pmcell--team">{sp || "not posted"}</span>
-                            <span className="pmcell pmcell--mkt">{ms !== null ? signed(ms) : "—"}</span>
+                            <span className="pmcell pmcell--mkt">
+                              {ms !== null ? spread(ms, g.homeAbbr, g.awayAbbr) : "—"}
+                            </span>
                             <span className="pmcell pmcell--mkt">{mt !== null ? mt.toFixed(1) : "—"}</span>
-                            <span className="pmcell pmcell--proj">{signed(os)}</span>
+                            <span className="pmcell pmcell--proj">{spread(os, g.homeAbbr, g.awayAbbr)}</span>
                             <span className="pmcell pmcell--proj">{g.total.toFixed(1)}</span>
                           </div>
                         );

@@ -63,6 +63,7 @@ import json
 import os
 import statistics
 import sys
+import unicodedata
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
@@ -76,6 +77,7 @@ K_BAT, K_OPP = 500, 1000         # shrinkage, swept on the train split only
 # Swept on the TRAIN split only; see the table printed by --sweep-dispersion.
 DISPERSION = None
 LG_MIN_PA = 20000                # plate appearances before the running league rate is trusted
+PARK_K = 6000                    # plate appearances of shrinkage on a park's HR factor
 SEASON = 2026
 
 # Mean plate appearances by batting slot, measured on 37,433 slot-joined batter-games. This IS the
@@ -130,7 +132,10 @@ def batter_vs_pitcher(pairs, refresh=False):
             cache = json.load(open(CACHE_BVP, encoding="utf-8"))
         except Exception:
             cache = {}
-    todo = [t for t in pairs if f"{t[0]}-{t[1]}" not in cache]
+    # Entries cached before home runs were added are two-element; refetch those rather than
+    # silently reading a missing index as zero.
+    todo = [t for t in pairs
+            if len(cache.get(f"{t[0]}-{t[1]}") or []) < 3]
 
     def one(t):
         bat, sp = t
@@ -139,8 +144,9 @@ def batter_vs_pitcher(pairs, refresh=False):
         for blk in (j or {}).get("stats", []):
             for spl in blk.get("splits", []):
                 st = spl["stat"]
-                return (f"{bat}-{sp}", [st.get("atBats", 0), st.get("hits", 0)])
-        return (f"{bat}-{sp}", [0, 0])
+                return (f"{bat}-{sp}", [st.get("atBats", 0), st.get("hits", 0),
+                                        st.get("homeRuns", 0)])
+        return (f"{bat}-{sp}", [0, 0, 0])
     if todo:
         with ThreadPoolExecutor(max_workers=10) as ex:
             for k, v in ex.map(one, todo):
@@ -149,6 +155,52 @@ def batter_vs_pitcher(pairs, refresh=False):
         json.dump(cache, open(CACHE_BVP, "w", encoding="utf-8"))
     print(f"batter-vs-pitcher: {len(pairs)} pairs ({len(todo)} fetched, rest cached)")
     return cache
+
+
+def _bvp3(v):
+    """A cached batter-vs-pitcher record padded to [ab, hits, hr]."""
+    v = list(v or [])
+    return (v + [0, 0, 0])[:3]
+
+
+def park_hr_factors(logs, lineups):
+    """How much each ballpark helps or hurts home runs, MEASURED — not a borrowed table.
+
+    A naive factor (HR per PA hit at this park / league) is confounded by whoever plays there:
+    Coors would look generous partly because the Rockies bat there 81 times. So compare each club's
+    OWN rate at home against its own rate on the road, which holds the batters roughly constant:
+
+        factor = (home HR/PA) / (road HR/PA)
+
+    Shrunk toward 1.0 by PARK_K plate appearances, because one season of a single park is a thin
+    sample and an unshrunk 1.6 would read as authority it has not earned.
+    """
+    hr_pa = collections.defaultdict(lambda: [0, 0])          # (team, is_home) -> [hr, pa]
+    log_by = collections.defaultdict(dict)
+    for r in logs:
+        log_by[r["date"]][r["pid"]] = r
+    for g in lineups:
+        day = log_by.get(g["date"])
+        if not day:
+            continue
+        home = g.get("side") == "home"
+        for p in (g.get("lineup") or []):
+            r = day.get(p["id"])
+            if r:
+                cell = hr_pa[(g["team"], home)]
+                cell[0] += r["hr"]; cell[1] += r["pa"]
+    out = {}
+    for team in {t for (t, _h) in hr_pa}:
+        h_hr, h_pa = hr_pa.get((team, True), [0, 0])
+        a_hr, a_pa = hr_pa.get((team, False), [0, 0])
+        if h_pa < 500 or a_pa < 500 or a_hr == 0:
+            continue
+        raw = (h_hr / h_pa) / (a_hr / a_pa)
+        w = h_pa / (h_pa + PARK_K)                            # shrink toward neutral
+        out[team] = round(1 + w * (raw - 1), 3)
+    print(f"park HR factors measured for {len(out)} parks "
+          f"(min {min(out.values(), default=0):.2f}, max {max(out.values(), default=0):.2f})")
+    return out
 
 
 def slot_pa_dist(logs, slots):
@@ -328,6 +380,19 @@ def validate(logs, slots):
 
 
 
+def _et_day(iso):
+    """The EASTERN calendar day of a UTC timestamp — the day baseball calls the game, and the day
+    StatsAPI stamps on a game log. commence_time[:10] is the UTC day, which is already tomorrow for
+    a west-coast night game."""
+    if not iso:
+        return ""
+    try:
+        t = _dt.datetime.fromisoformat(iso.replace("Z", "+00:00"))
+    except ValueError:
+        return iso[:10]
+    return (t - _dt.timedelta(hours=4)).date().isoformat()   # EDT; the season is inside DST
+
+
 def grade_against_market(logs, slots, lineups):
     """Us vs the de-vigged book price, both scored on what ACTUALLY happened.
 
@@ -369,7 +434,13 @@ def grade_against_market(logs, slots, lineups):
         off += 1000
 
     imp = lambda a: (-a / (-a + 100)) if a < 0 else (100 / (a + 100))
-    nm = lambda x: "".join(c for c in (x or "").lower() if c.isalnum() or c == " ").strip()
+    # Strip ACCENTS before comparing. Books post "Yandy Diaz", StatsAPI says "Yandy Díaz", and a
+    # naive alphanumeric filter deletes the accented letter entirely ("yandy daz") rather than
+    # folding it — silently dropping every Latin-American name on the board.
+    def nm(x):
+        d = unicodedata.normalize("NFD", x or "")
+        d = "".join(c for c in d if unicodedata.category(c) != "Mn")
+        return "".join(c for c in d.lower() if c.isalnum() or c == " ").strip()
 
     best = {}
     for r in rows:
@@ -380,7 +451,7 @@ def grade_against_market(logs, slots, lineups):
         ct = r.get("commence_time") or ""
         if ct and r["snapshot_at"] > ct:
             continue                              # never grade a price taken after first pitch
-        k = (nm(r["player"]), r["book"], r["side"].lower(), ct[:10])
+        k = (nm(r["player"]), r["book"], r["side"].lower(), _et_day(ct))
         if k not in best or r["snapshot_at"] > best[k][0]:
             best[k] = (r["snapshot_at"], int(r["price_american"]))
 
@@ -398,7 +469,14 @@ def grade_against_market(logs, slots, lineups):
         xs.sort()
         book_prob[k] = xs[len(xs) // 2] if len(xs) % 2 else (xs[len(xs)//2-1] + xs[len(xs)//2]) / 2
 
-    name_of = {p["id"]: p.get("fullName") or "" for r in lineups for p in r["lineup"]}
+    # The lineup rows store the player's name under "name", not "fullName" — reading the wrong key
+    # gave every log an EMPTY name, so the join produced 0 matches out of 583 book keys and the
+    # grader reported "not enough data" for two days while the data was sitting right there. An
+    # empty join is a claim; assert it rather than trusting a zero (see the skill's parser rule).
+    name_of = {p["id"]: (p.get("name") or p.get("fullName") or "") for r in lineups for p in r["lineup"]}
+    if not any(name_of.values()):
+        print("WARNING: no player names resolved from lineups — join will match nothing",
+              file=sys.stderr)
     actual = {(r["date"], r["pid"]): (1 if r["h"] > 0 else 0) for r in logs}
     R = Rates(logs, "h")
     by_date = collections.defaultdict(list)
@@ -509,6 +587,11 @@ def main(argv=None):
             for pl in hist_[-1]["lineup"]:
                 pairs.add((pl["id"], osp))
     bvp = batter_vs_pitcher(sorted(pairs), refresh=args.refresh) if pairs else {}
+    # Ballpark: the FACTOR is keyed on the home club (a park's identity, present on every cached
+    # day); the display NAME comes off the upcoming slate, which is always fetched fresh.
+    parks = park_hr_factors(logs, lineups)
+    venue_of = {r["gamePk"]: r.get("venue") for r in lineups if r.get("venue")}
+    homeclub_of = {r["gamePk"]: r.get("homeTeam") for r in lineups if r.get("homeTeam")}
 
     rows = []
     for r in lineups:
@@ -545,8 +628,14 @@ def main(argv=None):
                 "hitRate": RH.rate(pid), "hrRate": RHR.rate(pid),
                 "pa": SLOT_PA.get(slot),
                 "oppSp": spname.get(osp_id),
-                "bvpAb": (bvp.get(f"{pid}-{osp_id}") or [0, 0])[0],
-                "bvpH": (bvp.get(f"{pid}-{osp_id}") or [0, 0])[1],
+                "park": venue_of.get(r["gamePk"]),
+                "parkHr": parks.get(homeclub_of.get(r["gamePk"])),
+                # PAD on read. The cache is shared across runs and older entries predate the
+                # home-run field, so indexing [2] blind raises IndexError for any pair the current
+                # slate did not refetch. Never assume a cached record's shape.
+                "bvpAb": _bvp3(bvp.get(f"{pid}-{osp_id}"))[0],
+                "bvpH": _bvp3(bvp.get(f"{pid}-{osp_id}"))[1],
+                "bvpHr": _bvp3(bvp.get(f"{pid}-{osp_id}"))[2],
             })
     rows.sort(key=lambda x: (x["commence"], x["gameKey"], -(x["pHit"] or 0)))
     header = (f"// AUTO-GENERATED by mlb_player_props.py -- do not edit by hand.\n"
@@ -560,7 +649,8 @@ def main(argv=None):
           "  opp: string; pos: string | null; pStart: number; slot: number; posted: boolean;\n"
           "  lineupPosted: boolean; pHit: number | null; pHr: number | null;\n"
           "  hitRate: number | null; hrRate: number | null; pa: number | null;\n"
-          "  oppSp: string | null; bvpAb: number; bvpH: number };\n\n"
+          "  oppSp: string | null; bvpAb: number; bvpH: number; bvpHr: number;\n"
+          "  park: string | null; parkHr: number | null };\n\n"
           f"export const MLB_PROPS: MlbProp[] = {json.dumps(rows, ensure_ascii=False)};\n"
           f"export const MLB_PROP_SCORES = {json.dumps(SCORES)};\n")
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
