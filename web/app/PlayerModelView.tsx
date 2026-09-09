@@ -187,11 +187,15 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
           </div>
         ) : (
           <>
-            {groupByGameDay(games, (g) => gameKick[g] ?? null, todayEt, tomorrowEt).map((grp) => (
+            {groupByGameDay(games, (g) => gameKick[g] ?? null, todayEt, tomorrowEt).map((grp, gi) => (
               <div key={grp.key}>
                 <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
-                {grp.items.map((g) => (
-              <details className="pmgame" key={g}>
+                {grp.items.map((g, i) => (
+              /* The FIRST card opens. Every card closed means nothing on the board reads without a
+                 click, which is what all-cards-collapsed flags — and the row caps inside each card
+                 are worthless if you have to open something to see them. Only the first: 16 open
+                 cards at ~19 rows each is a different wall. Same shape as /audit. */
+              <details className="pmgame" key={g} open={gi === 0 && i === 0}>
                 <summary className="pmgame__h">{shortGame(g)}<span className="pmgame__chev" aria-hidden="true">▾</span></summary>
                 <div className="pmgame__body">
                 <ScrollHint />

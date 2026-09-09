@@ -3241,8 +3241,15 @@ a.snav__dfeat{display:block}
    an already-abbreviated name still wrapped to two lines. The state word now shortens too
    (Florida St -> Fla St, see lib/ncaafAbbrev), and the column has room for what is left.
    The tables already scroll horizontally, so the extra width costs nothing but scroll. */
-.pmrow--data{display:grid;grid-template-columns:minmax(205px,1.6fr) 74px repeat(4,minmax(0,1fr)) 104px;gap:16px;
-  align-items:baseline;border-top:1px solid var(--line);font-size:13px}
+/* The four stat columns were repeat(4, minmax(0,1fr)) — EQUAL width, for alignment. Equal is the
+   wrong shape here: "64%" needs 43px while "▲ 44% 52/118 gm" needs 130, so the two rate columns
+   ellipsized (12 x chart-truncated-with-space) while the two percentage columns each sat on ~35px
+   of slack. Alignment across rows comes from every row sharing this template, not from the tracks
+   being the same size — so weight them by what they hold. Measured needs, sampled off the rendered
+   board: book 43 / ours 43 / career 130 / prior 95, headers 57 / 47 / 110 / 127. */
+.pmrow--data{display:grid;
+  grid-template-columns:minmax(175px,1.5fr) 84px 58px 56px minmax(122px,1.3fr) minmax(112px,1.2fr) 84px;
+  gap:16px;align-items:baseline;border-top:1px solid var(--line);font-size:13px}
 /* passing table adds Home % / Road % → six stat columns instead of four */
 .pmtable--ha{min-width:1145px;max-width:1300px}
 /* MLB availability board. Five columns instead of football's nine — baseball's Stage A answers
