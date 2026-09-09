@@ -266,11 +266,19 @@ is now `prose-above-board`: it sums the visible prose ABOVE the first board in e
 anything past ~420 characters, with the severity lowered when a Tip already exists (meaning the
 pattern is understood and the split is just incomplete).
 
-Two things that check had to get right, both found by running it:
+Three things that check had to get right, all found by running it:
 - **Exclude the Tip's own bubble text.** It lives inside the legend `<p>`, so `textContent` includes
   every word correctly moved into the scroll — it reported **1,661 characters** on a panel whose
   visible copy is one line. Clone the node and strip `.tip, .tip__bubble` before counting.
 - **Count characters, not paragraphs.** One long paragraph is the same wall as three short ones.
+- **Require a board to be present.** The name is the specification: prose *above a chart*. A
+  collapsible explainer whose entire content is prose — `/considerations`' "How we read weather &
+  scoring" — has nothing to bury, and its `<summary>` already IS the click a scroll would add.
+  Flagging it (655 characters) was the check overreaching, not a page defect. `if (!board) continue;`
+
+**That last one is the general shape of a bad check: it fires on the ABSENCE of the thing it is
+about.** When a new check reports something, confirm the page actually has the structure the check
+presupposes before changing the page — twice now the honest fix has been to the probe.
 
 **When you write a house rule, ask whether it can be a check instead.** Every rule in this file that
 became a probe check has stayed fixed; the ones that stayed prose have all been re-broken at least

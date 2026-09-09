@@ -714,6 +714,11 @@
   for (const body of document.querySelectorAll(".hb-body, .ctxsec, .pmcat")) {
     if (!vis(body)) continue;
     const board = body.querySelector('[role="table"], table, .pmscroll, .propstack, .daygrid');
+    // No board => not this bug. The check is "prose stacked ABOVE a chart"; a collapsible
+    // explainer whose entire content is prose (/considerations' "How we read weather & scoring")
+    // is the correct shape for prose, and its <summary> is already the same click a scroll would
+    // be. Counting it reported 655 characters against a panel that has nothing to bury.
+    if (!board) continue;
     let chars = 0, paras = 0;
     for (const p of body.querySelectorAll("p")) {
       if (!vis(p)) continue;
