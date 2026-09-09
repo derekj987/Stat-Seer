@@ -238,6 +238,42 @@ def current_teams(season):
     return dict(zip(d.gsis_id.astype(str), d.team.astype(str)))
 
 
+def roster_profiles(season):
+    """{norm(name): {name, team, pos, pid}} from THIS season's roster.
+
+    The fallback for a player the books price who has NO prior-season game log — which is every
+    ROOKIE. `prior_year_rates` is built from last season's stats, so a rookie simply is not in it,
+    and the emit loop below dropped him. The loop even counted them: "N unmatched (rookies/no
+    2025)". It was printed on every run and nobody read it.
+
+    Measured on the 2026 Week 1 slate: 136 of 552 priced players (25%) had no row, and the misses
+    included the FOUR SHORTEST anytime-TD prices on the whole slate — Mike Washington Jr. (-200),
+    MarShawn Lloyd (-143), Jonathon Brooks (-140) and Jadarian Price (-115), Seattle's starting
+    back with Zach Charbonnet out. A board that omits the market's clearest pick is not thin, it is
+    wrong.
+
+    Same rule as `current_teams` above, one step further: the roster is the authority on who is on
+    a team NOW, so it can answer "who is this?" for someone our history has never seen. Keyed on
+    the normalised name because the odds feed carries no gsis_id; the roster's own gsis_id rides
+    along so downstream joins stay on the stable id."""
+    path = f"data/roster_{season}.csv"
+    if not os.path.exists(path):
+        return {}
+    d = pd.read_csv(path, low_memory=False)
+    d = d[d.full_name.notna() & d.team.notna()]
+    if "status" in d.columns:                      # prefer the ACTive entry for a repeated name
+        d = d.sort_values("status", key=lambda s: (s != "ACT").astype(int))
+    out = {}
+    for _, r in d.iterrows():
+        k = norm(str(r["full_name"]))
+        if not k or k in out:
+            continue
+        out[k] = {"name": str(r["full_name"]), "team": str(r["team"]),
+                  "pos": str(r.get("position") or r.get("depth_chart_position") or ""),
+                  "pid": str(r["gsis_id"]) if pd.notna(r.get("gsis_id")) else None}
+    return out
+
+
 CAREER_STAT = {"pass_yds": "passing_yards", "rush_yds": "rushing_yards",
                "rec_yds": "receiving_yards", "receptions": "receptions",
                "pass_tds": "passing_tds"}
@@ -650,13 +686,35 @@ def main():
         teams = {team_norm(r["away_team"]), team_norm(r["home_team"])}
         meta[r["player_name"]] = (f'{r["away_team"]} @ {r["home_team"]}', r["commence_time"], teams)
 
-    out, matched, unmatched, offteam = [], 0, [], []
+    roster = roster_profiles(args.season)
+    out, matched, unmatched, offteam, norow = [], 0, [], [], 0
     for (player, market), ls in sorted(lines.items()):
         cat, key = MARKET_MAP[market]
         rate = rates.get(norm(player))
         game, commence, teams = meta[player]
         book = round(statistics.median(ls), 1)
         if not rate:
+            # No prior-season history — a rookie, or someone who did not play last year. He still
+            # gets a row: the EXISTENCE of a posted prop decides who appears (the market saying he
+            # matters), never its VALUE, so line-blindness is untouched. The projection is null and
+            # renders as a dash, exactly as a thin sample already does; what the reader gains is
+            # the player, his line and the fact that we have nothing on him — which is honest and
+            # is strictly better than silence.
+            prof = roster.get(norm(player))
+            if prof and team_norm(prof["team"]) in teams:
+                norow += 1
+                out.append({
+                    "game": game, "commence": commence, "player": prof["name"],
+                    "team": prof["team"], "pos": prof["pos"], "cat": cat, "market": key,
+                    "book": book, "proj": None, "g": 0,
+                    "cOver": 0, "cG": 0, "pOver": 0, "pG": 0,
+                    "hOver": 0, "hG": 0, "rOver": 0, "rG": 0,
+                    "env": None, "envDelta": None,
+                    "matchup": matchup_tag(defmap,
+                                           (teams - {team_norm(prof["team"])} or {None}).pop(),
+                                           prof["pos"]),
+                })
+                continue
             unmatched.append(player)
             continue
         # Data-hygiene guard: the source occasionally attaches an out-of-game player to an
@@ -693,8 +751,14 @@ def main():
         })
 
     out.sort(key=lambda r: (r["commence"], r["game"], r["cat"], -(r["proj"] or 0)))
-    print(f"matched {matched} player-markets; {len(set(unmatched))} unmatched (rookies/no 2025); "
+    print(f"matched {matched} player-markets; {norow} priced-but-no-history rows (rookies, "
+          f"projection dashed); {len(set(unmatched))} still unmatched (not on the current roster); "
           f"{len(set(offteam))} dropped as off-team (moved or bad source row)")
+    # A drop count is only useful if someone reads it. "unmatched (rookies/no 2025)" was printed
+    # on every run for weeks while 25% of priced players were missing from the board, so the
+    # counts that mean COVERAGE LOST now name the players instead of just counting them.
+    for x in sorted(set(unmatched))[:20]:
+        print("   no row:", x)
     for x in sorted(set(offteam))[:20]:
         print("   off-team:", x)
 
@@ -702,7 +766,7 @@ def main():
     ts += "// Prior-season (%d) baseline projections: volume x position efficiency. PRESEASON —\n" % prior
     ts += "// not graded against closing lines yet.\n"
     ts += "export interface PlayerProj { game: string; commence: string; player: string; team: string;\n"
-    ts += "  pos: string; cat: string; market: string; book: number | null; proj: number; g: number;\n"
+    ts += "  pos: string; cat: string; market: string; book: number | null; proj: number | null; g: number;\n"
     ts += "  cOver: number; cG: number; pOver: number; pG: number;\n"
     ts += "  hOver: number; hG: number; rOver: number; rG: number;\n"
     ts += "  env?: number | null; envDelta?: number | null;\n"

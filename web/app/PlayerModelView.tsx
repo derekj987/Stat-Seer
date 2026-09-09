@@ -6,7 +6,8 @@
 import { Brand, FlowSteps, ModelSubnav, ScrollHint, WeekBadge } from "./Nav";
 import { WeekNav } from "./WeekNav";
 import Tip from "./Tip";
-import { PLAYER_PROJECTIONS, PROJ_WEEK, PROJ_PRIOR, type PlayerProj } from "@/lib/playerProjections";
+import { PLAYER_PROJECTIONS, PROJ_WEEK, PROJ_PRIOR, PROJ_SEASON, type PlayerProj } from "@/lib/playerProjections";
+import { weekInjuries, injuryKey, SUPPRESSES, type InjuryNote } from "@/lib/nflInactives";
 import { NCAAF_PLAYER_PROJECTIONS, NCAAF_PROJ_WEEK } from "@/lib/ncaafPlayerProjections";
 import { isRealistic } from "@/lib/depthChart";
 import { projLean, leanCentres, hasProjSample, MIN_PROJ_GAMES } from "@/lib/projLean";
@@ -78,6 +79,11 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
   } catch { /* no market yet — chips fall back to consensus pricing */ }
   const priceFor = (player: string, mkt: string, side: string): PricedSide | null =>
     priceIx.get(`${normName(player)}|player_${mkt}|${side}`) ?? null;
+
+  // Live availability, on the same 120s window as the prices above, so a row's designation and its
+  // book line are never more than two minutes out of step. NFL only: the NCAAF side has no
+  // equivalent feed. Never fatal — an empty map just means no tags.
+  const injuries = base === "ncaaf" ? new Map<string, InjuryNote>() : await weekInjuries(PROJ_SEASON, week);
   const home = base === "ncaaf" ? "/ncaaf/model/players" : "/model/players";
   const catHref = (c: string) => `${home}?cat=${c}&week=${week}`;
 
@@ -93,8 +99,20 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
   // NCAAF_PROJ_WEEK so the two sides agree on which week the rows describe.
   const projWeek = base === "ncaaf" ? NCAAF_PROJ_WEEK : PROJ_WEEK;
   const onProjWeek = week === projWeek;
+  // A player ruled OUT / IR / suspended is dropped from the board entirely — Derek's call: "if a
+  // player is injured and out for the game, we do not even need to list them." Only the
+  // not-playing designations remove a row; QUESTIONABLE and DOUBTFUL are game-time decisions, so
+  // those players stay and carry a tag instead.
+  // Trade-off worth knowing: a removed row is invisible, so if a designation is reversed the
+  // player silently returns rather than visibly changing. That is why the feed is read live on a
+  // 120s cache instead of baked at build time — a reversal shows up within two minutes.
+  const isOut = (p: PlayerProj): boolean => {
+    const n = injuries.get(injuryKey(p.player, p.team));
+    return !!n && SUPPRESSES.has(n.status);
+  };
   const rows: PlayerProj[] = onProjWeek
-    ? projections.filter((p) => p.cat === active.key && (base === "nfl" ? isRealistic(p.player) : true))
+    ? projections.filter((p) => p.cat === active.key
+        && (base === "nfl" ? isRealistic(p.player) && !isOut(p) : true))
     : [];
   const games: string[] = [];
   const byGame: Record<string, PlayerProj[]> = {};
@@ -259,6 +277,11 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                         // a thin number themselves rather than be shown nothing.
                         // The lean stays gated: it IS a claim, and projLean already shrinks a thin
                         // rate toward the category baseline, so the two guards work together.
+                        // Availability. Anyone ruled out has already been filtered off the board
+                        // above, so what survives here is a game-time decision — Questionable or
+                        // Doubtful. Those keep their projection (they may well play) and carry a
+                        // tag so the reader can price the risk themselves.
+                        const inj = injuries.get(injuryKey(r.player, r.team)) ?? null;
                         const enough = hasProjSample(r);
                         const lean = enough ? projLean(r, centres) : null;
                         // A continuation row (same player as the row above, e.g. a QB's TD line
@@ -271,6 +294,15 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                         return (
                           <div className={`pmrow pmrow--data${isMore ? " hb-row--more" : ""}${cont ? " pmrow--cont" : ""}`} role="row" key={`${r.player}-${r.market}`}>
                             <span className="pmcell pmcell--player">{cont ? "" : <>{r.player}<span className="pmslot"> ({[slot, shortTeam(r.team)].filter(Boolean).join(", ")})</span>
+                              {/* The designation, read live from ESPN on the same 120s window as the
+                                  book line beside it. Red for anyone not dressing, amber for a
+                                  game-time decision — a bettor needs those to look different. */}
+                              {inj && (
+                                <span className="pminj pminj--iffy"
+                                  title={`${r.player} is listed ${inj.label.toLowerCase()}${inj.detail ? ` — ${inj.detail.toLowerCase()}` : ""}. Read live from the league's injury report, refreshed every 2 minutes.`}>
+                                  {inj.label}{inj.detail ? ` · ${inj.detail}` : ""}
+                                </span>
+                              )}
                               {/* Matchup, not "spot". The old pill was built on envDelta — the change
                                   in a team's implied total vs the player's prior-season norm — which
                                   measured corr +0.0053 against how much a player beat his OWN
@@ -305,10 +337,15 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                                 contradicted the figure beside it (proj 193.2 vs a 180.5 line, arrow
                                 down). It now lives on the % over column it is actually computed from. */}
                             <span className={`pmcell pmcell--num pmcell--proj${enough ? "" : " pmcell--thin"}`}
-                              title={enough
+                              title={r.proj === null
+                                ? `No projection: ${r.player} has no prior-season NFL history, so there is nothing to build one from. He is on the board because a sportsbook priced him — that is the market saying he matters, and omitting him was worse than showing you an honest blank.`
+                                : enough
                                 ? `Our line-blind projection: ${r.player}'s expected ${propLabel(r.market).toLowerCase()}, an AVERAGE. Averages sit above the middle on these markets, so this can read higher than the book's line even when he clears that line less than half the time — the % over columns are what say how often he actually gets there.`
                                 : `Our line-blind projection, built on only ${r.g} game${r.g === 1 ? "" : "s"} of ${r.player}'s own history — read it as a thin one. We publish it rather than hide it, and we hold back the over/under lean until ${MIN_PROJ_GAMES} games, because a lean is a claim and a projection is a measurement.`}>
-                              {r.proj}{unitFor(r.market)}
+                              {/* A rookie has a posted line and no history. Dashing the projection
+                                  says so; dropping the row said nothing, and hid the market's
+                                  shortest price on the slate. */}
+                              {r.proj === null ? "—" : <>{r.proj}{unitFor(r.market)}</>}
                             </span>
                             {/* The lean sits HERE, on the number it is derived from, so the arrow, the
                                 colour and the figure are one statement instead of three. */}

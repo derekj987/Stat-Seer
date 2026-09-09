@@ -610,6 +610,58 @@ Generalise: whenever a scraped reference list decides *who gets shown*, measure 
 authoritative source has that the list lacks. A roster, a schedule, a team list — any of them can
 silently truncate a board.
 
+**🚨 The NFL board had the identical bug from a different gate: PRIOR-SEASON HISTORY.** Derek:
+*"I'm not seeing Jadarian Price... he is Seattle's starting running back and the sportsbooks have
+him as the highest odds to score."* `player_proj_export` builds `rates` from last season's stats
+and then:
+
+```python
+rate = rates.get(norm(player))
+if not rate:
+    unmatched.append(player); continue      # printed as "N unmatched (rookies/no 2025)"
+```
+
+**A rookie has no prior season, so he cannot have a row** — however short the market prices him.
+Measured on the 2026 Week 1 slate: **136 of 552 priced players (25%) had no row**, and the misses
+included the **four shortest anytime-TD prices on the entire slate** — Mike Washington Jr. (−200),
+MarShawn Lloyd (−143), Jonathon Brooks (−140) and Jadarian Price (−115), Seattle's starter with
+Charbonnet out. Fixed by falling back to the CURRENT ROSTER for team and position (it has every
+rookie: Price, SEA, RB, ACT) and emitting the row with a null projection. Rows 876 → 998.
+
+**The damning part: the count was printed on every single run and nobody read it.** Same shape as
+`offteam` being "appended to a list nobody read". A drop counter is not a safeguard unless
+something *reads* it, so these now name the players, not just tally them. The general rule:
+**a log line is not a check.** If a number means coverage lost, assert on it or surface it.
+
+And note this is the third distinct gate to cause the same bug — a scraped depth chart (NCAAF), a
+stale team join (both sports), and now prior-season history (NFL). **Whatever decides who appears
+on a prop board, reconcile it against who the market prices**, every audit:
+```python
+missing = {nm(r["player_name"]) for r in prop_snapshots} - {nm(p["player"]) for p in board}
+# then rank the misses by their SHORTEST price — the market tells you which omissions matter
+```
+Rank by price, not by count: 136 missing sounds like a data gap, "the four shortest prices on the
+slate are missing" is unmistakably a bug.
+
+**It is a script now, not a rule: `analysis/board_coverage.py`.** Every rule in this file that
+became runnable has stayed fixed; the ones that stayed prose have all been re-broken.
+```bash
+python analysis/board_coverage.py --season 2026 --week 1                  # report
+python analysis/board_coverage.py --season 2026 --week 1 --max-missing 40  # gate
+```
+Measured before/after on 2026 Week 1: **25% missing → 7%**. And mind the filter that excludes team
+defences — written as `"d/st"` it matched nothing, because it is applied AFTER `norm()` strips the
+slash, so twenty D/ST entries sat in the results looking like real misses. Same false-zero shape as
+every other parser in this file: **a filter that matches nothing is indistinguishable from a filter
+that had nothing to match.**
+
+The residual 7% is a different bug with a different fix: players the books price in a game their
+roster team is not in (Khalil Herbert priced in SF @ LA while the roster has him on NYJ). Refreshing
+the roster file did not move it, so these are genuine market-vs-roster disagreements — and per the
+rule above, **the market is right about who is playing in which game**. Closing that gap means
+trusting the priced game over the roster team, which is coverage information, not price information,
+so it stays line-blind. Not yet done.
+
 ### 🚨 A paged read that stops at the cap looks EXACTLY like a complete one
 The single highest-yield check in this file. **PostgREST caps every response at 1000 rows and does
 not tell you.** `&limit=5000` does not raise the ceiling — it returns 1000 and looks finished. A
@@ -699,6 +751,50 @@ mismatches = [r for r in rows if depth.get(nkey(r["player"]), {}).get("team") no
 Watch the parser: `ncaafDepth.ts` is double-quoted JSON, `depthChart.ts` is single-quoted TS object
 literal. A regex written for one silently matches **nothing** in the other and reports a clean zero
 — which is a false pass, not a pass. Assert the entry count before trusting the result.
+
+### 🚨 A board must say who is NOT PLAYING, and it must say it live
+Derek, on the Week 1 board: *"I believe Henderson or Stevenson is out tonight. Bettors rely on
+fresh data."* TreVeyon Henderson had been ruled **Out (ankle)** at Wednesday's practice, and the
+board was publishing a 37.5-yard rushing projection and a 48% career-over for him.
+
+**We already held the fact.** `ingest/injuries_nflverse.py` had written `game_status: OUT` into
+`practice_reports` hours earlier. It fed the game model's team adjustment (`injury_adj`) and
+nothing else — nobody had ever joined it to the PLAYER board. Before assuming a data feed is
+missing, grep for it: the gap is often a join, not a source.
+
+**Check what is actually stale before optimising the wrong thing.** The instinct was "the page is
+stale, run the workflow more often". Measured, the board's BOOK LINE was already live —
+`PlayerModelView` calls `weekProps(week)` with `next: { revalidate: 120 }`. The projection is
+build-time and *should* be: it is a prior-season baseline that does not move intraday. Only
+availability was missing, and re-running the projections workflow hourly would have cost a commit
+plus a full redeploy each time and **still shown Henderson**.
+
+**Three rules the fix encodes:**
+- **A player ruled OUT comes OFF the board.** Derek's call — *"if a player is injured and out for
+  the game, we do not even need to list them."* I had argued for keeping the row with the
+  projection dashed, on the grounds that a bettor should SEE he is out; Derek decided otherwise and
+  that is the behaviour. Only the not-playing designations (Out / IR / suspended) remove a row —
+  QUESTIONABLE and DOUBTFUL are game-time decisions, so those players stay, keep their projection
+  and carry a tag. The trade-off to remember: a removed row is invisible, so a reversed designation
+  makes a player silently reappear rather than visibly change. That is an argument for reading the
+  feed LIVE (a reversal shows within 120s), not for baking it at build time.
+- **Two sources, and the verifiable one leads.** `practice_reports` (ours) carries the Wed-Fri
+  designations; ESPN's per-game block carries game-day movement and the T-90 INACTIVES, which the
+  practice feed does not have at all. ESPN layers on top so a game-day change beats Wednesday.
+- **A cron cannot serve a T-90 list.** Actions' finest useful cadence is ~5 min and scheduled runs
+  routinely start 5-15 minutes late, so a T-90 sweep lands at T-70. A request-time read on a 120s
+  cache is strictly fresher — and needs no table, no migration and no SQL anyone has to remember
+  to run.
+
+Watch the day-of-week field on any capture cron. `capture-practice.yml` ran `3,4,5,6` — Wed-Sat —
+which covered the days the report is WRITTEN and stopped exactly before the days games are PLAYED.
+
+**⚠️ ESPN 403s every request from some networks, including a local dev server.** A local probe had
+it refuse every request carrying any `User-Agent` (and undici cannot omit one), while `cfbScores.ts`
+has served live NCAAF scores from production for months using `User-Agent: Mozilla/5.0`. That is
+egress fingerprinting, not ESPN policy. **When a local probe contradicts code that demonstrably
+works in production, trust production** — but do not let an unverifiable source be the only one, which
+is the second reason our own table leads.
 
 ### 🚨 Never join a player to LAST season's team
 `player_proj_export` took each player's team from his most recent game log — i.e. the team he played

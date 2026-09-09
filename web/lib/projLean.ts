@@ -81,7 +81,7 @@ export function leanCentres(rows: PlayerProj[]): Map<string, number> {
  *  comparison is already like-for-like — and it measures healthy (36% over in BOTH sports), which is
  *  the control showing the bias was distributional and not general miscalibration. */
 export function projLean(r: PlayerProj, centres: Map<string, number>): Lean {
-  if (r.book === null) return null;
+  if (r.book === null || r.proj === null) return null;   // priced, but no history to lean on
   if (r.cat === "td") return r.proj >= r.book ? "over" : "under";
   const v = rateOf(r);
   if (v === null) return null;                        // no history at this line — no opinion

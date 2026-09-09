@@ -35,7 +35,7 @@ const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(
 function tdModelMap(): Map<string, number> {
   const m = new Map<string, number>();
   for (const r of PLAYER_PROJECTIONS) {
-    if (r.market === "anytime_td") m.set(normName(r.player), r.proj);
+    if (r.market === "anytime_td" && r.proj !== null) m.set(normName(r.player), r.proj);
   }
   return m;
 }

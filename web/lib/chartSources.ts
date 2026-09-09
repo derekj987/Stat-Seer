@@ -170,9 +170,12 @@ export async function buildChart(spec: ChartSpec): Promise<ChartData> {
       ({ rec_yds: "rec yds", receptions: "receptions", rush_yds: "rush yds", pass_yds: "pass yds", pass_tds: "pass TDs" } as Record<string, string>)[m] ?? m;
     let list = proj
       .filter((p) => p.market !== "anytime_td")   // TD is a Yes/No % prop, not an over/under line
+      // A priced rookie carries no projection, so there is no edge-vs-line to chart. He belongs on
+      // the board (the market priced him) but not in a ranking OF projections.
+      .filter((p) => p.proj !== null)
       .filter(mk)
-      .map((p) => ({ player: p.player, team: p.team, market: p.market, book: p.book, proj: p.proj,
-        diff: p.book !== null ? p.proj - p.book : null }));
+      .map((p) => ({ player: p.player, team: p.team, market: p.market, book: p.book, proj: p.proj as number,
+        diff: p.book !== null ? (p.proj as number) - p.book : null }));
     if (spec.direction === "over" || spec.direction === "under") {
       const over = spec.direction === "over";
       list = list.filter((p) => p.diff !== null && (over ? p.diff > 0 : p.diff < 0))

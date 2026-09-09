@@ -3420,6 +3420,15 @@ a.snav__dfeat{display:block}
 .pmmatch--good{color:#0a7d3c;background:color-mix(in srgb,#0a7d3c 13%,transparent)}
 .pmmatch--bad{color:#b04521;background:color-mix(in srgb,#b04521 13%,transparent)}
 .pmmatch--toss{color:var(--muted);background:color-mix(in srgb,var(--muted) 12%,transparent)}
+/* Live injury designation. Same pill geometry as the matchup tag beside it, but louder: this one
+   changes whether the bet is live at all, so it carries a border the matchup tag does not.
+   Red = not dressing (projection withheld); amber = game-time decision (projection still shown). */
+.pminj{display:inline-block;margin-left:6px;font-size:10px;font-weight:800;letter-spacing:.02em;
+  padding:1px 6px;border-radius:6px;vertical-align:middle;cursor:help;white-space:nowrap}
+.pminj--out{color:#b0202a;background:color-mix(in srgb,#b0202a 13%,transparent);
+  border:1px solid color-mix(in srgb,#b0202a 38%,transparent)}
+.pminj--iffy{color:#a4680b;background:color-mix(in srgb,#a4680b 13%,transparent);
+  border:1px solid color-mix(in srgb,#a4680b 32%,transparent)}
 .pmempty--solo{border:1px solid var(--line);border-radius:12px;background:var(--surface)}
 .pmrow--head.pmrow--data{border-bottom:0;font-size:11px}
 /* header labels are longer than the data — let them wrap inside the equal columns so the

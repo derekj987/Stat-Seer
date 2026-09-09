@@ -10,11 +10,24 @@ name: Capture practice reports
 # Two polls a day catch nflverse's refresh whenever it lands: 23:00 UTC (~6-7pm ET,
 # same-day afternoon report) and 13:00 UTC (~8-9am ET, overnight refresh). Both UTC
 # hours share the calendar day with ET, so the day tag is correct.
+#
+# Runs EVERY day, not Wed-Sat. The old `3,4,5,6` covered the days the practice report
+# is written and stopped exactly before the days it matters: NFL games are played
+# Sun/Mon/Thu, and a designation can change on the morning of the game. Derek found
+# this the direct way — TreVeyon Henderson was ruled out for a Wednesday-night game
+# and the board was still publishing a projection for him.
+#
+# What this does NOT cover, and it is worth being precise: the official INACTIVES
+# list drops 90 minutes before kickoff and is not in the nflverse practice feed at
+# all. That gap is closed on the READ side instead — web/lib/nflInactives.ts layers
+# ESPN's live per-game designations over these rows at request time, on a 120s cache,
+# which is fresher than any cron can be (Actions schedules routinely start 5-15
+# minutes late, so a T-90 sweep can land at T-70).
 # All times UTC.
 
 on:
   schedule:
-    - cron: "0 13,23 * 9-12,1 3,4,5,6"   # Wed/Thu/Fri/Sat, Sep-Jan
+    - cron: "0 13,23 * 9-12,1 *"   # twice daily, EVERY day, Sep-Jan
   workflow_dispatch: {}                   # manual "Run workflow" for testing
 
 concurrency:

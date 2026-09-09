@@ -232,7 +232,8 @@ function PlayerSnapshot({ base }: { base: Sport }) {
     // market so the book value is comparable within it.
     const MIN_BOOK: Record<string, number> = { rush_yds: 40, rec_yds: 40, receptions: 3, pass_yds: 200, pass_tds: 1 };
     const PASS_MKTS = new Set(["pass_yds", "pass_tds"]);
-    const gap = (r: PlayerProj) => r.book === null ? 0 : Math.abs(r.proj / r.book - 1);
+    // A rookie has a posted line and no projection, so there is no gap to rank him by.
+    const gap = (r: PlayerProj) => (r.book === null || r.proj === null) ? 0 : Math.abs(r.proj / r.book - 1);
     const best = new Map<string, PlayerProj>();
     for (const r of PLAYER_PROJECTIONS) {
       if (!(r.market in MIN_BOOK)) continue; // skips anytime_td + anything unlisted
@@ -268,7 +269,7 @@ function PlayerSnapshot({ base }: { base: Sport }) {
   }
   const psnapRow = (r: PlayerProj, i: number) => {
     const unit = PROP_UNIT[r.market] ?? "";
-    const over = r.book === null || r.proj >= r.book;
+    const over = r.book === null || r.proj === null || r.proj >= r.book;
     return (
       <tr key={`${r.player}-${r.market}`} className={i >= 3 ? "hb-row--more" : undefined}>
         <td className="hb-l"><a className="hb-plrlink" href={href}>{r.player}</a> <span className="hb-plrpos">{depthTag(r.player, r.pos)}</span></td>
