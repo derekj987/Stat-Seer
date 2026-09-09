@@ -73,6 +73,16 @@ jobs:
       - name: Rebuild MLB player props
         run: python mlb_player_props.py
 
+      # Scores OUR probabilities and the BOOK's de-vigged price against what actually happened, and
+      # prints the comparison into the run log. Advisory: it must never fail the job, and it stays
+      # silent about a verdict until enough completed games exist to reach one.
+      - name: Grade hit props against the market (advisory)
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python mlb_player_props.py --grade
+
       - name: Commit if changed
         env:
           FILES: >-

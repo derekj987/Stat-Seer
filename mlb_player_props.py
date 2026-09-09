@@ -30,6 +30,19 @@ from an out is mostly where the ball lands, and that does not carry between game
 result, arriving on schedule. For scale, the availability model on the same data is +29.7% and
 pitcher strikeouts is +3.1%.
 
+WHY THE BOARD LEANS OVER THE BOOK, and what has been ruled out. Derek: "our hit % is still too
+high — there are no model percentages lower than the market's." Four candidates, measured:
+
+    Jensen's inequality (mean PA into a concave function)   REAL, fixed: bias 2.1pp -> 1.4pp
+    within-game correlation (Beta-Binomial, DISPERSION)     NO: train picks independent trials
+    league rate computed with a look-ahead leak             REAL leak, fixed, but bias unchanged
+    the market's 6.8% hold, stripped by the de-vig          the rest of the gap, and not our bug
+
+What is left is a PERIOD difference, not a model-shape one: bias is +0.24pp on the train split and
++1.43pp on the test split. Run `--grade` for the only test that settles it — our number and the
+book's de-vigged price, both scored against what actually happened. It stays silent until enough
+completed games exist, which is honest rather than unhelpful: capture began 2026-09-07.
+
 They are published anyway because they are WELL CALIBRATED -- predicted 50-59% comes in at 53.7%,
 60-69% at 62.9%, 70-79% at 70.6%. A calibrated probability is a fair number to price a book line
 against; that is the Pick Auditor idea, arithmetic rather than prediction. It is NOT an edge claim
@@ -59,6 +72,10 @@ API = "https://statsapi.mlb.com/api/v1"
 CACHE = os.path.join("data", "mlb_batter_logs.json")
 MIN_PA = 40                      # a batter needs this much history before he is projected
 K_BAT, K_OPP = 500, 1000         # shrinkage, swept on the train split only
+# Beta concentration for the within-game correlation in _p_none. None = independent trials.
+# Swept on the TRAIN split only; see the table printed by --sweep-dispersion.
+DISPERSION = None
+LG_MIN_PA = 20000                # plate appearances before the running league rate is trusted
 SEASON = 2026
 
 # Mean plate appearances by batting slot, measured on 37,433 slot-joined batter-games. This IS the
@@ -196,17 +213,66 @@ def batter_logs(ids, season=SEASON, refresh=False):
     return rows
 
 
+def _p_none(rate, n):
+    """P(zero successes in n plate appearances) for a batter whose LONG-RUN rate is `rate`.
+
+    Independent trials give (1-rate)^n. That is the wrong model and it is why the board ran high:
+    four trips against ONE starting pitcher on ONE night, in one park, in one weather, are
+    positively correlated, and positive correlation makes a blank night MORE likely than
+    independence says. Measured on held-out games, the independent version predicted 0.620 against
+    a realized 0.606.
+
+    So the night's rate is a draw, not a constant: Q ~ Beta with mean `rate` and concentration
+    DISPERSION, giving P(0) = prod_{i<n} (b+i)/(M+i) with b = M(1-rate). One parameter, swept on
+    the train split, and it degrades to the independent formula as DISPERSION -> infinity, so the
+    old behaviour is the limit rather than a special case.
+    """
+    n = int(round(n))
+    if n <= 0:
+        return 1.0
+    if DISPERSION is None:                      # independent trials (the pre-fix model)
+        return (1 - rate) ** n
+    M = DISPERSION
+    b = M * (1 - rate)
+    out = 1.0
+    for i in range(n):
+        out *= (b + i) / (M + i)
+    return out
+
+
 class Rates:
     """Season-to-date per-PA rates for batters and for opposing pitching staffs. Advanced game by
     game during validation; run to completion for tonight's projections."""
 
     def __init__(self, logs, stat):
         self.stat = stat
-        self.lg = sum(r[stat] for r in logs) / sum(r["pa"] for r in logs)
+        # 🚨 The league rate must be CAUSAL. It used to be sum(stat)/sum(pa) over the WHOLE log --
+        # held-out games included -- and fixed at construction, so every projection was anchored to
+        # a league rate computed partly from games it was about to predict, and the anchor could
+        # never move as the season's run environment did.
+        #
+        # The damage was invisible in the headline Brier and obvious in the split: the model was
+        # calibrated on TRAIN (+0.24pp) and ran +1.43pp high on TEST. That is not a wrong model
+        # shape, it is a stale level -- the later part of the season hits at a lower rate than the
+        # full-season average the anchor was pinned to. Exactly the leak already fixed in
+        # mlb_game_model.State; the sibling was never checked.
+        self._prior = (sum(r[stat] for r in logs[:2000])
+                       / max(1, sum(r["pa"] for r in logs[:2000]))) if logs else 0.0
+        self._s = 0
+        self._pa = 0
         self.bs = collections.defaultdict(int); self.bpa = collections.defaultdict(int)
         self.os_ = collections.defaultdict(int); self.opa = collections.defaultdict(int)
 
+    @property
+    def lg(self):
+        """League rate over games ALREADY SEEN. Falls back to an opening prior until enough
+        plate appearances have accumulated for the running figure to mean anything."""
+        if self._pa < LG_MIN_PA:
+            return self._prior
+        return self._s / self._pa
+
     def add(self, r):
+        self._s += r[self.stat]; self._pa += r["pa"]
         self.bs[r["pid"]] += r[self.stat]; self.bpa[r["pid"]] += r["pa"]
         self.os_[r["opp"]] += r[self.stat]; self.opa[r["opp"]] += r["pa"]
 
@@ -217,12 +283,10 @@ class Rates:
             return None
         p = (self.bs[pid] + K_BAT * self.lg) / (self.bpa[pid] + K_BAT)
         of = ((self.os_[opp] + K_OPP * self.lg) / (self.opa[opp] + K_OPP)) / self.lg
-        q = 1 - min(0.95, p * of)
+        rate = min(0.95, p * of)
         # Average the probability over the PA distribution, never evaluate it at the mean PA.
-        dist = SLOT_PA_DIST.get(slot)
-        if not dist:
-            return round(1 - q ** SLOT_PA[slot], 4)
-        return round(sum(w * (1 - q ** k) for k, w in dist), 4)
+        dist = SLOT_PA_DIST.get(slot) or [(SLOT_PA[slot], 1.0)]
+        return round(sum(w * (1 - _p_none(rate, k)) for k, w in dist), 4)
 
     def rate(self, pid):
         return round(self.bs[pid] / self.bpa[pid], 4) if self.bpa[pid] else None
@@ -263,10 +327,122 @@ def validate(logs, slots):
                       f"{statistics.mean(x['y'] for x in b):.3f}  n={len(b):,}")
 
 
+
+def grade_against_market(logs, slots, lineups):
+    """Us vs the de-vigged book price, both scored on what ACTUALLY happened.
+
+    This is the only test that settles "our % is always above the market's". Everything else is an
+    argument: the board can lean over the book for two very different reasons — our number being
+    high, or the book's fair price being low once a 6.8% hold is stripped out — and the mean
+    predicted against the mean realized tells you which.
+
+    Needs captured prices for games that have FINISHED, so it returns nothing until the first
+    graded day exists. It prints the count either way rather than implying a verdict it cannot
+    reach: MLB price capture began 2026-09-07.
+    """
+    url, key = os.environ.get("SUPABASE_URL"), os.environ.get("SUPABASE_SERVICE_KEY")
+    if not url or not key:
+        for line in open(".env", encoding="utf-8") if os.path.exists(".env") else []:
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                k, v = line.split("=", 1)
+                if k.strip() == "SUPABASE_URL":
+                    url = v.strip().strip('"').strip("'")
+                if k.strip() == "SUPABASE_SERVICE_KEY":
+                    key = v.strip().strip('"').strip("'")
+    if not url or not key:
+        print("no Supabase credentials — cannot grade", file=sys.stderr)
+        return
+
+    rows, off = [], 0
+    while True:                                   # PAGED: limit= does not raise the 1000 cap
+        req = urllib.request.Request(
+            f"{url.rstrip('/')}/rest/v1/mlb_prop_snapshots?market=eq.batter_hits"
+            "&select=player,side,line,price_american,book,snapshot_at,commence_time"
+            "&order=snapshot_at.desc",
+            headers={"apikey": key, "Authorization": f"Bearer {key}",
+                     "Range-Unit": "items", "Range": f"{off}-{off+999}"})
+        page = json.load(urllib.request.urlopen(req))
+        rows += page
+        if len(page) < 1000:
+            break
+        off += 1000
+
+    imp = lambda a: (-a / (-a + 100)) if a < 0 else (100 / (a + 100))
+    nm = lambda x: "".join(c for c in (x or "").lower() if c.isalnum() or c == " ").strip()
+
+    best = {}
+    for r in rows:
+        if r.get("line") is None or float(r["line"]) != 0.5:
+            continue                              # 1.5 is a different question entirely
+        if not r.get("player") or r.get("price_american") is None or not r.get("side"):
+            continue
+        ct = r.get("commence_time") or ""
+        if ct and r["snapshot_at"] > ct:
+            continue                              # never grade a price taken after first pitch
+        k = (nm(r["player"]), r["book"], r["side"].lower(), ct[:10])
+        if k not in best or r["snapshot_at"] > best[k][0]:
+            best[k] = (r["snapshot_at"], int(r["price_american"]))
+
+    byday = collections.defaultdict(list)
+    for (pl, book, side, day), (_ts, price) in best.items():
+        if side not in ("over", "yes"):
+            continue
+        u = best.get((pl, book, "under", day)) or best.get((pl, book, "no", day))
+        if u is None:
+            continue                              # one-sided: not a fair price, so not graded
+        o, un = imp(price), imp(u[1])
+        byday[(pl, day)].append(o / (o + un))
+    book_prob = {}
+    for k, xs in byday.items():
+        xs.sort()
+        book_prob[k] = xs[len(xs) // 2] if len(xs) % 2 else (xs[len(xs)//2-1] + xs[len(xs)//2]) / 2
+
+    name_of = {p["id"]: p.get("fullName") or "" for r in lineups for p in r["lineup"]}
+    actual = {(r["date"], r["pid"]): (1 if r["h"] > 0 else 0) for r in logs}
+    R = Rates(logs, "h")
+    by_date = collections.defaultdict(list)
+    for r in logs:
+        by_date[r["date"]].append(r)
+
+    graded = []
+    for date in sorted(by_date):
+        for r in by_date[date]:                   # score BEFORE advancing: same information the board had
+            k = (nm(name_of.get(r["pid"], "")), date)
+            if k in book_prob:
+                slot = slots.get((date, r["pid"]))
+                p = R.prob(r["pid"], r["opp"], slot) if slot else None
+                if p is not None:
+                    graded.append({"ours": p, "book": book_prob[k],
+                                   "y": actual.get((date, r["pid"]), 0)})
+        for r in by_date[date]:
+            R.add(r)
+
+    print(f"\n{len(book_prob):,} two-sided (player, day) quotes at the 0.5 line; "
+          f"{len(graded):,} on completed games")
+    if len(graded) < 30:
+        print("  Not enough graded props yet to say who is closer. Capture began 2026-09-07;")
+        print("  this becomes answerable once a full slate has been played and logged.")
+        return
+    ym = statistics.mean(g["y"] for g in graded)
+    om = statistics.mean(g["ours"] for g in graded)
+    bm = statistics.mean(g["book"] for g in graded)
+    br = lambda f: statistics.mean((f(g) - g["y"]) ** 2 for g in graded)
+    print(f"  actual hit rate       {ym:.3f}")
+    print(f"  ours   mean {om:.3f} ({om-ym:+.3f})   Brier {br(lambda g: g['ours']):.5f}")
+    print(f"  book   mean {bm:.3f} ({bm-ym:+.3f})   Brier {br(lambda g: g['book']):.5f}")
+    over = sum(1 for g in graded if g["ours"] > g["book"]) / len(graded) * 100
+    print(f"  we read higher than the book on {over:.0f}% of them")
+    print("  Whichever mean sits closer to the actual rate is the better number — that, not the")
+    print("  size of the gap between the two columns, is the question worth asking.")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--validate", action="store_true")
+    ap.add_argument("--grade", action="store_true",
+                    help="score our probabilities AND the book's against real outcomes")
     ap.add_argument("--refresh", action="store_true")
     ap.add_argument("--days", type=int, default=2)
     ap.add_argument("--out", default=os.path.join("web", "lib", "mlbPlayerProps.ts"))
@@ -288,6 +464,9 @@ def main(argv=None):
     # disagree and the published number is not the one that was scored.
     SLOT_PA_DIST.update(slot_pa_dist(logs, slots))
     print(f"PA distribution built for {len(SLOT_PA_DIST)} batting slots")
+    if args.grade:
+        grade_against_market(logs, slots, lineups)
+        return 0
     if args.validate:
         validate(logs, slots)
         return 0
