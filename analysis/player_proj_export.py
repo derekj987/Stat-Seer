@@ -13,6 +13,7 @@ projects the markets books have up, and writes web/lib/player-projections.json.
     python analysis/player_proj_export.py            # build + write the JSON
 """
 import argparse
+import datetime as dt
 import io
 import json
 import math
@@ -102,14 +103,45 @@ def latest_week(season):
 
 
 def fetch_props(season, week):
-    cols = "event_id,commence_time,home_team,away_team,book,market,player_name,side,line,price_american,snapshot_at"
+    """The CURRENT board: only rows from the most recent capture of each event.
+
+    The dedupe used to key on (event, market, player, side, LINE, book) and keep the newest row
+    for each. Because the line is part of the key, a line a book has since moved off never expires
+    — so the "current" set accumulated every line ever posted. Sam Darnold's passing yards carried
+    22 distinct lines from 197.5 to 258.5, and the median across that pile came out 230.5 while
+    every book actually on screen was at 228.5-229.5. Derek spotted it against FanDuel.
+
+    `collected_at` is the true capture time (`snapshot_at` is the sweep key and equals kickoff on
+    legacy rows, so max() on it picks the latest GAME, not the latest capture — a trap that has
+    now cost two separate investigations). Keeping only the newest capture per event is what makes
+    the board show what the books show right now."""
+    cols = ("event_id,commence_time,home_team,away_team,book,market,player_name,side,line,"
+            "price_american,snapshot_at,collected_at")
     rows = pg(f"?season=eq.{season}&week=eq.{week}&event_id=neq.test&select={cols}&order=snapshot_at.desc")
-    # keep the latest snapshot per (event,market,player,side,line,book)
-    latest = {}
+    # A sweep writes its rows in batches, each with its own collected_at, so "the newest capture"
+    # is a WINDOW, not an equality test. Matching exactly kept only the final batch and cut the
+    # slate from 16,901 quotes to 3,753 — a filter can be too sharp as easily as too blunt.
+    # SWEEP_WINDOW comfortably spans one sweep and is far short of the 3-6h gap to the next.
+    SWEEP_WINDOW = dt.timedelta(hours=1)
+    def when(r):
+        try:
+            return dt.datetime.fromisoformat((r.get("collected_at") or "").replace("Z", "+00:00"))
+        except ValueError:
+            return None
+    newest = {}
     for r in rows:
-        k = (r["event_id"], r["market"], r["player_name"], r["side"], r["line"], r["book"])
-        if k not in latest or r["snapshot_at"] > latest[k]["snapshot_at"]:
-            latest[k] = r
+        t = when(r)
+        if t and (r["event_id"] not in newest or t > newest[r["event_id"]]):
+            newest[r["event_id"]] = t
+    cur = [r for r in rows
+           if (t := when(r)) is not None and r["event_id"] in newest
+           and newest[r["event_id"]] - t <= SWEEP_WINDOW]
+    if not cur:                       # no usable collected_at (very old rows) — fall back
+        cur = rows
+    # Within one capture a book still posts each (side, line) once; dedupe defensively.
+    latest = {}
+    for r in cur:
+        latest[(r["event_id"], r["market"], r["player_name"], r["side"], r["line"], r["book"])] = r
     return list(latest.values())
 
 
@@ -123,6 +155,13 @@ def norm(name):
     n = name.lower().replace(".", "").replace("'", "").replace("-", " ")
     n = SUFFIX.sub("", n)
     return " ".join(n.split())
+
+
+# Market SIDES the books list as if they were players. "No Scorer" is a bet on nobody scoring and
+# a team defence is not a person; both arrive in `player_name` and would otherwise become rows now
+# that a priced name is no longer required to match a roster. "No Scorer" is priced in all 16
+# games, which is the tell — a player appears in one.
+NOT_A_PLAYER = re.compile(r"(d/?st|defense|no (scorer|touchdown)|test player)", re.I)
 
 
 # market -> (category, projection key)
@@ -671,6 +710,12 @@ def main():
     def team_norm(t): return ALIAS.get(t, t)
     lines = defaultdict(list)   # (player, market) -> [line]  (implied % for anytime_td)
     meta = {}                   # player -> (game, commence, {teams})
+    # (player, market, book) -> {line: {side: price}}. Grouped by BOOK because a book's alternate
+    # ladder is not several opinions about the line — it is one main line plus derivatives priced
+    # off it. Bovada posts seven rungs on a passing-yards market; pooling them with the two books
+    # that post a single line each let one book cast seven votes and dragged the median away from
+    # the number on screen.
+    quotes = defaultdict(lambda: defaultdict(dict))
     for r in props:
         if r["market"] not in MARKET_MAP:
             continue
@@ -680,19 +725,60 @@ def main():
                 continue
             lines[(r["player_name"], r["market"])].append(ip)
         elif r["line"] is not None:
-            lines[(r["player_name"], r["market"])].append(float(r["line"]))
+            quotes[(r["player_name"], r["market"], r["book"])][float(r["line"])][r["side"]] =                 r["price_american"]
         else:
             continue
         teams = {team_norm(r["away_team"]), team_norm(r["home_team"])}
         meta[r["player_name"]] = (f'{r["away_team"]} @ {r["home_team"]}', r["commence_time"], teams)
 
+    # Collapse each book's ladder to its MAIN line: the rung whose two sides are closest to even
+    # money. An alternate is priced away from even by construction (Bovada's 257.5 is +175/-240,
+    # implying 36%), so the balanced rung is the book's actual number. A book posting one line
+    # trivially wins its own comparison; a one-sided quote falls back to whatever it posted.
+    main_by_book = defaultdict(dict)          # (player, market) -> {book: main line}
+    for (player, market, book), ladder in quotes.items():
+        best, best_gap = None, None
+        for line, sides in ladder.items():
+            po = implied_prob(sides.get("Over") or sides.get("over"))
+            pu = implied_prob(sides.get("Under") or sides.get("under"))
+            gap = abs(po - pu) if (po is not None and pu is not None) else 1e6 - line
+            if best_gap is None or gap < best_gap:
+                best, best_gap = line, gap
+        if best is not None:
+            main_by_book[(player, market)][book] = best
+
+    # WHICH book's line do we print? Derek: "we need to match FanDuel... A.J. Brown listed at 61.5
+    # and in FanDuel he is 64.5." A cross-book median is a number nobody can actually bet, and it
+    # can be a number nobody even POSTS: with books at 64.5 and 65.5 the median is 65.0, which is
+    # not a line that exists on a receiving-yards market. So:
+    #   1. print FanDuel's line when FanDuel has posted one — the book the reader is looking at;
+    #   2. otherwise take the median across books and SNAP it to the nearest line a book actually
+    #      posts, so the board never shows a number that cannot be bet anywhere.
+    # `src` carries the book so the row can say where its line came from rather than implying a
+    # consensus it is not.
+    PREFERRED_BOOK = "fanduel"
+    line_src = {}
+    for kk, per_book in main_by_book.items():
+        if PREFERRED_BOOK in per_book:
+            lines[kk].append(per_book[PREFERRED_BOOK])
+            line_src[kk] = PREFERRED_BOOK
+        else:
+            vals = sorted(per_book.values())
+            med = statistics.median(vals)
+            snap = min(vals, key=lambda v: (abs(v - med), v))
+            lines[kk].append(snap)
+            line_src[kk] = next(b for b, v in sorted(per_book.items()) if v == snap)
+
     roster = roster_profiles(args.season)
     out, matched, unmatched, offteam, norow = [], 0, [], [], 0
     for (player, market), ls in sorted(lines.items()):
+        if NOT_A_PLAYER.search(player):
+            continue
         cat, key = MARKET_MAP[market]
         rate = rates.get(norm(player))
         game, commence, teams = meta[player]
         book = round(statistics.median(ls), 1)
+        src = line_src.get((player, market))
         if not rate:
             # No prior-season history — a rookie, or someone who did not play last year. He still
             # gets a row: the EXISTENCE of a posted prop decides who appears (the market saying he
@@ -701,27 +787,47 @@ def main():
             # the player, his line and the fact that we have nothing on him — which is honest and
             # is strictly better than silence.
             prof = roster.get(norm(player))
-            if prof and team_norm(prof["team"]) in teams:
+            if prof:
                 norow += 1
+                # Same rule as the veteran branch below: the book put him in this game, so he gets
+                # a row; if the roster disagrees about which side, we say nothing rather than
+                # something wrong.
+                pteam = prof["team"] if team_norm(prof["team"]) in teams else ""
                 out.append({
                     "game": game, "commence": commence, "player": prof["name"],
-                    "team": prof["team"], "pos": prof["pos"], "cat": cat, "market": key,
-                    "book": book, "proj": None, "g": 0,
+                    "team": pteam, "pos": prof["pos"], "cat": cat, "market": key,
+                    "book": book, "src": src, "proj": None, "g": 0,
                     "cOver": 0, "cG": 0, "pOver": 0, "pG": 0,
                     "hOver": 0, "hG": 0, "rOver": 0, "rG": 0,
                     "env": None, "envDelta": None,
                     "matchup": matchup_tag(defmap,
-                                           (teams - {team_norm(prof["team"])} or {None}).pop(),
-                                           prof["pos"]),
+                                           (teams - {team_norm(pteam)} or {None}).pop(),
+                                           prof["pos"]) if pteam else None,
                 })
                 continue
             unmatched.append(player)
             continue
-        # Data-hygiene guard: the source occasionally attaches an out-of-game player to an
-        # event (preseason odds noise). Keep only players whose prior-season team is in the game.
-        if team_norm(rate["team"]) not in teams:
-            offteam.append(f'{player} ({rate["team"]} not in {teams})')
-            continue
+        # THE BOOK DECIDES WHICH GAME A PLAYER IS IN. Derek: "the books will always be the most
+        # accurate." This used to drop any player whose roster team was not in the game as
+        # "preseason odds noise", and measured on the 2026 Week 1 slate that guard was wrong about
+        # nearly every row it removed: Jaleel McLaughlin (a Denver back, our roster said CLE
+        # practice squad), Jaydon Blue (a Cowboys back, roster said PHI), Khalil Herbert and
+        # Marquez Valdes-Scantling (not on our roster at all). These are recent signings and
+        # practice-squad elevations — the books know the active roster days before the nflverse
+        # release does, and neither the roster file nor the weekly depth chart had any of them.
+        #
+        # So he keeps his row. What we do NOT do is guess which SIDE he is on: an unresolved team
+        # becomes "", and a row that says nothing about his team is honest where a row that says
+        # "CLE" inside a DEN @ KC card is simply wrong. Everything that depends on knowing the
+        # team — the opponent-defence tag, the scoring-environment number — is withheld with it.
+        team = rate["team"]
+        if team_norm(team) not in teams:
+            prof = roster.get(norm(player))
+            if prof and team_norm(prof["team"]) in teams:
+                team = prof["team"]                      # roster is fresher than the game log
+            else:
+                team = ""
+                offteam.append(f'{player} ({rate["team"]} not in {teams}) — team unresolved')
         proj = project(rate, base)[key]
         cover, cgames = career_over(career, rate["pid"], key, book)
         if key == "anytime_td" and cgames:
@@ -734,20 +840,22 @@ def main():
         pover, pgames = prior_over(career, rate["pid"], key, book, prior)
         hOver, hG, rOver, rG = home_road_over(career, rate["pid"], key, book)
         # Forward scoring-environment change vs the player's prior-season norm (Context flag).
-        _ce = cur_env.get((week, team_norm(rate["team"])))
+        _ce = cur_env.get((week, team_norm(team))) if team else None
         _eb = env_base.get(rate["pid"])
         env_delta = round(_ce - _eb, 1) if (_ce is not None and _eb is not None) else None
         matched += 1
         out.append({
-            "game": game, "commence": commence, "player": rate["name"], "team": rate["team"],
-            "pos": rate["pos"], "cat": cat, "market": key, "book": book, "proj": proj,
+            "game": game, "commence": commence, "player": rate["name"], "team": team,
+            "pos": rate["pos"], "cat": cat, "market": key, "book": book, "src": src, "proj": proj,
             "g": rate["games"], "cOver": cover, "cG": cgames, "pOver": pover, "pG": pgames,
             "hOver": hOver, "hG": hG, "rOver": rOver, "rG": rG,
             "env": round(_ce, 1) if _ce is not None else None, "envDelta": env_delta,
             # Context: how this opponent has handled this position. RB/WR/TE only — a passing
             # matchup is a different quantity and has not been measured, so QBs get no tag.
-            "matchup": matchup_tag(defmap, (teams - {team_norm(rate["team"])} or {None}).pop(),
-                                   rate["pos"]),
+            # No team resolved => no opponent => no matchup tag. A defence rate is a claim about
+            # a specific opponent; inventing one for an unknown side would be worse than a blank.
+            "matchup": matchup_tag(defmap, (teams - {team_norm(team)} or {None}).pop(),
+                                   rate["pos"]) if team else None,
         })
 
     out.sort(key=lambda r: (r["commence"], r["game"], r["cat"], -(r["proj"] or 0)))
@@ -766,7 +874,8 @@ def main():
     ts += "// Prior-season (%d) baseline projections: volume x position efficiency. PRESEASON —\n" % prior
     ts += "// not graded against closing lines yet.\n"
     ts += "export interface PlayerProj { game: string; commence: string; player: string; team: string;\n"
-    ts += "  pos: string; cat: string; market: string; book: number | null; proj: number | null; g: number;\n"
+    ts += "  pos: string; cat: string; market: string; book: number | null; src?: string | null;\n"
+    ts += "  proj: number | null; g: number;\n"
     ts += "  cOver: number; cG: number; pOver: number; pG: number;\n"
     ts += "  hOver: number; hG: number; rOver: number; rG: number;\n"
     ts += "  env?: number | null; envDelta?: number | null;\n"

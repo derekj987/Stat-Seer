@@ -20,6 +20,12 @@ import { etToday, groupByGameDay } from "@/lib/gameDays";
 import { DayHeader } from "./DayHeader";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
 
+// Sportsbook slugs as the books spell themselves, for the book-line tooltip.
+const BOOK_LABEL: Record<string, string> = {
+  fanduel: "FanDuel", draftkings: "DraftKings", betmgm: "BetMGM", betrivers: "BetRivers",
+  bovada: "Bovada", betonlineag: "BetOnline", fanatics: "Fanatics", williamhill_us: "Caesars",
+};
+
 export interface PlayerCat {
   key: string;
   label: string;
@@ -329,7 +335,16 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                             {/* Shown on EVERY row (not blanked on continuations) — it's what
                                 distinguishes a player's stacked rows from each other. */}
                             <span className="pmcell pmcell--team">{propLabel(r.market)}</span>
-                            <span className="pmcell pmcell--num">{hasBook ? <>{r.book}{unitFor(r.market)}</> : "—"}</span>
+                            {/* Name the book. This column used to print a cross-book MEDIAN, which
+                                is a number nobody can bet and sometimes one nobody even posts
+                                (books at 64.5 and 65.5 median to 65.0, not a real receiving-yards
+                                line). It is FanDuel's line wherever FanDuel posts one. */}
+                            <span className="pmcell pmcell--num"
+                              title={hasBook
+                                ? `${r.src ? BOOK_LABEL[r.src] ?? r.src : "The market"}'s posted line for ${r.player}, from our latest capture of the board.`
+                                : undefined}>
+                              {hasBook ? <>{r.book}{unitFor(r.market)}</> : "—"}
+                            </span>
                             {/* NO arrow here. The lean is not a claim about THIS number: `proj` is an
                                 average and the book's line sits near the median, so a projection can
                                 sit above the line while the player rarely clears it. An arrow inside
