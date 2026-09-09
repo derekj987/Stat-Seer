@@ -41,6 +41,12 @@ const LU_CAP = 9;
 const GAME_CAP = 4;
 
 const pct = (p: number) => `${Math.round(p * 100)}%`;
+
+/** First pitch, Eastern, compact — the day is already the group header, so the date would repeat. */
+const timeFmt = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/New_York", hour: "numeric", minute: "2-digit",
+});
+const kickTime = (iso: string) => timeFmt.format(new Date(iso)).replace(/\s?([AP])M/, (_m, x) => x.toLowerCase());
 /** A margin as a bettor reads it: how many runs, and WHO is getting them.
  *
  *  A bare "-1.3" was unreadable twice over. MLB posts no such number (the run line is a fixed
@@ -58,6 +64,13 @@ const spread = (x: number, homeAbbr: string, awayAbbr: string) => {
 
 export default async function Page() {
   const { today: todayEt, tomorrow: tomorrowEt } = etToday();
+  // Drop games that have already started. The data file is rebuilt once a day, so by the evening it
+  // still carried this afternoon's games — and they are worse than clutter: the odds board drops a
+  // game at first pitch, so every one of them showed "—" in BOTH market columns, and a pre-game
+  // line-blind projection is not something anyone can act on once the game is under way.
+  // revalidate=300 means a game leaves the board within five minutes of starting.
+  const nowIso = new Date().toISOString();
+  const upcoming = MLB_GAMES.filter((g) => g.commence > nowIso);
 
   // Market numbers. A failure here must not take the model board down with it — the projections
   // are static and the odds are a network read, so the board degrades to "—" in the market column
@@ -68,9 +81,9 @@ export default async function Page() {
   // wrong. Both sides derive the ET day from the same real timestamp, so this holds.
   const mkt = new Map(board.map((g) => [`${etDayKey(g.commence)}|${g.matchup}`, g]));
 
-  const keys = MLB_GAMES.map((g) => g.gameKey);
-  const byKey = new Map(MLB_GAMES.map((g) => [g.gameKey, g]));
-  const kick = new Map(MLB_GAMES.map((g) => [g.gameKey, g.commence]));
+  const keys = upcoming.map((g) => g.gameKey);
+  const byKey = new Map(upcoming.map((g) => [g.gameKey, g]));
+  const kick = new Map(upcoming.map((g) => [g.gameKey, g.commence]));
 
   // Lineups, grouped by game underneath the chart.
   const luGames: string[] = [];
@@ -78,6 +91,7 @@ export default async function Page() {
   const luLabel: Record<string, string> = {};
   const luKick: Record<string, string> = {};
   for (const r of MLB_AVAIL) {
+    if (r.commence <= nowIso) continue;                  // started — same rule as the chart above
     if (!luByGame[r.gameKey]) { luByGame[r.gameKey] = []; luGames.push(r.gameKey); luLabel[r.gameKey] = r.game; }
     luByGame[r.gameKey].push(r);
     if (!luKick[r.gameKey] || r.commence < luKick[r.gameKey]) luKick[r.gameKey] = r.commence;
@@ -95,7 +109,7 @@ export default async function Page() {
       <details className="hb-panel hb-panel--card" data-embedchart="mlb-game-model" open>
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">Runs crunched</span>
-          <span className="hb-bar__count">{MLB_GAMES.length} game{MLB_GAMES.length === 1 ? "" : "s"}</span>
+          <span className="hb-bar__count">{upcoming.length} game{upcoming.length === 1 ? "" : "s"}</span>
           <PinButton size="sm" pin={{ id: "/mlb/model", kind: "model", label: "MLB · Game Model", detail: "runs + totals", href: "/mlb/model" }} />
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
@@ -134,7 +148,7 @@ export default async function Page() {
             </>} />
           </p>
 
-          {MLB_GAMES.length === 0 ? (
+          {upcoming.length === 0 ? (
             <p className="foot">No upcoming games projected yet. The board fills as probable starters post.</p>
           ) : (
             groupByGameDay(keys, (k) => kick.get(k) ?? null, todayEt, tomorrowEt).map((grp) => {
@@ -175,7 +189,9 @@ export default async function Page() {
                         return (
                           <div className={`pmrow pmrow--data${i >= GAME_CAP ? " hb-row--more" : ""}`}
                             role="row" key={k}>
-                            <span className="pmcell pmcell--player">{g.game}</span>
+                            <span className="pmcell pmcell--player">
+                              {g.game}<span className="pmslot"> ({kickTime(g.commence)})</span>
+                            </span>
                             <span className="pmcell pmcell--team">{sp || "not posted"}</span>
                             <span className="pmcell pmcell--mkt">
                               {ms !== null ? spread(ms, g.homeAbbr, g.awayAbbr) : "—"}
