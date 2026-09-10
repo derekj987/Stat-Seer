@@ -1998,6 +1998,39 @@ A hero/banner escapes its container with negative margins plus an over-100% widt
 element has to cancel that too — otherwise it stops short and leaves a strip of page background.
 Whenever you change a container's padding, re-check every full-bleed child inside it.
 
+### 🚨 Never rename a class with a blanket regex over a file
+`card-width-mismatch`. Derek: *"the context cards got messed up... put them next to each other
+again. How did this happen?"* I did it, one commit earlier, fixing a different bug.
+
+`.cxgrid` had been introduced for a new stat grid and collided with the existing CARD grid (see
+below), so it was renamed to `.cxstat` — with `re.sub(r'cxgrid...')` across the whole file. That
+also renamed `<section className="cxgrid">`, the container that lays the cards out two across. It
+lost `repeat(auto-fit, minmax(456px, 1fr))` and collapsed to one column.
+
+**The rename is the most dangerous possible moment for exactly this, and the reason is circular:
+you are only renaming BECAUSE the name is already in use elsewhere.** A blanket substitution is
+therefore guaranteed to hit the other usage. Rename by matching the full attribute you wrote
+(`className="cxgrid cxgrid--score"`), never the bare token, and grep the file afterwards for what
+survived:
+```bash
+grep -n 'cxgrid' web/app/considerations/page.tsx   # should be ONLY the pre-existing usages
+```
+
+**Why no check caught it, which is the more useful half.** `grid-dead-space` looks for MORE tracks
+than children — this was fewer. `unequal-row-height` needs two siblings sharing a row, and a
+one-column grid never has two. A collapsed grid is invisible to both. It is obvious as a WIDTH
+inconsistency though: the same card class rendered at **476px in one day group and 861px in
+another**, because days with one game looked identical either way and only the 13-game day went
+full width. Hence `card-width-mismatch` — same class, three or more instances, widest/narrowest
+past 1.5x. Two-way tested: silent as shipped, fires with the exact widths when the template is
+stripped, silent again on restore.
+
+**⚠️ And hit-test from scrollY 0.** While verifying this, the probe reported five
+`click-intercepted` on the week nav, all "covered by header.snav" — a sticky header covering what
+is beneath it at that scroll offset, which is what a sticky header does. Every one vanished at the
+top of the page. The check now scrolls to the top before hit-testing and restores the reader's
+position after, so the result does not depend on where the page happened to be.
+
 ### 🚨 A NEW class name can collide as easily as an edited rule
 The "shared global CSS" rule below is about EDITING a rule. Adding one is the same hazard from the
 other direction: `.cxgrid` was introduced for a small stat grid inside a considerations card, and

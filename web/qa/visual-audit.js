@@ -206,6 +206,13 @@
   }
 
   // ---- 6. Interactive controls whose clicks are intercepted -----------------
+  // Hit-test from the TOP of the page. A sticky header legitimately covers whatever is beneath it
+  // at other scroll offsets, so a probe run after scrolling reports controls as "intercepted" that
+  // are perfectly clickable once you scroll to them: five findings on /considerations, every one
+  // "covered by header.snav" and every one gone at scrollY 0. Deterministic beats incidental —
+  // restore the reader's position afterwards so the audit does not move the page under them.
+  const _scrollY = window.scrollY, _scrollX = window.scrollX;
+  window.scrollTo(0, 0);
   for (const el of document.querySelectorAll("button, a[href], [role='button'], summary, label[for]")) {
     if (cap(findings, "click-intercepted")) break;
     if (!vis(el) || el.disabled) continue;
@@ -238,6 +245,8 @@
     }
     if (getComputedStyle(el).pointerEvents === "none") add("click-intercepted", "high", el, "pointer-events:none");
   }
+
+  window.scrollTo(_scrollX, _scrollY);
 
   // ---- 7. Broken images ------------------------------------------------------
   for (const img of document.querySelectorAll("img")) {
@@ -724,6 +733,41 @@
       `board-wide (${[...info.vals].join(", ")}) — the column may not carry the information it ` +
       `appears to`);
     if (cap(findings, "column-no-variance")) break;
+  }
+
+  // ---- 20b2. Cards of one kind must render at ONE width ------------------------
+  // Derek: "the context cards got messed up... put them next to each other again." A blanket
+  // regex rename had turned `<section className="cxgrid">` — the CARD grid — into the new stat
+  // grid's class, so that container lost `repeat(auto-fit, minmax(456px,1fr))` and collapsed to a
+  // single column. Days with one game still looked right (one card either way); the 13-game day
+  // went full width. So the SAME card class rendered at 476px in one place and 861px in another.
+  //
+  // Nothing here caught it, and it is worth understanding why: `grid-dead-space` looks for MORE
+  // tracks than children, and this is the opposite — fewer. `unequal-row-height` needs two
+  // siblings sharing a row, and a one-column grid never has two. A collapsed grid is invisible to
+  // both, but it is obvious as a WIDTH inconsistency: cards of one kind should be one width.
+  {
+    const byClass = new Map();
+    for (const el of document.querySelectorAll('[class*="card"], [class*="Card"]')) {
+      if (!vis(el)) continue;
+      const cls = (el.getAttribute("class") || "").trim();
+      if (!cls) continue;
+      const w = Math.round(rectOf(el).width);
+      if (w < 120) continue;                       // chips and badges are not cards
+      (byClass.get(cls) || byClass.set(cls, []).get(cls)).push(w);
+    }
+    for (const [cls, ws] of byClass) {
+      if (ws.length < 3) continue;                 // too few to call a pattern
+      const lo = Math.min(...ws), hi = Math.max(...ws);
+      // 1.5x is well past any legitimate responsive variation WITHIN one rendered page; a
+      // deliberately featured card would be one or two, not a whole group.
+      if (hi / lo < 1.5) continue;
+      add("card-width-mismatch", "high", document.querySelector(`.${cls.split(/\s+/)[0]}`) || doc,
+        `"${cls}" renders at ${lo}px in one place and ${hi}px in another (${ws.length} cards) — ` +
+        `a grid that should lay these out in columns has probably collapsed to one`,
+        { widths: [...new Set(ws)].sort((a, b) => a - b) });
+      if (cap(findings, "card-width-mismatch")) break;
+    }
   }
 
   // ---- 20c1. Data rows in one chart must all be the same height ----------------
