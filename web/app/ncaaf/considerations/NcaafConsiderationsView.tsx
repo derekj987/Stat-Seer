@@ -10,8 +10,11 @@ import { CFB_GAME_WEATHER, type CfbGameWeather } from "@/lib/cfbWeatherData";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
 import { kickET } from "../CardCells";
 import type { NcaafCardGame } from "../model-data";
-import { groupByGameDay, dayBasis } from "@/lib/gameDays";
+import { groupByGameDay, dayBasis, capDayGroups, type DayGroup } from "@/lib/gameDays";
 import { DayHeader } from "../../DayHeader";
+
+// Enough to read the day without scrolling past it, matching the other boards' cap.
+const CARD_CAP = 8;
 
 type Rating = { rank: number; rating: number };
 const WX = new Map(CFB_GAME_WEATHER.map((w) => [w.game, w]));
@@ -140,16 +143,38 @@ export default function NcaafConsiderationsView({ games, ratings, hfa, slate, to
         <p className="foot">No games match this filter — try another conference, or clear it.</p>
       ) : (
         <div aria-label="Game considerations">
-          <div className="daygrid">
-            {groupByGameDay(shown, (g) => g.commence, today, tomorrow).map((grp) => (
+          {/* Capped. A college Saturday is 80+ games against the NFL's sixteen, and every one of
+              them was rendered — one continuous wall with no way to see the shape of the slate.
+              capDayGroups caps on whole DAYS and splits the day at the boundary with the tail
+              flagged `cont`, so the day header is drawn exactly once rather than repeated across
+              the cut (the split-group bug). */}
+          {(() => {
+            const groups = groupByGameDay(shown, (g) => g.commence, today, tomorrow);
+            const { head, rest, restCount } = capDayGroups(groups, CARD_CAP);
+            const dayBlock = (grp: DayGroup<NcaafCardGame>) => (
               <div className="daygrid__day" key={grp.key} style={dayBasis(grp.items.length, 2, 476, 16)}>
-                <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
+                {!grp.cont && <DayHeader label={grp.label} tone={grp.tone} count={grp.total ?? grp.items.length} />}
                 <section className="cxgrid">
                   {grp.items.map((g) => <ConsiderationCard key={`${g.away}-${g.home}`} g={g} hfa={hfa} ratings={ratings} />)}
                 </section>
               </div>
-            ))}
-          </div>
+            );
+            return (
+              <>
+                <div className="daygrid">{head.map(dayBlock)}</div>
+                {restCount > 0 && (
+                  <details className="hb-showmore">
+                    <summary className="hb-showmore__sum">
+                      <span className="hb-showmore__chev" aria-hidden="true">▸</span>
+                      <span className="hb-showmore__more">Show {restCount} more game{restCount === 1 ? "" : "s"}</span>
+                      <span className="hb-showmore__less">Collapse</span>
+                    </summary>
+                    <div className="daygrid">{rest.map(dayBlock)}</div>
+                  </details>
+                )}
+              </>
+            );
+          })()}
         </div>
       )}
     </>
