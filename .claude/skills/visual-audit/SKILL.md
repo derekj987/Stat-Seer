@@ -1915,6 +1915,31 @@ genuine second bug nobody had reported: the `/mlb/model` lineups panel had "batt
    187px vs 107px with nothing squeezed at all. Require `tight <= 24px` as well as a large gap.
 3. **Judge board-wide** (above).
 
+**What counts as a column's NEED depends on whether it can wrap.** Getting this wrong produced
+false findings in both directions before it settled:
+
+| cell | requirement | why |
+|---|---|---|
+| header | longest word | a label may wrap; "HR vs opp pitcher" over a single digit is a trade, not a squeeze |
+| `nowrap` data | full string | it has no second line, so anything short of the whole string ellipsizes |
+| wrapping data | longest word | it uses the row's second line, which the row already has |
+
+**And two columns are exempt from the IDLE side entirely** — they can still be reported as tight,
+which is where the real bugs are:
+- **the leading column**, which holds the name of the thing each row is about and is conventionally
+  given more room than arithmetic demands. Wrapping every name onto a second line is worse design
+  than leaving it generous.
+- **any column whose data wraps**, because its width is a judgement about how many lines its prose
+  should take. The MLB game board's "starting pitchers" holds two names and a slash and wraps on
+  purpose; by longest-word it measured 197px "idle".
+
+**A budget tuned to one moment's data drifts out of true within hours.** `.pmtable--mlb` was sized
+when the status column read "in the lineup"; once real lineups posted it read "projected" and the
+column sat on 78px of dead width. And a base shared across TABS has the same problem in space
+rather than time — a player column sized for receivers leaves running backs' names swimming. Both
+are why the tracks are `calc(<small base> + var(--pmx))`: a base that is only what the column needs
+at minimum, plus an equal share of whatever is going.
+
 **Run the sweep at a STRETCHED width, not just 1440.** This whole class of bug is invisible at the
 width a table was budgeted for — the mixed `fr`/`px` grids all measured perfectly at their 795px
 minimum. Add a 1900px pass whenever the finding is about how space is divided.

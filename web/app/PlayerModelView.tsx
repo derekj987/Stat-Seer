@@ -15,16 +15,11 @@ import PropAdd, { type PricedSide } from "./PropAdd";
 import PinButton from "./PinButton";
 import { playerSlot, normName } from "@/lib/playerSlot";
 import { weekProps, fanduelLines } from "@/lib/props";
+import { bookLabel } from "@/lib/bookLabel";
 import { cfbWeekProps } from "@/lib/cfbProps";
 import { etToday, groupByGameDay } from "@/lib/gameDays";
 import { DayHeader } from "./DayHeader";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
-
-// Sportsbook slugs as the books spell themselves, for the book-line tooltip.
-const BOOK_LABEL: Record<string, string> = {
-  fanduel: "FanDuel", draftkings: "DraftKings", betmgm: "BetMGM", betrivers: "BetRivers",
-  bovada: "Bovada", betonlineag: "BetOnline", fanatics: "Fanatics", williamhill_us: "Caesars",
-};
 
 export interface PlayerCat {
   key: string;
@@ -172,8 +167,12 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
   const { today: todayEt, tomorrow: tomorrowEt } = etToday();
   const LEAD = 4;   // rows shown before "see more"
   // Per-row unit — the passing category mixes markets (yards + TDs); anytime-TD is a %.
-  const unitFor = (market: string) =>
-    market === "receptions" ? "" : market === "pass_tds" ? " TD" : market === "anytime_td" ? "%" : " yds";
+  // The unit is already stated on the row: the Prop column says "Passing yds" / "Passing TDs"
+  // right beside these numbers, so repeating " yds" in both the book line and our projection cost
+  // 56px per row for nothing — and on the passing table, which carries two extra columns, that was
+  // the difference between fitting the card and escaping it by 48px. Anytime TD keeps its "%",
+  // because there the number is a probability and "37.8" alone would read as a count.
+  const unitFor = (market: string) => (market === "anytime_td" ? "%" : "");
   // Which market each row is — shown in its own column so a player's stacked rows are self-describing
   // ("Drake Maye … Passing yds / Passing TDs") instead of leaving you to infer it from the unit.
   const PROP_LABELS: Record<string, string> = {
@@ -277,10 +276,17 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                           title={isTd ? undefined : `How often each player has cleared his own line. Green/▲ and red/▼ compare against the TYPICAL rate for this market rather than a flat 50%, because these lines are not set at a coin flip — so a rate below 50% can still be an above-typical one.`}>
                           {isTd ? "Career TD rate" : "Career % over"}</span>
                         <span className="pmcell pmcell--career">{isTd ? "Prior szn TD rate" : "Prior szn % over"}</span>
-                        {active.key === "passing" && <>
-                          <span className="pmcell pmcell--career">Home % over</span>
-                          <span className="pmcell pmcell--career">Road % over</span>
-                        </>}
+                        {/* Home and Road as ONE column. Two separate columns needed 879px of ink
+                            in a 669px budget, so the passing table carried a 316px horizontal
+                            scrollbar at 1440. They are the same statistic split by venue and are
+                            read as a pair, so "61% / 56%" says it in one column and gives ~116px
+                            back — which is what removes the scrollbar. */}
+                        {active.key === "passing" && (
+                          <span className="pmcell pmcell--career"
+                            title="How often he has cleared this line at home, then on the road.">
+                            Home / Road
+                          </span>
+                        )}
                         <span className="pmcell pmcell--add">Add to slip</span>
                       </div>
                       {sec.rows.map((r, ri) => {
@@ -341,7 +347,8 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                               {inj && (
                                 <span className="pminj pminj--iffy"
                                   title={`${r.player} is listed ${inj.label.toLowerCase()}${inj.detail ? ` — ${inj.detail.toLowerCase()}` : ""}. Read live from the league's injury report, refreshed every 2 minutes.`}>
-                                  {inj.label}{inj.detail ? ` · ${inj.detail}` : ""}
+                                  {inj.label}
+                                  {inj.detail && <span className="pminj__d"> · {inj.detail}</span>}
                                 </span>
                               )}
                               {/* Matchup, not "spot". The old pill was built on envDelta — the change
@@ -378,7 +385,7 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                               title={hasBook
                                 ? (live !== null
                                     ? `FanDuel's line for ${r.player}, read live and refreshed every 2 minutes.`
-                                    : `${r.src ? BOOK_LABEL[r.src] ?? r.src : "The market"}'s posted line for ${r.player}, from our latest capture of the board.`)
+                                    : `${r.src ? bookLabel(r.src) : "The market"}'s posted line for ${r.player}, from our latest capture of the board.`)
                                 : undefined}>
                               {hasBook ? <>{shownLine}{unitFor(r.market)}</> : "—"}
                             </span>
@@ -412,14 +419,16 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                             <span className={`pmcell pmcell--career ${cls(ppct)}`}>
                               {ppct === null ? <span className="pmcell__sub">no {PROJ_PRIOR}</span> : <>{ppct}% <small className="pmcell__sub">{r.pOver}/{r.pG} gm</small></>}
                             </span>
-                            {active.key === "passing" && <>
-                              <span className={`pmcell pmcell--career ${cls(hpct)}`}>
-                                {hpct === null ? "—" : <>{hpct}% <small className="pmcell__sub">{r.hOver}/{r.hG} gm</small></>}
+                            {active.key === "passing" && (
+                              // Each half keeps its own red/green, so the pair still reads as two
+                              // separate judgements rather than one blended number.
+                              <span className="pmcell pmcell--career pmcell--split"
+                                title={`${r.player} at home: ${hpct === null ? "no games" : `${hpct}% (${r.hOver}/${r.hG})`}. On the road: ${rpct === null ? "no games" : `${rpct}% (${r.rOver}/${r.rG})`}.`}>
+                                <span className={cls(hpct)}>{hpct === null ? "—" : `${hpct}%`}</span>
+                                <span className="pmcell__sub"> / </span>
+                                <span className={cls(rpct)}>{rpct === null ? "—" : `${rpct}%`}</span>
                               </span>
-                              <span className={`pmcell pmcell--career ${cls(rpct)}`}>
-                                {rpct === null ? "—" : <>{rpct}% <small className="pmcell__sub">{r.rOver}/{r.rG} gm</small></>}
-                              </span>
-                            </>}
+                            )}
                             <span className="pmcell pmcell--add">
                               <PropAdd player={r.player} market={r.market} line={r.book} game={g} slot={slot}
                                 over={priceFor(r.player, r.market, "Over")}

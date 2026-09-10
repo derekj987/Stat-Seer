@@ -3297,7 +3297,6 @@ a.snav__dfeat{display:block}
 .pmtable--data .pmrow--data:not(.pmrow--head){height:62px;align-items:center}
 .pmtable--data .pmrow--head{align-items:end}
 /* passing table adds Home % / Road % → six stat columns instead of four */
-.pmtable--ha{min-width:1145px;max-width:1300px}
 /* MLB availability board. Five columns instead of football's nine — baseball's Stage A answers
    "is he in, and where does he bat", not a stat line — but it reuses .pmrow--data so the cells,
    gaps and header line up with the NFL and NCAAF boards rather than reading as a different table.
@@ -3311,9 +3310,9 @@ a.snav__dfeat{display:block}
    plus 4 gaps x 16 = 669. */
 .pmtable--mlb{min-width:795px;max-width:1120px}
 .pmtable--mlb .pmrow--data,
-.pmtable--mlb .pmrow--head{--pmx:max(0px,calc((100% - 669px) / 5));
-  grid-template-columns:calc(279px + var(--pmx)) calc(83px + var(--pmx)) calc(93px + var(--pmx))
-    calc(81px + var(--pmx)) calc(69px + var(--pmx))}
+.pmtable--mlb .pmrow--head{--pmx:max(0px,calc((100% - 474px) / 5));
+  grid-template-columns:calc(200px + var(--pmx)) calc(57px + var(--pmx)) calc(33px + var(--pmx))
+    calc(51px + var(--pmx)) calc(69px + var(--pmx))}
 /* Strikeouts board — six columns. Same .pmrow--data language as every other board so book line
    and our projection sit in the same relationship a reader already knows from football. */
 /* min-width was 840 while the column minimums only need ~586 + gaps, so the table forced a
@@ -3427,7 +3426,18 @@ a.snav__dfeat{display:block}
 .pmtable--mlbg .pmrow--data .pmcell--team{white-space:normal;line-height:1.25;text-overflow:clip}
 .mlbin{color:var(--accent);font-weight:800}
 .mlbout{color:var(--muted);font-weight:700}
-.pmtable--ha .pmrow--data{grid-template-columns:minmax(205px,1.6fr) 74px repeat(6,minmax(0,1fr)) 104px}
+/* PASSING — eight columns, not nine: Home % and Road % merged into one "Home / Road" cell. The
+   nine-column version needed 879px of ink against a 669px budget, so this table carried a 316px
+   horizontal scrollbar at 1440. min-width drops from 1145 to 829, the width of the scroller it
+   sits in, which is what actually removes the bar.
+   Measured needs after dropping the redundant " yds" suffix (the Prop column states the unit):
+   player 186 | prop 72 | book 44 | proj 44 | career 100 | prior 85 | home/road 78 | add 74 = 683,
+   plus 7 gaps x 16 (112) and 32 of row padding = 827, the card exactly. Prop takes its 72 from the
+   player column rather than the other way round: "Passing TDs" is a fixed string that either fits
+   or ellipsizes, while a long player name simply wraps onto the second line the row already has.
+   The two rate headers wrap to two lines on purpose — the header row is bottom-aligned. */
+.pmtable--ha{min-width:827px;max-width:1300px}
+.pmtable--ha .pmrow--data{grid-template-columns:minmax(186px,1.5fr) 72px 44px 44px minmax(100px,1.1fr) minmax(85px,1fr) 78px 74px}
 /* continuation row: a second market for the same player (e.g. a QB's passing-TD line under
    his passing-yards line). No top rule + tighter top padding so the two read as one block. */
 .pmrow--cont{border-top:0}
@@ -3470,6 +3480,10 @@ a.snav__dfeat{display:block}
   border:1px solid color-mix(in srgb,#b0202a 38%,transparent)}
 .pminj--iffy{color:#a4680b;background:color-mix(in srgb,#a4680b 13%,transparent);
   border:1px solid color-mix(in srgb,#a4680b 32%,transparent)}
+/* On a phone the pill shares the player cell with the name and a matchup tag, and the cause
+   ("Questionable · Hamstring") pushed that cell past its column — "Tory Horton (WR4, SEA)Qu…".
+   The designation is what changes the bet; the body part is detail, and it stays in the tooltip. */
+@media (max-width:560px){ .pminj__d{display:none} }
 .pmempty--solo{border:1px solid var(--line);border-radius:12px;background:var(--surface)}
 .pmrow--head.pmrow--data{border-bottom:0;font-size:11px}
 /* header labels are longer than the data — let them wrap inside the equal columns so the
@@ -3513,11 +3527,37 @@ a.snav__dfeat{display:block}
   .scrollnudge{display:flex;align-items:center;justify-content:flex-end;gap:6px;margin:0 0 5px;
     font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--accent)}
   .scrollnudge__a{font-size:15px;animation:impswipe 1.3s ease-in-out infinite}
-  .pmtable--data{min-width:680px}
-  .pmtable--ha{min-width:880px}
+  /* Sized to the ink so nothing has to hoard: 190 + 66 + 42 + 42 + 96 + 82 + 90 = 608, plus
+     6 gaps x 11 (66) and 20 of row padding = 694. Measured mobile needs: player wraps so it takes
+     the surplus, prop 84 — the binding case is "Receiving yds" at 82, and a column
+     label is a fixed string that ellipsizes rather than wrapping, unlike the player name beside
+     it, which is why player takes the SMALLER base (150) despite holding the longer text. Then
+     book 36, proj 36, career 50, prior 40, add 78. Player's base is deliberately LOW (110): these
+     bases are shared by all five category tabs while the ink varies per tab, so a generous base
+     for the longest tab leaves the shortest one (rushing — backs have short names) sitting on
+     dead width. A small base plus an equal share of the surplus fits every tab. */
+  .pmtable--data{min-width:694px}
+  /* 190 + 72 + 48 + 48 + 100 + 88 + 80 + 96 = 722, plus 7 gaps x 11 (77) and 20 padding = 819. */
+  .pmtable--ha{min-width:819px}
   .pmrow{padding:8px 10px}
-  .pmrow--data{gap:11px;grid-template-columns:minmax(84px,1.2fr) 64px repeat(4,minmax(0,1fr)) 96px;font-size:12px;align-items:start}
-  .pmtable--ha .pmrow--data{grid-template-columns:minmax(84px,1.2fr) 64px repeat(6,minmax(0,1fr)) 96px}
+  /* Even share of any surplus, same calc as the desktop tables: an `fr` track beside a fixed `px`
+     one takes ALL the extra, which is how the player column came to ellipsize while its row had
+     86px unused further right. */
+  .pmrow--data{gap:11px;font-size:12px;align-items:start;
+    --pmx:max(0px,calc((100% - 522px) / 7));
+    grid-template-columns:calc(110px + var(--pmx)) calc(84px + var(--pmx)) calc(40px + var(--pmx))
+      calc(40px + var(--pmx)) calc(62px + var(--pmx)) calc(52px + var(--pmx)) calc(68px + var(--pmx))}
+  /* Eight named tracks, not five equal ones: with `repeat(5, 1fr)` the merged Home / Road column
+     got the same width as the two rate columns and sat on 74px of empty space while "Passing TDs"
+     ellipsized at 64px next to it. Budget at the 880px mobile min-width: 880 - 20 padding -
+     (7 x 11) gaps = 783 against 652 of minimums. */
+  /* Player base 110, not 190, for the same reason as the table above: QB names are short and the
+     base is shared, so a generous one left 133px of dead width in this column while others were
+     tight. Small base + equal share of the surplus. */
+  .pmtable--ha .pmrow--data{--pmx:max(0px,calc((100% - 695px) / 8));
+    grid-template-columns:calc(110px + var(--pmx)) calc(72px + var(--pmx)) calc(48px + var(--pmx))
+      calc(48px + var(--pmx)) calc(100px + var(--pmx)) calc(88px + var(--pmx))
+      calc(80px + var(--pmx)) calc(72px + var(--pmx))}
   .pmadd__b{padding:6px 8px;font-size:11px}
   .pmcell--career{font-size:12px}
   /* Stack the "N/N gm" sample under the % so each stat cell stays narrow and columns don't

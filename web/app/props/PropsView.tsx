@@ -7,6 +7,7 @@ import { useSlip } from "@/lib/slip";
 import { groupByGameDay } from "@/lib/gameDays";
 import { DayHeader } from "../DayHeader";
 import { audit, VERDICT_LABEL } from "@/lib/fairValue";
+import { bookLabel, booksLabel } from "@/lib/bookLabel";
 
 const fmtOdds = (p: number) => (p > 0 ? `+${p}` : String(p));
 function sideLabel(side: string, line: number | null): string {
@@ -64,7 +65,13 @@ function PropChip({ q, market, marketLabel, game, saved, cont, onToggle }: {
           </sup>
         )}
       </span>
-      <span className="propq__book">{q.books.join(" / ")}</span>
+      {/* Name the books while they fit; count them once they do not. Three or more slugs run to
+          208px in a 140px column, so the list ellipsised to "bovada / draftkings / williamh" —
+          which names two books and truncates the third, the worst of both. "3 books" is shorter,
+          complete, and the full list is on the tooltip for anyone who wants it. */}
+      <span className="propq__book" title={q.books.map(bookLabel).join(" / ")}>
+        {booksLabel(q.books)}
+      </span>
       <span className="propq__add" aria-hidden="true">{saved ? "✓" : "+"}</span>
     </button>
   );

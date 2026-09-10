@@ -838,15 +838,37 @@
     for (let c = 0; c < head.children.length; c++) {
       const cand = rows.map((r) => r.children[c]).filter(Boolean)
         .sort((a, b) => b.textContent.trim().length - a.textContent.trim().length).slice(0, 3);
+      // A cell that is ALLOWED TO WRAP only needs its longest unbreakable word; a cell pinned to
+      // `nowrap` needs the whole string or it ellipsizes. Measuring every data cell at full width
+      // reported the mobile player column as 91px short while it was wrapping happily inside a
+      // fixed-height row — the same false positive the header rule already avoids, one column
+      // over. `chart-truncated-with-space` still owns the ellipsis case, which is exactly the
+      // nowrap cells this keeps measuring whole.
+      const fits = (cell) =>
+        getComputedStyle(cell).whiteSpace.startsWith("nowrap") ? ink(cell) : need1(cell);
       let need = need1(head.children[c]);
-      for (const cell of cand) need = Math.max(need, ink(cell));
+      for (const cell of cand) need = Math.max(need, fits(cell));
       const alloc = head.children[c].getBoundingClientRect().width;
+      // Does this column's DATA wrap? A wrapping column is sized by judgement — how many lines its
+      // prose should take — and cannot be called idle by arithmetic. A nowrap column is sized by
+      // its content exactly, so spare width there is genuinely spare. (The MLB game board's
+      // "starting pitchers" holds two names and a slash and wraps to two lines on purpose; by
+      // longest-word it looked 197px idle.)
+      const wraps = cand.some((cell) => !getComputedStyle(cell).whiteSpace.startsWith("nowrap"));
       slack.push({ label: (head.children[c].textContent || "").trim(), alloc: Math.round(alloc),
-                   need: Math.ceil(need), slack: Math.round(alloc - need) });
+                   need: Math.ceil(need), slack: Math.round(alloc - need), wraps });
     }
     box.remove();
     if (slack.some((s) => s.alloc <= 0)) continue;
-    const worst = Math.max(...slack.map((s) => s.slack));
+    // The LEADING column is exempt from the idle side. A board's first column holds the name of
+    // the thing each row is about, and it is conventionally given more room than its longest word
+    // strictly needs — wrapping every name onto a second line is worse design than leaving that
+    // column generous, even though the arithmetic cannot tell the difference. It stays eligible on
+    // the TIGHT side: a squeezed name column is still a real bug, and is how this check found the
+    // /mlb/model lineups panel.
+    const idle = slack.slice(1).filter((x) => !x.wraps);
+    if (!idle.length) { box.remove?.(); continue; }
+    const worst = Math.max(...idle.map((s) => s.slack));
     const tight = Math.min(...slack.map((s) => s.slack));
     // Only report a real imbalance: one column sitting on a lot of empty width while another is
     // AT OR UNDER its own content. A uniformly generous board is not a bug — and the gap alone
@@ -854,7 +876,7 @@
     // the difference between them. The homepage's 4-row shopping table fired at 187px vs 107px
     // with nothing squeezed at all. `tight` is what makes it a defect.
     if (worst - tight < 60 || worst < 40 || tight > 24) continue;
-    const w = slack.find((s) => s.slack === worst), t = slack.find((s) => s.slack === tight);
+    const w = idle.find((s) => s.slack === worst), t = slack.find((s) => s.slack === tight);
     add("chart-columns-lopsided", "medium", g.el,
       `column widths are not divided in proportion to their content — "${w.label}" has ${worst}px ` +
       `of empty width while "${t.label}" has ${tight}px (needs ${t.need}, has ${t.alloc}) ` +
