@@ -24,6 +24,7 @@ Take the official whose position is "Referee" — the crew chief REF_STATS is ke
 is not ordered by seniority; on the game checked, `officials[0]` was a Field Judge.
 """
 import argparse
+import datetime as dt
 import json
 import os
 import sys
@@ -74,14 +75,29 @@ def _espn_json(url):
         return None
 
 
+# How far ahead ESPN actually carries a crew. MEASURED on 2026-09-09: of the 16 week-1 games,
+# only the one kicking off that night had officials; the 15 others — including games four days
+# out — returned an empty list from both the site API and the core API. So there is no point
+# pulling a summary for a game two weeks away, and doing so was ~288 requests a run, twice a day.
+LOOKAHEAD_DAYS = 10
+
+
 def fetch_espn_crews(season, weeks=range(1, 19)):
     """[{season, week, home_team, away_team, referee}] for games ESPN has assigned a crew to."""
     out = []
+    now = dt.datetime.now(dt.timezone.utc)
     for wk in weeks:
         board = _espn_json(ESPN_BOARD % (season, wk))
         if not board:
             continue
         for ev in board.get("events", []) or []:
+            try:
+                when = dt.datetime.fromisoformat((ev.get("date") or "").replace("Z", "+00:00"))
+            except ValueError:
+                when = None
+            # Skip games too far out to have a crew yet; a later run picks them up.
+            if when and (when - now).days > LOOKAHEAD_DAYS:
+                continue
             comps = (ev.get("competitions") or [{}])[0].get("competitors") or []
             home = next((c for c in comps if c.get("homeAway") == "home"), {})
             away = next((c for c in comps if c.get("homeAway") == "away"), {})

@@ -208,16 +208,23 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
               <dd className="cxrow__v">{wx.windFlag && <b className="wxflag">⚑&nbsp;WIND</b>} {weatherCell(wx)}</dd>
             </div>
           )}
-          {/* Only when we actually have a crew. "Crew tagged game week" was a row that carried no
-              information, and a placeholder is indistinguishable from a feature that is waiting —
-              which is precisely how this row sat empty for months without anyone noticing the
-              source could never fill it. */}
-          {crew && (
-            <div className="cxrow">
-              <dt className="cxrow__k">Referee</dt>
-              <dd className="cxrow__v">{refereeCell(crew)}</dd>
-            </div>
-          )}
+          {/* Shown on every game. I had made this row conditional after it sat empty for months —
+              but that was a BROKEN SOURCE (nflverse fills `referee` only post-game), and the source
+              is fixed now. What remains is ordinary timing: the NFL publishes a crew close to
+              kickoff, so on 9 September only tonight's game had one and the other fifteen returned
+              zero officials from both ESPN endpoints. Derek: "put the referee crews back for all
+              games."
+              The distinction worth keeping: "assigned closer to kickoff" is a true statement with a
+              date attached, and it came true for this game within the day. "Player Incentives:
+              coming soon" was a placeholder with no resolution, which is why that one stays
+              hidden. A row that will fill itself is worth keeping; a row that never will is not. */}
+          <div className="cxrow">
+            <dt className="cxrow__k">Referee</dt>
+            <dd className="cxrow__v">
+              {crew ? refereeCell(crew)
+                    : <span className="muted">Crew assigned closer to kickoff</span>}
+            </dd>
+          </div>
           {/* Same rule as the referee row above: print it when there is something to print.
               "Player Incentives: coming soon" appeared on all sixteen cards and said nothing —
               in preseason NOBODY is near an incentive, so the row is empty by definition until
