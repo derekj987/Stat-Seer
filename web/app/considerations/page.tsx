@@ -4,6 +4,7 @@ import { weekRefs } from "@/lib/refAssignments";
 import { REF_STATS, REF_LEAGUE } from "@/lib/refStats";
 import { GAME_WEATHER, WEATHER_WEEK, WEATHER_UPDATED, type GameWeather } from "@/lib/weatherData";
 import { INCENTIVE_WATCH } from "@/lib/incentiveWatch";
+import { Fragment } from "react";
 import { TEAM_RATINGS, RATINGS_SEASON, RATINGS_IS_PRIOR } from "@/lib/teamRatings";
 import { COACH_TENDENCIES } from "@/lib/coachTendencies";
 import { CONTENTION } from "@/lib/contention";
@@ -157,27 +158,40 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
             </dd>
           </div>
           {hasRatings ? (
-            <>
-              <div className="cxrow">
-                {/* The season belongs on the VALUE, not the label. Putting it in the label wrapped
-                    "OFFENSE" onto two lines and made two consecutive rows start with the same
-                    word — the audit reported it as a repeated row label 11 times. */}
-                <dt className="cxrow__k">Offense</dt>
-                <dd className="cxrow__v">{g.away} <b>{ra!.off}</b> <span className="cxrank">({ord(ra!.offRank)})</span> · {g.home} <b>{rh!.off}</b> <span className="cxrank">({ord(rh!.offRank)})</span> <span className="cxinc__prog">pts/gm{RATINGS_IS_PRIOR ? ` · ${RATINGS_SEASON}` : ""}</span></dd>
-              </div>
-              <div className="cxrow">
-                <dt className="cxrow__k">Defense</dt>
-                <dd className="cxrow__v">{g.away} <b>{ra!.def}</b> <span className="cxrank">({ord(ra!.defRank)})</span> · {g.home} <b>{rh!.def}</b> <span className="cxrank">({ord(rh!.defRank)})</span> <span className="cxinc__prog">pts/gm allowed{RATINGS_IS_PRIOR ? ` · ${RATINGS_SEASON}` : ""}</span></dd>
-              </div>
-            </>
+            /* ONE Scoring row instead of an Offense row and a Defense row. The two said the same
+               shape of thing about the same two teams, and each repeated both team codes and its
+               own unit — six repetitions of "NE"/"SEA" and two unit strings across two rows. As a
+               small grid it is one row, each team appears once, and the units are stated once in
+               the header, which also stops the values sitting at ragged x-positions. */
+            <div className="cxrow cxrow--score">
+              <dt className="cxrow__k">Scoring</dt>
+              <dd className="cxrow__v">
+                <div className="cxstat cxstat--score">
+                  <span className="cxstat__h" />
+                  <span className="cxstat__h">scored</span>
+                  <span className="cxstat__h">allowed</span>
+                  {([[g.away, ra!], [g.home, rh!]] as const).map(([tm, r]) => (
+                    <Fragment key={tm}>
+                      <span className="cxstat__tm">{tm}</span>
+                      <span><b>{r.off}</b> <span className="cxrank">({ord(r.offRank)})</span></span>
+                      <span><b>{r.def}</b> <span className="cxrank">({ord(r.defRank)})</span></span>
+                    </Fragment>
+                  ))}
+                </div>
+                <div className="cxstat__note">pts/gm{RATINGS_IS_PRIOR ? ` · ${RATINGS_SEASON}` : ""}</div>
+              </dd>
+            </div>
           ) : (
             <div className="cxrow">
               <dt className="cxrow__k">Ratings</dt>
               <dd className="cxrow__v"><span className="muted">Off/def ratings arrive with the season</span></dd>
             </div>
           )}
+          {/* Not cxrow--wide any more: that stacks the label above the value, which was needed when
+              Coaching was a wide prose line. As a compact grid it fits the standard label-left row,
+              which keeps it aligned with SITE and WEATHER above and below. */}
           {(COACH_TENDENCIES[g.away] || COACH_TENDENCIES[g.home]) && (
-            <div className="cxrow cxrow--coach cxrow--wide">
+            <div className="cxrow cxrow--coach">
               <dt className="cxrow__k">Coaching</dt>
               <dd className="cxrow__v"><CoachTable away={g.away} home={g.home} /></dd>
             </div>
@@ -265,7 +279,7 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
               {groupByGameDay(games, (x) => x.g.commence, today, tomorrow).map((grp) => (
                 <div className="daygrid__day" key={grp.key} style={dayBasis(grp.items.length, 2, 476, 16)}>
                   <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
-                  <section className="cxgrid">{grp.items.map(renderCard)}</section>
+                  <section className="cxstat">{grp.items.map(renderCard)}</section>
                 </div>
               ))}
             </div>

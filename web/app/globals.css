@@ -996,13 +996,42 @@ a.sportstrip__i:hover{color:var(--ink)}
 .cxrow--wide{display:block}
 .cxrow--wide .cxrow__k{display:block;margin-bottom:6px}
 /* Coaching context — a plain stat line per coach (pts/g · off yds/g · def yds/g allowed) */
-.cxcoachlns{display:flex;flex-direction:column;gap:7px}
-.cxcoachln{font-size:12.5px;line-height:1.5}
-.cxcoachln__tm{color:var(--muted)}
-.cxcoachln__nm{color:var(--ink);font-weight:700}
-.cxcoachln__stats{color:var(--ink);font-variant-numeric:tabular-nums}
-.cxcoachln__stats b{font-weight:800}
-.cxcoachln__none{color:var(--muted);font-style:italic}
+/* Shared mini-grid for the Scoring and Coaching rows on a considerations card. Both used to be
+   sentences that repeated a team code and a unit string on every line — "NE 28.8 (2nd) · SEA 28.4
+   (3rd) pts/gm" twice for scoring, three units twice for coaching — which made Coaching the widest
+   row on the card and the only one that wrapped. Stating each unit ONCE in a header turns the
+   values into columns a reader can compare down, and both rows share the alignment.
+   Tabular numerals so the digits line up as well as the tracks do. */
+/* NB: `.cxgrid` was already taken — it is the CARD grid that lays considerations cards out two
+   across. Naming this block cxgrid too silently restyled that container (align-items:baseline
+   instead of stretch), which made the homepage's two cards differ by 21px. Hence `cxstat`. */
+.cxstat{display:grid;gap:3px 12px;align-items:baseline;font-size:12.5px;line-height:1.45;
+  font-variant-numeric:tabular-nums}
+.cxstat--score{grid-template-columns:34px minmax(0,1fr) minmax(0,1fr)}
+.cxstat--coach{grid-template-columns:34px minmax(0,1fr) 44px 52px 52px}
+.cxstat__h{font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--muted);white-space:nowrap}
+.cxstat__tm{color:var(--muted);font-weight:700}
+.cxstat__nm{color:var(--ink);font-weight:700;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap}
+.cxstat b{font-weight:800}
+/* A first-year coach has nothing to report: one phrase across the three stat columns rather than
+   three dashes, which read as missing data instead of "there is none yet". */
+.cxstat__none{grid-column:3 / -1;color:var(--muted);font-style:italic}
+.cxstat__note{margin-top:5px;font-size:10.5px;color:var(--muted)}
+/* On a phone the label column costs 80px the grid needs. Measured at 375: the coach-name track
+   collapsed to 0 and 32 names clipped. Below 560 the label goes back above the value (what
+   cxrow--wide did before these rows became grids) and the stat tracks tighten, which gives the
+   name ~96px instead of nothing. */
+@media (max-width:560px){
+  .cxrow--score,.cxrow--coach{display:block}
+  .cxrow--score>.cxrow__k,.cxrow--coach>.cxrow__k{display:block;margin-bottom:5px}
+  .cxstat{gap:3px 9px}
+  /* 30/38/44/44 rather than 32/40/46/46: the league's longest surname, Schottenheimer, needed 93px
+     against 85 and was the one name still ellipsising. The stat columns hold 3-digit numbers and
+     had the slack to give. */
+  .cxstat--coach{grid-template-columns:30px minmax(0,1fr) 38px 44px 44px}
+}
 .cxrank{color:var(--muted);font-size:11.5px;font-variant-numeric:tabular-nums}
 .cxroof{color:var(--muted)}
 .cxref__h{font-size:14px;font-weight:800;margin:16px 0 6px;color:var(--ink)}

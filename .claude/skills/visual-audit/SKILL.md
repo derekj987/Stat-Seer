@@ -1950,6 +1950,22 @@ A hero/banner escapes its container with negative margins plus an over-100% widt
 element has to cancel that too — otherwise it stops short and leaves a strip of page background.
 Whenever you change a container's padding, re-check every full-bleed child inside it.
 
+### 🚨 A NEW class name can collide as easily as an edited rule
+The "shared global CSS" rule below is about EDITING a rule. Adding one is the same hazard from the
+other direction: `.cxgrid` was introduced for a small stat grid inside a considerations card, and
+`.cxgrid` already existed as the CARD grid that lays those cards out two across. The new
+`align-items:baseline` silently replaced the container's stretch, and the homepage's two cards
+stopped matching — 21px apart, two components away from anything that had been touched.
+
+**Grep the name before you invent it**, exactly as you would before changing one:
+```bash
+grep -c "cxgrid" web/app/globals.css        # 0 means the name is free; anything else, pick another
+```
+The tell in the audit is a finding on a page you did not edit. Note also that the probe's
+`unequal-row-height` container selector ends in a deliberately broad `[class*='grid']`, so a new
+class with "grid" in its name is doubly worth checking — it opts the element into a check written
+for cards.
+
 ### Why a change "over here" surfaces a bug "over there"
 Two distinct causes — tell them apart before assuming you broke something:
 

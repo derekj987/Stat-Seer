@@ -154,6 +154,12 @@
       if (group.length < 2) continue;
       const hs = group.map((k) => Math.round(rectOf(k).height));
       const spread = Math.max(...hs) - Math.min(...hs);
+      // This check is about CARDS sharing a row, but its container selector ends in a deliberately
+      // broad `[class*='grid']` — which also matches any small data grid, and then compares its
+      // CELLS. A 10px uppercase column header beside a 12.5px value differs by ~18px and is
+      // correct; the considerations card's new stat grids reported it seven times. A card has
+      // height, a text cell does not, so require the tallest sibling to be card-sized.
+      if (Math.max(...hs) < 48) continue;
       if (spread > CFG.rowHeightTol) {
         add("unequal-row-height", "medium", c, `${group.length} siblings in a row differ by ${spread}px`, { heights: hs });
         break; // one finding per container is enough
