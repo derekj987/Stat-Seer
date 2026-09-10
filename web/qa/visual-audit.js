@@ -780,11 +780,16 @@
   }
   for (const [, g] of colGroups) {
     const head = g.head;
+    // Measure ink over EVERY data row, including the ones hidden behind the "show more" cap.
+    // A capped row is real data; skipping it measures the column against a partial sample and
+    // overstates its slack. /mlb/model reported "start % has 79px of empty width" purely because
+    // the pre-expand pass could only see four rows per card and the widest value sat in a hidden
+    // fifth. The clone used for measuring sets display:inline-block explicitly, so a cell inside a
+    // collapsed row still measures correctly.
     const rows = [];
     for (const t of g.tables) {
       for (const r of t.querySelectorAll('[class*="--data"], tbody tr')) {
         if (r === t.querySelector('[class*="--head"], thead tr')) continue;
-        if (!vis(r) || r.classList.contains("hb-row--more")) continue;
         rows.push(r);
       }
     }

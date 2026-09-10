@@ -226,11 +226,36 @@ def prior_year_rates(prior):
         if n == 0:
             continue
         row = g.iloc[-1]
+        # A QB's per-game passing volume counts games he PLAYED QUARTERBACK, not games he was
+        # active. Derek: "we have no QBs going over on their TD pass projections."
+        #
+        # The two halves of the projection were measured on different populations. `tdr` and `ypa`
+        # in build_baselines are computed over STARTS ONLY (`attempts >= 15`) — deliberately, so
+        # relief cameos do not distort the rate — while this per-player volume was averaged over
+        # every appearance, cameos included. Multiplying a starter rate by an all-games volume
+        # understates every quarterback.
+        #
+        # Measured on 2025, 37 QBs with 6+ starts: 29.81 attempts per game over all appearances
+        # against 31.61 over starts — 6% low on average, and far worse for anyone who split a
+        # season (Mac Jones 26.3 vs 36.1, Joe Flacco 32.0 vs 41.0). Downstream that put our median
+        # passing-TD projection at 1.35 against a 1.5 line, so 3 of 31 QBs projected over while
+        # those same players had cleared that line in 49% of their own career games. The formula
+        # itself was fine: 31.5 league attempts x 0.0469 TD/attempt = 1.48, which is exactly the
+        # measured league mean of 1.477. Only the input was wrong.
+        #
+        # The general rule: THE DENOMINATOR OF A PER-GAME RATE MUST MATCH THE POPULATION THE
+        # EFFICIENCY BASELINE WAS MEASURED ON. Rushing and receiving are unaffected — a back who
+        # plays every week at low volume genuinely is low volume, and there is no "start" filter
+        # on their baselines to disagree with.
+        starts = g[g.attempts >= 15]
+        ns = starts.week.nunique()
+        att_pg = (starts.attempts.sum() / ns) if ns else (g.attempts.sum() / n)
         rates[norm(str(row.player_display_name))] = {
             "name": row.player_display_name, "pos": row.position, "team": row.team, "games": int(n),
             "pid": row.player_id,
             "carries_pg": g.carries.sum() / n, "targets_pg": g.targets.sum() / n,
-            "att_pg": g.attempts.sum() / n,
+            "att_pg": att_pg,
+            "qb_starts": int(ns),
             "pass_att": g.attempts.sum(), "pass_ypa": g.passing_yards.sum() / max(g.attempts.sum(), 1),
         }
     return rates

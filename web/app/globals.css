@@ -3252,9 +3252,21 @@ a.snav__dfeat{display:block}
    of slack. Alignment across rows comes from every row sharing this template, not from the tracks
    being the same size — so weight them by what they hold. Measured needs, sampled off the rendered
    board: book 43 / ours 43 / career 130 / prior 95, headers 57 / 47 / 110 / 127. */
+/* Player raised 175 -> 205 and the two rate columns trimmed to pay for it. At 175 the longest
+   NFL line, "Jaxon Smith-Njigba (WR1, SEA)" at ~200px, wrapped BEFORE the matchup pill, so a row
+   could run to three lines while its neighbour used one — measured heights 44 / 62 / 83 on the
+   touchdown board. At 205 the name always takes one line and the pill always takes the second,
+   which is what makes every row the same shape. Budget: 205+76+56+56+112+112+84 = 701
+   = 829 scroller - 32 padding - (6 x 16) gaps. */
 .pmrow--data{display:grid;
-  grid-template-columns:minmax(175px,1.5fr) 84px 58px 56px minmax(122px,1.3fr) minmax(112px,1.2fr) 84px;
+  grid-template-columns:minmax(205px,1.5fr) 76px 56px 56px minmax(112px,1.2fr) minmax(112px,1.2fr) 84px;
   gap:16px;align-items:baseline;border-top:1px solid var(--line);font-size:13px}
+/* EVEN ROWS. A row is its own grid, so it sizes to its own tallest cell and one wrapped name made
+   that row taller than its neighbours. Fixed height rather than min-height: a floor lifts the
+   short rows and leaves the tall ones exactly as tall. Sized to two lines, which is what a row
+   with a matchup pill needs, and verified to clip nothing. */
+.pmtable--data .pmrow--data:not(.pmrow--head){height:62px;align-items:center}
+.pmtable--data .pmrow--head{align-items:end}
 /* passing table adds Home % / Road % → six stat columns instead of four */
 .pmtable--ha{min-width:1145px;max-width:1300px}
 /* MLB availability board. Five columns instead of football's nine — baseball's Stage A answers

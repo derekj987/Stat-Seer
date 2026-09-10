@@ -159,12 +159,15 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
           {hasRatings ? (
             <>
               <div className="cxrow">
-                <dt className="cxrow__k">Offense{RATINGS_IS_PRIOR ? <span className="cxinc__prog"> {RATINGS_SEASON}</span> : null}</dt>
-                <dd className="cxrow__v">{g.away} <b>{ra!.off}</b> <span className="cxrank">({ord(ra!.offRank)})</span> · {g.home} <b>{rh!.off}</b> <span className="cxrank">({ord(rh!.offRank)})</span> <span className="cxinc__prog">pts/gm</span></dd>
+                {/* The season belongs on the VALUE, not the label. Putting it in the label wrapped
+                    "OFFENSE" onto two lines and made two consecutive rows start with the same
+                    word — the audit reported it as a repeated row label 11 times. */}
+                <dt className="cxrow__k">Offense</dt>
+                <dd className="cxrow__v">{g.away} <b>{ra!.off}</b> <span className="cxrank">({ord(ra!.offRank)})</span> · {g.home} <b>{rh!.off}</b> <span className="cxrank">({ord(rh!.offRank)})</span> <span className="cxinc__prog">pts/gm{RATINGS_IS_PRIOR ? ` · ${RATINGS_SEASON}` : ""}</span></dd>
               </div>
               <div className="cxrow">
-                <dt className="cxrow__k">Defense{RATINGS_IS_PRIOR ? <span className="cxinc__prog"> {RATINGS_SEASON}</span> : null}</dt>
-                <dd className="cxrow__v">{g.away} <b>{ra!.def}</b> <span className="cxrank">({ord(ra!.defRank)})</span> · {g.home} <b>{rh!.def}</b> <span className="cxrank">({ord(rh!.defRank)})</span> <span className="cxinc__prog">pts/gm allowed</span></dd>
+                <dt className="cxrow__k">Defense</dt>
+                <dd className="cxrow__v">{g.away} <b>{ra!.def}</b> <span className="cxrank">({ord(ra!.defRank)})</span> · {g.home} <b>{rh!.def}</b> <span className="cxrank">({ord(rh!.defRank)})</span> <span className="cxinc__prog">pts/gm allowed{RATINGS_IS_PRIOR ? ` · ${RATINGS_SEASON}` : ""}</span></dd>
               </div>
             </>
           ) : (
@@ -191,27 +194,38 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
               <dd className="cxrow__v">{wx.windFlag && <b className="wxflag">⚑&nbsp;WIND</b>} {weatherCell(wx)}</dd>
             </div>
           )}
-          <div className="cxrow">
-            <dt className="cxrow__k">Referee</dt>
-            <dd className="cxrow__v">{crew ? refereeCell(crew) : <span className="muted">Crew tagged game week</span>}</dd>
-          </div>
-          <div className="cxrow cxrow--inc">
-            <dt className="cxrow__k">Incentive</dt>
-            <dd className="cxrow__v">
-              {incs.length > 0 ? (
-                incs.map((i) => (
-                  <span className="cxinc" key={`${i.player}-${i.requirement}`}>
-                    <b>{i.player}</b> — {i.needed} from {i.amount}{" "}
-                    <span className="cxinc__prog">({i.requirement}; now {i.currently})</span>
-                  </span>
-                ))
-              ) : INCENTIVE_WATCH.length === 0 ? (
-                <span className="muted">Player Incentives: coming soon</span>
-              ) : (
-                <span className="muted">No player near an incentive</span>
-              )}
-            </dd>
-          </div>
+          {/* Only when we actually have a crew. "Crew tagged game week" was a row that carried no
+              information, and a placeholder is indistinguishable from a feature that is waiting —
+              which is precisely how this row sat empty for months without anyone noticing the
+              source could never fill it. */}
+          {crew && (
+            <div className="cxrow">
+              <dt className="cxrow__k">Referee</dt>
+              <dd className="cxrow__v">{refereeCell(crew)}</dd>
+            </div>
+          )}
+          {/* Same rule as the referee row above: print it when there is something to print.
+              "Player Incentives: coming soon" appeared on all sixteen cards and said nothing —
+              in preseason NOBODY is near an incentive, so the row is empty by definition until
+              the season runs. "No player near an incentive" IS information (we looked, there is
+              none), so that one stays. */}
+          {(incs.length > 0 || INCENTIVE_WATCH.length > 0) && (
+            <div className="cxrow cxrow--inc">
+              <dt className="cxrow__k">Incentive</dt>
+              <dd className="cxrow__v">
+                {incs.length > 0 ? (
+                  incs.map((i) => (
+                    <span className="cxinc" key={`${i.player}-${i.requirement}`}>
+                      <b>{i.player}</b> — {i.needed} from {i.amount}{" "}
+                      <span className="cxinc__prog">({i.requirement}; now {i.currently})</span>
+                    </span>
+                  ))
+                ) : (
+                  <span className="muted">No player near an incentive</span>
+                )}
+              </dd>
+            </div>
+          )}
         </dl>
       </article>
     );
