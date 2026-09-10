@@ -4,39 +4,9 @@
 // RATINGS_IS_PRIOR says which, so the page can label it rather than imply it is current.
 export interface TeamRating { team: string; off: number; def: number;
   offRank: number; defRank: number; games: number }
-export const RATINGS_SEASON = 2025;
-export const RATINGS_IS_PRIOR = true;
+export const RATINGS_SEASON = 2026;
+export const RATINGS_IS_PRIOR = false;
 export const TEAM_RATINGS: Record<string, TeamRating> = {
-  "ARI": { team: "ARI", off: 20.9, def: 28.7, offRank: 22, defRank: 29, games: 17 },
-  "ATL": { team: "ATL", off: 20.8, def: 23.6, offRank: 24, defRank: 19, games: 17 },
-  "BAL": { team: "BAL", off: 24.9, def: 23.4, offRank: 11, defRank: 18, games: 17 },
-  "BUF": { team: "BUF", off: 28.3, def: 21.5, offRank: 5, defRank: 12, games: 17 },
-  "CAR": { team: "CAR", off: 18.3, def: 22.4, offRank: 27, defRank: 15, games: 17 },
-  "CHI": { team: "CHI", off: 25.9, def: 24.4, offRank: 9, defRank: 23, games: 17 },
-  "CIN": { team: "CIN", off: 24.4, def: 28.9, offRank: 12, defRank: 30, games: 17 },
-  "CLE": { team: "CLE", off: 16.4, def: 22.3, offRank: 31, defRank: 14, games: 17 },
-  "DAL": { team: "DAL", off: 27.7, def: 30.1, offRank: 7, defRank: 32, games: 17 },
-  "DEN": { team: "DEN", off: 23.6, def: 18.3, offRank: 14, defRank: 3, games: 17 },
-  "DET": { team: "DET", off: 28.3, def: 24.3, offRank: 4, defRank: 22, games: 17 },
-  "GB": { team: "GB", off: 23.0, def: 21.2, offRank: 16, defRank: 11, games: 17 },
-  "HOU": { team: "HOU", off: 23.8, def: 17.4, offRank: 13, defRank: 2, games: 17 },
-  "IND": { team: "IND", off: 27.4, def: 24.2, offRank: 8, defRank: 21, games: 17 },
-  "JAX": { team: "JAX", off: 27.9, def: 19.8, offRank: 6, defRank: 8, games: 17 },
-  "KC": { team: "KC", off: 21.3, def: 19.3, offRank: 21, defRank: 6, games: 17 },
-  "LA": { team: "LA", off: 30.5, def: 20.4, offRank: 1, defRank: 10, games: 17 },
-  "LAC": { team: "LAC", off: 21.6, def: 20.0, offRank: 20, defRank: 9, games: 17 },
-  "LV": { team: "LV", off: 14.2, def: 25.4, offRank: 32, defRank: 25, games: 17 },
-  "MIA": { team: "MIA", off: 20.4, def: 24.9, offRank: 25, defRank: 24, games: 17 },
-  "MIN": { team: "MIN", off: 20.2, def: 19.6, offRank: 26, defRank: 7, games: 17 },
-  "NE": { team: "NE", off: 28.8, def: 18.8, offRank: 2, defRank: 4, games: 17 },
-  "NO": { team: "NO", off: 18.0, def: 22.5, offRank: 28, defRank: 16, games: 17 },
-  "NYG": { team: "NYG", off: 22.4, def: 25.8, offRank: 18, defRank: 26, games: 17 },
-  "NYJ": { team: "NYJ", off: 17.6, def: 29.6, offRank: 29, defRank: 31, games: 17 },
-  "PHI": { team: "PHI", off: 22.3, def: 19.1, offRank: 19, defRank: 5, games: 17 },
-  "PIT": { team: "PIT", off: 23.4, def: 22.8, offRank: 15, defRank: 17, games: 17 },
-  "SEA": { team: "SEA", off: 28.4, def: 17.2, offRank: 3, defRank: 1, games: 17 },
-  "SF": { team: "SF", off: 25.7, def: 21.8, offRank: 10, defRank: 13, games: 17 },
-  "TB": { team: "TB", off: 22.4, def: 24.2, offRank: 17, defRank: 20, games: 17 },
-  "TEN": { team: "TEN", off: 16.7, def: 28.1, offRank: 30, defRank: 28, games: 17 },
-  "WAS": { team: "WAS", off: 20.9, def: 26.5, offRank: 23, defRank: 27, games: 17 },
+  "NE": { team: "NE", off: 10.0, def: 13.0, offRank: 2, defRank: 2, games: 1 },
+  "SEA": { team: "SEA", off: 13.0, def: 10.0, offRank: 1, defRank: 1, games: 1 },
 };
