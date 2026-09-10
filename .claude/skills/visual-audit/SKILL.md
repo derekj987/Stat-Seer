@@ -1998,6 +1998,58 @@ A hero/banner escapes its container with negative margins plus an over-100% widt
 element has to cancel that too — otherwise it stops short and leaves a strip of page background.
 Whenever you change a container's padding, re-check every full-bleed child inside it.
 
+### 🚨 A page-time read of an APPEND-ONLY table will exhaust the database
+The most expensive mistake in this file. Derek: *"the pages will not load anymore"* — with a
+Supabase warning that the project had depleted its Disk IO budget. The instance was answering 503,
+then 500.
+
+`prop_snapshots` is append-only: every sweep writes a fresh row per (book, market, player, side,
+line), so ONE NFL week holds **119,218 rows** and the table only grows. `weekProps` read the whole
+week — ~120 paged requests — on every ISR revalidation, on `/props`, `/best`, `/audit`,
+`/model/players` and the slip, each with its own cache. Only the newest sweep is ever used; the
+other ~100,000 rows were scanned and thrown away. I then added `fanduelLines`, a SECOND full scan
+of the same table, and spent a session reloading those pages for audits.
+
+**The correct pattern was already in the codebase.** `cfbProps.ts` probes for the latest timestamp
+with `limit=1` and then reads only rows at it — two cheap requests instead of a full scan:
+```ts
+const [{ collected_at }] = await get(`?...&select=collected_at&order=collected_at.desc&limit=1`);
+const rows = await pgAll(`?...&collected_at=gte.${new Date(Date.parse(collected_at) - 60*60_000).toISOString()}`);
+```
+**Before adding any page-time read, ask how the table GROWS and how much of it the render
+actually uses.** A snapshot table is the dangerous shape: correct on day one, ruinous by week two,
+and the symptom arrives as "the site is down" rather than as a slow page.
+
+```bash
+# every runtime reader, and whether it bounds what it pulls
+grep -rn "rest/v1" web/lib/*.ts | grep -v "limit=1"
+```
+Watch for the same shape in `mlbProps.ts`, `mlbBoard.ts` and `board.ts`, which also page whole
+tables. And note what an audit costs: repeatedly reloading boards to re-run the probe is itself
+heavy traffic against these reads.
+
+### 🚨 A CSS edit must be brace-balanced — check it, do not eyeball it
+The homepage reported `page-overflow-x` of +413px at 1440 and no element past the right edge. The
+cause: an `@media (max-width:640px)` block opened at line 4073 **and never closed**, so every rule
+after it — the whole highlight banner, the feedback widget — became mobile-only. Above 640px those
+elements fell back to UA defaults (`display:inline` on a flex row), and a 1600px image ran 413px
+past the viewport.
+
+I did it. A scripted edit anchored on text that ENDED with the block's closing `}` and the
+replacement did not re-emit it. That is the specific hazard: **an anchor whose last character is
+`}` deletes a block boundary unless the replacement puts it back.**
+
+The tell in the DOM is a computed style that matches no rule you wrote:
+```js
+getComputedStyle(el).display    // "inline" where the CSS says flex => the rule is not applying
+// then find out WHY — is it inside a media query that does not match?
+[...document.styleSheets].flatMap(s => [...s.cssRules]).filter(r => r.conditionText)
+```
+After any scripted CSS edit, count braces outside comments — it takes a second and it is decisive:
+```bash
+python -c "import re,pathlib;t=re.sub(r'/\*.*?\*/','',pathlib.Path('web/app/globals.css').read_text(encoding='utf-8'),flags=re.S);print(t.count('{'),t.count('}'))"
+```
+
 ### 🚨 Never rename a class with a blanket regex over a file
 `card-width-mismatch`. Derek: *"the context cards got messed up... put them next to each other
 again. How did this happen?"* I did it, one commit earlier, fixing a different bug.

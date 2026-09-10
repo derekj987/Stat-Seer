@@ -84,6 +84,44 @@ export interface PropGame {
   markets: MarketBlock[];
 }
 
+/** How far back to look for the newest capture.
+ *
+ *  `prop_snapshots` is APPEND-ONLY: every sweep writes a fresh row per (book, market, player,
+ *  side, line), so one NFL week accumulates ~119,000 rows and the table only grows. Reading the
+ *  whole week on every render — which is what these functions did — is ~120 paged requests and a
+ *  full scan per ISR window, per page, per region. That is what emptied the project's Disk IO
+ *  budget and made the instance start answering 503.
+ *
+ *  Only the newest sweep is ever used (see `newestCapture`), so the newest sweep is all we should
+ *  ask for. Captures run every 6h, so an 8h window always contains at least one complete sweep
+ *  while cutting the read by roughly 6x. If a capture has been down longer than that the filtered
+ *  read comes back empty and we fall back to the unbounded one, so a stale board still renders. */
+const CAPTURE_WINDOW_MIN = 60;   // one sweep writes its batches within an hour
+
+/** `collected_at>=` filter pinned to the NEWEST capture, found with a one-row probe.
+ *
+ *  This is the pattern `cfbProps.ts` has always used — ask for the latest timestamp, then read
+ *  only rows at it — and the NFL side should have been doing the same. Two cheap requests instead
+ *  of ~120 paged ones, and the scan drops from a whole week to a single sweep.
+ *  Returns "" if the probe fails, so the caller falls back to the unbounded read. */
+async function sinceNewest(base: string, filters: string): Promise<string> {
+  const url = process.env.SUPABASE_URL, key = process.env.SUPABASE_SERVICE_KEY;
+  if (!url || !key) return "";
+  try {
+    const res = await fetch(
+      `${url.replace(/\/$/, "")}/rest/v1/${base}${filters}` +
+      `&select=collected_at&order=collected_at.desc&limit=1`,
+      { headers: { apikey: key, Authorization: `Bearer ${key}` }, next: { revalidate: 120 } });
+    if (!res.ok) return "";
+    const rows = (await res.json()) as { collected_at: string | null }[];
+    const t = rows[0]?.collected_at ? Date.parse(rows[0].collected_at as string) : NaN;
+    if (Number.isNaN(t)) return "";
+    return `&collected_at=gte.${new Date(t - CAPTURE_WINDOW_MIN * 60_000).toISOString()}`;
+  } catch {
+    return "";
+  }
+}
+
 async function pgAll(query: string): Promise<PropRow[]> {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
@@ -157,11 +195,14 @@ function newestCapture(rows: PropRow[]): PropRow[] {
 }
 
 export async function weekProps(week: number, season = 2026): Promise<PropGame[]> {
-  const all = await pgAll(
-    `?season=eq.${season}&week=eq.${week}&event_id=neq.test` + // exclude the dev test row
-      `&select=snapshot_at,collected_at,event_id,commence_time,home_team,away_team,book,market,` +
-      `player_name,side,line,price_american&order=snapshot_at.desc`
-  );
+  const q = `?season=eq.${season}&week=eq.${week}&event_id=neq.test` + // exclude the dev test row
+    `&select=snapshot_at,collected_at,event_id,commence_time,home_team,away_team,book,market,` +
+    `player_name,side,line,price_american&order=snapshot_at.desc`;
+  // Ask the DATABASE for the recent rows rather than pulling the week and filtering here.
+  const since = await sinceNewest("prop_snapshots",
+    `?season=eq.${season}&week=eq.${week}&event_id=neq.test`);
+  let all = await pgAll(q + since);
+  if (!all.length && since) all = await pgAll(q);   // probe was stale — take whatever exists
   if (!all.length) return [];
   const rows = newestCapture(all);
 
@@ -259,11 +300,13 @@ export async function weekProps(week: number, season = 2026): Promise<PropGame[]
 export async function fanduelLines(week: number, season = 2026): Promise<Map<string, number>> {
   const out = new Map<string, number>();
   try {
-    const all = await pgAll(
-      `?season=eq.${season}&week=eq.${week}&event_id=neq.test&book=eq.fanduel` +
-        `&select=snapshot_at,collected_at,event_id,commence_time,home_team,away_team,book,market,` +
-        `player_name,side,line,price_american&order=snapshot_at.desc`
-    );
+    const q = `?season=eq.${season}&week=eq.${week}&event_id=neq.test&book=eq.fanduel` +
+      `&select=snapshot_at,collected_at,event_id,commence_time,home_team,away_team,book,market,` +
+      `player_name,side,line,price_american&order=snapshot_at.desc`;
+    const since = await sinceNewest("prop_snapshots",
+      `?season=eq.${season}&week=eq.${week}&event_id=neq.test&book=eq.fanduel`);
+    let all = await pgAll(q + since);
+    if (!all.length && since) all = await pgAll(q);
     const rows = newestCapture(all);
     // A book posts a ladder of alternates on one market; its MAIN line is the rung priced closest
     // to even money, since an alternate is priced away from even by construction.

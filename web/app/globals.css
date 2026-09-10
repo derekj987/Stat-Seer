@@ -4153,6 +4153,7 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .hb-form.hb-form--cards td .hb-game{display:inline;font-size:13.5px;line-height:1.35}
   .hb-form.hb-form--cards td .hb-at{margin:0 5px;font-size:11px;line-height:inherit;
     text-transform:none;letter-spacing:0}
+}
 /* Seer. Mobile: a wide image across the very bottom (hb-side stacks under content).
    Desktop (>=1100px): a 2-column grid, content left + a STICKY seer right that
    stays in view while scrolling and settles at the content bottom (above the
