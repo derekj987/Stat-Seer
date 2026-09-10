@@ -44,7 +44,7 @@ export default function NcaafLinesTable({ games, today, tomorrow }: { games: Nca
         <div key={grp.key}>
           {!grp.cont && <DayHeader label={grp.label} tone={grp.tone} count={grp.total ?? grp.items.length} />}
           <div className="hb-formwrap">
-          <table className="hb-form hb-form--mkt ncline">
+          <table className="hb-form hb-form--mkt hb-form--cards ncline">
             {i === 0 && <NcaafCardHead />}
             <tbody>
               {grp.items.map((g) => {
@@ -55,13 +55,13 @@ export default function NcaafLinesTable({ games, today, tomorrow }: { games: Nca
                 return (
                   <tr key={k} className={g.off ? "hb-off" : undefined}>
                     <NcaafGameCell g={g} />
-                <td className="hb-num">
+                <td className="hb-num" data-l="Market spread">
                   <div className="ncline__chips">
                     <Chip item={{ id: `ncsp-${k}-f`, kind: "line", title: `${abbrevTeam(ms.fav)} ${ms.num}`, detail: mk, price: -110 }} />
                     <Chip item={{ id: `ncsp-${k}-d`, kind: "line", title: `${abbrevTeam(dog)} +${Math.abs(ms.num)}`, detail: mk, price: -110 }} />
                   </div>
                 </td>
-                <td className="hb-num hb-tot">
+                <td className="hb-num hb-tot" data-l="Market O/U">
                   {g.marketTotal != null ? (
                     <div className="ncline__chips">
                       <Chip item={{ id: `nctot-${k}-o`, kind: "line", title: `Over ${g.marketTotal}`, detail: mk, price: -110 }} />
@@ -69,8 +69,8 @@ export default function NcaafLinesTable({ games, today, tomorrow }: { games: Nca
                     </div>
                   ) : "—"}
                 </td>
-                <td className="hb-num hb-model">{abbrevTeam(g.projSpread.fav)} {g.projSpread.num}</td>
-                <td className="hb-num hb-model">{g.projTotal}</td>
+                <td className="hb-num hb-model" data-l="Model spread">{abbrevTeam(g.projSpread.fav)} {g.projSpread.num}</td>
+                <td className="hb-num hb-model" data-l="Model O/U">{g.projTotal}</td>
               </tr>
             );
           })}

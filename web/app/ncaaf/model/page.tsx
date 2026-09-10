@@ -29,8 +29,8 @@ function CardRows({ games, scores }: { games: readonly NcaafCardGame[]; scores?:
         return (
           <tr key={`${g.away}-${g.home}`} className={g.off ? "hb-off" : undefined}>
             <NcaafGameCell g={g} score={scores ? scoreFor(scores, g.away, g.home) : null} />
-            <td className="hb-num">{ms ? `${abbrevTeam(ms.fav)} ${ms.num}` : "—"}</td>
-            <td className="hb-num hb-tot">{g.marketTotal ?? "—"}</td>
+            <td className="hb-num" data-l="Market spread">{ms ? `${abbrevTeam(ms.fav)} ${ms.num}` : "—"}</td>
+            <td className="hb-num hb-tot" data-l="Market O/U">{g.marketTotal ?? "—"}</td>
             {/* FCS opponents are rated from their own results plus a fitted division offset, so these
                 rows carry a real projection (2025 out of sample, as displayed: MAE 12.8 vs the
                 market's 12.4). `rated` stays the guard for a side we genuinely cannot rate — a team
@@ -38,13 +38,13 @@ function CardRows({ games, scores }: { games: readonly NcaafCardGame[]; scores?:
                 and a dash is the honest answer. */}
             {g.rated === false ? (
               <>
-                <td className="hb-num" title="No game history for one side, so we have no rating for it — we don't publish a projection we can't grade.">—</td>
-                <td className="hb-num" title="No game history for one side, so we have no rating for it — we don't publish a projection we can't grade.">—</td>
+                <td className="hb-num" data-l="Model spread" title="No game history for one side, so we have no rating for it — we don't publish a projection we can't grade.">—</td>
+                <td className="hb-num" data-l="Model O/U" title="No game history for one side, so we have no rating for it — we don't publish a projection we can't grade.">—</td>
               </>
             ) : (
               <>
-                <td className="hb-num hb-model">{abbrevTeam(g.projSpread.fav)} {g.projSpread.num}</td>
-                <td className="hb-num hb-model">{g.projTotal}</td>
+                <td className="hb-num hb-model" data-l="Model spread">{abbrevTeam(g.projSpread.fav)} {g.projSpread.num}</td>
+                <td className="hb-num hb-model" data-l="Model O/U">{g.projTotal}</td>
               </>
             )}
           </tr>
@@ -79,7 +79,7 @@ export default async function Page({ searchParams }: {
           drawn above the boundary, so drawing another is the duplicate-day-header bug. */}
       {!grp.cont && <DayHeader label={grp.label} tone={grp.tone} count={grp.total ?? grp.items.length} />}
       <div className="hb-formwrap">
-        <table className="hb-form hb-form--mkt">
+        <table className="hb-form hb-form--mkt hb-form--cards">
           {i === 0 && <NcaafCardHead />}
           <tbody><CardRows games={grp.items} scores={scores} /></tbody>
         </table>

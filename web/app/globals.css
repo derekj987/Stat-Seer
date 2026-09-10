@@ -4114,7 +4114,45 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   /* stack the two suggested picks so the column stays narrow on a phone */
   .hb-sugwrap{flex-direction:column;align-items:flex-start;gap:5px}
   .hb-sug__t{font-size:11px}
-}
+
+  /* CARD LAYOUT for the two NCAAF boards. A five-column table is 560px wide in a 301px scroller,
+     so on a phone it scrolled sideways AND its rows came out 73 / 74 / 86 / 87 / 100px tall —
+     the matchup cell wraps to a different number of lines per game ("Richmond at NC St" takes
+     two, "#1 Ohio St at #4 Texas" takes four) and nothing can make that uniform while the column
+     is 168px wide. Forcing a break after "at" was measured and changed the heights not at all.
+     So the table stops being a table below 560px: each game becomes a card, the matchup gets the
+     full width instead of a sixth of it, and the four numbers sit in a 2x2 grid underneath with
+     their column names carried on `data-l`. Rows cannot be uneven because there are no rows.
+     OPT-IN via .hb-form--cards rather than styling .hb-form--mkt, which is shared with the NFL
+     model card and three LandingHub tables.
+     Two classes (0,2,0) so it beats the `.hb-form--mkt{min-width:560px}` and `white-space:nowrap`
+     rules above regardless of source order. */
+  .hb-form.hb-form--cards{display:block;min-width:0;width:100%;border-collapse:separate}
+  .hb-form.hb-form--cards thead{display:none}
+  .hb-form.hb-form--cards tbody{display:block}
+  .hb-form.hb-form--cards tr{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;
+    border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 8px;
+    background:var(--surface)}
+  .hb-form.hb-form--cards td{display:block;width:auto;border:0;padding:0;white-space:normal;
+    text-align:left;vertical-align:top}
+  /* the matchup spans the card and keeps its own type scale */
+  .hb-form.hb-form--cards td.hb-l{grid-column:1 / -1;padding-bottom:2px;
+    border-bottom:1px solid var(--line);margin-bottom:2px}
+  /* every other cell names its column, since the header row is gone */
+  .hb-form.hb-form--cards td[data-l]::before{content:attr(data-l);display:block;
+    font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:2px}
+  .hb-form.hb-form--cards .hb-formwrap,
+  .hb-formwrap:has(> .hb-form--cards){overflow-x:visible}
+  /* Undo the vertical team stack inside a card. `.hb-game` is inline-flex/column on mobile so the
+     Game COLUMN can stay narrow in the table layout — sensible there, wrong here: the cell is the
+     full width of the card, and stacking was what made the matchup 2, 3 or 4 lines depending on
+     the names ("#1 Ohio St" over "at" over "#4 Texas") and therefore what made the cards uneven.
+     Measured: the flex box had collapsed to 41px wide inside a 309px cell.
+     Three classes (0,3,0) so this beats the single-class mobile rule above whatever the order. */
+  .hb-form.hb-form--cards td .hb-game{display:inline;font-size:13.5px;line-height:1.35}
+  .hb-form.hb-form--cards td .hb-at{margin:0 5px;font-size:11px;line-height:inherit;
+    text-transform:none;letter-spacing:0}
 /* Seer. Mobile: a wide image across the very bottom (hb-side stacks under content).
    Desktop (>=1100px): a 2-column grid, content left + a STICKY seer right that
    stays in view while scrolling and settles at the content bottom (above the

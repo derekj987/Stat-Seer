@@ -1846,6 +1846,29 @@ header said the same thing once and freed ~180px — which is what made every ot
 tell is *constant within each card, different between cards*; `column-no-variance` will not catch it
 because board-wide the column varies perfectly well.
 
+### A five-column table becomes CARDS on a phone, not a sideways scroller
+The NCAAF boards were 560px of table in a 301px scroller: it scrolled sideways AND its rows came
+out 73 / 74 / 86 / 87 / 100px tall. No column budget can fix that — the matchup cell wraps to a
+different number of lines per game ("Richmond at NC St" takes two, "#1 Ohio St at #4 Texas" takes
+four) and the column is 168px wide. **When the content genuinely does not fit the viewport, stop
+making it a table.** Below 560px each row becomes a card: the matchup takes the full width instead
+of a sixth of it, and the four numbers sit in a 2x2 grid underneath carrying their column names on
+`data-l`. Rows cannot be uneven because there are no rows — measured afterwards, every card is
+exactly one height (188px and 147px on the two boards) with no horizontal scroll anywhere.
+
+**Opt in with a new class, never by styling the shared one.** `.hb-form--mkt` is also the NFL model
+card and three LandingHub tables; the card rules hang off `.hb-form--cards`, which only the two
+NCAAF tables carry. Verified `/model` still reports clean and both boards still `display: table`
+at 1440.
+
+**And check what the mobile stylesheet already does to the cell you are widening.** `.hb-game` is
+`inline-flex; flex-direction: column` on mobile — deliberately, so the Game COLUMN stays narrow in
+a table. Inside a card that is exactly wrong, and it was the whole cause: the flex box had
+collapsed to **41px wide inside a 309px cell**, stacking "#1 Ohio St" over "at" over "#4 Texas".
+The first attempt (a forced line break after "at") changed the measured heights not at all, which
+is the tell that the diagnosis was wrong — a fix that changes nothing measurable should be reverted,
+not shipped as a fix.
+
 ### 🚨 Even COLUMNS: never mix `fr` tracks with fixed `px` ones
 `chart-columns-lopsided`. Derek, on a board the probe had just reported clean: *"the rows and
 columns are not spaced evenly."* He was right and the audit was useless, because **the check above
