@@ -1,5 +1,6 @@
 import { deVig, impliedProb as implied } from "@/lib/fairValue";
 import type { PropGame, Quote, MarketBlock } from "./props";
+import { usBooks } from "@/lib/bookLabel";
 // MLB captured props — the consensus book line per pitcher, for the strikeouts board.
 // Server-side only (Supabase service key). Mirrors lib/props.ts, including its paging.
 
@@ -39,7 +40,8 @@ async function pgAll(query: string): Promise<Row[]> {
     out.push(...page);
     if (page.length < PAGE) break;
   }
-  return out;
+  // The snapshot probes select only snapshot_at; a row without a book is not a quote to filter.
+  return out.length && out[0].book === undefined ? out : usBooks(out);
 }
 
 /** The newest sweep's `snapshot_at` for one market — a one-row probe.

@@ -26,6 +26,29 @@ const BOOK_LABEL: Record<string, string> = {
   mybookieag: "MyBookie",
 };
 
+/** The sportsbooks the site compares: US-licensed books only.
+ *
+ *  The odds feed's "us" region also returns offshore books — bovada, betonlineag, lowvig,
+ *  mybookieag, betus — and every board was quietly shopping across them, so "best price" was
+ *  sometimes a book a US member cannot legally use. Derek: "let's only use the 10 US sportsbooks."
+ *  Rows from any other book are dropped at the READ layer (`usBooks` below) on every sport, so the
+ *  best price, the de-vigged fair number, the shopping edge and the slip all agree on the field.
+ *
+ *  Captured but never shown is the right split: the capture returns them at no extra credit cost
+ *  and history is free; deciding what a member sees is a display policy, which lives here.
+ *
+ *  Currently captured from this list: DraftKings, FanDuel, BetMGM, Caesars, Fanatics, BetRivers.
+ *  ESPN BET, Hard Rock, Bally Bet and betPARX are on the feed's "us2" region, which the capture
+ *  does not request (it would double the credit cost of every sweep) — listed so they appear the
+ *  day that changes, with no code change. */
+export const US_BOOKS = new Set([
+  "draftkings", "fanduel", "betmgm", "williamhill_us", "fanatics", "betrivers",
+  "espnbet", "hardrockbet", "ballybet", "betparx",
+]);
+export const isUsBook = (slug: string): boolean => US_BOOKS.has(slug);
+/** Keep only rows from US-licensed books. Every reader calls this before anything else looks. */
+export const usBooks = <T extends { book: string }>(rows: T[]): T[] => rows.filter((r) => isUsBook(r.book));
+
 /** A book's display name, falling back to the raw slug so a new book still renders. */
 export const bookLabel = (slug: string): string => BOOK_LABEL[slug] ?? slug;
 

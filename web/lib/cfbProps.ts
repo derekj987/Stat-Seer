@@ -3,6 +3,7 @@
 // (tap-to-add chips + single best book). Server-side only (Supabase service key).
 import type { PropGame, Quote, MarketBlock } from "./props";
 import { PROP_LABELS } from "./props";
+import { usBooks } from "./bookLabel";
 import { etDayKey } from "./gameDays";
 import { NCAAF_MODEL } from "@/app/ncaaf/model-data";
 
@@ -44,7 +45,7 @@ async function fetchRows(): Promise<Row[]> {
     { headers: h, next: { revalidate: 120 } }
   );
   if (!res.ok) throw new Error(`Supabase ${res.status}`);
-  return (await res.json()) as Row[];
+  return usBooks((await res.json()) as Row[]);
 }
 
 // Better bet for the member (same player+side): lower line for Over, higher for Under, then

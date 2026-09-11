@@ -2072,6 +2072,18 @@ Derek's standing asks for the MLB section, all of which have bitten more than on
   sport to the Value Finder is a row in each table and three thin pages — never a copy of
   BoardView. MLB chips carry abbreviations via an `abbr` map (full names wrapped a chip onto two
   lines); the card header keeps the full name.
+- **🚨 US-licensed books only — and the filter must not eat the snapshot probe.** The feed's "us"
+  region returns bovada, betonlineag, lowvig, mybookieag and betus, and every board shopped
+  across them (Derek: *"I thought we should not include books like lowvig and bovada"*), so a
+  "best price" could be a book a member cannot use. `US_BOOKS` / `usBooks()` in
+  `web/lib/bookLabel.ts` is the one allow-list; every reader (board, props, cfbProps, mlbBoard,
+  mlbProps) filters at the READ layer, and the Python graders mirror the set. Two traps hit while
+  doing it: (1) the one-row `select=snapshot_at` probes go through the same `pg()` — a row with
+  no `book` column fails the filter and the whole board reads "no odds captured"; guard on
+  `out[0].book === undefined`. (2) A reader with an "empty → unbounded fallback" (props.ts) must
+  filter AFTER the fallback decision, or an all-offshore sweep triggers the full-table scan the
+  IO rule forbids. Check with `curl <page> | grep -ci "bovada\|lowvig"` → 0, and the stat strip
+  now counts books dynamically ("6 US books compared"), never a hard-coded 10.
 - **Row padding comes out of the column budget.** `.pmrow--data` carries 16px of padding each
   side, so `--pmx: calc((100% - <budget>px) / n)` has 32px less to give than it looks: a 818px
   budget in an 825px row put 9px of the last column outside the card (`content-escapes-card`).

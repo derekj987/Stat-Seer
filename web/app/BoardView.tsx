@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
+import { bookLabel } from "@/lib/bookLabel";
 import type { Game } from "@/lib/board";
 import { ShopSubnav, Brand, ValueFinderDrawer, FlowSteps, WeekBadge, DayBadge } from "./Nav";
 import { WeekNav } from "./WeekNav";
@@ -54,9 +55,9 @@ export interface Pick {
 
 function BookTag({ books }: { books: string[] }) {
   return books.length === 1 ? (
-    <span className="book">{books[0]}</span>
+    <span className="book">{bookLabel(books[0])}</span>
   ) : (
-    <span className="book tie" title={books.join(", ")}>×{books.length} books</span>
+    <span className="book tie" title={books.map(bookLabel).join(", ")}>×{books.length} books</span>
   );
 }
 
@@ -232,7 +233,7 @@ export default function BoardView({
                     ? <div className="stat"><span className="stat__v">{keyGames}</span><span className="stat__l">sweet-spot games</span></div>
                     : <div className="stat"><span className="stat__v">{board.length}</span><span className="stat__l">games priced</span></div>}
                   <div className="stat"><span className="stat__v">+{maxEdge.toFixed(2)}%</span><span className="stat__l">best shopping edge</span></div>
-                  <div className="stat"><span className="stat__v">{books || 10}</span><span className="stat__l">books compared</span></div>
+                  <div className="stat"><span className="stat__v">{books}</span><span className="stat__l">US books compared</span></div>
                 </section>
               </div>
             </details>

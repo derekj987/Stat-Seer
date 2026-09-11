@@ -91,6 +91,10 @@ LG_MIN_PA = 20000                # plate appearances before the running league r
 # 3,000 / 6,000 / 12,000 — train Brier flat across all four, so the window is a judgment: ~3,000
 # rows is about twelve days of batter-games, long enough not to chase one cold week.
 CAL_WINDOW = 3000
+# US-licensed books only, the same list the site shows (web/lib/bookLabel.ts US_BOOKS). The feed
+# also returns offshore books; the grader compares us with the field a member can actually bet.
+US_BOOKS = {"draftkings", "fanduel", "betmgm", "williamhill_us", "fanatics", "betrivers",
+            "espnbet", "hardrockbet", "ballybet", "betparx"}
 # PARK. Hits happen at a rate that depends on where: Coors ran 1.08x league this season, Petco
 # 0.96x. Batter and staff rates are accumulated in PARK-NEUTRAL units (each game's hits deflated
 # by the causal factor of the park it was played in) and tonight's rate is re-inflated by
@@ -535,6 +539,8 @@ def grade_against_market(logs, slots, lineups):
 
     best = {}
     for r in rows:
+        if r.get("book") not in US_BOOKS:
+            continue                              # the board never shows offshore books; grade the same field
         if r.get("line") is None or float(r["line"]) != 0.5:
             continue                              # 1.5 is a different question entirely
         if not r.get("player") or r.get("price_american") is None or not r.get("side"):

@@ -145,7 +145,7 @@ export function ValueFinderDrawer({ defaultOpen = false }: { defaultOpen?: boole
         <section className="vf-pitch">
           <h2 className="vf-pitch__h">Find the <b>best price</b>.</h2>
           <p className="vf-pitch__sub">
-            <b>Value Finder</b> shops every pick across <b>~10 sportsbooks</b> and shows you the single
+            <b>Value Finder</b> shops every pick across <b>the US sportsbooks we track</b> and shows you the single
             best place to bet each one — plus the <b>one book that pays the most</b> on your whole parlay.
             Same bets, better price.
           </p>
@@ -187,7 +187,7 @@ export function ValueFinderDrawer({ defaultOpen = false }: { defaultOpen?: boole
               </div>
               <p className="vf-slip__bestnote">
                 The single sportsbook that pays the most on this exact 5-pick parlay — Value Finder
-                checks all ~10 books for you and gives you the winner.
+                checks every US book we track for you and gives you the winner.
               </p>
             </div>
           </div>

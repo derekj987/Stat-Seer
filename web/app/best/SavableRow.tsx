@@ -4,11 +4,12 @@
 // row to save the pick. Columns are ordered bet · price · book · edge (edge last,
 // beside the book), with a heart marking whether it's on your slip.
 import { useSlip, type SlipItem } from "@/lib/slip";
+import { bookLabel } from "@/lib/bookLabel";
 
 function BookTag({ books }: { books: string[] }) {
   return books.length === 1
-    ? <span className="book">{books[0]}</span>
-    : <span className="book tie" title={books.join(", ")}>×{books.length} books</span>;
+    ? <span className="book">{bookLabel(books[0])}</span>
+    : <span className="book tie" title={books.map(bookLabel).join(", ")}>×{books.length} books</span>;
 }
 
 export default function SavableRow({

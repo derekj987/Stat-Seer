@@ -149,7 +149,7 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
         <ul className="lp-trust" aria-label="What StatSeer stands for">
           <li>Line-blind projections</li>
           <li>Every published read graded</li>
-          <li>~10 sportsbooks compared</li>
+          <li>US sportsbooks compared</li>
           <li>No guaranteed-win claims</li>
         </ul>
       </section>

@@ -13,6 +13,7 @@
 // the "appearance of rigor" this project exists against.
 import { buildBoard, type Game, type OddsRow } from "@/lib/board";
 import { deVig } from "@/lib/fairValue";
+import { usBooks } from "@/lib/bookLabel";
 
 /** Single-game margin SD, measured over 1,859 completed 2026 games (see mlb_game_model.py). */
 const MARGIN_SD = 4.63;
@@ -86,7 +87,8 @@ async function pg(path: string): Promise<OddsRow[]> {
     out.push(...rows);
     if (rows.length < PAGE) break;
   }
-  return out;
+  // The snapshot probe selects only snapshot_at; a row without a book is not a quote to filter.
+  return out.length && out[0].book === undefined ? out : usBooks(out);
 }
 
 /** The newest complete sweep. Every row in a capture shares one snapshot_at (that is what makes a

@@ -2,6 +2,7 @@
 // Runs server-side only (uses the Supabase service key from server env).
 
 import { empWinProb } from "./winCurve";
+import { usBooks } from "./bookLabel";
 import { deVig } from "./fairValue";
 
 const KEY_NUMBERS: Record<number, number> = { 3: 9.0, 7: 6.2 };
@@ -293,11 +294,11 @@ export async function fetchPreseason(season = 2026): Promise<OddsRow[]> {
   )) as { snapshot_at: string }[];
   if (!latest.length) return [];
   const snap = encodeURIComponent(latest[0].snapshot_at);
-  return (await pgFrom("preseason_odds",
+  return usBooks((await pgFrom("preseason_odds",
     `?season=eq.${season}&snapshot_at=eq.${snap}` +
       `&select=snapshot_at,event_id,commence_time,home_team,away_team,book,market,` +
       `outcome_name,outcome_point,price_american&limit=5000`
-  )) as OddsRow[];
+  )) as OddsRow[]);
 }
 
 /** One complete snapshot of the week's odds (pinned to the latest full sweep,
@@ -309,9 +310,9 @@ export async function fetchWeek(week: number, season = 2026): Promise<OddsRow[]>
   )) as { snapshot_at: string }[];
   if (!latest.length) return [];
   const snap = encodeURIComponent(latest[0].snapshot_at);
-  return (await pg(
+  return usBooks((await pg(
     `?season=eq.${season}&week=eq.${week}&snapshot_at=eq.${snap}` +
       `&select=snapshot_at,event_id,commence_time,home_team,away_team,book,market,` +
       `outcome_name,outcome_point,price_american&limit=5000`
-  )) as OddsRow[];
+  )) as OddsRow[]);
 }

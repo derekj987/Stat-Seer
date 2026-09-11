@@ -1,4 +1,5 @@
 import { deVig } from "@/lib/fairValue";
+import { usBooks } from "@/lib/bookLabel";
 // Player-props line shopping — reads prop_snapshots, best price per player across books.
 // Server-side only (Supabase service key).
 
@@ -204,7 +205,7 @@ export async function weekProps(week: number, season = 2026): Promise<PropGame[]
   let all = await pgAll(q + since);
   if (!all.length && since) all = await pgAll(q);   // probe was stale — take whatever exists
   if (!all.length) return [];
-  const rows = newestCapture(all);
+  const rows = usBooks(newestCapture(all));   // US-licensed books only (bookLabel.ts)
 
   // Keep the latest snapshot per (event,market,player,side,line,book).
   const latest = new Map<string, PropRow>();
@@ -307,7 +308,7 @@ export async function fanduelLines(week: number, season = 2026): Promise<Map<str
       `?season=eq.${season}&week=eq.${week}&event_id=neq.test&book=eq.fanduel`);
     let all = await pgAll(q + since);
     if (!all.length && since) all = await pgAll(q);
-    const rows = newestCapture(all);
+    const rows = usBooks(newestCapture(all));   // US-licensed books only (bookLabel.ts)
     // A book posts a ladder of alternates on one market; its MAIN line is the rung priced closest
     // to even money, since an alternate is priced away from even by construction.
     const best = new Map<string, { line: number; gap: number }>();

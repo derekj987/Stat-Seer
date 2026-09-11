@@ -29,7 +29,7 @@ const TIPS = {
   fan: <>Players surfaced from fan forums, beat writers and RSS feeds, then <b>hype-rated</b> with a plain bottom line (e.g. take the over on receptions). For discovery — not a graded pick.</>,
   considNfl: <>Per-game context that can move a number but isn&apos;t itself an edge: the <b>site &amp; roof</b>, the <b>weather</b> (⚑ marks notable wind), and the <b>referee crew</b>.</>,
   considNcaaf: <>Durable context for the slate: <b>home-field</b> value, <b>conference strength</b>, and game-week items (weather, injuries) as they firm up.</>,
-  valueFinder: <>Line shopping in action: the <b>best price</b> for each game&apos;s main spread across ~10 sportsbooks, and which book has it. That&apos;s <b>Value Finder</b> — the same bet, a better number, so you never leave value on the table.</>,
+  valueFinder: <>Line shopping in action: the <b>best price</b> for each game&apos;s main spread across the US sportsbooks we track, and which book has it. That&apos;s <b>Value Finder</b> — the same bet, a better number, so you never leave value on the table.</>,
   upsets: <>Games where the market has a team losing but <b>our model has them winning outright</b>. The number shown is how much more likely our model thinks they are to win than the market implies.</>,
   referee: <>Each crew&apos;s tendencies. The one thing that carries over year to year is <b>penalties per game</b> — the O/U and ATS leans are historical context, not a lean.</>,
 } as const;

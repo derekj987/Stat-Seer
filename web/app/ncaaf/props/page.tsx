@@ -74,7 +74,7 @@ export default async function Page({ searchParams }: PageProps<"/ncaaf/props">) 
       {all.length ? (
         <section className="ncf-sec">
           <div className="hb-legend">
-            <b>Player props, best price across ~10 books.</b> Each row is a player&apos;s number with the
+            <b>Player props, best price across the US books we track.</b> Each row is a player&apos;s number with the
             <b> single best price</b> and which book has it — <b>tap any chip to add it to your slip</b>. Props are the
             one place a real college edge might survive (books price hundreds of them semi-independently); once we have
             enough captured history we grade them, same as everything else.

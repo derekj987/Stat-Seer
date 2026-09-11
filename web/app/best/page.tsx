@@ -1,4 +1,5 @@
 import { weekRange } from "@/lib/board";
+import { bookLabel } from "@/lib/bookLabel";
 import { fetchBets, fetchBestProps, fmtOdds, type KeyPlay, type PropPlay } from "@/lib/bestbets";
 import { ShopSubnav, Brand, FlowSteps, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
@@ -20,8 +21,8 @@ const et = (iso: string) => kickFmt.format(new Date(iso)) + " ET";
 
 function BookTag({ books }: { books: string[] }) {
   return books.length === 1
-    ? <span className="book">{books[0]}</span>
-    : <span className="book tie" title={books.join(", ")}>×{books.length} books</span>;
+    ? <span className="book">{bookLabel(books[0])}</span>
+    : <span className="book tie" title={books.map(bookLabel).join(", ")}>×{books.length} books</span>;
 }
 
 

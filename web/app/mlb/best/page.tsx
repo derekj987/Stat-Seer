@@ -1,4 +1,5 @@
 import { fetchMlbBets, fetchMlbBestProps, MLB_KEYS, type RunLinePlay, type MlbPropPlay } from "@/lib/mlbBest";
+import { bookLabel } from "@/lib/bookLabel";
 import { fmtOdds, type KeyPlay } from "@/lib/bestbets";
 import { ShopSubnav, Brand, FlowSteps, DayBadge } from "../../Nav";
 import SavableRow from "../../best/SavableRow";
@@ -23,8 +24,8 @@ const RL_MIN_GAP = 0.02;   // two points of probability before a run-line / mone
 
 function BookTag({ books }: { books: string[] }) {
   return books.length === 1
-    ? <span className="book">{books[0]}</span>
-    : <span className="book tie" title={books.join(", ")}>×{books.length} books</span>;
+    ? <span className="book">{bookLabel(books[0])}</span>
+    : <span className="book tie" title={books.map(bookLabel).join(", ")}>×{books.length} books</span>;
 }
 
 const pct = (p: number) => `${(p * 100).toFixed(0)}%`;

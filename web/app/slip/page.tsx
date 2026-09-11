@@ -138,7 +138,7 @@ export default function SharedSlip() {
               )}
 
               <p className="sharebest__note">
-                The single sportsbook that pays the most on this exact parlay — StatSeer checked ~10 books.
+                The single sportsbook that pays the most on this exact parlay — StatSeer checked every US book we track.
                 {oneBook.covers < legs.length ? ` It prices ${oneBook.covers} of ${legs.length} legs.` : ""}
               </p>
             </div>

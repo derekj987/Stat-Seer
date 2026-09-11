@@ -141,11 +141,19 @@ def fetch_props(season, week):
     # Within one capture a book still posts each (side, line) once; dedupe defensively.
     latest = {}
     for r in cur:
+        if r["book"] not in US_BOOKS:             # offshore books are captured, never shown
+            continue
         latest[(r["event_id"], r["market"], r["player_name"], r["side"], r["line"], r["book"])] = r
     return list(latest.values())
 
 
 import re
+
+# The books a member can see — US-licensed only. The feed's "us" region also returns bovada,
+# betonlineag, lowvig, mybookieag and betus; the board's fallback line (when FanDuel has no
+# number) must never come from one of those. Mirror of web/lib/bookLabel.ts US_BOOKS.
+US_BOOKS = {"draftkings", "fanduel", "betmgm", "williamhill_us", "fanatics", "betrivers",
+            "espnbet", "hardrockbet", "ballybet", "betparx"}
 import statistics
 
 SUFFIX = re.compile(r"\b(jr|sr|ii|iii|iv|v)\b\.?", re.I)
