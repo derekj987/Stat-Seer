@@ -2000,6 +2000,22 @@ Derek's standing asks for the MLB section, all of which have bitten more than on
   said. Check it by reading three rows and asking whether each appears verbatim on the book.
   A "derived" number that a book never posts (a fair spread, a de-vigged probability) belongs
   under OUR header or in the Tip, labelled as ours.
+- **🚨 …and OUR column must be in the same currency as the market's, or it WILL be read as a
+  side.** The day after the run line went in, Derek read the margin beside it as *"3 of 12 games
+  in favor of taking the points"* — a margin of 1.3 against a 1.5 line looks like a lean to the
+  dog, and it isn't, because the price is what makes a run line fair (favourites cover −1.5 in
+  39% of games; that is why it pays +120 to +170). A margin and a priced line are different kinds
+  of number, and a reader compares whatever two numbers sit in one row. So "OUR SPREAD" became
+  **our cover %** for the SAME side the market names, with the market's de-vigged fair % under
+  its line and our margin under our %. The rule: when a market cell carries a probability-shaped
+  thing (a price), ours beside it is a probability too; when it carries a number (a total), ours
+  is a number.
+  **Measure before you publish a probability.** The first proposal — a normal on the margin — was
+  4 points high held out (said 37.6%, saw 35.6%; 51% vs 36% in the top bucket). What ships is a
+  logistic on the signed margin fitted on the train split (`cover_calibration()` in
+  `mlb_game_model.py`, constants in `SCORES["cover"]`): Brier +0.9% over the base rate, within 3
+  points in every bucket below 46%, still 8 high above it — and the Tip says so. A cover % that
+  had not been scored against what happened would have been a decoration with a percent sign.
 - **Never publish a raw factor as if it were a reading.** `1.01 neutral` meant nothing to a reader.
   A park factor is shown as a worded verdict — `Favorable for HRs` / `Neutral for HRs` / `Tough for
   HRs` (`parkTag()`, cut at 1.05 / 0.95) — and the number itself goes in the Tip if anywhere. The

@@ -52,12 +52,17 @@ proportionally than football's. It is not in the model because it is not disting
 SO WHAT IS THIS FOR. The same thing the football game boards are for: a line-blind number,
 published before the game, graded afterwards. It is the trust engine, not the edge. The edge, if
 there is one, is in Value Finder, where the arithmetic works regardless of how noisy the sport is.
-A run line is NOT published: the run line is a fixed +/-1.5 and turning a 0.8% total improvement
-into a side pick would be inventing precision this model does not have.
+No side pick is published. What the board DOES show against the posted run line is a calibrated
+cover probability -- P(the favourite wins by 2+) from a logistic on our margin (SCORES["cover"]),
+beside the market's own de-vigged fair %. Measured held out it is +0.9% on Brier over the base
+rate and calibrated within 3 points below 46%: honest, and nearly flat. Derek read the bare margin
+column as "we favour taking the points in 3 of 12 games"; the fix was to put ours in the market's
+currency rather than to keep explaining a margin.
 
 Stdlib only. statsapi.mlb.com is public and keyless.
 """
 import argparse
+import math
 import collections
 import datetime as _dt
 import json
@@ -126,7 +131,18 @@ CACHE_PRIOR = os.path.join("data", f"mlb_team_runs_{PRIOR_SEASON}.json")
 # where it does.
 SCORES = {"model": 3.5355, "base": 3.5634, "gain": 0.8, "sd": 4.52, "meanTotal": 8.96,
           "n": 554, "resid": 0.02,
-          "marModel": 3.3377, "marBase": 3.4296, "marGain": 2.7, "marMean": 0.79, "marActual": 3.43}
+          "marModel": 3.3377, "marBase": 3.4296, "marGain": 2.7, "marMean": 0.79, "marActual": 3.43,
+          # RUN-LINE COVER. P(a side wins by 2+ | our margin m for that side) = sigmoid(a + b*m),
+          # fitted on the train split with both sides of every game (so m=0 gives the pick'em
+          # cover rate, 36%, and a negative margin is handled rather than extrapolated). Held out
+          # over 554 games x 2 sides: Brier 0.2270 vs 0.2291 for the base rate, +0.9%; calibrated
+          # within 3 points in every bucket below 46%, and OVER by 8 in the one above it
+          # (said 50.8%, actual 43.0%, n=142) — big favourites cover less than the fit says.
+          # A plain normal on the margin (sd 4.65) ran 4 points high across the board and was
+          # replaced by this. The number is honest and nearly flat: our favourite covers -1.5 in
+          # 39% of held-out games, and the fit moves it between ~30% and ~50% on this slate.
+          "cover": {"a": -0.5717, "b": 0.3622, "brier": 0.2270, "brierBase": 0.2291, "gain": 0.9,
+                    "base": 35.6, "favBase": 39.4, "n": 1108}}
 
 
 def _outs(ip):
@@ -400,7 +416,62 @@ def validate(games, spby, prior=None):
     print(f"          mean |ours| {statistics.mean(abs(r['pM']) for r in te):.2f} vs "
           f"|actual| {statistics.mean(abs(r['yM']) for r in te):.2f} "
           f"(SD {statistics.pstdev([r['yM'] for r in rows]):.2f})")
+    cover_calibration(rows, te)
     return base, mod
+
+
+def cover_calibration(rows, te):
+    """Does our margin give an honest run-line cover probability?
+
+    The board shows P(the favourite wins by 2+) beside the market's de-vigged fair %, so the
+    number has to be calibrated or it is a decoration. Fit: a logistic on the SIGNED margin,
+    both sides of every train game (m for the home side, -m for the away side), scored on the
+    held-out games the same way — bucketed, plus a Brier against the base rate. The plain
+    normal on the margin is printed beside it because that was the first idea and it ran high."""
+    from statistics import NormalDist
+    nd = NormalDist()
+    tr = [r for r in rows if r not in te]
+    sd = statistics.pstdev([r["pM"] - r["yM"] for r in tr])
+
+    def sym(rs):
+        d = []
+        for r in rs:
+            d.append((r["pM"], 1 if r["yM"] >= 2 else 0))
+            d.append((-r["pM"], 1 if -r["yM"] >= 2 else 0))
+        return d
+    trs, tes = sym(tr), sym(te)
+    a, b = math.log(0.36 / 0.64), 0.1
+    for _ in range(6000):                         # plain gradient descent; two parameters
+        ga = gb = 0.0
+        for m, y in trs:
+            p = 1 / (1 + math.exp(-(a + b * m)))
+            ga += p - y; gb += (p - y) * m
+        a -= 0.05 * ga / len(trs); b -= 0.05 * gb / len(trs)
+    sig = lambda m: 1 / (1 + math.exp(-(a + b * m)))
+
+    def brier(pairs):
+        base = statistics.mean(y for _, y in pairs)
+        return (statistics.mean((p - y) ** 2 for p, y in pairs),
+                statistics.mean((base - y) ** 2 for _, y in pairs), base)
+    cal = [(sig(m), y) for m, y in tes]
+    bc, b0, base = brier(cal)
+    fav = [1 if r["yM"] * (1 if r["pM"] > 0 else -1) >= 2 else 0 for r in te if abs(r["pM"]) >= 0.05]
+    print(f"  run line: sigmoid(a + b*m), a={a:.4f} b={b:.4f} (train, both sides)")
+    print(f"            held out {len(cal)} sides: Brier {bc:.4f} vs {b0:.4f} for the base rate "
+          f"({base*100:.1f}%) -> {(b0-bc)/b0*100:+.2f}%; our favourite covers in "
+          f"{statistics.mean(fav)*100:.1f}% of {len(fav)} games")
+    edges = [0, 0.30, 0.34, 0.38, 0.42, 0.46, 1]
+    for lo, hi in zip(edges, edges[1:]):
+        bb = [(p, y) for p, y in cal if lo <= p < hi]
+        if bb:
+            print(f"            said {lo*100:.0f}-{hi*100:.0f}%: n={len(bb):3d}  "
+                  f"mean said {statistics.mean(p for p,_ in bb)*100:.1f}%  "
+                  f"actual {statistics.mean(y for _,y in bb)*100:.1f}%")
+    nrm = [(1 - nd.cdf((1.5 - m) / sd), y) for m, y in tes]
+    bn = statistics.mean((p - y) ** 2 for p, y in nrm)
+    print(f"            (normal on the margin, sd {sd:.2f}: Brier {bn:.4f}, says "
+          f"{statistics.mean(p for p,_ in nrm)*100:.1f}% on average vs {base*100:.1f}% actual)")
+    return a, b
 
 
 def main(argv=None):

@@ -3397,7 +3397,7 @@ a.snav__dfeat{display:block}
    tracks 738 + gaps (5x14) + padding (2x16) = 840 against an 825px card, so every row drew 9px
    outside it — while the pitchers column sat at 160px needing 202px with 87px unused further
    right. Sized to fit the card instead: 200+150+86+80+92+76 = 684 + 70 + 32 = 786. */
-.pmtable--mlbg{min-width:813px;max-width:1120px}
+.pmtable--mlbg{min-width:823px;max-width:1120px}
 /* Columns 3-6 are market run line, market total, our spread, our total. Two numbers a reader is
    meant to compare must be drawn at the same size — TOTAL equals TOTAL (50, "10.4"). The two
    spread columns are NOT the same shape any more: the market cell carries the posted run line
@@ -3407,13 +3407,22 @@ a.snav__dfeat{display:block}
    fixed height is what stops that wrap making the row taller than its neighbours.
    Everything else is the standard pattern (see .pmtable--mlbp): measured ink plus an equal share
    of the leftover, so no column hoards the surplus on a wide screen.
-   Ink: game 150 ("CLE @ BAL (6:35p)") | starting pitchers 236 | run line 116 | total 50 |
-   our spread 88 | our total 50 = 690, plus 5 gaps x 16 = 770. */
+   OUR column is now the cover chance ("41% (DET)") over the margin ("margin −1.3 (DET)", 11px):
+   two lines that fit the row's fixed 56px, and the wider of them is the small one at ~104px.
+   The market cell carries "fair 44% to cover" on its second line, well inside its 116.
+   Ink: game 150 ("CLE @ BAL (6:35p)") | starting pitchers 230 | run line 116 | total 50 |
+   our cover 104 | our total 50 = 700, plus 5 gaps x 16 = 780. */
 .pmtable--mlbg .pmrow--data,
-.pmtable--mlbg .pmrow--head{--pmx:max(0px,calc((100% - 770px) / 6));
-  grid-template-columns:calc(150px + var(--pmx)) calc(236px + var(--pmx))
+.pmtable--mlbg .pmrow--head{--pmx:max(0px,calc((100% - 780px) / 6));
+  grid-template-columns:calc(150px + var(--pmx)) calc(230px + var(--pmx))
     calc(116px + var(--pmx)) calc(50px + var(--pmx))
-    calc(88px + var(--pmx)) calc(50px + var(--pmx))}
+    calc(104px + var(--pmx)) calc(50px + var(--pmx))}
+/* Two-line market/ours cells on the game board. The second line is the explanation of the first
+   (the market's vig-free cover chance; our expected margin) — smaller, muted, and in the cell's
+   own colour family so the column still reads as one number with a footnote, not two numbers. */
+.pmcover{line-height:1.2}
+.pmcover__who{font-weight:600;font-size:.85em;opacity:.8}
+.pmcover__sub{display:block;font-size:11px;font-weight:500;color:var(--muted);font-family:var(--font-sans);letter-spacing:0}
 .pmtable--mlbg .pmrow--data{height:56px;align-items:center}
 .pmtable--mlbg .pmrow--head{align-items:end}
 .pmtable--mlbg .pmrow--data .pmcell--team{line-height:1.3}
