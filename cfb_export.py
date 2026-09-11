@@ -252,6 +252,10 @@ def detect_upcoming_week(db, season, fallback):
 # CFBD's school name vs the sportsbook feed's nickname, where they share no leading words so no
 # amount of prefix matching can bridge them. Keyed by the normalized CFBD name.
 # Symptom when one is missing: the board shows "—" for a game whose line the books have had for days.
+# US-licensed books only — the same list the site shows (web/lib/bookLabel.ts US_BOOKS).
+US_BOOKS = {"draftkings", "fanduel", "betmgm", "williamhill_us", "fanatics", "betrivers",
+            "espnbet", "hardrockbet", "ballybet", "betparx"}
+
 _TEAM_ALIASES = {
     "massachusetts": "umass",
     "umass": "massachusetts",
@@ -259,6 +263,7 @@ _TEAM_ALIASES = {
     "north carolina state": "nc state",
     "ole miss": "mississippi",
     "southern mississippi": "southern miss",
+    "southern miss": "southern mississippi",
     "louisiana monroe": "ul monroe",
     "sam houston": "sam houston state",
     "app state": "appalachian state",
@@ -296,20 +301,30 @@ def fetch_ncaaf_odds():
     out = []
     for e in data:
         hf, af = e.get("home_team"), e.get("away_team")
-        hsp, tot = [], []
+        # FanDuel's number first, the US-book median only where FanDuel has not posted. The card
+        # used to carry a median across every book the feed returns — nobody's number, and Derek
+        # caught it disagreeing with FanDuel. The live overlay (web/app/ncaaf/liveCard.ts) replaces
+        # these at render anyway; this keeps the fallback honest when the capture is down.
+        hsp, tot, fd_hsp, fd_tot = [], [], None, None
         for b in e.get("bookmakers", []):
+            if b.get("key") not in US_BOOKS:
+                continue
             for m in b.get("markets", []):
                 if m["key"] == "spreads":
                     for o in m.get("outcomes", []):
                         if o.get("name") == hf and o.get("point") is not None:
                             hsp.append(o["point"])
+                            if b.get("key") == "fanduel":
+                                fd_hsp = o["point"]
                 elif m["key"] == "totals":
                     pts = [o["point"] for o in m.get("outcomes", []) if o.get("point") is not None]
                     if pts:
                         tot.append(pts[0])
+                        if b.get("key") == "fanduel":
+                            fd_tot = pts[0]
         out.append({"away_n": _norm(af), "home_n": _norm(hf),
-                    "home_spread": round(statistics.median(hsp), 1) if hsp else None,
-                    "total": round(statistics.median(tot), 1) if tot else None})
+                    "home_spread": fd_hsp if fd_hsp is not None else (round(statistics.median(hsp), 1) if hsp else None),
+                    "total": fd_tot if fd_tot is not None else (round(statistics.median(tot), 1) if tot else None)})
     return out
 
 

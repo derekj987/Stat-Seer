@@ -92,6 +92,9 @@ body{background:var(--bg);color:var(--ink);
 .brand__tip{display:inline-flex;align-items:center;flex:0 0 auto;margin-left:2px}
 .asof{text-align:right;color:var(--muted);font-size:12px;
   text-transform:uppercase;letter-spacing:.08em;line-height:1.7}
+/* The same note in the flow of a page (NCAAF: "Market lines: FanDuel, as of 4:15 PM ET"), under
+   the week note rather than parked in the masthead. */
+.asof--inline{text-align:center;margin:-2px 0 10px}
 .asof b{color:var(--ink);font-family:var(--font-mono);font-size:13px;
   letter-spacing:0;text-transform:none}
 .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:22px 0 28px}

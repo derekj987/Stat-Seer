@@ -43,6 +43,25 @@ export function ncaafCard(week: number): NcaafWeekCard {
 }
 
 /** Honest note above a week's board: no games scheduled, or projections-up-lines-to-come. */
+const asOfFmt = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/New_York", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+});
+
+/** "Market lines: FanDuel, as of 4:15 PM ET" — drawn whenever the card carries live lines (see
+ *  liveCard.ts). A board that shows a book's number must say which book and when; the old
+ *  median-across-books, refreshed four times a day, is exactly what Derek caught disagreeing
+ *  with FanDuel. */
+export function NcaafLinesAsOf({ card }: { card: NcaafWeekCard & { linesAsOf?: string | null; liveGames?: number } }) {
+  if (!card.linesAsOf) return null;
+  return (
+    <p className="asof asof--inline">
+      Market lines: <b>FanDuel</b>, as of <b>{asOfFmt.format(new Date(card.linesAsOf))} ET</b>
+      {" "}· refreshed every 30 minutes{card.liveGames && card.liveGames < card.games.length
+        ? ` · ${card.games.length - card.liveGames} game${card.games.length - card.liveGames === 1 ? "" : "s"} not yet posted` : ""}
+    </p>
+  );
+}
+
 export function NcaafWeekNote({ card }: { card: NcaafWeekCard }) {
   if (card.games.length === 0) {
     return (

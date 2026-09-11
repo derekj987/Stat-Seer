@@ -1,5 +1,6 @@
 import { Brand, FlowSteps, ShopSubnav, WeekBadge } from "../../Nav";
-import { NcaafWeekNav, NcaafWeekNote, readNcaafWeek, ncaafCard } from "../NcaafWeek";
+import { NcaafWeekNav, NcaafWeekNote, readNcaafWeek } from "../NcaafWeek";
+import { liveNcaafCard } from "../liveCard";
 import PinButton from "../../PinButton";
 import { NCAAF_MODEL, type NcaafKeyNum } from "../model-data";
 import { StatCard } from "../StatCard";
@@ -21,7 +22,7 @@ export default async function Page({ searchParams }: {
   const v = M.value;
   const three = v.keyNumbers[0];
   const week = readNcaafWeek((await searchParams).week, M.card.week);
-  const c = ncaafCard(week);
+  const c = await liveNcaafCard(week);
 
   return (
     <main className="wrap">

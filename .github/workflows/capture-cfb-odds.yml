@@ -1,0 +1,42 @@
+name: capture-cfb-odds
+
+# NCAAF game lines (moneyline, spread, total) across every US book, every 30 minutes through the
+# season, appended to cfb_odds_snapshots. One Odds API call per run (6 credits: 2 regions x 3
+# markets), so a full season is ~8,600 credits a month against a 5M plan.
+#
+# WHY 30 MINUTES. The college pages read the newest sweep at render (ISR 120s) and show FanDuel's
+# own spread and total; before this table they showed a median from an export that ran four
+# times a day, and Derek caught it disagreeing with FanDuel. Lines move all week, not just on
+# game day, so the cadence is flat rather than kickoff-shaped.
+#
+# Table: ingest/cfb_odds_snapshots.sql (run once in the Supabase SQL editor). Until it exists the
+# writer gets a 4xx and the job fails loudly rather than silently — that is the intended signal.
+
+on:
+  schedule:
+    - cron: "*/30 * * 8-12,1 *"   # every 30 min, Aug–Jan (season + bowls + playoff)
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: capture-cfb-odds
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi -c requirements.txt
+      - name: Capture NCAAF game lines -> Supabase
+        env:
+          ODDS_API_KEY:         ${{ secrets.ODDS_API_KEY }}
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python cfb_capture.py --supabase --within-days 8

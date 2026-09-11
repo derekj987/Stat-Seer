@@ -1,6 +1,7 @@
 import { Brand, FlowSteps, ContextSubnav, WeekBadge } from "../../Nav";
 import Tip from "@/app/Tip";
-import { NcaafWeekNav, NcaafWeekNote, readNcaafWeek, ncaafCard } from "../NcaafWeek";
+import { NcaafWeekNav, NcaafWeekNote, readNcaafWeek } from "../NcaafWeek";
+import { liveNcaafCard } from "../liveCard";
 import PinButton from "../../PinButton";
 import { NCAAF_MODEL, type NcaafConf, type NcaafCardGame } from "../model-data";
 import { StatCard } from "../StatCard";
@@ -22,7 +23,7 @@ export default async function Page({ searchParams }: {
 }) {
   const cx = M.context;
   const week = readNcaafWeek((await searchParams).week, M.card.week);
-  const c = ncaafCard(week);
+  const c = await liveNcaafCard(week);
   const top = cx.conferences[0];
   const games: NcaafCardGame[] = [...c.games]
     .sort((a, b) => (a.commence || "9999").localeCompare(b.commence || "9999")); // soonest kickoff first

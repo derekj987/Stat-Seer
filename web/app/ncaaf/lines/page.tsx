@@ -1,5 +1,6 @@
 import { Brand, FlowSteps, ShopSubnav, WeekBadge } from "../../Nav";
-import { NcaafWeekNav, NcaafWeekNote, readNcaafWeek, ncaafCard } from "../NcaafWeek";
+import { NcaafWeekNav, NcaafWeekNote, NcaafLinesAsOf, readNcaafWeek } from "../NcaafWeek";
+import { liveNcaafCard } from "../liveCard";
 import PinButton from "../../PinButton";
 import Tip from "@/app/Tip";
 import { NCAAF_MODEL } from "../model-data";
@@ -23,7 +24,7 @@ export default async function Page({ searchParams }: {
 }) {
   const bs = M.value.bookShop;
   const week = readNcaafWeek((await searchParams).week, M.card.week);
-  const c = ncaafCard(week);
+  const c = await liveNcaafCard(week);
   const games = c.games.filter((g) => g.marketSpread)  // only games with a market line
     .sort((a, b) => (a.commence || "9999").localeCompare(b.commence || "9999")); // soonest kickoff first
   const total = c.games.length;                        // full slate (incl. games w/o odds yet)
@@ -41,14 +42,15 @@ export default async function Page({ searchParams }: {
       <WeekBadge week={c.week} tip={
         <Tip label="Line Shopping" text={<>
           <b>The board.</b> Every game with the market&apos;s <b>spread</b> and <b>total</b>, beside our
-          line-blind read of which side it covers. The market number is a consensus snapshot; the per-book
-          best-price shopping turns on as the live NCAAF odds capture feeds the site.
+          line-blind read of which side it covers. The market number is <b>FanDuel&apos;s current line</b>,
+          captured every 30 minutes; the per-book best-price shopping is next.
         </>} />
       } pin={<PinButton size="sm" pin={{ id: "/ncaaf/lines", kind: "lines", label: "NCAAF · Line Shopping", detail: `Week ${week}`, href: `/ncaaf/lines?week=${week}` }} />} />
       <FlowSteps active="value" base="ncaaf" />
       <div className="subnavrow"><ShopSubnav active="lines" base="ncaaf" /></div>
       <NcaafWeekNav base="/ncaaf/lines" week={week} />
       <NcaafWeekNote card={c} />
+      <NcaafLinesAsOf card={c} />
 
       <section className="ncf-sec">
         <h2 className="ncf-h">Game lines — Week {c.week}
@@ -68,9 +70,9 @@ export default async function Page({ searchParams }: {
         </div>
         <NcaafLinesTable games={games} {...etToday()} />
         <p className="ncf-note">
-          Consensus lines at −110 — <b>tap a side to add it to your slip</b>. Per-book best-price shopping (each
-          book&apos;s number + the single best price per game, like <a href="/lines">the NFL board</a>) turns on when the
-          live NCAAF odds capture is deployed.
+          FanDuel&apos;s line at −110 — <b>tap a side to add it to your slip</b>. Per-book best-price shopping (each
+          book&apos;s number + the single best price per game, like <a href="/lines">the NFL board</a>) is the next
+          piece; the capture that feeds it is already running.
         </p>
       </section>
 

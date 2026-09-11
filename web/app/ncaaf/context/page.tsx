@@ -1,5 +1,6 @@
 import { Brand, FlowSteps, ContextSubnav, WeekBadge } from "../../Nav";
-import { NcaafWeekNav, NcaafWeekNote, readNcaafWeek, ncaafCard } from "../NcaafWeek";
+import { NcaafWeekNav, NcaafWeekNote, readNcaafWeek } from "../NcaafWeek";
+import { liveNcaafCard } from "../liveCard";
 import { NCAAF_MODEL, type NcaafUpset } from "../model-data";
 import { ChaosBoard } from "../../ChaosBoard";
 import { buildChaosBoard, returnFromSpread, type ChaosInput } from "@/lib/chaos";
@@ -21,7 +22,7 @@ export default async function Page({ searchParams }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const week = readNcaafWeek((await searchParams).week, M.card.week);
-  const c = ncaafCard(week);
+  const c = await liveNcaafCard(week);
   const upsets: readonly NcaafUpset[] = c.upsets;
 
   // Speculative Chaos Board — every game with a real underdog, scored on chaos potential
