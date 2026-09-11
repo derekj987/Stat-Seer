@@ -7,6 +7,8 @@ export interface TeamRating { team: string; off: number; def: number;
 export const RATINGS_SEASON = 2026;
 export const RATINGS_IS_PRIOR = false;
 export const TEAM_RATINGS: Record<string, TeamRating> = {
-  "NE": { team: "NE", off: 10.0, def: 13.0, offRank: 2, defRank: 2, games: 1 },
-  "SEA": { team: "SEA", off: 13.0, def: 10.0, offRank: 1, defRank: 1, games: 1 },
+  "LA": { team: "LA", off: 7.0, def: 27.0, offRank: 4, defRank: 4, games: 1 },
+  "NE": { team: "NE", off: 10.0, def: 13.0, offRank: 3, defRank: 3, games: 1 },
+  "SEA": { team: "SEA", off: 13.0, def: 10.0, offRank: 2, defRank: 2, games: 1 },
+  "SF": { team: "SF", off: 27.0, def: 7.0, offRank: 1, defRank: 1, games: 1 },
 };
