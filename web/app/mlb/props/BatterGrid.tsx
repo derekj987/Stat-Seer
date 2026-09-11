@@ -25,8 +25,10 @@ const pkFmt = new Intl.DateTimeFormat("en-US", {
 });
 const kickET = (iso: string) => pkFmt.format(new Date(iso)) + " ET";
 
-// Rows shown per game before the dropdown — one lineup's worth.
-const ROW_CAP = 9;
+// Rows shown per game before the dropdown. Derek: "only show the first 4 players and then have
+// our standard dropdown" — four is the top of the away lineup, enough to read the card without
+// scrolling past it; the other fourteen are one click.
+const ROW_CAP = 4;
 // Games shown per day before the dropdown (matches PropsView).
 const DAY_CAP = 6;
 
