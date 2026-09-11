@@ -449,7 +449,7 @@ def main(argv=None):
                      metavar="PATH", help="parse a saved fixture (default: the golden one)")
     src.add_argument("--live", action="store_true", help="make one live API call")
     ap.add_argument("--markets", default="h2h,spreads,totals", help="live markets")
-    ap.add_argument("--regions", default="us", help="live regions")
+    ap.add_argument("--regions", default="us,us2", help="live regions (us = DK/FD/MGM/Caesars/Fanatics/BetRivers + offshore; us2 = ESPN BET/Hard Rock/Bally/betPARX)")
     ap.add_argument("--reason", default="MANUAL",
                     choices=["SCHEDULED", "PRE_KICKOFF", "BACKFILL", "MANUAL"])
     ap.add_argument("--write", action="store_true", help="write to Supabase (else dry-run)")

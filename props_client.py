@@ -171,7 +171,7 @@ def main(argv=None):
     src.add_argument("--fixture", nargs="?", const=FIXTURE, metavar="PATH")
     src.add_argument("--live", action="store_true")
     ap.add_argument("--markets", default=DEFAULT_MARKETS)
-    ap.add_argument("--regions", default="us")
+    ap.add_argument("--regions", default="us,us2")
     ap.add_argument("--reason", default="MANUAL",
                     choices=["SCHEDULED", "PRE_KICKOFF", "BACKFILL", "MANUAL"])
     ap.add_argument("--write", action="store_true")

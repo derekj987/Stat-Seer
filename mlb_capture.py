@@ -162,7 +162,7 @@ def main(argv=None):
                     help="only poll games starting within this many days (MLB props post ~a day out)")
     ap.add_argument("--max-events", type=int, default=20, help="safety cap (a full slate is ~15)")
     ap.add_argument("--markets", default=DEFAULT_MARKETS)
-    ap.add_argument("--regions", default="us")
+    ap.add_argument("--regions", default="us,us2")
     ap.add_argument("--reason", default="SCHEDULED",
                     choices=["SCHEDULED", "PRE_FIRST_PITCH", "BACKFILL", "MANUAL"])
     ap.add_argument("--props-only", action="store_true")

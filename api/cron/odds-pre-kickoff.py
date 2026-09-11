@@ -7,7 +7,7 @@ closing line, per the closing_lines view) is always captured without spamming ro
 
 Schedule (vercel.json): "*/15 16-23 * 9-12,1 0,1,4"
   every 15 min, 16:00-23:00 UTC, Sep-Jan, Sun/Mon/Thu.
-Credit cost per run: markets x regions = 3 x 1 = 3 (unchanged by the row filter —
+Credit cost per run: markets x regions = 3 x 2 = 6 (unchanged by the row filter —
 the API bills per call, not per game).
 
 Only difference from odds-scheduled: capture_reason=PRE_KICKOFF and rows are filtered
@@ -24,7 +24,7 @@ import odds_client as oc  # noqa: E402
 
 CAPTURE_REASON = "PRE_KICKOFF"
 MARKETS = "h2h,spreads,totals"
-REGIONS = "us"
+REGIONS = "us,us2"
 COMMENCE_WITHIN_MIN = 25  # headroom over the 15-min cron so no kickoff is missed
 
 

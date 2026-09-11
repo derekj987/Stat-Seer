@@ -168,7 +168,7 @@ def main(argv=None):
                     help="only poll games kicking off within this many days")
     ap.add_argument("--max-events", type=int, default=40, help="safety cap on events polled")
     ap.add_argument("--markets", default=DEFAULT_MARKETS)
-    ap.add_argument("--regions", default="us")
+    ap.add_argument("--regions", default="us,us2")
     ap.add_argument("--dry-run", action="store_true", help="fetch + report, but do not write")
     ap.add_argument("--supabase", action="store_true",
                     help="write to the Supabase cfb_prop_snapshots table instead of SQLite "

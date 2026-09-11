@@ -24,6 +24,8 @@ const BOOK_LABEL: Record<string, string> = {
   prophetx: "ProphetX",
   lowvig: "LowVig",
   mybookieag: "MyBookie",
+  betparx: "betPARX",
+  betus: "BetUS",
 };
 
 /** The sportsbooks the site compares: US-licensed books only.
@@ -37,10 +39,11 @@ const BOOK_LABEL: Record<string, string> = {
  *  Captured but never shown is the right split: the capture returns them at no extra credit cost
  *  and history is free; deciding what a member sees is a display policy, which lives here.
  *
- *  Currently captured from this list: DraftKings, FanDuel, BetMGM, Caesars, Fanatics, BetRivers.
- *  ESPN BET, Hard Rock, Bally Bet and betPARX are on the feed's "us2" region, which the capture
- *  does not request (it would double the credit cost of every sweep) — listed so they appear the
- *  day that changes, with no code change. */
+ *  The capture requests both US regions ("us,us2" since 2026-09-11; 6 credits a sweep instead of
+ *  3, against a 5M-credit plan), which is where ESPN BET, Hard Rock, Bally Bet and betPARX come
+ *  from. us2 also carries state feeds (hardrockbet_fl, hardrockbet_oh), sweepstakes books (fliff,
+ *  rebet) and another offshore (betanysports): a state feed would count Hard Rock three times in
+ *  a "×3 books" tie, and the others are not books a member shops, so none of them are listed. */
 export const US_BOOKS = new Set([
   "draftkings", "fanduel", "betmgm", "williamhill_us", "fanatics", "betrivers",
   "espnbet", "hardrockbet", "ballybet", "betparx",

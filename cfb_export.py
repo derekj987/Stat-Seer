@@ -286,7 +286,7 @@ def fetch_ncaaf_odds():
         return []
     oc.ensure_ssl_certs()
     url = ("https://api.the-odds-api.com/v4/sports/americanfootball_ncaaf/odds"
-           "?apiKey=%s&regions=us&markets=spreads,totals&oddsFormat=american" % key)
+           "?apiKey=%s&regions=us,us2&markets=spreads,totals&oddsFormat=american" % key)
     try:
         with urllib.request.urlopen(url, timeout=60) as r:
             data = json.loads(r.read())

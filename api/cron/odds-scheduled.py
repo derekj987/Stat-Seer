@@ -6,7 +6,7 @@ game markets. Thin HTTP shell over odds_client — all parsing/writing logic liv
 there and is unit-tested against the golden fixture.
 
 Schedule (vercel.json): "0 9,21 * * *"  — 09:00 and 21:00 UTC daily.
-Credit cost per run: markets x regions = 3 x 1 = 3.
+Credit cost per run: markets x regions = 3 x 2 = 6.
 
 Deployment requirements (see api/cron/README for the full list):
   * Env vars on Vercel: ODDS_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_KEY, CRON_SECRET
@@ -25,7 +25,7 @@ import odds_client as oc  # noqa: E402
 
 CAPTURE_REASON = "SCHEDULED"
 MARKETS = "h2h,spreads,totals"
-REGIONS = "us"
+REGIONS = "us,us2"
 COMMENCE_WITHIN_MIN = None  # scheduled = capture all upcoming games
 
 

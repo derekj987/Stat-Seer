@@ -92,7 +92,8 @@ LG_MIN_PA = 20000                # plate appearances before the running league r
 # rows is about twelve days of batter-games, long enough not to chase one cold week.
 CAL_WINDOW = 3000
 # US-licensed books only, the same list the site shows (web/lib/bookLabel.ts US_BOOKS). The feed
-# also returns offshore books; the grader compares us with the field a member can actually bet.
+# (regions us,us2) also returns offshore, state-feed and sweepstakes books; the grader compares us
+# with the field a member can actually bet.
 US_BOOKS = {"draftkings", "fanduel", "betmgm", "williamhill_us", "fanatics", "betrivers",
             "espnbet", "hardrockbet", "ballybet", "betparx"}
 # PARK. Hits happen at a rate that depends on where: Coors ran 1.08x league this season, Petco
