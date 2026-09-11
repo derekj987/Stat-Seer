@@ -7,7 +7,7 @@ import { ShopSubnav, Brand, ValueFinderDrawer, FlowSteps, WeekBadge, DayBadge } 
 import { WeekNav } from "./WeekNav";
 import { useSlip } from "@/lib/slip";
 import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
-import { capDayGroups, groupByGameDay, dayBasis, type DayGroup } from "@/lib/gameDays";
+import { groupByGameDay, dayBasis, type DayGroup } from "@/lib/gameDays";
 import { DayHeader } from "./DayHeader";
 import { audit, VERDICT_LABEL } from "@/lib/fairValue";
 import PinButton from "./PinButton";
@@ -90,7 +90,10 @@ function SavableChip({
 }
 
 
-const GAME_CAP = 3;   // games shown before the "show more" dropdown
+// Games shown before "show more". EVEN, because the card grid is two across at the width the
+// rails leave (826px at 1440; `.grid` is auto-fill minmax(330px)): three visible cards put the
+// third alone on the left with a blank slot beside it. Four fills two rows.
+const GAME_CAP = 4;
 
 /** The board serves two sports with one component. Everything a sport changes is in this table —
  *  the label on the handicap market (a football spread is a baseball run line), the copy, the pin,
@@ -113,8 +116,8 @@ const SPORT = {
 } as const;
 
 function GameCard({
-  g, has, onToggle, sport, abbr,
-}: { g: Game; has: (id: string) => boolean; onToggle: (p: Pick) => void; sport: BoardSport; abbr?: Record<string, string> }) {
+  g, has, onToggle, sport, abbr, more,
+}: { g: Game; has: (id: string) => boolean; onToggle: (p: Pick) => void; sport: BoardSport; abbr?: Record<string, string>; more?: boolean }) {
   const S = SPORT[sport];
   // Chips carry the club's abbreviation where the page supplies one (MLB: "Washington Nationals
   // −149" wrapped its chip onto two lines; "WSH −149" does not). The card header keeps the full
@@ -135,7 +138,7 @@ function GameCard({
   const wx = WX_BY_EVENT.get(g.eventId);
   const showWx = wx && (wx.indoor || wx.status === "ok");
   return (
-    <article className={s.key || t.key ? "game key" : "game"}>
+    <article className={`game${s.key || t.key ? " key" : ""}${more ? " hb-row--more" : ""}`}>
       <header className="game__head">
         <span className="matchup">{g.away}<span className="at">@</span>{g.home}</span>
         <time className="kick">{et(g.commence, kickFmt)}</time>
@@ -248,35 +251,43 @@ export default function BoardView({
               </div>
             </details>
 
-            {/* First GAME_CAP games visible, the rest behind the standard dropdown — the same
-                "see a few immediately, expand for the rest" shape the prop board uses. capDayGroups
-                splits a day at the boundary and flags the tail `cont` so the day header is drawn
-                exactly once, never duplicated across the cut. */}
+            {/* First GAME_CAP games visible, the rest revealed IN PLACE by the hb-moretbl checkbox
+                — one grid, never a second one. Rendering the tail as its own <details> started a
+                fresh grid, so with an odd cap the third card sat alone on the left with a blank
+                slot beside it and the fourth began a new row below (Derek: "make the value finder
+                cards side-by-side for all of them"). Hiding rows inside the one grid keeps every
+                card in flow; a day whose games are all hidden hides its header with them. */}
             {(() => {
               const groups = groupByGameDay(board, (g) => g.commence, today, tomorrow);
-              const { head, rest, restCount } = capDayGroups(groups, GAME_CAP);
-              const dayBlock = (grp: DayGroup<(typeof board)[number]>) => (
-                <div className="daygrid__day" key={grp.key} style={dayBasis(grp.items.length)}>
-                  {!grp.cont && <DayHeader label={grp.label} tone={grp.tone} count={grp.total ?? grp.items.length} />}
-                  <section className="grid">
-                    {grp.items.map((g) => <GameCard key={g.eventId} g={g} has={has} onToggle={toggle} sport={sport} abbr={abbr} />)}
-                  </section>
-                </div>
-              );
+              const moreId = `board-more-${sport}`;
+              let i = 0;
+              const hidden = Math.max(0, board.length - GAME_CAP);
               return (
-                <>
-                  <div className="daygrid">{head.map(dayBlock)}</div>
-                  {restCount > 0 && (
-                    <details className="hb-showmore">
-                      <summary className="hb-showmore__sum">
-                        <span className="hb-showmore__chev" aria-hidden="true">▸</span>
-                        <span className="hb-showmore__more">Show {restCount} more game{restCount === 1 ? "" : "s"}</span>
-                        <span className="hb-showmore__less">Collapse</span>
-                      </summary>
-                      <div className="daygrid">{rest.map(dayBlock)}</div>
-                    </details>
+                <div className="hb-moretbl">
+                  <input type="checkbox" id={moreId} className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
+                  <div className="daygrid">
+                    {groups.map((grp: DayGroup<(typeof board)[number]>) => {
+                      const first = i;
+                      const cards = grp.items.map((g) => {
+                        const more = i++ >= GAME_CAP;
+                        return <GameCard key={g.eventId} g={g} has={has} onToggle={toggle} sport={sport} abbr={abbr} more={more} />;
+                      });
+                      return (
+                        <div className={`daygrid__day${first >= GAME_CAP ? " hb-row--more" : ""}`} key={grp.key} style={dayBasis(grp.items.length)}>
+                          <DayHeader label={grp.label} tone={grp.tone} count={grp.total ?? grp.items.length} />
+                          <section className="grid">{cards}</section>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {hidden > 0 && (
+                    <label htmlFor={moreId} className="hb-moretbl__sum">
+                      <span className="hb-more__chev" aria-hidden="true">▸</span>
+                      <span className="hb-moretbl__more">Show {hidden} more game{hidden === 1 ? "" : "s"}</span>
+                      <span className="hb-moretbl__less">Show fewer</span>
+                    </label>
                   )}
-                </>
+                </div>
               );
             })()}
 

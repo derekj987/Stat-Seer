@@ -32,14 +32,20 @@ export default async function Page({ searchParams }: PageProps<"/mlb/props">) {
   const cat = mlbCategoryByKey(typeof sp.cat === "string" ? sp.cat : "hitting");
   const catSet = new Set(cat.markets);
   const all = await mlbPropBoard().catch(() => []);
-  // Team abbreviation per player from the lineup projections (the feed carries teams per GAME,
-  // not per player). Pitchers are not in the batting projections, so their tag is blank.
-  const teamOf = new Map(MLB_PROPS.map((p) => [norm(p.player), p.teamAbbr || p.team]));
+  // Team abbreviation and batting slot per player from the lineup projections (the feed carries
+  // teams per GAME, not per player). Pitchers are not in the batting projections: no tag, sorted
+  // last. Rows read in LINEUP ORDER — away side first, then home, leadoff to nine-hole — the way
+  // a sportsbook's own game page lists them, instead of A.J. Ewing first by alphabet.
+  const info = new Map(MLB_PROPS.map((p) => [norm(p.player), { team: p.teamAbbr || p.team, slot: p.slot, home: p.game.endsWith(`@ ${p.team}`) }]));
+  const order = (q: { player: string }) => { const i = info.get(norm(q.player)); return i ? (i.home ? 100 : 0) + (i.slot || 50) : 999; };
   const games = all
     .map((g) => ({
       ...g,
       markets: g.markets.filter((m) => catSet.has(m.market)).map((m) => ({
-        ...m, quotes: m.quotes.map((q) => ({ ...q, team: teamOf.get(norm(q.player)) })),
+        ...m,
+        quotes: m.quotes
+          .map((q) => ({ ...q, team: info.get(norm(q.player))?.team }))
+          .sort((a, b) => order(a) - order(b) || a.player.localeCompare(b.player) || (a.side === "Over" ? -1 : 1)),
       })),
     }))
     .filter((g) => g.markets.length > 0);

@@ -284,7 +284,7 @@ export default async function Page({ searchParams }: PageProps<"/considerations"
           <div id="cxgames" aria-label={`Week ${week} considerations`}>
             <div className="daygrid">
               {groupByGameDay(games, (x) => x.g.commence, today, tomorrow).map((grp) => (
-                <div className="daygrid__day" key={grp.key} style={dayBasis(grp.items.length, 2, 476, 16)}>
+                <div className="daygrid__day" key={grp.key} style={dayBasis(grp.items.length, 2, 422, 16)}>
                   <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
                   <section className="cxgrid">{grp.items.map(renderCard)}</section>
                 </div>

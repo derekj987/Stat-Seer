@@ -230,13 +230,25 @@ interface BoardRow extends Row {
   event_id: string; commence_time: string; home_team: string; away_team: string;
 }
 
-/** A better quote for the bettor: a lower Over line, a higher Under line, else the better price. */
-function isBetter(a: Quote, b: Quote): boolean {
-  if (a.line !== null && b.line !== null && a.line !== b.line) {
-    if (a.side === "Over") return a.line < b.line;
-    if (a.side === "Under") return a.line > b.line;
+/** The MAIN line for a player's market: the line the most books post BOTH sides of, FanDuel
+ *  breaking ties. The football boards took the bettor-friendliest line per side (lowest Over,
+ *  highest Under), and on a baseball board that paired "O 0.5" with "U 1.5" on one row — two
+ *  different questions (1+ hit; fewer than 2) dressed as one market. A reader wants the question
+ *  the book leads with, both sides of it, and the best price for each. */
+function mainLine(quotes: Quote[]): number | null {
+  const lines = new Map<number, { over: Set<string>; under: Set<string> }>();
+  for (const q of quotes) {
+    if (q.line === null) return null;
+    const e = lines.get(q.line) ?? lines.set(q.line, { over: new Set(), under: new Set() }).get(q.line)!;
+    for (const b of Object.keys(q.byBook)) (q.side === "Over" ? e.over : e.under).add(b);
   }
-  return a.price > b.price;
+  let best: number | null = null, score = -1;
+  for (const [line, e] of lines) {
+    const both = [...e.over].filter((b) => e.under.has(b)).length;
+    const s = both * 10 + (e.over.has("fanduel") ? 1 : 0) + Math.min(e.over.size, 9) / 10;
+    if (s > score) { score = s; best = line; }
+  }
+  return best;
 }
 
 export async function mlbPropBoard(): Promise<PropGame[]> {
@@ -312,16 +324,22 @@ export async function mlbPropBoard(): Promise<PropGame[]> {
   for (const g of games.values()) {
     const mm = mmap.get(g.eventId)!;
     g.markets = [...mm.entries()].map(([market, quotes]) => {
-      // One row per player + side: the single best line/book across all books.
-      const bestByKey = new Map<string, Quote>();
-      for (const q of quotes) {
-        const key = `${q.player}|${q.side}`;
-        const prev = bestByKey.get(key);
-        if (!prev || isBetter(q, prev)) bestByKey.set(key, q);
+      // One row per player + side, at the player's MAIN line for this market.
+      const byPlayer = new Map<string, Quote[]>();
+      for (const q of quotes) (byPlayer.get(q.player) ?? byPlayer.set(q.player, []).get(q.player)!).push(q);
+      const qs: Quote[] = [];
+      for (const pq of byPlayer.values()) {
+        const line = mainLine(pq);
+        const keep = pq.filter((q) => q.line === line);
+        // Over before Under; a yes/no market has one side.
+        keep.sort((x, y) => (x.side === "Over" || x.side === "Yes" ? -1 : 1) - (y.side === "Over" || y.side === "Yes" ? -1 : 1));
+        qs.push(...keep);
       }
-      const qs = [...bestByKey.values()].sort((x, y) => x.player.localeCompare(y.player) || x.side.localeCompare(y.side));
       return { market, label: mlbLabel(market), quotes: qs } as MarketBlock;
-    }).sort((x, y) => x.label.localeCompare(y.label));
+    });
+    // Market order is the CATEGORY's order (Hits before Doubles), not the alphabet's.
+    const rank = new Map(MLB_CATEGORIES.flatMap((c) => c.markets).map((m, i) => [m, i]));
+    g.markets.sort((x, y) => (rank.get(x.market) ?? 99) - (rank.get(y.market) ?? 99));
     out.push(g);
   }
   out.sort((x, y) => x.commence.localeCompare(y.commence));

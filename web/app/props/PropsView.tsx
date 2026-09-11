@@ -70,7 +70,9 @@ function PropChip({ q, market, marketLabel, game, saved, cont, onToggle }: {
           which names two books and truncates the third, the worst of both. "3 books" is shorter,
           complete, and the full list is on the tooltip for anyone who wants it. */}
       <span className="propq__book" title={q.books.map(bookLabel).join(" / ")}>
-        {booksLabel(q.books)}
+        {/* One book named, or a count. Two names ("DraftKings / Hard Rock") took ~110px of a row
+            that has ~230 to give, and the player's NAME was what ellipsized to pay for it. */}
+        {booksLabel(q.books, 1)}
       </span>
       <span className="propq__add" aria-hidden="true">{saved ? "✓" : "+"}</span>
     </button>

@@ -3,13 +3,11 @@
 // book per leg, and the one book with the best COMBINED price for the whole parlay.
 import type { SlipItem } from "./slip";
 
-export const BOOK_LABEL: Record<string, string> = {
-  draftkings: "DraftKings", fanduel: "FanDuel", betmgm: "BetMGM", caesars: "Caesars",
-  williamhill_us: "Caesars", betrivers: "BetRivers", pointsbetus: "PointsBet",
-  betonlineag: "BetOnline", bovada: "Bovada", mybookieag: "MyBookie", lowvig: "LowVig",
-  betus: "BetUS", espnbet: "ESPN BET", fanatics: "Fanatics", hardrockbet: "Hard Rock",
-};
-export const bookName = (b: string) => BOOK_LABEL[b] ?? b;
+// ONE label map, in lib/bookLabel.ts. This file used to carry its own copy, and the two drifted:
+// the day the us2 books arrived, the homepage shopping table read "ballybet / betparx" beside
+// "BetRivers / Caesars" because only the other map had learned the new names.
+import { bookLabel } from "./bookLabel";
+export const bookName = bookLabel;
 export const fmtOdds = (p?: number) => (p === undefined ? "" : p > 0 ? `+${p}` : String(p));
 
 // American ↔ decimal, so we can multiply prices across legs and show the combined number.

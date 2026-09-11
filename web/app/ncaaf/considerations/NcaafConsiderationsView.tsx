@@ -152,7 +152,7 @@ export default function NcaafConsiderationsView({ games, ratings, hfa, slate, to
             const groups = groupByGameDay(shown, (g) => g.commence, today, tomorrow);
             const { head, rest, restCount } = capDayGroups(groups, CARD_CAP);
             const dayBlock = (grp: DayGroup<NcaafCardGame>) => (
-              <div className="daygrid__day" key={grp.key} style={dayBasis(grp.items.length, 2, 476, 16)}>
+              <div className="daygrid__day" key={grp.key} style={dayBasis(grp.items.length, 2, 422, 16)}>
                 {!grp.cont && <DayHeader label={grp.label} tone={grp.tone} count={grp.total ?? grp.items.length} />}
                 <section className="cxgrid">
                   {grp.items.map((g) => <ConsiderationCard key={`${g.away}-${g.home}`} g={g} hfa={hfa} ratings={ratings} />)}

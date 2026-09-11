@@ -967,7 +967,11 @@ a.sportstrip__i:hover{color:var(--ink)}
 .wxchip--wind b{color:var(--mkt)}
 /* --- Special Considerations game cards (site+weather, referee, stakes per game) --- */
 /* Context cards: 2 across on desktop (1 on phones), roomier so they don't feel cluttered */
-.cxgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(456px,1fr));gap:16px;margin:10px 0 4px}
+/* 420 not 456: the content column the rails leave at 1440 is 861px, and 2 x 456 + 16 = 928 does
+   not fit, so a heavy day fell to ONE column of 861px cards while a one-game day (dayBasis 476)
+   drew a 476px card beside it — card-width-mismatch, 861 vs 476. Two columns of 422 fit, and the
+   light-day basis below matches them, so every context card on a page is one width. */
+.cxgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px;margin:10px 0 4px}
 @media (max-width:720px){.cxgrid{grid-template-columns:1fr}}
 .cxcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 22px}
 .cxcard--wind{border-color:color-mix(in srgb,var(--spot) 55%,var(--line))}
@@ -1026,6 +1030,11 @@ a.sportstrip__i:hover{color:var(--ink)}
    collapsed to 0 and 32 names clipped. Below 560 the label goes back above the value (what
    cxrow--wide did before these rows became grids) and the stat tracks tighten, which gives the
    name ~96px instead of nothing. */
+/* The coaching row is ALWAYS stacked (label above the grid). In a 422px card — two columns at
+   1440 — the label-beside-grid layout leaves the stat grid 296px and the surname track 66px, and
+   "Schottenheimer" (93px) and "McDermott" clip. Stacked, the grid gets the full 376px. */
+.cxrow--coach{display:block}
+.cxrow--coach>.cxrow__k{display:block;margin-bottom:5px}
 @media (max-width:560px){
   .cxrow--score,.cxrow--coach{display:block}
   .cxrow--score>.cxrow__k,.cxrow--coach>.cxrow__k{display:block;margin-bottom:5px}
@@ -3844,11 +3853,14 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
    The two Spread columns share one width and the two O/U columns share another, so the
    Market and Model sides mirror each other and the numbers line up in even columns instead
    of the Model values floating in oversized cells. */
+/* 30 / 21 / 14 / 21 / 14: the spread columns hold "Boston College -5.3" (149px at the 827px
+   table) and the totals hold "56.5" (~30px). At 19/16 the spreads had 8px to spare while each
+   total sat on 82px of empty width (chart-columns-lopsided). Spread = spread, total = total. */
 .hb-form--mkt th:nth-child(1),.hb-form--mkt td:nth-child(1){width:30%}
-.hb-form--mkt th:nth-child(2),.hb-form--mkt td:nth-child(2){width:19%}
-.hb-form--mkt th:nth-child(3),.hb-form--mkt td:nth-child(3){width:16%}
-.hb-form--mkt th:nth-child(4),.hb-form--mkt td:nth-child(4){width:19%}
-.hb-form--mkt th:nth-child(5),.hb-form--mkt td:nth-child(5){width:16%}
+.hb-form--mkt th:nth-child(2),.hb-form--mkt td:nth-child(2){width:21%}
+.hb-form--mkt th:nth-child(3),.hb-form--mkt td:nth-child(3){width:14%}
+.hb-form--mkt th:nth-child(4),.hb-form--mkt td:nth-child(4){width:21%}
+.hb-form--mkt th:nth-child(5),.hb-form--mkt td:nth-child(5){width:14%}
 /* single Model values sit centered against the two-chip Market cells (even vertical rhythm) */
 .hb-form--mkt td{vertical-align:middle}
 /* player-snapshot 4-col: Player · Team · Prop(book) · Our proj */

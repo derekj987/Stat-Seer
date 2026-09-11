@@ -2327,6 +2327,54 @@ Any that overflow are fragile — they *will* bleed with real long data (fix wit
 `max-width`, `overflow`, or letting the bubble size to content). Ignore count-only badges (`.slipbar__count`)
 that never hold long text. Do this at 320–375px width; overflow appears at the narrowest widths first.
 
+### ⚠️ The iframe harness audits 20 pages in minutes — and lies about width
+A full matrix (22 pages × 2 viewports) by `navigate` + `javascript_tool` is ~50 round trips. Faster:
+one host page, an `<iframe>` per page sized to the viewport, the probe `eval`ed inside
+`iframe.contentWindow`. Two pages per call fits the 45s tool timeout. It found everything the
+per-page pass finds, **with two artifacts that a per-page pass in the real tab does not have**:
+
+- **No rails, so the content column is ~1032px instead of 861/826.** The iframe page never
+  hydrates (Suspense stalls in dev), so `data-rail` is never set and the rail gutters never
+  reserve. Anything width-derived is measured on the wrong container: the homepage hero reported
+  `full-bleed-short` (44px each side) that does not exist with rails, and the considerations cards
+  reported 476 vs 861 — a real finding, as it turned out, but with the wrong numbers.
+- **`/context` at 375 reports +77px overflow after the splice** — the documented splice artifact.
+
+**Rule: the harness triages; every finding it raises is re-measured in the real tab before it
+is reported or fixed.** Three of six harness findings this pass were real (below); two were
+container artifacts; one was the known contrast false positive.
+
+### The rail-bounded width is the width that matters
+Three real findings this pass, one cause: a layout that only fits at a width the rails never give.
+- **Context cards** (`.cxgrid`): `minmax(456px,1fr)` needs 928 for two columns; the rails leave
+  861, so a 13-game day fell to one 861px column while a 1-game day (dayBasis 476) drew a 476px
+  card beside it. Now `minmax(420px)` and a 422 basis — two columns of 422 fit, every card one
+  width. Then the coaching stat grid clipped "Schottenheimer" inside a 422 card, so that row is
+  always stacked (label above the grid), not just below 560px.
+- **NCAAF model table**: 19/16/19/16 gave the totals 82px of empty width while "Boston College
+  −5.3" had 8 to spare. 21/14/21/14.
+- **Value Finder cards**: three visible cards in a two-across grid = an orphan (Derek: "make the
+  cards side-by-side for all of them"). The tail was a SECOND grid inside a `<details>`, so even
+  after expanding, the fourth card started a new row. Now one grid, rows hidden in place by the
+  `hb-moretbl` checkbox, and `GAME_CAP` is EVEN (4).
+Design and budget for 826–861, not 1120; check `main.wrap` and the panel at 1440 **with rails**.
+
+### One label map, or the new books get named twice
+`slipPricing.BOOK_LABEL` was a second copy of `bookLabel.ts`'s map. The day the us2 books
+arrived, the homepage shopping table read "ballybet / betparx" beside "BetRivers / Caesars",
+because only one map had learned the names. `bookName` now delegates. Grep for a second copy
+whenever a lookup table grows: `grep -rn "BOOK_LABEL" web/lib web/app`.
+
+### MLB props: the MAIN line, in lineup order, markets in the category's order
+Derek: *"let's get this cleaned up and organized by category."* The board had every hitting
+market three across, alphabetical (Doubles before Hits), players alphabetical (a bench bat first),
+names ellipsized by a two-book tie label, and rows pairing `O 0.5` with `U 1.5` — two different
+questions dressed as one market, because the football collapse takes the bettor-friendliest LINE
+per side. Fixes: `mainLine()` (the line the most books post BOTH sides of, FanDuel breaking
+ties) with both sides at that line; markets in `MLB_CATEGORIES` order; players in lineup order
+(away side, then home, leadoff to nine) from `MLB_PROPS` slots; `booksLabel(books, 1)` so one
+book is named or a count shown, which gave the name column its width back.
+
 ## Prerequisites (already in the repo)
 - **QA preview mode** is automatic on the local dev server: `web/proxy.ts` opens the gate when
   `NODE_ENV==="development"`, and `web/lib/supabase/client.ts` mocks `auth.getUser/getSession` so
