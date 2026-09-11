@@ -2024,9 +2024,21 @@ and the symptom arrives as "the site is down" rather than as a slow page.
 # every runtime reader, and whether it bounds what it pulls
 grep -rn "rest/v1" web/lib/*.ts | grep -v "limit=1"
 ```
-Watch for the same shape in `mlbProps.ts`, `mlbBoard.ts` and `board.ts`, which also page whole
-tables. And note what an audit costs: repeatedly reloading boards to re-run the probe is itself
-heavy traffic against these reads.
+**Measured once the instance recovered** (the week-1 table had grown from 119k to 194k rows
+overnight — it never stops):
+
+| read | before | after | |
+|---|---|---|---|
+| NFL `weekProps` | 194,465 rows | 10,277 | 18.9x less |
+| NFL `fanduelLines` | 194,465 | 1,640 | 118x less |
+| MLB `propLines` / `propBookProb` | 15,580 | 1,867 | 8.3x less |
+
+**Read the CALLER before flagging a paging helper.** I told Derek `mlbBoard.ts` and `board.ts` had
+the same defect because they share the paged-read shape. They do not: both already probe for the
+latest `snapshot_at` with `limit=1` and read only that sweep. Only `mlbProps.ts` was unbounded. A
+helper that pages is fine; a helper that pages *without a snapshot pin upstream* is the bug — and
+you can only tell which by reading the query each caller builds. And note what an audit costs:
+repeatedly reloading boards to re-run the probe is itself heavy traffic against these reads.
 
 ### 🚨 A CSS edit must be brace-balanced — check it, do not eyeball it
 The homepage reported `page-overflow-x` of +413px at 1440 and no element past the right edge. The

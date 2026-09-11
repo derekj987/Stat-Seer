@@ -41,13 +41,39 @@ async function pgAll(query: string): Promise<Row[]> {
   return out;
 }
 
+/** The newest sweep's `snapshot_at` for one market — a one-row probe.
+ *
+ *  `mlb_prop_snapshots` is append-only: every 6h sweep writes a fresh row per (player, book, side,
+ *  line), so a market's history grows without bound and both readers below used to pull ALL of
+ *  it — `?market=eq.X&order=snapshot_at.desc` with no time bound — then keep only the newest row
+ *  per key and discard the rest. That is the read pattern that exhausted the project's Disk IO
+ *  budget on the NFL side; this table is smaller but the same shape, and it only gets bigger.
+ *
+ *  MLB `snapshot_at` is ONE clock time per sweep by design (see ingest/mlb_snapshots.sql) and is
+ *  indexed, so `snapshot_at=eq.<latest>` is both exact and cheap. Same pattern as mlbBoard.ts
+ *  and cfbProps.ts. Returns null when the probe fails so the caller can fall back. */
+async function latestSnapshot(market: string): Promise<string | null> {
+  const rows = await pgAll(`?market=eq.${market}&select=snapshot_at&order=snapshot_at.desc&limit=1`);
+  return rows.length ? rows[0].snapshot_at : null;
+}
+
+/** Rows for a market at its newest sweep, falling back to the unbounded read only if the probe
+ *  returned nothing — so a stale board still renders rather than an empty one. */
+async function marketRows(market: string): Promise<Row[]> {
+  const snap = await latestSnapshot(market);
+  const sel = "&select=player,side,line,price_american,book,snapshot_at&order=snapshot_at.desc";
+  if (snap) {
+    const rows = await pgAll(`?market=eq.${market}&snapshot_at=eq.${encodeURIComponent(snap)}${sel}`);
+    if (rows.length) return rows;
+  }
+  return pgAll(`?market=eq.${market}${sel}`);
+}
+
 /** {normalised pitcher name -> consensus strikeout line}. The MEDIAN across books, not any single
  *  one — the same choice the NFL game board makes, and the reason the football copy says "the
  *  median across the sportsbooks we track, not any single book". */
 export async function propLines(market: string): Promise<Map<string, { line: number; books: number }>> {
-  const rows = await pgAll(
-    `?market=eq.${market}&select=player,side,line,price_american,book,snapshot_at&order=snapshot_at.desc`,
-  );
+  const rows = await marketRows(market);
   // Latest snapshot per (player, book), then the median of those.
   const latest = new Map<string, number>();
   for (const r of rows) {
@@ -95,9 +121,7 @@ export const strikeoutLines = () => propLines("pitcher_strikeouts");
  *  De-vigged against the Under so the two sides sum to 1 — that is the Pick Auditor's arithmetic,
  *  and it is arithmetic, never an edge claim. */
 export async function propBookProb(market: string): Promise<Map<string, number>> {
-  const rows = await pgAll(
-    `?market=eq.${market}&select=player,side,line,price_american,book,snapshot_at&order=snapshot_at.desc`,
-  );
+  const rows = await marketRows(market);
   // 🚨 THE LINE IS PART OF THE QUESTION. `batter_hits` carries BOTH the 0.5 line ("will he record
   // a hit") and the 1.5 line ("will he get two"), 399 of 5,845 rows at 1.5. Keying only on
   // (player, book, side) let whichever line a book happened to post most recently win — so Yandy
