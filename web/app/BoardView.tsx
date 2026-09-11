@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import type { Game } from "@/lib/board";
-import { ShopSubnav, Brand, ValueFinderDrawer, FlowSteps, WeekBadge } from "./Nav";
+import { ShopSubnav, Brand, ValueFinderDrawer, FlowSteps, WeekBadge, DayBadge } from "./Nav";
 import { WeekNav } from "./WeekNav";
 import { useSlip } from "@/lib/slip";
 import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
@@ -91,9 +91,28 @@ function SavableChip({
 
 const GAME_CAP = 3;   // games shown before the "show more" dropdown
 
+/** The board serves two sports with one component. Everything a sport changes is in this table —
+ *  the label on the handicap market (a football spread is a baseball run line), the copy, the pin,
+ *  and whether the week wheel exists (baseball has days, not weeks) — so the card, the chips, the
+ *  slip wiring and the day grouping stay identical, which is the point of sharing it. */
+export type BoardSport = "nfl" | "mlb";
+const SPORT = {
+  nfl: { label: "NFL", spread: "Spread", weeks: true, pin: "/lines", propsHref: "/props",
+         foot: <>Line shopping — the <b>best available number across books</b> on every game, plus where a
+           half-point sits on a <b>sweet spot</b> (a 3 or 7).</> },
+  mlb: { label: "MLB", spread: "Run line", weeks: false, pin: "/mlb/lines", propsHref: "/mlb/props",
+         foot: <>Line shopping — the <b>best available price across books</b> on every game&apos;s moneyline,
+           run line and total. The run line is ±1.5 everywhere, so the shopping is all in the price.</> },
+} as const;
+
 function GameCard({
-  g, has, onToggle,
-}: { g: Game; has: (id: string) => boolean; onToggle: (p: Pick) => void }) {
+  g, has, onToggle, sport, abbr,
+}: { g: Game; has: (id: string) => boolean; onToggle: (p: Pick) => void; sport: BoardSport; abbr?: Record<string, string> }) {
+  const S = SPORT[sport];
+  // Chips carry the club's abbreviation where the page supplies one (MLB: "Washington Nationals
+  // −149" wrapped its chip onto two lines; "WSH −149" does not). The card header keeps the full
+  // name, which is where a reader learns what the abbreviation means.
+  const nm = (team: string) => abbr?.[team] ?? team;
   const ml = Object.entries(g.ml);
   const bestSide = ml.length ? ml.reduce((a, b) => (b[1].edge > a[1].edge ? b : a))[0] : null;
   const bestEdge = ml.reduce((m, [, s]) => Math.max(m, s.edge), 0);
@@ -120,17 +139,17 @@ function GameCard({
         <div className="mkt">
           <span className="mkt__label">Moneyline</span>
           <div className="lines">
-            {ml.map(([side, m]) => chip(mk("ML", side, m.price, m.books, m.byBook, m.fairProb), side === bestSide))}
+            {ml.map(([side, m]) => chip(mk("ML", nm(side), m.price, m.books, m.byBook, m.fairProb), side === bestSide))}
           </div>
           <div className="mkt__note"><span className="edge">shop&nbsp;+{bestEdge.toFixed(1)}%</span></div>
         </div>
 
         {s.home && s.away && (
           <div className="mkt">
-            <span className="mkt__label">Spread</span>
+            <span className="mkt__label">{S.spread}</span>
             <div className="lines">
-              {chip(mk("Spread", `${g.home} ${fmtPt(s.home.point)}`, s.home.price, s.home.books, s.home.byBook, s.home.fairProb))}
-              {chip(mk("Spread", `${g.away} ${fmtPt(s.away.point)}`, s.away.price, s.away.books, s.away.byBook, s.away.fairProb))}
+              {chip(mk(S.spread, `${nm(g.home)} ${fmtPt(s.home.point)}`, s.home.price, s.home.books, s.home.byBook, s.home.fairProb))}
+              {chip(mk(S.spread, `${nm(g.away)} ${fmtPt(s.away.point)}`, s.away.price, s.away.books, s.away.byBook, s.away.fairProb))}
             </div>
             <div className="mkt__note">
               {s.key && <span className="badge sm">SWEET SPOT</span>}
@@ -158,8 +177,9 @@ function GameCard({
 }
 
 export default function BoardView({
-  board, min, max, week, season, snapshot, today, tomorrow,
-}: { board: Game[]; min: number; max: number; week: number; season: number; snapshot: string; today: string; tomorrow: string }) {
+  board, min = 1, max = 1, week = 1, snapshot, today, tomorrow, sport = "nfl", abbr,
+}: { board: Game[]; min?: number; max?: number; week?: number; season?: number; snapshot: string; today: string; tomorrow: string; sport?: BoardSport; abbr?: Record<string, string> }) {
+  const S = SPORT[sport];
   const { has, toggle: slipToggle } = useSlip();
   const toggle = useCallback((p: Pick) => slipToggle({
     id: p.id, kind: "line",
@@ -171,13 +191,14 @@ export default function BoardView({
   const avgEdge = edges.length ? edges.reduce((a, b) => a + b, 0) / edges.length : 0;
   const keyGames = board.filter((g) => g.spread.key).length;
   const maxEdge = edges.length ? Math.max(...edges) : 0;
+  const books = new Set(board.flatMap((g) => Object.values(g.ml).flatMap((m) => Object.keys(m.byBook)))).size;
 
   return (
     <>
       <main className="wrap">
         <header className="masthead">
           <Brand
-            sub={<><span className="brand__sport">NFL</span> · Line Shopping</>}
+            sub={<><span className="brand__sport">{S.label}</span> · Line Shopping</>}
             art={{ src: "/bag.png?v=1", alt: "Value Finder" }}
           />
           {snapshot && <div className="asof">lines as of<br /><b>{et(snapshot, snapFmt)}</b></div>}
@@ -185,14 +206,18 @@ export default function BoardView({
 
         <ValueFinderDrawer />
 
-        <WeekBadge week={week} pin={<PinButton size="sm" pin={{ id: "/lines", kind: "lines", label: "Value Finder · Line Shopping", detail: `NFL · Week ${week}`, href: `/lines?week=${week}` }} />} />
-        <FlowSteps active="value" />
-        <div className="subnavrow"><ShopSubnav active="lines" /></div>
+        {S.weeks ? (
+          <WeekBadge week={week} pin={<PinButton size="sm" pin={{ id: S.pin, kind: "lines", label: "Value Finder · Line Shopping", detail: `${S.label} · Week ${week}`, href: `${S.pin}?week=${week}` }} />} />
+        ) : (
+          <DayBadge pin={<PinButton size="sm" pin={{ id: S.pin, kind: "lines", label: `${S.label} · Line Shopping`, detail: "today's slate", href: S.pin }} />} />
+        )}
+        <FlowSteps active="value" base={sport} />
+        <div className="subnavrow"><ShopSubnav active="lines" base={sport} /></div>
 
-        <WeekNav min={min} max={max} current={week} base="/lines" />
+        {S.weeks && <WeekNav min={min} max={max} current={week} base="/lines" />}
 
         {board.length === 0 ? (
-          <p className="foot">No odds captured for Week {week} yet.</p>
+          <p className="foot">{S.weeks ? `No odds captured for Week ${week} yet.` : "No odds captured for upcoming games yet — the board fills as the capture runs."}</p>
         ) : (
           <>
             <details className="hb-panel hb-panel--card">
@@ -203,9 +228,11 @@ export default function BoardView({
               <div className="hb-body">
                 <section className="stats" aria-label="summary">
                   <div className="stat"><span className="stat__v">+{avgEdge.toFixed(2)}%</span><span className="stat__l">avg shopping edge / side</span></div>
-                  <div className="stat"><span className="stat__v">{keyGames}</span><span className="stat__l">sweet-spot games</span></div>
+                  {S.weeks
+                    ? <div className="stat"><span className="stat__v">{keyGames}</span><span className="stat__l">sweet-spot games</span></div>
+                    : <div className="stat"><span className="stat__v">{board.length}</span><span className="stat__l">games priced</span></div>}
                   <div className="stat"><span className="stat__v">+{maxEdge.toFixed(2)}%</span><span className="stat__l">best shopping edge</span></div>
-                  <div className="stat"><span className="stat__v">10</span><span className="stat__l">books compared</span></div>
+                  <div className="stat"><span className="stat__v">{books || 10}</span><span className="stat__l">books compared</span></div>
                 </section>
               </div>
             </details>
@@ -221,7 +248,7 @@ export default function BoardView({
                 <div className="daygrid__day" key={grp.key} style={dayBasis(grp.items.length)}>
                   {!grp.cont && <DayHeader label={grp.label} tone={grp.tone} count={grp.total ?? grp.items.length} />}
                   <section className="grid">
-                    {grp.items.map((g) => <GameCard key={g.eventId} g={g} has={has} onToggle={toggle} />)}
+                    {grp.items.map((g) => <GameCard key={g.eventId} g={g} has={has} onToggle={toggle} sport={sport} abbr={abbr} />)}
                   </section>
                 </div>
               );
@@ -244,9 +271,8 @@ export default function BoardView({
 
             <footer className="foot">
               <p>
-                <b>No model. No pick.</b> Line shopping — the <b>best available number across books</b> on every
-                game, plus where a half-point sits on a <b>sweet spot</b> (a 3 or 7). For player props, shop them
-                on <a href="/props">Player Props</a>. Prices move; this updates automatically as new odds are captured.
+                <b>No model. No pick.</b> {S.foot} For player props, shop them
+                on <a href={S.propsHref}>Player Props</a>. Prices move; this updates automatically as new odds are captured.
               </p>
             </footer>
           </>

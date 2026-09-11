@@ -1933,8 +1933,12 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 /* An open game is full-width, so lay its market sections (1st TD, ATTD, Passing, …)
    side-by-side rather than stacked — separates ATTD from 1st TD so members don't tap the
    wrong one, and uses the width. Each column is its own bordered block. */
+/* 280 not 232: at 232 an open game with six markets laid out three across, and the name column
+   in each was left ~95px — "Cole Carrigg (COL)" (135px) and "Adael Amador" (104px) ellipsized
+   on every MLB hitting row while the row had a 140px book list beside it. Two columns of ~390px
+   give the name ~230px; the long tail of five-book ties still ellipsizes on purpose. */
 @media (min-width:641px){
-  .propgame[open] .propgame__body{display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));
+  .propgame[open] .propgame__body{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
     gap:4px 20px;align-items:start}
   .propgame[open] .propgame__body .propmkt{margin-top:8px}
   .propgame[open] .propgame__body .propmkt+.propmkt{border-top:0;padding-top:0}
@@ -1964,6 +1968,9 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
    a 493px row. */
 .propq__book{color:var(--muted);font-size:10.5px;font-family:var(--font-mono);
   white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis}
+/* On a phone the name wins the fight for width: "Bovada / DraftKings" at 140px left "Cole Carrigg
+   (COL)" 69px. A book tie ellipsizes to its first book; the name is what the tap is FOR. */
+@media (max-width:640px){.propq__book{max-width:72px}}
 /* Pick Auditor verdict icon on a prop price — a small superscript beside the number. */
 .propq__price{position:relative}
 .propq__audit{font-size:9px;line-height:1;margin-left:2px;top:-.4em}

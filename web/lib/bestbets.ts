@@ -17,7 +17,7 @@ export interface Play {
   eventId: string;
   game: string;
   commence: string;
-  market: "Moneyline" | "Spread" | "Total";
+  market: "Moneyline" | "Spread" | "Total" | "Run line";   // "Run line" is baseball's spread (lib/mlbBest.ts)
   label: string;      // the exact bet, e.g. "SEA -3.5" or "Over 43.5"
   price: number;      // best available American price
   books: string[];    // book(s) offering it

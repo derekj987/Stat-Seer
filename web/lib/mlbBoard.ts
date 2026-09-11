@@ -97,10 +97,11 @@ export async function latestSnapshot(): Promise<string | null> {
   return rows.length ? rows[0].snapshot_at : null;
 }
 
-/** Tonight's board: one Game per matchup, best price per side across books. */
-export async function mlbBoard(): Promise<{ board: Game[]; snapshot: string | null }> {
+/** The newest sweep's rows for games that have not started — the raw material for both the game
+ *  board and the Sweet Spots page, so the two never disagree about which sweep they are reading. */
+export async function mlbOddsRows(): Promise<{ rows: OddsRow[]; snapshot: string | null }> {
   const snapshot = await latestSnapshot();
-  if (!snapshot) return { board: [], snapshot: null };
+  if (!snapshot) return { rows: [], snapshot: null };
   const rows = await pg(
     `?snapshot_at=eq.${encodeURIComponent(snapshot)}` +
     "&select=snapshot_at,event_id,commence_time,home_team,away_team,book,market,outcome_name,outcome_point,price_american",
@@ -108,6 +109,11 @@ export async function mlbBoard(): Promise<{ board: Game[]; snapshot: string | nu
   // Games already under way are not shoppable. The capture window reaches two days out, so
   // without this the board would lead with a game in the 6th inning.
   const now = new Date().toISOString();
-  const upcoming = rows.filter((r) => r.commence_time > now);
-  return { board: buildBoard(upcoming), snapshot };
+  return { rows: rows.filter((r) => r.commence_time > now), snapshot };
+}
+
+/** Tonight's board: one Game per matchup, best price per side across books. */
+export async function mlbBoard(): Promise<{ board: Game[]; snapshot: string | null }> {
+  const { rows, snapshot } = await mlbOddsRows();
+  return { board: buildBoard(rows), snapshot };
 }

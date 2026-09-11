@@ -2057,6 +2057,21 @@ Derek's standing asks for the MLB section, all of which have bitten more than on
   rates are now accumulated park-neutral and re-inflated by tonight's park (`PARK_HIT_K`), chosen
   on train, +0.03% Brier on both splits. Keyed on the HOME CLUB, because `venue` is on only 40 of
   4,600 lineup rows and `side` is on all of them.
+- **A coherence check needs the MARKET's constant, not ours.** The MLB Sweet Spots page compares a
+  run line with what its moneyline implies (fair win % × P(cover | win)). First cut used P(cover |
+  win) measured on OUR model's favourites (0.710 home / 0.787 road) and every card on the board
+  read "run line pays more" — one-sided, i.e. a bug. Measured on all games by venue it is 0.684 /
+  0.765, and the books themselves price in 0.684 / 0.770 (2,001 quotes with both markets). With
+  those the board split 3–3. When a page says "the market disagrees with itself", derive the
+  constant from the market or from unconditioned data, never from our model — otherwise the page
+  is quietly grading the market against us and calling it arithmetic. The walk-off asymmetry
+  itself (home wins by one run 31.6%, road 23.5%) is real and is the page's headline.
+- **The Value Finder is one component per board, parametrised by sport.** `BoardView` takes
+  `sport` ("nfl" | "mlb") and a `SPORT` table (label, "Spread" vs "Run line", week wheel or
+  `DayBadge`, pin, footer); `ShopSubnav` takes `base`; `SPORT_PATHS` carries the route. Adding a
+  sport to the Value Finder is a row in each table and three thin pages — never a copy of
+  BoardView. MLB chips carry abbreviations via an `abbr` map (full names wrapped a chip onto two
+  lines); the card header keeps the full name.
 - **Row padding comes out of the column budget.** `.pmrow--data` carries 16px of padding each
   side, so `--pmx: calc((100% - <budget>px) / n)` has 32px less to give than it looks: a 818px
   budget in an 825px row put 9px of the last column outside the card (`content-escapes-card`).

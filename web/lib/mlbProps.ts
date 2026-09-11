@@ -1,4 +1,5 @@
 import { deVig, impliedProb as implied } from "@/lib/fairValue";
+import type { PropGame, Quote, MarketBlock } from "./props";
 // MLB captured props — the consensus book line per pitcher, for the strikeouts board.
 // Server-side only (Supabase service key). Mirrors lib/props.ts, including its paging.
 
@@ -180,5 +181,147 @@ export async function propBookProb(market: string): Promise<Map<string, number>>
     const mid = Math.floor(xs.length / 2);
     out.set(p, xs.length % 2 ? xs[mid] : (xs[mid - 1] + xs[mid]) / 2);
   }
+  return out;
+}
+
+// ---------------------------------------------------------------------------------------------
+// The Value Finder prop board: every posted MLB prop, every book, the single best price per
+// player-side, in the same PropGame shape the NFL and NCAAF boards render (PropsView). Reads the
+// newest sweep only — one probe for its snapshot_at, then `snapshot_at=eq.` (the IO rule above).
+
+
+/** Sportsbook market slugs → what a reader calls them. Anything not listed falls back to the slug
+ *  with its prefix stripped, so a new market the capture picks up still renders. */
+export const MLB_PROP_LABELS: Record<string, string> = {
+  batter_hits: "Hits",
+  batter_total_bases: "Total Bases",
+  batter_hits_runs_rbis: "H + R + RBI",
+  batter_singles: "Singles",
+  batter_doubles: "Doubles",
+  batter_triples: "Triples",
+  batter_runs_scored: "Runs",
+  batter_rbis: "RBIs",
+  batter_walks: "Walks",
+  batter_stolen_bases: "Stolen Bases",
+  batter_home_runs: "Home Runs",
+  batter_first_home_run: "First HR",
+  pitcher_strikeouts: "Strikeouts",
+  pitcher_outs: "Outs Recorded",
+  pitcher_record_a_win: "To Win",
+  pitcher_earned_runs: "Earned Runs",
+  pitcher_hits_allowed: "Hits Allowed",
+  pitcher_walks: "Walks Allowed",
+};
+const mlbLabel = (k: string) => MLB_PROP_LABELS[k] ?? k.replace(/^(batter|pitcher)_/, "").replace(/_/g, " ");
+
+/** Tabs, the way a sportsbook splits its baseball board and the way The Model splits its own. */
+export interface MlbCategory { key: string; label: string; markets: string[] }
+export const MLB_CATEGORIES: MlbCategory[] = [
+  { key: "hitting", label: "Hitting", markets: ["batter_hits", "batter_total_bases", "batter_hits_runs_rbis", "batter_singles", "batter_doubles", "batter_triples"] },
+  { key: "hr", label: "Home Runs", markets: ["batter_home_runs", "batter_first_home_run"] },
+  { key: "scoring", label: "Runs & Bases", markets: ["batter_runs_scored", "batter_rbis", "batter_walks", "batter_stolen_bases"] },
+  { key: "pitching", label: "Pitching", markets: ["pitcher_strikeouts", "pitcher_outs", "pitcher_record_a_win", "pitcher_earned_runs", "pitcher_hits_allowed", "pitcher_walks"] },
+];
+export const mlbCategoryByKey = (k: string): MlbCategory => MLB_CATEGORIES.find((c) => c.key === k) ?? MLB_CATEGORIES[0];
+
+interface BoardRow extends Row {
+  event_id: string; commence_time: string; home_team: string; away_team: string;
+}
+
+/** A better quote for the bettor: a lower Over line, a higher Under line, else the better price. */
+function isBetter(a: Quote, b: Quote): boolean {
+  if (a.line !== null && b.line !== null && a.line !== b.line) {
+    if (a.side === "Over") return a.line < b.line;
+    if (a.side === "Under") return a.line > b.line;
+  }
+  return a.price > b.price;
+}
+
+export async function mlbPropBoard(): Promise<PropGame[]> {
+  const probe = await pgAll("?select=snapshot_at&order=snapshot_at.desc&limit=1");
+  if (!probe.length) return [];
+  const snap = encodeURIComponent(probe[0].snapshot_at);
+  const rows = (await pgAll(
+    `?snapshot_at=eq.${snap}&select=snapshot_at,event_id,commence_time,home_team,away_team,book,market,player,side,line,price_american`,
+  )) as BoardRow[];
+  if (!rows.length) return [];
+  // Games already under way are not shoppable — the same rule as the game board.
+  const now = new Date().toISOString();
+
+  // Every book's price per (event, market, player, side, line).
+  const agg = new Map<string, { r: BoardRow; byBook: Record<string, number> }>();
+  for (const r of rows) {
+    if (!r.player || !r.side || r.price_american == null || !r.commence_time || r.commence_time <= now) continue;
+    // "No Home Run" is a row in the first-HR market, not a player.
+    if (/^no /i.test(r.player)) continue;
+    const line = r.line == null ? null : Number(r.line);
+    const k = `${r.event_id}|${r.market}|${r.player}|${r.side}|${line}`;
+    let a = agg.get(k);
+    if (!a) { a = { r: { ...r, line }, byBook: {} }; agg.set(k, a); }
+    if (a.byBook[r.book] === undefined || r.price_american > a.byBook[r.book]) a.byBook[r.book] = r.price_american;
+  }
+
+  // Pick Auditor: the fair probability of each side, de-vigged per book against the other side at
+  // the same line and averaged — the same arithmetic as the NFL board.
+  const OPP: Record<string, string> = { Over: "Under", Under: "Over", Yes: "No", No: "Yes" };
+  const byLine = new Map<string, Record<string, Record<string, number>>>();
+  for (const [k, a] of agg) {
+    const [ev, mk, pl, side, line] = k.split("|");
+    const lk = `${ev}|${mk}|${pl}|${line}`;
+    (byLine.get(lk) ?? byLine.set(lk, {}).get(lk)!)[side] = a.byBook;
+  }
+  const fair = new Map<string, number>();
+  for (const [lk, sides] of byLine) {
+    for (const side of Object.keys(sides)) {
+      const opp = OPP[side];
+      if (!opp || !sides[opp]) continue;
+      const ps: number[] = [];
+      for (const b of Object.keys(sides[side])) if (sides[opp][b] != null) ps.push(deVig(sides[side][b], sides[opp][b]));
+      if (ps.length) fair.set(`${lk}|${side}`, ps.reduce((x, y) => x + y, 0) / ps.length);
+    }
+  }
+
+  const games = new Map<string, PropGame>();
+  const mmap = new Map<string, Map<string, Quote[]>>();
+  for (const a of agg.values()) {
+    const r = a.r;
+    const entries = Object.entries(a.byBook);
+    const best = Math.max(...entries.map(([, p]) => p));
+    const books = entries.filter(([, p]) => p === best).map(([b]) => b).sort();
+    if (!games.has(r.event_id)) {
+      games.set(r.event_id, {
+        eventId: r.event_id, matchup: `${r.away_team} @ ${r.home_team}`,
+        home: r.home_team, away: r.away_team, commence: r.commence_time,
+        snapshot: r.snapshot_at, markets: [],
+      });
+      mmap.set(r.event_id, new Map());
+    }
+    const mm = mmap.get(r.event_id)!;
+    if (!mm.has(r.market)) mm.set(r.market, []);
+    const line = r.line as number | null;
+    mm.get(r.market)!.push({
+      player: r.player!, market: r.market, side: r.side!, line, price: best, books, byBook: a.byBook,
+      eventId: r.event_id,
+      fairProb: fair.get(`${r.event_id}|${r.market}|${r.player}|${line}|${r.side}`) ?? null,
+    });
+  }
+
+  const out: PropGame[] = [];
+  for (const g of games.values()) {
+    const mm = mmap.get(g.eventId)!;
+    g.markets = [...mm.entries()].map(([market, quotes]) => {
+      // One row per player + side: the single best line/book across all books.
+      const bestByKey = new Map<string, Quote>();
+      for (const q of quotes) {
+        const key = `${q.player}|${q.side}`;
+        const prev = bestByKey.get(key);
+        if (!prev || isBetter(q, prev)) bestByKey.set(key, q);
+      }
+      const qs = [...bestByKey.values()].sort((x, y) => x.player.localeCompare(y.player) || x.side.localeCompare(y.side));
+      return { market, label: mlbLabel(market), quotes: qs } as MarketBlock;
+    }).sort((x, y) => x.label.localeCompare(y.label));
+    out.push(g);
+  }
+  out.sort((x, y) => x.commence.localeCompare(y.commence));
   return out;
 }

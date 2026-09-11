@@ -23,12 +23,28 @@ export function WeekBadge({ week, note, tip, pin }: { week: number; note?: strin
   );
 }
 
+/** The baseball-shaped WeekBadge. Baseball has no weeks, so the anchor a section page sits under is
+ *  the DAY — "Today · Sep 11" — in the same badge, on the same centred grid, with the pin parked to
+ *  its right. Every sport's Value Finder should look the same from the masthead down. */
+export function DayBadge({ pin }: { pin?: import("react").ReactNode }) {
+  const d = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", month: "short", day: "numeric" }).format(new Date());
+  return (
+    <div className="pageweekrow">
+      <div className="pageweek">
+        <span className="pageweek__k">Today</span>
+        <span className="pageweek__n">{d}</span>
+      </div>
+      {pin && <div className="pageweek__aside">{pin}</div>}
+    </div>
+  );
+}
+
 /** The guided journey: analyze → read the context → find the best price. */
 /** Every sport lays out identically — Home / The Model / Context / Value Finder — so the routes
  *  live in ONE table and the nav components read from it. Adding a sport is a row here.
- *  MLB is live for The Model only; its Context and Value Finder routes exist in this table so the
- *  flow renders the same three steps, and those pages say plainly what is not built yet rather
- *  than the nav pretending they are missing. */
+ *  MLB is live for The Model and the Value Finder; its Context route is empty here so the flow
+ *  renders the same three steps and says plainly which one is not built yet, rather than the nav
+ *  pretending it is missing. */
 export type Sport = "nfl" | "ncaaf" | "mlb";
 export const SPORT_PATHS: Record<Sport, { analyze: string; context: string; value: string }> = {
   nfl:   { analyze: "/model",       context: "/considerations",       value: "/lines" },
@@ -36,7 +52,7 @@ export const SPORT_PATHS: Record<Sport, { analyze: string; context: string; valu
   // Empty string = not built yet. FlowSteps renders those as a dimmed, non-clickable step rather
   // than a link to a 404 — the reader sees the same three-step flow every sport has, and sees
   // honestly which parts of it exist for this one.
-  mlb:   { analyze: "/mlb/model",   context: "",                      value: "" },
+  mlb:   { analyze: "/mlb/model",   context: "",                      value: "/mlb/lines" },
 };
 
 export function FlowSteps({ active, base = "nfl" }: {
@@ -348,11 +364,11 @@ export function ModelSubnav({ active = "game", base = "nfl" }: {
 
 /** Sub-tabs inside Value Finder (Game Lines · Player Props · Sweet Spots). */
 export function ShopSubnav({ active, base = "nfl" }: {
-  active: "lines" | "props" | "best" | "auditor"; base?: "nfl" | "ncaaf";
+  active: "lines" | "props" | "best" | "auditor"; base?: "nfl" | "ncaaf" | "mlb";
 }) {
-  const h = base === "ncaaf"
-    ? { lines: "/ncaaf/lines", props: "/ncaaf/props", best: "/ncaaf/best" }
-    : { lines: "/lines", props: "/props", best: "/best" };
+  const h = base === "nfl"
+    ? { lines: "/lines", props: "/props", best: "/best" }
+    : { lines: `/${base}/lines`, props: `/${base}/props`, best: `/${base}/best` };
   return (
     <nav className="subnav subnav--value" aria-label="Value Finder view">
       <a href={h.lines} className={active === "lines" ? "subnav__t active" : "subnav__t"}
