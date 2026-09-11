@@ -18,11 +18,28 @@ export function probToAmerican(p: number): number {
   return p <= 0.5 ? Math.round((1 - p) / p * 100) : -Math.round(p / (1 - p) * 100);
 }
 
-/** Strip the vig from a two-sided market → the fair probability of the FIRST side. */
+/** Strip the vig from a two-sided market → the fair probability of the FIRST side.
+ *
+ *  POWER method, not proportional. Proportional (a / (a + b)) hands both sides an equal share of
+ *  the hold, and that under-prices favourites: books load more of the vig onto the longshot (the
+ *  favourite–longshot bias), so the favourite's true chance sits ABOVE its proportional share.
+ *  Power finds k with a^k + b^k = 1 and returns a^k — identical to proportional at −110/−110
+ *  (game lines), and 1–1.5 points higher for the favourite on a lopsided prop such as 1+ hit at
+ *  −230/+175 (proportional 65.7%, power 67.0%).
+ *
+ *  Why it changed: the MLB hits board read above the book on 77% of rows. Half of that gap was
+ *  our level (fixed by a trailing calibration in mlb_player_props.py); the other half was THIS
+ *  number being low for a favourite market. After both, 56% of rows. Same method in
+ *  mlb_player_props._power_devig so the grader and the board agree. */
 export function deVig(sidePrice: number, otherPrice: number): number {
   const a = impliedProb(sidePrice), b = impliedProb(otherPrice);
-  const sum = a + b;
-  return sum > 0 ? a / sum : a;
+  if (a <= 0 || b <= 0 || a + b <= 1) return a + b > 0 ? a / (a + b) : a;
+  let lo = 0.5, hi = 4;
+  for (let i = 0; i < 60; i++) {
+    const k = (lo + hi) / 2;
+    if (Math.pow(a, k) + Math.pow(b, k) > 1) lo = k; else hi = k;
+  }
+  return Math.pow(a, (lo + hi) / 2);
 }
 
 /**

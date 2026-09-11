@@ -18,9 +18,9 @@ WHAT THE NUMBERS ARE WORTH -- measured, 2026, 10,272 held-out batter-games, walk
 constants swept on the train split only:
 
     market          base rate   "his own rate"   model     gain
-    hit                61.5%          0.24060  0.23639    +1.8%
-    home run           12.4%          0.09771  0.09666    +1.1%
-    stolen base         6.6%          0.05845  0.05866     -0.4%
+    hit                61.5%          0.24047  0.23608    +1.8%   (predicted 0.607, realized 0.605)
+    home run           12.3%          0.09871  0.09772    +1.0%   (predicted 0.110, realized 0.111)
+    stolen base         6.6%          0.05763  0.05789    -0.5%
 
 These are reproduced by `--validate` on every run, so the constants below cannot drift from what
 the code actually measures.
@@ -38,10 +38,14 @@ high — there are no model percentages lower than the market's." Four candidate
     league rate computed with a look-ahead leak             REAL leak, fixed, but bias unchanged
     the market's 6.8% hold, stripped by the de-vig          the rest of the gap, and not our bug
 
-What is left is a PERIOD difference, not a model-shape one: bias is +0.24pp on the train split and
-+1.43pp on the test split. Run `--grade` for the only test that settles it — our number and the
-book's de-vigged price, both scored against what actually happened. It stays silent until enough
-completed games exist, which is honest rather than unhelpful: capture began 2026-09-07.
+What was left was a PERIOD difference, not a model-shape one: bias +0.1pp on the train split,
++1.5pp on the test split, +2.6pp in September — and it is now handled by a causal trailing
+calibration (CAL_WINDOW): test bias +0.17pp after it. The other half of the visible gap was the
+BOOK'S number, not ours: a proportional de-vig hands the favourite too little of the hold, and 1+
+hit is a favourite market. `--grade` scores both against what actually happened; on the first 332
+completed September props, ours 0.622 → 0.610 calibrated, book 0.595 proportional → 0.605 power,
+and "we read higher than the book" went from 77% of rows to 49%. Both still sat above the 0.554
+those 332 games realized, the book by less — 332 is a fortnight, not a verdict.
 
 They are published anyway because they are WELL CALIBRATED -- predicted 50-59% comes in at 53.7%,
 60-69% at 62.9%, 70-79% at 70.6%. A calibrated probability is a fair number to price a book line
@@ -77,6 +81,28 @@ K_BAT, K_OPP = 500, 1000         # shrinkage, swept on the train split only
 # Swept on the TRAIN split only; see the table printed by --sweep-dispersion.
 DISPERSION = None
 LG_MIN_PA = 20000                # plate appearances before the running league rate is trusted
+# TRAILING CALIBRATION. The board's level drifts within the season — hits predicted +1.5pp high on
+# the held-out split and +2.6pp in September against +0.1pp on train — and neither a windowed
+# league rate (tried 10k-60k PA: nothing) nor the model shape explains it. So each market carries a
+# causal intercept: the mean (realized − predicted) over the last CAL_WINDOW scored batter-games,
+# applied to today's probabilities and updated a DAY at a time (never within a day — the board
+# predicts a whole slate before any of it is played). Walk-forward, hits: test bias +1.46pp →
+# +0.17pp, Brier 0.23620 → 0.23609, train unchanged; September +2.55pp → +1.71pp. Swept 1,500 /
+# 3,000 / 6,000 / 12,000 — train Brier flat across all four, so the window is a judgment: ~3,000
+# rows is about twelve days of batter-games, long enough not to chase one cold week.
+CAL_WINDOW = 3000
+# PARK. Hits happen at a rate that depends on where: Coors ran 1.08x league this season, Petco
+# 0.96x. Batter and staff rates are accumulated in PARK-NEUTRAL units (each game's hits deflated
+# by the causal factor of the park it was played in) and tonight's rate is re-inflated by
+# tonight's park. Keyed on the HOME CLUB, which is the park for every club but one temporary
+# home, and is present on every lineup row where a venue name is not. Walk-forward, hits:
+# train Brier 0.23460 → 0.23438, test 0.23611 → 0.23608 (K, w chosen on train from
+# {3000, 6000, 12000} × {0.5, 1.0}); at Coors, predicted 0.643 → 0.674 against 0.689 realized.
+# Tiny in the headline, visible on the one park where it matters.
+PARK_HIT_K = 3000                # plate appearances of shrinkage on a park's hit factor
+PARK_HIT_W = 1.0                 # how much of the measured factor to apply
+# (date, batter) -> home club id for that game. Filled from the lineups before any Rates is built.
+PARK_OF: dict[tuple[str, int], int] = {}
 PARK_K = 6000                    # plate appearances of shrinkage on a park's HR factor
 SEASON = 2026
 
@@ -227,10 +253,10 @@ def slot_pa_dist(logs, slots):
 # are not independent trials, and an independence model cannot express that. It is NOT closed by
 # scaling the output until it matches; that would be fitting the answer rather than the mechanism.
 SCORES = {
-    "hits": {"model": 0.23612, "own": 0.24060, "base": 0.615, "gain": 1.9,
-             "pred": 0.620, "act": 0.606},
-    "hr":   {"model": 0.09665, "own": 0.09771, "base": 0.124, "gain": 1.1,
-             "pred": 0.119, "act": 0.110},
+    "hits": {"model": 0.23608, "own": 0.24047, "base": 0.615, "gain": 1.8,
+             "pred": 0.607, "act": 0.605},
+    "hr":   {"model": 0.09772, "own": 0.09871, "base": 0.123, "gain": 1.0,
+             "pred": 0.110, "act": 0.111},
 }
 
 
@@ -314,6 +340,43 @@ class Rates:
         self._pa = 0
         self.bs = collections.defaultdict(int); self.bpa = collections.defaultdict(int)
         self.os_ = collections.defaultdict(int); self.opa = collections.defaultdict(int)
+        # Trailing calibration (see CAL_WINDOW): raw predictions made today, keyed by batter, are
+        # scored when that batter's game is added, and the residuals feed the shift only once the
+        # day rolls over.
+        self._pend = {}
+        self._day = None
+        self._buf = []
+        self._resid = collections.deque()
+        self._rsum = 0.0
+        # Park factors (PARK_HIT_K): raw stat and PA by home club, causal like everything else.
+        self.ps = collections.defaultdict(int); self.ppa = collections.defaultdict(int)
+        self.bs = collections.defaultdict(float); self.os_ = collections.defaultdict(float)
+
+    def park(self, club):
+        """Tonight's park's hit factor vs league, shrunk toward 1.0. Hits only — home runs keep
+        their own measured factor in park_hr_factors(), which is shown on the board as words."""
+        if self.stat != "h" or not club or self._pa < LG_MIN_PA:
+            return 1.0
+        lg = self._s / self._pa
+        f = ((self.ps[club] + PARK_HIT_K * lg) / (self.ppa[club] + PARK_HIT_K)) / lg
+        return 1 + PARK_HIT_W * (f - 1)
+
+    @property
+    def shift(self):
+        """Mean (realized − predicted) over the trailing window; 0 until half a window exists."""
+        return self._rsum / len(self._resid) if len(self._resid) >= CAL_WINDOW // 2 else 0.0
+
+    def _roll(self, date):
+        if self._day is not None and date != self._day:
+            for e in self._buf:
+                self._resid.append(e); self._rsum += e
+                if len(self._resid) > CAL_WINDOW:
+                    self._rsum -= self._resid.popleft()
+            self._buf = []
+            # Predictions for players who never appeared (scratched, rained out) would otherwise
+            # wait to be scored against some later game of theirs.
+            self._pend = {k: v for k, v in self._pend.items() if k[0] >= date}
+        self._day = date
 
     @property
     def lg(self):
@@ -324,21 +387,32 @@ class Rates:
         return self._s / self._pa
 
     def add(self, r):
+        self._roll(r["date"])
+        raw = self._pend.pop((r["date"], r["pid"]), None)
+        if raw is not None:
+            self._buf.append((1 if r[self.stat] > 0 else 0) - raw)
+        club = PARK_OF.get((r["date"], r["pid"]))
+        f = self.park(club)                        # BEFORE this game is counted: causal
         self._s += r[self.stat]; self._pa += r["pa"]
-        self.bs[r["pid"]] += r[self.stat]; self.bpa[r["pid"]] += r["pa"]
-        self.os_[r["opp"]] += r[self.stat]; self.opa[r["opp"]] += r["pa"]
+        self.ps[club] += r[self.stat]; self.ppa[club] += r["pa"]
+        self.bs[r["pid"]] += r[self.stat] / f; self.bpa[r["pid"]] += r["pa"]
+        self.os_[r["opp"]] += r[self.stat] / f; self.opa[r["opp"]] += r["pa"]
 
-    def prob(self, pid, opp, slot):
-        """P(at least one) for a batter facing `opp` from `slot`. None when either side is too thin
-        to say anything — an empty cell is better than a made-up one."""
+    def prob(self, pid, opp, slot, date=None, club=None):
+        """P(at least one) for a batter facing `opp` from `slot` at `club`'s park. None when either
+        side is too thin to say anything — an empty cell is better than a made-up one. Pass `date`
+        during a walk-forward so the prediction can be scored when that game is added."""
         if self.bpa[pid] < MIN_PA or self.opa.get(opp, 0) == 0 or slot not in SLOT_PA:
             return None
         p = (self.bs[pid] + K_BAT * self.lg) / (self.bpa[pid] + K_BAT)
         of = ((self.os_[opp] + K_OPP * self.lg) / (self.opa[opp] + K_OPP)) / self.lg
-        rate = min(0.95, p * of)
+        rate = min(0.95, p * of * self.park(club))
         # Average the probability over the PA distribution, never evaluate it at the mean PA.
         dist = SLOT_PA_DIST.get(slot) or [(SLOT_PA[slot], 1.0)]
-        return round(sum(w * (1 - _p_none(rate, k)) for k, w in dist), 4)
+        raw = sum(w * (1 - _p_none(rate, k)) for k, w in dist)
+        if date is not None:
+            self._pend[(date, pid)] = raw          # scored against the outcome when it is added
+        return round(min(0.99, max(0.01, raw + self.shift)), 4)
 
     def rate(self, pid):
         return round(self.bs[pid] / self.bpa[pid], 4) if self.bpa[pid] else None
@@ -352,7 +426,7 @@ def validate(logs, slots):
         rows = []
         for r in logs:
             slot = slots.get((r["date"], r["pid"]))
-            p = R.prob(r["pid"], r["opp"], slot) if slot else None
+            p = R.prob(r["pid"], r["opp"], slot, r["date"], PARK_OF.get((r["date"], r["pid"]))) if slot else None
             if p is not None:
                 rows.append({"date": r["date"], "y": 1 if r[stat] > 0 else 0, "p": p,
                              "own": hits[r["pid"]] / seen[r["pid"]] if seen[r["pid"]] else None})
@@ -391,6 +465,23 @@ def _et_day(iso):
     except ValueError:
         return iso[:10]
     return (t - _dt.timedelta(hours=4)).date().isoformat()   # EDT; the season is inside DST
+
+
+def _power_devig(o, u):
+    """Fair probability of the first side from two vig-laden implied probabilities, by the POWER
+    method: find k with o^k + u^k = 1 and return o^k. Proportional (o/(o+u)) hands both sides an
+    equal share of the hold, which under-prices favourites — the longshot carries more of the vig
+    (the favourite-longshot bias), and 1+ hit at −230/+175 is a favourite market. Matches
+    web/lib/fairValue.ts deVig(). On the graded September sample: proportional 0.595, power 0.605,
+    against our calibrated 0.610."""
+    lo, hi = 0.5, 4.0
+    for _ in range(60):
+        k = (lo + hi) / 2
+        if o ** k + u ** k > 1:
+            lo = k
+        else:
+            hi = k
+    return o ** ((lo + hi) / 2)
 
 
 def grade_against_market(logs, slots, lineups):
@@ -462,8 +553,7 @@ def grade_against_market(logs, slots, lineups):
         u = best.get((pl, book, "under", day)) or best.get((pl, book, "no", day))
         if u is None:
             continue                              # one-sided: not a fair price, so not graded
-        o, un = imp(price), imp(u[1])
-        byday[(pl, day)].append(o / (o + un))
+        byday[(pl, day)].append(_power_devig(imp(price), imp(u[1])))
     book_prob = {}
     for k, xs in byday.items():
         xs.sort()
@@ -486,13 +576,15 @@ def grade_against_market(logs, slots, lineups):
     graded = []
     for date in sorted(by_date):
         for r in by_date[date]:                   # score BEFORE advancing: same information the board had
+            # prob() on EVERY row with a slot, not just the priced ones: the trailing calibration
+            # is fed by these calls, and feeding it only the ~300 priced rows starves it (it stays
+            # at zero until half a window exists) and grades an uncalibrated number.
+            slot = slots.get((date, r["pid"]))
+            p = R.prob(r["pid"], r["opp"], slot, date, PARK_OF.get((date, r["pid"]))) if slot else None
             k = (nm(name_of.get(r["pid"], "")), date)
-            if k in book_prob:
-                slot = slots.get((date, r["pid"]))
-                p = R.prob(r["pid"], r["opp"], slot) if slot else None
-                if p is not None:
-                    graded.append({"ours": p, "book": book_prob[k],
-                                   "y": actual.get((date, r["pid"]), 0)})
+            if p is not None and k in book_prob:
+                graded.append({"ours": p, "book": book_prob[k],
+                               "y": actual.get((date, r["pid"]), 0)})
         for r in by_date[date]:
             R.add(r)
 
@@ -535,9 +627,11 @@ def main(argv=None):
     print(f"{len(logs):,} batter-games from {len({r['pid'] for r in logs})} batters")
 
     slots = {}
+    home_of = {r["gamePk"]: r["team"] for r in lineups if r.get("side") == "home"}
     for r in lineups:
         for i, p in enumerate(r["lineup"], 1):
             slots[(r["date"], p["id"])] = i
+            PARK_OF[(r["date"], p["id"])] = home_of.get(r["gamePk"])
     # Must be filled before ANY call to Rates.prob -- validation and export alike, or the two
     # disagree and the published number is not the one that was scored.
     SLOT_PA_DIST.update(slot_pa_dist(logs, slots))
@@ -550,8 +644,17 @@ def main(argv=None):
         return 0
 
     RH, RHR = Rates(logs, "h"), Rates(logs, "hr")
+    # Walk the season predicting before adding, exactly as --validate does, so the trailing
+    # calibration has the residuals it needs by the time tonight's slate is projected. A plain
+    # add-everything pass would leave the shift at zero and the board at the uncalibrated level.
     for r in logs:
+        slot = slots.get((r["date"], r["pid"]))
+        if slot:
+            club = PARK_OF.get((r["date"], r["pid"]))
+            RH.prob(r["pid"], r["opp"], slot, r["date"], club); RHR.prob(r["pid"], r["opp"], slot, r["date"], club)
         RH.add(r); RHR.add(r)
+    print(f"calibration shift: hits {RH.shift:+.4f}, home runs {RHR.shift:+.4f} "
+          f"(trailing {CAL_WINDOW} batter-games)")
 
     # Availability: who is likely to be in the lineup, and where. This is the GATE — a prop on a
     # player who is scratched is usually void, so P(start) is about whether the bet happens, and
@@ -607,9 +710,10 @@ def main(argv=None):
         away = r["teamName"] if r["side"] == "away" else r["opp"]
         home = r["opp"] if r["side"] == "away" else r["teamName"]
         osp_id = opp_sp.get((r["gamePk"], r["team"]))
+        park_club = home_of.get(r["gamePk"])
         for pid, f in av.features(hist[-av.WIN:], prev).items():
             slot = round(f["slot"])
-            ph, phr = RH.prob(pid, opp_id, slot), RHR.prob(pid, opp_id, slot)
+            ph, phr = RH.prob(pid, opp_id, slot, club=park_club), RHR.prob(pid, opp_id, slot, club=park_club)
             if ph is None and phr is None:
                 continue
             rows.append({

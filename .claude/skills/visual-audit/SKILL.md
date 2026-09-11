@@ -2031,6 +2031,32 @@ Derek's standing asks for the MLB section, all of which have bitten more than on
   +0.15 helped the TEST split only because home teams happened to win 53.6% there against 52.4%
   on TRAIN (+0.005 runs) — fails choose-on-train. The model is already the team analysis; the
   sport is the ceiling. Say so in the Tip rather than adding a feature because it sounds like one.
+- **🚨 "Ours is always above the book" has THREE causes, and only one of them is our model.**
+  Third time on the MLB hits board (Derek: *"I still do not like that our model % for hits is
+  always higher than the market's"* — 77% of rows). Diagnosed with `--grade`, which scores ours
+  AND the book's de-vigged price against what actually happened, plus the held-out split by
+  month and by regulars:
+  1. **A level drift, not a shape error.** Bias +0.1pp on train, +1.5pp on test, +2.6pp in
+     September; regulars alone +0.4pp. A windowed league rate did nothing (10k–60k PA). Fixed
+     with a CAUSAL trailing calibration (`CAL_WINDOW` in `mlb_player_props.py`: mean realized −
+     predicted over the last ~3,000 batter-games, updated a day at a time): test bias → +0.2pp,
+     Brier not worse. Never fit the level to the market — fit it to results.
+  2. **The book's number was low, not ours high.** Proportional de-vig (`a/(a+b)`) splits the
+     hold evenly; books load it onto the longshot, so a favourite market (1+ hit at −230/+175)
+     comes out 1–1.5pp under its true chance. `deVig()` in `web/lib/fairValue.ts` is now the
+     POWER method (`a^k + b^k = 1`) — identical at −110/−110, higher for favourites. Same in the
+     grader so they agree.
+  3. **The sort.** Ordering rows by OUR % puts the rows where we run hottest against the book at
+     the top of every card, so the first screen reads "always higher" even when the board is
+     balanced. Sort on the average of ours and the book's.
+  After all three: higher on 54–57% of rows, lower on 34%, equal on 9%, means within 1pp. On the
+  first 332 graded September props both numbers still sat above the 0.554 realized (ours 0.613,
+  book 0.605) — a fortnight, not a verdict; the grader reruns every day.
+  **Also caught in passing:** park. Coors ran 1.08× league on hits and the model had no park term
+  for hits (only for HR): at Coors it predicted 0.643 against 0.689 realized. Batter and staff
+  rates are now accumulated park-neutral and re-inflated by tonight's park (`PARK_HIT_K`), chosen
+  on train, +0.03% Brier on both splits. Keyed on the HOME CLUB, because `venue` is on only 40 of
+  4,600 lineup rows and `side` is on all of them.
 - **Row padding comes out of the column budget.** `.pmrow--data` carries 16px of padding each
   side, so `--pmx: calc((100% - <budget>px) / n)` has 32px less to give than it looks: a 818px
   budget in an 825px row put 9px of the last column outside the card (`content-escapes-card`).

@@ -85,11 +85,17 @@ function Honest({ cat }: { cat: CatKey }) {
         <b>{s.gain}%</b>. That is small and it is the honest number: what separates a hit from an out
         is mostly where the ball lands, which does not carry between games.<br /><br />
         <b>How well calibrated, exactly?</b> Over the held-out games these average{" "}
-        <b>{(s.pred * 100).toFixed(1)}%</b> against a real rate of <b>{(s.act * 100).toFixed(1)}%</b>{" "}
-        — about <b>{((s.pred - s.act) * 100).toFixed(1)} points too high</b>, so read them as
-        slightly optimistic. We know why: the model treats a batter&apos;s plate appearances as
-        independent, and four trips against the same pitcher on one night are not. We would rather
-        publish the gap than quietly scale the numbers until it closes.<br /><br />
+        <b>{(s.pred * 100).toFixed(1)}%</b> against a real rate of <b>{(s.act * 100).toFixed(1)}%</b>.
+        The level is held there by a trailing check: the last couple of weeks of results are scored
+        against what we said, and any drift — hitting runs a little cooler in September, say — is
+        taken out of tonight&apos;s numbers before they are published. Nothing here is fitted to
+        the market.<br /><br />
+        <b>Book %</b> is the sportsbook&apos;s own chance with the vig stripped out — the two prices
+        of the market solved as a pair, which gives the favourite side its proper share rather than
+        splitting the hold evenly. Ours and the book&apos;s now sit on either side of each other about
+        equally; where they differ by several points, that is a difference to notice, not an edge to
+        act on — the book&apos;s number has scored a shade better against results so far, over a
+        fortnight of games.<br /><br />
         <b>vs opp pitcher</b> is his career average against tonight&apos;s starter and <b>AB</b> is
         how many at-bats that average is built on — <b>read the AB column first</b>. Across a full 15-game slate, 171
         batter-pitcher pairs: <b>51%</b> had never faced each other, another <b>21%</b> had 1–4
@@ -162,7 +168,14 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
       hist2: "",
     }));
   }
-  rows.sort((a, b) => (b.ours ?? 0) - (a.ours ?? 0));
+  // Sort on the AVERAGE of ours and the book's where both exist, not on ours alone. Sorting on
+  // ours put the rows where we run hottest relative to the book at the top of every card, so the
+  // first screen read "ours is always higher" even on a board that is balanced overall (measured:
+  // 52% higher / 39% lower / 9% equal after the calibration, yet the top ten were all higher).
+  // The average orders by how likely the event is without favouring either column's optimism.
+  const key = (r: typeof rows[number]) =>
+    r.ours === null ? -1 : r.book === null || !r.oursPct ? r.ours : (r.ours + r.book) / 2;
+  rows.sort((a, b) => key(b) - key(a));
 
   // Group on gameKey (date + matchup), NOT the matchup string. Baseball plays series, so the same
   // two clubs meet on consecutive nights and a matchup-only key merged them into one card with
