@@ -1138,8 +1138,14 @@
     // column header once — reported as one board repeating its header 3x, because no single
     // descendant panel owned all the tables. Only the innermost panel counts as a chart.
     if (board.querySelector(".hb-panel")) continue;
+    // Likewise a board of PER-GAME CARDS, each carrying its own table with its own header: the
+    // MLB batter grid draws one table per game inside a `details.propgame`, and six games are
+    // six charts, not one chart chopped into six. Same shape as the /audit false positive on
+    // chart-split-scrollers. A header repeated WITHIN one card is still reported.
     const seen = new Map();
     for (const t of tables) {
+      const card = t.closest(".propgame, .pmgame, .augame, article.game");
+      if (card && card !== board && board.contains(card) && card.querySelectorAll("table").length === 1) continue;
       const head = t.querySelector("thead");
       if (!head || !vis(head)) continue;
       const key = (head.textContent || "").replace(/\s+/g, " ").trim();

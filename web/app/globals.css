@@ -3438,6 +3438,44 @@ a.snav__dfeat{display:block}
   grid-template-columns:calc(132px + var(--pmx)) calc(168px + var(--pmx))
     calc(112px + var(--pmx)) calc(46px + var(--pmx))
     calc(66px + var(--pmx)) calc(92px + var(--pmx)) calc(46px + var(--pmx))}
+/* ---- Batter grid (MLB Value Finder props): one row per hitter, one column per market ---- */
+.propgame--grid[open] .propgame__body--grid{display:block;padding:0 0 10px}
+.propgame__body--grid .pmscroll{overflow-x:auto;max-width:100%}
+.bgrid{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed}
+.bgrid th{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700;
+  text-align:left;padding:9px 8px 6px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bgrid th.bg__player,.bgrid td.bg__player{width:150px}
+.bgrid td{padding:4px 2px;vertical-align:top;border-bottom:1px solid var(--surface-2)}
+.bgrid td.bg__player{padding:8px 6px 4px;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bg__none{display:block;padding:6px 5px;color:var(--muted)}
+/* A side is one savable chip: side · price · book, on one line, the three parts on fixed
+   tracks so every cell in a column lines up with the one above it. */
+/* Tracks 30 / 38 / 30 + two 4px gaps + 3px padding each side + 4px cell padding = 116 per market
+   column, which is what lets six hitting markets and a 150px name fit the 859px the rails leave at 1440 without
+   a sideways scroll. The book is a CODE (DK, FD, MGM …) for that reason — the legend above the
+   grid and the tooltip carry the names. */
+.bg__q{display:grid;grid-template-columns:30px 38px 30px;align-items:baseline;gap:4px;width:100%;
+  padding:3px 3px;border-radius:6px;border:1px solid transparent;background:none;cursor:pointer;
+  color:inherit;font:inherit;text-align:left;white-space:nowrap}
+.bg__q:hover{background:var(--surface-2)}
+.bg__q.saved{background:var(--save-soft);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--save) 45%,transparent)}
+.bg__q.saved .bg__price{color:var(--save)}
+.bg__q:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.bg__side{font-family:var(--font-mono);font-size:10px;color:var(--muted)}
+.bg__price{font-family:var(--font-mono);font-weight:700;font-size:12px;color:var(--accent);position:relative}
+.bg__book{font-family:var(--font-mono);font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis}
+.bg__legend{margin-top:-6px;font-size:11px}
+.propgame--grid .hb-moretbl__chk:not(:checked) ~ .pmscroll .bg-row--more{display:none}
+/* min-width:0 on the flex items, or a game card grows to its table's min-width (846px at six
+   markets) and the PAGE scrolls sideways on a phone instead of the scroller — measured 868px of
+   document width at 375 before this line. The scroller must be the thing that scrolls. */
+.propstack--grid{display:flex;flex-direction:column;gap:12px}
+.propstack--grid > *{min-width:0;max-width:100%}
+.propgame--grid{min-width:0}
+@media (max-width:640px){
+  .bgrid th.bg__player,.bgrid td.bg__player{width:120px}
+}
+
 /* Two-line market/ours cells on the game board. The second line is the explanation of the first
    (the market's vig-free cover chance; our expected margin) — smaller, muted, and in the cell's
    own colour family so the column still reads as one number with a footnote, not two numbers. */

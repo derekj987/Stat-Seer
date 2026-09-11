@@ -1,8 +1,8 @@
 import { Brand, FlowSteps, ShopSubnav, DayBadge } from "../../Nav";
 import PinButton from "../../PinButton";
-import PropsView from "../../props/PropsView";
+import BatterGrid from "./BatterGrid";
 import { etToday } from "@/lib/gameDays";
-import { mlbPropBoard, MLB_CATEGORIES, mlbCategoryByKey, norm } from "@/lib/mlbProps";
+import { mlbPropBoard, MLB_CATEGORIES, MLB_PROP_LABELS, mlbCategoryByKey, norm } from "@/lib/mlbProps";
 import { MLB_PROPS } from "@/lib/mlbPlayerProps";
 
 // MLB · Value Finder · Player Props. The NFL/NCAAF prop board (PropsView: tap-to-add chips, the
@@ -37,6 +37,11 @@ export default async function Page({ searchParams }: PageProps<"/mlb/props">) {
   // last. Rows read in LINEUP ORDER — away side first, then home, leadoff to nine-hole — the way
   // a sportsbook's own game page lists them, instead of A.J. Ewing first by alphabet.
   const info = new Map(MLB_PROPS.map((p) => [norm(p.player), { team: p.teamAbbr || p.team, slot: p.slot, home: p.game.endsWith(`@ ${p.team}`) }]));
+  // Starting pitchers are on the batting rows as each batter's OPPOSING starter, so his club is
+  // the batter's opponent. Sorted after the hitters (slot 50), away side first.
+  for (const p of MLB_PROPS) {
+    if (p.oppSp && !info.has(norm(p.oppSp))) info.set(norm(p.oppSp), { team: p.oppAbbr || p.opp, slot: 50, home: !p.game.endsWith(`@ ${p.team}`) });
+  }
   const order = (q: { player: string }) => { const i = info.get(norm(q.player)); return i ? (i.home ? 100 : 0) + (i.slot || 50) : 999; };
   const games = all
     .map((g) => ({
@@ -66,15 +71,15 @@ export default async function Page({ searchParams }: PageProps<"/mlb/props">) {
       {all.length ? (
         <section className="ncf-sec">
           <div className="hb-legend">
-            <b>Player props, best price across the books we track.</b> Each row is a player&apos;s number with
-            the <b>single best price</b> and which book has it — <b>tap any chip to add it to your slip</b>.
-            Books price hundreds of these semi-independently, which is why props are the likeliest place a
-            price is wrong. For our own read on hits, home runs and strikeouts, see{" "}
+            <b>One row per player, in lineup order; one column per market.</b> Each cell is the player&apos;s
+            main line with the <b>single best US book</b> for each side — <b>tap any side to add it to your
+            slip</b>. Books price hundreds of these semi-independently, which is why props are the likeliest
+            place a price is wrong. For our own read on hits, home runs and strikeouts, see{" "}
             <a href="/mlb/model/players">The Model</a>.
           </div>
           <CatNav current={cat.key} />
           {games.length ? (
-            <PropsView games={games} embedded {...etToday()} />
+            <BatterGrid games={games} markets={cat.markets} labels={MLB_PROP_LABELS} {...etToday()} />
           ) : (
             <p className="ncf-note">
               No <b>{cat.label.toLowerCase()}</b> props posted for the upcoming slate yet — books post them

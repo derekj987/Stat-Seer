@@ -52,6 +52,20 @@ export const isUsBook = (slug: string): boolean => US_BOOKS.has(slug);
 /** Keep only rows from US-licensed books. Every reader calls this before anything else looks. */
 export const usBooks = <T extends { book: string }>(rows: T[]): T[] => rows.filter((r) => isUsBook(r.book));
 
+/** Short codes for dense grids (the MLB batter grid puts a book beside every price in six
+ *  columns; "DraftKings" is 55px and the cell has 34). Full names stay on the tooltip and in a
+ *  legend line above the grid. */
+const BOOK_CODE: Record<string, string> = {
+  draftkings: "DK", fanduel: "FD", betmgm: "MGM", williamhill_us: "CZR", fanatics: "FAN",
+  betrivers: "BR", espnbet: "ESPN", hardrockbet: "HRK", ballybet: "BLY", betparx: "PARX",
+};
+export const bookCode = (slug: string): string => BOOK_CODE[slug] ?? bookLabel(slug).slice(0, 4);
+/** One code, or a count for a tie ("×3"). */
+export const booksCode = (books: string[]): string => (books.length > 1 ? `×${books.length}` : bookCode(books[0]));
+/** "DK DraftKings · FD FanDuel · …" for the books present on a board. */
+export const bookLegend = (slugs: string[]): string =>
+  slugs.filter((s) => BOOK_CODE[s]).map((s) => `${BOOK_CODE[s]} ${bookLabel(s)}`).join(" · ");
+
 /** A book's display name, falling back to the raw slug so a new book still renders. */
 export const bookLabel = (slug: string): string => BOOK_LABEL[slug] ?? slug;
 

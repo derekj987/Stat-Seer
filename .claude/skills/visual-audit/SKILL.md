@@ -2375,6 +2375,29 @@ ties) with both sides at that line; markets in `MLB_CATEGORIES` order; players i
 (away side, then home, leadoff to nine) from `MLB_PROPS` slots; `booksLabel(books, 1)` so one
 book is named or a count shown, which gave the name column its width back.
 
+### The batter grid: a table has columns — that is the alignment fix
+Derek: *"line up the market totals evenly on top of each other. They are not spaced evenly."*
+In the market-block layout every prop row was its own grid with `auto` tracks, so an Over row's
+price and book sat at different x positions from the Under row beneath it. No amount of
+per-row tuning aligns two independent grids. `/mlb/props` is now `BatterGrid.tsx`: one `<table>`
+per game, one row per hitter in lineup order, one column per market, each cell the main line
+with both sides as savable chips on fixed tracks (30 / 38 / 30). Measured: every price in a
+column at the same x, one row height (61px), six hitting markets + a 150px name in the 859px
+the rails leave. Three things it needed:
+- **Book CODES in dense cells** (`bookCode`: DK, FD, MGM, CZR, FAN, BR, ESPN, HRK, BLY, PARX)
+  with a legend line above the grid and the names on the tooltip — "DraftKings" is 55px and
+  the cell had 34.
+- **A per-game show-more needs its own row class.** The day's `hb-moretbl` checkbox hides every
+  `hb-row--more` beneath it, so a nested per-game toggle on the same class can never win; the
+  grid uses `bg-row--more` with its own rule.
+- **🚨 `min-width:0` on the flex item, or the PAGE scrolls instead of the scroller.** A flex item's
+  min-width is `auto`, so the game card grew to the table's 846px min-width and the document was
+  868px wide at 375 — and mobile emulation then reported `innerWidth` 868, which looked like the
+  emulator was broken. When a phone viewport reads wider than you set it, look for overflow first.
+- **A board of per-game cards is not one chart.** `repeated-column-header` fired 6× because six
+  games each drew their own header; it now skips a table whose nearest `.propgame/.pmgame/.augame/
+  article.game` card holds exactly one table.
+
 ## Prerequisites (already in the repo)
 - **QA preview mode** is automatic on the local dev server: `web/proxy.ts` opens the gate when
   `NODE_ENV==="development"`, and `web/lib/supabase/client.ts` mocks `auth.getUser/getSession` so
