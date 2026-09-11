@@ -982,8 +982,16 @@
   // characters rather than paragraphs, because one long paragraph is the same problem as three
   // short ones.
   const PROSE_CHARS = 420;
-  for (const body of document.querySelectorAll(".hb-body, .ctxsec, .pmcat")) {
+  // .ncf-sec too, and .hb-legend / .hint / .ncf-note as well as <p>: the three Value Finder prop
+  // pages stacked a <div class="hb-legend"> paragraph, a games/players hint and a book legend
+  // above the board (~600 characters on /mlb/props) and this check, bound to <p> inside
+  // .hb-body/.ctxsec/.pmcat, saw none of it. Derek: "remove the text off of the MLB value finder
+  // player prop pages and put them in an informational scroll."
+  for (const body of document.querySelectorAll(".hb-body, .ctxsec, .pmcat, .ncf-sec")) {
     if (!vis(body)) continue;
+    // Innermost only: .ncf-sec wraps .propdays which is itself not a container here, but an
+    // .hb-body inside a .ctxsec would be counted twice.
+    if ([...body.querySelectorAll(".hb-body, .ctxsec, .pmcat, .ncf-sec")].some(vis)) continue;
     const board = body.querySelector('[role="table"], table, .pmscroll, .propstack, .daygrid');
     // No board => not this bug. The check is "prose stacked ABOVE a chart"; a collapsible
     // explainer whose entire content is prose (/considerations' "How we read weather & scoring")
@@ -991,7 +999,7 @@
     // be. Counting it reported 655 characters against a panel that has nothing to bury.
     if (!board) continue;
     let chars = 0, paras = 0;
-    for (const p of body.querySelectorAll("p")) {
+    for (const p of body.querySelectorAll("p, .hb-legend, .hint, .ncf-note")) {
       if (!vis(p)) continue;
       if (board && (board.contains(p) || board.compareDocumentPosition(p) & Node.DOCUMENT_POSITION_FOLLOWING)) continue;
       // Skip paragraphs that ARE inside a Tip. Stripping the bubble from the clone below only

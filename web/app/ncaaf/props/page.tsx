@@ -4,6 +4,7 @@ import PinButton from "../../PinButton";
 import { NCAAF_MODEL } from "../model-data";
 import { NcaafSoon } from "../Soon";
 import PropsView from "../../props/PropsView";
+import Tip from "../../Tip";
 import { etToday } from "@/lib/gameDays";
 import { cfbWeekProps } from "@/lib/cfbProps";
 import { CATEGORIES, categoryByKey } from "@/lib/props";
@@ -73,12 +74,19 @@ export default async function Page({ searchParams }: PageProps<"/ncaaf/props">) 
 
       {all.length ? (
         <section className="ncf-sec">
-          <div className="hb-legend">
-            <b>Player props, best price across the US books we track.</b> Each row is a player&apos;s number with the
-            <b> single best price</b> and which book has it — <b>tap any chip to add it to your slip</b>. Props are the
-            one place a real college edge might survive (books price hundreds of them semi-independently); once we have
-            enough captured history we grade them, same as everything else.
-          </div>
+          <p className="ctxsec__legend">
+            Every posted prop at the <b>single best US book</b>; tap any chip to add it to your slip.
+            <Tip label="About this board" text={<>
+              <b>The board.</b> Each row is a player&apos;s number with the single best price across the US
+              books we track and which book has it. A <b>✓</b> marks a price that beats the de-vigged market —
+              the Pick Auditor&apos;s arithmetic, not a model call.<br /><br />
+              <b>Why props.</b> Game lines are priced efficiently; books post hundreds of player props
+              semi-independently, so a prop is the likeliest place a real college edge survives. Once enough
+              captured history exists they are graded, same as everything else.<br /><br />
+              For the line-blind read, see <a href="/ncaaf/model">The Model</a>; for key numbers,{" "}
+              <a href="/ncaaf/best">Sweet Spots</a>.
+            </>} />
+          </p>
           <CatNav current={cat.key} />
           {games.length ? (
             <PropsView games={games} embedded {...etToday()} />
@@ -88,10 +96,6 @@ export default async function Page({ searchParams }: PageProps<"/ncaaf/props">) 
               kickoff. Try another category above, or check back as the slate fills in.
             </p>
           )}
-          <p className="ncf-note">
-            Best price shown per player across the books we track. For the line-blind read, see <a href="/ncaaf/model">The Model</a>;
-            for key numbers, <a href="/ncaaf/best">Sweet Spots</a>.
-          </p>
         </section>
       ) : (
         <NcaafSoon

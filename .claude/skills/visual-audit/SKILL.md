@@ -294,6 +294,19 @@ right in principle and is kept — but it was not the cause here, and shipping o
 have hidden a real page defect behind a silenced check. **When a check keeps reporting after a fix,
 confirm the fix actually landed in the DOM before adjusting the check.**
 
+**⚠️ Third time, and the check missed it because it was bound to the markup it was written on.**
+Derek, on `/mlb/props`: *"remove the text off of the MLB value finder player prop pages and put
+them in an informational scroll. Look for this across all pages."* The page carried a
+`<div class="hb-legend">` paragraph, a games/players hint and a book legend — **645 characters**
+above the grid — and `prose-above-board` reported clean, because it counted only `<p>` inside
+`.hb-body / .ctxsec / .pmcat` and this page's copy was a `div` inside `.ncf-sec`. A check that
+looks for one page's shape is silent on the next page's. It now scans `.ncf-sec` too and counts
+`.hb-legend`, `.hint` and `.ncf-note` alongside `<p>`; two-way tested (645 → fires; after the
+fix, 134 → silent). Swept all 20 boards afterwards: nothing else. **The standing shape for any
+board is one `ctxsec__legend` line naming what the columns are, a `<Tip>` for everything else,
+and no `ncf-note` paragraphs under the board either** — the links and the ✓ explanation go in
+the scroll with the rest.
+
 **That last one is the general shape of a bad check: it fires on the ABSENCE of the thing it is
 about.** When a new check reports something, confirm the page actually has the structure the check
 presupposes before changing the page — twice now the honest fix has been to the probe.

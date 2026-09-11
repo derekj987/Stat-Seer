@@ -3,6 +3,8 @@ import PinButton from "../../PinButton";
 import BatterGrid from "./BatterGrid";
 import { etToday } from "@/lib/gameDays";
 import { mlbPropBoard, MLB_CATEGORIES, MLB_PROP_LABELS, mlbCategoryByKey, norm } from "@/lib/mlbProps";
+import { US_BOOKS, bookLegend } from "@/lib/bookLabel";
+import Tip from "../../Tip";
 import { MLB_PROPS } from "@/lib/mlbPlayerProps";
 
 // MLB · Value Finder · Player Props. The NFL/NCAAF prop board (PropsView: tap-to-add chips, the
@@ -70,13 +72,26 @@ export default async function Page({ searchParams }: PageProps<"/mlb/props">) {
 
       {all.length ? (
         <section className="ncf-sec">
-          <div className="hb-legend">
-            <b>One row per player, in lineup order; one column per market.</b> Each cell is the player&apos;s
-            main line with the <b>single best US book</b> for each side — <b>tap any side to add it to your
-            slip</b>. Books price hundreds of these semi-independently, which is why props are the likeliest
-            place a price is wrong. For our own read on hits, home runs and strikeouts, see{" "}
-            <a href="/mlb/model/players">The Model</a>.
-          </div>
+          {/* One line on the board; everything else in the scroll. Three stacked paragraphs and a
+              book legend used to sit here (645 characters) — Derek: "remove the text ... and put
+              them in an informational scroll." prose-above-board now catches this shape. */}
+          <p className="ctxsec__legend">
+            One row per player in lineup order, one column per market — each side at the{" "}
+            <b>single best US book</b>; tap any side to add it to your slip.
+            <Tip label="About this board" text={<>
+              <b>The grid.</b> Each cell is the player&apos;s <b>main line</b> for that market — the line the
+              most books post both sides of — with the best price for each side and the book that has it.
+              A <b>✓</b> marks a price that beats the de-vigged market (the Pick Auditor&apos;s arithmetic, not a
+              model call). A dash means no book has posted that market for him.<br /><br />
+              <b>The books.</b> {bookLegend([...US_BOOKS])}. A tie shows as ×2 / ×3; hover a chip for the
+              names. US-licensed books only.<br /><br />
+              <b>Why props.</b> Books price hundreds of these semi-independently, which is why a player prop
+              is the likeliest place a price is wrong. For our own line-blind read on hits, home runs and
+              strikeouts, see <a href="/mlb/model/players">The Model</a>; for run lines and totals,{" "}
+              <a href="/mlb/lines">Line Shopping</a>; for where the half-run matters,{" "}
+              <a href="/mlb/best">Sweet Spots</a>.
+            </>} />
+          </p>
           <CatNav current={cat.key} />
           {games.length ? (
             <BatterGrid games={games} markets={cat.markets} labels={MLB_PROP_LABELS} {...etToday()} />
@@ -86,11 +101,6 @@ export default async function Page({ searchParams }: PageProps<"/mlb/props">) {
               through the afternoon. Try another category above, or check back closer to first pitch.
             </p>
           )}
-          <p className="ncf-note">
-            Best price shown per player across the books we track; ✓ marks a price that beats the
-            de-vigged market. For run lines and totals, see <a href="/mlb/lines">Line Shopping</a>; for
-            where the half-run matters, <a href="/mlb/best">Sweet Spots</a>.
-          </p>
         </section>
       ) : (
         <p className="foot">No props captured for upcoming games yet — the board fills as the capture runs.</p>

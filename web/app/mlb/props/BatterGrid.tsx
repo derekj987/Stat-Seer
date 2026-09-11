@@ -6,7 +6,7 @@ import { useSlip } from "@/lib/slip";
 import { groupByGameDay } from "@/lib/gameDays";
 import { DayHeader } from "../../DayHeader";
 import { audit } from "@/lib/fairValue";
-import { bookLabel, booksCode, bookLegend } from "@/lib/bookLabel";
+import { bookLabel, booksCode } from "@/lib/bookLabel";
 
 // The batter grid: one row per hitter in LINEUP order, one column per market, each cell the
 // player's main line with the best price for each side and the book that has it.
@@ -150,12 +150,10 @@ export default function BatterGrid({ games, markets, labels, today, tomorrow }: 
     price: l.best, books: l.books, byBook: l.byBook, fairProb: l.fairProb,
   }), [slipToggle]);
   const players = games.reduce((n, g) => n + new Set(g.markets.flatMap((m) => m.quotes.map((q) => q.player))).size, 0);
-  const books = [...new Set(games.flatMap((g) => g.markets.flatMap((m) => m.quotes.flatMap((q) => q.books))))].sort();
 
   return (
     <>
-      <p className="hint">{games.length} games · {players} players · each player&apos;s main line, best price on every side, shopped across US books.</p>
-      <p className="hint bg__legend">{bookLegend(books)} · ×2 = two books tied at the best price (hover for names)</p>
+      <p className="hint">{games.length} games · {players} players</p>
       <section className="propdays">
         {groupByGameDay(games, (g) => g.commence, today, tomorrow).map((grp) => (
           <div className="propday hb-moretbl" key={grp.key}>
