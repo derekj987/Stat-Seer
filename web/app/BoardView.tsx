@@ -96,7 +96,7 @@ const GAME_CAP = 3;   // games shown before the "show more" dropdown
  *  the label on the handicap market (a football spread is a baseball run line), the copy, the pin,
  *  and whether the week wheel exists (baseball has days, not weeks) — so the card, the chips, the
  *  slip wiring and the day grouping stay identical, which is the point of sharing it. */
-export type BoardSport = "nfl" | "mlb";
+export type BoardSport = "nfl" | "mlb" | "ncaaf";
 const SPORT = {
   nfl: { label: "NFL", spread: "Spread", weeks: true, pin: "/lines", propsHref: "/props",
          foot: <>Line shopping — the <b>best available number across books</b> on every game, plus where a
@@ -104,6 +104,12 @@ const SPORT = {
   mlb: { label: "MLB", spread: "Run line", weeks: false, pin: "/mlb/lines", propsHref: "/mlb/props",
          foot: <>Line shopping — the <b>best available price across books</b> on every game&apos;s moneyline,
            run line and total. The run line is ±1.5 everywhere, so the shopping is all in the price.</> },
+  // NCAAF brings its own week badge and week wheel (the card's schedule, not the odds table's
+  // week column, which this table does not have) through the `badge` / `nav` slots below.
+  ncaaf: { label: "NCAAF", spread: "Spread", weeks: false, pin: "/ncaaf/lines", propsHref: "/ncaaf/props",
+         foot: <>Line shopping — the <b>best available number across books</b> on every game, plus where a
+           half-point sits on a <b>sweet spot</b> (a 3 or 7 — college margins land there a little less often
+           than the NFL&apos;s; the card says how much the half-point is worth).</> },
 } as const;
 
 function GameCard({
@@ -178,8 +184,12 @@ function GameCard({
 }
 
 export default function BoardView({
-  board, min = 1, max = 1, week = 1, snapshot, today, tomorrow, sport = "nfl", abbr,
-}: { board: Game[]; min?: number; max?: number; week?: number; season?: number; snapshot: string; today: string; tomorrow: string; sport?: BoardSport; abbr?: Record<string, string> }) {
+  board, min = 1, max = 1, week = 1, snapshot, today, tomorrow, sport = "nfl", abbr, badge, nav, after, emptyText,
+}: { board: Game[]; min?: number; max?: number; week?: number; season?: number; snapshot: string; today: string; tomorrow: string;
+     sport?: BoardSport; abbr?: Record<string, string>;
+     /** Slots for a sport whose week/day framing is not the NFL's: `badge` replaces the Week/Day badge,
+      *  `nav` renders where the week wheel goes, `after` sits between the board and the footer. */
+     badge?: React.ReactNode; nav?: React.ReactNode; after?: React.ReactNode; emptyText?: string }) {
   const S = SPORT[sport];
   const { has, toggle: slipToggle } = useSlip();
   const toggle = useCallback((p: Pick) => slipToggle({
@@ -207,18 +217,18 @@ export default function BoardView({
 
         <ValueFinderDrawer />
 
-        {S.weeks ? (
+        {badge ?? (S.weeks ? (
           <WeekBadge week={week} pin={<PinButton size="sm" pin={{ id: S.pin, kind: "lines", label: "Value Finder · Line Shopping", detail: `${S.label} · Week ${week}`, href: `${S.pin}?week=${week}` }} />} />
         ) : (
           <DayBadge pin={<PinButton size="sm" pin={{ id: S.pin, kind: "lines", label: `${S.label} · Line Shopping`, detail: "today's slate", href: S.pin }} />} />
-        )}
+        ))}
         <FlowSteps active="value" base={sport} />
         <div className="subnavrow"><ShopSubnav active="lines" base={sport} /></div>
 
-        {S.weeks && <WeekNav min={min} max={max} current={week} base="/lines" />}
+        {nav ?? (S.weeks && <WeekNav min={min} max={max} current={week} base="/lines" />)}
 
         {board.length === 0 ? (
-          <p className="foot">{S.weeks ? `No odds captured for Week ${week} yet.` : "No odds captured for upcoming games yet — the board fills as the capture runs."}</p>
+          <p className="foot">{emptyText ?? (S.weeks ? `No odds captured for Week ${week} yet.` : "No odds captured for upcoming games yet — the board fills as the capture runs.")}</p>
         ) : (
           <>
             <details className="hb-panel hb-panel--card">
@@ -269,6 +279,8 @@ export default function BoardView({
                 </>
               );
             })()}
+
+            {after}
 
             <footer className="foot">
               <p>
