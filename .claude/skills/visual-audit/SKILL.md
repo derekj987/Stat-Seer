@@ -1984,6 +1984,22 @@ Derek's standing asks for the MLB section, all of which have bitten more than on
   a name-to-abbr map of your own.
 - **A market spread must name WHO it favours**: `−1.5 (BAL)`, not a bare `−1.5`. Derek: *"who is
   that spread for?"*
+- **🚨 A "market" column shows what the book POSTS, never a number derived from it.** The MLB game
+  board went round this twice. A bare run-line column printed `−1.5` on every row and read as
+  "we make everyone a favourite", so it was replaced with the moneyline converted to runs
+  (`marketMargin`) — and the board then showed `−0.9 (CLE)` / `−0.6 (NYY)` under a MARKET header.
+  Derek: *"They would never be listed as −.9 or −.6 in a sports book. It's almost always −1.5."*
+  Measured on one sweep of `mlb_odds_snapshots`: 163 rows at −1.5, 163 at +1.5, two at 2.0. The
+  number IS fixed; **the information is in the price beside it** — NYY −1.5 **+150** is a slight
+  favourite, −1.5 **−150** a heavy one. So the column shows the favourite's run line WITH FanDuel's
+  price (`runLine()` in `app/mlb/model/page.tsx`: the side whose `point < 0`, price
+  `byBook.fanduel ?? price`), and the derived margin lives only in "OUR SPREAD" and the Tip.
+  The general rule: a column headed *market* is the book's own number as the book lists it. If a
+  reader could not find the value on the sportsbook screen, it is not a market column — it is our
+  number wearing the market's label, and it teaches the reader the market said something it never
+  said. Check it by reading three rows and asking whether each appears verbatim on the book.
+  A "derived" number that a book never posts (a fair spread, a de-vigged probability) belongs
+  under OUR header or in the Tip, labelled as ours.
 - **Never publish a raw factor as if it were a reading.** `1.01 neutral` meant nothing to a reader.
   A park factor is shown as a worded verdict — `Favorable for HRs` / `Neutral for HRs` / `Tough for
   HRs` (`parkTag()`, cut at 1.05 / 0.95) — and the number itself goes in the Tip if anywhere. The
@@ -2228,6 +2244,11 @@ that never hold long text. Do this at 320–375px width; overflow appears at the
   gated client components (LeftRail, dashboards) hydrate with a mock member. Production is untouched.
   Requires `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `web/.env.local` (public
   values; already added). Set `NEXT_PUBLIC_QA_PREVIEW=0` to force a real signed-out dev session.
+- **Market columns need `SUPABASE_URL` in `web/.env.local` too** (same public value as
+  `NEXT_PUBLIC_SUPABASE_URL`; added 2026-09-11). Every server-side reader in `web/lib/*` reads
+  `process.env.SUPABASE_URL`, and the boards catch the "not set" throw and degrade to `—` in the
+  market columns — so a local dev server without it renders a board that LOOKS like "no lines
+  posted yet". Before concluding a market column is empty, check `grep -c '^SUPABASE_URL=' web/.env.local`.
 - **The probe** lives at `web/qa/visual-audit.js` — a self-contained, pasteable IIFE that returns JSON.
 
 ## Procedure

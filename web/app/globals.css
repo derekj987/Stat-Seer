@@ -3397,22 +3397,22 @@ a.snav__dfeat{display:block}
    tracks 738 + gaps (5x14) + padding (2x16) = 840 against an 825px card, so every row drew 9px
    outside it — while the pitchers column sat at 160px needing 202px with 87px unused further
    right. Sized to fit the card instead: 200+150+86+80+92+76 = 684 + 70 + 32 = 786. */
-.pmtable--mlbg{min-width:795px;max-width:1120px}
-/* Columns 3-6 are market spread, market total, our spread, our total. Two numbers a reader is
-   meant to compare must be drawn at the same size — but that means SPREAD equals SPREAD and TOTAL
-   equals TOTAL, not all four equal. Giving the totals the spreads' 88px cost 76px that the
-   pitchers column needed: at 375 it read 58px of idle width on "our total" against a pitchers
-   cell 60px short. Spreads 88 ("−0.2 (CLE)"), totals 50 ("10.4").
+.pmtable--mlbg{min-width:813px;max-width:1120px}
+/* Columns 3-6 are market run line, market total, our spread, our total. Two numbers a reader is
+   meant to compare must be drawn at the same size — TOTAL equals TOTAL (50, "10.4"). The two
+   spread columns are NOT the same shape any more: the market cell carries the posted run line
+   AND its price ("−1.5 (NYY) +150", 116px) while ours is a margin ("−0.2 (CLE)", 88px), so
+   they are budgeted to their own ink. The extra 28 came out of the pitchers column (246 → 236):
+   two names joined by a slash wrap to two lines at the minimum width either way, and the ROW's
+   fixed height is what stops that wrap making the row taller than its neighbours.
    Everything else is the standard pattern (see .pmtable--mlbp): measured ink plus an equal share
    of the leftover, so no column hoards the surplus on a wide screen.
-   Ink: game 150 ("CLE @ BAL (6:35p)") | starting pitchers 246 | spreads 2 x 88 | totals 2 x 50
-   = 672, plus 5 gaps x 16 = 752. Two pitcher names joined by a slash still wraps to two lines at
-   the 795px minimum, and the ROW's fixed height is what stops that wrap making the row taller
-   than its neighbours (measured 42 against 54 before). */
+   Ink: game 150 ("CLE @ BAL (6:35p)") | starting pitchers 236 | run line 116 | total 50 |
+   our spread 88 | our total 50 = 690, plus 5 gaps x 16 = 770. */
 .pmtable--mlbg .pmrow--data,
-.pmtable--mlbg .pmrow--head{--pmx:max(0px,calc((100% - 752px) / 6));
-  grid-template-columns:calc(150px + var(--pmx)) calc(246px + var(--pmx))
-    calc(88px + var(--pmx)) calc(50px + var(--pmx))
+.pmtable--mlbg .pmrow--head{--pmx:max(0px,calc((100% - 770px) / 6));
+  grid-template-columns:calc(150px + var(--pmx)) calc(236px + var(--pmx))
+    calc(116px + var(--pmx)) calc(50px + var(--pmx))
     calc(88px + var(--pmx)) calc(50px + var(--pmx))}
 .pmtable--mlbg .pmrow--data{height:56px;align-items:center}
 .pmtable--mlbg .pmrow--head{align-items:end}

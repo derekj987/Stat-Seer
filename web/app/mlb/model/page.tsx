@@ -5,7 +5,8 @@ import Tip from "../../Tip";
 import { etToday, etDayKey, groupByGameDay } from "@/lib/gameDays";
 import { MLB_GAMES, MLB_GAME_SCORES } from "@/lib/mlbGameModel";
 import { MLB_AVAIL, type MlbAvail } from "@/lib/mlbAvailability";
-import { mlbBoard, marketMargin } from "@/lib/mlbBoard";
+import { mlbBoard } from "@/lib/mlbBoard";
+import type { Game } from "@/lib/board";
 
 // MLB · Game Model — the spreads/totals half of the section, beside Player Props.
 //
@@ -15,10 +16,16 @@ import { mlbBoard, marketMargin } from "@/lib/mlbBoard";
 // identical to NFL/NCAAF on purpose — same masthead, FlowSteps, ModelSubnav, day grouping, hb-panel
 // shells and pm* table classes. Every sport reading the same way is the product.
 //
-// NO SIDE PICK. Both spreads are expected MARGINS in runs, never a bet. The posted run line is
-// deliberately absent: it is a fixed +/-1.5 on every game, so a run-line column printed -1.5 down
-// almost every row and read as "we make everyone a favourite" while carrying no information at all.
-// The market's side is read from the moneyline instead (marketMargin in lib/mlbBoard.ts).
+// NO SIDE PICK. Our spread is an expected MARGIN in runs, never a bet.
+//
+// THE MARKET COLUMN IS THE RUN LINE WITH ITS PRICE. This went round twice. A bare run-line column
+// printed -1.5 down every row and read as "we make everyone a favourite" while saying nothing, so it
+// was replaced with the moneyline converted to runs (marketMargin). Derek: "they would never be
+// listed as -.9 or -.6 in a sports book. It's almost always -1.5." Right — a book posts -1.5 and the
+// INFORMATION is in the price beside it: the Yankees laying 1.5 at +150 is a slight favourite; a
+// heavy favourite lays 1.5 at -150. Measured across one sweep: 163 rows at -1.5, 163 at +1.5, and
+// two at 2.0. So the column now shows exactly what the book shows — the favourite's run line and
+// FanDuel's price for it — and the moneyline-derived margin moves into the Tip as explanation.
 //
 // COPY LIVES IN THE SCROLL. One legend line on the board; the caveats, the measured gain and the
 // calibration go in the Tip. Paragraphs of hedging stacked above a chart are a wall nobody reads,
@@ -60,6 +67,19 @@ const kickTime = (iso: string) => timeFmt.format(new Date(iso)).replace(/\s?([AP
 const spread = (x: number, homeAbbr: string, awayAbbr: string) => {
   if (Math.abs(x) < 0.05) return "pick";
   return `−${Math.abs(x).toFixed(1)} (${x > 0 ? homeAbbr : awayAbbr})`;
+};
+
+const fmtPrice = (p: number) => (p > 0 ? `+${p}` : `−${Math.abs(p)}`);
+/** The posted run line as a sportsbook shows it: the favourite laying 1.5, with the price.
+ *  FanDuel's price where FanDuel posts one — the book Derek reads beside this board — else the
+ *  best available, which is what the board's shopping logic already picked. */
+const runLine = (m: Game, homeAbbr: string, awayAbbr: string): string | null => {
+  const h = m.spread.home, a = m.spread.away;
+  const fav = h?.point != null && h.point < 0 ? { line: h, abbr: homeAbbr }
+            : a?.point != null && a.point < 0 ? { line: a, abbr: awayAbbr } : null;
+  if (!fav) return null;
+  const price = fav.line.byBook?.fanduel ?? fav.line.price;
+  return `−${Math.abs(fav.line.point!).toFixed(1)} (${fav.abbr}) ${fmtPrice(price)}`;
 };
 
 export default async function Page() {
@@ -118,18 +138,20 @@ export default async function Page() {
               above a chart is not honesty, it is a wall nobody reads — the numbers still have to
               be one click away, which is what the Tip is for. */}
           <p className="ctxsec__legend">
-            <span className="lgnd lgnd--mkt">Market</span> spread and total, then{" "}
-            <span className="lgnd lgnd--model">ours</span>. A spread reads{" "}
-            <b>−1.3 (TOR)</b> — Toronto favoured by 1.3 runs.
+            <span className="lgnd lgnd--mkt">Market</span> run line and total, then{" "}
+            <span className="lgnd lgnd--model">ours</span>. <b>−1.5 (NYY) +150</b> is the Yankees
+            laying 1.5 at FanDuel&apos;s price; our <b>−0.3 (NYY)</b> is the margin we expect.
             <Tip label="About the MLB game model" text={<>
               <b>How it works.</b> Each side&apos;s offence against the other&apos;s defence,
               adjusted for the starting pitcher. Line-blind — it never sees the market columns.<br /><br />
-              <b>Why runs, not a run line?</b> Baseball&apos;s run line is a fixed ±1.5 on every
-              game, so it says nothing about who is favoured by how much. In baseball that lives in
-              the moneyline, so we strip the vig off the two prices and convert the fair win
-              probability into runs. <b>These are not posted lines</b> — you will not find −1.3 at a
-              sportsbook; it is the market&apos;s own price expressed in runs so it can sit beside
-              ours.<br /><br />
+              <b>Reading the run line.</b> Baseball&apos;s run line is ±1.5 on almost every game,
+              so the number alone says little — the favourite is in the PRICE. Laying 1.5 at +150
+              is a slight favourite; laying 1.5 at −150 is a heavy one. We show the favourite&apos;s
+              line with FanDuel&apos;s price, exactly as the book lists it.<br /><br />
+              <b>Our spread is in runs, not a run line.</b> It is the margin we expect, so a
+              <b> −0.3</b> means a coin flip and a <b>−1.8</b> means a clear favourite. Compare it
+              with the price: a run line at +150 and our margin near zero agree; a run line at −140
+              beside our margin of 0.3 do not.<br /><br />
               <b>What it is worth.</b> Over {S.n} held-out games, <b>{S.gain}%</b> closer than
               assuming {S.meanTotal} runs every time. That is small because of the sport: one game
               averages {S.meanTotal} runs with an SD of <b>{S.sd}</b>. Team quality alone measured{" "}
@@ -171,14 +193,14 @@ export default async function Page() {
                           together, then the two OURS together, so each pair reads as a pair. */}
                       <div className="pmrow pmrow--head pmrow--data" role="row">
                         <span>game</span><span>starting pitchers</span>
-                        <span>market spread</span><span>market total</span>
+                        <span>market run line</span><span>market total</span>
                         <span>our spread</span><span>our total</span>
                       </div>
                       {grp.items.map((k, i) => {
                         const g = byKey.get(k)!;
                         const m = mkt.get(`${etDayKey(g.commence)}|${g.game}`);
                         const mt = m?.total?.consensus ?? null;
-                        const ms = m ? marketMargin(m) : null;
+                        const rl = m ? runLine(m, g.homeAbbr, g.awayAbbr) : null;
                         // Home minus away, the same sign convention as the market column, so a
                         // reader compares two numbers that mean the same thing.
                         const os = g.homeRuns - g.awayRuns;
@@ -208,7 +230,7 @@ export default async function Page() {
                             </span>
                             <span className="pmcell pmcell--team">{sp || "not posted"}</span>
                             <span className="pmcell pmcell--mkt">
-                              {ms !== null ? spread(ms, g.homeAbbr, g.awayAbbr) : "—"}
+                              {rl ?? "—"}
                             </span>
                             <span className="pmcell pmcell--mkt">{mt !== null ? mt.toFixed(1) : "—"}</span>
                             <span className="pmcell pmcell--proj">{spread(os, g.homeAbbr, g.awayAbbr)}</span>
