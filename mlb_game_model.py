@@ -142,7 +142,22 @@ SCORES = {"model": 3.5355, "base": 3.5634, "gain": 0.8, "sd": 4.52, "meanTotal":
           # replaced by this. The number is honest and nearly flat: our favourite covers -1.5 in
           # 39% of held-out games, and the fit moves it between ~30% and ~50% on this slate.
           "cover": {"a": -0.5717, "b": 0.3622, "brier": 0.2270, "brierBase": 0.2291, "gain": 0.9,
-                    "base": 35.6, "favBase": 39.4, "n": 1108}}
+                    "base": 35.6, "favBase": 39.4, "n": 1108},
+          # WINNER. P(home wins) = Phi(margin / sd), sd = residual SD of the margin on the train
+          # split. Held out: Brier 0.2444 vs 0.2480 for the home base rate (+1.4%); our favourite
+          # won 55.0% of games. Calibrated within 2 points in three of four buckets, 5 high at
+          # 60-65% (said 62, saw 57). Real, small, and honest about being small.
+          "win": {"sd": 4.65, "brier": 0.2444, "brierBase": 0.2480, "gain": 1.4, "favAcc": 55.0,
+                  "n": 554},
+          # WHAT WAS TRIED AND LEFT OUT (walk-forward, scored on the same held-out dates; see
+          # analysis in the 2026-09-11 session). Lineup strength from the POSTED nine (each
+          # hitter's causal rate, shrunk): Brier 0.2444 -> 0.2441, margin MAE -0.0016, total MAE
+          # +0.006 — noise. Bullpen (runs allowed minus the starter's ER): worse at every weight.
+          # Recent form (15-game run differential): worse Brier. Home field: +0.15 runs helped the
+          # TEST split (home margin +0.19 there) and is absent from the TRAIN split (+0.005), so
+          # it fails the choose-on-train rule and stays out. The sport is the ceiling, not the
+          # feature list.
+          "tried": ["lineup strength", "bullpen", "recent form", "home field"]}
 
 
 def _outs(ip):
@@ -456,6 +471,19 @@ def cover_calibration(rows, te):
     cal = [(sig(m), y) for m, y in tes]
     bc, b0, base = brier(cal)
     fav = [1 if r["yM"] * (1 if r["pM"] > 0 else -1) >= 2 else 0 for r in te if abs(r["pM"]) >= 0.05]
+    # WINNER first: the same normal, asked P(home wins) = Phi(m / sd), scored the same way.
+    pw = [(nd.cdf(r["pM"] / sd), 1 if r["yM"] > 0 else 0) for r in te]
+    bw, bw0, hbase = brier(pw)
+    acc = statistics.mean(1 if (r["pM"] > 0) == (r["yM"] > 0) else 0 for r in te if abs(r["pM"]) >= 0.05)
+    print(f"  winner: Phi(m / {sd:.2f}); held out Brier {bw:.4f} vs {bw0:.4f} for the home rate "
+          f"({hbase*100:.1f}%) -> {(bw0-bw)/bw0*100:+.2f}%; our favourite won {acc*100:.1f}%")
+    fw = [(max(p, 1 - p), y if p >= 0.5 else 1 - y) for p, y in pw]
+    for lo, hi in ((0.5, 0.55), (0.55, 0.6), (0.6, 0.65), (0.65, 1)):
+        bb = [(p, y) for p, y in fw if lo <= p < hi]
+        if bb:
+            print(f"            said {lo*100:.0f}-{hi*100:.0f}%: n={len(bb):3d}  "
+                  f"mean said {statistics.mean(p for p,_ in bb)*100:.1f}%  "
+                  f"actual {statistics.mean(y for _,y in bb)*100:.1f}%")
     print(f"  run line: sigmoid(a + b*m), a={a:.4f} b={b:.4f} (train, both sides)")
     print(f"            held out {len(cal)} sides: Brier {bc:.4f} vs {b0:.4f} for the base rate "
           f"({base*100:.1f}%) -> {(b0-bc)/b0*100:+.2f}%; our favourite covers in "

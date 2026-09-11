@@ -27,11 +27,12 @@ import type { Game } from "@/lib/board";
 // two at 2.0. So the column now shows exactly what the book shows — the favourite's run line and
 // FanDuel's price for it — with the market's de-vigged cover chance underneath.
 //
-// OURS IS IN THE SAME CURRENCY. The bare margin beside that line was misread within a day ("3 of
-// 12 games favour taking the points": a margin of 1.3 against a 1.5 line looks like a lean to the
-// dog). Two numbers a reader is meant to compare must be the same kind of number, so our column is
-// now a calibrated cover probability for the same side, with the margin underneath as the graded,
-// line-blind quantity it always was. See coverProb() for what it is and what it is worth.
+// OURS IS A CALL, IN THE SAME CURRENCY. The bare margin beside that line was misread within a day
+// ("3 of 12 games favour taking the points": a margin of 1.3 against a 1.5 line looks like a lean
+// to the dog), and a cover % on the market's favourite read as "based off the market". So our
+// columns now say what Derek asked for outright — who we have winning (with our chance) and which
+// run-line side we have covering (with our chance) — computed from our margin alone, with the
+// margin underneath as the graded, line-blind quantity it always was. See ourCall().
 //
 // COPY LIVES IN THE SCROLL. One legend line on the board; the caveats, the measured gain and the
 // calibration go in the Tip. Paragraphs of hedging stacked above a chart are a wall nobody reads,
@@ -80,7 +81,7 @@ const fmtPrice = (p: number) => (p > 0 ? `+${p}` : `−${Math.abs(p)}`);
  *  FanDuel's price where FanDuel posts one — the book Derek reads beside this board — else the
  *  best available, which is what the board's shopping logic already picked. `fair` is the
  *  market's own de-vigged chance the favourite covers (Pick Auditor arithmetic, averaged across
- *  books), and `homeFav` says which side it is so our number can be put on the SAME side. */
+ *  books) — the chance the MARKET's favourite covers, which is the side named in the text. */
 type RunLine = { text: string; fair: number | null; homeFav: boolean; point: number };
 const runLine = (m: Game, homeAbbr: string, awayAbbr: string): RunLine | null => {
   const h = m.spread.home, a = m.spread.away;
@@ -106,6 +107,36 @@ const runLine = (m: Game, homeAbbr: string, awayAbbr: string): RunLine | null =>
  *  that base rate is most of what any honest number here can say. */
 const C = S.cover;
 const coverProb = (marginForSide: number) => 1 / (1 + Math.exp(-(C.a + C.b * marginForSide)));
+
+/** OUR chance a side WINS, from our margin for that side: Phi(m / sd). Held out, Brier +1.4% over
+ *  the home base rate and our favourite won 55% (SCORES["win"]). */
+const W = S.win;
+const erf = (x: number) => {                      // Abramowitz–Stegun 7.1.26, |err| < 1.5e-7
+  const t = 1 / (1 + 0.3275911 * Math.abs(x));
+  const y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x);
+  return x >= 0 ? y : -y;
+};
+const winProb = (marginForSide: number) => 0.5 * (1 + erf(marginForSide / W.sd / Math.SQRT2));
+
+/** Who we think wins, and which run-line side we think covers — both from OUR margin alone.
+ *
+ *  Derek: "I want real analysis of these teams and show who we think will win (ML), cover the
+ *  +1.5 or -1.5." The model never sees the market: offence, defence, the starting pitcher and
+ *  last season's prior. (Lineup strength from the posted nine, bullpen, recent form and home
+ *  field were each tested walk-forward and none improved held-out results — SCORES["tried"].)
+ *  The run-line side is whichever of {favourite −1.5, dog +1.5} we give the better chance;
+ *  favourites cover only 39% of the time, so the dog +1.5 is our side more often than not, and
+ *  that is the sport, not timidity. Whether either side is a good BET is the price's business. */
+const ourCall = (os: number, homeAbbr: string, awayAbbr: string) => {
+  const homeFav = os >= 0;
+  const fav = homeFav ? homeAbbr : awayAbbr, dog = homeFav ? awayAbbr : homeAbbr;
+  const m = Math.abs(os);
+  const win = winProb(m);
+  const cover = coverProb(m);
+  return cover >= 0.5
+    ? { fav, win, rlSide: fav, rlPt: "−1.5", rlProb: cover }
+    : { fav, win, rlSide: dog, rlPt: "+1.5", rlProb: 1 - cover };
+};
 
 export default async function Page() {
   const { today: todayEt, tomorrow: tomorrowEt } = etToday();
@@ -164,9 +195,10 @@ export default async function Page() {
               be one click away, which is what the Tip is for. */}
           <p className="ctxsec__legend">
             <span className="lgnd lgnd--mkt">Market</span> run line and total, then{" "}
-            <span className="lgnd lgnd--model">ours</span>. <b>−1.5 (NYY) +150</b> is the Yankees
-            laying 1.5 at FanDuel&apos;s price, and <i>fair 40%</i> is the market&apos;s own vig-free
-            chance they cover it; our <b>38% (NYY)</b> is the same chance from our numbers.
+            <span className="lgnd lgnd--model">ours</span> — who we have winning and which run-line
+            side we have covering, with our chance of each. <b>−1.5 (NYY) +150</b> is the Yankees
+            laying 1.5 at FanDuel&apos;s price; <i>fair 40%</i> is the market&apos;s vig-free chance
+            they cover it. Ours never sees the market.
             <Tip label="About the MLB game model" text={<>
               <b>How it works.</b> Each side&apos;s offence against the other&apos;s defence,
               adjusted for the starting pitcher. Line-blind — it never sees the market columns.<br /><br />
@@ -174,18 +206,25 @@ export default async function Page() {
               so the number alone says little — the favourite is in the PRICE. Laying 1.5 at +150
               is a slight favourite; laying 1.5 at −150 is a heavy one. We show the favourite&apos;s
               line with FanDuel&apos;s price, exactly as the book lists it.<br /><br />
-              <b>Our cover %.</b> The chance the favourite wins by two or more, from our expected
-              margin (shown underneath). Both percentages in a row are about the SAME side, so they
-              compare directly: ours above the market&apos;s fair means our numbers like laying
-              the 1.5 a little more than the market does; below it, the points. Favourites cover
-              −1.5 in only <b>{C.favBase}%</b> of games — that is why the run line pays plus money
-              on most of them, and why most rows here sit under 50%. It is not a lean to the dog;
-              it is the price doing its job.<br /><br />
-              <b>How honest that number is.</b> Held out over {C.n.toLocaleString()} sides it
-              scores <b>{C.gain}%</b> better than the base rate on Brier, and lands within three
-              points of what happened in every bucket below 46%. Above 46% it runs high (said 51%,
-              saw 43%) — treat a big number here with extra suspicion. A plain bell curve on the
-              margin was tried first and ran four points high everywhere, so it is not used.<br /><br />
+              <b>Our winner.</b> The side we have winning and our chance of it, from our expected
+              margin (shown underneath). Held out over {W.n} games it scores <b>{W.gain}%</b> better
+              than the home-team base rate on Brier and our favourite won <b>{W.favAcc}%</b>;
+              within two points of what happened in three of four confidence buckets, five high
+              in the 60–65% one. Small and real.<br /><br />
+              <b>Our run line.</b> Whichever of favourite −1.5 and underdog +1.5 we give the better
+              chance. Favourites cover −1.5 in only <b>{C.favBase}%</b> of games, so the underdog
+              +1.5 is our side more often than not — that is baseball, where a third of games are
+              decided by one run, and it is exactly why the run line pays plus money on the
+              favourite. Compare our chance with the market&apos;s fair % under its line: it says
+              whether the price is paying you for the side we like. Held out over{" "}
+              {C.n.toLocaleString()} sides the cover chance scores <b>{C.gain}%</b> better than the
+              base rate and lands within three points in every bucket below 46%; above 46% it runs
+              high (said 51%, saw 43%), so treat a big number there with extra suspicion.<br /><br />
+              <b>What goes in.</b> Each club&apos;s offence and defence this season, its starting
+              pitcher, and last season as a prior — all computed from games already played, never
+              from the market. Lineup strength from the posted nine, bullpen, recent form and home
+              field were each tested the same way and none improved the held-out results, so none
+              are in: the ceiling here is the sport, not the feature list.<br /><br />
               <b>What it is worth.</b> Over {S.n} held-out games, <b>{S.gain}%</b> closer than
               assuming {S.meanTotal} runs every time. That is small because of the sport: one game
               averages {S.meanTotal} runs with an SD of <b>{S.sd}</b>. Team quality alone measured{" "}
@@ -228,7 +267,7 @@ export default async function Page() {
                       <div className="pmrow pmrow--head pmrow--data" role="row">
                         <span>game</span><span>starting pitchers</span>
                         <span>market run line</span><span>market total</span>
-                        <span>our cover %</span><span>our total</span>
+                        <span>our winner</span><span>our run line</span><span>our total</span>
                       </div>
                       {grp.items.map((k, i) => {
                         const g = byKey.get(k)!;
@@ -238,11 +277,7 @@ export default async function Page() {
                         // Home minus away, the same sign convention as the market column, so a
                         // reader compares two numbers that mean the same thing.
                         const os = g.homeRuns - g.awayRuns;
-                        // Cover chance for the MARKET's favourite where a line is posted (so the two
-                        // percentages in the row are about the same side), else for ours.
-                        const homeFav = rl ? rl.homeFav : os >= 0;
-                        const cover = coverProb(homeFav ? os : -os);
-                        const favAbbr = homeFav ? g.homeAbbr : g.awayAbbr;
+                        const call = ourCall(os, g.homeAbbr, g.awayAbbr);
                         // First initial plus surname. "Hunter Brown (HOU) / Cristopher Sánchez
                         // (PHI)" is 285px of ink, and no honest budget fits that at 1440 — it was
                         // the one cell on the site that had to wrap, and a wrapping cell is what
@@ -276,8 +311,12 @@ export default async function Page() {
                             </span>
                             <span className="pmcell pmcell--mkt">{mt !== null ? mt.toFixed(1) : "—"}</span>
                             <span className="pmcell pmcell--proj pmcover">
-                              {pct(cover)} <span className="pmcover__who">({favAbbr})</span>
-                              <span className="pmcover__sub">margin {spread(os, g.homeAbbr, g.awayAbbr)}</span>
+                              {call.fav} <span className="pmcover__who">{pct(call.win)}</span>
+                              <span className="pmcover__sub">margin {Math.abs(os) < 0.05 ? "pick" : `−${Math.abs(os).toFixed(1)}`}</span>
+                            </span>
+                            <span className="pmcell pmcell--proj pmcover">
+                              {call.rlSide} {call.rlPt} <span className="pmcover__who">{pct(call.rlProb)}</span>
+                              <span className="pmcover__sub">{call.rlPt === "−1.5" ? "lay the run" : "take the run"}</span>
                             </span>
                             <span className="pmcell pmcell--proj">{g.total.toFixed(1)}</span>
                           </div>

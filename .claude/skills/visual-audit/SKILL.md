@@ -2016,6 +2016,26 @@ Derek's standing asks for the MLB section, all of which have bitten more than on
   `mlb_game_model.py`, constants in `SCORES["cover"]`): Brier +0.9% over the base rate, within 3
   points in every bucket below 46%, still 8 high above it — and the Tip says so. A cover % that
   had not been scored against what happened would have been a decoration with a percent sign.
+- **A cover % on the MARKET's favourite reads as "based off the market".** Derek's next message:
+  *"I don't want our model based off of the market alone. I want real analysis of these teams
+  and show who we think will win (ML), cover the +1.5 or −1.5."* The number was line-blind; the
+  SIDE it was about was the market's, so the column read as derived. What ships: **our winner**
+  (side + win %, `Φ(m/4.65)`, held out Brier +1.4%, favourite 55%) and **our run line** (whichever
+  of favourite −1.5 / dog +1.5 we give the better chance) — both from our margin alone, the
+  market's fair % left under ITS line for the comparison. When a column is "ours", the side it
+  names must be ours too.
+  **"Real analysis of these teams" was tested, not asserted.** Lineup strength from the posted
+  nine (each hitter's causal rate, shrunk), bullpen (runs allowed minus starter ER), 15-game form
+  and home field were each run walk-forward on the same held-out dates (`SCORES["tried"]`):
+  lineup Brier 0.2444 → 0.2441 (noise), bullpen worse at every weight, form worse, home field
+  +0.15 helped the TEST split only because home teams happened to win 53.6% there against 52.4%
+  on TRAIN (+0.005 runs) — fails choose-on-train. The model is already the team analysis; the
+  sport is the ceiling. Say so in the Tip rather than adding a feature because it sounds like one.
+- **Row padding comes out of the column budget.** `.pmrow--data` carries 16px of padding each
+  side, so `--pmx: calc((100% - <budget>px) / n)` has 32px less to give than it looks: a 818px
+  budget in an 825px row put 9px of the last column outside the card (`content-escapes-card`).
+  Budget against `100% − 32`, and measure ink with a clone appended INSIDE the row — a clone on
+  `<body>` inherits the body font and reads ~14/12 wider.
 - **Never publish a raw factor as if it were a reading.** `1.01 neutral` meant nothing to a reader.
   A park factor is shown as a worded verdict — `Favorable for HRs` / `Neutral for HRs` / `Tough for
   HRs` (`parkTag()`, cut at 1.05 / 0.95) — and the number itself goes in the Tip if anywhere. The
