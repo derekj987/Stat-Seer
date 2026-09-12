@@ -4,6 +4,7 @@ import { playerSlot, playerTeam } from "@/lib/playerSlot";
 import { ShopSubnav, Brand, FlowSteps, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
 import PropsView from "./PropsView";
+import Tip from "../Tip";
 import PinButton from "../PinButton";
 import { etToday } from "@/lib/gameDays";
 
@@ -69,7 +70,18 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
         {!isPre && snap && <div className="asof">props as of<br /><b>{et(snap)}</b></div>}
       </header>
 
-      <WeekBadge week={week} pin={<PinButton size="sm" pin={{ id: `/props?cat=${cat.key}`, kind: "props", label: `Player Props · ${cat.label}`, detail: `NFL · Week ${week}`, href: `/props?cat=${cat.key}&week=${week}` }} />} />
+      <WeekBadge week={week} tip={
+        <Tip label="About this board" text={<>
+          <span className="tip__lead">Every posted prop at the <b>single best US book</b>; tap any chip to add it to your slip.</span><br /><br />
+          <b>The board.</b> Each row is a player&apos;s number with the single best price across the US books
+          we track and which book has it — the same wager everyone else makes, at a better number. A <b>✓</b>{" "}
+          marks a price that beats the de-vigged market: the Pick Auditor&apos;s arithmetic, not a model call.<br /><br />
+          <b>Why props.</b> Game lines at a sharp book are priced within measurement error; books post hundreds
+          of player props semi-independently, which is where a price is likeliest to be wrong. For our own
+          line-blind read on each player, see <a href="/model/players">The Model</a>; for the line-blind game
+          read, <a href="/model">The Model</a>; for key numbers, <a href="/best">Sweet Spots</a>.
+        </>} />
+      } pin={<PinButton size="sm" pin={{ id: `/props?cat=${cat.key}`, kind: "props", label: `Player Props · ${cat.label}`, detail: `NFL · Week ${week}`, href: `/props?cat=${cat.key}&week=${week}` }} />} />
       <FlowSteps active="value" />
       <div className="subnavrow"><ShopSubnav active="props" /></div>
 

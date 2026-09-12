@@ -26,7 +26,7 @@ export function WeekBadge({ week, note, tip, pin }: { week: number; note?: strin
 /** The baseball-shaped WeekBadge. Baseball has no weeks, so the anchor a section page sits under is
  *  the DAY — "Today · Sep 11" — in the same badge, on the same centred grid, with the pin parked to
  *  its right. Every sport's Value Finder should look the same from the masthead down. */
-export function DayBadge({ pin }: { pin?: import("react").ReactNode }) {
+export function DayBadge({ pin, tip }: { pin?: import("react").ReactNode; tip?: import("react").ReactNode }) {
   const d = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", month: "short", day: "numeric" }).format(new Date());
   return (
     <div className="pageweekrow">
@@ -34,7 +34,7 @@ export function DayBadge({ pin }: { pin?: import("react").ReactNode }) {
         <span className="pageweek__k">Today</span>
         <span className="pageweek__n">{d}</span>
       </div>
-      {pin && <div className="pageweek__aside">{pin}</div>}
+      {(tip || pin) && <div className="pageweek__aside">{tip}{pin}</div>}
     </div>
   );
 }

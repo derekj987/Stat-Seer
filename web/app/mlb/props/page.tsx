@@ -66,19 +66,9 @@ export default async function Page({ searchParams }: PageProps<"/mlb/props">) {
         />
       </header>
 
-      <DayBadge pin={<PinButton size="sm" pin={{ id: `/mlb/props?cat=${cat.key}`, kind: "props", label: `MLB Props · ${cat.label}`, detail: "today's slate", href: `/mlb/props?cat=${cat.key}` }} />} />
-      <FlowSteps active="value" base="mlb" />
-      <div className="subnavrow"><ShopSubnav active="props" base="mlb" /></div>
-
-      {all.length ? (
-        <section className="ncf-sec">
-          {/* One line on the board; everything else in the scroll. Three stacked paragraphs and a
-              book legend used to sit here (645 characters) — Derek: "remove the text ... and put
-              them in an informational scroll." prose-above-board now catches this shape. */}
-          <p className="ctxsec__legend">
-            One row per player in lineup order, one column per market — each side at the{" "}
-            <b>single best US book</b>; tap any side to add it to your slip.
-            <Tip label="About this board" text={<>
+      <DayBadge tip={<Tip label="About this board" text={<>
+              <span className="tip__lead">One row per player in lineup order, one column per market — each side at the{" "}
+            <b>single best US book</b>; tap any side to add it to your slip.</span><br /><br />
               <b>The grid.</b> Each cell is the player&apos;s <b>main line</b> for that market — the line the
               most books post both sides of — with the best price for each side and the book that has it.
               A <b>✓</b> marks a price that beats the de-vigged market (the Pick Auditor&apos;s arithmetic, not a
@@ -90,8 +80,14 @@ export default async function Page({ searchParams }: PageProps<"/mlb/props">) {
               strikeouts, see <a href="/mlb/model/players">The Model</a>; for run lines and totals,{" "}
               <a href="/mlb/lines">Line Shopping</a>; for where the half-run matters,{" "}
               <a href="/mlb/best">Sweet Spots</a>.
-            </>} />
-          </p>
+            </>} />} pin={<PinButton size="sm" pin={{ id: `/mlb/props?cat=${cat.key}`, kind: "props", label: `MLB Props · ${cat.label}`, detail: "today's slate", href: `/mlb/props?cat=${cat.key}` }} />} />
+      <FlowSteps active="value" base="mlb" />
+      <div className="subnavrow"><ShopSubnav active="props" base="mlb" /></div>
+
+      {all.length ? (
+        <section className="ncf-sec">
+          {/* No copy above the board: the scroll beside the day badge carries the legend, the book
+              codes, the ✓ meaning and the links. Derek: "I do not want text like that anywhere." */}
           <CatNav current={cat.key} />
           {games.length ? (
             <BatterGrid games={games} markets={cat.markets} labels={MLB_PROP_LABELS} {...etToday()} />

@@ -196,22 +196,19 @@ export default async function Page({ searchParams }: {
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">The Model — Where We Differ Most</span>
           <PinButton size="sm" pin={{ id: "/ncaaf/model?only=where-we-differ", kind: "model", label: "NCAAF Model · Where We Differ Most", detail: `Week ${week}`, href: `/ncaaf/model?week=${week}&only=where-we-differ` }} />
-          <Tip text={<>The games where our <b>line-blind number is furthest from the market</b> — a <b>Δ</b> beside our projection shows how many points apart we are. This is where the model has an <b>independent opinion</b>. On big favorites we <b>defer to the market</b> (it&apos;s efficient there — heavy favorites cover about half the time), so those agree by design and don&apos;t lead here. Published <b>line-blind</b> as context: a divergence flags where our read differs from the market. The complete slate is in <b>Full Model — every game</b> below.</>} />
+          <Tip text={<><span className="tip__lead"><span className="hb-dia">Δ</span> How far our line-blind number sits from the market on this game.
+                        <span className="hb-x"> · Big favorites don&apos;t appear here — on blowouts the market is efficient and we
+                          defer to it. The games that lead are where <b>our read genuinely differs</b>. It&apos;s <b>context you can
+                          check</b> — our rating predicts about as well as Elo (see the record above).</span>
+                        {c.preseasonSeeded && (
+                          <span className="hb-x"> · <b>Preseason note:</b> with no {c.season} games played yet, these projections
+                            are seeded with published preseason ratings (SP+) blended with our own carryover, so the early number is
+                            credible instead of leaning on last season alone. As real games are played our in-season rating takes
+                            over and the seed washes out by about week 5.</span>
+                        )}</span><br /><br />The games where our <b>line-blind number is furthest from the market</b> — a <b>Δ</b> beside our projection shows how many points apart we are. This is where the model has an <b>independent opinion</b>. On big favorites we <b>defer to the market</b> (it&apos;s efficient there — heavy favorites cover about half the time), so those agree by design and don&apos;t lead here. Published <b>line-blind</b> as context: a divergence flags where our read differs from the market. The complete slate is in <b>Full Model — every game</b> below.</>} />
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
-          <div className="hb-legend">
-            <span className="hb-dia">Δ</span> How far our line-blind number sits from the market on this game.
-            <span className="hb-x"> · Big favorites don&apos;t appear here — on blowouts the market is efficient and we
-              defer to it. The games that lead are where <b>our read genuinely differs</b>. It&apos;s <b>context you can
-              check</b> — our rating predicts about as well as Elo (see the record above).</span>
-            {c.preseasonSeeded && (
-              <span className="hb-x"> · <b>Preseason note:</b> with no {c.season} games played yet, these projections
-                are seeded with published preseason ratings (SP+) blended with our own carryover, so the early number is
-                credible instead of leaning on last season alone. As real games are played our in-season rating takes
-                over and the seed washes out by about week 5.</span>
-            )}
-          </div>
           {dayTablesCapped(lead)}
         </div>
       </details>

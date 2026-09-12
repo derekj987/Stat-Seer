@@ -172,14 +172,10 @@ export default function PropsView({ games, embedded, today, tomorrow }: { games:
     price: l.best, books: l.books, byBook: l.byBook, fairProb: l.fairProb,
   }), [slipToggle]);
 
-  const players = games.reduce(
-    (n, g) => n + new Set(g.markets.flatMap((m) => m.quotes.map((q) => q.player))).size, 0
-  );
 
   return (
     <>
       {!embedded && <BetslipPromo />}
-      <p className="hint">{games.length} games · {players} players · best price on each, shopped across books.</p>
       <section className="propdays">
         {groupByGameDay(games, (g) => g.commence, today, tomorrow).map((grp) => (
           <div className="propday hb-moretbl" key={grp.key}>

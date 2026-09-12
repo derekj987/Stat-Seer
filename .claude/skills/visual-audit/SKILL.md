@@ -307,6 +307,23 @@ board is one `ctxsec__legend` line naming what the columns are, a `<Tip>` for ev
 and no `ncf-note` paragraphs under the board either** — the links and the ✓ explanation go in
 the scroll with the rest.
 
+**🚨 And then the one line went too. The house pattern is now: NO copy on a board — only the scroll.**
+The same afternoon, on the one-line legend left after the cut: *"remove the '5 games...' text and
+place the 'one row per player..' text into the informational scroll. I do not want text like that
+anywhere."* So the pattern above is superseded. What ships everywhere:
+- the legend sentence is the FIRST LINE INSIDE the Tip (`<span className="tip__lead">…</span>`
+  then `<br /><br />` and the detail);
+- the Tip lives in the **panel bar** (`.hb-bar`, after the count — `.hb-bar .tip{order:1}`
+  already places it), or in the **WeekBadge / DayBadge `tip` prop**, or inside the section's
+  `<h2 className="ctxsec__h">` — never in a `<p>` of its own;
+- no `hint`, `hb-legend`, `ctxsec__d`, `ctxsec__lead` or `ncf-note` sits above or under a board.
+Applied to every board in one pass (NFL/NCAAF/MLB model, props, sweet spots, auditor). Exempt:
+status notes (`tgsample` — "market lines to come"), copy inside a collapsed `<details>` explainer,
+and cross-link sentences between sections.
+Check: `legend-text-on-board` (medium) — any text outside a Tip in one of those classes, above the
+first board of a container, fires regardless of length. Two-way tested: 58 characters injected →
+fires; removed → silent. `prose-above-board` stays for long `<p>` copy generally.
+
 **That last one is the general shape of a bad check: it fires on the ABSENCE of the thing it is
 about.** When a new check reports something, confirm the page actually has the structure the check
 presupposes before changing the page — twice now the honest fix has been to the probe.

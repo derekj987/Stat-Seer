@@ -171,7 +171,6 @@ export default function AuditView({ games, today, tomorrow }: { games: PropGame[
         <span className="aulegend__i"><span className="aucircle aucircle--fair" /> Fair — normal price</span>
         <span className="aulegend__i"><span className="aucircle aucircle--cheat" /> Overpriced</span>
       </div>
-      <p className="hint">{games.length} games · {audited} prices audited against the de-vigged market.</p>
 
       {games.length === 0 ? (
         <p className="foot">No prices to audit yet — once this week&apos;s odds are captured, they&apos;ll appear here.</p>

@@ -149,11 +149,9 @@ export default function BatterGrid({ games, markets, labels, today, tomorrow }: 
     title: `${l.player} ${l.bet}`, detail: l.game,
     price: l.best, books: l.books, byBook: l.byBook, fairProb: l.fairProb,
   }), [slipToggle]);
-  const players = games.reduce((n, g) => n + new Set(g.markets.flatMap((m) => m.quotes.map((q) => q.player))).size, 0);
 
   return (
     <>
-      <p className="hint">{games.length} games · {players} players</p>
       <section className="propdays">
         {groupByGameDay(games, (g) => g.commence, today, tomorrow).map((grp) => (
           <div className="propday hb-moretbl" key={grp.key}>

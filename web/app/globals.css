@@ -3438,6 +3438,10 @@ a.snav__dfeat{display:block}
   grid-template-columns:calc(132px + var(--pmx)) calc(168px + var(--pmx))
     calc(112px + var(--pmx)) calc(46px + var(--pmx))
     calc(66px + var(--pmx)) calc(92px + var(--pmx)) calc(46px + var(--pmx))}
+/* The legend sentence that used to sit above a board, now the first line INSIDE its scroll.
+   Derek: "I do not want text like that anywhere." Set off from the detail beneath it. */
+.tip__lead{display:block;font-weight:600;color:var(--ink)}
+
 /* ---- Batter grid (MLB Value Finder props): one row per hitter, one column per market ---- */
 .propgame--grid[open] .propgame__body--grid{display:block;padding:0 0 10px}
 .propgame__body--grid .pmscroll{overflow-x:auto;max-width:100%}

@@ -998,9 +998,20 @@
     // is the correct shape for prose, and its <summary> is already the same click a scroll would
     // be. Counting it reported 655 characters against a panel that has nothing to bury.
     if (!board) continue;
-    let chars = 0, paras = 0;
+    let chars = 0, paras = 0, legendChars = 0, legendEl = null;
     for (const p of body.querySelectorAll("p, .hb-legend, .hint, .ncf-note")) {
       if (!vis(p)) continue;
+      // A legend / hint / description line is copy on the board whatever its length. Derek, on
+      // a one-line legend that had already been cut from three paragraphs: "I do not want text
+      // like that anywhere." The sentence goes INSIDE the scroll (.tip__lead); the board gets
+      // the scroll icon in its panel bar, badge or heading and nothing else.
+      if (p.matches(".ctxsec__legend, .hb-legend, .hint, .ctxsec__d, .ctxsec__lead, .ncf-note")
+          && !(board.contains(p) || board.compareDocumentPosition(p) & Node.DOCUMENT_POSITION_FOLLOWING)
+          && !p.closest("details:not(.hb-panel)")) {
+        const c = p.cloneNode(true); c.querySelectorAll(".tip, .tip__bubble").forEach((n) => n.remove());
+        const t = (c.textContent || "").trim();
+        if (t.length) { legendChars += t.length; legendEl = legendEl || p; }
+      }
       if (board && (board.contains(p) || board.compareDocumentPosition(p) & Node.DOCUMENT_POSITION_FOLLOWING)) continue;
       // Skip paragraphs that ARE inside a Tip. Stripping the bubble from the clone below only
       // handles a bubble nested in the legend paragraph; a Tip whose own content is written as
@@ -1016,6 +1027,11 @@
       const t = (clone.textContent || "").trim();
       if (t.length < 40) continue;               // a one-line legend is the CORRECT shape
       chars += t.length; paras++;
+    }
+    if (legendChars > 0) {
+      add("legend-text-on-board", "medium", legendEl,
+        `${legendChars} characters of legend/description copy sit on this board outside a scroll — move the sentence into the Tip (.tip__lead) and put the Tip in the panel bar, badge or heading`);
+      if (cap(findings, "legend-text-on-board")) break;
     }
     if (chars <= PROSE_CHARS) continue;
     // A panel that already routes its detail through a scroll has done the right thing.

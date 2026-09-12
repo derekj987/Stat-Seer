@@ -130,11 +130,8 @@ export default async function Page() {
       </details>
 
       <section className="ctxsec">
-        <h2 className="ctxsec__h">Baseball&apos;s key numbers</h2>
-        <p className="ctxsec__d">
-          Football has 3 and 7. Baseball has the <b>one-run game</b> and the <b>whole-number total</b>.{" "}
-          <Tip label="Where these numbers come from" text={<>
-            Measured on <b>{K.games.toLocaleString()}</b> completed games this season. <b>{K.margin[0].pct}%</b> were
+        <h2 className="ctxsec__h">Baseball&apos;s key numbers <Tip label="Where these numbers come from" text={<>
+          <span className="tip__lead">Football has 3 and 7. Baseball has the <b>one-run game</b> and the <b>whole-number total</b>.</span><br /><br />Measured on <b>{K.games.toLocaleString()}</b> completed games this season. <b>{K.margin[0].pct}%</b> were
             decided by exactly one run, <b>{K.margin[1].pct}%</b> by two, <b>{K.margin[2].pct}%</b> by three.<br /><br />
             <b>The walk-off skews it.</b> A home team that scores in the ninth or later stops playing the moment it
             leads, so <b>{K.oneRunWins.home}%</b> of home wins are by exactly one run against <b>{K.oneRunWins.away}%</b>{" "}
@@ -145,8 +142,7 @@ export default async function Page() {
             <b>Totals</b> land exactly on 7 in <b>{K.total[7]}%</b> of games, on 9 in <b>{K.total[9]}%</b>, on 8 in{" "}
             <b>{K.total[8]}%</b> — the same order as an NFL spread landing on 3. A total sitting on one of those
             numbers pushes that often, so the half-run either side of it is the most valuable half-run on the board.
-          </>} />
-        </p>
+        </>} /></h2>
         <div className="ncf-cards">
           <StatCard tone="good" label="Decided by one run" value={`${K.margin[0].pct}%`}
             sub="of games — the run line's whole story. Every −1.5 gives these up; the price has to pay for them." />
@@ -163,18 +159,12 @@ export default async function Page() {
         <>
           {rlPlays.length > 0 && (
             <section className="ctxsec">
-              <h2 className="ctxsec__h">Run line or moneyline — which is cheaper</h2>
-              <p className="ctxsec__d">
-                Two ways to back the same team. The moneyline says how good the team is; the run line adds a
-                price for the one-run games. When the two disagree by two points or more, one of them is the
-                better buy.{" "}
-                <Tip label="How this is worked out" text={<>
-                  Both prices are de-vigged first. The moneyline&apos;s fair win chance, multiplied by how often a
+              <h2 className="ctxsec__h">Run line or moneyline — which is cheaper <Tip label="How this is worked out" text={<>
+                <span className="tip__lead">Two ways to back the same team. The moneyline says how good the team is; the run line adds a price for the one-run games. When the two disagree by two points or more, one of them is the better buy.</span><br /><br />Both prices are de-vigged first. The moneyline&apos;s fair win chance, multiplied by how often a
                   favourite in that venue covers −1.5 when it wins, is what the run line <i>should</i> be worth.
                   The card shows that against what the book actually charges. It is arithmetic on the market&apos;s
                   own numbers — no model, no prediction about the game.
-                </>} />
-              </p>
+              </>} /></h2>
               <div className="daygrid">
                 {groupByGameDay(rlPlays, (r) => r.commence, today, tomorrow).map((grp) => (
                   <div className="daygrid__day" key={grp.key} style={dayBasis(grp.items.length, 3, 290, 14)}>
@@ -188,11 +178,9 @@ export default async function Page() {
 
           {keys.length > 0 && (
             <section className="ctxsec">
-              <h2 className="ctxsec__h">Totals on a whole number</h2>
-              <p className="ctxsec__d">
-                A total sitting on 7, 8 or 9 pushes far more often than one on a half — shop for the half-run
-                first, then the price.
-              </p>
+              <h2 className="ctxsec__h">Totals on a whole number <Tip label="Totals on a whole number" text={<>
+                <span className="tip__lead">A total sitting on 7, 8 or 9 pushes far more often than one on a half — shop for the half-run first, then the price.</span>
+              </>} /></h2>
               <div className="daygrid">
                 {groupByGameDay(keys, (k) => k.commence, today, tomorrow).map((grp) => (
                   <div className="daygrid__day" key={grp.key} style={dayBasis(grp.items.length, 3, 290, 14)}>
@@ -204,24 +192,13 @@ export default async function Page() {
             </section>
           )}
 
-          <p className="ctxsec__lead">
-            <b>Tap any row to add it to your slip.</b>{" "}
-            <Tip label="How the slip works" text={<>
-              StatSeer lines up the single best sportsbook for each leg you save, and totals your ticket at
-              the bottom of the screen.
-            </>} />
-          </p>
 
           <section className="ctxsec">
-            <h2 className="ctxsec__h">Best prices tonight</h2>
-            <p className="ctxsec__d">
-              The biggest <b>shopping edges</b> — how far the best book&apos;s price beats the market average.{" "}
-              <Tip label="What a shopping edge is" text={<>
-                Placing at the named book captures the difference. It is the same wager everyone else makes,
+            <h2 className="ctxsec__h">Best prices tonight <Tip label="What a shopping edge is" text={<>
+              <span className="tip__lead"><b>Tap any row to add it to your slip</b> — StatSeer lines up the single best book for each leg and totals your ticket at the bottom of the screen. The biggest <b>shopping edges</b> — how far the best book&apos;s price beats the market average.</span><br /><br />Placing at the named book captures the difference. It is the same wager everyone else makes,
                 at a worse number — no prediction involved, which is why this is the part of the app that
                 does not depend on a model being right.
-              </>} />
-            </p>
+            </>} /></h2>
             <div className="pricetable" role="table" aria-label="Best prices">
               {groupByGameDay(topPrices, (p) => p.commence, today, tomorrow).map((grp) => (
                 <div key={grp.key}>
@@ -244,11 +221,9 @@ export default async function Page() {
 
           {propPlays.length > 0 && (
             <section className="ctxsec">
-              <h2 className="ctxsec__h">Best props tonight</h2>
-              <p className="ctxsec__d">
-                Player props where <b>one book is priced well above the field</b> — the same prop at a better
-                number. Shopping edge is the de-vigged gap vs. the other books.
-              </p>
+              <h2 className="ctxsec__h">Best props tonight <Tip label="Best props tonight" text={<>
+                <span className="tip__lead">Player props where <b>one book is priced well above the field</b> — the same prop at a better number. Shopping edge is the de-vigged gap vs. the other books.</span>
+              </>} /></h2>
               <div className="pricetable" role="table" aria-label="Best props">
                 {groupByGameDay(propPlays, (p) => p.commence, today, tomorrow).map((grp) => (
                   <div key={grp.key}>

@@ -66,17 +66,8 @@ export default async function Page({ searchParams }: PageProps<"/ncaaf/props">) 
 
       {/* The SELECTED week, not `cur` — everything else on the page (nav, note, the board itself)
           follows the selection, so a badge pinned to the current week just mislabels the board. */}
-      <WeekBadge week={week} pin={<PinButton size="sm" pin={{ id: `/ncaaf/props?cat=${cat.key}`, kind: "props", label: `NCAAF Props · ${cat.label}`, detail: `Week ${week}`, href: `/ncaaf/props?cat=${cat.key}&week=${week}` }} />} />
-      <FlowSteps active="value" base="ncaaf" />
-      <ShopSubnav active="props" base="ncaaf" />
-      <NcaafWeekNav base="/ncaaf/props" week={week} params={`cat=${cat.key}`} />
-      <NcaafWeekNote card={ncaafCard(week)} />
-
-      {all.length ? (
-        <section className="ncf-sec">
-          <p className="ctxsec__legend">
-            Every posted prop at the <b>single best US book</b>; tap any chip to add it to your slip.
-            <Tip label="About this board" text={<>
+      <WeekBadge week={week} tip={<Tip label="About this board" text={<>
+              <span className="tip__lead">Every posted prop at the <b>single best US book</b>; tap any chip to add it to your slip.</span><br /><br />
               <b>The board.</b> Each row is a player&apos;s number with the single best price across the US
               books we track and which book has it. A <b>✓</b> marks a price that beats the de-vigged market —
               the Pick Auditor&apos;s arithmetic, not a model call.<br /><br />
@@ -85,8 +76,14 @@ export default async function Page({ searchParams }: PageProps<"/ncaaf/props">) 
               captured history exists they are graded, same as everything else.<br /><br />
               For the line-blind read, see <a href="/ncaaf/model">The Model</a>; for key numbers,{" "}
               <a href="/ncaaf/best">Sweet Spots</a>.
-            </>} />
-          </p>
+            </>} />} pin={<PinButton size="sm" pin={{ id: `/ncaaf/props?cat=${cat.key}`, kind: "props", label: `NCAAF Props · ${cat.label}`, detail: `Week ${week}`, href: `/ncaaf/props?cat=${cat.key}&week=${week}` }} />} />
+      <FlowSteps active="value" base="ncaaf" />
+      <ShopSubnav active="props" base="ncaaf" />
+      <NcaafWeekNav base="/ncaaf/props" week={week} params={`cat=${cat.key}`} />
+      <NcaafWeekNote card={ncaafCard(week)} />
+
+      {all.length ? (
+        <section className="ncf-sec">
           <CatNav current={cat.key} />
           {games.length ? (
             <PropsView games={games} embedded {...etToday()} />

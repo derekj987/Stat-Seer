@@ -93,8 +93,6 @@ export default function NcaafSweetSpots({ games, keyNums, week, today, tomorrow 
         </div>
       ))}
       </div>
-      <p className="ncf-note">Consensus lines at −110 — tap a side to add it. Key-number value from {" "}
-        {keyNums.length} measured margins below.</p>
     </section>
   );
 }

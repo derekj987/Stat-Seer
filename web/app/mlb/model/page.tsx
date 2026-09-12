@@ -186,20 +186,12 @@ export default async function Page() {
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">Runs crunched</span>
           <span className="hb-bar__count">{upcoming.length} game{upcoming.length === 1 ? "" : "s"}</span>
-          <PinButton size="sm" pin={{ id: "/mlb/model", kind: "model", label: "MLB · Game Model", detail: "runs + totals", href: "/mlb/model" }} />
-          <span className="hb-bar__chev" aria-hidden="true">▾</span>
-        </summary>
-        <div className="hb-body">
-          {/* One line on the board, everything else behind the scroll. Five paragraphs of caveat
-              above a chart is not honesty, it is a wall nobody reads — the numbers still have to
-              be one click away, which is what the Tip is for. */}
-          <p className="ctxsec__legend">
-            <span className="lgnd lgnd--mkt">Market</span> run line and total, then{" "}
+          <Tip label="About the MLB game model" text={<>
+              <span className="tip__lead"><span className="lgnd lgnd--mkt">Market</span> run line and total, then{" "}
             <span className="lgnd lgnd--model">ours</span> — who we have winning and which run-line
             side we have covering, with our chance of each. <b>−1.5 (NYY) +150</b> is the Yankees
             laying 1.5 at FanDuel&apos;s price; <i>fair 40%</i> is the market&apos;s vig-free chance
-            they cover it. Ours never sees the market.
-            <Tip label="About the MLB game model" text={<>
+            they cover it. Ours never sees the market.</span><br /><br />
               <b>How it works.</b> Each side&apos;s offence against the other&apos;s defence,
               adjusted for the starting pitcher. Line-blind — it never sees the market columns.<br /><br />
               <b>Reading the run line.</b> Baseball&apos;s run line is ±1.5 on almost every game,
@@ -241,7 +233,12 @@ export default async function Page() {
               only began recording MLB odds on <b>7 September</b>. A gap here is a difference to
               notice, not an edge to act on.
             </>} />
-          </p>
+          <PinButton size="sm" pin={{ id: "/mlb/model", kind: "model", label: "MLB · Game Model", detail: "runs + totals", href: "/mlb/model" }} />
+          <span className="hb-bar__chev" aria-hidden="true">▾</span>
+        </summary>
+        <div className="hb-body">
+          {/* No copy on the board: the scroll in the panel bar carries the legend and the caveats.
+              Derek: "I do not want text like that anywhere." */}
 
           {upcoming.length === 0 ? (
             <p className="foot">No upcoming games projected yet. The board fills as probable starters post.</p>
@@ -343,16 +340,9 @@ export default async function Page() {
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">Who&apos;s playing tonight</span>
           <span className="hb-bar__count">{luGames.length} game{luGames.length === 1 ? "" : "s"}</span>
-          <PinButton size="sm" pin={{ id: "/mlb/model#lineups", kind: "model", label: "MLB · Lineups", detail: "who starts tonight", href: "/mlb/model" }} />
-          <span className="hb-bar__chev" aria-hidden="true">▾</span>
-        </summary>
-        <div className="hb-body">
-          {/* Derek read this board twice and asked both times what it was for, so the answer has to
-              be ON the page — but as one line plus a scroll, not the three paragraphs it was. */}
-          <p className="ctxsec__legend">
-            Our estimate of who starts tonight, until the real lineup posts.{" "}
-            <b>Start %</b> = chance he plays. <b>Slot</b> = where he bats.
-            <Tip label="About tonight's lineups" text={<>
+          <Tip label="About tonight's lineups" text={<>
+              <span className="tip__lead">Our estimate of who starts tonight, until the real lineup posts.{" "}
+            <b>Start %</b> = chance he plays. <b>Slot</b> = where he bats.</span><br /><br />
               <b>Why this exists.</b> A football team&apos;s starting eleven is the same most weeks.
               A baseball manager rests people constantly — about two of the nine slots turn over
               every night — and the lineup card only posts about three hours before first pitch. So
@@ -369,7 +359,10 @@ export default async function Page() {
               comfortably the strongest model on this page. Once a lineup posts, the row shows the
               lineup instead of our estimate.
             </>} />
-          </p>
+          <PinButton size="sm" pin={{ id: "/mlb/model#lineups", kind: "model", label: "MLB · Lineups", detail: "who starts tonight", href: "/mlb/model" }} />
+          <span className="hb-bar__chev" aria-hidden="true">▾</span>
+        </summary>
+        <div className="hb-body">
           {luGames.length === 0 ? (
             <p className="foot">No games in the window. This board fills as tonight&apos;s slate approaches.</p>
           ) : (

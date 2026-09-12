@@ -3,6 +3,7 @@ import { NcaafWeekNav, NcaafWeekNote, readNcaafWeek } from "../NcaafWeek";
 import { liveNcaafCard } from "../liveCard";
 import { NCAAF_MODEL, type NcaafUpset } from "../model-data";
 import { ChaosBoard } from "../../ChaosBoard";
+import Tip from "../../Tip";
 import { buildChaosBoard, returnFromSpread, type ChaosInput } from "@/lib/chaos";
 import { CFB_CHAOS, CHAOS_WINDOW } from "@/lib/chaosTraits";
 
@@ -88,11 +89,9 @@ export default async function Page({ searchParams }: {
 
       {/* --- Honest roadmap: data-dependent panels not yet live for CFB --- */}
       <section className="ctxsec">
-        <h2 className="ctxsec__h">Arriving this season</h2>
-        <p className="ctxsec__d">
-          The panels below need live in-season data we&apos;re capturing as the year runs. We&apos;d rather show
-          nothing than fake it — here&apos;s what&apos;s coming and why it isn&apos;t here yet.
-        </p>
+        <h2 className="ctxsec__h">Arriving this season <Tip label="Arriving this season" text={<>
+          <span className="tip__lead">The panels below need live in-season data we&apos;re capturing as the year runs. We&apos;d rather show nothing than fake it — here&apos;s what&apos;s coming and why it isn&apos;t here yet.</span>
+        </>} /></h2>
         <div className="soongrid">
           <div className="soon">
             <span className="soon__h">Weather</span>

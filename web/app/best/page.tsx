@@ -107,24 +107,14 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
         <>
           {keys.length > 0 && (
             <section className="ctxsec">
-              <h2 className="ctxsec__h">Key numbers — what to do</h2>
-              {/* One line on the board, the detail in the scroll — the house pattern. 476
-                  characters stacked above a chart is a wall nobody reads, which protects nobody. */}
-              <p className="ctxsec__d">
-                Margins land on <b>3</b> and <b>7</b> more than any other number, so a line sitting on one is
-                worth acting on.{" "}
-                {/* Tip content uses <br /><br />, never <p>: this legend IS a <p>, and a nested <p>
-                    makes the parser close the outer one, so the "moved into the scroll" copy pops
-                    back out onto the page as siblings. It looked moved and was not. */}
-                <Tip label="How to play a key number" text={<>
-                  NFL games are decided by <b>3</b> or <b>7</b> far more than any other margin. So when a
+              <h2 className="ctxsec__h">Key numbers — what to do <Tip label="How to play a key number" text={<>
+                <span className="tip__lead">Margins land on <b>3</b> and <b>7</b> more than any other number, so a line sitting on one is worth acting on.</span><br /><br />NFL games are decided by <b>3</b> or <b>7</b> far more than any other margin. So when a
                   spread or total sits right on one of those numbers, do one of two things: <b>take the side
                   that already has the number working for it</b> (the favorite laying fewer than 3, or the dog
                   getting 3+), or <b>buy the half-point</b> to move onto it.<br /><br />
                   That half-point swings more games than any model edge on a line — the biggest, cheapest edge
                   in the app. Each card below shows the number and exactly what the half-point is worth.
-                </>} />
-              </p>
+              </>} /></h2>
               <div className="daygrid">
                 {groupByGameDay(keys, (k) => k.commence, today, tomorrow).map((grp) => (
                   <div className="daygrid__day" key={grp.key} style={dayBasis(grp.items.length, 3, 290, 14)}>
@@ -136,24 +126,13 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
             </section>
           )}
 
-          <p className="ctxsec__lead">
-            <b>Tap any row to add it to your slip.</b>{" "}
-            <Tip label="How the slip works" text={<>
-              StatSeer lines up the single best sportsbook for each leg you save, and totals your ticket at
-              the bottom of the screen.
-            </>} />
-          </p>
 
           <section className="ctxsec">
-            <h2 className="ctxsec__h">Best prices this week</h2>
-            <p className="ctxsec__d">
-              The biggest <b>shopping edges</b> — how far the best book&apos;s price beats the market average.{" "}
-              <Tip label="What a shopping edge is" text={<>
-                Placing at the named book captures the difference. It is the same wager everyone else makes,
+            <h2 className="ctxsec__h">Best prices this week <Tip label="What a shopping edge is" text={<>
+              <span className="tip__lead"><b>Tap any row to add it to your slip</b> — StatSeer lines up the single best book for each leg and totals your ticket at the bottom of the screen. The biggest <b>shopping edges</b> — how far the best book&apos;s price beats the market average.</span><br /><br />Placing at the named book captures the difference. It is the same wager everyone else makes,
                 at a worse number — no prediction involved, which is why this is the part of the app that
                 does not depend on a model being right.
-              </>} />
-            </p>
+            </>} /></h2>
             <div className="pricetable" role="table" aria-label="Best prices">
               {groupByGameDay(topPrices, (p) => p.commence, today, tomorrow).map((grp) => (
                 <div key={grp.key}>
@@ -176,11 +155,9 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
 
           {propPlays.length > 0 && (
             <section className="ctxsec">
-              <h2 className="ctxsec__h">Best props this week</h2>
-              <p className="ctxsec__d">
-                Player props where <b>one book is priced well above the field</b> — the same prop at a better
-                number. Shopping edge is the de-vigged gap vs. the other books.
-              </p>
+              <h2 className="ctxsec__h">Best props this week <Tip label="Best props this week" text={<>
+                <span className="tip__lead">Player props where <b>one book is priced well above the field</b> — the same prop at a better number. Shopping edge is the de-vigged gap vs. the other books.</span>
+              </>} /></h2>
               <div className="pricetable" role="table" aria-label="Best props">
                 {groupByGameDay(propPlays, (p) => p.commence, today, tomorrow).map((grp) => (
                   <div key={grp.key}>

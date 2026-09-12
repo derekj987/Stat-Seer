@@ -47,7 +47,8 @@ const parkTag = (f: number) =>
   f >= 1.05 ? "Favorable for HRs" : f <= 0.95 ? "Tough for HRs" : "Neutral for HRs";
 
 /** How good the number on this tab actually is, in one sentence, in the reader's terms. */
-/** One legend line on the board; everything that qualifies it goes in the scroll.
+/** The scroll for the panel bar. No legend line on the board — the lead sentence is the first
+ *  line inside the scroll (Derek: "I do not want text like that anywhere").
  *
  *  This used to be three stacked paragraphs of caveat above the chart. Every sentence was measured
  *  and true, and together they were a wall nobody reads — which protects nobody. The numbers still
@@ -56,9 +57,8 @@ const parkTag = (f: number) =>
 function Honest({ cat }: { cat: CatKey }) {
   if (cat === "pitching") {
     return (
-      <p className="ctxsec__legend">
-        Projected strikeouts for tonight&apos;s starters, beside the book&apos;s line.
-        <Tip label="About the pitching model" text={<>
+      <Tip label="About the pitching model" text={<>
+              <span className="tip__lead">Projected strikeouts for tonight&apos;s starters, beside the book&apos;s line.</span><br /><br />
           <b>How it works.</b> Batters faced × his strikeout rate, adjusted for how often the
           opposing lineup strikes out. Volume first, then rate.<br /><br />
           <b>What it is worth.</b> Over <b>925 held-out starts</b> it lands <b>0.06 strikeouts
@@ -68,15 +68,13 @@ function Honest({ cat }: { cat: CatKey }) {
           <b>Measured against results, not the market.</b> Whether it beats a closing line is
           untested — MLB prop capture began 7 September and that needs history.
         </>} />
-      </p>
     );
   }
   const s = cat === "hits" ? MLB_PROP_SCORES.hits : MLB_PROP_SCORES.hr;
   const what = cat === "hits" ? "records a hit" : "hits a home run";
   return (
-    <p className="ctxsec__legend">
-      The chance this batter <b>{what}</b> tonight. Only players a sportsbook has priced.
-      <Tip label={`About the ${cat === "hits" ? "hits" : "home runs"} model`} text={<>
+    <Tip label={`About the ${cat === "hits" ? "hits" : "home runs"} model`} text={<>
+              <span className="tip__lead">The chance this batter <b>{what}</b> tonight. Only players a sportsbook has priced.</span><br /><br />
         <b>How it works.</b> His own rate per plate appearance, shrunk toward league, nudged by the
         opposing pitching staff, and spread across the plate appearances his batting slot gets —
         leading off is about <b>4.5</b>, batting ninth <b>3.4</b>. That difference is most of the
@@ -110,7 +108,6 @@ function Honest({ cat }: { cat: CatKey }) {
         event as ≥1 hit, and this model is the wrong shape for it. A missing number is a decision,
         not an omission.
       </>} />
-    </p>
   );
 }
 
@@ -215,12 +212,11 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
             {CATS.find((c) => c.key === cat)!.label}
           </span>
           <span className="hb-bar__count">{games.length} game{games.length === 1 ? "" : "s"}</span>
+          <Honest cat={cat} />
           <PinButton size="sm" pin={{ id: `/mlb/model/players?cat=${cat}`, kind: "model", label: `MLB · ${CATS.find((c) => c.key === cat)!.label}`, detail: "player props", href: `/mlb/model/players?cat=${cat}` }} />
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
-          <Honest cat={cat} />
-
           {games.length === 0 ? (
             <p className="foot">Nothing posted for the coming slate yet.</p>
           ) : (

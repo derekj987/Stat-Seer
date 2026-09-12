@@ -344,15 +344,15 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">Week {week} numbers crunched</span>
           <span className="hb-bar__count">{scored.length} games</span>
+          <Tip label="About this board" text={<>
+            <span className="tip__lead">The market&apos;s <b>spread</b> and <b>total</b> for each game — the <b>median</b> across the
+            US sportsbooks we track — with our <b>line-blind model&apos;s</b> own read of each beside it. Market
+            numbers on the left, ours on the right.</span>
+          </>} />
           <PinButton size="sm" pin={{ id: "/model?only=numbers-crunched", kind: "model", label: "The Model · Numbers Crunched", detail: `NFL · Week ${week}`, href: `/model?week=${week}&only=numbers-crunched` }} />
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
-        <p className="ctxsec__d">
-          The market&apos;s <b>spread</b> and <b>total</b> for each game — the <b>median</b> across the
-          sportsbooks we track, not any single book — with our <b>line-blind model&apos;s</b> own read of
-          each sitting beside it. Market numbers are grouped on the left, our model&apos;s on the right.
-        </p>
 
         {scored.length === 0 ? (
           <p className="foot">No lines captured for Week {week} yet.</p>
