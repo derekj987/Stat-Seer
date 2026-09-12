@@ -157,7 +157,11 @@ export default function BatterGrid({ games, markets, labels, today, tomorrow }: 
           <div className="propday hb-moretbl" key={grp.key}>
             <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
             <input type="checkbox" id={`bgd-${grp.key}`} className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
-            <div className="propstack propstack--grid">
+            {/* Two games across when the category has two markets or fewer (Home Runs: HR and
+                first HR). A two-column table stretched to the full card width put ~500px of
+                nothing between the columns — Derek: "eliminate all that space in the charts.
+                On this page we can have two games side-by-side." */}
+            <div className={`propstack propstack--grid${markets.length <= 2 ? " propstack--pairs" : ""}`}>
               {grp.items.map((g, i) => (
                 <GameGrid key={g.eventId} g={g} markets={markets} labels={labels} has={has} toggle={toggle}
                   cls={i >= DAY_CAP ? "hb-row--more" : undefined} />

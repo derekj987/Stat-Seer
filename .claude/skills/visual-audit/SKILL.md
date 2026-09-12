@@ -2126,6 +2126,11 @@ Derek's standing asks for the MLB section, all of which have bitten more than on
   filter AFTER the fallback decision, or an all-offshore sweep triggers the full-table scan the
   IO rule forbids. Check with `curl <page> | grep -ci "bovada\|lowvig"` → 0, and the stat strip
   now counts books dynamically ("6 US books compared"), never a hard-coded 10.
+- **A floating handle is not an interceptor.** `click-intercepted` flagged two batter-grid chips
+  "covered by the dock handle" at 375: a fixed floating button sits over whatever scrolls beneath
+  it at every offset, which is what floating means. The probe now skips `.dock__handle` and
+  `.slipbar__toggle` as the covering element; a fixed CONTAINER bigger than what it paints (the
+  original dock bug) is still reported.
 - **Row padding comes out of the column budget.** `.pmrow--data` carries 16px of padding each
   side, so `--pmx: calc((100% - <budget>px) / n)` has 32px less to give than it looks: a 818px
   budget in an 825px row put 9px of the last column outside the card (`content-escapes-card`).
@@ -2416,6 +2421,26 @@ per side. Fixes: `mainLine()` (the line the most books post BOTH sides of, FanDu
 ties) with both sides at that line; markets in `MLB_CATEGORIES` order; players in lineup order
 (away side, then home, leadoff to nine) from `MLB_PROPS` slots; `booksLabel(books, 1)` so one
 book is named or a count shown, which gave the name column its width back.
+
+### A page reporting 0 rows on its DEFAULT URL is a bug until proven otherwise
+`/ncaaf/model/players` reported `dataRows: 0, chars: 794` in two audits running and was waved
+through as "no projections this week". It had 889 projections — for week 2 — and the page
+defaulted to `week = 1` while every other NCAAF page defaults to `NCAAF_MODEL.card.week`. The bare
+URL, the one the nav links to, showed an empty board all of game week; `?week=2` had 1,036 TD
+rows. When the harness prints a zero-row page, open the ITS default URL and the current week side
+by side before accepting the zero. Same family as the week-gate rule above, from the other end:
+the gate was right, the default was wrong.
+
+### Two games across when a category has two markets; and the phone-width trap in `minmax()`
+Home Runs has two markets, so a full-width table put ~500px of nothing between two columns
+(Derek: "eliminate all that space in the charts … two games side-by-side"). `.propstack--pairs`
+lays the game cards two across (`repeat(auto-fit, minmax(min(400px,100%), 1fr))`). Three things
+it needed, all found by the probe: `minmax(400px …)` alone made the PAGE 420px wide on a
+375px phone — wrap the minimum in `min(…, 100%)`; `.propgame[open]{grid-column:1/-1}` (an open
+NFL prop card spans its stack) put every open card back to full width — undo it for the pair
+grid; and the base `.propstack{align-items:start}` let two expanded cards differ by 183px —
+`stretch` on the pair grid. A one-sided row (first HR is yes-only) is now 61px like every
+other row (`tbody tr{height:61px}`).
 
 ### The batter grid: a table has columns — that is the alignment fix
 Derek: *"line up the market totals evenly on top of each other. They are not spaced evenly."*

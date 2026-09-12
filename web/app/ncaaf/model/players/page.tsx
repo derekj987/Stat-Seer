@@ -1,3 +1,5 @@
+import { readNcaafWeek } from "../../NcaafWeek";
+import { NCAAF_MODEL } from "../../model-data";
 import PlayerModelView from "../../../PlayerModelView";
 
 export const metadata = {
@@ -10,7 +12,9 @@ export default async function Page({ searchParams }: {
 }) {
   const sp = await searchParams;
   const cat = typeof sp.cat === "string" ? sp.cat : "td";
-  const w = typeof sp.week === "string" ? parseInt(sp.week, 10) : NaN;
-  const week = Number.isFinite(w) ? Math.min(18, Math.max(1, w)) : 1;
+  // Default to the CURRENT card week, not week 1: with PROJ_WEEK at 2 the bare URL rendered an
+  // empty board ("projections publish here as each week's data comes in") all of game week,
+  // while ?week=2 had 889 rows. Same helper every other NCAAF page uses.
+  const week = readNcaafWeek(sp.week, NCAAF_MODEL.card.week);
   return <PlayerModelView base="ncaaf" cat={cat} week={week} />;
 }

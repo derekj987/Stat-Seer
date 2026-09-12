@@ -241,6 +241,11 @@
     const hit = document.elementFromPoint(cx, cy);
     if (!hit) continue;
     if (hit !== el && !el.contains(hit) && !hit.contains(el)) {
+      // A floating action button (the phone dock's handle, the slip bar's toggle) sits over
+      // whatever scrolls beneath it at every scroll offset — that is what floating means, and
+      // the reader scrolls. Two batter-grid chips happened to be under the handle at scrollY 0.
+      // A fixed CONTAINER that is bigger than what it paints is still reported (the dock bug).
+      if (hit.closest(".dock__handle, .slipbar__toggle")) continue;
       add("click-intercepted", "high", el, `center covered by ${selOf(hit)} — clicks may not reach it`);
     }
     if (getComputedStyle(el).pointerEvents === "none") add("click-intercepted", "high", el, "pointer-events:none");
