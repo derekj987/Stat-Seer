@@ -19,6 +19,7 @@ first-pass -- not graded against closing lines yet, exactly like the NFL Week-1 
 Auth: CFBD_API_KEY + SUPABASE_URL/SUPABASE_SERVICE_KEY in .env. Stdlib + cfbd_client.
 """
 import argparse
+import collections
 import concurrent.futures as cf
 import json
 import os
@@ -35,6 +36,12 @@ import odds_client as oc
 CUR_SEASON = 2026
 PRIOR_SEASON = 2025
 HIST_SEASONS = [2024, 2025]        # career = these; prior = PRIOR_SEASON only
+# The seasons whose game logs are PULLED. The cache/fetch code below always said "in-progress
+# season: fetch fresh" — and no caller ever asked for it, so through Week 2 of 2026 the model had
+# not seen a single 2026 game: Sategna's 12 logged games were all 2025, and Oklahoma's two new
+# starters (no 2024-25 log anywhere) had no row at all. Current-season games are what the
+# usage re-rank runs on and what "recent" should mean in September.
+LOG_SEASONS = HIST_SEASONS + [CUR_SEASON]
 DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "cfb.db")
 
 # Which markets to project for each depth-chart position, and how deep down the chart to go.
@@ -47,6 +54,10 @@ POS_MARKETS = {
     "FB": ["rush_yds", "anytime_td"],
 }
 DEPTH_LIMIT = {"QB": 1, "RB": 2, "WR": 3, "TE": 1, "FB": 1}
+# The position a market implies when we know nothing else about the player (second pass, no log).
+POS_OF_MARKET = {"pass_yds": "QB", "pass_tds": "QB", "rush_yds": "RB", "rec_yds": "WR", "receptions": "WR", "anytime_td": ""}
+# norm name -> the name as the book posts it, for rows we emit without a CFBD log to name them.
+PROP_DISPLAY = {}
 # our market -> (page category, unit label)
 MARKET_CAT = {
     "pass_yds": ("passing", "yds"), "pass_tds": ("passing", "TD"),
@@ -70,21 +81,107 @@ def _ascii(s):
 
 
 def norm(name):
-    """Player-name key: ascii, alpha only (so 'C.J. Carr' == 'CJ Carr')."""
-    return re.sub(r"[^a-z]", "", _ascii(name).lower())
+    """Player-name key: ascii, alpha only (so 'C.J. Carr' == 'CJ Carr'), generational suffix
+    dropped. The books post "Isaiah Sategna III"; CFBD and Ourlads say "Isaiah Sategna" and
+    "Isaiah Sategna III" respectively — the 'iii' kept three sources from ever agreeing, so the
+    receiver with Oklahoma's shortest anytime-TD price had no row and no depth slot (Derek: "I do
+    not even see Isaiah Sategna III listed")."""
+    s = _ascii(name).lower()
+    s = re.sub(r"\b(jr|sr|ii|iii|iv|v)\.?\s*$", "", s.strip())
+    return re.sub(r"[^a-z]", "", s)
+
+
+_SUFFIX = {"jr", "sr", "ii", "iii", "iv", "v"}
+
+
+def _first_last(display):
+    """('gio', 'lopez') from a display name, suffix dropped; ('', '') when it has no last name."""
+    parts = [re.sub(r"[^a-z]", "", w) for w in _ascii(display or "").lower().split()]
+    parts = [w for w in parts if w]
+    if parts and parts[-1] in _SUFFIX:
+        parts = parts[:-1]
+    return (parts[0], parts[-1]) if len(parts) >= 2 else ("", "")
+
+
+def reconcile_book_names(prop_index, logs, slate, cur_team=None):
+    """Re-key priced players the books spell differently from CFBD onto the CFBD key.
+
+    The books post the name a player goes by; CFBD posts the roster name. "Gio Lopez" is
+    "Giovanni Lopez", "Kam Shanks" is "Kameran Shanks", "JoJo Bermudez" is "Jovanni Bermudez" —
+    an exact-key join finds no log for any of them, so a starting QB with a posted 239.5 passing
+    line sat on the board with no projection and no team. 96 priced players on the 2026-09-12
+    slate.
+
+    A priced name with no log is matched to the ONE log on either team in that game that shares
+    his last name and first initial; failing that, when the depth chart knows the book's spelling
+    ("Hollywood Smothers" is on Ourlads' Texas chart; CFBD calls him "Daylan Smothers"), the ONE
+    log on THAT team with his last name. Anything ambiguous is left alone (a wrong merge is worse
+    than a blank projection). The board keeps the book's spelling: PROP_DISPLAY learns the CFBD
+    key. Returns the number re-keyed."""
+    by_last = {}
+    for nm, e in logs.items():
+        first, last = _first_last(e["display"])
+        if last:
+            by_last.setdefault((e["team"], last), []).append((nm, first))
+    teams_of = {f"{a} @ {h}": (a, h) for a, h, _ in slate}
+    remap = {}
+    for gk, pname, _mk in list(prop_index):
+        if pname in logs or pname in remap or gk not in teams_of:
+            continue
+        first, last = _first_last(PROP_DISPLAY.get(pname, pname))
+        if not last:
+            continue
+        cands = sorted({nm for t in teams_of[gk] for nm, f in by_last.get((t, last), [])
+                        if f[:1] == first[:1]})
+        if len(cands) != 1 and cur_team:
+            t = cur_team.get(pname)
+            if t in teams_of[gk]:
+                cands = sorted({nm for nm, _f in by_last.get((t, last), [])})
+        if len(cands) == 1:
+            remap[pname] = cands[0]
+    if remap:
+        for k in list(prop_index):
+            gk, pname, mk = k
+            if pname in remap:
+                prop_index[(gk, remap[pname], mk)] = prop_index.pop(k)
+        for pname, nm in remap.items():
+            PROP_DISPLAY[nm] = PROP_DISPLAY.get(pname, pname)
+    return len(remap)
 
 
 def tnorm(s):
-    """Team-name key: ascii words (for Odds-full-name <-> CFBD-short-name matching)."""
-    return " ".join("".join(c if c.isalnum() else " " for c in _ascii(s).lower()).split())
+    """Team-name key: ascii words (for Odds-full-name <-> CFBD-short-name matching). Apostrophes
+    are dropped, not split on: "Hawai'i" must key as "hawaii", the way the feed spells it, or the
+    two never meet (same lesson cfb_export._norm learned)."""
+    s = _ascii(s).lower().replace("'", "").replace("’", "")
+    return " ".join("".join(c if c.isalnum() else " " for c in s).split())
+
+
+# Odds-feed spellings the prefix rule cannot bridge to a CFBD school. The feed says "Southern
+# Mississippi Golden Eagles" and "Appalachian State Mountaineers"; CFBD says "Southern Miss" and
+# "App State" — neither is a prefix of the other. Shared with cfb_depth.ALIAS (Ourlads has the
+# same long spellings), keyed on the tnorm'd school part.
+def _team_alias():
+    try:
+        import cfb_depth
+        return dict(cfb_depth.ALIAS)
+    except Exception:                                            # noqa: BLE001
+        return {"hawaii": "Hawai'i", "appalachian state": "App State",
+                "southern mississippi": "Southern Miss", "mississippi": "Ole Miss"}
 
 
 def cfbd_team_map(odds_names, key):
     """Map each Odds API team name ('USC Trojans') to its CFBD school name ('USC') by the
-    same prefix rule cfb_export uses. Falls back to the original name if no match."""
+    same prefix rule cfb_export uses, then by the alias table for the spellings the rule misses.
+
+    Falls back to the original name if no match — and PRINTS it, because an unmapped name is a
+    whole game silently absent from the board: on the 2026-09-12 slate three games (Southern Miss
+    @ Auburn, App State @ East Carolina, New Mexico State @ Hawai'i — 55 priced players) had every
+    prop dropped because the feed's spelling never joined the CFBD schedule's."""
     st, teams = cc.cfbd_get("/teams/fbs", {"year": CUR_SEASON}, key)
     schools = [t.get("school") for t in teams if t.get("school")] if isinstance(teams, list) else []
-    out = {}
+    alias = _team_alias()
+    out, unmapped = {}, []
     for od in set(odds_names):
         on = tnorm(od)
         best = None
@@ -93,7 +190,18 @@ def cfbd_team_map(odds_names, key):
             if cn == on or on.startswith(cn + " ") or cn.startswith(on + " "):
                 if best is None or len(tnorm(best)) < len(cn):
                     best = sc
+        if best is None:
+            # Longest alias key that is the school part of the feed name.
+            for ak, sc in sorted(alias.items(), key=lambda kv: -len(kv[0])):
+                if on == ak or on.startswith(ak + " "):
+                    best = sc
+                    break
+        if best is None:
+            unmapped.append(od)
         out[od] = best or od
+    if unmapped:
+        print(f"  WARNING: {len(unmapped)} feed team names have no CFBD school — their games will "
+              f"be missing from the board: {', '.join(sorted(unmapped))}")
     return out
 
 
@@ -155,6 +263,11 @@ def fetch_props():
         side = r.get("side")
         if mk == "player_anytime_td":
             if side != "Yes":
+                continue
+            # "East Carolina Pirates D/ST" / "Oklahoma Sooners Defense" is a team scoring prop the
+            # books file under player anytime TD. Not a player: no log, no slot, nothing to
+            # project. Left to the props board.
+            if r["player"].upper().endswith(("D/ST", " DEFENSE")):
                 continue
         elif side != "Over":
             continue
@@ -229,15 +342,31 @@ def _cache_team_season(team, season, data):
 CFBD_WORKERS = 8      # concurrent /games/players pulls; see _fetch_all_logs
 
 
-def _fetch_one(team, season, key):
-    """Cache-first fetch of one team-season payload. Returns (team, season, data|None)."""
+# In-process memo for the CURRENT season, which the disk cache refuses (it changes weekly).
+# _fetch_all_logs runs twice per invocation (team_logs, then defence_by_category); without this
+# the second run re-pulled all 138 current-season payloads from CFBD.
+_LIVE_MEMO = {}
+
+
+def _fetch_one(team, season, key, tries=2):
+    """Cache-first fetch of one team-season payload. Returns (team, season, data|None).
+
+    One extra try on a bad response: a transient CFBD failure on the current season is a whole
+    team's week-1 usage missing from the board (its QB1 with no log, no slot, no projection)."""
     data = _cached_team_season(team, season)
+    if data is None:
+        data = _LIVE_MEMO.get((team, season))
     if data is not None:
         return team, season, data
-    st, data = cc.cfbd_get("/games/players", {"year": season, "team": team}, key)
-    if st != 200 or not isinstance(data, list):
+    for _ in range(tries):
+        st, data = cc.cfbd_get("/games/players", {"year": season, "team": team}, key)
+        if st == 200 and isinstance(data, list):
+            break
+        data = None
+    if data is None:
         return team, season, None
     _cache_team_season(team, season, data)
+    _LIVE_MEMO[(team, season)] = data
     return team, season, data
 
 
@@ -254,19 +383,20 @@ def _fetch_all_logs(teams, key):
 
     Returns {(team, season): payload}; failures are simply absent, exactly as the sequential
     version skipped them via `continue`."""
-    jobs = [(t, s) for t in sorted(set(teams)) for s in HIST_SEASONS]
-    out, failed = {}, 0
+    jobs = [(t, s) for t in sorted(set(teams)) for s in LOG_SEASONS]
+    out, failed = {}, []
     oc.ensure_ssl_certs()          # once, up front — not from inside every worker
     with cf.ThreadPoolExecutor(max_workers=CFBD_WORKERS) as ex:
         futures = [ex.submit(_fetch_one, t, s, key) for t, s in jobs]
         for fut in cf.as_completed(futures):
             team, season, data = fut.result()
             if data is None:
-                failed += 1
+                failed.append((team, season))
             else:
                 out[(team, season)] = data
     if failed:
-        print(f"  WARNING: {failed} of {len(jobs)} team-season log pulls failed (skipped)")
+        print(f"  WARNING: {len(failed)} of {len(jobs)} team-season log pulls failed (skipped): "
+              + ", ".join(f"{t} {s}" for t, s in sorted(failed)))
     return out
 
 
@@ -282,7 +412,7 @@ def team_logs(teams, key, cur_team=None):
     # built by appending to shared lists, and the ordering feeds recency weighting downstream, so
     # parsing off the completion order would make the output depend on which request finished first.
     for team in sorted(set(teams)):
-        for season in HIST_SEASONS:
+        for season in LOG_SEASONS:
             data = payloads.get((team, season))
             if not isinstance(data, list):
                 continue
@@ -315,7 +445,7 @@ def team_logs(teams, key, cur_team=None):
                     for aid, slot in per.items():
                         td = (slot.get(("rushing", "TD")) or 0) + (slot.get(("receiving", "TD")) or 0)
                         rec = {
-                            "season": season, "homeAway": ha, "gid": gid,
+                            "season": season, "homeAway": ha, "gid": gid, "team": team,
                             "pass_yds": slot.get(("passing", "YDS")),
                             "pass_att": slot.get(("passing", "ATT")),   # parsed from C/ATT below
                             "pass_tds": slot.get(("passing", "TD")),
@@ -334,6 +464,13 @@ def team_logs(teams, key, cur_team=None):
     # end-of-season role — a late-season promotion is the most recent games.
     for e in by_id.values():
         e["games"].sort(key=lambda g: (g["season"], g["gid"]))
+        # The log's own answer to "which team": the one he played for MOST RECENTLY, not the one
+        # that sorted first alphabetically. The depth-chart re-tag in build_slate still overrides
+        # this where the chart knows the name; this is the fallback for the names it spells
+        # differently -- Ourlads' "Gio Lopez" never re-tagged CFBD's "Giovanni Lopez", so he
+        # stayed on North Carolina (his 2025 school) and the market's Wake Forest QB1 had no
+        # projection.
+        e["team"] = e["games"][-1]["team"]
 
     # Collapse athlete-id records to the name key the rest of the module looks up by.
     #
@@ -716,6 +853,50 @@ def depth_lookup(depth):
     return out
 
 
+# Games a player needs THIS season before his own usage outranks the scraped chart. One game is
+# a data point; two is a pattern the chart has had time to reflect and has not.
+USAGE_MIN_GAMES = 1
+
+
+def usage_ranks(dlook, logs):
+    """Re-rank each (team, pos) group by CURRENT-SEASON per-game volume — receptions for WR/TE,
+    carries for RB, attempts for QB — with the scraped order as the tiebreak and the fallback for
+    players who have not played yet.
+
+    WHY. Ourlads' order is a preseason roster listing, and it lags what is happening on the field:
+    on the 2026-09-12 slate the chart's WR1 was NOT the receiver the market priced highest on
+    12 of 31 teams (39%). Oklahoma's chart read Livingstone / Harris / Sategna; Sategna carried
+    the team's top receiving-yards line and its shortest anytime-TD price, and Livingstone had
+    no yardage line at all (Derek: "Parker Livingstone does not appear to be WR1 for Oklahoma
+    and is listed at +900"). The rank feeds project_role(), so a stale WR1 is not just a wrong
+    tag — it hands the wrong player the WR1's workload.
+
+    LINE-BLIND. The re-rank uses what the players have DONE this season, never what the books
+    price. The market comparison above is how the problem was measured, not how it is fixed."""
+    groups = {}
+    for (team, nm), (pos, rank) in dlook.items():
+        groups.setdefault((team, pos), []).append((rank, nm))
+    out = dict(dlook)
+    moved = 0
+    for (team, pos), members in groups.items():
+        pool = POOL.get(pos, "WR")
+        field = VOL_FIELD[pool]
+        scored = []
+        for rank, nm in members:
+            e = logs.get(nm)
+            cur = [g for g in (e["games"] if e else []) if g["season"] == CUR_SEASON and g.get(field) is not None]
+            per_game = (sum(g[field] for g in cur) / len(cur)) if len(cur) >= USAGE_MIN_GAMES else None
+            scored.append((per_game, rank, nm))
+        played = sorted([x for x in scored if x[0] is not None], key=lambda x: (-x[0], x[1]))
+        rest = sorted([x for x in scored if x[0] is None], key=lambda x: x[1])
+        for i, (_, rank, nm) in enumerate(played + rest, start=1):
+            if i != rank:
+                moved += 1
+            out[(team, nm)] = (pos, i)
+    print(f"  usage re-rank: {moved} players moved from their scraped depth slot")
+    return out
+
+
 def build(props, key, depth):
     teams = set()
     for p in props:
@@ -732,7 +913,7 @@ def build(props, key, depth):
             retagged += 1
     print(f"  re-tagged {retagged} players to their current team from the depth chart")
     per_team, league = rank_baselines(logs)
-    dlook = depth_lookup(depth)
+    dlook = usage_ranks(depth_lookup(depth), logs)
 
     out, matched, missed, roled = [], 0, 0, 0
     for p in props:
@@ -771,6 +952,7 @@ def build(props, key, depth):
         out.append({
             "game": f"{p['away']} @ {p['home']}",
             "commence": p["commence"], "player": e["display"], "team": e["team"], "pos": pos,
+            "slot": f"{dpos}{drank}" if dpos and drank else None,
             "cat": cat, "market": mk, "book": p["book"],
             "proj": proj, "g": len([g for g in games if g.get(mk) is not None]) if mk != "anytime_td" else len(games),
             "cOver": cO, "cG": cG, "pOver": pO, "pG": pG, "hOver": hO, "hG": hG, "rOver": rO, "rG": rG,
@@ -830,11 +1012,19 @@ def build_slate(slate, depth, prop_index, key):
             _e["team"] = _t
             retagged += 1
     print(f"  re-tagged {retagged} players to their current team from the depth chart")
+    # Book spelling -> CFBD key, AFTER the re-tag so the team the log carries is the current one.
+    print(f"  re-keyed {reconcile_book_names(prop_index, logs, slate, cur)} priced players from the "
+          f"book's spelling to CFBD's (Gio -> Giovanni)")
     # Context matchup tag. _fetch_all_logs reads the same per-team-season cache team_logs just
     # used, so this is disk-only — no extra CFBD calls. See defence_by_category().
     defmap = defence_by_category(_fetch_all_logs(teams, key), None)
     print(f"  matchup: {len(defmap)} team-category defence rates from {PRIOR_SEASON}")
     per_team, league = rank_baselines(logs)
+    # Usage re-rank: each (team, pos) group in this season's per-game volume order, Ourlads as
+    # the tiebreak and the fallback — see usage_ranks(). The rank is a projection INPUT
+    # (project_role scales to the role's workload), so a stale chart mis-projects, not just
+    # mis-labels.
+    dlook = usage_ranks(depth_lookup(depth), logs)
 
     out, seen = [], set()
     for away, home, commence in slate:
@@ -842,7 +1032,8 @@ def build_slate(slate, depth, prop_index, key):
         for team in (away, home):
             for pos, names in (depth.get(team) or {}).items():
                 lim = DEPTH_LIMIT.get(pos, 0)
-                for rank, name in enumerate(names[:lim], start=1):
+                ordered = sorted(names, key=lambda n: dlook.get((team, norm(n)), (pos, 999))[1])
+                for rank, name in enumerate(ordered[:lim], start=1):
                     e = logs.get(norm(name))
                     if not e or e["team"] != team:
                         continue                      # no CFBD game log (e.g. true freshman) -> skip
@@ -875,7 +1066,8 @@ def build_slate(slate, depth, prop_index, key):
                         cat, _unit = MARKET_CAT[mk]
                         out.append({
                             "game": gk, "commence": commence, "player": e["display"],
-                            "team": team, "pos": pos, "cat": cat, "market": mk, "book": book,
+                            "team": team, "pos": pos, "slot": f"{pos}{rank}",
+                            "cat": cat, "market": mk, "book": book,
                             "proj": proj,
                             "g": len([g for g in games if g.get(mk) is not None]) if mk != "anytime_td" else len(games),
                             "cOver": cO, "cG": cG, "pOver": pO, "pG": pG,
@@ -897,6 +1089,18 @@ def build_slate(slate, depth, prop_index, key):
     # was already prop-driven -- never its VALUE, which would break the line-blind rule. And with no
     # depth rank there is no role baseline to scale to, so these rows use the player's own history
     # straight, which also keeps them clear of the role-volume ratchet.
+    # A PRICED player is on the board whatever we know about him. The three `continue`s this
+    # pass used to take — no CFBD log, log on a team not in this game, too little history to
+    # project — each dropped the row silently, and together they dropped 240 of 866 priced
+    # players (28%) on the 2026-09-12 slate, headed by the shortest anytime-TD prices on it
+    # (Cam Edwards −340, Trey Cooley −300, Roderick Robinson −260). Derek: "You must do this
+    # for all players and all games." A posted prop is the market saying a player matters;
+    # the row is emitted with a null projection and whatever history exists, and the reasons
+    # are counted and printed so a rising number is visible. (Same rule the NFL exporter
+    # learned from Jadarian Price.) A team the log disagrees with is not a reason to drop the
+    # row either — the market is right about who is playing in which game.
+    dropped = collections.Counter()
+    display = PROP_DISPLAY
     for away, home, commence in slate:
         gk = f"{away} @ {home}"
         for (pgk, pname, mk), book in prop_index.items():
@@ -906,13 +1110,32 @@ def build_slate(slate, depth, prop_index, key):
             if sig in seen:
                 continue
             e = logs.get(pname)
-            if not e or e["team"] not in (away, home):
-                continue                          # no CFBD game log -> nothing to project from
-            games = e["games"]
-            if mk != "anytime_td" and not series(games, mk):
-                continue
-            proj = project(games, mk)             # own history, NO role re-scaling (no rank known)
-            if proj is None:
+            games = e["games"] if e else []
+            # The team on the row: the log's if it is in this game, else the depth chart's for
+            # either spelling (a transfer who has not played for the new school yet), else blank.
+            team = e["team"] if e and e["team"] in (away, home) else ""
+            if not team:
+                for k in (pname, norm(display.get(pname, pname))):
+                    if cur.get(k) in (away, home):
+                        team = cur[k]
+                        break
+            if not e:
+                dropped["no CFBD log"] += 1
+            elif e["team"] not in (away, home):
+                dropped["log team not in game"] += 1
+            proj = project(games, mk) if games and (mk == "anytime_td" or series(games, mk)) else None
+            if proj is None and e:
+                dropped["too little history"] += 1
+            if not games:
+                cat, _unit = MARKET_CAT[mk]
+                out.append({
+                    "game": gk, "commence": commence, "player": display.get(pname, pname),
+                    "team": team, "pos": POS_OF_MARKET.get(mk, ""), "cat": cat, "market": mk,
+                    "book": book, "proj": None, "g": 0,
+                    "cOver": 0, "cG": 0, "pOver": 0, "pG": 0, "hOver": 0, "hG": 0, "rOver": 0, "rG": 0,
+                    "matchup": None,
+                })
+                seen.add(sig)
                 continue
             if mk == "anytime_td":
                 cO, cG = over_split(games, mk, None, lambda g: True)
@@ -927,17 +1150,20 @@ def build_slate(slate, depth, prop_index, key):
             cat, _unit = MARKET_CAT[mk]
             out.append({
                 "game": gk, "commence": commence, "player": e["display"],
-                "team": e["team"], "pos": _pos_from_usage(games), "cat": cat, "market": mk,
+                "team": team, "pos": _pos_from_usage(games), "cat": cat, "market": mk,
                 "book": book, "proj": proj,
                 "g": len([g for g in games if g.get(mk) is not None]) if mk != "anytime_td" else len(games),
                 "cOver": cO, "cG": cG, "pOver": pO, "pG": pG,
                 "hOver": hO, "hG": hG, "rOver": rO, "rG": rG,
                 # No depth rank on this path (that is what makes it the second pass), so the
                 # anytime-TD tag falls back to the position inferred from usage.
-                "matchup": cfb_matchup(defmap, home if e["team"] == away else away, mk,
-                                       _pos_from_usage(games)),
+                "matchup": cfb_matchup(defmap, home if team == away else away, mk,
+                                       _pos_from_usage(games)) if team else None,
             })
             seen.add(sig)
+    if dropped:
+        print("  second pass, rows kept WITHOUT a projection: " +
+              ", ".join(f"{k} {v}" for k, v in dropped.most_common()))
     return out
 
 
@@ -969,6 +1195,7 @@ def main(argv=None):
     for p in props:
         mk = MARKETS[p["market"]][0]
         prop_index[(f"{p['away']} @ {p['home']}", norm(p["player"]), mk)] = p["book"]
+        PROP_DISPLAY.setdefault(norm(p["player"]), p["player"])
 
     # Current depth charts (scraped by cfb_depth) drive role-adjusted volume. Prefer the
     # committed cfb_depth.json; scrape live if it's missing.
@@ -1012,8 +1239,26 @@ def main(argv=None):
     # captured before the books post will be thin. That is the intended reading — it says the market
     # has not priced this game yet, rather than showing rows nobody can act on.
     rows = [r for r in rows if r["book"] is not None]
+    # The name on the board is the book's spelling. CFBD says "Isaiah Sategna", FanDuel "Isaiah
+    # Sategna III"; a reader checking the board against the app matches on the name he sees there
+    # (Derek: "the players ... in the model sections need to match the players ... in the
+    # sportsbooks"). Keying stayed suffix-blind; only the display changes.
+    # Reconcile against the market BEFORE the display rewrite (prop_index is keyed on the CFBD
+    # spelling once reconcile_book_names has run): every priced (game, player, market) must have a
+    # row. This is the check that would have caught the three unmapped games and the 1000-row cap
+    # on day one.
+    shown = {(r["game"], norm(r["player"]), r["market"]) for r in rows}
+    missing = [k for k in prop_index if k not in shown]
+    for r in rows:
+        r["player"] = PROP_DISPLAY.get(norm(r["player"]), r["player"])
     print(f"  publishing {len(rows)} rows the sportsbook lists "
           f"({len({(r['game']) for r in rows})} games with posted props).")
+    if missing:
+        print(f"  WARNING: {len(missing)} priced player-markets have NO row: "
+              + ", ".join(f"{g}: {p} {m}" for g, p, m in missing[:8])
+              + (" ..." if len(missing) > 8 else ""))
+    else:
+        print(f"  reconciled: all {len(prop_index)} priced player-markets have a row.")
 
     if args.probe:
         for r in rows[:25]:
@@ -1022,6 +1267,7 @@ def main(argv=None):
                   f"| career {r['cOver']}/{r['cG']} prior {r['pOver']}/{r['pG']}")
         return 0
 
+    CHUNK = 300
     body = (
         "// AUTO-GENERATED by cfb_player_proj.py -- do not edit by hand.\n"
         "// First-pass NCAAF player-prop projections: prior-season per-game baseline (line-blind)\n"
@@ -1032,8 +1278,15 @@ def main(argv=None):
         # The week this slate was built for. Without it the board had no way to tell which week the
         # rows belong to, so it showed them on EVERY week — week 5 rendered week 1's games.
         f"export const NCAAF_PROJ_WEEK = {wk};\n"
-        "export const NCAAF_PLAYER_PROJECTIONS: PlayerProj[] = [\n"
-        + "".join("  " + json.dumps(r) + ",\n" for r in rows)
+        # Emitted in chunks: one 1,300-row literal made tsc give up with TS2590 ("union type too
+        # complex") once rows mixed null and string slots — smaller literals type-check fine.
+        + "".join(
+            f"const P{i}: PlayerProj[] = [\n"
+            + "".join("  " + json.dumps(r) + ",\n" for r in rows[j:j + CHUNK])
+            + "];\n"
+            for i, j in enumerate(range(0, len(rows), CHUNK)))
+        + "export const NCAAF_PLAYER_PROJECTIONS: PlayerProj[] = ["
+        + ", ".join(f"...P{i}" for i in range(len(range(0, len(rows), CHUNK))))
         + "];\n"
     )
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)

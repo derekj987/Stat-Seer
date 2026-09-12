@@ -3,6 +3,7 @@
 // not graded against closing lines yet.
 export interface PlayerProj { game: string; commence: string; player: string; team: string;
   pos: string; cat: string; market: string; book: number | null; src?: string | null;
+  slot?: string | null;
   proj: number | null; g: number;
   cOver: number; cG: number; pOver: number; pG: number;
   hOver: number; hG: number; rOver: number; rG: number;

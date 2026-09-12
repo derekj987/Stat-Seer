@@ -11,12 +11,18 @@ name: Capture CFB props
 # Cost (Odds API) = markets x regions per event that HAS props; events with none cost 0,
 # so early-week runs (props not posted yet) are nearly free. --within-days 8 limits it to
 # the near-term slate; --max-events 150 covers a full college Saturday (the API posts ~167
-# NCAAF events at once, and a 40 cap was polling under a quarter of them). Twice daily (00/12 UTC)
-# catches morning and evening line posts. All times UTC.
+# NCAAF events at once, and a 40 cap was polling under a quarter of them).
+#
+# Every two hours, not twice daily. The model boards read the NEWEST snapshot live, so the
+# "market" column is only as fresh as this job: at twice daily, Derek was reading a receiver at
+# +550 on the board against +900 in the FanDuel app, ten hours after the last capture. Cost at
+# this cadence: ~45 priced events x 6 markets x 2 regions = ~540 credits per run on a college
+# Saturday, ~6.5k/day at the peak, well under 1% of the monthly allowance; weekday runs find far
+# fewer priced events and cost accordingly less. All times UTC.
 
 on:
   schedule:
-    - cron: "0 0,12 * 8-12,1 *"   # twice daily, late Aug - Jan (CFB season + bowls)
+    - cron: "0 */2 * 8-12,1 *"    # every 2 hours, late Aug - Jan (CFB season + bowls)
   workflow_dispatch: {}            # manual "Run workflow" for testing
 
 concurrency:

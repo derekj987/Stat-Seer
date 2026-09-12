@@ -298,6 +298,14 @@ export async function weekProps(week: number, season = 2026): Promise<PropGame[]
  *  FAVOURABLE to the bettor across books — the right answer for "what can I get", and the wrong
  *  one for "what does my book show". The board's market column is the second question: Derek reads
  *  it beside FanDuel and expects the same number. */
+// American price -> implied probability as a percent (vig included), one decimal — the same
+// figure the projections file bakes into `book` for anytime TD, so the column reads the same
+// whichever source filled it.
+export function impliedPct(price: number): number {
+  const p = price > 0 ? 100 / (price + 100) : -price / (-price + 100);
+  return Math.round(p * 1000) / 10;
+}
+
 export async function fanduelLines(week: number, season = 2026): Promise<Map<string, number>> {
   const out = new Map<string, number>();
   try {
@@ -313,9 +321,17 @@ export async function fanduelLines(week: number, season = 2026): Promise<Map<str
     // to even money, since an alternate is priced away from even by construction.
     const best = new Map<string, { line: number; gap: number }>();
     for (const r of rows) {
-      if (r.line === null || r.line === undefined) continue;
       if (r.side !== "Over" && r.side !== "Yes") continue;
       const k = `${r.player_name}|${r.market}`;
+      // Anytime TD has no line: the market number is FanDuel's Yes price as an implied %. The
+      // board used to show the median-implied % baked into the projections file here, so the
+      // "market" column on the TD board was nobody's price — Derek: "the players and odds in the
+      // model sections need to match the players and odds in the sportsbooks (fanduel)".
+      if (r.line === null || r.line === undefined) {
+        if (r.market !== "player_anytime_td" || r.price_american == null || best.has(k)) continue;
+        best.set(k, { line: impliedPct(r.price_american), gap: 0 });
+        continue;
+      }
       const gap = Math.abs(r.price_american ?? 0);
       const prev = best.get(k);
       if (!prev || gap < prev.gap) best.set(k, { line: r.line, gap });

@@ -1612,6 +1612,87 @@ Then bucket `missing` by cause and be suspicious of any bucket that isn't tiny:
 `no game log` (true freshmen — legitimate in NCAAF), `absent from the fetch` (truncation — a BUG).
 A star name anywhere in that list means it is a join bug, not a data gap.
 
+**The generator now runs this itself** — `cfb_player_proj.main()` prints `reconciled: all N priced
+player-markets have a row` or a `WARNING: … have NO row` naming the first eight. A refresh log
+without the `reconciled:` line is a failed refresh. Read it before trusting the board.
+
+### 🚨 "Missing players" is never ONE bug — it is a stack, and each layer hides the next
+Derek's report on the 2026-09-12 NCAAF slate: *"One section says there's 30 games today and there
+are about 80. We are missing players and games… I do not even see Isaiah Sategna III… Parker
+Livingstone does not appear to be WR1… The players and odds in the model sections need to match the
+players and odds in the sportsbooks (fanduel). Simple as that."*
+
+That one sentence turned out to be **seven** separate defects, found one at a time because each one
+capped the board at a size where the next could not be seen. Every layer below is a check to run,
+in this order, whenever coverage looks short:
+
+| # | Layer | Symptom | Measured | Check |
+|---|---|---|---|---|
+| 1 | Reader truncation | 6 games / 132 players | `cfbProps.fetchRows` used `limit=8000` → 1000 rows | `len(rows) == 1000` — page it |
+| 2 | Export cadence | Priced Friday night, no row Saturday | daily 13:00 UTC export vs Fri/Sat postings | rows priced after the export's `snapshot_at` |
+| 3 | Name key: suffix | Sategna absent | `"Isaiah Sategna III"` (book) ≠ `"Isaiah Sategna"` (CFBD) | `norm()` strips `jr/sr/ii/iii/iv/v` |
+| 4 | Current season never fetched | 973 wrong depth slots | `HIST_SEASONS=[2024,2025]` only; 2026 week 1 never pulled | `LOG_SEASONS` includes `CUR_SEASON` |
+| 5 | Team-name spelling | 3 whole games gone (55 players) | "Southern Mississippi Golden Eagles" / "Appalachian State" / "Hawaii" never prefix-match CFBD's "Southern Miss" / "App State" / "Hawai'i" | `cfbd_team_map` prints every unmapped feed name |
+| 6 | Name key: nickname | Starting QB with no projection | "Gio Lopez" vs CFBD "Giovanni Lopez"; "Kam"/"Kameran"; "JoJo"/"Jovanni" | `reconcile_book_names` — last name + first initial on a game team, else depth-chart team + last name; ambiguous → leave alone |
+| 7 | Team from the log | Transfer stranded on old school | `e["team"]` was the FIRST team parsed (alphabetical) | team = the team of his MOST RECENT game; depth chart still overrides |
+
+Plus one that was not a data bug at all: the second pass `continue`d past any priced player it could
+not project — no log, log on another team, too little history — **240 of 866 priced players (28%),
+headed by the shortest TD prices on the slate.** A row with the book's line and no projection is
+the honest answer; silently dropping him is not. The reasons are now counted and printed.
+
+After all seven: **1,314 of 1,314 priced player-markets on the board, 45 of 45 games**, Sategna WR1
+at FanDuel's 38.5%, 37 rows (2.8%) with no projection — all true freshmen or no-log names, all
+still listed with their line.
+
+**The rule: when a board is short, do not stop at the first cause.** Fix it, regenerate, re-measure
+`priced − shown`, and keep going until the gap is zero or every remaining name has a reason you can
+say out loud. Each fix here raised coverage by 10–30 points and exposed the next.
+
+### The name on the board is the BOOK's spelling, the key is not
+Rows carry the sportsbook's display name (`PROP_DISPLAY`, applied at the write step), keyed
+internally on a suffix-blind, nickname-reconciled `norm()`. A reader checks the board against the
+FanDuel app by the name they see there; CFBD's "Isaiah Sategna" against the app's "Isaiah Sategna
+III" reads as a different player. Same reason the market column is FanDuel's number: the board is
+read NEXT TO the book, so it has to use the book's words.
+
+Team scoring props (`"… D/ST"`, `"… Defense"`) are filed by the books under player anytime TD.
+They are not players — skip them at the reader (`fetch_props`) AND at the live-row path in
+`PlayerModelView`, or the TD board grows 120 rows of "Michigan Wolverines Defense".
+
+### 🚨 The market column is only as fresh as the capture job
+Derek read Livingstone at **+900** in the FanDuel app while the board said **+550** — from a
+snapshot ten hours old (`capture-cfb-props` ran twice daily). The boards read the NEWEST snapshot
+live, so no amount of view-side work can beat the cron. Every "our number doesn't match the book"
+report starts with `select max(snapshot_at)` — if it is hours old, the capture cadence is the bug.
+Now every 2 hours (~540 credits per run on a Saturday), with the projections refresh twice daily.
+
+And the anytime-TD market column now comes from the live capture too: `fanduelLines` /
+`cfbFanduelLines` carry FanDuel's Yes price as an implied % (`impliedPct`), where before only
+yardage lines were overridden and the TD % was the median baked into the projections file — nobody's
+price. DK Metcalf: file 34.0%, FanDuel +185 = 35.1% — the board shows 35.1.
+
+### 🚨 A generated data file can be too big for `tsc`
+1,314 rows in one array literal, now mixing `slot: null` with `slot: "WR1"` and `proj: null` with
+numbers, made `tsc` fail with **TS2590 "Expression produces a union type that is too complex to
+represent"** on `lib/ncaafPlayerProjections.ts:8`. The generator emits `const P0…P4: PlayerProj[]`
+chunks of 300 and spreads them into the export. Local `next dev` was fine — only `tsc` (CI) sees it.
+Run the clean-state typecheck after any change that grows a generated file.
+
+### A projection job fetches the live season TWICE unless you memoise it
+`_fetch_all_logs` is called by `team_logs` and again by `defence_by_category`. Completed seasons hit
+the disk cache; the CURRENT season is deliberately never disk-cached, so once `LOG_SEASONS` included
+2026 the second call re-pulled all 138 payloads from CFBD. `_LIVE_MEMO` holds them in-process, and
+`_fetch_one` retries once — a transient failure on a current-season pull is a whole team's week-1
+usage missing (its QB1 with no log, no slot, no projection), and the run said only "4 of 414 pulls
+failed" without naming which.
+
+### ⚠️ The Bash tool's heredoc eats backslashes
+`\\b` inside a quoted `<<'PY'` heredoc reached Python as `\b` and wrote a **backspace byte** into a
+regex in `PlayerModelView.tsx` (`/^H(D\/ST|Defense)$/` under `cat -A`). Twice now. Any patch whose
+payload contains a backslash goes through the Edit/Write tool, never a heredoc; after a heredoc
+patch, `cat -A` the touched line.
+
 ### ⚠️ A measurement taken on broken data justifies a broken fix
 `MIN_PROJ_GAMES = 5` blanked any projection built on under 5 of a player's own games. Its stated
 evidence was median(proj ÷ line) of **1.74 at 0-2 games and 1.87 at 3-4, against 1.10 from 5 up**.

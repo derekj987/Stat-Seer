@@ -16,7 +16,7 @@ import PinButton from "./PinButton";
 import { playerSlot, normName } from "@/lib/playerSlot";
 import { weekProps, fanduelLines } from "@/lib/props";
 import { bookLabel } from "@/lib/bookLabel";
-import { cfbWeekProps } from "@/lib/cfbProps";
+import { cfbWeekProps, cfbFanduelLines } from "@/lib/cfbProps";
 import { etToday, groupByGameDay } from "@/lib/gameDays";
 import { DayHeader } from "./DayHeader";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
@@ -80,9 +80,10 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
   // It CANNOT come from weekProps: that collapses each player to the line most favourable to the
   // bettor across books, which is the right answer for the ＋ chips and the wrong one for a column
   // that is meant to show what FanDuel shows.
-  const liveLine = base === "ncaaf" ? new Map<string, number>() : await fanduelLines(week);
+  const liveLine = base === "ncaaf" ? await cfbFanduelLines(week) : await fanduelLines(week);
+  let priced: Awaited<ReturnType<typeof weekProps>> = [];
   try {
-    const priced = base === "ncaaf" ? await cfbWeekProps(week) : await weekProps(week);
+    priced = base === "ncaaf" ? await cfbWeekProps(week) : await weekProps(week);
     for (const pg of priced) for (const m of pg.markets) for (const q of m.quotes) {
       // A book posts a LADDER of alternate lines on the same (player, market, side), so a plain
       // set() keeps whichever arrived last — an arbitrary rung, not the main line. Prefer the
@@ -146,6 +147,52 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
     ? projections.filter((p) => p.cat === active.key
         && (base === "nfl" ? isRealistic(p.player) && !isOut(p) : true))
     : [];
+  // NCAAF: every player the MARKET prices is on the board, whether or not the daily projections
+  // export knew about him. The export runs at 13:00 UTC and books post most college props Friday
+  // night and Saturday morning, so on game day the file was a day behind the market — Isaiah
+  // Sategna III, priced at every book in Oklahoma @ Michigan, had no row (19 of the game's 53
+  // priced players did). A posted prop is the market saying a player matters; he appears with
+  // his live book line and no projection until the next export catches up (the NFL rule, applied
+  // at render because the NCAAF slate moves faster than a daily job). Uses the EXISTENCE of the
+  // prop only — never its value — so the board stays line-blind.
+  if (base === "ncaaf" && onProjWeek) {
+    const CAT_MARKETS: Record<string, string[]> = {
+      td: ["anytime_td"], passing: ["pass_yds", "pass_tds"], rushing: ["rush_yds"],
+      receiving: ["rec_yds", "receptions"],
+    };
+    const wanted = new Set(CAT_MARKETS[active.key] ?? []);
+    const have = new Set(rows.map((r) => `${normName(r.player)}|${r.market}`));
+    // The export names games by school ("Oklahoma @ Michigan"); the feed by school + mascot
+    // ("Oklahoma Sooners @ Michigan Wolverines"). Match on the school being a prefix of the
+    // feed name, so a live row lands in the same card as the exported ones.
+    const schoolOf = (feed: string): string => {
+      const f = feed.toLowerCase();
+      const hit = [...new Set(projections.flatMap((r) => r.game.split(" @ ")))]
+        .filter((sch) => f === sch.toLowerCase() || f.startsWith(sch.toLowerCase() + " "))
+        .sort((a, b) => b.length - a.length)[0];
+      return hit ?? feed.replace(/\s+\S+$/, "");        // no export game: drop the mascot
+    };
+    const seen = new Set<string>();
+    for (const pg of priced) for (const m of pg.markets) for (const q of m.quotes) {
+      const market = m.market.replace(/^player_/, "");
+      if (!wanted.has(market) || (q.side !== "Over" && q.side !== "Yes")) continue;
+      // "Michigan Wolverines D/ST" / "... Defense" is a team scoring prop filed under player
+      // anytime TD — not a player, and the export skips it for the same reason.
+      if (/(D\/ST| Defense)$/i.test(q.player)) continue;
+      const k = `${normName(q.player)}|${market}`;
+      if (have.has(k) || seen.has(k)) continue;
+      seen.add(k);
+      const fdPrice = (q.byBook as Record<string, number> | undefined)?.fanduel ?? q.price;
+      const implied = fdPrice > 0 ? 100 / (fdPrice + 100) : -fdPrice / (-fdPrice + 100);
+      rows.push({
+        game: `${schoolOf(pg.away)} @ ${schoolOf(pg.home)}`, commence: pg.commence,
+        player: q.player, team: "", pos: "", cat: active.key, market,
+        book: market === "anytime_td" ? Math.round(implied * 1000) / 10 : q.line,
+        proj: null, g: 0, cOver: 0, cG: 0, pOver: 0, pG: 0, hOver: 0, hG: 0, rOver: 0, rG: 0,
+        matchup: null,
+      });
+    }
+  }
   const games: string[] = [];
   const byGame: Record<string, PlayerProj[]> = {};
   const gameKick: Record<string, string> = {};   // earliest kickoff per game, for date ordering
@@ -337,10 +384,13 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                         const isMore = grpIndex[r.player] >= LEAD;
                         // Depth-chart slot (RB1/WR2) when we have it, else the player's plain
                         // position (RB/WR/QB) — so every player carries a position tag.
-                        const slot = playerSlot(r.player, base) ?? r.pos;
+                        // NCAAF rows carry a usage-ranked slot from the export (Ourlads' order
+                        // disagreed with the market's top receiver on 12 of 31 teams); the depth
+                        // chart is the fallback, and the NFL path.
+                        const slot = r.slot ?? playerSlot(r.player, base) ?? r.pos;
                         return (
                           <div className={`pmrow pmrow--data${isMore ? " hb-row--more" : ""}${cont ? " pmrow--cont" : ""}`} role="row" key={`${r.player}-${r.market}`}>
-                            <span className="pmcell pmcell--player">{cont ? "" : <>{r.player}<span className="pmslot"> ({[slot, shortTeam(r.team)].filter(Boolean).join(", ")})</span>
+                            <span className="pmcell pmcell--player">{cont ? "" : <>{r.player}{(slot || r.team) && <span className="pmslot"> ({[slot, shortTeam(r.team)].filter(Boolean).join(", ")})</span>}
                               {/* The designation, read live from ESPN on the same 120s window as the
                                   book line beside it. Red for anyone not dressing, amber for a
                                   game-time decision — a bettor needs those to look different. */}

@@ -2,7 +2,7 @@
 // per player across books, shaped as PropGame[] so it can reuse the NFL PropsView UI
 // (tap-to-add chips + single best book). Server-side only (Supabase service key).
 import type { PropGame, Quote, MarketBlock } from "./props";
-import { PROP_LABELS } from "./props";
+import { PROP_LABELS, impliedPct } from "./props";
 import { usBooks } from "./bookLabel";
 import { etDayKey } from "./gameDays";
 import { NCAAF_MODEL } from "@/app/ncaaf/model-data";
@@ -40,12 +40,71 @@ async function fetchRows(): Promise<Row[]> {
   const lat = (await latRes.json()) as { snapshot_at: string }[];
   if (!lat.length) return [];
   const snap = encodeURIComponent(lat[0].snapshot_at);
-  const res = await fetch(
-    `${base}?snapshot_at=eq.${snap}&select=event_id,commence,home_team,away_team,book,market,player,side,line,price,snapshot_at&limit=8000`,
-    { headers: h, next: { revalidate: 120 } }
-  );
-  if (!res.ok) throw new Error(`Supabase ${res.status}`);
-  return usBooks((await res.json()) as Row[]);
+  // PAGED. `limit=8000` was one request, and PostgREST caps every response at 1,000 rows without
+  // saying so: the newest sweep held 7,280 rows across 45 games and 882 players, and this read
+  // returned the first 1,000 — 6 games, 132 players. Derek: "One section says there's 30 games
+  // today and there are about 80. We are missing players and games." The skill's single
+  // highest-yield rule, and this reader had never been checked against it.
+  const sel = `?snapshot_at=eq.${snap}&select=event_id,commence,home_team,away_team,book,market,player,side,line,price,snapshot_at`;
+  const PAGE = 1000;
+  const out: Row[] = [];
+  for (let off = 0; off < 200000; off += PAGE) {
+    const res = await fetch(`${base}${sel}`, {
+      headers: { ...h, "Range-Unit": "items", Range: `${off}-${off + PAGE - 1}` },
+      next: { revalidate: 120 },
+    });
+    if (!res.ok) throw new Error(`Supabase ${res.status}`);
+    const rows = (await res.json()) as Row[];
+    out.push(...rows);
+    if (rows.length < PAGE) break;
+  }
+  return usBooks(out);
+}
+
+/** FanDuel's CURRENT line per `${normalised player}|${market}` on this week's slate — the number
+ *  the NCAAF player board shows as the book's line. Same idea as props.ts fanduelLines: the
+ *  board's market column must match the app on Derek's phone, so it is FanDuel's main line (the
+ *  rung priced closest to even money), read live on the same 120s window as the chips, not the
+ *  line baked into the projections file when it was last generated. */
+export async function cfbFanduelLines(week?: number): Promise<Map<string, number>> {
+  const out = new Map<string, number>();
+  let rows: Row[];
+  try { rows = await fetchRows(); } catch { return out; }
+  if (week !== undefined) {
+    const days = weekDays(week);
+    if (!days) return out;
+    rows = rows.filter((r) => days.has(etDayKey(r.commence)));
+  }
+  // Each book's MAIN line per player-market (the rung closest to even money). FanDuel's where
+  // FanDuel posts one; otherwise the median of the other US books' main lines, snapped to a
+  // half — FanDuel carries 24 of the 45 priced games on a Saturday, and a line the reader can
+  // actually find at a US book beats the stale value baked into the projections file.
+  // Anytime TD has no line: its "line" here is the book's Yes price as an implied %, FanDuel's
+  // where posted, else the median of the other US books' — so the TD board's market column is a
+  // price a reader can find, not the median baked into the projections file.
+  const perBook = new Map<string, Map<string, { line: number; gap: number }>>();
+  for (const r of rows) {
+    if (!r.player) continue;
+    if (r.side !== "Over" && r.side !== "Yes") continue;
+    const k = `${r.player}|${r.market}`;
+    const books = perBook.get(k) ?? perBook.set(k, new Map()).get(k)!;
+    if (r.line === null) {
+      if (r.market !== "player_anytime_td" || r.price == null || books.has(r.book)) continue;
+      books.set(r.book, { line: impliedPct(r.price), gap: 0 });
+      continue;
+    }
+    const gap = Math.abs(r.price ?? 0);
+    const prev = books.get(r.book);
+    if (!prev || gap < prev.gap) books.set(r.book, { line: r.line, gap });
+  }
+  for (const [k, books] of perBook) {
+    const fd = books.get("fanduel");
+    if (fd) { out.set(k, fd.line); continue; }
+    const lines = [...books.values()].map((b) => b.line).sort((a, b) => a - b);
+    const mid = lines.length % 2 ? lines[(lines.length - 1) / 2] : (lines[lines.length / 2 - 1] + lines[lines.length / 2]) / 2;
+    out.set(k, k.endsWith("|player_anytime_td") ? Math.round(mid * 10) / 10 : Math.round(mid * 2) / 2);
+  }
+  return out;
 }
 
 // Better bet for the member (same player+side): lower line for Over, higher for Under, then

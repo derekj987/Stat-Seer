@@ -908,6 +908,9 @@ def main():
     ts += "// not graded against closing lines yet.\n"
     ts += "export interface PlayerProj { game: string; commence: string; player: string; team: string;\n"
     ts += "  pos: string; cat: string; market: string; book: number | null; src?: string | null;\n"
+    # NCAAF stamps the player's usage-ranked depth slot ("WR2") on the row (cfb_player_proj.py
+    # usage_ranks); the NFL side reads its slots from the depth chart at render and leaves it out.
+    ts += "  slot?: string | null;\n"
     ts += "  proj: number | null; g: number;\n"
     ts += "  cOver: number; cG: number; pOver: number; pG: number;\n"
     ts += "  hOver: number; hG: number; rOver: number; rG: number;\n"

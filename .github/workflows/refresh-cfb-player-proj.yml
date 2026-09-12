@@ -3,13 +3,15 @@ name: Refresh CFB player projections
 # Rebuilds web/lib/ncaafPlayerProjections.ts (the /ncaaf/model/players data), then commits it —
 # Vercel auto-deploys. The board is driven by the UPCOMING slate x depth charts (every game gets
 # our line-blind projections), with a book line attached where cfb_prop_snapshots has one.
-# Daily in-season so new games/props flow in and hit-rates track the posted line as it moves.
-# Runs after the noon props capture (capture-cfb-props at 12:00 UTC) so it sees fresh lines.
-# All times UTC.
+# Twice daily in-season so new games/props flow in and hit-rates track the posted line as it
+# moves: books post most college props Friday night and Saturday morning, and a single 13:00 UTC
+# run left the file a day behind the market on game day (the view fills any player priced since
+# with a live row, but his projection waits for this job). Each run follows a props capture
+# (capture-cfb-props, every 2 hours) so it sees fresh lines. All times UTC.
 
 on:
   schedule:
-    - cron: "0 13 * 8-12,1 *"   # daily 13:00 UTC, Aug-Jan (season + bowls)
+    - cron: "0 1,13 * 8-12,1 *"   # 01:00 + 13:00 UTC, Aug-Jan (season + bowls)
   workflow_dispatch: {}         # manual "Run workflow"
 
 concurrency:
