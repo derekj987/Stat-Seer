@@ -656,6 +656,36 @@ export const NCAAF_MODEL = {
         "featured": true
       },
       {
+        "away": "Wagner",
+        "home": "James Madison",
+        "neutral": 0,
+        "commence": "2026-09-12T16:00:00.000Z",
+        "apAway": null,
+        "apHome": null,
+        "conf": "Sun Belt",
+        "marketSpread": {
+          "fav": "James Madison",
+          "num": -46.5
+        },
+        "marketTotal": 55.5,
+        "projSpread": {
+          "fav": "James Madison",
+          "num": -46.7
+        },
+        "projTotal": 54.8,
+        "homeRiser": 0,
+        "awayRiser": 0,
+        "pick": {
+          "side": "James Madison",
+          "num": -46.5
+        },
+        "totalLean": null,
+        "off": false,
+        "rated": true,
+        "crossDiv": true,
+        "featured": true
+      },
+      {
         "away": "Wake Forest",
         "home": "Purdue",
         "neutral": 0,
@@ -842,6 +872,36 @@ export const NCAAF_MODEL = {
           "dir": "OVER",
           "num": 46.5
         },
+        "off": false,
+        "rated": true,
+        "crossDiv": true,
+        "featured": false
+      },
+      {
+        "away": "Gardner-Webb",
+        "home": "Liberty",
+        "neutral": 0,
+        "commence": "2026-09-12T16:00:00.000Z",
+        "apAway": null,
+        "apHome": null,
+        "conf": "Conference USA",
+        "marketSpread": {
+          "fav": "Liberty",
+          "num": -27.5
+        },
+        "marketTotal": 54.5,
+        "projSpread": {
+          "fav": "Liberty",
+          "num": -26.9
+        },
+        "projTotal": 54.0,
+        "homeRiser": 0,
+        "awayRiser": 0,
+        "pick": {
+          "side": "Gardner-Webb",
+          "num": 27.5
+        },
+        "totalLean": null,
         "off": false,
         "rated": true,
         "crossDiv": true,
@@ -1127,36 +1187,6 @@ export const NCAAF_MODEL = {
         "off": false,
         "rated": true,
         "crossDiv": false,
-        "featured": true
-      },
-      {
-        "away": "Wagner",
-        "home": "James Madison",
-        "neutral": 0,
-        "commence": "2026-09-12T19:30:00.000Z",
-        "apAway": null,
-        "apHome": null,
-        "conf": "Sun Belt",
-        "marketSpread": {
-          "fav": "James Madison",
-          "num": -46.5
-        },
-        "marketTotal": 56.5,
-        "projSpread": {
-          "fav": "James Madison",
-          "num": -46.7
-        },
-        "projTotal": 54.8,
-        "homeRiser": 0,
-        "awayRiser": 0,
-        "pick": {
-          "side": "James Madison",
-          "num": -46.5
-        },
-        "totalLean": null,
-        "off": false,
-        "rated": true,
-        "crossDiv": true,
         "featured": true
       },
       {
@@ -1862,36 +1892,6 @@ export const NCAAF_MODEL = {
         "off": true,
         "rated": true,
         "crossDiv": false,
-        "featured": false
-      },
-      {
-        "away": "Gardner-Webb",
-        "home": "Liberty",
-        "neutral": 0,
-        "commence": "2026-09-12T22:00:00.000Z",
-        "apAway": null,
-        "apHome": null,
-        "conf": "Conference USA",
-        "marketSpread": {
-          "fav": "Liberty",
-          "num": -27.5
-        },
-        "marketTotal": 54.5,
-        "projSpread": {
-          "fav": "Liberty",
-          "num": -26.9
-        },
-        "projTotal": 54.0,
-        "homeRiser": 0,
-        "awayRiser": 0,
-        "pick": {
-          "side": "Gardner-Webb",
-          "num": 27.5
-        },
-        "totalLean": null,
-        "off": false,
-        "rated": true,
-        "crossDiv": true,
         "featured": false
       },
       {
@@ -6645,6 +6645,36 @@ export const NCAAF_MODEL = {
             "featured": true
           },
           {
+            "away": "Wagner",
+            "home": "James Madison",
+            "neutral": 0,
+            "commence": "2026-09-12T16:00:00.000Z",
+            "apAway": null,
+            "apHome": null,
+            "conf": "Sun Belt",
+            "marketSpread": {
+              "fav": "James Madison",
+              "num": -46.5
+            },
+            "marketTotal": 55.5,
+            "projSpread": {
+              "fav": "James Madison",
+              "num": -46.7
+            },
+            "projTotal": 54.8,
+            "homeRiser": 0,
+            "awayRiser": 0,
+            "pick": {
+              "side": "James Madison",
+              "num": -46.5
+            },
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": true,
+            "featured": true
+          },
+          {
             "away": "Wake Forest",
             "home": "Purdue",
             "neutral": 0,
@@ -6831,6 +6861,36 @@ export const NCAAF_MODEL = {
               "dir": "OVER",
               "num": 46.5
             },
+            "off": false,
+            "rated": true,
+            "crossDiv": true,
+            "featured": false
+          },
+          {
+            "away": "Gardner-Webb",
+            "home": "Liberty",
+            "neutral": 0,
+            "commence": "2026-09-12T16:00:00.000Z",
+            "apAway": null,
+            "apHome": null,
+            "conf": "Conference USA",
+            "marketSpread": {
+              "fav": "Liberty",
+              "num": -27.5
+            },
+            "marketTotal": 54.5,
+            "projSpread": {
+              "fav": "Liberty",
+              "num": -26.9
+            },
+            "projTotal": 54.0,
+            "homeRiser": 0,
+            "awayRiser": 0,
+            "pick": {
+              "side": "Gardner-Webb",
+              "num": 27.5
+            },
+            "totalLean": null,
             "off": false,
             "rated": true,
             "crossDiv": true,
@@ -7116,36 +7176,6 @@ export const NCAAF_MODEL = {
             "off": false,
             "rated": true,
             "crossDiv": false,
-            "featured": true
-          },
-          {
-            "away": "Wagner",
-            "home": "James Madison",
-            "neutral": 0,
-            "commence": "2026-09-12T19:30:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "Sun Belt",
-            "marketSpread": {
-              "fav": "James Madison",
-              "num": -46.5
-            },
-            "marketTotal": 56.5,
-            "projSpread": {
-              "fav": "James Madison",
-              "num": -46.7
-            },
-            "projTotal": 54.8,
-            "homeRiser": 0,
-            "awayRiser": 0,
-            "pick": {
-              "side": "James Madison",
-              "num": -46.5
-            },
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": true,
             "featured": true
           },
           {
@@ -7851,36 +7881,6 @@ export const NCAAF_MODEL = {
             "off": true,
             "rated": true,
             "crossDiv": false,
-            "featured": false
-          },
-          {
-            "away": "Gardner-Webb",
-            "home": "Liberty",
-            "neutral": 0,
-            "commence": "2026-09-12T22:00:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "Conference USA",
-            "marketSpread": {
-              "fav": "Liberty",
-              "num": -27.5
-            },
-            "marketTotal": 54.5,
-            "projSpread": {
-              "fav": "Liberty",
-              "num": -26.9
-            },
-            "projTotal": 54.0,
-            "homeRiser": 0,
-            "awayRiser": 0,
-            "pick": {
-              "side": "Gardner-Webb",
-              "num": 27.5
-            },
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": true,
             "featured": false
           },
           {
