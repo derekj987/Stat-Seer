@@ -239,6 +239,10 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
   const modelById = new Map<string, ModelPrediction>(preds.map((p) => [p.eventId, p]));
   let refs: Awaited<ReturnType<typeof weekRefs>> = new Map();
   try { refs = await weekRefs(week, SEASON); } catch { /* assignments post game-week */ }
+  // `consensus` is FanDuel's line where posted (lib/board.ts LINE_BOOK), the US-book median only
+  // where it is not — so this column matches the app on Derek's phone.
+  const fdEvents = new Set(board.filter((r) => r.book === "fanduel" && r.market === "spreads").map((r) => r.event_id));
+  const fdGames = built.filter((g) => fdEvents.has(g.eventId)).length;
   const envs: Env[] = built.map((g) => {
     const mp = modelById.get(g.eventId);
     const spread = g.spread.consensus;
@@ -345,9 +349,13 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
           <span className="hb-bar__title hb-bar__title--gold">Week {week} numbers crunched</span>
           <span className="hb-bar__count">{scored.length} games</span>
           <Tip label="About this board" text={<>
-            <span className="tip__lead">The market&apos;s <b>spread</b> and <b>total</b> for each game — the <b>median</b> across the
-            US sportsbooks we track — with our <b>line-blind model&apos;s</b> own read of each beside it. Market
-            numbers on the left, ours on the right.</span>
+            <span className="tip__lead">The market&apos;s <b>spread</b> and <b>total</b> for each game — <b>FanDuel&apos;s</b> current line,
+            captured through the week — with our <b>line-blind model&apos;s</b> own read of each beside it. Market
+            numbers on the left, ours on the right.</span><br /><br />
+            {fdGames < scored.length && <>{scored.length - fdGames} game{scored.length - fdGames === 1 ? "" : "s"} FanDuel has not posted
+            yet show the median across the other US books instead.<br /><br /></>}
+            Line shopping — every book&apos;s number and the best price per side — is on{" "}
+            <a href="/lines">Line Shopping</a>.
           </>} />
           <PinButton size="sm" pin={{ id: "/model?only=numbers-crunched", kind: "model", label: "The Model · Numbers Crunched", detail: `NFL · Week ${week}`, href: `/model?week=${week}&only=numbers-crunched` }} />
           <span className="hb-bar__chev" aria-hidden="true">▾</span>

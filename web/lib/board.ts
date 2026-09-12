@@ -118,11 +118,19 @@ function lineSide(rows: OddsRow[], want: "max" | "min"): Line | null {
 // half so what we show is always a real, bettable number.
 const halfPt = (x: number) => Math.round(x * 2) / 2;
 
+/** THE market line a board shows is FanDuel's, where FanDuel has posted one; the half-point-snapped
+ *  median across US books only where it has not. Derek's rule, applied first to the player board,
+ *  then NCAAF, then here: a median across books is nobody's number, and a reader checks the board
+ *  against FanDuel. The field keeps its name (`consensus`) because every reader — NFL/MLB/NCAAF
+ *  model boards, the homepage card, Context — reads it as "the market line", which it still is. */
+export const LINE_BOOK = "fanduel";
+const bookPoint = (rows: OddsRow[]) => rows.find((r) => r.book === LINE_BOOK && r.outcome_point !== null)?.outcome_point ?? null;
+
 function spread(rows: OddsRow[], home: string, away: string): Game["spread"] {
   const sides: Record<string, OddsRow[]> = {};
   for (const r of rows) (sides[r.outcome_name] ??= []).push(r);
   const homePts = (sides[home] ?? []).map((r) => r.outcome_point).filter((p): p is number => p !== null);
-  const consensus = homePts.length ? halfPt(median(homePts)) : null;
+  const consensus = bookPoint(sides[home] ?? []) ?? (homePts.length ? halfPt(median(homePts)) : null);
   const key = consensus !== null && KEY_NUMBERS[Math.abs(consensus)]
     ? { num: Math.abs(consensus), cost: KEY_NUMBERS[Math.abs(consensus)] }
     : null;
@@ -138,7 +146,7 @@ function total(rows: OddsRow[]): Game["total"] {
   const sides: Record<string, OddsRow[]> = {};
   for (const r of rows) (sides[r.outcome_name] ??= []).push(r);
   const pts = rows.map((r) => r.outcome_point).filter((p): p is number => p !== null);
-  const consensus = pts.length ? halfPt(median(pts)) : null;
+  const consensus = bookPoint(sides["Over"] ?? []) ?? (pts.length ? halfPt(median(pts)) : null);
   const key = consensus !== null && TOTAL_KEY_NUMBERS[consensus]
     ? { num: consensus, cost: TOTAL_KEY_NUMBERS[consensus] }
     : null;

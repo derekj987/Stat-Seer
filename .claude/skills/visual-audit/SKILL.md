@@ -475,6 +475,18 @@ well calibrated." Nobody had measured it; when someone did, it was 2.1pp out. Sa
 as the hardcoded `is-online` class: the page stated a fact it never checked. It now prints the two
 numbers and the gap.
 
+### The market line on every board is FanDuel's — one place, `LINE_BOOK` in lib/board.ts
+The rule arrived three times: the NFL player board ("Sam Darnold is listed at 228.5 on
+FanDuel. We have him at 230.5"), then NCAAF ("the market spread and over/unders do not match the
+current lines on FanDuel"), then the NFL model board, whose "market" spread and total were still a
+half-point-snapped median across ten books. `buildBoard()` now sets `spread.consensus` /
+`total.consensus` to FanDuel's posted point where FanDuel has one and to the US-book median only
+where it has not — so every reader of that field (NFL/MLB/NCAAF model boards, the homepage card,
+Context, the run-line column) shows the same number as the app on Derek's phone, and the
+sweet-spot key is computed on the line actually shown. Verified row for row against FanDuel's
+rows in `odds_snapshots` (DET@BUF −3.5/52.5, NO@BAL −8.5/46.5, CIN@HOU −2.5/46.5 …). Before
+building a new board with a market column, read `LINE_BOOK`; never re-derive a median.
+
 ### A week-scoped board must be able to say WHICH week its data is for
 `/ncaaf/model/players` rendered week 1's games on every week of the season. The generated data set
 carried `season` and `prior` but **no week**, so the view gated on `projections.length > 0` — true
