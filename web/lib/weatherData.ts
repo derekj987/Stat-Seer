@@ -7,8 +7,7 @@ export interface GameWeather { eventId: string; game: string; home: string; away
   gustMph: number|null; precipPct: number|null; conditions: string|null; windFlag: boolean }
 export const WEATHER_SEASON = 2026;
 export const WEATHER_WEEK = 1;
-export const WEATHER_UPDATED = "2026-09-14T03:08Z";
+export const WEATHER_UPDATED = "2026-09-14T14:41Z";
 export const GAME_WEATHER: GameWeather[] = [
-  {"eventId": "3e646c7479c57f5d9752d8c7dfe7059b", "game": "DAL @ NYG", "home": "NYG", "away": "DAL", "commence": "2026-09-14T00:20:00+00:00", "neutral": false, "venue": "MetLife Stadium", "city": "East Rutherford", "state": "NJ", "roof": "outdoor", "indoor": false, "status": "pending", "tempF": null, "windMph": null, "gustMph": null, "precipPct": null, "conditions": null, "windFlag": false},
-  {"eventId": "5ad8135dc2b5f27de0b777acd317855a", "game": "DEN @ KC", "home": "KC", "away": "DEN", "commence": "2026-09-15T00:15:00+00:00", "neutral": false, "venue": "Arrowhead Stadium", "city": "Kansas City", "state": "MO", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 91, "windMph": 16, "gustMph": 33, "precipPct": 1, "conditions": "Clear", "windFlag": true},
+  {"eventId": "5ad8135dc2b5f27de0b777acd317855a", "game": "DEN @ KC", "home": "KC", "away": "DEN", "commence": "2026-09-15T00:15:00+00:00", "neutral": false, "venue": "Arrowhead Stadium", "city": "Kansas City", "state": "MO", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 90, "windMph": 16, "gustMph": 33, "precipPct": 0, "conditions": "Clear", "windFlag": true},
 ];
