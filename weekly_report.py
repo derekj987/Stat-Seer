@@ -243,11 +243,12 @@ def summarize_props(props):
         by[p["cat"]].append(p)
     out = {}
     for cat, rows in by.items():
-        graded = [r for r in rows if r.get("actual") is not None]
+        voided = [r for r in rows if r.get("result") == "void"]
+        graded = [r for r in rows if r.get("actual") is not None and r.get("result") != "void"]
         leaned = [r for r in graded if r.get("lean")]
         cont = [r for r in graded if cat != "td" and r.get("proj") is not None]
         out[cat] = {
-            "n": len(rows), "graded": len(graded),
+            "n": len(rows), "graded": len(graded), "voided": len(voided),
             "lean": tally(r["result"] for r in leaned),
             "overLean": tally(r["result"] for r in leaned if r["lean"] == "over"),
             "underLean": tally(r["result"] for r in leaned if r["lean"] == "under"),
@@ -278,6 +279,50 @@ def summarize_props(props):
 
 
 # ----------------------------------------------------------------------------- NFL
+# VOIDS. Derek: "When a player gets injured, there's bet protection built in where that player
+# will be voided from betslips. It is not technically a loss." So a prop on a player who did not
+# really play is a VOID on the card, excluded from every tally, not a loss. The test is snaps:
+# an established starter (>= VOID_PRIOR_SHARE of his team's offensive snaps last season) who saw
+# <= VOID_SNAP_SHARE of them this game left early or never dressed (Sam Darnold 10%, Kyler
+# Murray 17%, Dylan Sampson 0% in week 1). A committee back at his usual 30% is NOT voided --
+# that is his role, and the line priced it.
+VOID_SNAP_SHARE, VOID_PRIOR_SHARE = 0.20, 0.50
+_SNAPS = {}
+
+
+def nfl_snap_shares(season, week):
+    """{norm(player): offense_pct} for the week, and {norm(player): mean offense_pct} for the
+    prior season. Empty when the nflverse snap files are not on disk."""
+    if (season, week) in _SNAPS:
+        return _SNAPS[(season, week)]
+    import pandas as pd
+    cur, prior = {}, {}
+    p_cur = os.path.join(ROOT, "data", f"snaps_{season}.csv")
+    p_pri = os.path.join(ROOT, "data", f"snaps_{season - 1}.csv")
+    if os.path.exists(p_cur):
+        d = pd.read_csv(p_cur, low_memory=False)
+        d = d[(d.week == week) & (d.game_type == "REG")]
+        for _, r in d.iterrows():
+            if isinstance(r.player, str):
+                cur[norm(r.player)] = float(r.offense_pct or 0)
+    if os.path.exists(p_pri):
+        d = pd.read_csv(p_pri, low_memory=False)
+        d = d[d.game_type == "REG"]
+        for name, g in d.groupby("player"):
+            if isinstance(name, str):
+                prior[norm(name)] = float(g.offense_pct.mean())
+    _SNAPS[(season, week)] = (cur, prior)
+    return cur, prior
+
+
+def nfl_void(player, season, week):
+    cur, prior = nfl_snap_shares(season, week)
+    k = norm(player)
+    if k not in cur:
+        return False
+    return cur[k] <= VOID_SNAP_SHARE and prior.get(k, 0.0) >= VOID_PRIOR_SHARE
+
+
 def nfl_games_csv():
     import grade_predictions as gp
     g = gp.fetch_fresh_games()
@@ -423,6 +468,13 @@ def build_nfl(season, week):
             row = {"player": r["player"], "team": r["team"], "pos": r["pos"], "game": game,
                    "cat": r["cat"], "market": r["market"], "line": line, "lineSrc": src,
                    "proj": r["proj"], "lean": prop_lean({**r, "book": line}, cen), "actual": None, "result": None}
+            if nfl_void(r["player"], season, week):
+                row["result"] = "void"
+                if a is not None and r["market"] != "anytime_td":
+                    v = a.get(NFL_STAT[r["market"]])
+                    row["actual"] = float(v) if v is not None and not (isinstance(v, float) and v != v) else None
+                props.append(row)
+                continue
             if a is not None:
                 if r["market"] == "anytime_td":
                     scored = (float(a.rushing_tds or 0) + float(a.receiving_tds or 0)) > 0
@@ -573,6 +625,20 @@ def build_ncaaf(season, week):
             row = {"player": r["player"], "team": r.get("team") or "", "pos": r.get("pos") or "", "game": r["game"],
                    "cat": r["cat"], "market": r["market"], "line": r["book"], "lineSrc": "file",
                    "proj": r.get("proj"), "lean": prop_lean(r, cen), "actual": None, "result": None}
+            # No snap counts in college: a QB priced to pass who threw fewer than 8 times, or a
+            # back/receiver with a yardage line and no touch at all, did not really play -- void.
+            if a is not None:
+                att = None
+                m = re.match(r"\s*\d+\s*/\s*(\d+)", str(a.get("passing|C/ATT") or ""))
+                if m:
+                    att = float(m.group(1))
+                touches = (num(a.get("rushing|CAR")) or 0) + (num(a.get("receiving|REC")) or 0)
+                if (r["cat"] == "passing" and att is not None and att < 8) or \
+                        (r["cat"] in ("rushing", "receiving", "receptions") and touches == 0 and (r["book"] or 0) >= 15):
+                    row["result"] = "void"
+                    row["actual"] = num(a.get(CFB_STAT.get(r["market"], ""))) if r["market"] != "anytime_td" else None
+                    props.append(row)
+                    continue
             if a is not None:
                 if r["market"] == "anytime_td":
                     scored = (num(a.get("rushing|TD")) or 0) + (num(a.get("receiving|TD")) or 0) > 0
@@ -620,14 +686,14 @@ def write(cards):
         "export interface ReportProp {\n"
         "  player: string; team: string; pos: string; game: string; cat: string; market: string;\n"
         "  line: number; lineSrc: string; proj: number | null; lean: \"over\" | \"under\" | null;\n"
-        "  actual: number | null; result: WL | null;\n"
+        "  actual: number | null; result: WL | \"void\" | null;\n"
         "}\n"
         "export interface GameSummary {\n"
         "  games: number; su: Tally; ats: Tally; lay: Tally; dog: Tally; totals: Tally; overs: Tally; unders: Tally;\n"
         "  brier: number | null; marketBrier: number | null; marginMae: number | null; marketMarginMae: number | null;\n"
         "}\n"
         "export interface PropCatSummary {\n"
-        "  n: number; graded: number; lean: Tally; overLean: Tally; underLean: Tally;\n"
+        "  n: number; graded: number; voided: number; lean: Tally; overLean: Tally; underLean: Tally;\n"
         "  projMae: number | null; lineMae: number | null; projAboveLine: number | null; actualOver: number | null;\n"
         "  projBias: number | null;\n"
         "  tdRows?: number; meanOurs?: number; meanBook?: number; scoredPct?: number; brierOurs?: number; brierBook?: number;\n"
@@ -651,7 +717,7 @@ def print_summary(card):
           f"   totals {s['totals']['w']}-{s['totals']['l']}-{s['totals']['p']} (overs {s['overs']['w']}-{s['overs']['l']}, unders {s['unders']['w']}-{s['unders']['l']})")
     print(f"  margin MAE ours {s['marginMae']} vs market {s['marketMarginMae']}   Brier ours {s['brier']} vs market {s['marketBrier']}")
     for cat, c in card["propSummary"].items():
-        print(f"  props {cat:10} rows {c['n']:4} graded {c['graded']:4}  lean {c['lean']['w']}-{c['lean']['l']}"
+        print(f"  props {cat:10} rows {c['n']:4} graded {c['graded']:4} void {c['voided']:3}  lean {c['lean']['w']}-{c['lean']['l']}"
               f" (over {c['overLean']['w']}-{c['overLean']['l']}, under {c['underLean']['w']}-{c['underLean']['l']})"
               f"  MAE ours {c['projMae']} book {c['lineMae']}  proj>line {c['projAboveLine']}% actual over {c['actualOver']}%  bias {c['projBias']}"
               + (f"  | TD: ours {c['meanOurs']}% book {c['meanBook']}% scored {c['scoredPct']}%  Brier ours {c['brierOurs']} book {c['brierBook']}" if "tdRows" in c else ""))

@@ -12,14 +12,14 @@ export interface ReportGame {
 export interface ReportProp {
   player: string; team: string; pos: string; game: string; cat: string; market: string;
   line: number; lineSrc: string; proj: number | null; lean: "over" | "under" | null;
-  actual: number | null; result: WL | null;
+  actual: number | null; result: WL | "void" | null;
 }
 export interface GameSummary {
   games: number; su: Tally; ats: Tally; lay: Tally; dog: Tally; totals: Tally; overs: Tally; unders: Tally;
   brier: number | null; marketBrier: number | null; marginMae: number | null; marketMarginMae: number | null;
 }
 export interface PropCatSummary {
-  n: number; graded: number; lean: Tally; overLean: Tally; underLean: Tally;
+  n: number; graded: number; voided: number; lean: Tally; overLean: Tally; underLean: Tally;
   projMae: number | null; lineMae: number | null; projAboveLine: number | null; actualOver: number | null;
   projBias: number | null;
   tdRows?: number; meanOurs?: number; meanBook?: number; scoredPct?: number; brierOurs?: number; brierBook?: number;
@@ -35,7 +35,7 @@ export const REPORT_CARDS: ReportCard[] = [
   "season": 2026,
   "week": 2,
   "label": "NCAAF Week 2",
-  "generatedAt": "2026-09-15T15:49:45+00:00",
+  "generatedAt": "2026-09-15T21:12:53+00:00",
   "publishedRefs": [
    "13c1937ae382d51c45d28f8ba7b02756dd82d1c3",
    "2523ae6e71d226866f66f8e5b640fcc103694b8c",
@@ -7616,7 +7616,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "proj": 36.3,
     "lean": null,
     "actual": null,
-    "result": null
+    "result": "void"
    },
    {
     "player": "Garrett Oakley",
@@ -18452,7 +18452,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "proj": 40.7,
     "lean": "under",
     "actual": null,
-    "result": null
+    "result": "void"
    },
    {
     "player": "Wayne Knight",
@@ -22729,6 +22729,7 @@ export const REPORT_CARDS: ReportCard[] = [
    "receiving": {
     "n": 204,
     "graded": 165,
+    "voided": 2,
     "lean": {
      "w": 56,
      "l": 42,
@@ -22753,6 +22754,7 @@ export const REPORT_CARDS: ReportCard[] = [
    "receptions": {
     "n": 173,
     "graded": 138,
+    "voided": 0,
     "lean": {
      "w": 48,
      "l": 47,
@@ -22777,6 +22779,7 @@ export const REPORT_CARDS: ReportCard[] = [
    "td": {
     "n": 795,
     "graded": 596,
+    "voided": 0,
     "lean": {
      "w": 352,
      "l": 236,
@@ -22807,6 +22810,7 @@ export const REPORT_CARDS: ReportCard[] = [
    "passing": {
     "n": 110,
     "graded": 104,
+    "voided": 0,
     "lean": {
      "w": 38,
      "l": 35,
@@ -22831,6 +22835,7 @@ export const REPORT_CARDS: ReportCard[] = [
    "rushing": {
     "n": 107,
     "graded": 98,
+    "voided": 0,
     "lean": {
      "w": 41,
      "l": 29,
@@ -22859,7 +22864,7 @@ export const REPORT_CARDS: ReportCard[] = [
   "season": 2026,
   "week": 1,
   "label": "NFL Week 1",
-  "generatedAt": "2026-09-15T15:48:36+00:00",
+  "generatedAt": "2026-09-15T21:11:45+00:00",
   "publishedRefs": [
    "01708f263695fa48802560a73d41bf271d036a67",
    "059c47cfaab734e7e3f1989083971f7f5971d4ff",
@@ -23483,7 +23488,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "proj": 239.1,
     "lean": null,
     "actual": 13.0,
-    "result": null
+    "result": "void"
    },
    {
     "player": "Drake Maye",
@@ -23511,7 +23516,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "proj": 1.34,
     "lean": "under",
     "actual": 0.0,
-    "result": "win"
+    "result": "void"
    },
    {
     "player": "Jaxon Smith-Njigba",
@@ -23945,7 +23950,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "proj": 9.1,
     "lean": "over",
     "actual": 0.0,
-    "result": "loss"
+    "result": "void"
    },
    {
     "player": "Rashid Shaheed",
@@ -24182,8 +24187,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 10.9,
     "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
+    "actual": null,
+    "result": "void"
    },
    {
     "player": "Kyle Williams",
@@ -24575,7 +24580,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "proj": 19.5,
     "lean": "over",
     "actual": 12.0,
-    "result": "loss"
+    "result": "void"
    },
    {
     "player": "Kyren Williams",
@@ -24771,7 +24776,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "proj": 1.9,
     "lean": "over",
     "actual": 2.0,
-    "result": "win"
+    "result": "void"
    },
    {
     "player": "Demarcus Robinson",
@@ -25120,8 +25125,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 16.0,
     "lean": "under",
-    "actual": 0.0,
-    "result": "win"
+    "actual": null,
+    "result": "void"
    },
    {
     "player": "Kyle Juszczyk",
@@ -29713,7 +29718,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "proj": 31.3,
     "lean": "over",
     "actual": 8.0,
-    "result": "loss"
+    "result": "void"
    },
    {
     "player": "Dylan Sampson",
@@ -29881,7 +29886,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "proj": 2.5,
     "lean": "over",
     "actual": 1.0,
-    "result": "loss"
+    "result": "void"
    },
    {
     "player": "Quinshon Judkins",
@@ -30174,8 +30179,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 17.6,
     "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
+    "actual": null,
+    "result": "void"
    },
    {
     "player": "Raheim Sanders",
@@ -31798,8 +31803,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 19.9,
     "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
+    "actual": null,
+    "result": "void"
    },
    {
     "player": "Elic Ayomanor",
@@ -32653,7 +32658,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "proj": 23.6,
     "lean": "over",
     "actual": null,
-    "result": null
+    "result": "void"
    },
    {
     "player": "Bam Knight",
@@ -32708,8 +32713,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 16.0,
     "lean": "under",
-    "actual": 0.0,
-    "result": "win"
+    "actual": null,
+    "result": "void"
    },
    {
     "player": "Keaton Mitchell",
@@ -33703,7 +33708,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "proj": 212.7,
     "lean": "over",
     "actual": 18.0,
-    "result": "loss"
+    "result": "void"
    },
    {
     "player": "Kyler Murray",
@@ -33717,7 +33722,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "proj": 1.42,
     "lean": "under",
     "actual": 0.0,
-    "result": "win"
+    "result": "void"
    },
    {
     "player": "Jordan Love",
@@ -34081,7 +34086,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "proj": 25.5,
     "lean": "over",
     "actual": 9.0,
-    "result": "loss"
+    "result": "void"
    },
    {
     "player": "Jordan Love",
@@ -34192,8 +34197,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 29.4,
     "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
+    "actual": null,
+    "result": "void"
    },
    {
     "player": "Tucker Kraft",
@@ -35858,8 +35863,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 28.3,
     "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
+    "actual": null,
+    "result": "void"
    },
    {
     "player": "Devin Singletary",
@@ -37041,39 +37046,41 @@ export const REPORT_CARDS: ReportCard[] = [
   "propSummary": {
    "passing": {
     "n": 64,
-    "graded": 64,
+    "graded": 60,
+    "voided": 4,
     "lean": {
-     "w": 18,
-     "l": 23,
+     "w": 16,
+     "l": 22,
      "p": 0
     },
     "overLean": {
      "w": 11,
-     "l": 13,
+     "l": 12,
      "p": 0
     },
     "underLean": {
-     "w": 7,
+     "w": 5,
      "l": 10,
      "p": 0
     },
-    "projMae": 33.6,
-    "lineMae": 34.8,
-    "projAboveLine": 35,
-    "actualOver": 47,
-    "projBias": 4.6
+    "projMae": 28.6,
+    "lineMae": 30.0,
+    "projAboveLine": 36,
+    "actualOver": 50,
+    "projBias": -2.4
    },
    "receiving": {
     "n": 190,
-    "graded": 184,
+    "graded": 182,
+    "voided": 2,
     "lean": {
      "w": 64,
-     "l": 60,
+     "l": 58,
      "p": 0
     },
     "overLean": {
      "w": 33,
-     "l": 31,
+     "l": 29,
      "p": 0
     },
     "underLean": {
@@ -37081,23 +37088,24 @@ export const REPORT_CARDS: ReportCard[] = [
      "l": 29,
      "p": 0
     },
-    "projMae": 21.5,
-    "lineMae": 20.0,
+    "projMae": 21.6,
+    "lineMae": 20.2,
     "projAboveLine": 69,
-    "actualOver": 49,
-    "projBias": -0.2
+    "actualOver": 50,
+    "projBias": -0.4
    },
    "receptions": {
     "n": 189,
-    "graded": 183,
+    "graded": 181,
+    "voided": 2,
     "lean": {
-     "w": 72,
-     "l": 61,
+     "w": 71,
+     "l": 60,
      "p": 0
     },
     "overLean": {
-     "w": 34,
-     "l": 28,
+     "w": 33,
+     "l": 27,
      "p": 0
     },
     "underLean": {
@@ -37113,15 +37121,16 @@ export const REPORT_CARDS: ReportCard[] = [
    },
    "rushing": {
     "n": 88,
-    "graded": 87,
+    "graded": 85,
+    "voided": 2,
     "lean": {
      "w": 29,
-     "l": 31,
+     "l": 29,
      "p": 0
     },
     "overLean": {
      "w": 17,
-     "l": 15,
+     "l": 13,
      "p": 0
     },
     "underLean": {
@@ -37129,27 +37138,28 @@ export const REPORT_CARDS: ReportCard[] = [
      "l": 16,
      "p": 0
     },
-    "projMae": 18.3,
-    "lineMae": 16.5,
-    "projAboveLine": 67,
-    "actualOver": 53,
-    "projBias": -4.1
+    "projMae": 18.5,
+    "lineMae": 16.7,
+    "projAboveLine": 66,
+    "actualOver": 54,
+    "projBias": -4.5
    },
    "td": {
     "n": 439,
-    "graded": 347,
+    "graded": 340,
+    "voided": 8,
     "lean": {
-     "w": 132,
-     "l": 168,
+     "w": 130,
+     "l": 163,
      "p": 0
     },
     "overLean": {
      "w": 17,
-     "l": 122,
+     "l": 117,
      "p": 0
     },
     "underLean": {
-     "w": 115,
+     "w": 113,
      "l": 46,
      "p": 0
     },
@@ -37158,12 +37168,12 @@ export const REPORT_CARDS: ReportCard[] = [
     "projAboveLine": null,
     "actualOver": null,
     "projBias": null,
-    "tdRows": 300,
+    "tdRows": 293,
     "meanOurs": 20.8,
-    "meanBook": 21.8,
-    "scoredPct": 21.0,
-    "brierOurs": 0.1396,
-    "brierBook": 0.1359
+    "meanBook": 22.0,
+    "scoredPct": 21.5,
+    "brierOurs": 0.1419,
+    "brierBook": 0.1385
    }
   }
  },
@@ -37172,7 +37182,7 @@ export const REPORT_CARDS: ReportCard[] = [
   "season": 2026,
   "week": 1,
   "label": "NCAAF Week 1",
-  "generatedAt": "2026-09-15T20:24:16+00:00",
+  "generatedAt": "2026-09-15T21:13:29+00:00",
   "publishedRefs": [
    "02a835023de64269535ded74862abfc8c63f4368",
    "0469ae0a00c995fbbf0b5c6b679f364846088ccf",
@@ -50364,6 +50374,7 @@ export const REPORT_CARDS: ReportCard[] = [
    "td": {
     "n": 414,
     "graded": 336,
+    "voided": 0,
     "lean": {
      "w": 183,
      "l": 153,
@@ -50394,6 +50405,7 @@ export const REPORT_CARDS: ReportCard[] = [
    "rushing": {
     "n": 70,
     "graded": 69,
+    "voided": 0,
     "lean": {
      "w": 22,
      "l": 26,
@@ -50418,6 +50430,7 @@ export const REPORT_CARDS: ReportCard[] = [
    "receiving": {
     "n": 98,
     "graded": 80,
+    "voided": 0,
     "lean": {
      "w": 29,
      "l": 26,
@@ -50442,6 +50455,7 @@ export const REPORT_CARDS: ReportCard[] = [
    "passing": {
     "n": 65,
     "graded": 65,
+    "voided": 0,
     "lean": {
      "w": 28,
      "l": 18,
@@ -50466,6 +50480,7 @@ export const REPORT_CARDS: ReportCard[] = [
    "receptions": {
     "n": 28,
     "graded": 23,
+    "voided": 0,
     "lean": {
      "w": 5,
      "l": 5,

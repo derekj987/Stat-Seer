@@ -34,8 +34,11 @@ const spread = (n: number | null) => (n === null ? "—" : n > 0 ? `+${n}` : n =
 const kickFmt = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric" });
 const team = (sport: string, t: string) => (sport === "ncaaf" ? abbrevTeam(t) : t);
 
-function Grade({ r }: { r: WL | null | undefined }) {
+// "void": the player did not really play (left early, never dressed). Derek: books void that
+// slip, so it is neither a win nor a loss here — shown as V and excluded from every tally.
+function Grade({ r }: { r: WL | "void" | null | undefined }) {
   if (!r) return <span className="rc-wl rc-wl--none">—</span>;
+  if (r === "void") return <span className="rc-wl rc-wl--void" title="Voided — the player did not really play (left early or never dressed); books void the slip, so it is neither a win nor a loss">V</span>;
   return <span className={`rc-wl rc-wl--${r}`}>{r === "win" ? "W" : r === "loss" ? "L" : "P"}</span>;
 }
 
@@ -64,7 +67,8 @@ function Card({ c }: { c: ReportCard }) {
   }
   const td = c.propSummary.td;
   // Worst projection misses (continuous markets), then every graded lean, capped.
-  const graded = c.props.filter((p) => p.actual !== null);
+  const voided = c.props.filter((p) => p.result === "void");
+  const graded = c.props.filter((p) => p.actual !== null && p.result !== "void");
   const misses = graded.filter((p) => p.market !== "anytime_td" && p.proj !== null)
     .sort((a, b) => Math.abs((b.proj ?? 0) - (b.actual ?? 0)) - Math.abs((a.proj ?? 0) - (a.actual ?? 0)))
     .slice(0, PROP_CAP);
@@ -104,6 +108,12 @@ function Card({ c }: { c: ReportCard }) {
           <ul className="rc-note__list">{note.learned.map((t, i) => <li key={i}>{t}</li>)}</ul>
           <h3 className="rc-note__h">What changed because of it</h3>
           <ul className="rc-note__list">{note.changed.map((t, i) => <li key={i}>{t}</li>)}</ul>
+          {note.watch && note.watch.length > 0 && (
+            <>
+              <h3 className="rc-note__h">Contenders and pretenders — what next week should test</h3>
+              <ul className="rc-note__list">{note.watch.map((t, i) => <li key={i}>{t}</li>)}</ul>
+            </>
+          )}
           {note.caveat && <p className="rc-note__caveat">{note.caveat}</p>}
         </div>
       )}
@@ -138,7 +148,7 @@ function Card({ c }: { c: ReportCard }) {
       <h3 className="rc-sub">Player props by category</h3>
       <div className="pmscroll">
         <table className="rc-tbl rc-tbl--cat">
-          <thead><tr><th>Category</th><th>Graded</th><th>Leans</th><th>▲ over</th><th>▼ under</th><th>Our error</th><th>Book&apos;s error</th><th>Projected over</th><th>Went over</th></tr></thead>
+          <thead><tr><th>Category</th><th>Graded</th><th>Void</th><th>Leans</th><th>▲ over</th><th>▼ under</th><th>Our error</th><th>Book&apos;s error</th><th>Projected over</th><th>Went over</th></tr></thead>
           <tbody>
             {CAT_ORDER.filter((k) => c.propSummary[k]).map((k) => {
               const ps = c.propSummary[k];
@@ -147,6 +157,7 @@ function Card({ c }: { c: ReportCard }) {
                 <tr key={k}>
                   <td><b>{CAT_LABEL[k]}</b></td>
                   <td className="rc-g__num">{ps.graded}<span className="rc-muted">/{ps.n}</span></td>
+                  <td className="rc-g__num">{ps.voided || <span className="rc-muted">—</span>}</td>
                   <td className="rc-g__num">{k === "td" ? <span className="rc-muted">calibration</span> : <>{fmtRec(ps.lean)}{p !== null && <span className="rc-muted"> {p}%</span>}</>}</td>
                   <td className="rc-g__num">{k === "td" ? "—" : fmtRec(ps.overLean)}</td>
                   <td className="rc-g__num">{k === "td" ? "—" : fmtRec(ps.underLean)}</td>
@@ -169,6 +180,18 @@ function Card({ c }: { c: ReportCard }) {
             <table className="rc-tbl rc-tbl--props">
               <thead><tr><th>Player</th><th>Market</th><th>Close</th><th>Ours</th><th>Actual</th><th>Lean</th></tr></thead>
               <tbody>{misses.map((p) => <tr key={`${p.player}-${p.market}`}><PropRowCells p={p} /></tr>)}</tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {voided.length > 0 && (
+        <section className="rc-chart">
+          <h3 className="rc-sub">Voided <span className="rc-muted">— {voided.length} rows; the player left early or never dressed, so the slip is voided, not lost</span></h3>
+          <div className="pmscroll">
+            <table className="rc-tbl rc-tbl--props">
+              <thead><tr><th>Player</th><th>Market</th><th>Close</th><th>Ours</th><th>Actual</th><th>Lean</th></tr></thead>
+              <tbody>{voided.filter((p) => p.market !== "anytime_td").map((p) => <tr key={`${p.player}-${p.market}`}><PropRowCells p={p} /></tr>)}</tbody>
             </table>
           </div>
         </section>
