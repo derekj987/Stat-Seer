@@ -70,6 +70,14 @@ def load_env(path=".env"):
                 os.environ.setdefault(k.strip(), v.strip())
 
 
+class TransientRead(Exception):
+    """Supabase kept answering 5xx through the retries. Upstream, not ours: the run is skipped
+    (exit 0) and the next scheduled run — 6 hours later — regenerates. Two runs died this way on
+    2026-09-14/15, both while the in-play capture sweeps were writing (18:21 and 01:10 UTC), each
+    with a full traceback and a failure email for an outage that cleared within minutes. A 4xx
+    (bad key, quota) still raises and still emails: that is a break on our side."""
+
+
 def pg(query):
     url = os.environ["SUPABASE_URL"].rstrip("/")
     key = os.environ["SUPABASE_SERVICE_KEY"]
@@ -79,18 +87,21 @@ def pg(query):
             f"{url}/rest/v1/prop_snapshots{query}",
             headers={"apikey": key, "Authorization": f"Bearer {key}",
                      "Range": f"{off}-{off+PAGE-1}", "Range-Unit": "items"})
-        # Transient-retry: a Supabase 5xx / network blip is retried with backoff; a
-        # persistent failure or a genuine 4xx raises so a real outage still surfaces.
-        for attempt in range(3):
+        # Transient-retry: a Supabase 5xx / network blip is retried with backoff (5s, 15s, 45s —
+        # the old 2s/4s never outlasted a real blip); a genuine 4xx raises so a break on our side
+        # still surfaces; a 5xx that outlasts the retries becomes TransientRead (skip the run).
+        for attempt in range(4):
             try:
                 with urllib.request.urlopen(req, timeout=60) as r:
                     page = json.loads(r.read())
                 break
             except (urllib.error.URLError, urllib.error.HTTPError) as e:
                 code = getattr(e, "code", None)
-                if (code and code < 500) or attempt == 2:
+                if code and code < 500:
                     raise
-                time.sleep(2 * (attempt + 1))
+                if attempt == 3:
+                    raise TransientRead(f"Supabase {code or 'network'} persisted through 4 attempts: {e}")
+                time.sleep(5 * 3 ** attempt)
         out += page
         if len(page) < PAGE:
             break
@@ -698,8 +709,12 @@ def main():
         print("ERROR: SUPABASE_URL / SUPABASE_SERVICE_KEY missing in .env", file=sys.stderr)
         sys.exit(1)
 
-    week = latest_week(args.season)
-    props = fetch_props(args.season, week)
+    try:
+        week = latest_week(args.season)
+        props = fetch_props(args.season, week)
+    except TransientRead as e:
+        print(f"{e} — skipping this run (the next scheduled run regenerates)")
+        return 0
     print(f"season={args.season} week={week}: {len(props)} prop quotes")
 
     if args.probe:

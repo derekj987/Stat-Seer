@@ -3953,6 +3953,8 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
    Specificity matters here: `.hb-form td` is (0,1,1), so a bare `.hb-books` (0,1,0) LOSES and the
    cell stays nowrap — verified by getComputedStyle, not by reading the rule. Qualify it. */
 .hb-form td.hb-books{white-space:normal}
+.hb-books__short{display:none}
+@media (max-width:560px){.hb-books__long{display:none}.hb-books__short{display:inline;white-space:nowrap}}
 
 /* Live / final score badge on NCAAF game cards. */
 .lsc{display:inline-flex;align-items:center;gap:5px;margin-left:8px;padding:1px 7px;border-radius:999px;
@@ -5071,6 +5073,9 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
   text-align:left;padding:8px 8px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
 .rc-tbl td{padding:7px 8px;border-bottom:1px solid var(--surface-2);font-size:13px;vertical-align:middle;white-space:nowrap}
 .rc-tbl--props{min-width:720px}
+/* Every row the two-line height (name + game): a continuation row blanks its name and would
+   otherwise be 15px shorter than the row above it (audit, chart-rows-uneven). */
+.rc-tbl--props tbody tr{height:51px}
 .rc-tbl--cat{min-width:760px}
 .rc-g__game b{font-weight:700}
 .rc-g__kick,.rc-p__game{display:block;font-size:11px;color:var(--muted);font-weight:400}

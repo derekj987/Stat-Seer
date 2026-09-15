@@ -20,6 +20,7 @@ import CoachTable from "./CoachTable";
 import Tip from "./Tip";
 import { MoreTable } from "./Nav";
 import { bookName } from "@/lib/slipPricing";
+import { booksCode } from "@/lib/bookLabel";
 
 // Plain-English explanations shown behind each section's medieval "?" seal.
 const TIPS = {
@@ -308,7 +309,12 @@ function NflValueTable({ rows }: { rows: VfRow[] }) {
                   ("BetOnline / BetUS / Bovada / Fanatics / LowVig"). .hb-form td is nowrap, so it
                   overflowed its 34% column and gave the whole table a horizontal scrollbar — only
                   on slates where a line happened to be tied that widely. Let this one wrap. */}
-              <td className="hb-books">{r.books.map(bookName).join(" / ")}</td>
+              {/* Phone: book CODES (DK / MGM) on one line — the wrapped names made a tied row 50px
+                  against 34px for its neighbours (audit, chart-rows-uneven at 375). */}
+              <td className="hb-books" title={r.books.map(bookName).join(" / ")}>
+                <span className="hb-books__long">{r.books.map(bookName).join(" / ")}</span>
+                <span className="hb-books__short">{booksCode(r.books)}</span>
+              </td>
             </tr>
           ))}
         </tbody>

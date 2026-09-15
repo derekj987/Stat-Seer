@@ -222,9 +222,12 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
   const unitFor = (market: string) => (market === "anytime_td" ? "%" : "");
   // Which market each row is — shown in its own column so a player's stacked rows are self-describing
   // ("Drake Maye … Passing yds / Passing TDs") instead of leaving you to infer it from the unit.
+  // Short forms: the Prop column is 76px and "Receiving yds" is 82px of ink — it ellipsized on
+  // every receiving row while the rate columns beside it sat on spare width (audit,
+  // chart-truncated-with-space). The header tooltip carries the long names.
   const PROP_LABELS: Record<string, string> = {
-    pass_yds: "Passing yds", pass_tds: "Passing TDs", rush_yds: "Rushing yds",
-    rec_yds: "Receiving yds", receptions: "Receptions", anytime_td: "Anytime TD",
+    pass_yds: "Pass yds", pass_tds: "Pass TDs", rush_yds: "Rush yds",
+    rec_yds: "Rec yds", receptions: "Receptions", anytime_td: "Anytime TD",
   };
   const propLabel = (market: string) => PROP_LABELS[market] ?? market.replace(/_/g, " ");
   // The Touchdowns tab is a Yes/No prop: relabel the numeric + hit-rate headers.

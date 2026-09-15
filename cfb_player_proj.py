@@ -26,7 +26,9 @@ import os
 import re
 import sqlite3
 import sys
+import time
 import unicodedata
+import urllib.error
 import urllib.parse
 import urllib.request
 
@@ -205,6 +207,10 @@ def cfbd_team_map(odds_names, key):
     return out
 
 
+class TransientRead(Exception):
+    """Supabase kept answering 5xx through the retries — upstream, not ours; skip the run."""
+
+
 def sb_get(path):
     """PostgREST read, PAGED.
 
@@ -227,8 +233,21 @@ def sb_get(path):
                                      headers={"apikey": key, "Authorization": f"Bearer {key}",
                                               "Range-Unit": "items",
                                               "Range": f"{off}-{off + PAGE - 1}"})
-        with urllib.request.urlopen(req, timeout=60) as r:
-            page = json.loads(r.read())
+        # A Supabase 5xx is retried with backoff (5s, 15s, 45s); one that outlasts the retries is
+        # TransientRead, which main() turns into a skipped run rather than a failure email (the
+        # NFL export died twice this way on 2026-09-14/15). A 4xx still raises: that is ours.
+        for attempt in range(4):
+            try:
+                with urllib.request.urlopen(req, timeout=60) as r:
+                    page = json.loads(r.read())
+                break
+            except (urllib.error.URLError, urllib.error.HTTPError) as e:
+                code = getattr(e, "code", None)
+                if code and code < 500:
+                    raise
+                if attempt == 3:
+                    raise TransientRead(f"Supabase {code or 'network'} persisted through 4 attempts: {e}")
+                time.sleep(5 * 3 ** attempt)
         out += page
         if len(page) < PAGE:
             return out
@@ -1180,7 +1199,11 @@ def main(argv=None):
 
     # Posted props are OPTIONAL now: they attach a book line where a book has one, but the board is
     # driven by the upcoming schedule + depth charts, so it fills in even before any prop posts.
-    props = fetch_props()
+    try:
+        props = fetch_props()
+    except TransientRead as e:
+        print(f"{e} — skipping this run (the next scheduled run regenerates)")
+        return 0
     if props:
         # Convert Odds API team names to CFBD school names so the game-log pull + match line up.
         cmap = cfbd_team_map([t for p in props for t in (p["home"], p["away"])], key)

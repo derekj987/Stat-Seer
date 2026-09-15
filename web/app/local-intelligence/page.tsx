@@ -1,4 +1,4 @@
-import { weekRange } from "@/lib/board";
+import { weekRange, currentWeek } from "@/lib/board";
 import { weekTailgate } from "@/lib/tailgate";
 import { Brand, FlowSteps, ContextSubnav, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
@@ -20,8 +20,12 @@ export default async function Page({ searchParams }: PageProps<"/local-intellige
   try { range = await weekRange(SEASON); } catch { range = null; }
   const min = range?.min ?? 1;
   const max = range?.max ?? 1;
+  // Default to the CURRENT week (earliest with a game still to play), not the earliest week that
+  // has odds — `min` is week 1 all season, so every NFL board opened on the completed week.
+  let cur: number | null = null;
+  try { cur = await currentWeek(SEASON); } catch { cur = null; }
   const requested = typeof sp.week === "string" ? parseInt(sp.week, 10) : NaN;
-  const week = Number.isFinite(requested) ? Math.min(max, Math.max(min, requested)) : min;
+  const week = Number.isFinite(requested) ? Math.min(max, Math.max(min, requested)) : (cur ?? min);
 
   const feed = await weekTailgate(week, SEASON);
 

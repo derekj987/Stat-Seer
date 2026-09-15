@@ -1,4 +1,4 @@
-import { weekRange, fetchWeek, buildBoard } from "@/lib/board";
+import { weekRange, fetchWeek, buildBoard, currentWeek } from "@/lib/board";
 import { fetchModelWeek, fetchCalibration, type ModelPrediction } from "@/lib/model";
 import { MODEL_TOTALS } from "@/lib/modelTotals";
 import { weekRefs } from "@/lib/refAssignments";
@@ -224,8 +224,12 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
   }
   const min = range?.min ?? 1;
   const max = range?.max ?? 1;
+  // Default to the CURRENT week (earliest with a game still to play), not the earliest week that
+  // has odds — `min` is week 1 all season, so every NFL board opened on the completed week.
+  let cur: number | null = null;
+  try { cur = await currentWeek(SEASON); } catch { cur = null; }
   const requested = typeof sp.week === "string" ? parseInt(sp.week, 10) : NaN;
-  const week = Number.isFinite(requested) ? Math.min(max, Math.max(min, requested)) : min;
+  const week = Number.isFinite(requested) ? Math.min(max, Math.max(min, requested)) : (cur ?? min);
 
   let preds: ModelPrediction[] = [];
   try { preds = await fetchModelWeek(week, SEASON); } catch { preds = []; }

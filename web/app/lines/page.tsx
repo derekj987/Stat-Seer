@@ -1,4 +1,4 @@
-import { fetchWeek, weekRange, buildBoard } from "@/lib/board";
+import { fetchWeek, weekRange, buildBoard, currentWeek } from "@/lib/board";
 import { Brand, ShopSubnav } from "../Nav";
 import BoardView from "../BoardView";
 import { etToday } from "@/lib/gameDays";
@@ -40,10 +40,14 @@ export default async function Page({ searchParams }: PageProps<"/lines">) {
     );
   }
 
+  // Default to the CURRENT week (earliest with a game still to play), not `range.min`, which is
+  // week 1 all season — every NFL board opened on the completed week the Tuesday after it.
+  let cur: number | null = null;
+  try { cur = await currentWeek(SEASON); } catch { cur = null; }
   const requested = typeof sp.week === "string" ? parseInt(sp.week, 10) : NaN;
   const week = Number.isFinite(requested)
     ? Math.min(range.max, Math.max(range.min, requested))
-    : range.min;
+    : (cur ?? range.min);
 
   const board = buildBoard(await fetchWeek(week, SEASON));
   const { today, tomorrow } = etToday();
