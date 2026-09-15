@@ -437,6 +437,10 @@ def team_logs(teams, key, cur_team=None):
                 continue
             for g in data:
                 gid = g.get("id") or 0
+                # Backtest mode (--week N): a game from week N onward of the current season is the
+                # future as of that slate and must not feed its own projection.
+                if LOG_CUTOFF_WEEK is not None and season == CUR_SEASON                         and (GID_WEEK.get(gid) is None or GID_WEEK.get(gid) >= LOG_CUTOFF_WEEK):
+                    continue
                 for tm in g.get("teams", []):
                     if tm.get("team") != team:
                         continue
@@ -630,6 +634,32 @@ DEFAULT_VOL = {"carries": 10.0, "receptions": 3.6, "pass_att": 28.0}   # per-gam
 # question (why CFB own-volume reads so low against the role baseline) is still open. A genuine
 # promotion still lifts a player, just not without limit.
 ROLE_VOL_CAP = 1.6
+# How the depth role and the player's own volume combine. "max" was the original one-way lift
+# (capped at ROLE_VOL_CAP); "blend2" is a games-weighted, symmetric blend in which this season's
+# games count in full and last season's at PRIOR_GAME_W each (see rolevol()). Overridable from
+# the environment so analysis/cfb_role_backtest.py can score every variant on played slates.
+#
+# Chosen on 2026 weeks 1 and 2 — the report card had measured the max rule 5-12 yards HIGH per
+# category — projecting each played slate from only what was knowable before it (--week
+# backtest), scored on every priced row against the player's actual line (n = 183, 366):
+#
+#                         week 1 (no current games)     week 2 (one game played)
+#     rule                  MAE     bias                  MAE     bias   proj>line
+#     max (shipped)         28.1    +1.6                  22.6    +7.0      70-83%
+#     blend2  K=6           28.1    -0.3                  21.5    +4.9
+#     blend2  K=3           27.9    -2.7                  21.2    +2.8      51-72%
+#     blend2  K=1.5         27.9    -5.2                  21.1    +0.7
+#     the book's line       25.9-33.0 by category         26.3-28.7
+#
+# Every blend beats the lift by 1.1-1.5 yards MAE once a game has been played, and the optimum
+# is flat across K = 1.5-6. K=3 is the setting that is best-or-tied in BOTH regimes rather than
+# the one that wins the week being looked at: it halves the week-2 bias without running the
+# preseason board low (a promoted backup still projects near his slot's workload before he has
+# a snap). The residual receiving lean (proj > line on ~70% of rows) is the mean-vs-median gap
+# the board's arrow already reads through the player's own exceedance rate.
+ROLE_MODE = os.environ.get("CFB_ROLE_MODE", "blend2")
+ROLE_BLEND_K = float(os.environ.get("CFB_ROLE_K", "3"))
+PRIOR_GAME_W = float(os.environ.get("CFB_PRIOR_W", "0.25"))
 # ...and how many games of that stat we need before the cap is allowed to bite at all.
 #
 # The cap is multiplicative on a player's own volume, so on a near-zero own volume ANY multiple is
@@ -717,6 +747,24 @@ def project_role(games, market, pos, rank, team, per_team, league):
             base *= TE_VOL_FACTOR
         decay = _decay_for(games, field, base)
         own = _recent_avg(games, field, decay) or 0.0
+        if ROLE_MODE == "blend2":
+            # As "blend", but the player's own volume earns its weight from THIS season's games
+            # in full and last season's only at PRIOR_GAME_W each: before a snap is played the
+            # depth role leads (a promoted backup projects near a starter's workload), and one
+            # or two played games move the number most of the way to what he is actually doing.
+            n = _gp([g for g in games if g.get("season") == CUR_SEASON], field)                 + PRIOR_GAME_W * _gp([g for g in games if g.get("season") != CUR_SEASON], field)
+            v = (own * n + base * ROLE_BLEND_K) / (n + ROLE_BLEND_K) if n else base
+            return v, decay
+        if ROLE_MODE == "blend":
+            # Games-weighted blend of the role's workload and the player's own, the shape the NFL
+            # exporter validated (ROLE_K there; blended beat both role-only and own-only). It is
+            # symmetric: a promoted backup is pulled UP to the role, a starter whose history
+            # sits above his slot's typical workload is pulled DOWN toward it. The max() below
+            # could only lift, which is why the projections ran 5-12 yards high (report card,
+            # 2026 week 2: rushing bias +11.6, proj > line on 66% of rows vs 44% that went over).
+            n = _gp(games, field)
+            v = (own * n + base * ROLE_BLEND_K) / (n + ROLE_BLEND_K) if n else base
+            return v, decay
         v = max(base, own)
         # Cap the role lift against what the player has actually done -- but only when his own
         # volume is worth trusting. Too few games and this clamps a genuine promotion to his
@@ -980,6 +1028,23 @@ def build(props, key, depth):
     return out, matched, missed
 
 
+LOG_CUTOFF_WEEK = None      # set by --week: current-season games from this week on are excluded
+GID_WEEK = {}               # CFBD game id -> week, from cfb.db (current season)
+
+
+def week_games(db, season, week):
+    """All FBS-vs-FBS games of one week, played or not, plus the id -> week map that lets
+    team_logs cut the current season off at that week. Backtest mode: project a slate that has
+    already been played, from only what was knowable before it."""
+    conn = sqlite3.connect(db)
+    games = conn.execute(
+        "SELECT away_team, home_team, start_date FROM games WHERE season=? AND week=? "
+        "AND home_class='fbs' AND away_class='fbs' ORDER BY start_date", (season, week)).fetchall()
+    gw = dict(conn.execute("SELECT id, week FROM games WHERE season=?", (season,)).fetchall())
+    conn.close()
+    return games, gw
+
+
 def upcoming_games(db, season):
     """The soonest not-yet-played week's FBS-vs-FBS games (away, home, start_date). Already-played
     games are excluded — the player model is forward-looking."""
@@ -1190,6 +1255,9 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--probe", action="store_true", help="list props + match status, write nothing")
     ap.add_argument("--out", default="web/lib/ncaafPlayerProjections.ts")
+    ap.add_argument("--week", type=int, default=None,
+                    help="BACKTEST: project this (played) week from what was knowable before it")
+    ap.add_argument("--all-rows", action="store_true", help="keep unpriced rows (backtests)")
     args = ap.parse_args(argv)
 
     oc.ensure_ssl_certs()
@@ -1238,11 +1306,29 @@ def main(argv=None):
         except Exception as e:                                   # noqa: BLE001
             print(f"  depth-chart unavailable ({e}); projections fall back to raw per-game averages")
 
-    wk, slate = upcoming_games(DB, CUR_SEASON)
+    global LOG_CUTOFF_WEEK, GID_WEEK
+    if args.week is not None:
+        slate, GID_WEEK = week_games(DB, CUR_SEASON, args.week)
+        wk, LOG_CUTOFF_WEEK = args.week, args.week
+        print(f"  BACKTEST week {wk}: current-season logs cut off before week {wk}")
+    else:
+        wk, slate = upcoming_games(DB, CUR_SEASON)
     if not slate:
         print(f"No upcoming FBS games found in {DB} (run cfb_backfill.py first).", file=sys.stderr)
         return 0
     print(f"  upcoming week {wk}: {len(slate)} games to project.")
+    # The market is right about who is at home. cfb.db (CFBD's schedule as of the last backfill)
+    # had "Arizona State @ Kansas" where every book priced "Kansas @ Arizona State", so the game's
+    # 42 priced player-markets found no slate game to join and vanished. When the feed prices the
+    # same two teams the other way round, take the feed's ordering for the slate row.
+    priced_games = {gk for gk, _p, _m in prop_index}
+    flipped = 0
+    for i, (away, home, commence) in enumerate(slate):
+        if f"{away} @ {home}" not in priced_games and f"{home} @ {away}" in priced_games:
+            slate[i] = (home, away, commence)
+            flipped += 1
+    if flipped:
+        print(f"  {flipped} game(s) re-ordered to the market's home/away")
     rows = build_slate(slate, depth, prop_index, key)
     lined = sum(1 for r in rows if r["book"] is not None)
     print(f"  {len(rows)} projection rows ({lined} with a posted book line, {len(rows) - lined} line-blind).")
@@ -1261,7 +1347,8 @@ def main(argv=None):
     # Consequence to keep in mind: a game with no posted props shows no players at all, and a slate
     # captured before the books post will be thin. That is the intended reading — it says the market
     # has not priced this game yet, rather than showing rows nobody can act on.
-    rows = [r for r in rows if r["book"] is not None]
+    if not args.all_rows:
+        rows = [r for r in rows if r["book"] is not None]
     # The name on the board is the book's spelling. CFBD says "Isaiah Sategna", FanDuel "Isaiah
     # Sategna III"; a reader checking the board against the app matches on the name he sees there
     # (Derek: "the players ... in the model sections need to match the players ... in the

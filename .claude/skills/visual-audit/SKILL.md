@@ -1756,6 +1756,46 @@ summary it prints, write the note, commit both files. Week 1 NFL: SU 9-7, vs clo
 5-11, prop leans 183-175, TD calibration 20.8 / 21.8 / 21.0. NCAAF week 2: SU 72-14, vs close
 38-48, prop leans 183-153, projections 5–12 yards HIGH per category.
 
+### 🚨 A week default of `weekRange().min` is week 1 forever
+Every NFL page (`/model`, `/props`, `/lines`, `/best`, `/considerations`, `/context`,
+`/local-intelligence`, `/audit`) defaulted to `range.min` — the EARLIEST week with any odds
+captured, which is week 1 all season. The Tuesday after week 1, every board opened on the
+completed week, `/props` on an empty one. Now `currentWeek()` (earliest week with a game still to
+play), `min` only as the fallback. Same family as the NCAAF default-week bug: **a default must
+name the week a reader wants NOW, and the audit checks the bare URL, not just `?week=N`.**
+```bash
+curl -s "$BASE/props" | grep -o "Sep [0-9]*" | head -3     # must be THIS week's dates
+```
+
+### "Adjust the model" means measure first — the two adjustments that survived week 1
+Derek: *"deep analysis on what happened in week 1 and adjust accordingly."* Three candidates,
+two changed, one deliberately not:
+- **NFL game model: unchanged.** Week 1 (16 games): ours 12.6 MAE vs the close 11.2, Brier 0.244
+  vs 0.210, margins compressed the same as the market's (3.7 vs 4.1), home lean +3.2 vs +2.7.
+  Nothing there overturns parameters chosen on 2016-22 and held out on 2023-25; the in-season
+  blend (PRIOR_K) is the designed week-2 adjustment. Retuning on one week is how a model gets
+  worse — say so instead of changing a number to look responsive.
+- **NFL props: current-season volume blended in** (`CUR_K = 1.5`, `player_proj_export.py`).
+  They were prior-season-only all year. Backtest 2023-25, next-game volume from prior mean +
+  season-to-date mean: carries 3.87 → 3.13, WR targets 2.05 → 1.93, QB attempts 8.36 → 7.76;
+  flat optimum K = 1-2. The workflow now fetches `stats_<SEASON>.csv` (optional — missing before
+  week 1 is not a failure).
+- **NCAAF props: the role rule is a symmetric blend** (`ROLE_MODE = "blend2"`, K=3,
+  `PRIOR_GAME_W = 0.25`). `max(role, own)` could only lift and ran +7.0 biased on week 2.
+  `analysis/cfb_role_backtest.py` re-projects PLAYED weeks with `cfb_player_proj.py --week N
+  --all-rows` (current-season logs cut off before the slate — the honesty guard) and scores
+  every priced row: week 2 MAE 22.6 → 21.2, bias +7.0 → +2.8; week 1 tied. **K=3 was picked
+  because it is best-or-tied in BOTH regimes**, not because it won either week.
+The backtest mode itself is the reusable part: any projection change to `cfb_player_proj.py`
+can now be scored on a played slate in minutes. Run it before shipping a "fix".
+
+### The market is right about who is at home — join on the pair when the ordered key misses
+`cfb.db` had "Arizona State @ Kansas"; every book priced "Kansas @ Arizona State". The prop
+keys are `"away @ home"`, so all 42 of that game's priced player-markets found no slate game and
+the reconciliation warned. The slate row now takes the feed's ordering when the reversed key is
+priced. Same rule as the roster/team entries above: a fact the market cannot be wrong about wins
+over our reference.
+
 ### A page of several charts is not one chart — the probe scopes by sub-section now
 `/report` holds one `<section class="rc">` per sport-week, each with a game table and two prop
 tables that share a header (biggest misses, then every graded lean). `repeated-column-header`

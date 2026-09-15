@@ -82,9 +82,10 @@ def git_ref_before(when_iso):
 
 
 def git_show(ref, path):
+    """The file at `ref`, or "" when it did not exist yet (a week-0 kickoff predates the file)."""
     out = subprocess.run(["git", "show", f"{ref}:{path}"], cwd=ROOT, capture_output=True,
-                         text=True, check=True, encoding="utf-8")
-    return out.stdout
+                         text=True, encoding="utf-8")
+    return out.stdout if out.returncode == 0 else ""
 
 
 def json_lines(s):
@@ -517,7 +518,7 @@ def build_ncaaf(season, week):
         if ref not in cards:
             s = git_show(ref, "web/app/ncaaf/model-data.ts")
             m = re.search(r"export const NCAAF_MODEL[^=]*=\s*", s)
-            cards[ref] = json.loads(s[s.index("{", m.end() - 1): s.rindex("}") + 1])["card"]
+            cards[ref] = json.loads(s[s.index("{", m.end() - 1): s.rindex("}") + 1])["card"] if m else {"games": []}
         return cards[ref]
     def proj_at(ref):
         if ref not in projs:

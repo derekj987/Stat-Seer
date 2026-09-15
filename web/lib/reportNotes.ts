@@ -24,6 +24,8 @@ export const REPORT_NOTES: Record<string, ReportNote> = {
     changed: [
       "The market column on the player boards now shows PREGAME lines only. A sweep that ran three hours into Panthers–Bears captured FanDuel's live 130.5 receiving yards for Jalen Coker (he had 120 at the time) and the board published it as the market. Pregame it was 37.5. Every reader and the projections export now ignore rows captured after kickoff, and the capture job no longer polls games in play.",
       "Completed games keep their closing line and their teams. The model board read \"? @ CAR\" for every finished game because the newest odds sweep only contained the game still to be played. Each played game now carries its last pregame sweep — its close — which is also the number this report grades against.",
+      "Player projections now read this season's games. They had been last season's per-game volume all year long, so a back who just carried 20 times as the new starter was still projected on last year's 6. Measured on 2023–2025, blending a player's season-to-date usage with his prior season (equal weight after one game) cut the error in next-game volume by 10–20% in every position group — carries 3.87 → 3.13 (2025), targets 2.05 → 1.93, attempts 8.36 → 7.76. Week 2's numbers carry week 1's usage.",
+      "The game model itself is unchanged. One week cannot overturn parameters chosen on 2016–2022 and held out on 2023–2025; the in-season blend that folds week 1's results into each team's rating is the designed adjustment, and it applied for week 2.",
       "The report card itself: what you see here is graded against the files as they were committed before each kickoff, not the working copy, and against FanDuel's closing line.",
     ],
     caveat: "Sixteen games and one week. The prop leans are 358 graded rows, which is enough to say \"coin flip\"; the game reads are not enough to say anything except that the market was better this week.",
@@ -41,10 +43,25 @@ export const REPORT_NOTES: Record<string, ReportNote> = {
     changed: [
       "Player board coverage: every priced player and game (1,314 of 1,314 priced player-markets), depth slots re-ranked on this season's usage, book spellings (\"Gio Lopez\") reconciled to CFBD's (\"Giovanni Lopez\"), team-defense scoring props kept off the player boards.",
       "Market freshness: props captured every 2 hours instead of twice a day, projections refreshed twice daily, and the anytime-TD market column is FanDuel's live price, not the median baked into the file.",
+      "The projections' role rule. A player's workload was the GREATER of his depth slot's typical volume and his own — a lift that could only push up, and did: +7.0 yards of bias across every priced row. Re-projecting both played weeks from only what was knowable before them, a symmetric blend (this season's games in full, last season's at a quarter weight, three games of role prior) cut the week-2 error from 22.6 to 21.2 yards and the bias from +7.0 to +2.8, while leaving the preseason board — where the depth chart is all there is — no worse. That rule is what projects week 3.",
       "Grading: this card grades what was committed before each kickoff against the last pregame FanDuel line captured for that game.",
     ],
     caveat: "Eighty-six games is a real sample for the straight-up and spread records; the prop leans are one Saturday. 288 priced prop rows could not be graded — players who did not record a stat line, or names CFBD spells differently from the book — and they are excluded rather than counted as losses.",
   },
+};
+
+REPORT_NOTES["ncaaf-2026-1"] = {
+  headline: "Opening week: 88 of 99 winners, 38-58-1 against the number — taking the points went 12-34.",
+  learned: [
+    "The rating ordered teams well (88-11 straight-up) and the market ordered margins better (13.6 points of error to our 14.1). Preseason ratings are last season plus a forward-looking seed; the market also had the transfer portal, the depth charts and the injury reports.",
+    "Taking the points went 12-34. Our preseason numbers ran compressed against the market's big early-season spreads, so on most games we sat on the underdog's side of the number — and the favourites covered. The spread-aware anchor in the card already ramps toward the market past 18 points; this week said the ramp was still too gentle at the top.",
+    "Props were graded on a board that, at the time, held 7 of 35 games: the paged read behind it stopped at 1,000 rows. The rows that were on it ran 3–4 yards high and the book's line beat our number by 5–6 yards in every yardage category.",
+    "Anytime TD: we said 25.5%, the books' prices implied 34.3%, 26.2% scored. Our level was right; the books' ranking was better (Brier 0.182 to our 0.220).",
+  ],
+  changed: [
+    "The truncated read, the name keys, the current-season logs, the team-name aliases and the second pass that dropped unprojectable players were all fixed the following week — see NCAAF Week 2.",
+  ],
+  caveat: "The projections graded here are what the board showed at each kickoff, on the coverage it had then. 102 of the 675 priced rows could not be graded — no stat line, or a spelling CFBD does not share.",
 };
 
 export const noteKey = (sport: string, season: number, week: number) => `${sport}-${season}-${week}`;

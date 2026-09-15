@@ -45,6 +45,13 @@ jobs:
             curl -fsSL --retry 3 -o "data/stats_$Y.csv" \
               "https://github.com/nflverse/nflverse-data/releases/download/stats_player/stats_player_week_$Y.csv"
           done
+          # THIS season too: played games blend into each player's volume (player_proj_export
+          # CUR_K). nflverse publishes the file once Week 1 is in the books, so a miss before then
+          # is not a failure — the export prints "projecting from prior volume only".
+          echo "fetching stats_$SEASON.csv (current season; optional)"
+          curl -fsSL --retry 3 -o "data/stats_$SEASON.csv" \
+            "https://github.com/nflverse/nflverse-data/releases/download/stats_player/stats_player_week_$SEASON.csv" \
+            || rm -f "data/stats_$SEASON.csv"
 
       - name: Build projections
         env:

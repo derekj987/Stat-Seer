@@ -296,6 +296,89 @@ def prior_year_rates(prior):
     return rates
 
 
+# Weight of the PRIOR season's per-game volume, in games of THIS season, when blending in the
+# games a player has actually played this year:
+#
+#     volume_pg = (n * this_season_pg + CUR_K * prior_season_pg) / (n + CUR_K)
+#
+# The projections used to be prior-season volume only, all season long — so after Week 1 a back
+# who had just carried 20 times as the new starter was still projected on last year's 6. Volume is
+# the persistent thing (carries r=0.678, target share 0.623), and this season's usage is the
+# freshest read of it. Measured on 2023-2025, predicting each player's NEXT game's volume from his
+# prior-season mean and his season-to-date mean (weeks 2-10; RB carries / WR+TE targets / QB
+# attempts), mean absolute error:
+#
+#                       prior only   K=8    K=5    K=2    K=1    K=0.5
+#     RB carries 2025     3.87       3.46   3.35   3.19   3.13   3.12
+#     WR targets 2025     2.05       1.95   1.93   1.92   1.93   1.96
+#     TE targets 2025     1.64       1.54   1.52   1.49   1.49   1.50
+#     QB attempts 2025    8.36       7.98   7.89   7.79   7.76   7.76
+#
+# Same shape in 2023 and 2024: the current season should carry equal weight after ONE game and
+# dominate after two, and the optimum is flat across K = 1-2, so this is not balanced on an edge.
+# Line-blind: it reads the player's own box scores, never a line.
+CUR_K = 1.5
+
+
+def current_season_rates(season):
+    """Per-player per-game volume from THIS season's completed games, same shape as
+    prior_year_rates. Empty when the season's stats file is not there (Week 1)."""
+    path = f"data/stats_{season}.csv"
+    if not os.path.exists(path):
+        return {}
+    s = pd.read_csv(path, low_memory=False)
+    s = s[s.season_type == "REG"].copy()
+    for c in ["carries", "targets", "receptions", "attempts", "rushing_yards", "receiving_yards", "passing_yards"]:
+        s[c] = pd.to_numeric(s.get(c), errors="coerce").fillna(0.0)
+    out = {}
+    for pid, g in s.groupby("player_id"):
+        n = g.week.nunique()
+        if n == 0 or not isinstance(g.iloc[-1].player_display_name, str):
+            continue
+        row = g.iloc[-1]
+        starts = g[g.attempts >= 15]
+        ns = starts.week.nunique()
+        out[str(pid)] = {
+            "name": row.player_display_name, "pos": row.position, "team": row.team, "games": int(n),
+            "pid": row.player_id,
+            "carries_pg": g.carries.sum() / n, "targets_pg": g.targets.sum() / n,
+            "att_pg": (starts.attempts.sum() / ns) if ns else (g.attempts.sum() / n),
+            "qb_starts": int(ns),
+            "pass_att": g.attempts.sum(), "pass_ypa": g.passing_yards.sum() / max(g.attempts.sum(), 1),
+        }
+    return out
+
+
+def blend_current(rates, cur):
+    """Fold this season's games into each player's volume (CUR_K). A player with no prior-season
+    row but games this season (a rookie starter) gets a row built from this season alone — the
+    role blend downstream still pulls a one-game sample hard toward his depth slot."""
+    blended, created = 0, 0
+    by_pid = {str(r["pid"]): r for r in rates.values()}
+    for pid, c in cur.items():
+        r = by_pid.get(pid)
+        n = c["games"]
+        if r is not None:
+            for f in ("carries_pg", "targets_pg", "att_pg"):
+                r[f] = (n * c[f] + CUR_K * r[f]) / (n + CUR_K)
+            # QB efficiency and attempts pool across both seasons; starts add up.
+            r["pass_att"] = r.get("pass_att", 0.0) + c["pass_att"]
+            if r["pass_att"] > 0:
+                r["pass_ypa"] = ((r.get("pass_ypa", 0.0) * (r["pass_att"] - c["pass_att"]))
+                                 + c["pass_ypa"] * c["pass_att"]) / r["pass_att"]
+            r["qb_starts"] = r.get("qb_starts", 0) + c["qb_starts"]
+            r["games"] = r.get("games", 0) + n
+            r["cur_games"] = n
+            blended += 1
+        else:
+            key = norm(c["name"])
+            if key in rates:
+                continue                      # same name, different id — leave the veteran's row
+            rates[key] = dict(c, cur_games=n)
+            created += 1
+    return blended, created
+
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # repo root
 import odds_client as oc  # noqa: E402 — needs the path insert above
 
@@ -743,6 +826,15 @@ def main():
             moved += 1
     print(f"  re-tagged {moved} players to their {args.season} team "
           f"({len(cur_team)} on the roster)")
+    # This season's games, blended in BEFORE the role blend so the role pull acts on the
+    # freshest volume. See CUR_K.
+    _cur = current_season_rates(args.season)
+    if _cur:
+        _b, _c = blend_current(rates, _cur)
+        print(f"  blended {args.season} games into {_b} players' volume (K={CUR_K}); "
+              f"{_c} rows built from this season alone")
+    else:
+        print(f"  no data/stats_{args.season}.csv — projecting from {prior} volume only")
     # Blend prior-season volume toward the player's CURRENT depth role. Without this the board
     # projects last year's usage: a former starter now third on the chart keeps a starter's number.
     _ranks = current_ranks(args.season)
@@ -751,7 +843,10 @@ def main():
         _moved = apply_role(rates, _ranks, _rolevol)
         print(f"  role-adjusted volume for {_moved} player-fields "
               f"({len(_ranks)} on the depth chart, {len(_rolevol)} role baselines)")
-    career = load_career(range(2016, args.season), *load_venue_sets())   # all game logs, venue-tagged
+    # All game logs, venue-tagged — including this season's, so the hit-rate columns count the
+    # games already played this year (the row's "9/25 gm" moves with the season).
+    _seasons = [y for y in range(2016, args.season + 1) if os.path.exists(f"data/stats_{y}.csv")]
+    career = load_career(_seasons, *load_venue_sets())
 
     # Forward scoring-environment context (Context flag, NOT a projection input). Degrades to
     # empty if the schedule/lines aren't available, so it can never block a projection.
