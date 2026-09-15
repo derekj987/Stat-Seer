@@ -203,8 +203,21 @@ def main(argv=None):
         except TransientError as e:
             print(f"transient: {e}; skipping this run (no email)", file=sys.stderr)
             return 0
+        # Never a game that has already kicked off. The events list keeps a game while it is in
+        # play, and /events/{id}/odds then returns the books' LIVE props — which this capture wrote
+        # as if they were pregame lines (Jalen Coker "130.5" receiving yards, captured three hours
+        # into the Panthers game, published as the market). It also spent credits on games nobody
+        # can bet pregame. And sort by kickoff BEFORE the cap, so the cap spends itself on the
+        # nearest slate rather than on whatever order the feed returned.
+        n_all = len(events)
+        now = datetime.now(timezone.utc)
+        events = [e for e in events
+                  if datetime.fromisoformat(e["commence_time"].replace("Z", "+00:00")) > now]
+        if n_all - len(events):
+            print(f"  skipped {n_all - len(events)} event(s) already in play")
         if args.commence_within is not None:
             events = [e for e in events if within_window(e["commence_time"], args.commence_within)]
+        events.sort(key=lambda e: e.get("commence_time") or "9999")
         if args.max_events:
             events = events[:args.max_events]
         print(f"LIVE  {len(events)} event(s) to query  markets={args.markets}")

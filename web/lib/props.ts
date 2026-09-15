@@ -181,6 +181,18 @@ function collapseBest(quotes: Quote[]): Quote[] {
  *  legacy rows, so ordering or max()-ing on it picks the latest GAME, not the latest capture.
  *  A sweep writes in batches with their own timestamps, so "newest capture" is a WINDOW. */
 const SWEEP_WINDOW_MS = 60 * 60 * 1000;
+/** Rows captured BEFORE the game started. A book keeps pricing a prop after kickoff — a live line
+ *  that tracks the game — and a sweep that lands mid-game writes it: Jalen Coker's 37.5 receiving
+ *  yards became "130.5" on the board three hours into the Panthers game (he finished with 138).
+ *  That is not a market line for the game. Applied before the newest-capture step so a played
+ *  game's newest PREGAME sweep — its close — is what survives. */
+function pregame(rows: PropRow[]): PropRow[] {
+  return rows.filter((r) => {
+    const t = Date.parse(r.collected_at ?? r.snapshot_at), k = Date.parse(r.commence_time);
+    return Number.isNaN(t) || Number.isNaN(k) || t < k;
+  });
+}
+
 function newestCapture(rows: PropRow[]): PropRow[] {
   const newest = new Map<string, number>();
   for (const r of rows) {
@@ -205,7 +217,7 @@ export async function weekProps(week: number, season = 2026): Promise<PropGame[]
   let all = await pgAll(q + since);
   if (!all.length && since) all = await pgAll(q);   // probe was stale — take whatever exists
   if (!all.length) return [];
-  const rows = usBooks(newestCapture(all));   // US-licensed books only (bookLabel.ts)
+  const rows = usBooks(newestCapture(pregame(all)));   // US-licensed books only (bookLabel.ts)
 
   // Keep the latest snapshot per (event,market,player,side,line,book).
   const latest = new Map<string, PropRow>();
@@ -316,7 +328,7 @@ export async function fanduelLines(week: number, season = 2026): Promise<Map<str
       `?season=eq.${season}&week=eq.${week}&event_id=neq.test&book=eq.fanduel`);
     let all = await pgAll(q + since);
     if (!all.length && since) all = await pgAll(q);
-    const rows = usBooks(newestCapture(all));   // US-licensed books only (bookLabel.ts)
+    const rows = usBooks(newestCapture(pregame(all)));   // US-licensed books only (bookLabel.ts)
     // A book posts a ladder of alternates on one market; its MAIN line is the rung priced closest
     // to even money, since an alternate is priced away from even by construction.
     const best = new Map<string, { line: number; gap: number }>();

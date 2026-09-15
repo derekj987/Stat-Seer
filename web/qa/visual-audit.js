@@ -1167,6 +1167,16 @@
     // column header once — reported as one board repeating its header 3x, because no single
     // descendant panel owned all the tables. Only the innermost panel counts as a chart.
     if (board.querySelector(".hb-panel")) continue;
+    // Same rule for plain <section>s: the report card (/report) is one <main> holding one section
+    // per sport-week, each with a "Game by game" table and two prop tables that share a header
+    // ("Player · Market · Close · Ours · Actual · Lean" — the biggest misses, then every graded
+    // lean). Each table sits in its own <section class="rc-chart">, so when the tables are owned by
+    // two or more distinct descendant sections the container is a page of charts, not one chart.
+    const owners = new Set(tables.map((t) => {
+      const s = t.parentElement && t.parentElement.closest("section, .hb-panel, .hb-body");
+      return s && s !== board && board.contains(s) ? s : null;
+    }).filter(Boolean));
+    if (owners.size >= 2) continue;
     // Likewise a board of PER-GAME CARDS, each carrying its own table with its own header: the
     // MLB batter grid draws one table per game inside a `details.propgame`, and six games are
     // six charts, not one chart chopped into six. Same shape as the /audit false positive on

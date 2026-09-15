@@ -128,6 +128,22 @@ def fetch_props(season, week):
             return dt.datetime.fromisoformat((r.get("collected_at") or "").replace("Z", "+00:00"))
         except ValueError:
             return None
+    # PREGAME rows only. The books keep pricing a prop after kickoff — a LIVE line that tracks the
+    # game — and the 6-hourly sweep captured it: Jalen Coker, priced at 37.5 receiving yards
+    # before the Panthers kicked off, was captured at 130.5 three hours in (he finished with 138),
+    # and 130.5 is what the board published as "the market". Derek: "I know Jalen Coker's market
+    # receiving yards is not 130.5." A row captured at or after the game's start is not a market
+    # line for the game; for a played game the newest PREGAME sweep is its close, which is the
+    # number the report card grades against.
+    def kick(r):
+        try:
+            return dt.datetime.fromisoformat((r.get("commence_time") or "").replace("Z", "+00:00"))
+        except ValueError:
+            return None
+    n_all = len(rows)
+    rows = [r for r in rows if (t := when(r)) is None or (k := kick(r)) is None or t < k]
+    if n_all - len(rows):
+        print(f"  dropped {n_all - len(rows):,} in-play prop rows (captured after kickoff)")
     newest = {}
     for r in rows:
         t = when(r)

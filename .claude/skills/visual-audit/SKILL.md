@@ -1687,6 +1687,83 @@ the disk cache; the CURRENT season is deliberately never disk-cached, so once `L
 usage missing (its QB1 with no log, no slot, no projection), and the run said only "4 of 414 pulls
 failed" without naming which.
 
+### 🚨 A line captured AFTER kickoff is a LIVE line, not a market line
+Derek: *"I know Jalen Coker's market receiving yards is not 130.5."* It was not — pregame FanDuel
+had him at 37.5. The 6-hourly props sweep ran at 20:13 UTC, three hours into Panthers–Bears, and
+`/events/{id}/odds` for a game in play returns the books' LIVE props (he had ~120 yards at the
+time). The capture wrote them like any other row, the export took the newest sweep per event as
+"current", and the board published 130.5 as the market.
+
+Three places had to change, and all three are checks now:
+1. **Capture never polls a game in play.** `props_client.py` drops events whose `commence_time`
+   is past, sorts by kickoff, THEN applies `--max-events` (the cap used to spend itself on whatever
+   order the feed returned). `odds_client` already had this via `--commence-within`; `cfb_props.py`
+   via `now <= ct`. **When you add a capture, look for the in-play guard first.**
+2. **Every reader keeps pregame rows only** — `pregame()` in `lib/props.ts`, the same filter in
+   `cfbProps.fetchRows`, and the export (`player_proj_export.current_rows`), which prints how many
+   in-play rows it dropped. For a played game the newest PREGAME sweep is its close.
+3. **The generated file can still carry the bad number** — the projections export that ran after
+   kickoff baked 130.5 into `playerProjections.ts`, and the live override could not replace it
+   (the pregame rows were outside the newest-capture window). Regenerate the file after fixing a
+   reader; the reader fix alone leaves the stale value on the board.
+
+Standing check, any snapshot table:
+```python
+late = [r for r in rows if r["collected_at"] >= r["commence_time"]]     # must be 0 going forward
+```
+And the eyeball version: **a yardage line above ~110 on a receiver, or any line that moved by
+3× in one sweep, is a live line.** Compare the board's market column to FanDuel's PREGAME number,
+not to whatever the app shows while the game is on.
+
+### 🚨 The newest sweep drops every game that has kicked off — "? @ CAR"
+Derek's screenshot of the NFL model board: `? @ CAR`, `? @ CIN`, `? @ DET` … every game but
+Monday night's, with no market row. `fetchWeek` returned the week's newest full sweep, and the
+odds feed removes a game the moment it starts, so once Sunday was over the newest week-1 sweep held
+one event; `lib/model.ts` fell back to `{home: subject, away: "?"}` for the other fifteen.
+
+`fetchWeek` now returns, for every played game, its **last pregame sweep — its closing line** —
+alongside the newest sweep for the games still to come. That is also the number the report card
+grades against. Standing check after any week completes:
+```js
+[...document.querySelectorAll('article.game .matchup')].filter(m => m.textContent.includes('?')).length   // 0
+[...document.querySelectorAll('article.game')].filter(a => !a.textContent.includes('The market')).length  // 0
+```
+Sibling: the `PRE_KICKOFF` closing-line cron never fired for 1pm ET or prime-time games (window
+`17-23 UTC` started AT the 1pm kickoff; SNF/MNF/TNF land after midnight UTC on the NEXT weekday),
+so week 1 had zero PRE_KICKOFF rows. Now `16-23 UTC Sun/Mon/Thu` + `0-1 UTC Mon/Tue/Fri`, 45-min
+window. **Check crons in UTC against the actual kickoff times, and count the rows they produced:**
+`select capture_reason, count(*) … where week = N` — a reason with 0 rows is a cron that never ran.
+
+### The weekly report card — grade what was PUBLISHED, not what the board shows now
+`/report` (`weekly_report.py` → `lib/reportCards.ts`, review in `lib/reportNotes.ts`). Rules that
+make it honest, each of which was a way to cheat by accident:
+- **The files as committed before each kickoff** (`git rev-list -1 --before=<kickoff> main`, then
+  `git show ref:path`), never the working copy — the nightly jobs regenerate the projections and
+  the NCAAF card daily, and by Tuesday the file describes NEXT week (`PROJ_WEEK` had already moved
+  to 2 when week 1 was being graded). One ref per kickoff time; a Saturday slate used 13.
+- **The market is the closing line from the snapshot tables**, pregame, FanDuel where posted. Not
+  the projections file's `book` (see the live-line entry above) and not the card's own market
+  field (refreshed weekly, overlaid live).
+- **Anytime TD is calibration, not W/L.** An "over" lean on a 15% player who does not score is the
+  expected outcome. Report mean ours vs mean book vs scored %, and a Brier for each.
+- **Ungraded rows are excluded, not counted as losses** — players with no stat line (inactive) or
+  a name CFBD spells differently. Say how many.
+- **The narrative cites the card's numbers** and is written after reading it. `reportNotes.ts` is
+  hand-written and keyed `${sport}-${season}-${week}` so a regeneration never touches it.
+
+Run it Tuesday for both sports (`--sport nfl --week N`, `--sport ncaaf --week N`), read the
+summary it prints, write the note, commit both files. Week 1 NFL: SU 9-7, vs close 4-12, totals
+5-11, prop leans 183-175, TD calibration 20.8 / 21.8 / 21.0. NCAAF week 2: SU 72-14, vs close
+38-48, prop leans 183-153, projections 5–12 yards HIGH per category.
+
+### A page of several charts is not one chart — the probe scopes by sub-section now
+`/report` holds one `<section class="rc">` per sport-week, each with a game table and two prop
+tables that share a header (biggest misses, then every graded lean). `repeated-column-header`
+reported the `<main>` as one board repeating its header 2×. Each chart now sits in its own
+`<section class="rc-chart">`, and the probe skips any container whose tables are owned by two or
+more distinct descendant sections. When you add a page with several same-shaped tables, wrap each
+in its own section — it is what makes them separate charts to the probe AND to a screen reader.
+
 ### ⚠️ The Bash tool's heredoc eats backslashes
 `\\b` inside a quoted `<<'PY'` heredoc reached Python as `\b` and wrote a **backspace byte** into a
 regex in `PlayerModelView.tsx` (`/^H(D\/ST|Defense)$/` under `cat -A`). Twice now. Any patch whose
@@ -2588,7 +2665,7 @@ the rails leave. Three things it needed:
 
 ## Page matrix (adjust per task)
 Public/content (render fully in QA mode): `/`, `/model?week=1`, `/best?week=1`, `/props?week=1`,
-`/considerations?week=1`, `/ncaaf/model`, `/ncaaf/best`, `/bankroll`, `/dashboard`, `/creator`.
+`/considerations?week=1`, `/ncaaf/model`, `/ncaaf/best`, `/report`, `/bankroll`, `/dashboard`, `/creator`.
 Always include: `/` and `/model` at **mobile** (overflow) and one page in **dark** (contrast).
 
 ## Known limitations (state these, don't fight them)

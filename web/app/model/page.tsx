@@ -390,7 +390,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
       </details>
 
       <section className="calib">
-        <h2 className="calib__h">Calibration</h2>
+        <h2 className="calib__h">Calibration <a href="/report" className="calib__link">Weekly report card →</a></h2>
         {calibration.length === 0 ? (
           <p className="foot">
             No graded reads yet — calibration begins once Week&nbsp;1 games are played and graded.

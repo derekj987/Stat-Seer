@@ -155,6 +155,7 @@ export default async function Page({ searchParams }: {
           </div>
           <div className="ncf-honest" role="note">
             <span className="ncf-honest__tag">Why we show you this</span>
+            <p><a href="/report" className="calib__link">This week&apos;s report card →</a></p>
             <p>
               Most sites hide their track record. We publish ours in full and grade every number in the open —
               the strong weeks and the quiet ones alike. Our CFB model reads games as well as the best public

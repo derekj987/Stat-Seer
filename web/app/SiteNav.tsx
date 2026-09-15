@@ -208,6 +208,7 @@ export default function SiteNav() {
           <a href="/assistant" className="snav__dtop">✨ Slip Assistant</a>
           <a href="/forum" className="snav__dtop">Community</a>
           <a href="/how" className="snav__dtop">How our Model works</a>
+          <a href="/report" className="snav__dtop">Weekly Report Card</a>
 
           <div className="snav__ddiv" />
           <details className="snav__pgroup">

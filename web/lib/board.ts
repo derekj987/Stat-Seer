@@ -309,18 +309,41 @@ export async function fetchPreseason(season = 2026): Promise<OddsRow[]> {
   )) as OddsRow[]);
 }
 
-/** One complete snapshot of the week's odds (pinned to the latest full sweep,
- * so it's whole and under the 1000-row cap). Mirrors the_board.fetch_week. */
+/** The week's odds: the latest full sweep for every game still to be played, and for every game
+ * already played its LAST pre-kickoff sweep — the closing line.
+ *
+ * It used to be the newest sweep alone. The feed drops a game the moment it kicks off, so once
+ * Sunday's games were in the books the newest week sweep held only Monday night's, and every
+ * other game on the model board lost its market AND its away team — Derek's screenshot read
+ * "? @ CAR", "? @ CIN", "? @ DET" (lib/model.ts falls back to `{home: subject, away: "?"}` when
+ * the odds hold no names). A completed game's line is its close, and the close is the number the
+ * report card grades against, so it has to stay on the board after kickoff. Mirrors
+ * the_board.fetch_week. */
 export async function fetchWeek(week: number, season = 2026): Promise<OddsRow[]> {
-  const latest = (await pg(
-    `?season=eq.${season}&week=eq.${week}&capture_reason=in.(SCHEDULED,MANUAL)` +
-      `&select=snapshot_at&order=snapshot_at.desc&limit=1`
-  )) as { snapshot_at: string }[];
+  const wk = `?season=eq.${season}&week=eq.${week}&capture_reason=in.(SCHEDULED,MANUAL)`;
+  const sel = `&select=snapshot_at,event_id,commence_time,home_team,away_team,book,market,` +
+    `outcome_name,outcome_point,price_american`;
+  const latest = (await pg(`${wk}&select=snapshot_at&order=snapshot_at.desc&limit=1`)) as { snapshot_at: string }[];
   if (!latest.length) return [];
-  const snap = encodeURIComponent(latest[0].snapshot_at);
-  return usBooks((await pg(
-    `?season=eq.${season}&week=eq.${week}&snapshot_at=eq.${snap}` +
-      `&select=snapshot_at,event_id,commence_time,home_team,away_team,book,market,` +
-      `outcome_name,outcome_point,price_american&limit=5000`
-  )) as OddsRow[]);
+  let rows = (await pg(`${wk}&snapshot_at=eq.${encodeURIComponent(latest[0].snapshot_at)}${sel}`)) as OddsRow[];
+  // One row per (event, sweep) — FanDuel's Over on the total — is enough to find each played
+  // game's last pre-kickoff sweep. Only the odds table: the closing_lines view is not readable
+  // with the service key (403), and PostgREST cannot compare snapshot_at to commence_time.
+  const present = new Set(rows.map((r) => r.event_id));
+  // The newest FULL sweep must be SCHEDULED/MANUAL; a game's close may be a PRE_KICKOFF sweep.
+  const wkAny = `?season=eq.${season}&week=eq.${week}&capture_reason=in.(SCHEDULED,MANUAL,PRE_KICKOFF)`;
+  const marks = (await pg(`${wkAny}&book=eq.${LINE_BOOK}&market=eq.totals&outcome_name=eq.Over` +
+    `&select=event_id,snapshot_at,commence_time`)) as { event_id: string; snapshot_at: string; commence_time: string }[];
+  const lastBy = new Map<string, string>();
+  for (const m of marks) {
+    if (present.has(m.event_id) || m.snapshot_at >= m.commence_time) continue;   // pregame only
+    if (m.snapshot_at > (lastBy.get(m.event_id) ?? "")) lastBy.set(m.event_id, m.snapshot_at);
+  }
+  if (lastBy.size) {
+    const ids = [...lastBy.keys()].map(encodeURIComponent).join(",");
+    const snaps = [...new Set(lastBy.values())].map((s) => `"${encodeURIComponent(s)}"`).join(",");
+    const extra = (await pg(`${wkAny}&event_id=in.(${ids})&snapshot_at=in.(${snaps})${sel}`)) as OddsRow[];
+    rows = rows.concat(extra.filter((r) => r.snapshot_at === lastBy.get(r.event_id)));
+  }
+  return usBooks(rows);
 }

@@ -58,7 +58,12 @@ async function fetchRows(): Promise<Row[]> {
     out.push(...rows);
     if (rows.length < PAGE) break;
   }
-  return usBooks(out);
+  // Pregame rows only — a sweep that lands mid-game captures the book's LIVE line, which is not a
+  // market line for the game (props.ts pregame() has the NFL example).
+  return usBooks(out.filter((r) => {
+    const t = Date.parse(r.snapshot_at), k = Date.parse(r.commence ?? "");
+    return Number.isNaN(t) || Number.isNaN(k) || t < k;
+  }));
 }
 
 /** FanDuel's CURRENT line per `${normalised player}|${market}` on this week's slate — the number

@@ -14,7 +14,11 @@ name: Capture props
 
 on:
   schedule:
-    - cron: "0 */6 * 8-12,1 *"   # every 6 hours, Aug-Jan
+    # Every 2 hours (was 6). The player boards read the newest sweep as "the market", so on a
+    # Sunday the 1pm lines were the 8am ET capture and the 4pm lines were captured mid-game by the
+    # 18:00 UTC run (props_client now skips games in play). ~16 events x 7 markets x 2 regions =
+    # ~224 credits per run at the week's peak, well under 1% of the monthly allowance.
+    - cron: "0 */2 * 8-12,1 *"   # every 2 hours, Aug-Jan
   workflow_dispatch: {}
 
 concurrency:
@@ -37,5 +41,5 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: >
-          python props_client.py --live --write --reason SCHEDULED --max-events 32
+          python props_client.py --live --write --reason SCHEDULED --max-events 32 --commence-within 10080
           --markets "player_rush_yds,player_reception_yds,player_receptions,player_pass_yds,player_pass_tds,player_anytime_td,player_1st_td"

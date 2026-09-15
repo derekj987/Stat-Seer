@@ -26,9 +26,15 @@ on:
     # still captured for line-movement/CLV work. Hour 10 deliberately avoids the */3 hours
     # (0,3,6,9,12,15,18,21) so the two never fire together.
     - cron: "0 10 * 8-12,1 *"
-    # Pre-kickoff sharpener: every 15 min during afternoon/evening game windows
-    # on Sun/Mon/Thu, filtered to games within 30 min of kickoff.
-    - cron: "*/15 17-23 * 8-12,1 0,1,4"
+    # Pre-kickoff sharpener: every 15 min through the game windows, filtered to games within 45 min
+    # of kickoff. Two crons because the windows straddle midnight UTC: 1pm ET kicks off at 17:00
+    # UTC, so the sweep must START at 16:00 (a window that opened AT 17:00 never saw a 1pm game),
+    # and the night games — TNF/SNF/MNF at 00:15-00:20 UTC — fall on the NEXT UTC day (Fri/Mon/
+    # Tue). The old single window (17-23 UTC, Sun/Mon/Thu) covered only the 4pm slate, and week 1
+    # of 2026 has zero PRE_KICKOFF rows to show for it. 45 min > the 15-min interval plus GitHub's
+    # usual scheduling delay.
+    - cron: "*/15 16-23 * 8-12,1 0,1,4"
+    - cron: "*/15 0-1 * 8-12,1 1,2,5"
   workflow_dispatch: {}   # manual "Run workflow" button for testing
 
 concurrency:
@@ -52,9 +58,9 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: |
           case "${{ github.event.schedule }}" in
-            "*/15 17-23 * 8-12,1 0,1,4")
+            "*/15 16-23 * 8-12,1 0,1,4"|"*/15 0-1 * 8-12,1 1,2,5")
               # Closing line: only games about to kick off.
-              python odds_client.py --live --write --reason PRE_KICKOFF --commence-within 30
+              python odds_client.py --live --write --reason PRE_KICKOFF --commence-within 45
               ;;
             "0 10 * 8-12,1 *")
               # Once daily: the whole season, unwindowed, for long-range opening lines.
