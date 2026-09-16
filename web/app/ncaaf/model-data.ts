@@ -694,7 +694,7 @@ export const NCAAF_MODEL = {
           "fav": "Iowa State",
           "num": -23.5
         },
-        "marketTotal": 43.5,
+        "marketTotal": 44.5,
         "projSpread": {
           "fav": "Iowa State",
           "num": -25.8
@@ -708,7 +708,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "OVER",
-          "num": 43.5
+          "num": 44.5
         },
         "off": false,
         "rated": true,
@@ -1288,7 +1288,7 @@ export const NCAAF_MODEL = {
           "fav": "Iowa",
           "num": -38.5
         },
-        "marketTotal": 48.5,
+        "marketTotal": 49.5,
         "projSpread": {
           "fav": "Iowa",
           "num": -39.6
@@ -1318,7 +1318,7 @@ export const NCAAF_MODEL = {
           "fav": "Baylor",
           "num": -19.5
         },
-        "marketTotal": 52.5,
+        "marketTotal": 53.5,
         "projSpread": {
           "fav": "Baylor",
           "num": -16.9
@@ -1332,7 +1332,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "OVER",
-          "num": 52.5
+          "num": 53.5
         },
         "off": false,
         "rated": true,
@@ -2026,7 +2026,7 @@ export const NCAAF_MODEL = {
           "fav": "Nebraska",
           "num": -24.5
         },
-        "marketTotal": 50.5,
+        "marketTotal": 51.5,
         "projSpread": {
           "fav": "Nebraska",
           "num": -24.1
@@ -2038,10 +2038,7 @@ export const NCAAF_MODEL = {
           "side": "North Dakota",
           "num": 24.5
         },
-        "totalLean": {
-          "dir": "OVER",
-          "num": 50.5
-        },
+        "totalLean": null,
         "off": false,
         "rated": true,
         "crossDiv": true,
@@ -9114,7 +9111,7 @@ export const NCAAF_MODEL = {
               "fav": "Iowa State",
               "num": -23.5
             },
-            "marketTotal": 43.5,
+            "marketTotal": 44.5,
             "projSpread": {
               "fav": "Iowa State",
               "num": -25.8
@@ -9128,7 +9125,7 @@ export const NCAAF_MODEL = {
             },
             "totalLean": {
               "dir": "OVER",
-              "num": 43.5
+              "num": 44.5
             },
             "off": false,
             "rated": true,
@@ -9708,7 +9705,7 @@ export const NCAAF_MODEL = {
               "fav": "Iowa",
               "num": -38.5
             },
-            "marketTotal": 48.5,
+            "marketTotal": 49.5,
             "projSpread": {
               "fav": "Iowa",
               "num": -39.6
@@ -9738,7 +9735,7 @@ export const NCAAF_MODEL = {
               "fav": "Baylor",
               "num": -19.5
             },
-            "marketTotal": 52.5,
+            "marketTotal": 53.5,
             "projSpread": {
               "fav": "Baylor",
               "num": -16.9
@@ -9752,7 +9749,7 @@ export const NCAAF_MODEL = {
             },
             "totalLean": {
               "dir": "OVER",
-              "num": 52.5
+              "num": 53.5
             },
             "off": false,
             "rated": true,
@@ -10446,7 +10443,7 @@ export const NCAAF_MODEL = {
               "fav": "Nebraska",
               "num": -24.5
             },
-            "marketTotal": 50.5,
+            "marketTotal": 51.5,
             "projSpread": {
               "fav": "Nebraska",
               "num": -24.1
@@ -10458,10 +10455,7 @@ export const NCAAF_MODEL = {
               "side": "North Dakota",
               "num": 24.5
             },
-            "totalLean": {
-              "dir": "OVER",
-              "num": 50.5
-            },
+            "totalLean": null,
             "off": false,
             "rated": true,
             "crossDiv": true,
