@@ -4,6 +4,6 @@
 export interface IncentiveWatch { player: string; team: string; amount: string;
   requirement: string; currently: string; needed: string; pct: number | null }
 export const INCENTIVE_SEASON = 2026;
-export const INCENTIVE_WEEK = 1;
+export const INCENTIVE_WEEK = 2;
 export const INCENTIVE_WATCH: IncentiveWatch[] = [
 ];
