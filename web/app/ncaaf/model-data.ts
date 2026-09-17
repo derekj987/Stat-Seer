@@ -1136,21 +1136,24 @@ export const NCAAF_MODEL = {
         "conf": "Big Ten",
         "marketSpread": {
           "fav": "Michigan",
-          "num": -34.5
+          "num": -35.5
         },
-        "marketTotal": 49.5,
+        "marketTotal": 48.5,
         "projSpread": {
           "fav": "Michigan",
-          "num": -34.7
+          "num": -35.6
         },
         "projTotal": 50.9,
         "homeRiser": 0,
         "awayRiser": 7,
         "pick": {
           "side": "Michigan",
-          "num": -34.5
+          "num": -35.5
         },
-        "totalLean": null,
+        "totalLean": {
+          "dir": "OVER",
+          "num": 48.5
+        },
         "off": false,
         "rated": true,
         "crossDiv": false,
@@ -2438,7 +2441,7 @@ export const NCAAF_MODEL = {
         "conf": "Mountain West",
         "marketSpread": {
           "fav": "San Diego State",
-          "num": -2.5
+          "num": -1.5
         },
         "marketTotal": 46.5,
         "projSpread": {
@@ -2450,7 +2453,7 @@ export const NCAAF_MODEL = {
         "awayRiser": 0,
         "pick": {
           "side": "James Madison",
-          "num": 2.5
+          "num": 1.5
         },
         "totalLean": {
           "dir": "OVER",
@@ -2675,20 +2678,20 @@ export const NCAAF_MODEL = {
         "byPoints": 3.1
       },
       {
-        "dog": "James Madison",
-        "matchup": "at San Diego State",
-        "spread": "+2.5",
-        "modelPct": 54,
-        "marketPct": 44,
-        "byPoints": 1.8
-      },
-      {
         "dog": "North Texas",
         "matchup": "at Texas State",
         "spread": "+2.5",
         "modelPct": 54,
         "marketPct": 44,
         "byPoints": 1.6
+      },
+      {
+        "dog": "James Madison",
+        "matchup": "at San Diego State",
+        "spread": "+1.5",
+        "modelPct": 54,
+        "marketPct": 47,
+        "byPoints": 1.8
       }
     ],
     "weeks": [
@@ -9553,21 +9556,24 @@ export const NCAAF_MODEL = {
             "conf": "Big Ten",
             "marketSpread": {
               "fav": "Michigan",
-              "num": -34.5
+              "num": -35.5
             },
-            "marketTotal": 49.5,
+            "marketTotal": 48.5,
             "projSpread": {
               "fav": "Michigan",
-              "num": -34.7
+              "num": -35.6
             },
             "projTotal": 50.9,
             "homeRiser": 0,
             "awayRiser": 7,
             "pick": {
               "side": "Michigan",
-              "num": -34.5
+              "num": -35.5
             },
-            "totalLean": null,
+            "totalLean": {
+              "dir": "OVER",
+              "num": 48.5
+            },
             "off": false,
             "rated": true,
             "crossDiv": false,
@@ -10855,7 +10861,7 @@ export const NCAAF_MODEL = {
             "conf": "Mountain West",
             "marketSpread": {
               "fav": "San Diego State",
-              "num": -2.5
+              "num": -1.5
             },
             "marketTotal": 46.5,
             "projSpread": {
@@ -10867,7 +10873,7 @@ export const NCAAF_MODEL = {
             "awayRiser": 0,
             "pick": {
               "side": "James Madison",
-              "num": 2.5
+              "num": 1.5
             },
             "totalLean": {
               "dir": "OVER",
@@ -11092,20 +11098,20 @@ export const NCAAF_MODEL = {
             "byPoints": 3.1
           },
           {
-            "dog": "James Madison",
-            "matchup": "at San Diego State",
-            "spread": "+2.5",
-            "modelPct": 54,
-            "marketPct": 44,
-            "byPoints": 1.8
-          },
-          {
             "dog": "North Texas",
             "matchup": "at Texas State",
             "spread": "+2.5",
             "modelPct": 54,
             "marketPct": 44,
             "byPoints": 1.6
+          },
+          {
+            "dog": "James Madison",
+            "matchup": "at San Diego State",
+            "spread": "+1.5",
+            "modelPct": 54,
+            "marketPct": 47,
+            "byPoints": 1.8
           }
         ]
       },
@@ -12520,7 +12526,7 @@ export const NCAAF_MODEL = {
             "conf": "SEC",
             "marketSpread": {
               "fav": "LSU",
-              "num": -6.0
+              "num": -5.5
             },
             "marketTotal": 54.5,
             "projSpread": {
@@ -12532,7 +12538,7 @@ export const NCAAF_MODEL = {
             "awayRiser": 2,
             "pick": {
               "side": "Texas A&M",
-              "num": 6.0
+              "num": 5.5
             },
             "totalLean": {
               "dir": "UNDER",
@@ -22017,7 +22023,7 @@ export const NCAAF_MODEL = {
             "conf": "SEC",
             "marketSpread": {
               "fav": "LSU",
-              "num": -6.0
+              "num": -5.5
             },
             "marketTotal": 54.5,
             "projSpread": {
@@ -22029,7 +22035,7 @@ export const NCAAF_MODEL = {
             "awayRiser": 8,
             "pick": {
               "side": "Texas",
-              "num": 6.0
+              "num": 5.5
             },
             "totalLean": {
               "dir": "UNDER",
