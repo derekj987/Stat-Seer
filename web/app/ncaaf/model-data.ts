@@ -653,19 +653,19 @@ export const NCAAF_MODEL = {
         "conf": "ACC",
         "marketSpread": {
           "fav": "Georgia Tech",
-          "num": -40.5
+          "num": -38.5
         },
         "marketTotal": 59.5,
         "projSpread": {
           "fav": "Georgia Tech",
-          "num": -38.6
+          "num": -36.8
         },
         "projTotal": 53.4,
         "homeRiser": 0,
         "awayRiser": 0,
         "pick": {
           "side": "Mercer",
-          "num": 40.5
+          "num": 38.5
         },
         "totalLean": {
           "dir": "UNDER",
@@ -850,7 +850,7 @@ export const NCAAF_MODEL = {
           "fav": "Illinois",
           "num": -38.5
         },
-        "marketTotal": 54.5,
+        "marketTotal": 55.5,
         "projSpread": {
           "fav": "Illinois",
           "num": -37.4
@@ -864,7 +864,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "UNDER",
-          "num": 54.5
+          "num": 55.5
         },
         "off": false,
         "rated": true,
@@ -1315,7 +1315,7 @@ export const NCAAF_MODEL = {
           "fav": "Baylor",
           "num": -20.5
         },
-        "marketTotal": 48.5,
+        "marketTotal": 49.5,
         "projSpread": {
           "fav": "Baylor",
           "num": -17.4
@@ -1329,7 +1329,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "OVER",
-          "num": 48.5
+          "num": 49.5
         },
         "off": false,
         "rated": true,
@@ -2591,7 +2591,7 @@ export const NCAAF_MODEL = {
         "conf": "Pac-12",
         "marketSpread": {
           "fav": "Oregon State",
-          "num": -17.5
+          "num": -16.5
         },
         "marketTotal": 54.5,
         "projSpread": {
@@ -2603,7 +2603,7 @@ export const NCAAF_MODEL = {
         "awayRiser": 0,
         "pick": {
           "side": "Montana",
-          "num": 17.5
+          "num": 16.5
         },
         "totalLean": {
           "dir": "UNDER",
@@ -9066,19 +9066,19 @@ export const NCAAF_MODEL = {
             "conf": "ACC",
             "marketSpread": {
               "fav": "Georgia Tech",
-              "num": -40.5
+              "num": -38.5
             },
             "marketTotal": 59.5,
             "projSpread": {
               "fav": "Georgia Tech",
-              "num": -38.6
+              "num": -36.8
             },
             "projTotal": 53.4,
             "homeRiser": 0,
             "awayRiser": 0,
             "pick": {
               "side": "Mercer",
-              "num": 40.5
+              "num": 38.5
             },
             "totalLean": {
               "dir": "UNDER",
@@ -9263,7 +9263,7 @@ export const NCAAF_MODEL = {
               "fav": "Illinois",
               "num": -38.5
             },
-            "marketTotal": 54.5,
+            "marketTotal": 55.5,
             "projSpread": {
               "fav": "Illinois",
               "num": -37.4
@@ -9277,7 +9277,7 @@ export const NCAAF_MODEL = {
             },
             "totalLean": {
               "dir": "UNDER",
-              "num": 54.5
+              "num": 55.5
             },
             "off": false,
             "rated": true,
@@ -9728,7 +9728,7 @@ export const NCAAF_MODEL = {
               "fav": "Baylor",
               "num": -20.5
             },
-            "marketTotal": 48.5,
+            "marketTotal": 49.5,
             "projSpread": {
               "fav": "Baylor",
               "num": -17.4
@@ -9742,7 +9742,7 @@ export const NCAAF_MODEL = {
             },
             "totalLean": {
               "dir": "OVER",
-              "num": 48.5
+              "num": 49.5
             },
             "off": false,
             "rated": true,
@@ -11004,7 +11004,7 @@ export const NCAAF_MODEL = {
             "conf": "Pac-12",
             "marketSpread": {
               "fav": "Oregon State",
-              "num": -17.5
+              "num": -16.5
             },
             "marketTotal": 54.5,
             "projSpread": {
@@ -11016,7 +11016,7 @@ export const NCAAF_MODEL = {
             "awayRiser": 0,
             "pick": {
               "side": "Montana",
-              "num": 17.5
+              "num": 16.5
             },
             "totalLean": {
               "dir": "UNDER",
