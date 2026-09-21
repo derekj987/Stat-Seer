@@ -8,6 +8,6 @@
 # To upgrade: bump a pin here, run the pipeline locally, then commit.
 
 certifi==2026.7.22          # TLS cert bundle — see SSL_CERT_FILE handling in odds_client.py
-numpy==2.5.2                # cfb_power / cfb_ats rating fits
-pandas==3.0.5               # analysis scripts
-anthropic==1.0.0            # presser extraction (ingest/presser_collector.py)
+numpy==2.5.3                # cfb_power / cfb_ats rating fits
+pandas==3.0.6               # analysis scripts
+anthropic==1.6.0            # presser extraction (ingest/presser_collector.py)
