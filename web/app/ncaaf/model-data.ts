@@ -338,7 +338,7 @@ export const NCAAF_MODEL = {
         "conf": "American Athletic",
         "marketSpread": {
           "fav": "Navy",
-          "num": -7.5
+          "num": -6.5
         },
         "marketTotal": 51.5,
         "projSpread": {
@@ -350,7 +350,7 @@ export const NCAAF_MODEL = {
         "awayRiser": 0,
         "pick": {
           "side": "Navy",
-          "num": -7.5
+          "num": -6.5
         },
         "totalLean": {
           "dir": "OVER",
@@ -686,7 +686,7 @@ export const NCAAF_MODEL = {
         "conf": "ACC",
         "marketSpread": {
           "fav": "Virginia Tech",
-          "num": -13.5
+          "num": -14.5
         },
         "marketTotal": 48.5,
         "projSpread": {
@@ -698,7 +698,7 @@ export const NCAAF_MODEL = {
         "awayRiser": 49,
         "pick": {
           "side": "Virginia Tech",
-          "num": -13.5
+          "num": -14.5
         },
         "totalLean": {
           "dir": "OVER",
@@ -847,7 +847,7 @@ export const NCAAF_MODEL = {
           "fav": "Eastern Michigan",
           "num": -26.5
         },
-        "marketTotal": 50.5,
+        "marketTotal": 49.5,
         "projSpread": {
           "fav": "Eastern Michigan",
           "num": -21.8
@@ -861,7 +861,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "OVER",
-          "num": 50.5
+          "num": 49.5
         },
         "off": false,
         "rated": true,
@@ -11066,7 +11066,7 @@ export const NCAAF_MODEL = {
             "conf": "American Athletic",
             "marketSpread": {
               "fav": "Navy",
-              "num": -7.5
+              "num": -6.5
             },
             "marketTotal": 51.5,
             "projSpread": {
@@ -11078,7 +11078,7 @@ export const NCAAF_MODEL = {
             "awayRiser": 0,
             "pick": {
               "side": "Navy",
-              "num": -7.5
+              "num": -6.5
             },
             "totalLean": {
               "dir": "OVER",
@@ -11414,7 +11414,7 @@ export const NCAAF_MODEL = {
             "conf": "ACC",
             "marketSpread": {
               "fav": "Virginia Tech",
-              "num": -13.5
+              "num": -14.5
             },
             "marketTotal": 48.5,
             "projSpread": {
@@ -11426,7 +11426,7 @@ export const NCAAF_MODEL = {
             "awayRiser": 49,
             "pick": {
               "side": "Virginia Tech",
-              "num": -13.5
+              "num": -14.5
             },
             "totalLean": {
               "dir": "OVER",
@@ -11575,7 +11575,7 @@ export const NCAAF_MODEL = {
               "fav": "Eastern Michigan",
               "num": -26.5
             },
-            "marketTotal": 50.5,
+            "marketTotal": 49.5,
             "projSpread": {
               "fav": "Eastern Michigan",
               "num": -21.8
@@ -11589,7 +11589,7 @@ export const NCAAF_MODEL = {
             },
             "totalLean": {
               "dir": "OVER",
-              "num": 50.5
+              "num": 49.5
             },
             "off": false,
             "rated": true,
