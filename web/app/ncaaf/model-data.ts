@@ -461,7 +461,7 @@ export const NCAAF_MODEL = {
         "conf": "SEC",
         "marketSpread": {
           "fav": "Texas",
-          "num": -5.5
+          "num": -4.5
         },
         "marketTotal": 55.5,
         "projSpread": {
@@ -473,7 +473,7 @@ export const NCAAF_MODEL = {
         "awayRiser": 8,
         "pick": {
           "side": "Tennessee",
-          "num": 5.5
+          "num": 4.5
         },
         "totalLean": {
           "dir": "OVER",
@@ -1486,7 +1486,7 @@ export const NCAAF_MODEL = {
           "fav": "Auburn",
           "num": -9.5
         },
-        "marketTotal": 55.5,
+        "marketTotal": 54.5,
         "projSpread": {
           "fav": "Auburn",
           "num": -5.7
@@ -1498,10 +1498,7 @@ export const NCAAF_MODEL = {
           "side": "Vanderbilt",
           "num": 9.5
         },
-        "totalLean": {
-          "dir": "UNDER",
-          "num": 55.5
-        },
+        "totalLean": null,
         "off": false,
         "rated": true,
         "crossDiv": false,
@@ -2018,7 +2015,7 @@ export const NCAAF_MODEL = {
         "conf": "Big Ten",
         "marketSpread": {
           "fav": "Oregon",
-          "num": -2.5
+          "num": -3.5
         },
         "marketTotal": 61.5,
         "projSpread": {
@@ -2030,7 +2027,7 @@ export const NCAAF_MODEL = {
         "awayRiser": 0,
         "pick": {
           "side": "USC",
-          "num": 2.5
+          "num": 3.5
         },
         "totalLean": {
           "dir": "UNDER",
@@ -2330,7 +2327,7 @@ export const NCAAF_MODEL = {
         "conf": "Other",
         "marketSpread": {
           "fav": "Massachusetts",
-          "num": -4.5
+          "num": -3.5
         },
         "marketTotal": 48.5,
         "projSpread": {
@@ -2342,7 +2339,7 @@ export const NCAAF_MODEL = {
         "awayRiser": 5,
         "pick": {
           "side": "Sacramento State",
-          "num": 4.5
+          "num": 3.5
         },
         "totalLean": {
           "dir": "OVER",
@@ -2464,7 +2461,7 @@ export const NCAAF_MODEL = {
           "fav": "Georgia Tech",
           "num": -3.5
         },
-        "marketTotal": 47.5,
+        "marketTotal": 48.5,
         "projSpread": {
           "fav": "Georgia Tech",
           "num": -5.9
@@ -2478,7 +2475,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "OVER",
-          "num": 47.5
+          "num": 48.5
         },
         "off": false,
         "rated": true,
@@ -2523,25 +2520,17 @@ export const NCAAF_MODEL = {
       {
         "dog": "Sacramento State",
         "matchup": "vs Massachusetts",
-        "spread": "+4.5",
+        "spread": "+3.5",
         "modelPct": 69,
-        "marketPct": 40,
+        "marketPct": 42,
         "byPoints": 8.6
-      },
-      {
-        "dog": "Tennessee",
-        "matchup": "vs Texas",
-        "spread": "+5.5",
-        "modelPct": 52,
-        "marketPct": 38,
-        "byPoints": 0.7
       },
       {
         "dog": "USC",
         "matchup": "vs Oregon",
-        "spread": "+2.5",
+        "spread": "+3.5",
         "modelPct": 57,
-        "marketPct": 44,
+        "marketPct": 42,
         "byPoints": 3.2
       },
       {
@@ -2551,6 +2540,14 @@ export const NCAAF_MODEL = {
         "modelPct": 51,
         "marketPct": 38,
         "byPoints": 0.5
+      },
+      {
+        "dog": "Tennessee",
+        "matchup": "vs Texas",
+        "spread": "+4.5",
+        "modelPct": 52,
+        "marketPct": 40,
+        "byPoints": 0.7
       },
       {
         "dog": "Maryland",
@@ -11189,7 +11186,7 @@ export const NCAAF_MODEL = {
             "conf": "SEC",
             "marketSpread": {
               "fav": "Texas",
-              "num": -5.5
+              "num": -4.5
             },
             "marketTotal": 55.5,
             "projSpread": {
@@ -11201,7 +11198,7 @@ export const NCAAF_MODEL = {
             "awayRiser": 8,
             "pick": {
               "side": "Tennessee",
-              "num": 5.5
+              "num": 4.5
             },
             "totalLean": {
               "dir": "OVER",
@@ -12214,7 +12211,7 @@ export const NCAAF_MODEL = {
               "fav": "Auburn",
               "num": -9.5
             },
-            "marketTotal": 55.5,
+            "marketTotal": 54.5,
             "projSpread": {
               "fav": "Auburn",
               "num": -5.7
@@ -12226,10 +12223,7 @@ export const NCAAF_MODEL = {
               "side": "Vanderbilt",
               "num": 9.5
             },
-            "totalLean": {
-              "dir": "UNDER",
-              "num": 55.5
-            },
+            "totalLean": null,
             "off": false,
             "rated": true,
             "crossDiv": false,
@@ -12746,7 +12740,7 @@ export const NCAAF_MODEL = {
             "conf": "Big Ten",
             "marketSpread": {
               "fav": "Oregon",
-              "num": -2.5
+              "num": -3.5
             },
             "marketTotal": 61.5,
             "projSpread": {
@@ -12758,7 +12752,7 @@ export const NCAAF_MODEL = {
             "awayRiser": 0,
             "pick": {
               "side": "USC",
-              "num": 2.5
+              "num": 3.5
             },
             "totalLean": {
               "dir": "UNDER",
@@ -13058,7 +13052,7 @@ export const NCAAF_MODEL = {
             "conf": "Other",
             "marketSpread": {
               "fav": "Massachusetts",
-              "num": -4.5
+              "num": -3.5
             },
             "marketTotal": 48.5,
             "projSpread": {
@@ -13070,7 +13064,7 @@ export const NCAAF_MODEL = {
             "awayRiser": 5,
             "pick": {
               "side": "Sacramento State",
-              "num": 4.5
+              "num": 3.5
             },
             "totalLean": {
               "dir": "OVER",
@@ -13192,7 +13186,7 @@ export const NCAAF_MODEL = {
               "fav": "Georgia Tech",
               "num": -3.5
             },
-            "marketTotal": 47.5,
+            "marketTotal": 48.5,
             "projSpread": {
               "fav": "Georgia Tech",
               "num": -5.9
@@ -13206,7 +13200,7 @@ export const NCAAF_MODEL = {
             },
             "totalLean": {
               "dir": "OVER",
-              "num": 47.5
+              "num": 48.5
             },
             "off": false,
             "rated": true,
@@ -13251,25 +13245,17 @@ export const NCAAF_MODEL = {
           {
             "dog": "Sacramento State",
             "matchup": "vs Massachusetts",
-            "spread": "+4.5",
+            "spread": "+3.5",
             "modelPct": 69,
-            "marketPct": 40,
+            "marketPct": 42,
             "byPoints": 8.6
-          },
-          {
-            "dog": "Tennessee",
-            "matchup": "vs Texas",
-            "spread": "+5.5",
-            "modelPct": 52,
-            "marketPct": 38,
-            "byPoints": 0.7
           },
           {
             "dog": "USC",
             "matchup": "vs Oregon",
-            "spread": "+2.5",
+            "spread": "+3.5",
             "modelPct": 57,
-            "marketPct": 44,
+            "marketPct": 42,
             "byPoints": 3.2
           },
           {
@@ -13279,6 +13265,14 @@ export const NCAAF_MODEL = {
             "modelPct": 51,
             "marketPct": 38,
             "byPoints": 0.5
+          },
+          {
+            "dog": "Tennessee",
+            "matchup": "vs Texas",
+            "spread": "+4.5",
+            "modelPct": 52,
+            "marketPct": 40,
+            "byPoints": 0.7
           },
           {
             "dog": "Maryland",
@@ -13522,30 +13516,6 @@ export const NCAAF_MODEL = {
               "dir": "OVER",
               "num": 55.5
             },
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": true
-          },
-          {
-            "away": "Texas Tech",
-            "home": "Colorado",
-            "neutral": 0,
-            "commence": "2026-10-03T04:00:00.000Z",
-            "apAway": 11,
-            "apHome": null,
-            "conf": "Big 12",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "Texas Tech",
-              "num": -16.4
-            },
-            "projTotal": 56.8,
-            "homeRiser": 7,
-            "awayRiser": 0,
-            "pick": null,
-            "totalLean": null,
             "off": false,
             "rated": true,
             "crossDiv": false,
@@ -14455,6 +14425,30 @@ export const NCAAF_MODEL = {
             },
             "projTotal": 60.7,
             "homeRiser": 5,
+            "awayRiser": 0,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": true
+          },
+          {
+            "away": "Texas Tech",
+            "home": "Colorado",
+            "neutral": 0,
+            "commence": "2026-10-03T23:30:00.000Z",
+            "apAway": 11,
+            "apHome": null,
+            "conf": "Big 12",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "Texas Tech",
+              "num": -16.4
+            },
+            "projTotal": 56.8,
+            "homeRiser": 7,
             "awayRiser": 0,
             "pick": null,
             "totalLean": null,
