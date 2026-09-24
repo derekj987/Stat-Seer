@@ -2,33 +2,30 @@
 import { useEffect, useState } from "react";
 
 // A rotating "highlight the site" banner — spotlights sections that don't get their own
-// snapshot on the homepage. Chaos Board leads, then each player-prop analysis. Auto-advances,
-// pauses on hover, dots to jump. Client-only; links are plain <a> so navigation is normal.
+// snapshot on the homepage. Auto-advances, pauses on hover, dots to jump. Client-only; links are
+// plain <a> so navigation is normal.
+//
+// The Chaos Board and Local Intelligence slides were removed with the Context section (Derek:
+// "remove the chaos board, local intel pictures from the homepage since we removed those
+// sections"). Chaos lives on as the Upset Meter inside each game; Local Intelligence is retired.
+// A banner slide advertising a redirect is worse than one fewer slide.
 type Sport = "nfl" | "ncaaf";
 interface Slide { emoji: string; kicker: string; title: string; blurb: string; path: string; img?: string; focus?: string; }
 
 function slides(sport: Sport): Slide[] {
-  const ctx = sport === "ncaaf" ? "/ncaaf/context" : "/context";
   const players = sport === "ncaaf" ? "/ncaaf/model/players" : "/model/players";
   const value = sport === "ncaaf" ? "/ncaaf/lines" : "/lines";
-  const fan = sport === "ncaaf" ? "/ncaaf/local-intelligence" : "/local-intelligence";
   const model = sport === "ncaaf" ? "/ncaaf/model" : "/model";
   return [
     { emoji: "🛠", kicker: "New · Your Dashboard", title: "Build your own board",
       blurb: "Pin any chart across StatSeer — the model, value, props, sweet spots — into one personal view, or ask the AI to build one for you.",
       path: "/dashboard", img: "/dashboard.jpg?v=1" },
-    { emoji: "🌪", kicker: "New · just for fun", title: "The Upset Lab — Chaos Board",
-      blurb: "Which underdogs could win outright, ranked by pure chaos potential — for the aggressive bettor.",
-      path: ctx, img: "/chaosboard.jpg?v=8" },
     { emoji: "👑", kicker: "The Model", title: "Our line vs the market, graded",
       blurb: "Line-blind predictions, published and locked pre-kickoff, with a calibration record anyone can check.",
       path: model, img: "/model.jpg?v=7" },
     { emoji: "🎯", kicker: "Player Props", title: "Every prop, our line vs the book",
       blurb: "Passing, rushing, receiving, receptions & anytime TD — each player's book number beside our line-blind projection.",
       path: players, img: "/playerprops.jpg?v=11" },
-    { emoji: "📣", kicker: "Local Intelligence", title: "What the fan boards are buzzing",
-      blurb: "We scour team forums, beat writers & RSS for players you haven't heard about — then hand you the bottom line.",
-      path: fan, img: "/localintel.jpg?v=10" },
     { emoji: "💰", kicker: "Value Finder", title: "Find the best price",
       blurb: "We shop every book so you never leave value on the table — line shopping, sweet spots & the single best number.",
       path: value, img: "/valuefinder.jpg?v=11" },

@@ -471,6 +471,40 @@
     }
   }
 
+  // ---- 15b. Dead space at the bottom of a scroll container -----------------------
+  // A scroll container's scrollable area includes its ABSOLUTELY POSITIONED descendants, even
+  // ones that are invisible. Every closed Tip bubble on the model board is one of those, and each
+  // added its own height of empty ground below the last game plus a vertical scrollbar on the
+  // panel -- Derek: "at the bottom of this new section there is dead space."
+  //
+  // The fix was `content-visibility:hidden` on the closed bubble (it removes the box from layout
+  // while keeping the element, so the open transition still runs). The CHECK is general: a
+  // scroller whose content is taller than its box, where the extra height is not a visible child,
+  // is dead space by definition.
+  for (const el of document.querySelectorAll("[class*='scroll'],[class*='wrap'],div")) {
+    if (cap(findings, "scroller-dead-space")) break;
+    if (!vis(el)) continue;
+    const s = getComputedStyle(el);
+    if (!/auto|scroll/.test(s.overflowY) && !/auto|scroll/.test(s.overflowX)) continue;
+    const extra = el.scrollHeight - el.clientHeight;
+    if (extra < 40) continue;
+    // How far down does anything VISIBLE actually reach?
+    const box = el.getBoundingClientRect();
+    let ink = box.top;
+    for (const c of el.querySelectorAll("*")) {
+      const cs = getComputedStyle(c);
+      if (cs.visibility === "hidden" || cs.display === "none" || cs.contentVisibility === "hidden") continue;
+      const r = c.getBoundingClientRect();
+      if (r.height > 0 && r.width > 0) ink = Math.max(ink, r.bottom);
+    }
+    const dead = Math.round(box.top + el.scrollHeight - ink);
+    if (dead < 40) continue;
+    add("scroller-dead-space", "medium", el,
+      `${dead}px of empty scrollable height below the last visible content — an absolutely ` +
+      `positioned or hidden child (a closed popover?) is extending the scroll area`,
+      { dead, extra });
+  }
+
   // ---- 16. Table overflowing its own scroll container (desktop) ----------------
   // A chart that needs a horizontal scrollbar on a wide screen is usually a column-budget bug: the
   // per-column width rules don't cover every column (e.g. 4 widths declared for a 5-column table), so

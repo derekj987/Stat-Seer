@@ -1128,7 +1128,16 @@ a.sportstrip__i:hover{color:var(--ink)}
 .improw__modh,.modh{color:var(--offc-ink)}
 .improw__t{font-family:var(--font-mono);text-align:right;color:var(--muted)}
 .improw__tot{font-family:var(--font-mono);font-weight:700;text-align:left;color:var(--accent)}
-.impgame{background:var(--surface);border:1px solid var(--line);border-radius:9px}
+/* One game card, visibly separated from the next. Each game now runs to three sections and most
+   of a screen, so consecutive cards ran together (Derek: "put some sort of divider line in between
+   each game. Right now it looks like each game blends into each other"). A gap alone was not
+   enough at this height — the card gets its own ground, a shadow to lift it off the board, and a
+   rule between cards. */
+.impgame{background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.impgame + .impgame{margin-top:18px;position:relative}
+.impgame + .impgame::before{content:"";position:absolute;left:8%;right:8%;top:-10px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--line) 15%,var(--line) 85%,transparent)}
 .impgame .improw{border:0;background:transparent;border-radius:0;padding-bottom:4px}
 .impgame .improw--head{padding-top:8px;padding-bottom:2px;border-bottom:1px solid var(--line);
   margin:0 12px;padding-left:0;padding-right:0}
@@ -3825,14 +3834,21 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
      table wrapper's scrollWidth to 2,071px against an 878px box (audit,
      table-overflows-container x9). Same family as the `.hb-books` nowrap overflow. */
   white-space:normal;
-  opacity:0;visibility:hidden;pointer-events:none;transition:opacity .13s ease}
+  /* A CLOSED bubble must not occupy layout. `visibility:hidden` keeps the box, and inside a
+     scroll container (.imp-scroll) an absolutely-positioned box EXTENDS the scrollable area — so
+     every closed scroll on the model board added its own height of empty ground below the last
+     game, and the panel grew a vertical scrollbar (Derek: "at the bottom of this new section
+     there is dead space"). `content-visibility:hidden` removes it from layout while keeping the
+     element, so the opacity transition still runs on open. */
+  opacity:0;visibility:hidden;content-visibility:hidden;pointer-events:none;
+  transition:opacity .13s ease}
 .tip__bubble b{color:var(--gold);font-weight:800}
-.tip:has(.tip__chk:checked) .tip__bubble{opacity:1;visibility:visible;pointer-events:auto}
+.tip:has(.tip__chk:checked) .tip__bubble{opacity:1;visibility:visible;content-visibility:visible;pointer-events:auto}
 /* hover reveal only on real pointer devices — on touch, iOS keeps a stuck :hover that would
    prevent the re-tap from collapsing the bubble, so phones use the checkbox toggle alone. */
 @media (hover:hover){
   .tip__seal:hover{transform:translateY(-1px) scale(1.1);filter:drop-shadow(0 1px 3px rgba(0,0,0,.3))}
-  .tip:hover .tip__bubble{opacity:1;visibility:visible;pointer-events:auto}
+  .tip:hover .tip__bubble{opacity:1;visibility:visible;content-visibility:visible;pointer-events:auto}
 }
 /* On a phone, centring on the seal cannot be clamped: a scroll near either edge throws the bubble
    past the viewport (measured -123px off the left, and 5px of page overflow from the CLOSED bubble,
@@ -5158,6 +5174,8 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 .impspec__v{color:var(--ink);line-height:1.5;font-size:12.5px}
 .impspec__none{color:var(--muted);font-style:italic;line-height:1.4}
 .impspec__note{font-size:9.5px;font-weight:600;letter-spacing:.04em;text-transform:none;color:var(--muted)}
+/* The crew's historical splits, one line each under the tendency. */
+.impspec__refhist{display:flex;flex-direction:column;gap:1px;margin-top:2px;font-size:11px;color:var(--muted)}
 /* Scoring: each team once, units named in the heading. */
 .impspec__grid{display:grid;grid-template-columns:auto 1fr 1fr;gap:6px 22px;align-items:baseline;
   color:var(--ink);font-size:12.5px}

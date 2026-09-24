@@ -38,6 +38,11 @@ export interface UpsetInput {
   /** % of this crew's games the FAVOURITE covered, and the league's rate. */
   refFavCoverPct?: number | null;
   refLeagueFavCoverPct?: number | null;
+  /** % of this crew's games the HOME side covered, and the league's rate. Read through
+   *  `dogIsHome` so the reading always points at the underdog. */
+  refHomeCoverPct?: number | null;
+  refLeagueHomeCoverPct?: number | null;
+  dogIsHome?: boolean;
   /** Points per game the underdog scores, and the favourite allows (season to date). */
   dogOff?: number | null;
   favDef?: number | null;
@@ -142,6 +147,14 @@ export function upsetMeter(g: UpsetInput, dogName: string | null, favName: strin
       // A crew whose games see the favourite cover LESS often reads as upset-friendlier.
       parts.push({ v: clamp(50 + (g.refLeagueFavCoverPct - g.refFavCoverPct) * 2.2), w: 1 });
       bits.push(`favourites covered ${g.refFavCoverPct}% of his games`);
+    }
+    if (g.refHomeCoverPct != null && g.refLeagueHomeCoverPct != null && g.dogIsHome !== undefined) {
+      // Turn "how often the home side covered" into "how often THIS game's underdog's side
+      // covered", so the number always argues in the same direction as the meter.
+      const dogCover = g.dogIsHome ? g.refHomeCoverPct : 100 - g.refHomeCoverPct;
+      const lgDog = g.dogIsHome ? g.refLeagueHomeCoverPct : 100 - g.refLeagueHomeCoverPct;
+      parts.push({ v: clamp(50 + (dogCover - lgDog) * 2.2), w: 1 });
+      bits.push(`${g.dogIsHome ? "home" : "road"} teams covered ${Math.round(dogCover)}% of his games`);
     }
     if (g.refOverPct != null && g.refLeagueOverPct != null) {
       // A high-scoring environment gives a dog more ways back into a game.

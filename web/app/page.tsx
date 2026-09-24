@@ -262,16 +262,12 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
             <span className="lp-feat__p">Line-blind prop projections with published historical hit rates.</span>
             <span className="lp-feat__go">Open →</span>
           </a>
-          <a href="/considerations" className="lp-feat">
+          {/* Context and Local Intelligence retired with that section; the factors they carried
+              are under each game on the model board, so the tile points there. */}
+          <a href="/model" className="lp-feat">
             <span className="lp-feat__ic" aria-hidden="true">🧭</span>
-            <span className="lp-feat__h">Context</span>
-            <span className="lp-feat__p">Weather, venue, coaching, officiating — what the number misses.</span>
-            <span className="lp-feat__go">Open →</span>
-          </a>
-          <a href="/local-intelligence" className="lp-feat">
-            <span className="lp-feat__ic" aria-hidden="true">📣</span>
-            <span className="lp-feat__h">Local Intelligence</span>
-            <span className="lp-feat__p">We scour fan forums, beat writers &amp; RSS feeds for players you haven&apos;t heard about — then hand you the bottom line on each.</span>
+            <span className="lp-feat__h">Special Considerations</span>
+            <span className="lp-feat__p">Weather, officiating, injuries and each team&apos;s scoring — on every game, beside the number.</span>
             <span className="lp-feat__go">Open →</span>
           </a>
           <a href="/lines" className="lp-feat lp-feat--vf">

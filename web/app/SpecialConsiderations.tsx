@@ -49,14 +49,26 @@ const ord = (n: number) => {
   return `${n}${s[(v - 20) % 10] ?? s[v] ?? s[0]}`;
 };
 
-/** The ONE crew tendency that persists year to year is the penalty rate; the rest is history. */
-function refereeText(crew: { referee: string; tendency: string; pen: number }): string {
+/** The ONE crew tendency that persists year to year is the penalty rate, so it leads and is the
+ *  only part stated as a tendency. Everything after the dash is what HAPPENED in his games —
+ *  scoring, the favourite/underdog split, the home/away split — printed with the sample size so a
+ *  reader can weigh it, and never phrased as a lean. */
+function RefereeCell({ crew }: { crew: { referee: string; tendency: string; pen: number } }) {
   const s = refByName.get(crew.referee);
   const read = crew.tendency === "flag-happy" ? "flag-heavy"
     : crew.tendency === "flag-light" ? "lets them play" : "average flags";
-  let t = `${crew.referee} — ${read}, ~${crew.pen} pen/g`;
-  if (s) t += ` · his games average ${s.total} pts`;
-  return t;
+  return (
+    <>
+      <b>{crew.referee}</b> — {read}, ~{crew.pen} pen/g
+      {s && (
+        <span className="impspec__refhist">
+          <span>{s.total} pts a game · {s.over}% over</span>
+          <span>favourites covered {s.atsFav}% · home teams {s.homeCover}% · home teams won {s.homeWin}%</span>
+          <span className="impspec__note">his last {s.games} games — history, not a tendency that carries</span>
+        </span>
+      )}
+    </>
+  );
 }
 
 function weatherText(w: GameWeather): string {
@@ -152,7 +164,7 @@ export function SpecialConsiderations({ ctx }: { ctx: SpecialCtx }) {
               on it, and it comes true within the week. */}
           <div className="impspec__blk">
             <span className="impspec__bh">Referee</span>
-            <span className="impspec__v">{crew ? refereeText(crew) : <span className="impspec__none">Crew assigned closer to kickoff</span>}</span>
+            <span className="impspec__v">{crew ? <RefereeCell crew={crew} /> : <span className="impspec__none">Crew assigned closer to kickoff</span>}</span>
           </div>
         </div>
 

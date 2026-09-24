@@ -1871,6 +1871,84 @@ Three things that pass forward to any block like it:
   into a two-column card at 375px, which squeezed the spanning cell into half the width and
   ellipsized it. `tr.hb-specrow{display:block}` + `td{grid-column:1/-1}`.
 
+### 🚨 A closed popover inside a SCROLL CONTAINER is dead space you cannot see
+`scroll-height` includes absolutely-positioned descendants — including invisible ones. Every
+closed Tip bubble on the model board sat inside `.imp-scroll`, so each one added its own height to
+the scrollable area: ~500px of empty ground below the last game, plus a vertical scrollbar on a
+panel that should not scroll at all. Derek: *"at the bottom of this new section there is dead
+space."*
+
+`visibility:hidden` is not enough — it keeps the box. **`content-visibility:hidden` removes it
+from layout while keeping the element**, so the opacity transition still runs when it opens.
+
+New check, `scroller-dead-space`: for any element that scrolls, compare its `scrollHeight` against
+the bottom of the lowest VISIBLE descendant. Anything past that is by definition space nothing
+occupies.
+```js
+let ink = box.top;
+for (const c of el.querySelectorAll("*")) {
+  const cs = getComputedStyle(c);
+  if (cs.visibility === "hidden" || cs.display === "none" || cs.contentVisibility === "hidden") continue;
+  const r = c.getBoundingClientRect();
+  if (r.width > 0 && r.height > 0) ink = Math.max(ink, r.bottom);
+}
+const dead = box.top + el.scrollHeight - ink;      // > 40px = a finding
+```
+Two-way tested: 0 as shipped, **500px reported** with `content-visibility:visible` forced back on,
+0 again on restore. The general rule to carry: **whenever you put an absolutely-positioned element
+inside something that scrolls, check what it does to the scroll extent in BOTH states.**
+
+### 🚨 A feed can stop carrying a field mid-season, and the fallback text hides it
+The referee row read "Crew assigned closer to kickoff" on games kicking off that night, all season.
+ESPN's summary endpoint had simply stopped returning `gameInfo.officials` pre-game — the job
+logged `+0 pre-game crews from ESPN` on every single run and nothing else changed, so the board
+looked like it was waiting rather than broken. Our only other source was nflverse, which fills
+`referee` AFTER a game is played.
+
+**Football Zebras publishes the league's weekly assignments days ahead** and is now the pre-game
+source (`fetch_zebras_crews`, nicknames mapped through `NFL_NICK`, unresolvable lines counted and
+skipped, never guessed). Verified end to end: all 16 week-3 games have a crew in the table and all
+16 render one on the board.
+
+Two things to carry:
+- **A counter that prints 0 forever is a broken source, not a quiet week.** Grep your own logs:
+  a line like `+0 pre-game crews` repeating across every run is the signal.
+- **Verify a data fix against the SCHEDULE, not against a sample.** The check that settles it is
+  every scheduled game joined to the stored rows, with the misses named:
+  ```python
+  missing = [(r.away_team, r.home_team) for _, r in week_games.iterrows()
+             if (r.away_team, r.home_team) not in stored]        # must be []
+  ```
+
+### 🚨 "Why so many unders?" — separate the VIG from the level, then split by subset
+Derek, on the homepage player panel: *"How come we are showing so many unders for this week's
+player reads?"* Board-wide it was 399 of 668 rows (60%) under. Two different answers, and only one
+of them was ours:
+
+| slice | under | what it means |
+|---|---|---|
+| anytime TD (416 rows) | 63% | the book's "%" is a PRICE, hold included — ours 17.5% vs book 20.1% |
+| yards & receptions (252) | 55% | near even |
+| starters only (the panel's filter) | 10 of 12 | a real lean, see below |
+
+**The TD half is arithmetic, not a lean**, and the graded cards prove our level is the honest one:
+week 1 ours 20.8% / book 22.0% / **actually scored 21.5%**; week 2 ours 19.3 / 20.8 / 15.5.
+
+**The starters half is ours.** Graded on weeks 1-2, restricted to the same filter the panel uses:
+```
+rec_yds, line >= 40   n=94   proj-actual -7.76   line-actual -3.82    proj<line 69%, actual<line 55%
+pass_yds, line >= 200 n=53   proj-actual -6.25   line-actual -4.54
+receptions, line >= 3 n=164  proj-actual -0.16   line-actual +0.09
+```
+Everyone is low on high-volume receivers; **we are ~4 yards lower than the market**. That is
+shrink-to-the-mean at the top of the distribution — the same shape as the NCAAF role blend, which
+helps the middle and costs the top. It is a real, measured lead, and it gets a backtest before a
+constant moves, not a nudge because a screenshot looked one-sided.
+
+**The method is the reusable part: split the board by market and by the subset the SURFACE
+actually shows before concluding anything.** A panel that filters to starters can be strongly
+one-sided while the board it draws from is balanced.
+
 ### 🚨 A Tip bubble inherits `white-space` from wherever you put it
 The Upset Meter's scroll went into a `<td>` on the NCAAF board, and `.hb-form td` is
 `white-space:nowrap` — so the bubble's prose laid out on ONE 2,129px line and drove the table
