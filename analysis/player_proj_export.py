@@ -1038,6 +1038,29 @@ def defence_by_position(season):
     return out
 
 
+# Which volume actually drives each market, so the board can show the reason beside the number.
+VOL_FOR_MARKET = {"rush_yds": "car", "rec_yds": "tgt", "receptions": "tgt", "pass_yds": "att",
+                  "pass_tds": "att"}
+
+
+def _vol_driver(cur_vol, prior_vol, rate, market):
+    """{volNow, volPrior, volUnit, volGames} — the per-game volume behind this projection.
+
+    Line-blind: our own box-score reading of the player, in the units the projection is built from.
+    It explains the number without appealing to the market's."""
+    kind = VOL_FOR_MARKET.get(market)
+    pid = str(rate.get("pid") or "")
+    if not kind or not pid:
+        return {"volNow": None, "volPrior": None, "volUnit": None, "volGames": 0}
+    now, was = cur_vol.get(pid), prior_vol.get(pid)
+    return {
+        "volNow": round(now[kind], 1) if now else None,
+        "volPrior": round(was[kind], 1) if was else None,
+        "volUnit": kind,
+        "volGames": int(now["n"]) if now else 0,
+    }
+
+
 def matchup_tag(defmap, opponent, pos):
     """'good' | 'toss' | 'bad' for this player against this opponent, or None when unknown.
 
@@ -1263,7 +1286,17 @@ def main():
           f"({len(cur_team)} on the roster)")
     # This season's games, blended in BEFORE the role blend so the role pull acts on the
     # freshest volume. See CUR_K.
+    # The DRIVER behind every projection, captured before blend_current mixes the two together.
+    # The board publishes a number; without this it cannot publish the reason, and a number with no
+    # visible reason reads as a mistake. Derek: "it's hard for people to trust our receiving model
+    # right now because it looks like a glaring mistake."
+    _prior_vol = {str(r["pid"]): {"car": r.get("carries_pg", 0.0), "tgt": r.get("targets_pg", 0.0),
+                                  "att": r.get("att_pg", 0.0)}
+                  for r in rates.values() if r.get("pid")}
     _cur = current_season_rates(args.season)
+    _cur_vol = {str(pid): {"car": c.get("carries_pg", 0.0), "tgt": c.get("targets_pg", 0.0),
+                           "att": c.get("att_pg", 0.0), "n": c.get("games", 0)}
+                for pid, c in _cur.items()}
     if _cur:
         _b, _c = blend_current(rates, _cur)
         print(f"  blended {args.season} games into {_b} players' volume (K={CUR_K}); "
@@ -1457,6 +1490,10 @@ def main():
             # a specific opponent; inventing one for an unknown side would be worse than a blank.
             "matchup": matchup_tag(defmap, (teams - {team_norm(team)} or {None}).pop(),
                                    rate["pos"]) if team else None,
+            # What actually moves this number: the volume, this season against last. Published for
+            # every row so a reader can see WHY a projection sits where it does instead of taking it
+            # on faith — the whole point of a line-blind model with a published record.
+            **_vol_driver(_cur_vol, _prior_vol, rate, key),
         })
 
     out.sort(key=lambda r: (r["commence"], r["game"], r["cat"], -(r["proj"] or 0)))
@@ -1485,7 +1522,11 @@ def main():
     ts += "  env?: number | null; envDelta?: number | null;\n"
     # 'good' | 'toss' | 'bad' — how this opponent has handled this position. Context only, and
     # RB/WR/TE only: a passing matchup is a different quantity that has not been measured.
-    ts += "  matchup?: 'good' | 'toss' | 'bad' | null }\n"
+    ts += "  matchup?: 'good' | 'toss' | 'bad' | null;\n"
+    # The volume behind the projection — this season's per-game rate, last season's, the unit, and
+    # how many games this season it rests on. This is what the board shows as the REASON.
+    ts += ("  volNow?: number | null; volPrior?: number | null;"
+           " volUnit?: string | null; volGames?: number }\n")
     ts += f"export const PROJ_SEASON = {args.season};\nexport const PROJ_WEEK = {week};\nexport const PROJ_PRIOR = {prior};\n"
     ts += "export const PLAYER_PROJECTIONS: PlayerProj[] = [\n"
     for r in out:

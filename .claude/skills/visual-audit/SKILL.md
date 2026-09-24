@@ -2052,6 +2052,46 @@ cannot invert the curve and shove the stars back down.
   it.** Bucketing by our own projection mixed players of different true levels together and flattened
   the very curve the fit existed to find.
 
+### 🚨 NCAAF has the same tilt — and its cause is VOLUME, not skew
+Applying the NFL day's work to college, measured rather than assumed. The same defect is there:
+
+    market        n    over    TILT rec_yds: top half 59% over, bottom half 88%, gap 30 pts
+    rec_yds     237    74%
+    receptions  130    62%
+    rush_yds    128    60%
+    anytime_td 1263    35%   <- the control, correct in both sports
+
+The 50/50 conversion was refitted on NCAAF's OWN priced rows — never borrowed from the NFL, since a
+conversion is only valid for the population it was fitted on. `cfb_prop_snapshots` joined to the
+CFBD logs on **(player, week)** through `cfb.db`'s schedule, because the odds feed and ESPN share no
+game key. Sanity check on the join: actual outcomes beat the closing line 49/43/54/47% across the
+four markets, which is what a fair line looks like.
+
+Leans improved (rec_yds 74% → 61%, rush 60% → 55%) **and the tilt got WORSE, 30 → 37 points.** The
+reason is the important part:
+
+| line band | median proj / line |
+|---|---|
+| 0-18 | **1.87** |
+| 18-28 | 1.22 |
+| 28-45 | 1.01 |
+| 62+ | 0.89 |
+
+**At the bottom of the NCAAF board our number is nearly DOUBLE the line.** That is not skew — the
+NFL equivalent is ~1.0 after its fix — it is the `rolevol` ratchet this file already documents for
+CFB, still inflating low-volume players. `weekly_flags` now catches it directly: 8 rows sit at 2x a
+non-trivial line, worst `Evan Dickens 45.5 -> 112.2`.
+
+**A skew conversion cannot fix a volume inflation, and stacking one on top hides it.** The ratio
+table is looked up by OUR projection but fitted by LINE band; where those two diverge — which is
+exactly where the volume is inflated — the wrong ratio gets applied. Fix the volume first, then
+re-fit. NCAAF is knowingly left failing its own checks rather than papered over.
+
+Two smaller calls carried across from the NFL side: **receptions is not converted in either sport**
+(its whole range fits one band, so the fit yields a single flat ratio, which moves the level and not
+the tilt — applied to NCAAF it drove 62% over to 35%), and NCAAF already had the efficiency fix,
+since `_recent_rate` regresses a player's own rate toward a league prior.
+
 ### ⚠️ Know when to STOP calibrating — measure the board against the market, not against the eye
 After several rounds of constant-tuning driven by "the big receivers are still unders", the check
 that should have been run first settles it. On the SHIPPED board:

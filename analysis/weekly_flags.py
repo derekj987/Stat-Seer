@@ -93,6 +93,16 @@ def sb(env, path):
         return []
 
 
+def ncaaf_projections():
+    """The generated NCAAF prop board. Chunked into P0..Pn, so it is matched object-by-object."""
+    path = os.path.join(ROOT, "web/lib/ncaafPlayerProjections.ts")
+    if not os.path.exists(path):
+        return []
+    txt = open(path, encoding="utf-8").read()
+    pat = '\\{"game":.*?\\}(?=,\\n|\\n\\])'
+    return [json.loads(m.group(0)) for m in re.finditer(pat, txt, re.S)]
+
+
 def projections():
     """The generated prop board: (week, [rows])."""
     path = os.path.join(ROOT, "web/lib/playerProjections.ts")
@@ -249,12 +259,12 @@ def section_disagreements(rows, depth, n=12):
     say()
 
 
-def section_calibration(rows, depth):
+def section_calibration(rows, depth, label="NFL"):
     """The board-level checks that came out of the "everything is an under" hunt.
 
     Each one is here because a whole session was spent discovering it by eye. They are cheap, they
     run on the generated board, and they fail loudly rather than looking plausible."""
-    say("## 4. Is the board calibrated?")
+    say(f"## 4. Is the {label} board calibrated?")
     say()
     priced = [r for r in rows if r.get("book") and r.get("proj") is not None]
     ok = True
@@ -311,9 +321,16 @@ def section_calibration(rows, depth):
           f"{len(big)} rows" + ("" if not big else ": " + ", ".join(
               f"{r['player']} {r['book']}->{r['proj']}" for r in big[:4])))
 
-    # 4. LEVEL vs the market, team by team. Our receivers should sum to roughly what the market
-    # allocates the SAME rows. This is what proved the "everything is under" complaint was about
-    # distribution rather than level, and it costs nothing to keep checking.
+    # 4. LEVEL vs the market, team by team.  (NFL only: the NCAAF board carries a `team` per row
+    # but its rooms are far larger and only a fraction are priced, so the ratio is not comparable.)
+    if label != "NFL":
+        say()
+        say("  ALL CLEAR" if ok else "  SOMETHING IS OFF -- see above.")
+        say()
+        return
+    # Our receivers should sum to roughly what the market allocates the SAME rows. This is what
+    # proved the "everything is under" complaint was about distribution rather than level, and it
+    # costs nothing to keep checking.
     off = []
     for game in {r["game"] for r in rows}:
         gr = [r for r in rows if r["game"] == game]
@@ -389,6 +406,9 @@ def main():
     section_adjustment(args.season, week)
     section_disagreements(rows, depth)
     section_calibration(rows, depth)
+    nc = ncaaf_projections()
+    if nc:
+        section_calibration(nc, depth, label="NCAAF")
     section_staleness(env, args.season, week, proj_week, depth)
 
     summary = os.environ.get("GITHUB_STEP_SUMMARY")

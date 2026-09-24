@@ -829,6 +829,61 @@ def project_role(games, market, pos, rank, team, per_team, league):
 # Context only. Not folded into any projection, not an edge claim.
 CFB_MATCHUP_LO, CFB_MATCHUP_HI = 0.94, 1.06
 # our market -> the defensive category that matters for it
+# ---- What the board PUBLISHES: a 50/50 number, not an expected value ------------------------
+#
+# The NFL board's fix, re-measured for college. We compute a recency-weighted MEAN; a book prices a
+# yardage line near the MEDIAN. Yardage is right-skewed, so a mean sits far above a median at the
+# bottom of the board and barely above it at the top, and `proj > line` fires on the depth while
+# missing on the stars. Measured on this board before any change:
+#
+#     rec_yds     74% over     TILT: top half of each game 59% over, bottom half 88%, gap 30 pts
+#     receptions  62% over
+#     rush_yds    60% over
+#     anytime_td  35% over  <- the control, and correct: there both numbers are probabilities
+#
+# FITTED ON NCAAF'S OWN PRICED ROWS, not borrowed from the NFL — a conversion is only valid for the
+# population it was fitted on, which the NFL side learned the hard way twice. `cfb_prop_snapshots`
+# joined to the CFBD logs on (player, week) via cfb.db's schedule, since the odds feed and ESPN
+# share no game key. See analysis/cfb_median_fit.py. The join's own sanity check: actual outcomes
+# beat the closing line 49% / 43% / 54% / 47% of the time across the four markets, which is what a
+# fair line should look like and says the pairing is sound.
+#
+#     level      0-18   18-28   28-45   45-62   62-80    80+
+#     rec_yds    0.62    0.62    0.74    0.91    0.91    0.91
+#     rush_yds   0.72    0.72    0.72    0.96    1.00    1.00
+#     pass_yds   1.01 flat  <- near-symmetric market, nothing to correct
+#     receptions 0.79 flat
+#
+# Monotone by construction: skew can only shrink as the level rises, so a thin band cannot invert
+# the curve and push the best players back down.
+#
+# CAVEAT, stated because the sample is young: this is four weeks of one season (391 receiving pairs,
+# 267 rushing), because NCAAF prop history starts when we began capturing it and cannot be
+# backfilled. Re-run cfb_median_fit.py as the season accumulates.
+PUBLISH_BANDS = [0.0, 18.0, 28.0, 45.0, 62.0, 80.0]
+PUBLISH_RATIO = {
+    "rec_yds":    [0.616, 0.616, 0.740, 0.911, 0.911, 0.911],
+    "rush_yds":   [0.722, 0.722, 0.722, 0.961, 1.002, 1.002],
+    "pass_yds":   [1.006, 1.006, 1.006, 1.006, 1.006, 1.006],
+}
+# RECEPTIONS is deliberately absent, the same call the NFL side made. Its whole range fits inside
+# one band, so the fit produces a single flat 0.79 -- and a flat ratio is a uniform shrink, which
+# does not correct a tilt, it just moves the level. Applied, it drove the board from 62% over to
+# 35%: overshot, in the other direction. A small-integer market needs its own band structure before
+# it can be converted at all.
+
+
+def to_fifty_fifty(market, mu):
+    """Convert an expected value to the point a player is as likely to beat as not."""
+    r = PUBLISH_RATIO.get(market)
+    if not r or mu is None or mu <= 0:
+        return mu
+    i = 0
+    while i + 1 < len(PUBLISH_BANDS) and mu >= PUBLISH_BANDS[i + 1]:
+        i += 1
+    return round(mu * r[min(i, len(r) - 1)], 1)
+
+
 MARKET_GRP = {"pass_yds": "passing", "pass_tds": "passing",
               "rush_yds": "rushing", "rec_yds": "receiving", "receptions": "receiving"}
 # anytime TD spans both, so it follows the player's depth-chart position instead.
@@ -1032,6 +1087,8 @@ def build(props, key, depth):
             proj = project(games, mk)
         if proj is None:
             continue
+        # Published on the same scale as the line it sits beside.
+        proj = to_fifty_fifty(mk, proj)
         out.append({
             "game": f"{p['away']} @ {p['home']}",
             "commence": p["commence"], "player": e["display"], "team": e["team"], "pos": pos,
@@ -1147,6 +1204,7 @@ def build_slate(slate, depth, prop_index, key):
                         proj = project_role(games, mk, pos, rank, team, per_team, league)
                         if proj is None:
                             continue
+                        proj = to_fifty_fifty(mk, proj)
                         book = prop_index.get(sig)    # posted line/% if a book has it, else None
                         # Hit-rates are "% over the LINE", so they only mean something when a book
                         # has posted one. TD rate needs no line (it counts scoring games), so it

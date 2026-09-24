@@ -45,6 +45,9 @@ export const playerCatByKey = (k: string): PlayerCat =>
 // college defences vary far more than NFL ones, so the tag carries more there.
 //   NFL   2021-25: RB +5.6 / TE +3.6 / WR +1.0   (overall corr +0.058)
 //   NCAAF 2024-25: passing +/-10.8, rushing +/-5.4, receiving +/-1.8  (overall corr +0.084)
+/** The volume units, spelled for a reader rather than for the exporter. */
+const VOL_WORD: Record<string, string> = { tgt: "targets", car: "carries", att: "attempts" };
+
 const MATCHUP_SIZE: Record<"nfl" | "ncaaf", string> = {
   nfl: "Worth about +5.6 yards for a running back, +3.6 for a tight end and +1.0 for a receiver.",
   ncaaf: "Worth about 10.8 yards on passing, 5.4 on rushing and 1.8 on receiving.",
@@ -341,6 +344,12 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                       </div>
                       {sec.rows.map((r, ri) => {
                         const cpct = r.cG ? Math.round((100 * r.cOver) / r.cG) : null;
+                        // Show the driver where the row needs defending: we have both readings, the
+                        // volume actually moved, and our number sits >=20% from the line.
+                        const volWhy = r.volNow != null && r.volPrior != null && r.volUnit
+                          && r.book != null && r.proj != null && r.book > 0
+                          && Math.abs(r.proj - r.book) / r.book >= 0.20
+                          && Math.abs(r.volNow - r.volPrior) >= 1.0;
                         const ppct = r.pG ? Math.round((100 * r.pOver) / r.pG) : null;
                         const hpct = r.hG ? Math.round((100 * r.hOver) / r.hG) : null;
                         const rpct = r.rG ? Math.round((100 * r.rOver) / r.rG) : null;
@@ -411,6 +420,24 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                                   +0.0581 over 2021-25, so that is what the tag now says. Three
                                   states, because "toss-up" is the honest answer for most rows and a
                                   binary forced every player into a verdict. */}
+              {/* WHY our number is where it is. Shown only when we disagree with the market by
+                  enough that the row would otherwise read as a mistake — Derek: "it's hard for
+                  people to trust our receiving model right now because it looks like a glaring
+                  mistake." A projection with no visible reason IS indistinguishable from an error,
+                  and the fix for that is the reason, not a different number.
+
+                  It is our own box-score reading in the units the projection is built from, so it
+                  explains the number without appealing to the market's. Deliberately not shown on
+                  every row: on a board where most numbers sit near the line, a driver on all of
+                  them is noise, and the rows that need defending are exactly the ones that look
+                  wrong. */}
+                              {volWhy && (
+                                <span className="pmwhy"
+                                  title={`Our projection is built on volume: ${r.player} is at ${r.volNow} ${VOL_WORD[r.volUnit!] ?? r.volUnit} per game across ${r.volGames} game${r.volGames === 1 ? "" : "s"} this season, against ${r.volPrior} per game last season. That change is what moves the number, and it is the whole disagreement with the book's line — decide for yourself which reading of his role you believe.`}>
+                                  {r.volNow} {VOL_WORD[r.volUnit!] ?? r.volUnit}/g
+                                  <span className="pmwhy__was"> vs {r.volPrior} last yr</span>
+                                </span>
+                              )}
                               {r.matchup && (
                                 <span className={`pmmatch pmmatch--${r.matchup}`}
                                   title={r.matchup === "toss"
