@@ -1081,11 +1081,33 @@ def matchup_tag(defmap, opponent, pos):
 #
 # Receptions and anytime TD are NOT converted. Receptions is a small integer whose whole range fits
 # in one band, and anytime TD is already a probability on the same scale as the book's.
-PUBLISH_BANDS = [0.0, 15.0, 25.0, 40.0, 60.0, 85.0]
+# The bands are on the player's LEVEL, and the first cut of them was wrong in a way that hid
+# itself. It bucketed by our own projected mean from a SIMPLIFIED estimator — not the number the
+# board publishes — and came out nearly flat (1.02, 0.85, 0.88, 0.84, 0.87, 0.70). A flat ratio is
+# a uniform shrink: it moves the board's average over-rate to 50% and leaves the TILT untouched,
+# which is why Derek could still see it after the average said it was fixed:
+#
+#     top half of a game by line     26% over          <- after the "fix"
+#     bottom half                    65% over
+#
+# Re-measured against the player's LEVEL rather than our estimate of it — 2,850 priced receiving
+# rows and 1,329 rushing, 2024 plus 2026 weeks 1-2 — the real curve is steep, not flat. The skew is
+# severe on small lines and nearly gone on big ones, which is exactly the tilt:
+#
+#     level     0-18   18-28   28-45   45-62   62-80    80+
+#     rec_yds   0.68    0.81    0.87    0.92    0.94    1.02
+#     rush_yds  0.69    0.87    0.87    0.90    0.96    0.96
+#
+# Passing is flat at 1.01 across every band, as it should be: near-symmetric market, no tilt to
+# correct, and the number barely moves.
+#
+# Monotone by construction — skew can only shrink as the level rises — so a thin top band cannot
+# invert the curve and push the stars back down.
+PUBLISH_BANDS = [0.0, 18.0, 28.0, 45.0, 62.0, 80.0]
 PUBLISH_RATIO = {
-    "rec_yds":  [1.021, 0.850, 0.875, 0.839, 0.868, 0.701],
-    "rush_yds": [1.225, 0.868, 0.824, 0.903, 0.930, 0.747],
-    "pass_yds": [1.024, 1.024, 1.024, 1.024, 1.024, 1.024],
+    "rec_yds":  [0.679, 0.812, 0.869, 0.917, 0.936, 1.023],
+    "rush_yds": [0.690, 0.867, 0.867, 0.904, 0.965, 0.965],
+    "pass_yds": [1.014, 1.014, 1.014, 1.014, 1.014, 1.014],
 }
 
 

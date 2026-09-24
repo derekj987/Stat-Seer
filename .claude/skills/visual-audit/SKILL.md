@@ -59,6 +59,55 @@ the control that triggers it — the "the scroll doesn't work any more" family) 
 scroll — the "too wordy" family).
 Console errors + network 4xx/5xx are collected separately (see step 4).
 
+### ▶ RUN THIS FIRST for anything about the numbers
+
+```bash
+python analysis/weekly_flags.py
+```
+
+Five sections, all mechanical, all of them here because a whole session was once spent finding them
+by eye. It also runs automatically inside `player-projections.yml` and writes to the Actions run
+summary, so the weekly answers arrive without anyone asking.
+
+| section | answers |
+|---|---|
+| 1. OUT and BACK | which starters are unavailable, and who a team is getting back |
+| 2. What the model did | the injury adjustment per team, and the change from last week |
+| 3. Self-contradicting rows | our number says over while the player clears that line <35% of the time |
+| 4. Is the board calibrated | lean per market, proj/line on mid-range players, absurd rows, team totals vs the market |
+| 5. Is anything stale | projection week, depth chart, availability feed age, teams filed |
+
+**Section 4 is the one to trust over your eye.** Every threshold in it was learned the hard way:
+
+- **lean PER MARKET, never pooled** — anytime TD sits near 37% by construction and drags an average
+- **proj/line ~1.00** on players whose own history says the line is their median — it read 1.05
+  while the board published a mean next to a median
+- **rows ≥ 2× a line of 15+** — a 2× ratio on a half-point line is arithmetic, not a defect
+- **team receiving totals within ±20% of the market's** — this is what proves a complaint is about
+  distribution rather than level
+- **TILT: top half of each game by line vs bottom half** — the one an average cannot see, and the
+  one that kept passing while the board was visibly wrong
+
+### 🗂 Measurement ledger — do not re-run these dead ends
+Every script below was written to answer one question. The verdict matters more than the code: a
+negative result here is a season of work someone does not have to repeat.
+
+| script | question | verdict |
+|---|---|---|
+| `volume_backtest.py` / `volume_sweep.py` | how to weight current-season volume | recency half-life 2.5, `CUR_K` 1.5→1.0. **Last game alone is far worse than the mean.** Share-of-team-volume adds nothing |
+| `curk_by_n.py` | is `CUR_K` wrong early in the season? | **No.** Optimum at n≤2 is 0.5, LOWER than shipped; a per-n schedule made WR/TE worse |
+| `role_weight_backtest.py` | should the depth-chart role prior stay on all year? | No — taper to 0 after 2 games |
+| `role_change_signal.py` / `role_change_fit.py` | does depth-chart MOVEMENT predict? | **No** — looked strong pooled, vanished on a proper split. Vacated volume DOES, for RB only |
+| `ratings_injury_adj.py` | correct past margins for who was missing? | **No** — slightly worse on train and held-out |
+| `share_prior_sweep.py` | `injury_adj` forgets a season-long absentee | real bug, fixed at `SHARE_PRIOR_K=4`; buys no measurable accuracy |
+| `efficiency_by_volume.py` | tier the efficiency baseline by volume? | **No** — no out-of-sample gain |
+| `rec_efficiency_persist.py` / `efficiency_persist_all.py` | regress a player's OWN efficiency? | **Yes, all positions.** `REC_YPT_K=120`, `RUSH_YPC_K=700`, `PASS_K` 300→1000 |
+| `concentration_fit.py` | sharpen the within-team split? | **Carries yes** (γ=1.10). **Targets no** — it fixes the concentration and costs accuracy, because the flat split is a hedge over WHICH receiver leads |
+| `compression_check.py` / `lean_explained.py` | is the board compressed? | it is a units clash: we published a mean, the book prices a median |
+| `median_calibration.py` | convert to a 50/50 number on all player-games | **wrong population** — swung the board to 33% over |
+| `priced_median_fit.py` | …on rows that carried a line | **shipped**, but the first cut bucketed by our own estimate and came out flat, fixing the average and not the tilt. Refit by LEVEL: ratios 0.68→1.02, halves 26/65 → 40/55 |
+| `qb_out_receivers.py` | do receivers lose volume when QB1 is out? | primary −6.9%, fringe +17.2%. Small; nothing shipped |
+
 ### 🚨 Never hand-edit an AUTO-GENERATED file
 Several `web/lib/*.ts` files are written by scripts and rewritten by scheduled jobs. Anything added to
 one by hand is silently wiped on the next refresh. **Before editing any file under `web/lib/`, check
@@ -1775,7 +1824,8 @@ two changed, one deliberately not:
   Nothing there overturns parameters chosen on 2016-22 and held out on 2023-25; the in-season
   blend (PRIOR_K) is the designed week-2 adjustment. Retuning on one week is how a model gets
   worse — say so instead of changing a number to look responsive.
-- **NFL props: current-season volume blended in** (`CUR_K = 1.5`, `player_proj_export.py`).
+- **NFL props: current-season volume blended in** (`CUR_K = 1.0`, `player_proj_export.py`; was 1.5,
+  re-swept alongside the recency half-life).
   They were prior-season-only all year. Backtest 2023-25, next-game volume from prior mean +
   season-to-date mean: carries 3.87 → 3.13, WR targets 2.05 → 1.93, QB attempts 8.36 → 7.76;
   flat optimum K = 1-2. The workflow now fetches `stats_<SEASON>.csv` (optional — missing before
@@ -1972,9 +2022,51 @@ number barely moves. And absolute error IMPROVES on the two skewed markets, beca
 minimises absolute error where the mean minimises squared error — so the report cards, which grade
 absolute error, get better rather than worse. Board-wide `proj / line` median moved 1.050 → **0.987**.
 
-**The rule: before comparing two numbers side by side on a board, check they are the same statistic.**
-A mean beside a median will look biased forever, and every fix aimed at the model will measure clean
-and change nothing.
+**Then it was calibrated wrong a second time, and the way it hid is the real lesson.** The ratio was
+bucketed by our own projected mean from a SIMPLIFIED estimator rather than by the player's LEVEL, and
+came out nearly flat — 1.02, 0.85, 0.88, 0.84, 0.87, 0.70. **A flat ratio is a uniform shrink: it
+moves the average over-rate to 50% and leaves the TILT completely untouched.** The board-wide check
+went green while Derek could still see it, game after game:
+
+    top half of a game by line     26% over     <- after the "fix"
+    bottom half                    65% over
+
+Re-measured against LEVEL (2,850 priced receiving rows, 1,329 rushing), the true curve is steep:
+
+| level | 0-18 | 18-28 | 28-45 | 45-62 | 62-80 | 80+ |
+|---|---|---|---|---|---|---|
+| rec_yds | **0.68** | 0.81 | 0.87 | 0.92 | 0.94 | **1.02** |
+| rush_yds | **0.69** | 0.87 | 0.87 | 0.90 | 0.96 | 0.96 |
+
+Skew is severe on small lines and gone on big ones — that gradient IS the tilt. Passing stays flat at
+1.01 across every band, as a near-symmetric market should. Shipping the steep curve moved the halves
+to 40% / 55%. Ratios are forced monotone: skew can only shrink as the level rises, so a thin top band
+cannot invert the curve and shove the stars back down.
+
+**Two rules:**
+- **Before comparing two numbers side by side on a board, check they are the same statistic.** A mean
+  beside a median looks biased forever, and every fix aimed at the model measures clean and changes
+  nothing.
+- **Bucket a calibration by the quantity you are calibrating AGAINST, not by your own estimate of
+  it.** Bucketing by our own projection mixed players of different true levels together and flattened
+  the very curve the fit existed to find.
+
+### 🚨 An AVERAGE hides a SLOPE — split the board and compare the halves
+The single most useful check to come out of this, because it is what Derek's eye was doing and what
+every automated check was missing. A board-wide lean of 45% over looks healthy. Split each game at
+its median line:
+
+    top half by line      26% over
+    bottom half           65% over
+
+Those cancel to 45%. **The project had already written this lesson down once** — the win-curve entry
+notes weeks 1-2 at -3.2 and weeks 6-10 at +3.6 averaging to a perfect-looking +0.2 — and it was still
+missed on a different board, because the check that shipped measured the aggregate.
+
+`weekly_flags.py` section 4 now carries it as `rec_yds tilt (big lines vs small)`, failing above a
+22-point gap. **Any time a summary statistic looks healthy and a human still says the board is
+wrong, believe the human and go looking for the slope the average is hiding** — by line size, by
+depth slot, by week, by anything the rows are ordered on.
 
 ### 🚨 Defining a player's importance from a season he MISSED erases him — twice in one day
 Two independent bugs, same shape, found hours apart:
@@ -2082,8 +2174,8 @@ this term moves:
 | WR inefficient (bottom) | **+2.44** | +1.57 |
 | TE efficient (top third) | **−3.64** | −1.06 |
 
-`REC_YPT_K = {"WR": 500, "TE": 120}` now regresses a receiver's own yards-per-target toward the
-league rather than replacing it — the same shape `PASS_K = 300` already used for QB passing yards,
+`REC_YPT_K = {"WR": 120, "TE": 120}` now regresses a receiver's own yards-per-target toward the
+league rather than replacing it — the same shape `PASS_K` already used for QB passing yards,
 whose comment had said *"QB YPA persists (unlike RB/WR efficiency)"* for as long as the file has
 existed. Nobody had tested the receiver half of that parenthesis. RB stays on the league rate
 (r = 0.104, held-out −0.10%).
@@ -2095,17 +2187,17 @@ see — which is precisely how it was found.
 **The rule to carry: when a project-wide finding gets applied to a new position or market, re-measure
 it there.** "Efficiency doesn't persist" was measured on carries and quietly inherited by targets.
 
-### ⚠️ Whether a QB1 is out barely moves his receivers' VOLUME
-Tested while explaining the above, because it was the obvious next suspect for a star whose targets
-had halved. Within-player, comparing each receiver's games with and without his team's leading
-passer, 2021-2025:
+### ⚠️ Whether a QB1 is out — RETRACTED, the first measurement was circular
+This entry used to read *"barely moves his receivers' volume — 3.34 → 3.40 targets/game, n=258,
+do not build a correction for it."* **That was wrong**, and the retraction is kept rather than
+deleted so nobody re-derives the mistake: the test defined QB1 as the team's SEASON-LEADING PASSER,
+which excludes any quarterback who missed most of the season — exactly the cases it existed to
+measure. The corrected version, run against the depth chart, is under *"Defining a player's
+importance from a season he MISSED"* further up. The real effect is a gradient: primary receivers
+−6.9%, fringe receivers +17.2%.
 
-    all receivers (n=258)        3.34 -> 3.40 targets/game   (+0.06)
-    high-volume only (n=40)      7.24 -> 6.74                (-0.50)
-
-Essentially nothing. A back-up quarterback throws to the same people. So a receiver whose target
-share has collapsed while his QB was hurt has genuinely lost role — do not explain it away with the
-quarterback, and do not build a correction for it.
+**Leave a retraction in place when a finding is overturned.** A skill entry is read as settled fact
+by whoever comes next, and a confident wrong number does more damage than a missing one.
 
 ### 🚨 "X% of rows lean over" is measuring SKEW unless the market is symmetric
 Derek: *"look into why starter rows lean 62% over."* The answer is that the metric was wrong, and
@@ -2297,11 +2389,22 @@ big. It is a market-chosen subset, so "projection minus actual" on it measures t
 as the projection. **Bucket by something you produced, not by something the book produced** — the
 whole point of a line-blind model is that its own errors can be measured without the line.
 
-The follow-on test was a negative result worth keeping: efficiency really does slope with usage
-(WR yards/target runs -7.6% in the lowest projected-volume quintile and +3.6% in the highest), but
-tiering the efficiency baseline by volume **did not improve yards out of sample at all** (-0.11% to
-+0.05% by position) and made the top-tier bias worse. The flat positional baseline stays. "Volume
-persists, efficiency doesn't" survives contact with the data again.
+**Both halves of the lesson need an update, written here because the original entry was read as
+settled and was half wrong:**
+
+- *"The bias is not there"* — it IS there. See *"Two measurements that disagree are usually measuring
+  different populations"*: bucketing by our own projection finds players WE think are big and we
+  overshoot those; bucketing by the market's line finds players IT thinks are big and we undershoot
+  those. Both were real, and together they are compression. The methodological point survives —
+  a market-chosen subset measures the selection as much as the projection, so bucket by something
+  you produced — but "therefore no bias exists" did not follow and was wrong.
+- *"The flat positional baseline stays"* — it did not. Tiering efficiency by VOLUME was indeed a
+  dead end, but regressing each player's OWN efficiency toward the league was not, and now ships for
+  every position (see the founding-finding entry). The negative result was about the wrong knob.
+
+The durable rule is narrower than the entry first claimed: **a subset chosen by the market can only
+tell you that a disagreement exists, never which side is wrong.** Settle that with a third
+measurement that uses neither selector — here, regressing outcomes on projections.
 
 ### 🚨 A closed popover inside a SCROLL CONTAINER is dead space you cannot see
 `scroll-height` includes absolutely-positioned descendants — including invisible ones. Every

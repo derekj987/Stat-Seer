@@ -32,6 +32,7 @@ import datetime as dt
 import json
 import os
 import re
+import statistics
 import sys
 import urllib.error
 import urllib.parse
@@ -248,8 +249,92 @@ def section_disagreements(rows, depth, n=12):
     say()
 
 
+def section_calibration(rows, depth):
+    """The board-level checks that came out of the "everything is an under" hunt.
+
+    Each one is here because a whole session was spent discovering it by eye. They are cheap, they
+    run on the generated board, and they fail loudly rather than looking plausible."""
+    say("## 4. Is the board calibrated?")
+    say()
+    priced = [r for r in rows if r.get("book") and r.get("proj") is not None]
+    ok = True
+
+    def check(label, good, detail):
+        nonlocal ok
+        if not good:
+            ok = False
+        say(f"  [{'ok' if good else 'LOOK'}] {label}: {detail}")
+
+    # 1. LEAN PER MARKET. Must be near 50% on each market SEPARATELY. Pooling hides it, because
+    # anytime-TD is a probability market and sits near 37% by construction, which drags the average.
+    for mkt in ("rec_yds", "rush_yds", "pass_yds", "receptions"):
+        g = [r for r in priced if r["market"] == mkt]
+        if len(g) < 20:
+            continue
+        pct = 100.0 * sum(1 for r in g if r["proj"] > r["book"]) / len(g)
+        check(f"{mkt} lean", 38 <= pct <= 62, f"{pct:.0f}% over (n={len(g)}); want ~50")
+
+    # 1b. TILT. The check that was missing, and the reason Derek could still see a broken board
+    # while section 4 reported ALL CLEAR. A lean averaged over a whole market hides a slope: top-half
+    # unders and bottom-half overs cancel to a healthy-looking 45%. Split each game at its median
+    # line and compare the halves — this is exactly what the eye does when it says "all the big
+    # receivers are unders and the little ones are overs".
+    for mkt in ("rec_yds", "rush_yds"):
+        tops = bots = topn = botn = 0
+        for game in {r["game"] for r in priced}:
+            q = sorted([r for r in priced if r["game"] == game and r["market"] == mkt],
+                       key=lambda x: -x["book"])
+            if len(q) < 6:
+                continue
+            h = len(q) // 2
+            tops += sum(1 for r in q[:h] if r["proj"] > r["book"]); topn += h
+            bots += sum(1 for r in q[h:] if r["proj"] > r["book"]); botn += len(q) - h
+        if topn < 20 or botn < 20:
+            continue
+        t, b = 100.0 * tops / topn, 100.0 * bots / botn
+        check(f"{mkt} tilt (big lines vs small)", abs(t - b) <= 22,
+              f"top half {t:.0f}% over, bottom half {b:.0f}% over, gap {abs(t - b):.0f}pts; want <22")
+
+    # 2. PROJECTION / LINE on players whose own history says the line IS their median. If both
+    # numbers are the same statistic this sits at 1.0. It read 1.05 while we published a mean.
+    mid = [r for r in priced if r["market"] != "anytime_td" and (r.get("cG") or 0) >= 8
+           and 0.40 <= (r.get("cOver") or 0) / max(r.get("cG") or 1, 1) <= 0.60]
+    if len(mid) >= 30:
+        med = statistics.median(r["proj"] / r["book"] for r in mid)
+        check("proj/line on mid-range players", 0.93 <= med <= 1.07,
+              f"median {med:.3f} (n={len(mid)}); want ~1.00")
+
+    # 3. ABSURD ROWS. A projection at 2x its line is only defensible on a tiny line.
+    nt = [r for r in priced if r["market"] != "anytime_td"]
+    big = [r for r in nt if r["proj"] / r["book"] >= 2 and r["book"] >= 15]
+    check("rows >= 2x a non-trivial line", not big,
+          f"{len(big)} rows" + ("" if not big else ": " + ", ".join(
+              f"{r['player']} {r['book']}->{r['proj']}" for r in big[:4])))
+
+    # 4. LEVEL vs the market, team by team. Our receivers should sum to roughly what the market
+    # allocates the SAME rows. This is what proved the "everything is under" complaint was about
+    # distribution rather than level, and it costs nothing to keep checking.
+    off = []
+    for game in {r["game"] for r in rows}:
+        gr = [r for r in rows if r["game"] == game]
+        for team in {r["team"] for r in gr if r.get("team")}:
+            rec = [r for r in gr if r["market"] == "rec_yds" and r["team"] == team
+                   and r.get("proj") is not None and r.get("book")]
+            if len(rec) < 3:
+                continue
+            ours, mkt = sum(r["proj"] for r in rec), sum(r["book"] for r in rec)
+            if mkt > 0 and not 0.80 <= ours / mkt <= 1.20:
+                off.append(f"{team} {ours / mkt:.2f}")
+    check("team receiving totals vs the market", len(off) <= 2,
+          f"{len(off)} teams outside +/-20%" + ("" if not off else ": " + ", ".join(off[:5])))
+
+    say()
+    say("  ALL CLEAR" if ok else "  SOMETHING IS OFF — see above.")
+    say()
+
+
 def section_staleness(env, season, week, proj_week, depth):
-    say("## 4. Is anything stale?")
+    say("## 5. Is anything stale?")
     say()
     ok = True
 
@@ -303,6 +388,7 @@ def main():
     section_availability(env, args.season, week, depth)
     section_adjustment(args.season, week)
     section_disagreements(rows, depth)
+    section_calibration(rows, depth)
     section_staleness(env, args.season, week, proj_week, depth)
 
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
