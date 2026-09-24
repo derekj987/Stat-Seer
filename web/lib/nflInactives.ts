@@ -146,6 +146,84 @@ async function addPracticeReports(out: Map<string, InjuryNote>, season: number, 
   }
 }
 
+// ---------------------------------------------------------------- Sleeper (news-driven)
+//
+// Derek: "I'm not seeing Jaxson Dart major injury in the NYG game (he's out for the season)...
+// Also the same for Caleb Williams for the Bears."
+//
+// He was right, and the reason is structural rather than a bug. The two sources above are both
+// versions of the OFFICIAL game-status report, and that report has two blind spots:
+//
+//   - it carries no designation until Friday, so a Wednesday DNP reads as nothing. Dart was in our
+//     week-3 data with practice_status "Did Not Participate In Practice" and report_status NULL;
+//   - a player moved to injured reserve drops OFF the report entirely rather than being marked,
+//     because he is off the active roster. Caleb Williams had zero rows.
+//
+// Measured against the live feed the same morning: nflverse had Dart as an undesignated DNP and
+// nothing at all on Williams, while Sleeper had Dart "Out — Knee - MCL, Surgery" and Williams
+// "Doubtful — Hamstring", both timestamped the previous evening. It also had Jayden Daniels out.
+//
+// Sleeper is a fantasy platform aggregating the same beat reporting the wires carry. It is free,
+// needs no key, and is the only feed we found that moves on NEWS instead of on the league's filing
+// schedule. It is layered BETWEEN our capture and ESPN deliberately: it fills the silence the
+// official report leaves, and ESPN's game-day inactives still overrule it, because 90 minutes
+// before kickoff the official list is the truth and a wire report is not.
+//
+// SKILL POSITIONS ONLY. Sleeper carries ~14 designated players per team across the whole roster,
+// most of them long-term IR that changes nothing about this week; taking all of them would bury
+// the Special Considerations block in names. The positions below are the ones whose absence moves
+// a prop or a line. Non-skill injuries keep coming from the two official sources, as today.
+interface SleeperPlayer {
+  full_name?: string; team?: string | null; position?: string | null;
+  active?: boolean; injury_status?: string | null; injury_body_part?: string | null;
+}
+
+// Sleeper spells two clubs differently from nflverse, and still tags a handful of players OAK.
+const SLEEPER_TEAM: Record<string, string> = { LAR: "LA", OAK: "LV" };
+const SLEEPER_POS = new Set(["QB", "RB", "WR", "TE", "K", "FB"]);
+// "NA" is deliberately absent: Sleeper uses it for "no current information", and healthy starters
+// carry it. Mapping it to a tag would put a pill on players with nothing wrong.
+const SLEEPER_STATUS: Record<string, { status: InjuryStatus; label: string }> = {
+  OUT: { status: "OUT", label: "Out" },
+  IR: { status: "IR", label: "IR" },
+  PUP: { status: "IR", label: "PUP" },
+  NFI: { status: "IR", label: "NFI" },
+  DNR: { status: "IR", label: "DNR" },
+  DOUBTFUL: { status: "DOUBTFUL", label: "Doubtful" },
+  QUESTIONABLE: { status: "QUESTIONABLE", label: "Questionable" },
+  SUS: { status: "SUSPENDED", label: "Susp." },
+};
+
+async function addSleeper(out: Map<string, InjuryNote>) {
+  try {
+    // ~2.6MB gzipped for every player in the league; Sleeper asks that it not be polled hard, and
+    // injury news does not move faster than this anyway. One fetch per 15 minutes per region.
+    const res = await fetch("https://api.sleeper.app/v1/players/nfl", {
+      headers: { "User-Agent": "statseer/1.0" },
+      next: { revalidate: 900 },
+    });
+    if (!res.ok) {
+      console.warn(`[nflInactives] Sleeper ${res.status}`);
+      return;
+    }
+    const all = (await res.json()) as Record<string, SleeperPlayer>;
+    for (const p of Object.values(all)) {
+      if (!p?.active || !p.team || !p.full_name) continue;
+      if (!SLEEPER_POS.has(String(p.position ?? ""))) continue;
+      const c = SLEEPER_STATUS[String(p.injury_status ?? "").toUpperCase()];
+      if (!c) continue;
+      const team = SLEEPER_TEAM[p.team] ?? p.team;
+      out.set(injuryKey(p.full_name, team), {
+        status: c.status, label: c.label,
+        detail: p.injury_body_part ?? null, player: p.full_name,
+      });
+    }
+  } catch (e) {
+    /* availability is an enhancement — a failed read must never break the board */
+    console.warn(`[nflInactives] Sleeper fetch failed: ${String(e)}`);
+  }
+}
+
 interface EspnCompetitor { team?: { abbreviation?: string } }
 interface EspnEvent { id?: string; competitions?: { competitors?: EspnCompetitor[] }[] }
 interface EspnInjury {
@@ -172,7 +250,12 @@ export async function weekInjuries(season: number, week: number): Promise<Map<st
   // is carried alongside precisely to make a collision need TWO coincidences.
   await addPracticeReports(out, season, week);
 
-  // ---- 2. ESPN, layered on top, so a game-day change wins over Wednesday's practice report.
+  // ---- 2. Sleeper, which moves on news rather than on the league's filing schedule, so it fills
+  // the gap before Friday's designation and the gap left by anyone moved to IR. Run BEFORE the
+  // early return below: if ESPN's scoreboard is unavailable, we still want these.
+  await addSleeper(out);
+
+  // ---- 3. ESPN, layered on top, so a game-day change wins over everything above it.
   const board = (await espn(
     `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard` +
     `?year=${season}&seasontype=2&week=${week}`, 600)) as { events?: EspnEvent[] } | null;

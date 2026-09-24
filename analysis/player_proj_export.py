@@ -719,6 +719,149 @@ def apply_role(rates, ranks, rolevol):
     return moved
 
 
+# ---- Vacated volume: the man ahead of him is OUT, so his workload has to go somewhere --------
+#
+# Derek: "let's find a source for in-week role changes." This is one, and we already held it. The
+# weekly injury report is the only in-week, pre-kickoff, line-blind feed we have that says a role
+# is about to change, and we were using it in exactly one direction: to SUPPRESS the injured
+# player's own projection. His carries were never pushed down to the backs who inherit them.
+#
+# Measured on 27,053 player-games, train 2021-24 and confirmed on held-out 2025-26. The quantity
+# is the sum of our own projected volume for same-team, same-position team-mates ruled Out, and it
+# only survives for two positions:
+#
+#                 train bias   held-out bias    fitted k    held-out MAE
+#     RB  vac>0     +1.721        +1.924         +0.2065    4.111 -> 3.899  (+5.2%)
+#     QB  vac>0     +8.529        +5.677         +0.2970   11.326 -> 10.693 (+5.6%)
+#     WR  vac>0     +0.267        +0.312            --      no gain (-0.3%)
+#     TE  vac>0     +0.458        +0.001            --      worse (-9.7%)
+#
+# So a running back whose team-mate is out was beating our number by ~1.9 carries and now does not
+# (held-out bias -1.924 -> -0.119). WR and TE are not corrected: a receiving room redistributes
+# across five players and a defence, and the effect is too small to fit without adding noise.
+#
+# k is well under 1 on purpose -- vacated volume is shared out among everyone still standing, and
+# some of it leaves the position group entirely. The coefficient absorbs that; it is not a share.
+#
+# QB is deliberately NOT corrected, even though it fitted well (k = +0.2970, held-out MAE
+# 11.326 -> 10.693). The fit does not transfer, and a week-2 replay is what exposed it: the
+# backtest estimates a QB from attempts averaged over EVERY appearance, so a back-up sits near
+# zero and the coefficient has to carry him all the way up to a starter's workload. Production's
+# `att_pg` is averaged over STARTS ONLY -- Jacoby Brissett already reads 34.7 there -- so adding
+# the same coefficient on top took him to 41.1, and Kirk Cousins from 30.0 to 39.1. Right
+# coefficient, wrong quantity. A QB correction needs to be fitted against the starts-only rate, or
+# framed as what it actually is -- a binary "is he starting now" -- and neither is measured yet.
+#
+# The lesson generalises and is in the audit skill: a coefficient is only valid for the exact
+# quantity it was fitted against, and "attempts per game" meant two different things in two files.
+#
+# Only "Out" counts, not "Doubtful", because only "Out" was measured. `injury_adj.py` treats the
+# two together for the GAME model, which is a separate calibration; matching it here would apply
+# this correction more often than the fit that produced it.
+VACATED_K = {"RB": 0.2065, "FB": 0.2065}
+VACATED_FIELD = {"RB": "carries_pg", "FB": "carries_pg"}
+
+
+# Sleeper spells two clubs differently and still tags a few players OAK.
+SLEEPER_TEAM = {"LAR": "LA", "OAK": "LV"}
+# Statuses that mean "he is not playing". "NA" is excluded: Sleeper uses it for "no information"
+# and healthy starters carry it.
+SLEEPER_OUT = {"OUT", "IR", "PUP", "NFI", "DNR", "SUS"}
+
+
+def sleeper_out(rates):
+    """gsis-free set of (norm name, team) Sleeper says will not play.
+
+    The official injury report carries no designation before Friday and drops anyone moved to IR
+    entirely, so on a Thursday it is nearly empty -- week 3 had five rows league-wide, all from the
+    two teams playing that night. Sleeper moves on the beat reporting instead, which is how it had
+    Jaxson Dart "Out, Knee - MCL, Surgery" while our report had him as an undesignated DNP.
+
+    Returns an empty set on any failure: an unavailable feed must leave the board unchanged."""
+    try:
+        oc.ensure_ssl_certs()
+        req = urllib.request.Request("https://api.sleeper.app/v1/players/nfl",
+                                     headers={"User-Agent": "statseer-proj/1.0"})
+        with urllib.request.urlopen(req, timeout=120) as r:
+            all_players = json.loads(r.read().decode("utf-8", "replace"))
+    except Exception as e:  # noqa: BLE001 — supplementary source, never fatal
+        print(f"  WARNING: Sleeper unavailable ({e}); using the official report only",
+              file=sys.stderr)
+        return set()
+    out = set()
+    for pl in all_players.values():
+        if not pl.get("active") or not pl.get("team") or not pl.get("full_name"):
+            continue
+        if str(pl.get("injury_status") or "").upper() not in SLEEPER_OUT:
+            continue
+        team = SLEEPER_TEAM.get(pl["team"], pl["team"])
+        out.add((norm(str(pl["full_name"])), team))
+    return out
+
+
+def apply_vacated(rates, season, week):
+    """Push an Out player's projected volume down to the team-mates who inherit it.
+
+    Returns (players_adjusted, players_ruled_out). Degrades to (0, 0) when the report is not
+    published yet -- a week with no injury report must leave the board unchanged, not fail."""
+    # The official report first. A failure here must NOT skip Sleeper below — on a Thursday the
+    # official report is nearly empty by design, which is the whole reason the second source exists.
+    out_ids = set()
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from injury_adj import load_injuries
+        inj = load_injuries(season, refresh=True)
+        if inj is not None and "week" in inj.columns:
+            wk = inj[(pd.to_numeric(inj.week, errors="coerce") == week)
+                     & (inj.report_status.astype(str).str.strip().str.lower() == "out")]
+            out_ids = set(wk.gsis_id.astype(str))
+    except Exception as e:  # noqa: BLE001 — the correction degrades off rather than failing
+        print(f"  WARNING: injury report unavailable ({e}); using Sleeper alone", file=sys.stderr)
+
+    # The official report is joined on gsis_id; Sleeper has that field on only a fifth of players,
+    # so it joins on normalised name + team — the weaker key, which is why the team has to agree
+    # too. Extending the out-set beyond the designations the coefficient was fitted on is safe
+    # here because it is SELF-LIMITING: a player who has been on IR for weeks has a recency-weighted
+    # volume of ~0, so he vacates ~0. The rows this actually changes are starters newly ruled out,
+    # which is exactly the fitted case, only found sooner.
+    sleeper = sleeper_out(rates)
+    out_keys = {(norm(str(r.get("name", ""))), str(r.get("team"))) for r in rates.values()
+                if str(r.get("pid")) in out_ids} | sleeper
+    if not out_keys:
+        return 0, 0
+
+    def is_out(r):
+        return (str(r.get("pid")) in out_ids
+                or (norm(str(r.get("name", ""))), str(r.get("team"))) in sleeper)
+
+    # {(team, group): vacated volume}, summing only players we actually have a projection for.
+    vacated = defaultdict(float)
+    for r in rates.values():
+        if not is_out(r) or VACATED_K.get(str(r.get("pos"))) is None:
+            continue
+        field = VACATED_FIELD[str(r["pos"])]
+        vacated[(str(r.get("team")), str(r["pos"]))] += float(r.get(field, 0.0) or 0.0)
+
+    moved = 0
+    for r in rates.values():
+        pos = str(r.get("pos"))
+        k = VACATED_K.get(pos)
+        if k is None or is_out(r):
+            continue
+        # RB and FB share one room.
+        keys = [(str(r.get("team")), p) for p in (("RB", "FB") if pos in ("RB", "FB") else (pos,))]
+        vac = sum(vacated.get(kk, 0.0) for kk in keys)
+        if vac <= 0:
+            continue
+        field = VACATED_FIELD[pos]
+        r[field] = float(r.get(field, 0.0) or 0.0) + k * vac
+        r["vacated"] = round(vac, 2)
+        moved += 1
+    # Report both sources separately: "5 Out" from the official report on a Thursday is correct and
+    # would look like a broken feed if it were the only number printed.
+    return moved, (len(out_ids), len(sleeper))
+
+
 # ---- Matchup: how a defence has handled this POSITION (Context, never a projection input) ----
 # Replaces the old "better/tougher spot" pill, which was built on envDelta (the change in a team's
 # implied total vs the player's prior-season norm). Measured head to head against how much a player
@@ -922,6 +1065,11 @@ def main():
         _moved = apply_role(rates, _ranks, _rolevol)
         print(f"  role-adjusted volume for {_moved} player-fields "
               f"({len(_ranks)} on the depth chart, {len(_rolevol)} role baselines)")
+    # AFTER the role blend, because this acts on the volume we are actually going to publish.
+    _vac, (_official, _news) = apply_vacated(rates, args.season, week)
+    if _official or _news:
+        print(f"  vacated volume: {_official} ruled Out on the official report, {_news} on the news "
+              f"feed; {_vac} team-mates inherited share")
     # All game logs, venue-tagged — including this season's, so the hit-rate columns count the
     # games already played this year (the row's "9/25 gm" moves with the season).
     _seasons = [y for y in range(2016, args.season + 1) if os.path.exists(f"data/stats_{y}.csv")]

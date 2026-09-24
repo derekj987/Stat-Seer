@@ -1920,6 +1920,89 @@ newly-promoted players ~2 carries/targets per game under what they went on to do
 since it was written. **When two sports run the same kind of model, diff their constants** — the one
 without a recency term is not simpler, it is the one with the bug.
 
+### 🚨 The official injury report has two blind spots, and both hide the biggest role changes
+Derek: *"I'm not seeing Jaxson Dart major injury in the NYG game (he's out for the season)... Also
+the same for Caleb Williams for the Bears."* Both were genuinely missing, and not from a bug — from
+what the feed IS. nflverse `injuries` is the league's official game-status report:
+
+- **No designation lands before Friday.** Dart was in our week-3 data with `practice_status =
+  "Did Not Participate In Practice"` and `report_status = NULL`. We only ever read `report_status`,
+  so the strongest practice signal there is read as nothing.
+- **A player moved to IR drops OFF the report entirely** rather than being marked, because he is no
+  longer on the active roster. Caleb Williams had **zero rows**.
+
+Measured the same morning against Sleeper (`api.sleeper.app/v1/players/nfl`, free, no key, 2.6MB
+gzipped):
+
+| | nflverse | Sleeper |
+|---|---|---|
+| Jaxson Dart | undesignated DNP | **Out** — Knee/MCL, *Surgery*, depth order 3 |
+| Caleb Williams | nothing at all | **Doubtful** — hamstring |
+| Jayden Daniels | nothing | **Out** |
+
+It is layered BETWEEN our own capture and ESPN: it fills the silence the official report leaves,
+and ESPN's game-day inactives still overrule it, because 90 minutes before kickoff the official
+list is the truth and a wire report is not. **Skill positions only** — Sleeper carries ~14
+designated players per team across the full roster, mostly long-term IR that changes nothing this
+week; unfiltered it buried the block. Filtered it is ~4.4 per team, 140 rows across a 16-game
+board.
+
+**The general rule: know whether your feed is a RECORD or a REPORT.** A record of what a league
+filed is on the league's schedule, not the news's. Anything that moves on news — a role change, a
+surgery, a promotion — needs a source that moves on news. Check the same way: name two players you
+know are hurt and grep the feed for them.
+
+Also worth carrying: Sleeper's `gsis_id` is populated on only **20%** of active skill players (and
+some values have leading whitespace), so it joins on normalised name **plus team** — the weaker key,
+which is why the team has to agree too.
+
+### 🚨 Pooling train and held-out will manufacture a signal that is not there
+The sharpest self-inflicted error of this session, caught only because the confirmation step ran.
+
+Looking for an in-week role-change signal, depth-chart MOVEMENT looked excellent — measured across
+all seasons at once, a player promoted into the starting slot beat our volume estimate by **+0.85**
+(RB +1.39, QB +2.37, n=477). It read as free, historical, line-blind and additive.
+
+Split properly it evaporates:
+
+| | train 2021-24 | held-out 2025-26 |
+|---|---|---|
+| climbed the chart | +0.931 | **+0.104** |
+| promoted to starter | +1.016 | **-0.089** |
+
+And the joint linear fit, which looked strong on train, made held-out **worse almost everywhere**
+(-4.3% on the moved subset; the bias it was supposed to remove flipped from -0.020 to +0.251). The
+depth chart lags the box score, and our recency weighting already had everything it carried.
+
+Vacated volume — a same-position team-mate ruled Out — replicated instead, and only for RB:
+
+| | train bias | held-out bias | shipped |
+|---|---|---|---|
+| RB | +1.721 | +1.924 | yes, k=+0.2065 → held-out MAE +5.2%, bias -1.924 → **-0.119** |
+| WR | +0.267 | +0.312 | no — fitting it lost 0.3% |
+| TE | +0.458 | +0.001 | no — fitting it lost 9.7% |
+
+**Never read a coefficient off a pooled sample.** The first pass had no split, and it would have
+shipped a correction that actively degraded the board.
+
+### 🚨 A coefficient is only valid for the exact quantity it was fitted against
+QB vacated volume fitted beautifully — k=+0.2970, held-out MAE 11.326 → 10.693, bias halved — and
+was still wrong to ship. A week-2 replay is what caught it:
+
+```
+Jacoby Brissett   attempts/g  34.70 -> 41.12
+Kirk Cousins      attempts/g  29.95 -> 39.06
+```
+
+The backtest estimates a QB from attempts averaged over **every appearance**, so a back-up sits near
+zero and the coefficient has to lift him all the way to a starter's workload. Production's `att_pg`
+is averaged over **starts only** — Brissett already reads 34.7 — so the same coefficient stacked on
+top of a number that already assumed he starts. Right coefficient, wrong quantity, and both files
+call it "attempts per game".
+
+**Before shipping any fitted constant, replay it on real data and read the outputs.** The held-out
+MAE said it worked. Two names and their numbers said it did not.
+
 ### ⚠️ Conditioning a check on the BOOK's line will invent a bias that is not there
 Worth its own entry because it produced a confident, wrong finding that survived a whole session.
 
