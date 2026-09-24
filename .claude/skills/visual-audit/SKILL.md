@@ -1871,6 +1871,74 @@ Three things that pass forward to any block like it:
   into a two-column card at 375px, which squeezed the spanning cell into half the width and
   ellipsized it. `tr.hb-specrow{display:block}` + `td{grid-column:1/-1}`.
 
+### 🚨 A season-to-date SIMPLE MEAN cannot see a role change — which is the only reason to look
+Derek, on tonight's Green Bay backfield: *"Kaleb Johnson is projected to be Green Bay's starter and
+get a bulk of the carries. We cannot look at his career % and need to predict his carries and volume
+better."* Tracing it found THREE defects stacked in the same few lines, and the shape generalises.
+
+**1. A simple mean averages the old role with the new one.** Johnson carried 0 times in week 1 and 8
+in week 2; `current_season_rates` called that 4.0. The whole point of reading current-season usage is
+to catch a role that has moved, and a flat mean is the one estimator guaranteed to split the
+difference. Replaced with a recency-weighted mean, half-life 2.5 games.
+
+**2. `apply_role` was weighted by the wrong count.** `blend_current` sets `games = prior_games +
+current_games`, and the role blend then used that as "how much do I trust this player's own volume".
+For a player whose role just changed, that count is mostly games in the role he no longer has:
+
+    MarShawn Lloyd   no prior row, games=2   -> 2/(2+12)  = 14% own, 86% a league RB1 median
+    Kaleb Johnson    12 prior + 2, games=12  -> 50% own, and that "own" was last year's reserve rate
+
+So the back with 19 carries in two games was overwritten by a league median, and the back the market
+now has leading was anchored to his old role — from one line of code.
+
+**3. ROLE_K=12 was measured on the WEEK 1 problem and left switched on all season.** The depth-chart
+rank is a coarse, LAGGING proxy for volume; once a player has actually carried the ball you hold a
+direct measurement of the thing the proxy estimates. Swept against next-game volume on 25,193
+player-games with the chart as it stood going into each week — the pull is monotonically harmful from
+the second game onward, so it now tapers: `role_k_for(cur_n)` = 12 at 0 games, 2 at 1, **0 after**.
+
+Held-out 2025-26 (train 2021-24 chose everything):
+
+| | MAE | |
+|---|---|---|
+| all positions | 2.829 -> 2.774 | +1.9% |
+| RB carries | 3.329 -> 3.257 | +2.2% |
+| QB attempts | 8.349 -> 8.139 | +2.5% |
+| role stepped up | 3.291 -> 3.156 | +4.1%, and **bias -1.88 -> -0.96** |
+
+The board-wide number is small; the bias number is the one that mattered. We were projecting
+newly-promoted players ~2 carries/targets per game under what they went on to do, every week.
+
+**Two things that did NOT work, recorded so nobody rebuilds them:**
+- **Last game only** is far worse than the simple mean (MAE 3.24 vs 2.93). The answer is "weight
+  recent games more", never "use the recent game".
+- **Volume as a share of team volume** added nothing (2.939 vs 2.927). There is no share layer on
+  purpose.
+
+**The cross-check that found it: NCAAF already did this right.** `cfb_player_proj` has had
+`DECAY = 0.82` (a ~3.5-game half-life) and a *steeper* `DECAY_MOVED = 0.78` for promoted starters
+since it was written. **When two sports run the same kind of model, diff their constants** — the one
+without a recency term is not simpler, it is the one with the bug.
+
+### ⚠️ Conditioning a check on the BOOK's line will invent a bias that is not there
+Worth its own entry because it produced a confident, wrong finding that survived a whole session.
+
+Grading weeks 1-2 on rows **with a posted line >= 40** said our receiving-yards projections came in
+7.76 yards BELOW actual against the market's 3.82 — read as "we run low on starters". Re-measured
+line-blind, bucketing by our OWN projected volume instead, the top decile projects **+3.57 yards
+above** actual. Same players, opposite sign.
+
+Selecting on the line selects games the market expected to be big, which are games that largely were
+big. It is a market-chosen subset, so "projection minus actual" on it measures the selection as much
+as the projection. **Bucket by something you produced, not by something the book produced** — the
+whole point of a line-blind model is that its own errors can be measured without the line.
+
+The follow-on test was a negative result worth keeping: efficiency really does slope with usage
+(WR yards/target runs -7.6% in the lowest projected-volume quintile and +3.6% in the highest), but
+tiering the efficiency baseline by volume **did not improve yards out of sample at all** (-0.11% to
++0.05% by position) and made the top-tier bias worse. The flat positional baseline stays. "Volume
+persists, efficiency doesn't" survives contact with the data again.
+
 ### 🚨 A closed popover inside a SCROLL CONTAINER is dead space you cannot see
 `scroll-height` includes absolutely-positioned descendants — including invisible ones. Every
 closed Tip bubble on the model board sat inside `.imp-scroll`, so each one added its own height to

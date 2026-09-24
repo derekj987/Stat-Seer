@@ -317,7 +317,49 @@ def prior_year_rates(prior):
 # Same shape in 2023 and 2024: the current season should carry equal weight after ONE game and
 # dominate after two, and the optimum is flat across K = 1-2, so this is not balanced on an edge.
 # Line-blind: it reads the player's own box scores, never a line.
-CUR_K = 1.5
+#
+# Re-swept with the recency weighting below (analysis/volume_sweep.py, train 2021-24 / held-out
+# 2025-26). The surface is flat across K = 0.5-1.5 at every half-life, so this is a nudge, not a
+# knife edge -- K = 1.0 was simply the floor.
+CUR_K = 1.0
+
+# Games of half-life for the season-to-date mean. THIS is the fix for the defect Derek caught on
+# tonight's Green Bay backfield: Kaleb Johnson carried 0 times in week 1 and 8 times in week 2, and
+# a simple mean called that 4. When a player's role changes mid-season -- which is the whole reason
+# we look at current-season usage at all -- averaging the old role with the new one is the worst
+# available estimator.
+#
+# Measured on 27,053 player-games, predicting each player's NEXT game's volume (RB carries / WR+TE
+# targets / QB attempts) from data strictly before it. Train 2021-24 picked 2.5; the surface is
+# flat from 2.0 to 3.0 so it is not balanced on an edge. Held-out 2025-26, MAE:
+#
+#                     simple mean   half-life 2.5
+#     all positions      2.829         2.774      +1.9%
+#     RB carries         3.329         3.257      +2.2%
+#     WR targets         1.844         1.816      +1.6%
+#     QB attempts        8.349         8.139      +2.5%
+#     TE targets         1.476         1.471      +0.3%
+#
+# The board-wide gain is small. The gain where it matters is not: on players whose role had just
+# stepped up, MAE improved 4.1% and -- the number that actually mattered -- the BIAS went from
+# -1.88 to -0.96. We were projecting the newly-promoted roughly two carries/targets per game under
+# what they went on to do, every week, which is exactly the complaint.
+#
+# Note what did NOT work, so nobody rebuilds it: weighting the last game alone is far worse than
+# the simple mean (MAE 3.24 vs 2.93) -- the answer is "weight recent games more", not "use the
+# recent game". And projecting volume as a share of team volume added nothing at all (2.939 vs
+# 2.927), so there is no share layer here on purpose.
+HALF_LIFE = 2.5
+
+
+def _ewma(vals, half_life=HALF_LIFE):
+    """Recency-weighted mean of a per-game series, oldest first."""
+    vals = [float(v) for v in vals]
+    if not vals:
+        return 0.0
+    lam = 0.5 ** (1.0 / half_life)
+    w = np.array([lam ** i for i in range(len(vals) - 1, -1, -1)], dtype=float)
+    return float(np.dot(w, vals) / w.sum())
 
 
 def current_season_rates(season):
@@ -338,11 +380,15 @@ def current_season_rates(season):
         row = g.iloc[-1]
         starts = g[g.attempts >= 15]
         ns = starts.week.nunique()
+        # Per-WEEK series, oldest first, so recent games can be weighted more heavily. A player who
+        # appears twice in one week (rare data artifact) is summed, not double-counted as a game.
+        wk = g.groupby("week", as_index=True)[["carries", "targets", "attempts"]].sum().sort_index()
+        sw = starts.groupby("week", as_index=True)["attempts"].sum().sort_index()
         out[str(pid)] = {
             "name": row.player_display_name, "pos": row.position, "team": row.team, "games": int(n),
             "pid": row.player_id,
-            "carries_pg": g.carries.sum() / n, "targets_pg": g.targets.sum() / n,
-            "att_pg": (starts.attempts.sum() / ns) if ns else (g.attempts.sum() / n),
+            "carries_pg": _ewma(wk.carries.tolist()), "targets_pg": _ewma(wk.targets.tolist()),
+            "att_pg": _ewma(sw.tolist()) if ns else _ewma(wk.attempts.tolist()),
             "qb_starts": int(ns),
             "pass_att": g.attempts.sum(), "pass_ypa": g.passing_yards.sum() / max(g.attempts.sum(), 1),
         }
@@ -542,6 +588,36 @@ DEPTH_URL = ("https://github.com/nflverse/nflverse-data/releases/download/"
 # The blend beats BOTH extremes, which is the tell that a player's own history and his current role
 # each carry information the other lacks.
 ROLE_K = 12.0
+
+
+def role_k_for(cur_games):
+    """How hard to pull a player toward his depth slot, given games played THIS season.
+
+    ROLE_K = 12 was measured on the WEEK 1 problem -- predicting a season from the season before,
+    with no current-season games in evidence at all. It was then left switched on all year, and
+    that is the second half of the Green Bay defect: the depth-chart rank is a coarse, LAGGING
+    proxy for volume, and once a player has actually carried the ball we are holding a direct
+    measurement of the very thing the proxy estimates. MarShawn Lloyd's 19 carries in two games
+    were being overwritten by a league-wide "what an RB1 typically gets" median, while Kaleb
+    Johnson was anchored to the reserve role he had last year.
+
+    Swept against next-game volume on 25,193 player-games with the depth chart as it stood going
+    into each week (analysis/role_weight_backtest.py). Train 2021-24 MAE, by games played this
+    season -- the pull is monotonically harmful from the second game onward:
+
+        cur_n      K=0      K=2      K=4      K=8     K=12
+            1   3.2227   3.1258   3.1758   3.2467   3.2987
+            2   2.8594   2.9004   2.9783   3.0848   3.1574
+            3   3.0976   3.1589   3.2466   3.3631   3.4403
+          10+   2.9559   2.9624   2.9873   3.0490   3.1132
+
+    The single-game pocket replicates on held-out 2025-26 (K=2 beats K=0 at every position, RB
+    3.030 vs 3.268), so it is kept rather than rounded away. Everything past it goes to zero:
+    held-out overall 2.858 -> 2.822, +1.3%, and RB +3.4%.
+
+    Week 1 is untouched -- with no games played the rank is the only role information we have."""
+    n = max(int(cur_games or 0), 0)
+    return ROLE_K if n == 0 else 2.0 if n == 1 else 0.0
 # Games of the volume-implied TD probability mixed into a player's own scoring rate. Scoring is the
 # one thing that genuinely does not persist (receiving TD r=0.093, CLAUDE.md), so the prior is
 # heavy: Brier on 33,861 player-games in 2024-25 was 0.14028 volume-only, 0.13895 at k=40, and
@@ -623,6 +699,9 @@ def apply_role(rates, ranks, rolevol):
         if target is None:
             continue
         n = max(r.get("games", 0), 0)
+        role_k = role_k_for(r.get("cur_games", 0))
+        if role_k <= 0:
+            continue
         for field, applies in (("carries_pg", pos in ("RB", "FB")),
                                ("targets_pg", pos in ("WR", "TE", "RB")),
                                ("att_pg", pos == "QB")):
@@ -634,7 +713,7 @@ def apply_role(rates, ranks, rolevol):
                           (field == "targets_pg" and pos in ("WR", "TE")) or \
                           (field == "att_pg" and pos == "QB") else r[field]
             before = r[field]
-            r[field] = (before * n + t * ROLE_K) / (n + ROLE_K)
+            r[field] = (before * n + t * role_k) / (n + role_k)
             if abs(r[field] - before) > 0.5:
                 moved += 1
     return moved
