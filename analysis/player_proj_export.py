@@ -292,6 +292,10 @@ def prior_year_rates(prior):
             "att_pg": att_pg,
             "qb_starts": int(ns),
             "pass_att": g.attempts.sum(), "pass_ypa": g.passing_yards.sum() / max(g.attempts.sum(), 1),
+            # The player's OWN receiving efficiency last season, kept raw so `project` can regress
+            # it toward the league by REC_YPT_K. See that constant for why receivers get this and
+            # running backs do not.
+            "prev_tgt": float(g.targets.sum()), "prev_rec_yds": float(g.receiving_yards.sum()),
         }
     return rates
 
@@ -574,6 +578,41 @@ def home_road_over(career_by_pid, pid, market, line):
 
 PASS_K = 300.0   # QB YPA persists (unlike RB/WR efficiency), so we regress the player's OWN
                  # YPA toward the starter baseline by ~300 attempts, not strip it to league avg.
+
+# Targets of regression for a RECEIVER's own yards-per-target, same shape as PASS_K above.
+#
+# Derek, on the week-3 receiving board: "All of the main receivers are all unders and the bottom
+# half players are all overs. That is not correct." He was right, and it took three wrong answers
+# to find out why — the skew of the market, the current-season volume blend, and the projected-
+# volume tiering were each measured first and each came back clean. It is this term.
+#
+# rec_yds was volume x a LEAGUE catch rate x a LEAGUE yards-per-reception, discarding the player's
+# own efficiency entirely, on the founding finding that efficiency does not persist. That finding
+# is about RUSHING — yards per carry correlates 0.058 year to year. Receiving is not the same
+# quantity, because yards per target is substantially a ROLE (a deep threat and a check-down slot
+# are not drawing from one distribution) and roles persist. Measured season-over-season, players
+# with 25+ targets in both:
+#
+#     WR  r = 0.207 (n=447)     TE  r = 0.336 (n=183)     RB  r = 0.104 (n=156)     rushing 0.058
+#
+# So the league baseline systematically marks efficient receivers down and inefficient ones up,
+# which is precisely the top-half-under / bottom-half-over board Derek was reading. Held-out
+# 2025-26, per-game receiving yards with volume held identical so only this term moves:
+#
+#                              bias, league baseline    bias, own regressed
+#     WR efficient (top third)        -3.29                   -1.63
+#     WR inefficient (bottom)         +2.44                   +1.57
+#     TE efficient (top third)        -3.64                   -1.06
+#     TE inefficient (bottom)         +0.76                   -1.03
+#
+# Be honest about the size: MAE barely moves (WR +0.30%, TE +0.14%). This is a CALIBRATION fix, and
+# calibration is what the board publishes — a number that is systematically 3.3 yards light on
+# every good receiver is wrong in a way a reader can see, which is how it was found.
+#
+# K is deliberately heavy. At 500, a receiver with 100 prior targets gets 17% of his own rate; at
+# 120 a tight end with 70 gets 37%. Both were chosen on train 2021-24 and confirmed on held-out.
+# RB is ABSENT on purpose: r = 0.104 and held-out came back -0.10%, so backs keep the league rate.
+REC_YPT_K = {"WR": 500.0, "TE": 120.0}
 
 
 DEPTH_URL = ("https://github.com/nflverse/nflverse-data/releases/download/"
@@ -933,9 +972,18 @@ def project(rate, base):
     # gets the VOLUME near league scoring rates — not a goal-line-role guess we can't see.
     rec_pg = rate["targets_pg"] * b["catch"]
     lam = rate["carries_pg"] * b.get("rush_tdr", 0.0) + rec_pg * b.get("rec_tdr", 0.0)
+    # Receiving: the league's yards-per-target, nudged toward what this player has actually done
+    # with a target. A player with no prior-season targets falls back to the league rate exactly.
+    lg_ypt = b["catch"] * b["ypr"]
+    k = REC_YPT_K.get(rate["pos"])
+    if k:
+        pt, py = rate.get("prev_tgt", 0.0) or 0.0, rate.get("prev_rec_yds", 0.0) or 0.0
+        ypt = (py + lg_ypt * k) / (pt + k)
+    else:
+        ypt = lg_ypt
     return {
         "rush_yds": round(rate["carries_pg"] * b["ypc"], 1),
-        "rec_yds": round(rate["targets_pg"] * b["catch"] * b["ypr"], 1),
+        "rec_yds": round(rate["targets_pg"] * ypt, 1),
         "receptions": round(rate["targets_pg"] * b["catch"], 1),
         "pass_yds": round(rate["att_pg"] * reg_ypa, 1),
         # Passing TDs: projected attempts x the LEAGUE starter TD-per-attempt rate. Unlike

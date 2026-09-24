@@ -1947,6 +1947,63 @@ stale", not "beat the line".
 **The general check: whenever a feature weights by a share, ask what that share is for someone with
 zero of the thing.** Zero usage should not silently mean zero importance.
 
+### 🚨 A founding finding can be true for one position and wrong for the next one over
+Derek: *"All of the main receivers are all unders and the bottom half players are all overs. That is
+not correct."* He was right, and it took THREE wrong answers to get there. Worth keeping all of
+them, because each was a plausible explanation that measured clean:
+
+1. **Market skew** — real (see the entry below) but it explains the board's overall lean, not why
+   the split lands exactly at the middle of one game's list.
+2. **The current-season volume blend** — hypothesis was that `CUR_K = 1.0` over-weights a 2-game
+   sample. Swept K separately at each n: the optimum at n≤2 is **0.5, LOWER** than we ship, and a
+   per-n schedule made WR/TE at n≤3 **worse (−1.90%)** held-out. The blend is right.
+3. **Volume-tiered efficiency** — measured earlier, no out-of-sample gain.
+
+The actual cause is the efficiency term, and it is a founding finding applied one position too far.
+`rec_yds` was volume × a LEAGUE catch rate × a LEAGUE yards-per-reception, discarding the player's
+own efficiency entirely, because "volume persists, efficiency doesn't". **That finding is about
+RUSHING** — yards per carry correlates 0.058 year to year. Receiving is a different quantity,
+because yards per target is substantially a ROLE, and roles persist:
+
+| | WR | TE | RB (receiving) | rushing YPC |
+|---|---|---|---|---|
+| season-over-season r | **0.207** | **0.336** | 0.104 | 0.058 |
+
+So the league baseline marks efficient receivers down and inefficient ones up — the exact top-half-
+under / bottom-half-over board Derek was reading. Held-out 2025-26, volume held identical so only
+this term moves:
+
+| | bias, league baseline | bias, own regressed |
+|---|---|---|
+| WR efficient (top third) | **−3.29 yds** | −1.63 |
+| WR inefficient (bottom) | **+2.44** | +1.57 |
+| TE efficient (top third) | **−3.64** | −1.06 |
+
+`REC_YPT_K = {"WR": 500, "TE": 120}` now regresses a receiver's own yards-per-target toward the
+league rather than replacing it — the same shape `PASS_K = 300` already used for QB passing yards,
+whose comment had said *"QB YPA persists (unlike RB/WR efficiency)"* for as long as the file has
+existed. Nobody had tested the receiver half of that parenthesis. RB stays on the league rate
+(r = 0.104, held-out −0.10%).
+
+**MAE barely moves (WR +0.30%, TE +0.14%) and it still ships**, because it is a CALIBRATION fix. A
+number that is systematically 3.3 yards light on every good receiver is wrong in a way a reader can
+see — which is precisely how it was found.
+
+**The rule to carry: when a project-wide finding gets applied to a new position or market, re-measure
+it there.** "Efficiency doesn't persist" was measured on carries and quietly inherited by targets.
+
+### ⚠️ Whether a QB1 is out barely moves his receivers' VOLUME
+Tested while explaining the above, because it was the obvious next suspect for a star whose targets
+had halved. Within-player, comparing each receiver's games with and without his team's leading
+passer, 2021-2025:
+
+    all receivers (n=258)        3.34 -> 3.40 targets/game   (+0.06)
+    high-volume only (n=40)      7.24 -> 6.74                (-0.50)
+
+Essentially nothing. A back-up quarterback throws to the same people. So a receiver whose target
+share has collapsed while his QB was hurt has genuinely lost role — do not explain it away with the
+quarterback, and do not build a correction for it.
+
 ### 🚨 "X% of rows lean over" is measuring SKEW unless the market is symmetric
 Derek: *"look into why starter rows lean 62% over."* The answer is that the metric was wrong, and
 the same trap is available on every board this project publishes.
