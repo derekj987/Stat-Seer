@@ -1947,6 +1947,75 @@ stale", not "beat the line".
 **The general check: whenever a feature weights by a share, ask what that share is for someone with
 zero of the thing.** Zero usage should not silently mean zero importance.
 
+### 🚨 Publish the SAME STATISTIC the market publishes
+The resolution of the long "top half under, bottom half over" hunt. We computed a recency-weighted
+MEAN; a book sets its line near the MEDIAN, because that is where the two sides split. Yards are
+right-skewed, so a mean sits far above a median at the bottom of the board and barely above it at
+the top — `proj > line` fires on the depth and misses on the stars, deterministically, with nothing
+wrong in the model. No efficiency constant, volume blend or role prior can change that, and two
+sessions were spent proving it the hard way.
+
+The board now publishes the 50/50 point. What matters is HOW it was calibrated — the first attempt
+fitted `median(actual)/mean(projection)` over every player-game and swung the board from 67% over to
+**33%** over, because books only price players with a real role and a WR5 whose median is zero drags
+the ratio down while never appearing on the board. Refitted on rows that actually carried a line —
+train on the backfilled 2024 season (4,175 rows), held out on 2026 weeks 1-2:
+
+| held-out | our number over the line | actual over the line | MAE |
+|---|---|---|---|
+| rec_yds | 67.5% → **51.4%** | 47.7% | 22.90 → **21.89** |
+| rush_yds | 63.8% → **52.0%** | 44.1% | 19.28 → **18.84** |
+| pass_yds | 41.3% → 49.2% | 46.0% | ~unchanged |
+
+**Passing yards is the control and behaves like one**: near-symmetric, ratio comes out 1.02 flat,
+number barely moves. And absolute error IMPROVES on the two skewed markets, because the median
+minimises absolute error where the mean minimises squared error — so the report cards, which grade
+absolute error, get better rather than worse. Board-wide `proj / line` median moved 1.050 → **0.987**.
+
+**The rule: before comparing two numbers side by side on a board, check they are the same statistic.**
+A mean beside a median will look biased forever, and every fix aimed at the model will measure clean
+and change nothing.
+
+### 🚨 Defining a player's importance from a season he MISSED erases him — twice in one day
+Two independent bugs, same shape, found hours apart:
+
+- `injury_adj._shares` took a player's share of team volume from current-season games, so a starter
+  out since the opener had no share and produced **no adjustment at all**.
+- A test of "do receivers lose volume when their QB1 is out" defined QB1 as the team's
+  **season-leading passer**. Atlanta's 2026 leading passer is Cooper Rush, because Penix has not
+  played — so Penix being ruled Out was never counted as QB1-out, and the test reported the
+  reassuring **+0.06 targets/game** that made me tell Derek it did not matter.
+
+Redone against the nflverse depth chart, which names a QB1 going into each week regardless of who
+has thrown the most, the same headline hides a real gradient:
+
+| receiver's role | with QB1 | QB1 out | change |
+|---|---|---|---|
+| fringe (<3 tgt/g) | 1.62 | 1.90 | **+17.2%** |
+| starter (5-7) | 5.97 | 5.69 | −4.7% |
+| primary (7+) | 8.33 | 7.76 | **−6.9%** |
+
+A back-up quarterback spreads the ball around: the primary loses ~7%, the fringe gains. Small, and
+the primary bucket is only n=27, so nothing ships off it yet — but "no effect" was wrong.
+
+**Whenever a definition ranks players by accumulated volume, ask what it returns for someone with
+none.** Season-leading passer, share of team targets, top-N by carries — all silently exclude the
+absent, which is exactly the population an availability question is about.
+
+### 🚨 A BACKFILLED row timestamps differently from a live one
+`prop_snapshots` mixes both, and the pregame filter that is correct for one discards the entire
+history of the other. A live sweep stamps `collected_at` truthfully. A row with
+`capture_reason = 'BACKFILL'` has `collected_at` = when the backfill ran (2026-08-23 for all of
+2024) and carries the real capture in `snapshot_at` (~10 minutes before kickoff). Filtering
+`collected_at < commence_time` on the backfilled season returned **0 priced rows** — not an error,
+just an empty result that reads like missing data.
+
+```python
+when = x["snapshot_at"] if x.get("capture_reason") == "BACKFILL" else x["collected_at"]
+```
+Related trap in the same table: `ORDER BY snapshot_at` is unindexed, so asking a live season's 360k
+rows to sort by it returns **HTTP 500**. Order by `collected_at` and resolve latest-wins in code.
+
 ### 🚨 Decompose a board-shaped complaint BEFORE fixing anything
 Derek said three times that the top half of the receiving board was all unders and the bottom half
 all overs. Two real bugs were found and shipped in between, and **neither changed the pattern**,

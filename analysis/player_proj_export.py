@@ -1050,6 +1050,56 @@ def matchup_tag(defmap, opponent, pos):
     return "good" if rel >= MATCHUP_HI else "bad" if rel <= MATCHUP_LO else "toss"
 
 
+# ---- What the board PUBLISHES: a 50/50 number, not an expected value ------------------------
+#
+# Derek, over and over: "all of the main receivers are all unders and the bottom half players are
+# all overs." The cause was never a bad projection. It was a units clash. We computed a
+# recency-weighted MEAN; a book sets its line near the MEDIAN, because that is where the two sides
+# split. Receiving and rushing yards are right-skewed, so a mean sits above a median — a lot at the
+# bottom of the board and barely at the top — and `proj > line` fires on the depth and misses on the
+# stars, deterministically, with nothing wrong in the model.
+#
+# So the published number is converted to the same statistic the line is: the point where the
+# player is as likely to go over as under.
+#
+# CALIBRATED ON THE PRICED POPULATION, which is the part that took two attempts. Fitting
+# median(actual)/mean(projection) over every player-game in the league swung the board from 67%
+# over to 33% over — books only post a line on players with a real role, and a WR5 whose median is
+# zero drags the ratio down while never appearing on the board. Refitted on rows that actually
+# carried a FanDuel line: train on the backfilled 2024 season (4,175 rows), held out on 2026 weeks
+# 1-2. The test is not MAE, it is whether a reader comparing our column to theirs is told the truth:
+#
+#                        our number over the line        actual over     held-out MAE
+#     rec_yds   held-out    67.5%  ->  51.4%                47.7%        22.90 -> 21.89
+#     rush_yds  held-out    63.8%  ->  52.0%                44.1%        19.28 -> 18.84
+#     pass_yds  held-out    41.3%  ->  49.2%                46.0%        72.06 -> 72.46
+#
+# Passing is the control and behaves like one: near-symmetric, so the ratio comes out 1.02 flat and
+# the number barely moves. Absolute error improves on the two skewed markets because the median
+# minimises absolute error where the mean minimises squared error — so the report cards, which grade
+# absolute error against the close, get better too rather than worse.
+#
+# Receptions and anytime TD are NOT converted. Receptions is a small integer whose whole range fits
+# in one band, and anytime TD is already a probability on the same scale as the book's.
+PUBLISH_BANDS = [0.0, 15.0, 25.0, 40.0, 60.0, 85.0]
+PUBLISH_RATIO = {
+    "rec_yds":  [1.021, 0.850, 0.875, 0.839, 0.868, 0.701],
+    "rush_yds": [1.225, 0.868, 0.824, 0.903, 0.930, 0.747],
+    "pass_yds": [1.024, 1.024, 1.024, 1.024, 1.024, 1.024],
+}
+
+
+def to_fifty_fifty(market, mu):
+    """Convert an expected value to the point a player is as likely to beat as not."""
+    r = PUBLISH_RATIO.get(market)
+    if not r or mu is None or mu <= 0:
+        return mu
+    i = 0
+    while i + 1 < len(PUBLISH_BANDS) and mu >= PUBLISH_BANDS[i + 1]:
+        i += 1
+    return mu * r[min(i, len(r) - 1)]
+
+
 def project(rate, base):
     b = base.get(rate["pos"], base["WR"])
     # Passing: volume x the QB's own YPA regressed toward the starter league YPA. Using pure
@@ -1075,10 +1125,10 @@ def project(rate, base):
     pc, py_r = rate.get("prev_car", 0.0) or 0.0, rate.get("prev_rush_yds", 0.0) or 0.0
     ypc = (py_r + b["ypc"] * RUSH_YPC_K) / (pc + RUSH_YPC_K)
     return {
-        "rush_yds": round(rate["carries_pg"] * ypc, 1),
-        "rec_yds": round(rate["targets_pg"] * ypt, 1),
+        "rush_yds": round(to_fifty_fifty("rush_yds", rate["carries_pg"] * ypc), 1),
+        "rec_yds": round(to_fifty_fifty("rec_yds", rate["targets_pg"] * ypt), 1),
         "receptions": round(rate["targets_pg"] * b["catch"], 1),
-        "pass_yds": round(rate["att_pg"] * reg_ypa, 1),
+        "pass_yds": round(to_fifty_fifty("pass_yds", rate["att_pg"] * reg_ypa), 1),
         # Passing TDs: projected attempts x the LEAGUE starter TD-per-attempt rate. Unlike
         # YPA, a QB's TD rate doesn't persist, so we don't credit his own rate — this lands
         # near the book line by design (scoring is not where a projection edge lives).
