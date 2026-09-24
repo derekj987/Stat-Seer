@@ -1947,6 +1947,40 @@ stale", not "beat the line".
 **The general check: whenever a feature weights by a share, ask what that share is for someone with
 zero of the thing.** Zero usage should not silently mean zero importance.
 
+### 🚨 Decompose a board-shaped complaint BEFORE fixing anything
+Derek said three times that the top half of the receiving board was all unders and the bottom half
+all overs. Two real bugs were found and shipped in between, and **neither changed the pattern**,
+because neither was the cause. The decomposition that should have come first:
+
+**1. Is the LEVEL wrong?** No. Sum each team's projected receiving yards and compare to the sum of
+the same priced rows at the book's numbers — ATL 181.6 vs 177.0, GB 216.1 vs 205.5, BAL 59.2 vs
+72.5. Team by team we allocate what the market allocates. So it is a distribution question, and
+every level-shifting fix was doomed before it was written.
+
+**2. Is the DISTRIBUTION wrong?** Yes, measurably — and mostly unfixable. Over 2,393 team-weeks
+with no market data:
+
+| share of a team's targets | ours | reality |
+|---|---|---|
+| top receiver | 27.2% | **30.7%** |
+| top two | 47.4% | **52.3%** |
+
+But sharpening it (`share^γ` renormalised) made per-player MAE **worse at every γ > 1**: 1.688 →
+1.722 at the γ that matched the concentration exactly. **The flat split is not a failure to see the
+WR1 — it is a hedge over WHICH receiver leads that week, and hedging minimises absolute error.** A
+backfield is more stable, so the same transform pays there: carries γ=1.10, held-out MAE +0.56%,
+top-1 share 56.5% → 59.2% against an actual 59.9%. Shipped for carries, refused for targets.
+
+**3. Is it UNITS?** Mostly, yes — see the mean-vs-median entry below. And the attempted fix failed
+in an instructive way: converting to a 50/50 number improved MAE **+4.44%** on all player-games,
+then swung the board from 67% over to **33% over** when applied. The ratios were fitted on every
+player-game, but **books only price players with real roles**, whose distributions are far less
+skewed. Same population-selection trap as the `line >= 40` entry below, one more time.
+
+**The rule: when a complaint is about a board's SHAPE, decompose into level, distribution and units
+before touching a constant.** Each has a different fix and a different test, and a fix aimed at the
+wrong one can measure clean and change nothing a reader can see.
+
 ### 🚨 A founding finding can be true for one position and wrong for the next one over
 Derek: *"All of the main receivers are all unders and the bottom half players are all overs. That is
 not correct."* He was right, and it took THREE wrong answers to get there. Worth keeping all of

@@ -296,6 +296,7 @@ def prior_year_rates(prior):
             # it toward the league by REC_YPT_K. See that constant for why receivers get this and
             # running backs do not.
             "prev_tgt": float(g.targets.sum()), "prev_rec_yds": float(g.receiving_yards.sum()),
+            "prev_car": float(g.carries.sum()), "prev_rush_yds": float(g.rushing_yards.sum()),
         }
     return rates
 
@@ -576,8 +577,24 @@ def home_road_over(career_by_pid, pid, market, line):
     return (ho, hg, ao, ag)
 
 
-PASS_K = 300.0   # QB YPA persists (unlike RB/WR efficiency), so we regress the player's OWN
-                 # YPA toward the starter baseline by ~300 attempts, not strip it to league avg.
+# QB YPA persists more strongly than anything else on the board (r = 0.384 season over season), so
+# the player's own rate is regressed toward the starter baseline rather than stripped to it. The
+# value moved 300 -> 1000 when the sweep was finally run against the right objective: at 300 we were
+# over-crediting good quarterbacks by +12.4 yards relative to bad ones on held-out data, which is a
+# bias in the opposite direction from the receiver bug and just as visible.
+#
+#     K        held-out MAE   held-out bias spread
+#     league      40.958            -16.79
+#     300         40.911            +12.37   <- what shipped
+#     700         40.659             +2.12
+#     1000        40.656             -1.79   <- chosen, best on BOTH
+#     1500        40.698             -5.62
+#
+# CAVEAT, stated because this project has been bitten by it: the sweep used PRIOR-SEASON attempts,
+# while production's `pass_att` pools prior plus current season. Production therefore gives a QB
+# slightly more of his own rate than the fit did, pushing the bias a little positive. The MAE
+# surface is flat from 700 to 1500 (0.1%), so the choice is not balanced on that edge.
+PASS_K = 1000.0
 
 # Targets of regression for a RECEIVER's own yards-per-target, same shape as PASS_K above.
 #
@@ -612,7 +629,24 @@ PASS_K = 300.0   # QB YPA persists (unlike RB/WR efficiency), so we regress the 
 # K is deliberately heavy. At 500, a receiver with 100 prior targets gets 17% of his own rate; at
 # 120 a tight end with 70 gets 37%. Both were chosen on train 2021-24 and confirmed on held-out.
 # RB is ABSENT on purpose: r = 0.104 and held-out came back -0.10%, so backs keep the league rate.
-REC_YPT_K = {"WR": 500.0, "TE": 120.0}
+REC_YPT_K = {"WR": 120.0, "TE": 120.0}
+
+# The same treatment for a running back's yards per carry. The founding rule says rushing efficiency
+# does not persist and cites r = 0.058 — measured per GAME. Measured the way a projection actually
+# uses it, season to season on backs with 40+ carries in both, it is r = 0.194. Not large, and the
+# league rate still does most of the work at K = 700, but enough that stripping a back's own rate
+# entirely left the same good-players-marked-down bias the receivers had:
+#
+#     K        held-out MAE   held-out bias spread
+#     league      13.219            -3.21
+#     700         13.280            +0.08   <- chosen
+#     300         13.357            +2.58
+#
+# This one costs a little accuracy (-0.46%) to remove the bias, which is the opposite trade from
+# the receivers and quarterbacks, where the chosen K improved both. Taken deliberately: 0.46% of
+# 13.2 yards is 0.06 yards of accuracy, against a 3.2-yard systematic gap between good and bad backs
+# that a reader can see on every row of the board.
+RUSH_YPC_K = 700.0
 
 
 DEPTH_URL = ("https://github.com/nflverse/nflverse-data/releases/download/"
@@ -754,6 +788,62 @@ def apply_role(rates, ranks, rolevol):
             before = r[field]
             r[field] = (before * n + t * role_k) / (n + role_k)
             if abs(r[field] - before) > 0.5:
+                moved += 1
+    return moved
+
+
+# Sharpening of the within-team CARRY split.
+#
+# Derek, repeatedly: "the top half players are all still unders and the bottom half are all overs."
+# Chasing that turned up a real defect, though not the one expected. Our team-level totals agree
+# with the market almost exactly (ATL receivers 181.6 vs the market's 177.0, GB 216.1 vs 205.5), so
+# the LEVEL is right; what was wrong is how the total is split inside a room. Measured against what
+# actually happened, 2,393 team-weeks, no market data involved:
+#
+#     share of a team's targets to its top receiver   ours 27.2%   reality 30.7%
+#     ... top two                                          47.4%           52.3%
+#     ... top three                                        62.8%           68.2%
+#
+# Three shrinkages stack — the prior-season blend, the depth-chart role prior and the recency
+# weighting all pull a player toward the middle of his room, and nothing pulls back.
+#
+# The fix is a power transform on each player's share of the room, which concentrates the split
+# while preserving the team total that is already right:  share' = share^G / sum(share^G).
+#
+# IT ONLY SHIPS FOR CARRIES. Swept on train against per-player volume error, held out on 2025-26:
+#
+#     carries   G=1.10   MAE 1.4455 -> 1.4373 (+0.56%)   top-1 share 56.5% -> 59.2% (actual 59.9%)
+#     targets   every G > 1 made MAE WORSE (1.688 -> 1.722 at the G that matched concentration)
+#
+# The targets result is the interesting one and it is why this is not applied there. Sharpening
+# fixes the concentration number and costs accuracy, because the top receiver in a room is a
+# DIFFERENT PLAYER from week to week. Our flat split is not a failure to see the WR1; it is a hedge
+# across which receiver leads that week, and hedging is what minimises absolute error. A backfield
+# is more stable, so concentrating it pays.
+CARRY_GAMMA = 1.10
+
+
+def sharpen_carries(rates):
+    """Concentrate each team's carry split toward its lead back, preserving the team total."""
+    rooms = defaultdict(list)
+    for r in rates.values():
+        if str(r.get("pos")) in ("RB", "FB", "QB", "WR") and r.get("team"):
+            rooms[str(r["team"])].append(r)
+    moved = 0
+    for room in rooms.values():
+        vals = [float(r.get("carries_pg", 0.0) or 0.0) for r in room]
+        tot = sum(vals)
+        if tot <= 0 or len(room) < 4:
+            continue
+        shares = [v / tot for v in vals]
+        powed = [x ** CARRY_GAMMA for x in shares]
+        ps = sum(powed)
+        if ps <= 0:
+            continue
+        for r, q in zip(room, powed):
+            before = float(r.get("carries_pg", 0.0) or 0.0)
+            r["carries_pg"] = q / ps * tot
+            if abs(r["carries_pg"] - before) > 0.25:
                 moved += 1
     return moved
 
@@ -981,8 +1071,11 @@ def project(rate, base):
         ypt = (py + lg_ypt * k) / (pt + k)
     else:
         ypt = lg_ypt
+    # Rushing: same shape as the receiving term above.
+    pc, py_r = rate.get("prev_car", 0.0) or 0.0, rate.get("prev_rush_yds", 0.0) or 0.0
+    ypc = (py_r + b["ypc"] * RUSH_YPC_K) / (pc + RUSH_YPC_K)
     return {
-        "rush_yds": round(rate["carries_pg"] * b["ypc"], 1),
+        "rush_yds": round(rate["carries_pg"] * ypc, 1),
         "rec_yds": round(rate["targets_pg"] * ypt, 1),
         "receptions": round(rate["targets_pg"] * b["catch"], 1),
         "pass_yds": round(rate["att_pg"] * reg_ypa, 1),
@@ -1114,6 +1207,8 @@ def main():
         print(f"  role-adjusted volume for {_moved} player-fields "
               f"({len(_ranks)} on the depth chart, {len(_rolevol)} role baselines)")
     # AFTER the role blend, because this acts on the volume we are actually going to publish.
+    _sharp = sharpen_carries(rates)
+    print(f"  carry split sharpened (gamma={CARRY_GAMMA}) for {_sharp} players")
     _vac, (_official, _news) = apply_vacated(rates, args.season, week)
     if _official or _news:
         print(f"  vacated volume: {_official} ruled Out on the official report, {_news} on the news "
