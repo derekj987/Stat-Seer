@@ -107,6 +107,7 @@ negative result here is a season of work someone does not have to repeat.
 | `median_calibration.py` | convert to a 50/50 number on all player-games | **wrong population** — swung the board to 33% over |
 | `priced_median_fit.py` | …on rows that carried a line | **shipped**, but the first cut bucketed by our own estimate and came out flat, fixing the average and not the tilt. Refit by LEVEL: ratios 0.68→1.02, halves 26/65 → 40/55 |
 | `qb_out_receivers.py` | do receivers lose volume when QB1 is out? | primary −6.9%, fringe +17.2%. Small; nothing shipped |
+| `discount_qbless_games.py` | should QB1-less games count less? | **No.** W=1.0 optimal and monotone on both splits — they are exactly as predictive |
 
 ### 🚨 Never hand-edit an AUTO-GENERATED file
 Several `web/lib/*.ts` files are written by scripts and rewritten by scheduled jobs. Anything added to
@@ -2050,6 +2051,46 @@ cannot invert the curve and shove the stars back down.
 - **Bucket a calibration by the quantity you are calibrating AGAINST, not by your own estimate of
   it.** Bucketing by our own projection mixed players of different true levels together and flattened
   the very curve the fit existed to find.
+
+### ⚠️ Know when to STOP calibrating — measure the board against the market, not against the eye
+After several rounds of constant-tuning driven by "the big receivers are still unders", the check
+that should have been run first settles it. On the SHIPPED board:
+
+| | sd(line) | sd(ours) | slope(ours ~ line) |
+|---|---|---|---|
+| rec_yds | 19.4 | **19.4** | 0.904 |
+| rush_yds | 24.2 | 28.1 | 1.087 |
+
+Dispersion matches the market exactly, and at a 65-yard line we publish 61.5 — about 5% under, not
+30%. **The board-wide compression was real and is now gone.** What remained was one game where three
+specific rows sat 27-33% under, which is an outlier, not a slope.
+
+Two things this is worth remembering for:
+- **`slope(ours ~ line)` and `sd(ours)` vs `sd(line)` are the cheapest possible tilt diagnostic**,
+  and they run on the current board with no history. Run them BEFORE fitting anything.
+- **We are less sharp than the market and should look it.** On 2,850 priced receiving rows the
+  book's line has MAE 20.49 and correlation 0.567 with the outcome; ours are 22.55 and 0.483. A
+  less-informed forecaster's best estimate is correctly shrunk toward the mean, so some tendency to
+  read "under" on the biggest lines is what being second-sharpest looks like. Stretching our number
+  to remove it was measured: it moves the halves the right way and makes MAE monotonically worse.
+
+### ⚠️ Games played without the QB1 are NOT worth less — tested, W = 1.0
+The obvious rescue for a star whose targets collapsed while his quarterback was hurt, and it does not
+work. The question is sharper than "does a back-up QB cost receivers volume" (measured separately at
+-6.9% for primaries): it is whether games played WITHOUT the QB1 are less PREDICTIVE of games played
+with him. If they were, they should carry less weight and no effect size would be needed.
+
+Targets are receiver-games where the depth-chart QB1 played, estimated from his past games with
+QB1-less ones down-weighted by W. Train 2021-24, held out 2025-26, 443 held-out rows whose history
+actually contains such a game:
+
+    W        1.00    0.75    0.50    0.35    0.20    0.00
+    affected 1.769   1.770   1.774   1.778   1.786   1.804   <- train MAE, monotone
+
+**W = 1.0 wins, monotonically, on both splits.** A receiver's games without his QB1 are exactly as
+predictive as the rest. So a target share that collapsed while the starter was hurt is real evidence
+about his role, not an artifact to discount — and there is no basis for marking a player back up
+because his quarterback is returning.
 
 ### 🚨 An AVERAGE hides a SLOPE — split the board and compare the halves
 The single most useful check to come out of this, because it is what Derek's eye was doing and what
