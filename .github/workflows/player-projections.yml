@@ -68,6 +68,19 @@ jobs:
       - name: Build team ratings (current-season off/def points per game)
         run: python analysis/team_ratings_export.py
 
+      # The weekly questions Derek was asking by hand -- who is out, who is BACK, whether the model
+      # moved for them, where we disagree most with the market, and whether any feed is stale.
+      # It runs HERE rather than on its own schedule so it always describes the board that was just
+      # generated. Writes to the run summary, so it arrives in the Actions notification instead of
+      # sitting in a log. Never fails the job: a flag report that can break the refresh it rides on
+      # is worse than no flag report.
+      - name: Weekly flags
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python analysis/weekly_flags.py
+
       - name: Commit if changed
         run: |
           FILES="web/lib/playerProjections.ts web/lib/depthChart.ts web/lib/incentiveWatch.ts web/lib/teamRatings.ts"

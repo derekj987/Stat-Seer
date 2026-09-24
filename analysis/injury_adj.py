@@ -120,20 +120,63 @@ def load_usage(seasons):
     return u
 
 
+# How many games of evidence the PRIOR season is worth when working out a player's share of his
+# team's volume. This exists because of a silent failure Derek walked into: the share used to come
+# from current-season games only, so a starter who had been out since the opener had no volume,
+# therefore no share, therefore NO ADJUSTMENT AT ALL. Atlanta, without Michael Penix Jr:
+#
+#     week 1   QB shares: Penix 0.51, Cousins 0.49        -> adjustment -2.20   (fires)
+#     week 2   QB shares: Cooper Rush 1.00                -> adjustment  0.00   (silent)
+#
+# The longer a starter was out, the more completely the model forgot he existed, and it is the long
+# absences that move a line. Blending the prior season in keeps him on the books.
+#
+# Be straight about what this buys: NOTHING MEASURABLE. Swept 0/2/4/6/10 on train 2017-22 and
+# held-out 2023-25 (analysis/share_prior_sweep.py), every value lands within 0.05% of every other —
+# train drifts slightly worse as K rises, held-out slightly better, which is two readings of noise.
+# In three held-out seasons exactly ONE game is the forgotten-starter case, because a player who is
+# out long enough usually goes to injured reserve and drops off the injury report altogether, at
+# which point neither version can see him.
+#
+# It is kept anyway, on the same footing as the rest of this file: a correction, not an edge. The
+# current behaviour is indefensible on inspection — a model that silently stops accounting for a
+# quarterback the longer he is hurt is publishing a number we know is wrong — and the measurement
+# says fixing it costs nothing.
+SHARE_PRIOR_K = 4.0
+
+
 def _shares(u, season, week):
     """{(team, pos): {player_id: share}} from games BEFORE `week` — no look-ahead.
 
-    Week 1 has no current-season games, so it falls back to the prior season, which is what was
-    knowable at the time."""
+    The prior season is folded in at SHARE_PRIOR_K games so that a player with no current-season
+    volume keeps a share rather than vanishing. Week 1 has no current-season games at all, so it is
+    the prior season alone, which is what was knowable at the time."""
     hist = u[(u.season == season) & (u.week < week)]
+    prev = u[u.season == season - 1]
     if hist.empty:
-        hist = u[u.season == season - 1]
+        hist, prev = prev, prev.iloc[0:0]
+    prev_games = max(int(prev.week.nunique()), 1) if len(prev) else 1
     out = {}
     for pos, col in VOLUME.items():
         sub = hist[hist.position == pos]
-        if sub.empty:
+        pre = prev[prev.position == pos] if len(prev) else prev
+        if sub.empty and (pre is None or pre.empty):
             continue
-        tot = sub.groupby(["team", "player_id"], as_index=False)[col].sum()
+        tot = sub.groupby(["team", "player_id"], as_index=False)[col].sum() if not sub.empty             else pd.DataFrame(columns=["team", "player_id", col])
+        if pre is not None and not pre.empty and SHARE_PRIOR_K > 0:
+            pv = pre.groupby(["team", "player_id"], as_index=False)[col].sum().rename(
+                columns={col: "prev"})
+            # Carry a player on the team he is on NOW where we have one; a player who has not
+            # taken a snap this season can only be placed by last season's team.
+            cur_team = dict(zip(tot.player_id, tot.team)) if len(tot) else {}
+            pv["team"] = [cur_team.get(pid, tm) for pid, tm in zip(pv.player_id, pv.team)]
+            tot = pd.merge(tot, pv[["team", "player_id", "prev"]],
+                           on=["team", "player_id"], how="outer")
+            tot[col] = pd.to_numeric(tot.get(col), errors="coerce").fillna(0.0)
+            tot["prev"] = pd.to_numeric(tot.get("prev"), errors="coerce").fillna(0.0)
+            tot[col] = tot[col] + SHARE_PRIOR_K * (tot["prev"] / prev_games)
+        if tot.empty:
+            continue
         team_tot = tot.groupby("team")[col].transform("sum")
         tot["share"] = np.where(team_tot > 0, tot[col] / team_tot, 0.0)
         for team, grp in tot.groupby("team"):

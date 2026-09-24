@@ -1920,6 +1920,56 @@ newly-promoted players ~2 carries/targets per game under what they went on to do
 since it was written. **When two sports run the same kind of model, diff their constants** — the one
 without a recency term is not simpler, it is the one with the bug.
 
+### 🚨 A "share of team volume" computed from the current season ERASES anyone out all season
+Derek: *"have we considered Michael Penix's return into our model spread and over/under yet?"*
+Checking turned up something worse than a missing feature. `injury_adj._shares` took each player's
+share of his team's volume from CURRENT-SEASON games only, falling back to the prior season just in
+week 1, when the current frame is empty. A starter out since the opener therefore has no volume, no
+share, and **no adjustment at all**:
+
+```
+week 1   ATL QB shares: Penix 0.51, Cousins 0.49   -> adjustment -2.20   fires
+week 2   ATL QB shares: Cooper Rush 1.00           -> adjustment  0.00   silent
+```
+
+The longer a starter was out, the more completely the model forgot him — and long absences are the
+ones that move a line. The bug hides because the adjustment works fine for a player hurt in week 6,
+who by then has five games of share on the books. The fix folds the prior season in at
+`SHARE_PRIOR_K = 4` games; ATL week 2 goes 0.00 → **−2.81**.
+
+**Be honest about what it bought: nothing measurable.** Swept 0/2/4/6/10 on train 2017-22 and
+held-out 2023-25, every value lands within 0.05%, and in three held-out seasons exactly ONE game is
+the forgotten-starter case — because a player out long enough usually goes to IR and drops off the
+injury report entirely, where neither version can see him. It ships as a CORRECTION, on the footing
+this project already uses for injury_adj: the standard is "do not publish a number we know is
+stale", not "beat the line".
+
+**The general check: whenever a feature weights by a share, ask what that share is for someone with
+zero of the thing.** Zero usage should not silently mean zero importance.
+
+### ⚠️ Two measurements that disagree are usually measuring different populations
+Derek: *"most of the receivers are an under for tonight's game. Is that correct or a data error?"*
+Neither — the answer needed three separate numbers, and the first two look contradictory.
+
+1. **The visible board is sorted by line size**, so every under clusters at the top where the eye
+   lands. Tonight was 7 of 13 over (54%); the whole 16-game board was 66 of 111 (59%) over.
+2. **Against the MARKET there is a real slope**: WR1 rows are 33% over while WR2 are 71% and RB1 78%,
+   and the projection-to-line ratio runs 1.43 at lines under 15 down to 0.96 at lines over 50.
+3. **Against ACTUAL RESULTS there is no compression at all.** Regressing actual on projected over
+   held-out seasons gives b = 0.906 (WR), 0.913 (TE), 0.937 (RB) — all **below** 1, meaning our
+   spread is already slightly too WIDE. Stretching projections to match the market's spread was
+   measured and made MAE worse at every position (WR −1.26%, RB −1.61%).
+
+So we sit inside the market's spread on star receivers, and our own calibration says the market's
+spread — not ours — is the wide one. That is a Value Finder observation, untested, not a model bug.
+
+**I had earlier called finding (2) an artifact and dropped it.** That was wrong in an instructive
+way: bucketing by OUR projection finds the players we think are big and we overshoot those;
+bucketing by the MARKET's line finds the players it thinks are big and we undershoot those. Both are
+real. **When two slices disagree, name the population each one selected before deciding which is the
+artifact** — and settle it with a third measurement that uses neither selector, which here was
+regressing on outcomes.
+
 ### 🚨 The official injury report has two blind spots, and both hide the biggest role changes
 Derek: *"I'm not seeing Jaxson Dart major injury in the NYG game (he's out for the season)... Also
 the same for Caleb Williams for the Bears."* Both were genuinely missing, and not from a bug — from
