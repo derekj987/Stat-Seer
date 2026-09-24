@@ -1832,6 +1832,38 @@ Three things that pass forward to any block like it:
   into a two-column card at 375px, which squeezed the spanning cell into half the width and
   ellipsized it. `tr.hb-specrow{display:block}` + `td{grid-column:1/-1}`.
 
+### A fixed track must be wider than its widest LABEL, or the label lands on its neighbour
+The injury pill sits in a fixed column so every player's name starts at the same x. "QUESTIONABLE"
+is ~78px of ink in a 44px track, so it printed straight over the name — Derek: *"there is also
+overlapping text on top of each other"*. Two ways out, and the wrong one is widening the track:
+that steals width from the name for a label that appears on half the rows. Abbreviate the label to
+fit (`OUT / IR / SUSP / DOUBT / QUES`, full word on `title`) and size the track to the longest of
+those.
+
+Check it directly rather than by eye — the gap between a fixed cell's right edge and the next
+cell's left edge must be positive on EVERY row:
+```js
+[...document.querySelectorAll('.impspec__inj li')].map(li => {
+  const [a, b] = li.children;
+  return b.getBoundingClientRect().left - a.getBoundingClientRect().right;   // all > 0
+})
+```
+
+### Filling space is a LAYOUT question, not a font-size one
+Same block, second pass. Derek: *"use the space more... move the injuries over to the right...
+use grid lines to make it cleaner... make the Scoring, Weather, Referee headers bigger and stand
+out."* What that came to, and it generalises to any dense panel:
+- **Give the columns that hold the most content the most width.** The game facts are
+  content-sized (`minmax(200px,auto)`); the two team columns split the remainder (`1fr 1fr`), so
+  they widen as the card does — 206 / 331 / 331 at 1440 instead of three near-equal columns.
+- **Separate with 1px rules, not with gaps.** `border-left` on each column after the first plus
+  symmetric padding reads as a table; a big `column-gap` just reads as a hole.
+- **A row of data is one LINE on tracks**, not a stack: status / player / detail across the
+  column with the detail right-aligned uses the width the stack was wasting, and a dotted
+  `border-bottom` per row makes a long list scannable.
+- **Section headings earn their own rule**: 11px, 800 weight, ink colour, `border-bottom`. A
+  heading in muted 9.5px over a list of 12px ink is quieter than the content it labels.
+
 ### 🚨 A full-width ANNOTATION row is not a data row — teach the probe, don't reshape the board
 Adding that row made every model board report `chart-rows-uneven` (58px and 170px alternating)
 and `chart-columns-lopsided`. Both were the probe measuring a detail panel as if it were data.

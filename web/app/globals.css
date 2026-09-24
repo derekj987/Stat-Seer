@@ -5102,69 +5102,85 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 .calib__link{font-size:12px;font-weight:700;letter-spacing:.03em;color:var(--accent);text-decoration:none;margin-left:auto}
 .calib__link:hover{text-decoration:underline}
 
-/* ---- Special Considerations, on the model board under each game's Bottom Line ----------------
-   Moved off the Context page (Derek: "add a Special Considerations section under the Bottom Line
-   ... remove the Special Considerations section completely from the Context section"). Four
-   factors: team scoring ratings, injuries, weather, referee. Context, never a pick.
+/* ---- Special Considerations, on the model board under each game's row ------------------------
+   Moved off the Context page in both sports (Derek: "add a Special Considerations section under
+   the Bottom Line ... remove the Special Considerations section completely from the Context
+   section", then "move the NCAAF context data over too"). Context, never a pick.
 
-   THREE COLUMNS: the game's own facts, then one injury column per team. A single stacked list
-   left the right half of a 1100px row empty and had to cap the injuries behind a "+4 more" with
-   nothing to click ("fill in the open space and break the injuries down by teams"). Columns 2/3
-   are equal so the two sides read as a comparison; column 1 is content-sized. */
-.impspec{display:flex;flex-direction:column;gap:6px;padding:7px 12px 10px;
+   THREE COLUMNS separated by rules: the game's own facts, then one column per team. A stacked
+   single list left the right half of a 1100px row empty; a first three-column pass still crowded
+   the injuries into the middle and ran the "QUESTIONABLE" pill over the player's name, because
+   the pill's ink (78px) was wider than its 44px track. Derek: "use the space more ... there is
+   also overlapping text on top of each other ... use grid lines to make it cleaner ... make the
+   Scoring, Weather, Referee headers bigger and stand out."
+
+   So: the team columns take the larger share and start at a rule; every injury is ONE line of
+   status / player / detail on a fixed track (short status codes, full word on the title); section
+   headings are 11px caps in the ink colour over a rule of their own. */
+.impspec{display:flex;flex-direction:column;gap:8px;padding:9px 12px 12px;
   border-top:1px dashed var(--line);background:var(--surface-2);font-size:12px;color:var(--muted)}
-.impspec__k{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--mkt)}
-.impspec__cols{display:grid;grid-template-columns:minmax(210px,auto) minmax(0,1fr) minmax(0,1fr);
-  gap:10px 22px;align-items:start}
-.impspec__col{min-width:0;display:flex;flex-direction:column;gap:6px}
-.impspec__col--game{gap:7px}
-.impspec__blk{display:flex;flex-direction:column;gap:2px;min-width:0}
-.impspec__bh,.impspec__colt{font-size:9.5px;font-weight:800;text-transform:uppercase;
-  letter-spacing:.05em;color:var(--muted)}
-.impspec__v{color:var(--ink);line-height:1.35}
-.impspec__none{color:var(--muted);font-style:italic;line-height:1.35}
-.impspec__note{font-weight:600;letter-spacing:.03em;text-transform:none;color:var(--muted)}
-/* Scoring: one small grid, each team once, units stated once in the heading. */
-.impspec__grid{display:inline-grid;grid-template-columns:auto auto auto;gap:1px 14px;
-  align-items:baseline;color:var(--ink)}
+.impspec__k{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--mkt)}
+/* The game column is content-sized and the two team columns split what is left equally, so the
+   injuries sit right rather than bunching in the middle. 1px rules divide them. */
+.impspec__cols{display:grid;grid-template-columns:minmax(200px,auto) minmax(0,1fr) minmax(0,1fr);
+  gap:0;align-items:stretch}
+.impspec__col{min-width:0;display:flex;flex-direction:column;gap:9px;padding:0 18px}
+.impspec__col:first-child{padding-left:0}
+.impspec__col:last-child{padding-right:0}
+.impspec__col + .impspec__col{border-left:1px solid var(--line)}
+.impspec__blk{display:flex;flex-direction:column;gap:3px;min-width:0}
+/* Section headings: bigger, inked, and sitting on their own rule so each block reads as a unit. */
+.impspec__bh,.impspec__colt{display:flex;align-items:baseline;gap:8px;font-size:11px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--ink);
+  border-bottom:1px solid var(--line);padding-bottom:3px}
+.impspec__colt{border:0;padding:0}
+.impspec__v{color:var(--ink);line-height:1.4}
+.impspec__none{color:var(--muted);font-style:italic;line-height:1.4}
+.impspec__note{font-size:9.5px;font-weight:600;letter-spacing:.04em;text-transform:none;color:var(--muted)}
+/* Scoring: each team once, units named in the heading. */
+.impspec__grid{display:grid;grid-template-columns:auto 1fr 1fr;gap:3px 16px;align-items:baseline;color:var(--ink)}
 .impspec__h{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
 .impspec__tm{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
-.impspec__rank{font-size:10.5px;color:var(--muted)}
-/* Injury column: team code + a count, then every designated player — no cap, nothing hidden. */
-.impspec__colh{display:flex;align-items:baseline;gap:7px;border-bottom:1px solid var(--line);
-  padding-bottom:2px;margin-bottom:1px}
-.impspec__colt{font-family:var(--font-mono);font-size:11px;color:var(--ink);letter-spacing:.04em}
-.impspec__coln{font-size:10px;color:var(--muted)}
-.impspec__inj{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
-.impspec__inj li{display:grid;grid-template-columns:44px minmax(0,1fr);gap:7px;align-items:baseline;
-  line-height:1.3}
+.impspec__rank{font-size:10.5px;color:var(--muted);font-weight:400}
+/* Injury column: team heading + count over a rule, then one ruled line per player. */
+.impspec__colh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;
+  border-bottom:1px solid var(--line);padding-bottom:3px}
+.impspec__coln{font-size:10px;color:var(--muted);white-space:nowrap}
+.impspec__inj{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+/* status | player | detail, one line each, on tracks so every column lines up down the list. */
+.impspec__inj li{display:grid;grid-template-columns:58px minmax(0,1fr) auto;gap:10px;
+  align-items:center;line-height:1.5;padding:3px 0;border-bottom:1px dotted var(--line)}
+.impspec__inj li:last-child{border-bottom:0}
 .impspec__p{color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.impspec__det{grid-column:2;font-size:10.5px;color:var(--muted);margin-top:-2px}
-.impspec__st{justify-self:start;font-size:9px;font-weight:800;text-transform:uppercase;
-  letter-spacing:.03em;padding:1px 5px;border-radius:4px;background:var(--surface);color:var(--muted)}
+.impspec__det{font-size:10.5px;color:var(--muted);white-space:nowrap;text-align:right}
+.impspec__st{justify-self:stretch;text-align:center;font-size:9px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.03em;padding:2px 0;border-radius:4px;
+  background:var(--surface);color:var(--muted)}
 .impspec__st--out,.impspec__st--ir,.impspec__st--suspended{
   background:color-mix(in srgb,var(--mkt) 16%,transparent);color:var(--mkt)}
 .impspec__st--doubtful,.impspec__st--questionable{
   background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
+/* NCAAF variant: stat lists instead of injuries (college has no injury report), on the same
+   tracks so both sports' blocks read identically. */
+.impspec__stats{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.impspec__stats li{display:grid;grid-template-columns:72px auto minmax(0,1fr);gap:10px;
+  align-items:baseline;line-height:1.5;padding:3px 0;border-bottom:1px dotted var(--line);color:var(--ink)}
+.impspec__stats li:last-child{border-bottom:0}
+.impspec__sl{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.impspec__stats li .impspec__rank{text-align:right}
+.impspec__foot{font-size:10.5px;color:var(--muted);line-height:1.4;
+  border-top:1px solid var(--line);padding-top:6px}
 @media (max-width:860px){
   .impspec__cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-  .impspec__col--game{grid-column:1 / -1}
+  .impspec__col--game{grid-column:1 / -1;padding:0 0 9px;border-bottom:1px solid var(--line)}
+  .impspec__col + .impspec__col{border-left:0}
+  .impspec__col:nth-child(3){border-left:1px solid var(--line)}
+  .impspec__col:nth-child(2){padding-left:0}
 }
 @media (max-width:560px){
   .impspec__cols{grid-template-columns:1fr}
   .impspec__col--game{grid-column:auto}
-}
-
-/* NCAAF variant of the block: stat lists instead of injuries (college has no injury report), and
-   a footnote naming the season the scoring rates come from. */
-.impspec__stats{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
-.impspec__stats li{display:grid;grid-template-columns:62px auto minmax(0,1fr);gap:8px;
-  align-items:baseline;line-height:1.3;color:var(--ink)}
-.impspec__sl{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
-.impspec__foot{font-size:10.5px;color:var(--muted);line-height:1.35}
-/* The block sits in a full-width cell under its game row; the cell adds no padding of its own. */
-.hb-specrow > td{padding:0;border:0}
-@media (max-width:560px){
-  .impspec__stats li{grid-template-columns:62px auto}
-  .impspec__stats li .impspec__rank{grid-column:2}
+  .impspec__col{padding:0}
+  .impspec__col:nth-child(3){border-left:0;border-top:1px solid var(--line);padding-top:9px}
+  .impspec__det{text-align:left}
 }

@@ -69,6 +69,12 @@ function weatherText(w: GameWeather): string {
 
 // Out / IR / suspended first, then the game-time decisions — a bettor reads the definite ones.
 const RANK: Record<string, number> = { OUT: 0, IR: 1, SUSPENDED: 2, DOUBTFUL: 3, QUESTIONABLE: 4 };
+// The pill sits in a fixed track so every player's name starts at the same x. "Questionable" is
+// 78px of ink and the track is 58, so it ran straight over the name beside it — Derek: "there is
+// also overlapping text on top of each other". Short forms fit; the full word is on the title.
+const SHORT: Record<string, string> = {
+  OUT: "OUT", IR: "IR", SUSPENDED: "SUSP", DOUBTFUL: "DOUBT", QUESTIONABLE: "QUES",
+};
 
 function TeamInjuries({ team, list, feedHasAny }: {
   team: string; list: { player: string; note: InjuryNote }[]; feedHasAny: boolean;
@@ -79,7 +85,7 @@ function TeamInjuries({ team, list, feedHasAny }: {
   return (
     <div className="impspec__col">
       <div className="impspec__colh">
-        <span className="impspec__colt">{team}</span>
+        <span className="impspec__colt">{team} injuries</span>
         <span className="impspec__coln">
           {sorted.length === 0 ? "" : `${sorted.length} listed${outs ? ` · ${outs} out` : ""}`}
         </span>
@@ -92,9 +98,10 @@ function TeamInjuries({ team, list, feedHasAny }: {
         <ul className="impspec__inj">
           {sorted.map((i) => (
             <li key={i.player}>
-              <span className={`impspec__st impspec__st--${i.note.status.toLowerCase()}`}>{i.note.label}</span>
-              <span className="impspec__p">{i.player}</span>
-              {i.note.detail && <span className="impspec__det">{i.note.detail.toLowerCase()}</span>}
+              <span className={`impspec__st impspec__st--${i.note.status.toLowerCase()}`}
+                title={i.note.label}>{SHORT[i.note.status] ?? i.note.label}</span>
+              <span className="impspec__p" title={i.player}>{i.player}</span>
+              <span className="impspec__det">{i.note.detail ? i.note.detail.toLowerCase() : ""}</span>
             </li>
           ))}
         </ul>
@@ -115,7 +122,7 @@ export function SpecialConsiderations({ ctx }: { ctx: SpecialCtx }) {
         <div className="impspec__col impspec__col--game">
           {ra && rh && (
             <div className="impspec__blk">
-              <span className="impspec__bh">Scoring <span className="impspec__note">pts/gm{RATINGS_IS_PRIOR ? ` · ${RATINGS_SEASON}` : ""}</span></span>
+              <span className="impspec__bh">Scoring<span className="impspec__note">pts/gm{RATINGS_IS_PRIOR ? ` · ${RATINGS_SEASON}` : ""}</span></span>
               <span className="impspec__grid">
                 <span className="impspec__h" />
                 <span className="impspec__h">scored</span>

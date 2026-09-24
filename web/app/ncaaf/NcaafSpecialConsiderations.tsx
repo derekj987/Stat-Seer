@@ -84,8 +84,8 @@ export function NcaafSpecialConsiderations({ g }: { g: NcaafCardGame }) {
             <span className="impspec__v">
               {wx?.venue ? <>{wx.venue}{wx.city ? ` · ${wx.city}, ${wx.state}` : ""}</>
                 : (g.neutral ? "Neutral site" : `${abbrevTeam(g.home)} — home`)}
-              {g.neutral ? <span className="impspec__rank"> no home edge</span>
-                : <span className="impspec__rank"> home field +{CX.hfa}</span>}
+              {g.neutral ? <span className="impspec__rank"> · no home edge</span>
+                : <span className="impspec__rank"> · home field +{CX.hfa}</span>}
             </span>
           </div>
           <div className={`impspec__blk${wx?.windFlag ? " impspec__blk--wind" : ""}`}>
