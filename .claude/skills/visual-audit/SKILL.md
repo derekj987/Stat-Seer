@@ -1956,6 +1956,41 @@ Also worth carrying: Sleeper's `gsis_id` is populated on only **20%** of active 
 some values have leading whitespace), so it joins on normalised name **plus team** — the weaker key,
 which is why the team has to agree too.
 
+### ⚠️ A count of DESIGNATIONS is not a count of games missed
+The "key players back" row (Derek: *"ATL is getting their QB1 Michael Penix Jr back"*) shipped with
+two wrong numbers on the first pass, both from reading a feed literally:
+
+- **"Tua Tagovailoa · missed 2 games"** counted a week he was listed DOUBTFUL. Doubtful is a
+  designation, not an outcome; a doubtful player who suits up missed nothing. The count now takes
+  OUT and IR only, while DOUBTFUL still qualifies him as having been hurt — two different questions,
+  two different filters.
+- **"TreVeyon Henderson · missed 1 game"** was three weeks stale. He was out in week 1 and back in
+  week 2, and a three-week lookback happily announced him as returning in week 3. A player only
+  counts as back if he was designated in the week IMMEDIATELY before; the wider window exists only
+  to measure how long he was gone.
+
+Also note the shape of the underlying count: `practice_reports` is written several times a week, so
+counting ROWS says a player missed six games inside one week. Count distinct weeks.
+
+**Verify any number the board publishes against the source before believing the render.** One query
+settled both: `wk1=NONE/OUT wk2=NONE/OUT wk3=NONE` for Penix (2 is right), `wk1=NONE/OUT
+wk2=DOUBTFUL/NONE` for Tua (2 was wrong).
+
+### ⚠️ Next will not cache a fetch over 2MB, and says so only in the server log
+Reading Sleeper's all-players endpoint straight from a server component looked fine — the page
+rendered, the data was right. The dev log said otherwise:
+
+```
+Failed to set Next.js data cache for https://api.sleeper.app/v1/players/nfl,
+items over 2MB can not be cached (19548885 bytes)
+```
+
+`next: { revalidate: 900 }` on a 19.5MB response is silently a no-op: every render refetches and
+reparses the whole thing, and `/model` took 19.2s. The fix was the one Derek called for anyway —
+a cron writes the ~450 rows that matter into a table and the page reads those. **Check
+`preview_logs` after adding any large external fetch; a page that renders correctly can still be
+paying full cost on every request.**
+
 ### 🚨 Pooling train and held-out will manufacture a signal that is not there
 The sharpest self-inflicted error of this session, caught only because the confirmation step ran.
 

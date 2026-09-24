@@ -1,0 +1,50 @@
+name: Capture availability news
+
+# News-driven NFL availability from Sleeper (free, no API key) into sleeper_availability.
+#
+# WHY. Every other availability source we have is a version of the league's OFFICIAL game-status
+# report, which carries no designation before Friday and drops anyone moved to IR entirely. Derek
+# caught both holes on the same board: "I'm not seeing Jaxson Dart major injury in the NYG game...
+# Also the same for Caleb Williams for the Bears." Sleeper had Dart "Out — Knee - MCL, Surgery" and
+# Williams "Doubtful — Hamstring" the previous evening; our report had an undesignated DNP and
+# nothing at all.
+#
+# CADENCE. Every four hours, Sep-Jan. Sleeper asks that the all-players endpoint not be polled hard
+# (2.6MB gzipped, every player in the league), and beat reporting does not move faster than this in
+# the Tue-Sat window this exists to cover. Game day is NOT this job's problem: the official
+# inactives drop 90 minutes before kickoff and web/lib/nflInactives.ts layers ESPN's live per-game
+# designations on top at request time, which is fresher than any cron can be — Actions schedules
+# routinely start 5-15 minutes late, so a T-90 sweep can land at T-70.
+#
+# Writes only CHANGES — a new designation, a changed one, or a clearing — so a season is on the
+# order of tens of thousands of rows rather than the ~400k a snapshot-per-run would cost. That also
+# makes the table a history: how much earlier the news feed knew than the league's own report is
+# measurable from it, and like the practice trajectory it cannot be reconstructed afterwards.
+#
+# Idempotent in the sense that matters: a re-run with nothing changed writes nothing at all.
+# All times UTC.
+
+on:
+  schedule:
+    - cron: "0 */4 * 9-12,1 *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: capture-sleeper
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi -c requirements.txt
+      - name: Sleeper availability -> Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python ingest/sleeper_availability.py --write

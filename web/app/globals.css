@@ -5224,6 +5224,15 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 .impspec__stats li:last-child{border-bottom:0}
 .impspec__sl{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
 .impspec__stats li .impspec__rank{text-align:right}
+/* "Back" — players the team is getting back. Under the injury list, in the accent colour, because
+   it is the opposite kind of fact: everything above it is a subtraction, this is an addition. */
+.impspec__back{margin-top:7px;padding-top:6px;border-top:1px solid var(--line);
+  display:flex;flex-direction:column;gap:3px}
+.impspec__backh{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--accent)}
+.impspec__backl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.impspec__backl li{font-size:12px;line-height:1.4;color:var(--ink);min-width:0}
+.impspec__backl b{font-weight:600}
 .impspec__foot{font-size:10.5px;color:var(--muted);line-height:1.4;
   border-top:1px solid var(--line);padding-top:6px}
 @media (max-width:860px){

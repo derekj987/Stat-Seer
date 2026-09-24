@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import { REF_STATS } from "@/lib/refStats";
 import { TEAM_RATINGS, RATINGS_SEASON, RATINGS_IS_PRIOR } from "@/lib/teamRatings";
 import type { GameWeather } from "@/lib/weatherData";
-import type { InjuryNote } from "@/lib/nflInactives";
+import type { InjuryNote, ReturningNote } from "@/lib/nflInactives";
 import type { UpsetRead } from "@/lib/upsetMeter";
 import { UpsetMeter } from "./UpsetMeter";
 
@@ -38,6 +38,9 @@ export interface SpecialCtx {
    *  report routinely lists 40+ players with no designation, so early in the week the honest
    *  answer really is the second. */
   feedHasAny: boolean;
+  /** Players each team is getting BACK this week — out recently, no designation now. Keyed by our
+   *  team abbreviation. Absent for a game where nobody is returning. */
+  returning?: Record<string, ReturningNote[]>;
   /** The game's Upset Meter — the Chaos Board, folded in beside the model and the context
    *  factors. Null when there is no market line to read a disagreement against. */
   upset?: UpsetRead | null;
@@ -104,8 +107,40 @@ const SHORT: Record<string, string> = {
   OUT: "OUT", IR: "IR", SUSPENDED: "SUSP", DOUBTFUL: "DOUBT", QUESTIONABLE: "QUES",
 };
 
-function TeamInjuries({ team, list, feedHasAny }: {
+/** Players the team is getting BACK — out recently, carrying no designation now.
+ *
+ *  Derek: "I also want to setup a 'key players back' row in the Injuries sections. Like tonight,
+ *  ATL is getting their QB1 Michael Penix Jr back."
+ *
+ *  It sits under the injury list rather than in it, in the accent colour, because it is the
+ *  opposite kind of fact: everything above is a subtraction and this is an addition. Sorted by
+ *  depth slot so the quarterback leads. */
+function BackRow({ list }: { list: ReturningNote[] }) {
+  if (!list.length) return null;
+  const sorted = [...list].sort((a, b) => a.slot.localeCompare(b.slot));
+  return (
+    <div className="impspec__back">
+      <span className="impspec__backh">Back</span>
+      <ul className="impspec__backl">
+        {sorted.map((r) => (
+          <li key={r.player}>
+            <b>{r.player}</b>
+            <span className="impspec__rank"> {r.slot}</span>
+            {r.missed > 0 && (
+              <span className="impspec__det">
+                {" "}· missed {r.missed} {r.missed === 1 ? "game" : "games"}
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function TeamInjuries({ team, list, feedHasAny, back }: {
   team: string; list: { player: string; note: InjuryNote }[]; feedHasAny: boolean;
+  back: ReturningNote[];
 }) {
   const sorted = [...list].sort(
     (a, b) => (RANK[a.note.status] ?? 9) - (RANK[b.note.status] ?? 9) || a.player.localeCompare(b.player));
@@ -134,12 +169,13 @@ function TeamInjuries({ team, list, feedHasAny }: {
           ))}
         </ul>
       )}
+      <BackRow list={back} />
     </div>
   );
 }
 
 export function SpecialConsiderations({ ctx }: { ctx: SpecialCtx }) {
-  const { away, home, crew, wx, injuries, feedHasAny, upset } = ctx;
+  const { away, home, crew, wx, injuries, feedHasAny, upset, returning } = ctx;
   const ra = TEAM_RATINGS[away], rh = TEAM_RATINGS[home];
   const byTeam = (t: string) => injuries.filter((i) => i.team === t);
   return (
@@ -180,8 +216,10 @@ export function SpecialConsiderations({ ctx }: { ctx: SpecialCtx }) {
         </div>
 
         {/* Columns 2 and 3 — availability, one per team, complete. */}
-        <TeamInjuries team={away} list={byTeam(away)} feedHasAny={feedHasAny} />
-        <TeamInjuries team={home} list={byTeam(home)} feedHasAny={feedHasAny} />
+        <TeamInjuries team={away} list={byTeam(away)} feedHasAny={feedHasAny}
+          back={returning?.[away] ?? []} />
+        <TeamInjuries team={home} list={byTeam(home)} feedHasAny={feedHasAny}
+          back={returning?.[home] ?? []} />
       </div>
       {/* The meter reads the factors ABOVE it, so it sits under them (Derek: "move the Upset
           Meter under the Scoring, Weather, and Referee data"). */}

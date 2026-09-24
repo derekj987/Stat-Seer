@@ -3,7 +3,7 @@ import { fetchModelWeek, fetchCalibration, type ModelPrediction } from "@/lib/mo
 import { MODEL_TOTALS } from "@/lib/modelTotals";
 import { weekRefs } from "@/lib/refAssignments";
 import { GAME_WEATHER, WEATHER_WEEK } from "@/lib/weatherData";
-import { weekInjuries, type InjuryNote } from "@/lib/nflInactives";
+import { weekInjuries, weekReturning, type InjuryNote, type ReturningNote } from "@/lib/nflInactives";
 import { SpecialConsiderations, type SpecialCtx } from "../SpecialConsiderations";
 import { upsetMeter } from "@/lib/upsetMeter";
 import { TEAM_RATINGS } from "@/lib/teamRatings";
@@ -263,6 +263,11 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
   // designation that changes on game morning shows without a redeploy; never fatal.
   let injAll: Awaited<ReturnType<typeof weekInjuries>> = new Map();
   try { injAll = await weekInjuries(SEASON, week); } catch { /* no feed — no tags */ }
+  // Who each side is getting BACK. Depends on the designations above, because a player who is out
+  // again this week is not returning — so it runs after, not in parallel.
+  let backAll: Map<string, ReturningNote[]> = new Map();
+  try { backAll = await weekReturning(SEASON, week, injAll); } catch { /* no feed — no row */ }
+  const backByTeam: Record<string, ReturningNote[]> = Object.fromEntries(backAll);
   const wxByEvent = new Map(GAME_WEATHER.map((w) => [w.eventId, w]));
   const injByTeam = new Map<string, { player: string; team: string; note: InjuryNote }[]>();
   for (const [key, note] of injAll) {
@@ -322,6 +327,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
     wx: week === WEATHER_WEEK ? wxByEvent.get(g.eventId) : undefined,
     injuries: [...(injByTeam.get(g.away) ?? []), ...(injByTeam.get(g.home) ?? [])],
     feedHasAny: injAll.size > 0,
+    returning: backByTeam,
     upset: upsetByEvent.get(g.eventId) ?? null,
   }]));
   // `consensus` is FanDuel's line where posted (lib/board.ts LINE_BOOK), the US-book median only

@@ -7,29 +7,38 @@
 // had written `game_status: OUT` into `practice_reports` hours earlier. It fed the game model's
 // team adjustment and nothing else. Nobody had ever joined it to the player board.
 //
-// TWO sources, deliberately, because they answer two different questions:
+// THREE sources, layered in this order, because they answer three different questions and each one
+// is blind to something the next can see:
 //
 //   1. `practice_reports` (ours). Written by `ingest/injuries_nflverse.py` from the nflverse
 //      release — the Wed/Thu/Fri PRACTICE REPORT and its Out / Doubtful / Questionable
 //      designations. Already populated: it had Henderson OUT hours before Derek asked.
-//   2. ESPN's per-game injury block. This is the one that keeps moving on GAME DAY, which the
-//      practice report does not: the INACTIVES list is official 90 minutes before kickoff and is
-//      published on a different clock entirely. Measured against our own capture for Week 1
-//      NE @ SEA, ESPN also simply had MORE — Zach Charbonnet OUT (Seattle's starter, and the
-//      reason Jadarian Price is playing) plus four Injured Reserve designations our feed never
-//      listed.
+//   2. `sleeper_availability` (ours, written by `capture-sleeper.yml`). The official report above
+//      carries no designation until Friday and drops anyone moved to IR entirely, because he is off
+//      the active roster. Derek found both holes on one board — "I'm not seeing Jaxson Dart major
+//      injury in the NYG game... Also the same for Caleb Williams for the Bears" — and both were
+//      genuinely absent. Sleeper aggregates the beat reporting and moves on NEWS rather than on the
+//      league's filing schedule: it had Dart "Out — Knee - MCL, Surgery" and Williams "Doubtful —
+//      Hamstring" the previous evening, plus Jayden Daniels out.
+//   3. ESPN's per-game injury block. This is the one that keeps moving on GAME DAY, which neither
+//      of the above does: the INACTIVES list is official 90 minutes before kickoff and is published
+//      on a different clock entirely. Measured against our own capture for Week 1 NE @ SEA, ESPN
+//      also simply had MORE — Zach Charbonnet OUT (Seattle's starter, and the reason Jadarian Price
+//      is playing) plus four Injured Reserve designations our feed never listed.
 //
-// A GitHub Actions cron cannot serve (2): its finest useful cadence is ~5 minutes and scheduled
-// runs routinely start 5-15 minutes late, so a T-90 sweep can land at T-70. Reading at request
-// time on a 120s cache is strictly fresher than anything a cron can write, and needs no table, no
-// migration and no SQL for Derek to run.
+// The order is the point. A wire report fills the silence the official report leaves, and the
+// official inactives then overrule the wire, because 90 minutes before kickoff the league's list is
+// the truth and a beat reporter's is not.
 //
-// ESPN is the ENRICHMENT, not the foundation, and the order matters: our own table is the source
-// that is verifiable from a dev machine, so the feature works without ESPN and gets better with
-// it. Neither source can throw — availability improves the board, so a failure must degrade to
-// "no tags", never to a broken page.
+// A GitHub Actions cron cannot serve (3): its finest useful cadence is ~5 minutes and scheduled
+// runs routinely start 5-15 minutes late, so a T-90 sweep can land at T-70. It serves (2) well,
+// where the news moves over days and the payload — every player in the league, 14.7MB parsed — is
+// far too heavy to pull on a page render.
+//
+// No source can throw. Availability improves the board, so a failure must degrade to "no tags",
+// never to a broken page; and (2) simply returns nothing until its table exists.
 
-import { normName } from "@/lib/playerSlot";
+import { normName, playerSlot } from "@/lib/playerSlot";
 
 /** ESPN's designation, normalised. Ordered by how much it should suppress. */
 export type InjuryStatus = "OUT" | "IR" | "SUSPENDED" | "DOUBTFUL" | "QUESTIONABLE";
@@ -171,16 +180,24 @@ async function addPracticeReports(out: Map<string, InjuryNote>, season: number, 
 //
 // SKILL POSITIONS ONLY. Sleeper carries ~14 designated players per team across the whole roster,
 // most of them long-term IR that changes nothing about this week; taking all of them would bury
-// the Special Considerations block in names. The positions below are the ones whose absence moves
-// a prop or a line. Non-skill injuries keep coming from the two official sources, as today.
-interface SleeperPlayer {
-  full_name?: string; team?: string | null; position?: string | null;
-  active?: boolean; injury_status?: string | null; injury_body_part?: string | null;
+// the Special Considerations block in names. Non-skill injuries keep coming from the two official
+// sources, as today.
+//
+// Read from OUR table, not from Sleeper directly. The endpoint is every player in the league —
+// 2.6MB gzipped, 14.7MB parsed — which is far too much to do on a page render, and Sleeper asks
+// that it not be polled hard. `capture-sleeper.yml` writes changes every four hours into
+// `sleeper_availability`; this reads ~450 small rows from the current-state view. The position and
+// status filtering happens once, in ingest/sleeper_availability.py.
+interface SleeperRow {
+  player: string | null; team: string | null; pos: string | null;
+  status: string | null; body_part: string | null;
 }
 
-// Sleeper spells two clubs differently from nflverse, and still tags a handful of players OAK.
-const SLEEPER_TEAM: Record<string, string> = { LAR: "LA", OAK: "LV" };
-const SLEEPER_POS = new Set(["QB", "RB", "WR", "TE", "K", "FB"]);
+/** A player who was out and is not any more. `missed` is distinct weeks he appeared on the report
+ *  as Out/Doubtful/IR; 0 when the only evidence is a cleared news designation, which carries no
+ *  week of its own (someone activated off IR, say). */
+export interface ReturningNote { player: string; team: string; slot: string; missed: number }
+
 // "NA" is deliberately absent: Sleeper uses it for "no current information", and healthy starters
 // carry it. Mapping it to a tag would put a pill on players with nothing wrong.
 const SLEEPER_STATUS: Record<string, { status: InjuryStatus; label: string }> = {
@@ -194,34 +211,188 @@ const SLEEPER_STATUS: Record<string, { status: InjuryStatus; label: string }> = 
   SUS: { status: "SUSPENDED", label: "Susp." },
 };
 
-async function addSleeper(out: Map<string, InjuryNote>) {
+/** One row per player, newest first, from the DISTINCT ON view. Rows whose status is NULL are
+ *  players who have been CLEARED; they are filtered out here and read by `weekReturning` below —
+ *  stored rather than deleted so "he was out and now is not" stays answerable. */
+async function sleeperRows(statusIsNull: boolean, since?: string): Promise<SleeperRow[]> {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY;
+  if (!url || !key) return [];
+  const filter = (statusIsNull ? "status=is.null" : "status=not.is.null")
+    + (since ? `&captured_at=gte.${since}` : "");
   try {
-    // ~2.6MB gzipped for every player in the league; Sleeper asks that it not be polled hard, and
-    // injury news does not move faster than this anyway. One fetch per 15 minutes per region.
+    const q = `?select=player,team,pos,status,body_part&${filter}&limit=2000`;
+    const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/sleeper_availability_current${q}`, {
+      headers: {
+        apikey: key, Authorization: `Bearer ${key}`,
+        Range: "0-1999", "Range-Unit": "items",
+      },
+      next: { revalidate: 300 },
+    });
+    if (!res.ok && res.status !== 206) {
+      // 404 here means the table has not been created yet — run ingest/sleeper_availability.sql.
+      console.warn(`[nflInactives] sleeper_availability_current ${res.status}`);
+      return [];
+    }
+    return (await res.json()) as SleeperRow[];
+  } catch (e) {
+    /* availability is an enhancement — a failed read must never break the board */
+    console.warn(`[nflInactives] sleeper_availability read failed: ${String(e)}`);
+    return [];
+  }
+}
+
+interface SleeperPlayer {
+  full_name?: string; team?: string | null; position?: string | null;
+  active?: boolean; injury_status?: string | null; injury_body_part?: string | null;
+}
+
+const SLEEPER_TEAM: Record<string, string> = { LAR: "LA", OAK: "LV" };
+const SLEEPER_POS = new Set(["QB", "RB", "WR", "TE", "K", "FB"]);
+
+/**
+ * Straight from Sleeper, used ONLY when the table has nothing.
+ *
+ * The table is the intended path and this is the safety net: before `ingest/sleeper_availability.sql`
+ * has been run, or if the capture cron stops, the board would otherwise silently lose every player
+ * the official report cannot see — which is the exact failure this source was added to fix, so it
+ * must not be the failure mode. It costs a 2.6MB fetch and a 14.7MB parse, hence the hour-long
+ * revalidate and hence not doing it as a matter of course.
+ */
+async function sleeperDirect(): Promise<SleeperRow[]> {
+  try {
     const res = await fetch("https://api.sleeper.app/v1/players/nfl", {
       headers: { "User-Agent": "statseer/1.0" },
-      next: { revalidate: 900 },
+      next: { revalidate: 3600 },
     });
-    if (!res.ok) {
-      console.warn(`[nflInactives] Sleeper ${res.status}`);
-      return;
-    }
+    if (!res.ok) return [];
     const all = (await res.json()) as Record<string, SleeperPlayer>;
+    const rows: SleeperRow[] = [];
     for (const p of Object.values(all)) {
       if (!p?.active || !p.team || !p.full_name) continue;
       if (!SLEEPER_POS.has(String(p.position ?? ""))) continue;
-      const c = SLEEPER_STATUS[String(p.injury_status ?? "").toUpperCase()];
-      if (!c) continue;
-      const team = SLEEPER_TEAM[p.team] ?? p.team;
-      out.set(injuryKey(p.full_name, team), {
-        status: c.status, label: c.label,
-        detail: p.injury_body_part ?? null, player: p.full_name,
+      if (!p.injury_status) continue;
+      rows.push({
+        player: p.full_name, team: SLEEPER_TEAM[p.team] ?? p.team, pos: p.position ?? null,
+        status: p.injury_status, body_part: p.injury_body_part ?? null,
       });
     }
-  } catch (e) {
-    /* availability is an enhancement — a failed read must never break the board */
-    console.warn(`[nflInactives] Sleeper fetch failed: ${String(e)}`);
+    return rows;
+  } catch {
+    return [];
   }
+}
+
+async function addSleeper(out: Map<string, InjuryNote>) {
+  let rows = await sleeperRows(false);
+  if (!rows.length) rows = await sleeperDirect();
+  for (const r of rows) {
+    if (!r.player || !r.team || !r.status) continue;
+    const c = SLEEPER_STATUS[r.status.toUpperCase()];
+    if (!c) continue;
+    out.set(injuryKey(r.player, r.team), {
+      status: c.status, label: c.label, detail: r.body_part ?? null, player: r.player,
+    });
+  }
+}
+
+/**
+ * Players who WERE out and are not any more — the "key players back" row.
+ *
+ * Derek: "I also want to setup a 'key players back' row in the Injuries sections. Like tonight,
+ * ATL is getting their QB1 Michael Penix Jr back."
+ *
+ * Two sources, because they cover different absences:
+ *
+ *   - `practice_reports` for the preceding weeks. Penix carried game_status OUT for week 2 and
+ *     nothing for week 3, which is the whole signal. This needs no new history and works today.
+ *   - the cleared rows in `sleeper_availability`, which catch the returns the official report never
+ *     recorded in the first place — anyone activated off IR, who was invisible to it going out and
+ *     would be invisible coming back.
+ *
+ * Anyone carrying a CURRENT designation is excluded. A player who was out in week 2 and is doubtful
+ * again is not back, he is still hurt, and listing him under "back" would be worse than not listing
+ * him at all.
+ */
+export async function weekReturning(
+  season: number, week: number, current: Map<string, InjuryNote>,
+): Promise<Map<string, ReturningNote[]>> {
+  const byTeam = new Map<string, ReturningNote[]>();
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY;
+  if (!url || !key || week < 2) return byTeam;
+
+  const seen = new Set<string>();
+  const add = (player: string, team: string, missed: number) => {
+    const k = injuryKey(player, team);
+    const now = current.get(k);
+    // Still designated in any form -> not back.
+    if (now) return;
+    if (seen.has(k)) return;
+    const slot = playerSlot(player, "nfl");
+    // "Key" is the depth chart's call rather than ours. Without an entry we cannot say he matters,
+    // so he is left off instead of guessed at.
+    if (!slot || !/^(QB[12]|RB[12]|WR[123]|TE1)$/.test(slot)) return;
+    seen.add(k);
+    const list = byTeam.get(team) ?? [];
+    list.push({ player, team, slot, missed });
+    byTeam.set(team, list);
+  };
+
+  // Look back three weeks to measure how long he was gone, but he only counts as BACK if he was
+  // designated in the week immediately before this one. Derek's ask is about a player a team is
+  // getting back NOW — "tonight, ATL is getting their QB1 Michael Penix Jr back" — and without
+  // that condition the row goes stale: TreVeyon Henderson was out in week 1, back in week 2, and
+  // would still have been announced as returning in week 3.
+  const from = Math.max(1, week - 3);
+  try {
+    const q = `?select=scraped_name,team,game_status,week&season=eq.${season}` +
+      `&week=gte.${from}&week=lt.${week}&game_status=in.(OUT,DOUBTFUL,IR)`;
+    const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/practice_reports${q}`, {
+      headers: {
+        apikey: key, Authorization: `Bearer ${key}`,
+        Range: "0-9999", "Range-Unit": "items",
+      },
+      next: { revalidate: 300 },
+    });
+    if (res.ok || res.status === 206) {
+      const rows = (await res.json()) as
+        { scraped_name: string | null; team: string | null; game_status: string | null; week: number }[];
+      // Two different counts, because they mean different things. `missed` counts only OUT and IR:
+      // Doubtful is a designation, not an outcome, and a player who was doubtful and played did not
+      // miss that game — printing "missed 2 games" for him would be simply untrue. `lastWeek` is
+      // the qualifier and accepts Doubtful, because being doubtful is still being hurt.
+      // Both count DISTINCT WEEKS, never rows: the report is written several times a week, so a
+      // row count would claim a player missed six games inside one week.
+      const seenWk = new Map<string, {
+        player: string; team: string; missed: Set<number>; lastWeek: boolean;
+      }>();
+      for (const r of rows) {
+        if (!r.scraped_name || !r.team) continue;
+        const k = injuryKey(r.scraped_name, r.team);
+        const e = seenWk.get(k)
+          ?? { player: r.scraped_name, team: r.team, missed: new Set<number>(), lastWeek: false };
+        const st = (r.game_status || "").toUpperCase();
+        if (st === "OUT" || st === "IR") e.missed.add(r.week);
+        if (r.week === week - 1) e.lastWeek = true;
+        seenWk.set(k, e);
+      }
+      for (const e of seenWk.values()) {
+        if (e.lastWeek) add(e.player, e.team, e.missed.size);
+      }
+    }
+  } catch {
+    /* enhancement only */
+  }
+
+  // Cleared news designations catch the returns the official report never recorded going out —
+  // anyone activated off IR. Bounded to the last ten days for the same reason as `lastWeek` above:
+  // a clearing from a month ago is not a player a team is getting back this week.
+  const since = new Date(Date.now() - 10 * 864e5).toISOString();
+  for (const r of await sleeperRows(true, since)) {
+    if (r.player && r.team) add(r.player, r.team, 0);
+  }
+  return byTeam;
 }
 
 interface EspnCompetitor { team?: { abbreviation?: string } }
