@@ -98,11 +98,11 @@ function cxCardEl(w: GameWeather) {
  *  lives on the Context page, so no in-panel "see more" dump. */
 function NflConsiderations({ limit = 3 }: { limit?: number }) {
   const lead = GAME_WEATHER.slice(0, limit);
-  if (!lead.length) return <p className="hb-empty">Considerations load with the week&apos;s board — see <a href="/considerations">Special Considerations</a>.</p>;
+  if (!lead.length) return <p className="hb-empty">Considerations load with the week&apos;s board — see <a href="/model">The Model</a>.</p>;
   return (
     <>
       <div className="cxgrid cxgrid--snap">{lead.map(cxCardEl)}</div>
-      <p className="lp-cardfoot"><a href="/considerations">See our Context Model →</a></p>
+      <p className="lp-cardfoot"><a href="/model">See every game&apos;s considerations →</a></p>
     </>
   );
 }
@@ -364,7 +364,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf, vf, isMember }: {
           <PlayerSnapshot base="nfl" />
         </Panel>
         <Panel title="The context a number misses" count="context" hint={TIPS.considNfl} open
-          pin={pin("considerations", "Special Considerations", "/considerations")}>
+          pin={pin("considerations", "Special Considerations", "/model")}>
           <NflConsiderations limit={2} />
         </Panel>
         <Panel title="Where the value is" count="line shopping" hint={TIPS.valueFinder} open

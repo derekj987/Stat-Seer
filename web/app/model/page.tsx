@@ -2,6 +2,9 @@ import { weekRange, fetchWeek, buildBoard, currentWeek } from "@/lib/board";
 import { fetchModelWeek, fetchCalibration, type ModelPrediction } from "@/lib/model";
 import { MODEL_TOTALS } from "@/lib/modelTotals";
 import { weekRefs } from "@/lib/refAssignments";
+import { GAME_WEATHER, WEATHER_WEEK } from "@/lib/weatherData";
+import { weekInjuries, type InjuryNote } from "@/lib/nflInactives";
+import { SpecialConsiderations, type SpecialCtx } from "../SpecialConsiderations";
 import { Brand, FlowSteps, ModelSubnav, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
 import Tip from "../Tip";
@@ -55,7 +58,10 @@ function bottomLine(e: Env): { spread: string; total: string | null } | null {
   return { spread, total };
 }
 
-function ImpTable({ rows, refs, today, tomorrow, cap }: { rows: Env[]; refs: Awaited<ReturnType<typeof weekRefs>>; today: string; tomorrow: string; cap?: number }) {
+function ImpTable({ rows, refs, spec, today, tomorrow, cap }: {
+  rows: Env[]; refs: Awaited<ReturnType<typeof weekRefs>>;
+  spec: Map<string, SpecialCtx>; today: string; tomorrow: string; cap?: number;
+}) {
   // `cap` shows the first N games and marks the rest `hb-row--more`, which the surrounding
   // hb-moretbl checkbox reveals — all in ONE table so the day headers never split and the
   // collapse control stays at the bottom (a two-table slice duplicated the day header and
@@ -77,7 +83,6 @@ function ImpTable({ rows, refs, today, tomorrow, cap }: { rows: Env[]; refs: Awa
         const rowHidden = cap != null && gi >= cap && !groupHidden;
         gi++;
         const bl = bottomLine(e);
-        const crew = refs.get(e.home);
         return (
           <div className={rowHidden ? "impgame hb-row--more" : "impgame"} key={e.eventId}>
             <div className="improw" role="row">
@@ -104,12 +109,10 @@ function ImpTable({ rows, refs, today, tomorrow, cap }: { rows: Env[]; refs: Awa
               {bl
                 ? <span className="impbottom__txt"><b>{bl.spread}</b>{bl.total && <> and <b>{bl.total}</b></>}</span>
                 : <span className="impbottom__txt impbottom__none">No model read yet</span>}
-              {crew && (
-                <span className="impbottom__crew">
-                  Crew: <b>{crew.referee}</b> ({crew.tendency}, {crew.pen} pen/g)
-                </span>
-              )}
             </div>
+            {/* The Context page's Special Considerations, moved under the line it informs — the
+                crew line that used to sit in the Bottom Line is one of its rows now. */}
+            {spec.get(e.eventId) && <SpecialConsiderations ctx={spec.get(e.eventId)!} />}
           </div>
         );
       })}
@@ -243,6 +246,24 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
   const modelById = new Map<string, ModelPrediction>(preds.map((p) => [p.eventId, p]));
   let refs: Awaited<ReturnType<typeof weekRefs>> = new Map();
   try { refs = await weekRefs(week, SEASON); } catch { /* assignments post game-week */ }
+  // Special Considerations (referee · weather · injuries · team scoring ratings), one entry per
+  // game. Injuries are read LIVE on the same 120s window as the board's market numbers, so a
+  // designation that changes on game morning shows without a redeploy; never fatal.
+  let injAll: Awaited<ReturnType<typeof weekInjuries>> = new Map();
+  try { injAll = await weekInjuries(SEASON, week); } catch { /* no feed — no tags */ }
+  const wxByEvent = new Map(GAME_WEATHER.map((w) => [w.eventId, w]));
+  const injByTeam = new Map<string, { player: string; team: string; note: InjuryNote }[]>();
+  for (const [key, note] of injAll) {
+    const team = key.split("|")[1] ?? "";
+    (injByTeam.get(team) ?? injByTeam.set(team, []).get(team)!).push({ player: note.player, team, note });
+  }
+  const spec = new Map<string, SpecialCtx>(built.map((g) => [g.eventId, {
+    away: g.away, home: g.home,
+    crew: refs.get(g.home),
+    wx: week === WEATHER_WEEK ? wxByEvent.get(g.eventId) : undefined,
+    injuries: [...(injByTeam.get(g.away) ?? []), ...(injByTeam.get(g.home) ?? [])],
+    feedHasAny: injAll.size > 0,
+  }]));
   // `consensus` is FanDuel's line where posted (lib/board.ts LINE_BOOK), the US-book median only
   // where it is not — so this column matches the app on Derek's phone.
   const fdEvents = new Set(board.filter((r) => r.book === "fanduel" && r.market === "spreads").map((r) => r.event_id));
@@ -312,6 +333,53 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
       </div>
       <WeekNav min={min} max={max} current={week} base="/model" />
 
+      {/* Week's numbers crunched — market spread/total beside our line-blind projection. */}
+      <details className="hb-panel hb-panel--card" data-embedchart="numbers-crunched" open>
+        <summary className="hb-bar">
+          <span className="hb-bar__title hb-bar__title--gold">Week {week} numbers crunched</span>
+          <span className="hb-bar__count">{scored.length} games</span>
+          <Tip label="About this board" text={<>
+            <span className="tip__lead">The market&apos;s <b>spread</b> and <b>total</b> for each game — <b>FanDuel&apos;s</b> current line,
+            captured through the week — with our <b>line-blind model&apos;s</b> own read of each beside it. Market
+            numbers on the left, ours on the right.</span><br /><br />
+            {fdGames < scored.length && <>{scored.length - fdGames} game{scored.length - fdGames === 1 ? "" : "s"} FanDuel has not posted
+            yet show the median across the other US books instead.<br /><br /></>}
+            Line shopping — every book&apos;s number and the best price per side — is on{" "}
+            <a href="/lines">Line Shopping</a>.
+          </>} />
+          <PinButton size="sm" pin={{ id: "/model?only=numbers-crunched", kind: "model", label: "The Model · Numbers Crunched", detail: `NFL · Week ${week}`, href: `/model?week=${week}&only=numbers-crunched` }} />
+          <span className="hb-bar__chev" aria-hidden="true">▾</span>
+        </summary>
+        <div className="hb-body">
+
+        {scored.length === 0 ? (
+          <p className="foot">No lines captured for Week {week} yet.</p>
+        ) : (
+          <div className="imp-wrap hb-moretbl">
+            <input type="checkbox" id="imp-more" className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
+            <p className="imp-scrollhint" aria-hidden="true">
+              Swipe for totals <span className="imp-scrollhint__a">→</span>
+            </p>
+            {/* The scroller wraps the TABLE ONLY — the hint above and the "show more" below must
+                not scroll with it. .imptable itself must never carry overflow-x (see .imp-scroll
+                in globals.css: it makes every row size to the phone, not the content, and the
+                model columns then draw outside the card border). */}
+            <div className="imp-scroll">
+              <ImpTable rows={scored} cap={4} refs={refs} spec={spec} today={todayEt} tomorrow={tomorrowEt} />
+            </div>
+            {scored.length > 4 && (
+              <label htmlFor="imp-more" className="hb-moretbl__sum">
+                <span className="hb-more__chev" aria-hidden="true">▸</span>
+                <span className="hb-moretbl__more">Show {scored.length - 4} more game{scored.length - 4 === 1 ? "" : "s"}</span>
+                <span className="hb-moretbl__less">Collapse</span>
+              </label>
+            )}
+          </div>
+        )}
+        </div>
+      </details>
+
+
       {preds.length === 0 ? (
         <p className="foot">No reads published for Week {week} yet.</p>
       ) : (
@@ -346,52 +414,6 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
           </div>
         </details>
       )}
-
-      {/* Week's numbers crunched — market spread/total beside our line-blind projection. */}
-      <details className="hb-panel hb-panel--card" data-embedchart="numbers-crunched" open>
-        <summary className="hb-bar">
-          <span className="hb-bar__title hb-bar__title--gold">Week {week} numbers crunched</span>
-          <span className="hb-bar__count">{scored.length} games</span>
-          <Tip label="About this board" text={<>
-            <span className="tip__lead">The market&apos;s <b>spread</b> and <b>total</b> for each game — <b>FanDuel&apos;s</b> current line,
-            captured through the week — with our <b>line-blind model&apos;s</b> own read of each beside it. Market
-            numbers on the left, ours on the right.</span><br /><br />
-            {fdGames < scored.length && <>{scored.length - fdGames} game{scored.length - fdGames === 1 ? "" : "s"} FanDuel has not posted
-            yet show the median across the other US books instead.<br /><br /></>}
-            Line shopping — every book&apos;s number and the best price per side — is on{" "}
-            <a href="/lines">Line Shopping</a>.
-          </>} />
-          <PinButton size="sm" pin={{ id: "/model?only=numbers-crunched", kind: "model", label: "The Model · Numbers Crunched", detail: `NFL · Week ${week}`, href: `/model?week=${week}&only=numbers-crunched` }} />
-          <span className="hb-bar__chev" aria-hidden="true">▾</span>
-        </summary>
-        <div className="hb-body">
-
-        {scored.length === 0 ? (
-          <p className="foot">No lines captured for Week {week} yet.</p>
-        ) : (
-          <div className="imp-wrap hb-moretbl">
-            <input type="checkbox" id="imp-more" className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
-            <p className="imp-scrollhint" aria-hidden="true">
-              Swipe for totals <span className="imp-scrollhint__a">→</span>
-            </p>
-            {/* The scroller wraps the TABLE ONLY — the hint above and the "show more" below must
-                not scroll with it. .imptable itself must never carry overflow-x (see .imp-scroll
-                in globals.css: it makes every row size to the phone, not the content, and the
-                model columns then draw outside the card border). */}
-            <div className="imp-scroll">
-              <ImpTable rows={scored} cap={4} refs={refs} today={todayEt} tomorrow={tomorrowEt} />
-            </div>
-            {scored.length > 4 && (
-              <label htmlFor="imp-more" className="hb-moretbl__sum">
-                <span className="hb-more__chev" aria-hidden="true">▸</span>
-                <span className="hb-moretbl__more">Show {scored.length - 4} more game{scored.length - 4 === 1 ? "" : "s"}</span>
-                <span className="hb-moretbl__less">Collapse</span>
-              </label>
-            )}
-          </div>
-        )}
-        </div>
-      </details>
 
       <section className="calib">
         <h2 className="calib__h">Calibration <a href="/report" className="calib__link">Weekly report card →</a></h2>

@@ -15,7 +15,7 @@ type Me = { username: string; role: string; title: string | null } | null;
 const LINKS = [
   { href: "/", label: "Home", on: (p: string) => p === "/" },
   { href: "/model", label: "The Model", on: (p: string) => p.startsWith("/model") },
-  { href: "/considerations", label: "Context", on: (p: string) => ["/context", "/considerations", "/local-intelligence", "/tailgate"].some((x) => p.startsWith(x)) },
+  { href: "/context", label: "Context", on: (p: string) => ["/context", "/local-intelligence", "/tailgate"].some((x) => p.startsWith(x)) },
   { href: "/lines", label: "Value Finder", on: (p: string) => ["/lines", "/props", "/preseason", "/best"].some((x) => p.startsWith(x)) },
   { href: "/forum", label: "Community", on: (p: string) => p.startsWith("/forum") },
 ];
@@ -157,7 +157,6 @@ export default function SiteNav() {
 
                 <details className="snav__pgroup snav__pgroup--feat">
                   <summary className="snav__dfeat snav__psum">Context</summary>
-                  <a href="/considerations" className="snav__dsub">Special Considerations</a>
                   <a href="/context" className="snav__dsub">Upset Watch</a>
                   <a href="/local-intelligence" className="snav__dsub">Local Intelligence</a>
                 </details>

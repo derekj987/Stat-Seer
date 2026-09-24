@@ -179,7 +179,11 @@ function Card({ c }: { c: ReportCard }) {
           <div className="pmscroll">
             <table className="rc-tbl rc-tbl--props">
               <thead><tr><th>Player</th><th>Market</th><th>Close</th><th>Ours</th><th>Actual</th><th>Lean</th></tr></thead>
-              <tbody>{misses.map((p) => <tr key={`${p.player}-${p.market}`}><PropRowCells p={p} /></tr>)}</tbody>
+              <tbody>{misses.map((p, i) => (
+                <tr key={`${p.player}-${p.market}`}>
+                  <PropRowCells p={p} cont={i > 0 && misses[i - 1].player === p.player && misses[i - 1].game === p.game} />
+                </tr>
+              ))}</tbody>
             </table>
           </div>
         </section>
@@ -191,7 +195,11 @@ function Card({ c }: { c: ReportCard }) {
           <div className="pmscroll">
             <table className="rc-tbl rc-tbl--props">
               <thead><tr><th>Player</th><th>Market</th><th>Close</th><th>Ours</th><th>Actual</th><th>Lean</th></tr></thead>
-              <tbody>{voided.filter((p) => p.market !== "anytime_td").map((p) => <tr key={`${p.player}-${p.market}`}><PropRowCells p={p} /></tr>)}</tbody>
+              <tbody>{voided.filter((p) => p.market !== "anytime_td").map((p, i, all) => (
+                <tr key={`${p.player}-${p.market}`}>
+                  <PropRowCells p={p} cont={i > 0 && all[i - 1].player === p.player && all[i - 1].game === p.game} />
+                </tr>
+              ))}</tbody>
             </table>
           </div>
         </section>

@@ -38,6 +38,10 @@ export interface InjuryNote {
   status: InjuryStatus;
   label: string;          // what the board prints: "Out", "Doubtful", "Questionable", "IR"
   detail: string | null;  // "Ankle", "Hamstring" — null when ESPN gives no cause
+  // The name as the SOURCE spells it. The map is keyed on a normalised name, which is right for
+  // looking a player up and useless for printing him, and the model board's Special
+  // Considerations block lists the designated players by name.
+  player: string;
 }
 
 /** A player with one of these is not going to produce, so his projection is withheld. */
@@ -134,7 +138,7 @@ async function addPracticeReports(out: Map<string, InjuryNote>, season: number, 
       const c = PRACTICE_STATUS[(r.game_status || "").toUpperCase()];
       if (!c) continue;
       out.set(injuryKey(r.scraped_name, r.team), {
-        status: c.status, label: c.label, detail: r.injury_primary ?? null,
+        status: c.status, label: c.label, detail: r.injury_primary ?? null, player: r.scraped_name,
       });
     }
   } catch {
@@ -194,6 +198,7 @@ export async function weekInjuries(season: number, week: number): Promise<Map<st
           status: c.status,
           label: c.label,
           detail: inj.details?.type ?? null,
+          player: name,
         });
       }
     }

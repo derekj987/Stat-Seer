@@ -205,8 +205,15 @@ def main():
     args = ap.parse_args()
     load_env()
 
-    # current week = the earliest week still on the board (matches the lines page default)
-    wk = sb(f"odds_snapshots?season=eq.{args.season}&select=week&order=week.asc&limit=1")
+    # The CURRENT week: the earliest week that still has a game to be played. This used to be
+    # "the earliest week on the board" (`order=week.asc&limit=1` over the whole season), which is
+    # week 1 from September to January -- so from week 2 on this job refreshed the forecast for
+    # games that had already been played and the model board showed no weather at all. Same
+    # defect, same week, as the eight NFL pages that defaulted to weekRange().min; the fix is the
+    # same as currentWeek() in web/lib/board.ts.
+    now_iso = datetime.now(timezone.utc).isoformat()
+    wk = sb(f"odds_snapshots?season=eq.{args.season}&commence_time=gt.{urllib.parse.quote(now_iso)}"
+            f"&select=week&order=week.asc&limit=1")
     week = wk[0]["week"] if wk else 1
     games = current_week_games(args.season, week)
     now = datetime.now(timezone.utc)

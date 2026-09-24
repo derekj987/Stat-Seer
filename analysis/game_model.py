@@ -45,6 +45,31 @@ REGRESS = 0.65   # shrink the rating gap toward the mean
 # Still NOT an edge -- the market remains sharper, exactly as the docstring says. This makes the
 # published prediction defensible, not profitable.
 PRIOR_K = 5.0
+# ...but the right weight is not the same all season. By week 12 a team has eleven games of its
+# own and last season is a decade of football ago in roster terms, so holding the prior at 5
+# keeps stale information in the rating. Measured by WEEK BAND on held-out 2023-25 (816 games,
+# analysis/game_model_weeks.py), mean absolute error of the predicted margin:
+#
+#     weeks        1-2    3-5    6-10   11-18   overall
+#     prior_k 5   8.61   12.10   10.00   10.24    10.30   <- one flat weight (what shipped)
+#     prior_k 2   8.62   12.37   10.08   10.09    10.30
+#     the market  8.60   11.45    9.35    9.63     9.74
+#
+# Early weeks want the heavier prior and late weeks the lighter one, so a step function beats
+# either alone: 5 through week 10, then 2. Held-out overall 10.303 -> 10.234, and every taper in
+# the family (late 1.5-3, cut 8-12) beat no taper on BOTH splits, which is what separates a small
+# real gain from a lucky cell. The train optimum was early 6 / late 2 (10.150 vs 10.154 for
+# early 5) -- a 0.004 difference, so early stays at the 5 that two earlier exercises validated.
+#
+# NOTE ON THE LEDGER: weeks 1-10 are bit-identical under this change, so every prediction already
+# published this season came from the same model and MODEL_VERSION does not move. A change that
+# altered a published number would have to bump it instead.
+LATE_PRIOR_K, LATE_FROM_WEEK = 2.0, 11
+
+
+def prior_k_for(week):
+    """The prior-season weight for a given week — see PRIOR_K / LATE_PRIOR_K."""
+    return LATE_PRIOR_K if (week or 0) >= LATE_FROM_WEEK else PRIOR_K
 
 
 def load(path="../data/games.csv"):
@@ -76,6 +101,7 @@ def ratings_asof(g, season, week):
     A team absent from last season (expansion, or a name change) simply starts at 0.0 and is
     carried entirely by its current-season games."""
     prior = ratings(g, season - 1)
+    k = prior_k_for(week)
     s = g[(g.season == season) & (g.game_type == "REG") & g.home_score.notna() & (g.week < week)]
     cum, cnt = {}, {}
     for _, r in s.iterrows():
@@ -87,7 +113,7 @@ def ratings_asof(g, season, week):
     for t in set(prior) | set(cnt):
         p = prior.get(t, 0.0)
         n = cnt.get(t, 0)
-        out[t] = p if n == 0 else (cum[t] + PRIOR_K * p) / (n + PRIOR_K)
+        out[t] = p if n == 0 else (cum[t] + k * p) / (n + k)
     return out
 
 

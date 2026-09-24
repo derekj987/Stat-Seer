@@ -80,4 +80,50 @@ REPORT_NOTES["ncaaf-2026-1"] = {
   caveat: "The projections graded here are what the board showed at each kickoff, on the coverage it had then. 102 of the 675 priced rows could not be graded — no stat line, or a spelling CFBD does not share.",
 };
 
+REPORT_NOTES["nfl-2026-2"] = {
+  headline: "Even against the number — 8-8 against the close and 8-8 on totals, after a 4-12 opening week.",
+  learned: [
+    "Against the close 8-8 (laying 2-2, taking 6-6), straight-up 9-7. Margin error 12.6 to the market's 11.6, and the market was still better calibrated on the winner (Brier 0.233 to our 0.246). The gap narrowed from week 1 but it is the same gap.",
+    "Our read correlated 0.30 with the actual margins against the market's 0.56. That is the honest measure of a week-2 rating: it points the right way more often than not, and the market points the right way more reliably.",
+    "Totals were the week's real miss, in the other direction from week 1. The league scored 40.4 points a game; we averaged 46.0 and the market 45.2. Everyone was high, we were higher, and the board still went 8-8 because the over/under leans split.",
+    "Player props were the strongest half yet. Leans 174-163 overall, with passing 25-15 and rushing 34-26. The projections came in slightly UNDER the results on every continuous market (bias -2.6 passing, -2.7 receiving, -0.2 receptions) after running over in week 1 — which is what an unbiased projection looks like when you only have two weeks of it.",
+    "Anytime TD: we said 19.3%, the books' prices implied 20.8%, 15.5% scored. Both high, ours closer to the truth on level, the books fractionally better at ranking (Brier 0.1196 to our 0.1211).",
+    "Eighteen rows voided — Saquon Barkley, David Njoku, Jaxson Dart, Travis Hunter and the others who left early or never dressed. Those are not losses and are not counted as any.",
+  ],
+  changed: [
+    "Nothing in the game model. Two weeks is not a reason to move a parameter chosen on nine seasons, and the in-season blend already folded week 1 into every rating for this week.",
+    "The totals model was tested and left alone — see the NCAAF week 3 card for the measurement; it is the same test for both sports.",
+  ],
+  watch: [
+    "The week-1 pretenders were exposed on schedule. Chicago, who won by 22 in week 1 while earning +14, won 9-3 and beat Minnesota — who had won by 17 on a negative offensive EPA. Pittsburgh, +7 on a -0.30 EPA offense in week 1, lost 20-3 to New England. Neither team's week-1 scoreboard was worth what it looked like.",
+    "The contenders held: Baltimore (earned +34 in week 1) won again; Kansas City and San Francisco both covered; Jacksonville lost outright at Denver, the one that did not follow through.",
+    "Carolina at Atlanta was the model's biggest disagreement with the market (we had Atlanta by 4.3, FanDuel had Carolina by 2.5). Carolina won 34-3. That is a loss, and it is the honest kind: we were holding last season's ratings on an offense the market had already re-priced.",
+    "For week 3, the same earned-vs-scoreboard read is on the board itself now — each game's Special Considerations block carries both teams' scored and allowed rates with their league rank, so the pretender check is one line under the number instead of a second page.",
+  ],
+  caveat: "Sixteen games. Two weeks of game reads is 32 games — enough to see a direction, not enough to conclude one. The prop leans are 337 graded rows.",
+};
+
+REPORT_NOTES["ncaaf-2026-3"] = {
+  headline: "The projection fix landed: rushing bias +11.6 to -1.0, and our receiving number beat the book's for the first time.",
+  learned: [
+    "The role-volume change shipped after week 2 did exactly what the backtest said it would. Rushing projections had been running 11.6 yards ABOVE what players gained; this week they ran 1.0 below. Receiving went +5.2 to -4.8, receptions +0.4 to -0.1.",
+    "On receiving yards our projection's error was 26.9 against the book's 27.1 — the first category, in either sport, where our number has been closer than the closing line. One week, 212 rows, and not a claim of edge; it is the first time the comparison has not gone the other way.",
+    "Passing over-corrected: -8.6 yards of bias, having been +5.8 under the old rule. We tested a lighter role weight for quarterbacks specifically and it made passing WORSE in both played weeks, so the swing is week-to-week variance in how much college offenses threw, not a mis-set weight. Left alone and written down.",
+    "Games: 66-9 straight-up, 33-42 against the close, margin error 10.6 to the market's 9.5. The rating orders teams well and does not beat the number — for the third week running, which is now a measurement rather than an impression.",
+    "Totals went 40-35 with overs 24-16. Nothing to read at this sample.",
+    "Anytime TD: we said 26.2%, the books implied 31.7%, 28.0% scored. Our level is a little low, the books' a little high (that is their vig), and the books still rank scorers better (Brier 0.182 to our 0.205).",
+  ],
+  changed: [
+    "Nothing further this week — week 3 IS the read on the change made after week 2, and it confirmed it. Moving a parameter again on the strength of the week that validated it is how a model gets fitted to noise.",
+    "The NFL totals model was tested for the same in-season treatment the projections got and did NOT earn it: blending this season's scoring into each team's tendency moved held-out error from 10.474 to 10.418 points across 816 games, non-monotonically, and made the first two weeks of a season worse. Negative result, no change. (analysis/totals_inseason.py)",
+    "The NFL game model's in-season blend was re-measured by week band and gained a late-season taper: the prior-season weight holds at 5 through week 10 and drops to 2 from week 11, worth 0.07 points of margin error on held-out seasons. Weeks 1-10 are unchanged, so nothing published this season moves. (analysis/game_model_weeks.py)",
+  ],
+  watch: [
+    "Oregon, the biggest two-week underperformer against the number (-49), was not on this week's priced board. Rutgers (-50) lost again. Mississippi State (+44 through two weeks) kept going.",
+    "The receiving projections still sit above the line on 71% of rows while 57% went over. The bias is gone from the LEVEL; what remains is the mean-versus-median gap that the board's arrow already reads through each player's own exceedance rate rather than through the projection.",
+    "Watch passing next week. A single week at -8.6 after a week at +5.8 is variance; two weeks in the same direction would be a level to fix.",
+  ],
+  caveat: "Seventy-five games and 639 graded prop rows. The three voided rows are players who did not take a snap.",
+};
+
 export const noteKey = (sport: string, season: number, week: number) => `${sport}-${season}-${week}`;

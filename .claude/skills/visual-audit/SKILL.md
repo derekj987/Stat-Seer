@@ -1796,6 +1796,30 @@ the reconciliation warned. The slate row now takes the feed's ordering when the 
 priced. Same rule as the roster/team entries above: a fact the market cannot be wrong about wins
 over our reference.
 
+### 🚨 The `weekRange().min` bug again — this time in a CAPTURE job
+Fixed in eight web pages one week, found in `weather_capture.py` the next: *"current week = the
+earliest week still on the board"*, implemented as `order=week.asc&limit=1` over the whole season,
+which is week 1 from September to January. So from week 2 onward the job refreshed the forecast for
+games already played, `WEATHER_WEEK` stayed 1, and the model board showed no weather at all —
+silently, with a green run every eight hours. Now `commence_time=gt.<now>` first, mirroring
+`currentWeek()`.
+
+**Grep for the shape after fixing it anywhere**, because it is copy-pasted per script and per page:
+```bash
+grep -rn "order=week.asc&limit=1\|week.asc" --include=*.py --include=*.ts . | grep -v commence_time
+```
+And the audit check that catches it without reading code: **a "current" data file whose week stamp
+is not this week.** `grep -n "WEEK = " web/lib/*.ts` — every one of those should be the live week.
+
+### A UI must not say "nobody" when it means "we do not know"
+The Special Considerations block prints the injured players for a game. An empty list means two
+different things — nobody is hurt, or the report is not in yet — and Wednesday's practice report
+routinely lists 40+ players with NO designation, so early in the week the second is the true one.
+Printing "Nobody carrying a designation" then is the same defect as the hardcoded `is-online`
+class: the page stating a fact it never checked. It now distinguishes the two by whether the WEEK
+has any designation at all. Whenever an empty collection renders as prose, ask which of "none" and
+"unknown" it is, and prove you can tell.
+
 ### A page of several charts is not one chart — the probe scopes by sub-section now
 `/report` holds one `<section class="rc">` per sport-week, each with a game table and two prop
 tables that share a header (biggest misses, then every graded lean). `repeated-column-header`

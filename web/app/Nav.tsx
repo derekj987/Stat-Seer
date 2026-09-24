@@ -47,7 +47,7 @@ export function DayBadge({ pin, tip }: { pin?: import("react").ReactNode; tip?: 
  *  pretending it is missing. */
 export type Sport = "nfl" | "ncaaf" | "mlb";
 export const SPORT_PATHS: Record<Sport, { analyze: string; context: string; value: string }> = {
-  nfl:   { analyze: "/model",       context: "/considerations",       value: "/lines" },
+  nfl:   { analyze: "/model",       context: "/context",              value: "/lines" },
   ncaaf: { analyze: "/ncaaf/model", context: "/ncaaf/considerations", value: "/ncaaf/lines" },
   // Empty string = not built yet. FlowSteps renders those as a dimmed, non-clickable step rather
   // than a link to a 404 — the reader sees the same three-step flow every sport has, and sees
@@ -298,11 +298,16 @@ export function ContextSubnav({ active, base = "nfl" }: {
 }) {
   const h = base === "ncaaf"
     ? { upset: "/ncaaf/context", special: "/ncaaf/considerations", fan: "/ncaaf/local-intelligence" }
-    : { upset: "/context", special: "/considerations", fan: "/local-intelligence" };
+    : { upset: "/context", special: null, fan: "/local-intelligence" };
   return (
     <nav className="subnav subnav--context" aria-label="Context view">
-      <a href={h.special} className={active === "special" ? "subnav__t active" : "subnav__t"}
-        aria-current={active === "special" ? "page" : undefined}>Special Considerations</a>
+      {/* NFL: retired. Derek moved its four factors (referee, weather, injuries, team scoring
+          ratings) onto the model board under each game's Bottom Line, "remove the Special
+          Considerations section completely from the Context section". NCAAF still has the tab. */}
+      {h.special && (
+        <a href={h.special} className={active === "special" ? "subnav__t active" : "subnav__t"}
+          aria-current={active === "special" ? "page" : undefined}>Special Considerations</a>
+      )}
       <a href={h.upset} className={active === "upset" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "upset" ? "page" : undefined}>Upset Watch</a>
       <a href={h.fan} className={active === "fan" ? "subnav__t active" : "subnav__t"}

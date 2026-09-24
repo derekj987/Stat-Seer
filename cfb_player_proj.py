@@ -660,6 +660,7 @@ ROLE_VOL_CAP = 1.6
 ROLE_MODE = os.environ.get("CFB_ROLE_MODE", "blend2")
 ROLE_BLEND_K = float(os.environ.get("CFB_ROLE_K", "3"))
 PRIOR_GAME_W = float(os.environ.get("CFB_PRIOR_W", "0.25"))
+QB_BLEND_K = float(os.environ.get("CFB_QB_K", "3"))
 # ...and how many games of that stat we need before the cap is allowed to bite at all.
 #
 # The cap is multiplicative on a player's own volume, so on a near-zero own volume ANY multiple is
@@ -753,7 +754,22 @@ def project_role(games, market, pos, rank, team, per_team, league):
             # depth role leads (a promoted backup projects near a starter's workload), and one
             # or two played games move the number most of the way to what he is actually doing.
             n = _gp([g for g in games if g.get("season") == CUR_SEASON], field)                 + PRIOR_GAME_W * _gp([g for g in games if g.get("season") != CUR_SEASON], field)
-            v = (own * n + base * ROLE_BLEND_K) / (n + ROLE_BLEND_K) if n else base
+            # QB_BLEND_K exists because passing looked over-corrected — week 3 graded at -8.6
+            # yards of bias against +5.8 under the old rule — and a quarterback's attempt volume
+            # is arguably a TEAM property the role median should not pull. TESTED AND LEFT EQUAL:
+            # lightening the QB role weight makes passing WORSE in both played weeks, so the
+            # hypothesis was wrong (analysis/cfb_role_backtest.py, MAE / bias on passing rows):
+            #
+            #     QB K       week 2 (n=102)        week 3 (n=129)      all rows wk2 / wk3
+            #     3 (=role)  27.9  +2.1            33.5  -7.5           21.2 / 23.2   <- ships
+            #     1          28.9  -1.9            34.3 -11.1           21.5 / 23.4
+            #     0.5        30.1  -3.8            35.1 -12.6           21.9 / 23.7
+            #
+            # The bias swings +2.1 to -7.5 at a FIXED setting, which is week-to-week variance in
+            # how much college offenses threw, not a weight that is mis-set. The knob stays,
+            # defaulted to the role weight, so the next person can re-run rather than re-reason.
+            k = QB_BLEND_K if field == "pass_att" else ROLE_BLEND_K
+            v = (own * n + base * k) / (n + k) if n else base
             return v, decay
         if ROLE_MODE == "blend":
             # Games-weighted blend of the role's workload and the player's own, the shape the NFL

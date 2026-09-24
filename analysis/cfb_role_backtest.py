@@ -26,7 +26,9 @@ sys.path.insert(0, ROOT)
 import weekly_report as wr  # noqa: E402
 
 SCRATCH = os.path.join(ROOT, "data", "cfb_role_bt")
-VARIANTS = [("max", None), ("blend", 3), ("blend", 6), ("blend2", 1.5), ("blend2", 3), ("blend2", 6)]
+# (mode, role K, QB K) -- QB attempts get their own weight; see cfb_player_proj.QB_BLEND_K.
+VARIANTS = [("max", None, 3), ("blend2", 3, 3), ("blend2", 3, 1), ("blend2", 3, 0.5),
+            ("blend2", 2, 1), ("blend2", 4, 1)]
 CATS = ("passing", "rushing", "receiving", "receptions")
 
 
@@ -43,11 +45,11 @@ def actuals_from_cards():
     return out
 
 
-def run(week, mode, k):
+def run(week, mode, k, qk=3):
     os.makedirs(SCRATCH, exist_ok=True)
-    out = os.path.join(SCRATCH, f"w{week}_{mode}{k or ''}.ts")
+    out = os.path.join(SCRATCH, f"w{week}_{mode}{k or ''}_q{qk}.ts")
     if not os.path.exists(out):
-        env = dict(os.environ, CFB_ROLE_MODE=mode, CFB_ROLE_K=str(k or 6))
+        env = dict(os.environ, CFB_ROLE_MODE=mode, CFB_ROLE_K=str(k or 6), CFB_QB_K=str(qk))
         r = subprocess.run([sys.executable, "cfb_player_proj.py", "--week", str(week), "--all-rows", "--out", out],
                            cwd=ROOT, env=env, capture_output=True, text=True, encoding="utf-8")
         if r.returncode != 0:
@@ -85,18 +87,19 @@ def main(argv=None):
     for week in args.weeks:
         print(f"\n=== week {week}")
         print(f"  {'variant':10} {'cat':11} {'n':>4} {'MAE':>6} {'book':>6} {'bias':>6} {'proj>line':>9}")
-        for mode, k in VARIANTS:
-            rows = run(week, mode, k)
+        for mode, k, qk in VARIANTS:
+            rows = run(week, mode, k, qk)
             sc = score(rows, actual, week)
             tot_n = sum(v["n"] for v in sc.values())
             tot_mae = sum(v["mae"] * v["n"] for v in sc.values()) / max(tot_n, 1)
             tot_bias = sum(v["bias"] * v["n"] for v in sc.values()) / max(tot_n, 1)
+            label = f"{mode}{k or ''}/q{qk}"
             for cat in CATS:
                 v = sc.get(cat)
                 if v:
-                    print(f"  {mode + (str(k) if k else ''):10} {cat:11} {v['n']:4} {v['mae']:6.1f} {v['book_mae']:6.1f} "
+                    print(f"  {label:10} {cat:11} {v['n']:4} {v['mae']:6.1f} {v['book_mae']:6.1f} "
                           f"{v['bias']:+6.1f} {100 * v['over']:8.0f}%")
-            print(f"  {mode + (str(k) if k else ''):10} {'ALL':11} {tot_n:4} {tot_mae:6.1f} {'':6} {tot_bias:+6.1f}")
+            print(f"  {label:10} {'ALL':11} {tot_n:4} {tot_mae:6.1f} {'':6} {tot_bias:+6.1f}")
     return 0
 
 
