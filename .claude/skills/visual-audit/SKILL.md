@@ -1947,6 +1947,42 @@ stale", not "beat the line".
 **The general check: whenever a feature weights by a share, ask what that share is for someone with
 zero of the thing.** Zero usage should not silently mean zero importance.
 
+### 🚨 "X% of rows lean over" is measuring SKEW unless the market is symmetric
+Derek: *"look into why starter rows lean 62% over."* The answer is that the metric was wrong, and
+the same trap is available on every board this project publishes.
+
+We publish a recency-weighted **MEAN**. A book prices a yardage line near the **MEDIAN**, because
+that is where the two sides split. Receiving and rushing yards are strongly right-skewed — a floor
+at zero, an occasional huge game — so the mean sits above the median almost always, and
+`proj > line` fires far more than half the time **even when both numbers are perfectly calibrated**.
+
+Measured on 44,619 player-weeks, 2021-2025, with no market data at all:
+
+| market | mean/median at a LOW level | at a HIGH level | our mean above the median |
+|---|---|---|---|
+| rec_yds | 1.83 | 1.13 | **95.9%** of rows |
+| rush_yds | 1.74 | 1.10 | 90.9% |
+| receptions | 1.48 | 1.01 | 69.2% |
+| **pass_yds** | **1.01** | **1.01** | **52.0%** |
+
+**Passing yards is the control and it settles it.** Attempts and passing yards are near-symmetric,
+mean/median is 1.01 at every level, and that market shows no lean. The lean tracks each market's
+SKEW, not anything about the model. (Anytime TD is the other control, already in this file at 36-37%
+over in both sports, because there `proj` and `book` are both probabilities.)
+
+It also explains the shape seen on the board: projection-to-line ran **1.43** on lines under 15 and
+**0.96** on lines over 50 — the same curve as the skew, because it IS the skew.
+
+**Two consequences:**
+- **Never rank a review queue by `|proj - line| / line`.** It sorts by smallness of line. The
+  replacement in `weekly_flags.py` ranks by rows contradicting THEMSELVES — our projection says
+  comfortably over while the player's own hit rate at that exact line is under 35%. Those are real
+  (Xavier Hutchinson: ours 50.2, line 40.5, clears it 10% of the time) and need no market constant.
+- **The boards were already right.** `projLean()` reads the arrow from the player's empirical
+  exceedance rate, not from proj vs line, which is exactly this fix applied earlier for NCAAF. The
+  bug was in the new QA metric, not in what users see — worth checking which of the two you are
+  looking at before concluding the board is broken.
+
 ### ⚠️ Two measurements that disagree are usually measuring different populations
 Derek: *"most of the receivers are an under for tonight's game. Is that correct or a data error?"*
 Neither — the answer needed three separate numbers, and the first two look contradictory.

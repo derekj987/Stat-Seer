@@ -6,17 +6,21 @@ Over this season the same four questions have come up by hand, every time about 
 
     "I'm not seeing Jaxson Dart... also Caleb Williams"      -> who is out, and do we know it?
     "is ATL getting Penix back in the model?"                -> who is BACK, and did the model move?
-    "Kaleb Johnson may be RB1, we have him way under"        -> where do we disagree with the market?
+    "Kaleb Johnson may be RB1, we have him way under"        -> which rows are worth a second look?
     "the NFL cards show ? for most teams"                    -> is any feed stale?
 
 Each one is mechanical. This prints all four for the current week, and writes the same thing to
 $GITHUB_STEP_SUMMARY so it lands in the Actions run summary and the notification e-mail rather
 than in a log nobody opens.
 
-LINE-BLINDNESS. Section 3 ranks rows by how far our projection sits from the market's number. That
-is a REVIEW QUEUE, not a model input — no projection is changed by it, and nothing here is written
-back into any generated file. Ranking what a human should look at is the one legitimate use of the
-line inside the model half of the app, and it is the same thing Derek was doing by eye.
+LINE-BLINDNESS. Section 3 reads the market line, but only as a THRESHOLD against the player's own
+history — "our number says over, his own record at that same number says rarely". It is a review
+queue: no projection is changed by it and nothing is written back into any generated file.
+
+An earlier version ranked that section by |proj - line| / line and reported the share of rows
+leaning over. Both were wrong, and the way they were wrong is documented on section_disagreements:
+we publish a MEAN and a book prices near the MEDIAN, so on right-skewed markets `proj > line` fires
+most of the time by construction, and ranking by it just finds whoever has the smallest line.
 
     python analysis/weekly_flags.py                 # current week
     python analysis/weekly_flags.py --week 3
@@ -183,33 +187,64 @@ def section_adjustment(season, week):
 
 
 def section_disagreements(rows, depth, n=12):
-    say("## 3. Where we disagree most with the market")
+    """Rows where our number and the player's OWN history contradict each other.
+
+    The first version of this ranked by |proj - line| / line and reported "62% of starter rows lean
+    over", which Derek quite reasonably asked about. That metric was measuring skew, not bias.
+    We publish a recency-weighted MEAN; a book sets a yardage line near the MEDIAN; and receiving
+    and rushing yards are strongly right-skewed, so the mean sits above the median almost always.
+    Measured on 44,619 player-weeks, 2021-2025:
+
+        market       mean/median at a LOW level   at a HIGH level   our mean above the median
+        rec_yds            1.83                        1.13                   95.9% of rows
+        rush_yds           1.74                        1.10                   90.9%
+        receptions         1.48                        1.01                   69.2%
+        pass_yds           1.01                        1.01                   52.0%   <- the control
+
+    Passing yards is near-symmetric, and it shows no lean at all. That is the tell: the lean tracks
+    the SKEW of each market, not anything about our model. `proj > line` firing 62% of the time is
+    what a calibrated mean does next to a median, so ranking by it just surfaces whichever players
+    have the smallest lines.
+
+    What is worth a human's time instead is a row that disagrees with ITSELF: our projection says
+    comfortably over while the player's own history says he clears that number rarely. That is the
+    failure mode this project has actually shipped before (a receiver projected at 3.7x his line),
+    and it needs no market-derived constant to detect."""
+    say("## 3. Rows that contradict their own history")
     say()
     say("Review queue only. Nothing here feeds a projection; it is the eyeball pass, automated.")
+    say("Ranked by our projection disagreeing with the player's OWN hit rate at that same line —")
+    say("not by distance from the line, which only ever finds the smallest lines (see the source).")
     say()
-    priced = [r for r in rows
-              if r.get("book") and r.get("proj") is not None and r["market"] != "anytime_td"]
-    scored = []
-    for r in priced:
+    flagged = []
+    for r in rows:
+        if not r.get("book") or r.get("proj") is None or r["market"] == "anytime_td":
+            continue
         sl = slot_of(depth, r["player"])
-        if not sl or not KEY_SLOTS.match(sl):
+        if not sl or not KEY_SLOTS.match(sl) or r["book"] < 10:
             continue
-        if r["book"] < 10:                      # a half-point line makes any ratio look enormous
+        g = r.get("cG") or 0
+        if g < 6:                               # too few games to call anything a contradiction
             continue
-        scored.append((abs(r["proj"] - r["book"]) / r["book"], sl, r))
-    scored.sort(key=lambda x: -x[0])
-    if not scored:
-        say("No priced starter rows on the board yet.")
+        rate = (r.get("cOver") or 0) / g
+        says_over = r["proj"] > r["book"]
+        # A mean sits above the median by construction, so "we say over" is only interesting when
+        # his own record is clearly on the other side. The thresholds are deliberately wide.
+        if says_over and rate < 0.35:
+            flagged.append((0.35 - rate, "we say OVER, he clears it rarely", rate, sl, r))
+        elif not says_over and rate > 0.65:
+            flagged.append((rate - 0.65, "we say UNDER, he clears it usually", rate, sl, r))
+    flagged.sort(key=lambda x: -x[0])
+    if not flagged:
+        say("No starter row contradicts its own history. That is the healthy state.")
         say()
         return
-    say(f"  {'':4s} {'player':22s} {'slot':5s} {'market':>9s} {'ours':>8s} {'gap':>8s}")
-    for gap, sl, r in scored[:n]:
+    say(f"  {'':4s} {'player':22s} {'slot':5s} {'market':>9s} {'ours':>8s} {'his rate':>9s}  note")
+    for _, note, rate, sl, r in flagged[:n]:
         say(f"  {r['team']:4s} {r['player']:22s} {sl:5s} {r['book']:9.1f} {r['proj']:8.1f} "
-             f"{(r['proj'] - r['book']) / r['book'] * 100:+7.0f}%")
+            f"{rate * 100:8.0f}%  {note}")
     say()
-    lean = sum(1 for _, _, r in scored if r["proj"] > r["book"])
-    say(f"Starter rows leaning over: {lean}/{len(scored)} ({lean / len(scored) * 100:.0f}%). "
-        "Far from 50% is worth a look; near it is a healthy board.")
+    say(f"{len(flagged)} starter rows flagged out of those with a usable sample.")
     say()
 
 
