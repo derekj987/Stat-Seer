@@ -20,6 +20,15 @@
     (typeof window !== "undefined" && window.__SS_AUDIT_CFG) || {},
   );
   const vw = window.innerWidth, vh = window.innerHeight;
+  // A full-width ANNOTATION row is not a data row. The model boards put each game's Special
+  // Considerations in a `<tr><td colSpan=5>` under its game row, so a table legitimately
+  // alternates 58px and 170px, and every board reported `chart-rows-uneven` — a finding on the
+  // shape of the markup, not on anything ragged. The rule generalises: one cell spanning the whole
+  // table is a detail panel; its height is not a column-budget problem and it sits in no column.
+  const spanRow = (r) => {
+    const cells = [...r.children].filter((c) => c.tagName === "TD" || c.tagName === "TH");
+    return cells.length === 1 && Number(cells[0].getAttribute("colspan") || 1) > 1;
+  };
   const findings = [];
   const add = (type, severity, el, detail, extra) =>
     findings.push(Object.assign({ type, severity, sel: selOf(el), detail }, extra || {}));
@@ -677,7 +686,7 @@
     if (!vis(tbl)) continue;
     const head = tbl.querySelector('[class*="--head"], thead tr');
     const rows = [...tbl.querySelectorAll('[class*="--data"], tbody tr')].filter(
-      (r) => r !== head && vis(r) && !r.classList.contains("hb-row--more"));
+      (r) => r !== head && vis(r) && !r.classList.contains("hb-row--more") && !spanRow(r));
     if (!head || !vis(head) || !rows.length) continue;
     const cells = (r) => [...r.children].filter((c) => c.getBoundingClientRect().width > 0 ||
                                                        c.getBoundingClientRect().height > 0);
@@ -791,7 +800,7 @@
     if (!vis(tbl)) continue;
     const head = tbl.querySelector('[class*="--head"], thead tr');
     const rows = [...tbl.querySelectorAll('[class*="--data"], tbody tr')].filter(
-      (r) => r !== head && vis(r) && !r.classList.contains("hb-row--more"));
+      (r) => r !== head && vis(r) && !r.classList.contains("hb-row--more") && !spanRow(r));
     if (rows.length < 3) continue;
     const hs = rows.map((r) => Math.round(r.getBoundingClientRect().height));
     const spread = Math.max(...hs) - Math.min(...hs);
@@ -845,6 +854,7 @@
     for (const t of g.tables) {
       for (const r of t.querySelectorAll('[class*="--data"], tbody tr')) {
         if (r === t.querySelector('[class*="--head"], thead tr')) continue;
+        if (spanRow(r)) continue;   // a full-width annotation row is in no column
         rows.push(r);
       }
     }

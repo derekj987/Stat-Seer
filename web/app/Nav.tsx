@@ -48,7 +48,7 @@ export function DayBadge({ pin, tip }: { pin?: import("react").ReactNode; tip?: 
 export type Sport = "nfl" | "ncaaf" | "mlb";
 export const SPORT_PATHS: Record<Sport, { analyze: string; context: string; value: string }> = {
   nfl:   { analyze: "/model",       context: "/context",              value: "/lines" },
-  ncaaf: { analyze: "/ncaaf/model", context: "/ncaaf/considerations", value: "/ncaaf/lines" },
+  ncaaf: { analyze: "/ncaaf/model", context: "/ncaaf/context",       value: "/ncaaf/lines" },
   // Empty string = not built yet. FlowSteps renders those as a dimmed, non-clickable step rather
   // than a link to a 404 — the reader sees the same three-step flow every sport has, and sees
   // honestly which parts of it exist for this one.
@@ -297,13 +297,14 @@ export function ContextSubnav({ active, base = "nfl" }: {
   active: "upset" | "fan" | "special"; base?: "nfl" | "ncaaf";
 }) {
   const h = base === "ncaaf"
-    ? { upset: "/ncaaf/context", special: "/ncaaf/considerations", fan: "/ncaaf/local-intelligence" }
+    ? { upset: "/ncaaf/context", special: null, fan: "/ncaaf/local-intelligence" }
     : { upset: "/context", special: null, fan: "/local-intelligence" };
   return (
     <nav className="subnav subnav--context" aria-label="Context view">
-      {/* NFL: retired. Derek moved its four factors (referee, weather, injuries, team scoring
-          ratings) onto the model board under each game's Bottom Line, "remove the Special
-          Considerations section completely from the Context section". NCAAF still has the tab. */}
+      {/* Retired in BOTH sports: the factors moved onto each model board under the game's row
+          ("remove the Special Considerations section completely from the Context section", then
+          "move the NCAAF context data over too"). `special` is null for every sport now; the
+          slot stays so a future sport can fill it without reshaping this nav. */}
       {h.special && (
         <a href={h.special} className={active === "special" ? "subnav__t active" : "subnav__t"}
           aria-current={active === "special" ? "page" : undefined}>Special Considerations</a>

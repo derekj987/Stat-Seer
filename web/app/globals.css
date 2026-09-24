@@ -4249,6 +4249,12 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .hb-form.hb-form--cards td .hb-game{display:inline;font-size:13.5px;line-height:1.35}
   .hb-form.hb-form--cards td .hb-at{margin:0 5px;font-size:11px;line-height:inherit;
     text-transform:none;letter-spacing:0}
+  /* The Special Considerations row is a full-width detail panel, not a card cell: it must span
+     both card columns and lay out as its own grid. Without this the 1fr 1fr card grid squeezed it
+     into half the width and the block ellipsized (audit, chart-truncated-with-space at 375). */
+  .hb-form.hb-form--cards tr.hb-specrow{display:block;border:0;padding:0;margin:-6px 0 8px;
+    background:none;border-radius:0}
+  .hb-form.hb-form--cards tr.hb-specrow > td{display:block;grid-column:1 / -1;width:auto}
 }
 /* Seer. Mobile: a wide image across the very bottom (hb-side stacks under content).
    Desktop (>=1100px): a 2-column grid, content left + a STICKY seer right that
@@ -5099,34 +5105,66 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 /* ---- Special Considerations, on the model board under each game's Bottom Line ----------------
    Moved off the Context page (Derek: "add a Special Considerations section under the Bottom Line
    ... remove the Special Considerations section completely from the Context section"). Four
-   factors: team scoring ratings, injuries, weather, referee. Context, never a pick — the block
-   states facts and takes no side. Label column fixed so every row's value starts at one x. */
-.impspec{display:flex;flex-direction:column;gap:4px;padding:6px 12px 9px;
+   factors: team scoring ratings, injuries, weather, referee. Context, never a pick.
+
+   THREE COLUMNS: the game's own facts, then one injury column per team. A single stacked list
+   left the right half of a 1100px row empty and had to cap the injuries behind a "+4 more" with
+   nothing to click ("fill in the open space and break the injuries down by teams"). Columns 2/3
+   are equal so the two sides read as a comparison; column 1 is content-sized. */
+.impspec{display:flex;flex-direction:column;gap:6px;padding:7px 12px 10px;
   border-top:1px dashed var(--line);background:var(--surface-2);font-size:12px;color:var(--muted)}
 .impspec__k{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--mkt)}
-.impspec__rows{display:flex;flex-direction:column;gap:3px;margin:0}
-.impspec__row{display:grid;grid-template-columns:74px minmax(0,1fr);gap:10px;align-items:baseline}
-.impspec__row dt{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
-.impspec__row dd{margin:0;line-height:1.4;color:var(--ink);min-width:0}
-.impspec__row--wind dd{color:var(--ink)}
-.impspec__none{color:var(--muted);font-style:italic}
-/* Scoring: one small grid, each team once, units stated once — the shape the Context card used. */
-.impspec__grid{display:inline-grid;grid-template-columns:auto auto auto;gap:1px 14px;align-items:baseline}
+.impspec__cols{display:grid;grid-template-columns:minmax(210px,auto) minmax(0,1fr) minmax(0,1fr);
+  gap:10px 22px;align-items:start}
+.impspec__col{min-width:0;display:flex;flex-direction:column;gap:6px}
+.impspec__col--game{gap:7px}
+.impspec__blk{display:flex;flex-direction:column;gap:2px;min-width:0}
+.impspec__bh,.impspec__colt{font-size:9.5px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--muted)}
+.impspec__v{color:var(--ink);line-height:1.35}
+.impspec__none{color:var(--muted);font-style:italic;line-height:1.35}
+.impspec__note{font-weight:600;letter-spacing:.03em;text-transform:none;color:var(--muted)}
+/* Scoring: one small grid, each team once, units stated once in the heading. */
+.impspec__grid{display:inline-grid;grid-template-columns:auto auto auto;gap:1px 14px;
+  align-items:baseline;color:var(--ink)}
 .impspec__h{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
 .impspec__tm{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
 .impspec__rank{font-size:10.5px;color:var(--muted)}
-.impspec__note{display:block;font-size:10px;color:var(--muted);margin-top:2px}
-/* Injuries: one chip per player, wrapping — a designation and its cause read as one unit. */
-.impspec__row dd .impspec__inj{display:inline-block;margin-right:12px;white-space:nowrap}
-.impspec__st{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;
-  padding:0 4px;border-radius:4px;background:var(--surface);color:var(--muted)}
+/* Injury column: team code + a count, then every designated player — no cap, nothing hidden. */
+.impspec__colh{display:flex;align-items:baseline;gap:7px;border-bottom:1px solid var(--line);
+  padding-bottom:2px;margin-bottom:1px}
+.impspec__colt{font-family:var(--font-mono);font-size:11px;color:var(--ink);letter-spacing:.04em}
+.impspec__coln{font-size:10px;color:var(--muted)}
+.impspec__inj{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.impspec__inj li{display:grid;grid-template-columns:44px minmax(0,1fr);gap:7px;align-items:baseline;
+  line-height:1.3}
+.impspec__p{color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.impspec__det{grid-column:2;font-size:10.5px;color:var(--muted);margin-top:-2px}
+.impspec__st{justify-self:start;font-size:9px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.03em;padding:1px 5px;border-radius:4px;background:var(--surface);color:var(--muted)}
 .impspec__st--out,.impspec__st--ir,.impspec__st--suspended{
   background:color-mix(in srgb,var(--mkt) 16%,transparent);color:var(--mkt)}
 .impspec__st--doubtful,.impspec__st--questionable{
   background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
-.impspec__det{font-size:11px;color:var(--muted)}
-.impspec__more{font-size:11px;color:var(--muted)}
-@media (max-width:640px){
-  .impspec__row{grid-template-columns:1fr;gap:1px}
-  .impspec__row dd .impspec__inj{display:block;margin:0;white-space:normal}
+@media (max-width:860px){
+  .impspec__cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .impspec__col--game{grid-column:1 / -1}
+}
+@media (max-width:560px){
+  .impspec__cols{grid-template-columns:1fr}
+  .impspec__col--game{grid-column:auto}
+}
+
+/* NCAAF variant of the block: stat lists instead of injuries (college has no injury report), and
+   a footnote naming the season the scoring rates come from. */
+.impspec__stats{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.impspec__stats li{display:grid;grid-template-columns:62px auto minmax(0,1fr);gap:8px;
+  align-items:baseline;line-height:1.3;color:var(--ink)}
+.impspec__sl{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.impspec__foot{font-size:10.5px;color:var(--muted);line-height:1.35}
+/* The block sits in a full-width cell under its game row; the cell adds no padding of its own. */
+.hb-specrow > td{padding:0;border:0}
+@media (max-width:560px){
+  .impspec__stats li{grid-template-columns:62px auto}
+  .impspec__stats li .impspec__rank{grid-column:2}
 }

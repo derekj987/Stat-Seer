@@ -392,6 +392,45 @@ def team_scoring(db, season, decay):
     return L, off, deff
 
 
+def current_scoring(db, season):
+    """Each FBS team's points scored and allowed per game THIS season, with a national rank.
+
+    Not the same thing as team_scoring() above, which is a regressed, decayed deviation used to
+    PROJECT a total. This is the plain descriptive rate a reader wants beside a game -- the
+    college counterpart of the NFL board's Scoring row -- so it is the raw per-game number with
+    no shrink and no carry-over, and it is empty until the season has games.
+
+    Falls back to LAST season while this one has no completed games, stamped so the board can say
+    which year it is showing: "off/def ratings arrive with the season" is honest and useless on
+    exactly the week-1 board someone is reading."""
+    conn = sqlite3.connect(db)
+
+    def pull(yr):
+        return conn.execute(
+            """SELECT home_team, away_team, home_points, away_points FROM games
+                 WHERE season=? AND home_class='fbs' AND away_class='fbs'
+                   AND home_points IS NOT NULL""", (yr,)).fetchall()
+
+    rows, used, is_prior = pull(season), season, False
+    if not rows:
+        rows, used, is_prior = pull(season - 1), season - 1, True
+    conn.close()
+    if not rows:
+        return {}, None, False
+    scored, allowed = {}, {}
+    for h, a, hp, ap in rows:
+        scored.setdefault(h, []).append(hp); allowed.setdefault(h, []).append(ap)
+        scored.setdefault(a, []).append(ap); allowed.setdefault(a, []).append(hp)
+    out = {t: {"off": round(sum(scored[t]) / len(scored[t]), 1),
+               "def": round(sum(allowed[t]) / len(allowed[t]), 1),
+               "g": len(scored[t])} for t in scored}
+    for key, rev in (("off", True), ("def", False)):
+        order = sorted(out, key=lambda t: out[t][key], reverse=rev)
+        for i, t in enumerate(order, start=1):
+            out[t][key + "Rank"] = i
+    return out, used, is_prior
+
+
 WINK = 11.0  # margin -> win-prob logistic scale (a 7-pt edge ~ 65%)
 
 
@@ -679,6 +718,10 @@ def main():
          for c, rs in by_conf.items() if len(rs) >= 3),
         key=lambda d: d["avgRating"], reverse=True)
 
+    cur_scoring, scoring_season, scoring_is_prior = current_scoring(DB, CARD_SEASON)
+    print(f"  scoring: {len(cur_scoring)} teams from {scoring_season}"
+          f"{' (prior season — no games played yet)' if scoring_is_prior else ''}")
+
     # --- Value: CFB key numbers (margin distribution) + line-shopping spread ------
     conn = sqlite3.connect(DB)
     margins = [m for (m,) in conn.execute(
@@ -701,7 +744,12 @@ def main():
     data = {
         "season": last, "seasons": "2020-2025", "hfa": round(hfa, 1),
         "teamsRated": len(final), "top": top, "validation": valid, "ats": ats,
-        "context": {"hfa": round(hfa, 1), "conferences": conferences},
+        "context": {"hfa": round(hfa, 1), "conferences": conferences,
+                    # Per-team scored/allowed for the Special Considerations block on the model
+                    # board (see current_scoring). `scoringSeason` says WHICH season it is, so a
+                    # prior-season fallback is never mistaken for this one.
+                    "scoring": cur_scoring, "scoringSeason": scoring_season,
+                    "scoringIsPrior": scoring_is_prior},
         "value": {"games": ng, "keyNumbers": key_numbers, "bookShop": book_shop},
         "card": {"season": CARD_SEASON, "week": card_week, "preseasonSeeded": preseason_seeded,
                  "games": card_games, "upsets": upsets,
@@ -723,7 +771,15 @@ def main():
             " rated: boolean; crossDiv: boolean; featured: boolean };\n"
             "export type NcaafUpset = { dog: string; matchup: string; spread: string;"
             " modelPct: number; marketPct: number; byPoints: number };\n"
-            "export const NCAAF_MODEL = " + json.dumps(data, indent=2) + " as const;\n")
+            # Points scored/allowed per game with a national rank, for the Special Considerations
+            # block on the model board (see current_scoring).
+            "export type NcaafScoring = { off: number; def: number; g: number;"
+            " offRank: number; defRank: number };\n"
+            "export const NCAAF_MODEL = " + json.dumps(data, indent=2) + " as const;\n"
+            # `as const` makes the literal's own team names the only indexable keys, and the board
+            # looks a team up by a name off a game row — so widen it once, here.
+            "export const NCAAF_SCORING: Record<string, NcaafScoring> ="
+            " NCAAF_MODEL.context.scoring;\n")
     with open(OUT, "w", encoding="utf-8") as f:
         f.write(body)
     print(f"Wrote {OUT}")

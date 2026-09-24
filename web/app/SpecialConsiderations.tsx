@@ -14,8 +14,14 @@ import type { InjuryNote } from "@/lib/nflInactives";
 // section." So four factors travel and the rest is retired: a reader deciding on a game now has
 // the situational facts on the same row as the number, instead of a second page to cross-check.
 //
-// Still CONTEXT, not a pick. None of this is in the projection, and the block never states a lean —
-// it is the same discipline the Context page carried, moved to where the decision is made.
+// LAYOUT: three columns — the game's own facts on the left, then one injury column per team.
+// The first cut stacked everything in a single label-and-value list, which left the right half of
+// a 1100px row empty and capped the injuries at six with a "+4 more" that a reader cannot expand
+// (Derek: "fill in the open space and break the injuries down by teams... list them all out").
+// Splitting by team is also how the list is actually read — you want one side's availability, not
+// an alphabetical merge of both.
+//
+// Still CONTEXT, not a pick. None of this is in the projection, and the block never states a lean.
 
 export interface SpecialCtx {
   away: string;
@@ -63,22 +69,53 @@ function weatherText(w: GameWeather): string {
 
 // Out / IR / suspended first, then the game-time decisions — a bettor reads the definite ones.
 const RANK: Record<string, number> = { OUT: 0, IR: 1, SUSPENDED: 2, DOUBTFUL: 3, QUESTIONABLE: 4 };
-const INJ_CAP = 6;
+
+function TeamInjuries({ team, list, feedHasAny }: {
+  team: string; list: { player: string; note: InjuryNote }[]; feedHasAny: boolean;
+}) {
+  const sorted = [...list].sort(
+    (a, b) => (RANK[a.note.status] ?? 9) - (RANK[b.note.status] ?? 9) || a.player.localeCompare(b.player));
+  const outs = sorted.filter((i) => RANK[i.note.status] <= 2).length;
+  return (
+    <div className="impspec__col">
+      <div className="impspec__colh">
+        <span className="impspec__colt">{team}</span>
+        <span className="impspec__coln">
+          {sorted.length === 0 ? "" : `${sorted.length} listed${outs ? ` · ${outs} out` : ""}`}
+        </span>
+      </div>
+      {sorted.length === 0 ? (
+        <span className="impspec__none">{feedHasAny
+          ? "Nobody carrying a designation"
+          : "Designations post Wednesday through Friday"}</span>
+      ) : (
+        <ul className="impspec__inj">
+          {sorted.map((i) => (
+            <li key={i.player}>
+              <span className={`impspec__st impspec__st--${i.note.status.toLowerCase()}`}>{i.note.label}</span>
+              <span className="impspec__p">{i.player}</span>
+              {i.note.detail && <span className="impspec__det">{i.note.detail.toLowerCase()}</span>}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 export function SpecialConsiderations({ ctx }: { ctx: SpecialCtx }) {
   const { away, home, crew, wx, injuries, feedHasAny } = ctx;
   const ra = TEAM_RATINGS[away], rh = TEAM_RATINGS[home];
-  const inj = [...injuries].sort(
-    (a, b) => (RANK[a.note.status] ?? 9) - (RANK[b.note.status] ?? 9) || a.player.localeCompare(b.player));
-  const shown = inj.slice(0, INJ_CAP);
+  const byTeam = (t: string) => injuries.filter((i) => i.team === t);
   return (
-    <div className="impspec">
+    <section className="impspec" aria-label={`Special considerations, ${away} at ${home}`}>
       <span className="impspec__k">Special considerations</span>
-      <dl className="impspec__rows">
-        {ra && rh && (
-          <div className="impspec__row">
-            <dt>Scoring</dt>
-            <dd>
+      <div className="impspec__cols">
+        {/* Column 1 — the game's own facts. */}
+        <div className="impspec__col impspec__col--game">
+          {ra && rh && (
+            <div className="impspec__blk">
+              <span className="impspec__bh">Scoring <span className="impspec__note">pts/gm{RATINGS_IS_PRIOR ? ` · ${RATINGS_SEASON}` : ""}</span></span>
               <span className="impspec__grid">
                 <span className="impspec__h" />
                 <span className="impspec__h">scored</span>
@@ -91,46 +128,26 @@ export function SpecialConsiderations({ ctx }: { ctx: SpecialCtx }) {
                   </Fragment>
                 ))}
               </span>
-              <span className="impspec__note">pts/gm{RATINGS_IS_PRIOR ? ` · ${RATINGS_SEASON}` : ""}</span>
-            </dd>
+            </div>
+          )}
+          {wx && (
+            <div className={`impspec__blk${wx.windFlag ? " impspec__blk--wind" : ""}`}>
+              <span className="impspec__bh">Weather</span>
+              <span className="impspec__v">{wx.windFlag && <b className="wxflag">⚑&nbsp;WIND</b>} {weatherText(wx)}</span>
+            </div>
+          )}
+          {/* Printed on every game: "assigned closer to kickoff" is a true statement with a date
+              on it, and it comes true within the week. */}
+          <div className="impspec__blk">
+            <span className="impspec__bh">Referee</span>
+            <span className="impspec__v">{crew ? refereeText(crew) : <span className="impspec__none">Crew assigned closer to kickoff</span>}</span>
           </div>
-        )}
-        <div className="impspec__row">
-          <dt>Injuries</dt>
-          <dd>
-            {shown.length === 0
-              ? <span className="impspec__none">{feedHasAny
-                  ? "Nobody carrying a designation"
-                  : "Designations post Wednesday through Friday"}</span>
-              : (
-                <>
-                  {shown.map((i) => (
-                    <span className="impspec__inj" key={`${i.team}-${i.player}`}>
-                      <b>{i.player}</b> <span className="impspec__tm">{i.team}</span>{" "}
-                      <span className={`impspec__st impspec__st--${i.note.status.toLowerCase()}`}>{i.note.label}</span>
-                      {i.note.detail && <span className="impspec__det"> · {i.note.detail.toLowerCase()}</span>}
-                    </span>
-                  ))}
-                  {inj.length > shown.length && (
-                    <span className="impspec__more">+{inj.length - shown.length} more</span>
-                  )}
-                </>
-              )}
-          </dd>
         </div>
-        {wx && (
-          <div className={`impspec__row${wx.windFlag ? " impspec__row--wind" : ""}`}>
-            <dt>Weather</dt>
-            <dd>{wx.windFlag && <b className="wxflag">⚑&nbsp;WIND</b>} {weatherText(wx)}</dd>
-          </div>
-        )}
-        {/* Printed on every game: "assigned closer to kickoff" is a true statement with a date on
-            it, and it comes true within the week. */}
-        <div className="impspec__row">
-          <dt>Referee</dt>
-          <dd>{crew ? refereeText(crew) : <span className="impspec__none">Crew assigned closer to kickoff</span>}</dd>
-        </div>
-      </dl>
-    </div>
+
+        {/* Columns 2 and 3 — availability, one per team, complete. */}
+        <TeamInjuries team={away} list={byTeam(away)} feedHasAny={feedHasAny} />
+        <TeamInjuries team={home} list={byTeam(home)} feedHasAny={feedHasAny} />
+      </div>
+    </section>
   );
 }

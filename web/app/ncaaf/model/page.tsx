@@ -1,6 +1,8 @@
 import { Brand, FlowSteps, ModelSubnav, WeekBadge } from "../../Nav";
 import Tip from "@/app/Tip";
 import { NCAAF_MODEL, type NcaafCardGame } from "../model-data";
+import { NcaafSpecialConsiderations } from "../NcaafSpecialConsiderations";
+import { Fragment } from "react";
 import { StatCard } from "../StatCard";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
 import { NcaafCardHead, NcaafGameCell } from "../CardCells";
@@ -28,7 +30,8 @@ function CardRows({ games, scores }: { games: readonly NcaafCardGame[]; scores?:
       {games.map((g) => {
         const ms = g.marketSpread;
         return (
-          <tr key={`${g.away}-${g.home}`} className={g.off ? "hb-off" : undefined}>
+          <Fragment key={`${g.away}-${g.home}`}>
+          <tr className={g.off ? "hb-off" : undefined}>
             <NcaafGameCell g={g} score={scores ? scoreFor(scores, g.away, g.home) : null} />
             <td className="hb-num" data-l="Market spread">{ms ? `${abbrevTeam(ms.fav)} ${ms.num}` : "—"}</td>
             <td className="hb-num hb-tot" data-l="Market O/U">{g.marketTotal ?? "—"}</td>
@@ -49,6 +52,12 @@ function CardRows({ games, scores }: { games: readonly NcaafCardGame[]; scores?:
               </>
             )}
           </tr>
+          {/* Special Considerations, spanning the row — the same block the NFL board carries,
+              with the factors college actually has. See NcaafSpecialConsiderations. */}
+          <tr className="hb-specrow">
+            <td colSpan={5}><NcaafSpecialConsiderations g={g} /></td>
+          </tr>
+          </Fragment>
         );
       })}
     </>

@@ -127,7 +127,7 @@ function NcaafConsiderations() {
           </article>
         ))}
       </div>
-      <p className="lp-cardfoot"><a href="/ncaaf/considerations">See our Context Model →</a></p>
+      <p className="lp-cardfoot"><a href="/ncaaf/model">See every game&apos;s considerations →</a></p>
     </>
   );
 }

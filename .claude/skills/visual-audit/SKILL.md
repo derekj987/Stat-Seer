@@ -1811,6 +1811,38 @@ grep -rn "order=week.asc&limit=1\|week.asc" --include=*.py --include=*.ts . | gr
 And the audit check that catches it without reading code: **a "current" data file whose week stamp
 is not this week.** `grep -n "WEEK = " web/lib/*.ts` — every one of those should be the live week.
 
+### Context lives WITH the number, not on its own page
+Both sports' "Special Considerations" pages are retired; their factors sit under each game's row
+on the model board (`app/SpecialConsiderations.tsx`, `app/ncaaf/NcaafSpecialConsiderations.tsx`).
+Derek: *"move the context data into our model data... add a Special Considerations section under
+the Bottom Line. I want to remove the Special Considerations section completely from the Context
+section."*
+
+Three things that pass forward to any block like it:
+- **Retire a route by REDIRECTING it**, not by deleting it. `/considerations` and
+  `/ncaaf/considerations` are pinned on dashboards and linked from the homepage; they now land on
+  the board that carries the same facts. Also sweep the nav, the drawer and the landing panels —
+  `grep -rn "/considerations" web/app` found five other references.
+- **Only move what the sport HAS.** The NFL block is referee · weather · injuries · scoring;
+  college has no pre-game referee crew and no injury report at all, so it carries site · weather ·
+  conference · per-team scoring and power rating instead. An empty "Injuries" row on 71 college
+  games would be a placeholder that never resolves — the rule this file already has about
+  "arriving soon".
+- **A full-width detail row needs its own mobile rule.** `.hb-form--cards` turns each table row
+  into a two-column card at 375px, which squeezed the spanning cell into half the width and
+  ellipsized it. `tr.hb-specrow{display:block}` + `td{grid-column:1/-1}`.
+
+### 🚨 A full-width ANNOTATION row is not a data row — teach the probe, don't reshape the board
+Adding that row made every model board report `chart-rows-uneven` (58px and 170px alternating)
+and `chart-columns-lopsided`. Both were the probe measuring a detail panel as if it were data.
+`spanRow()` is now a module-level helper — one cell with `colspan > 1` and nothing else — and the
+row-height, column-width and ink checks all skip it.
+
+Note the near-miss: the first patch landed the helper in the wrong loop (two checks in this file
+open with a near-identical `for (const tbl of ...)` header), so the finding kept firing and it
+looked like the logic was wrong. **When a check keeps reporting after a fix, confirm the fix is in
+the block that emits it** — `grep -n 'add("<kind>"' ` to find the emitter, then read upward.
+
 ### A UI must not say "nobody" when it means "we do not know"
 The Special Considerations block prints the injured players for a game. An empty list means two
 different things — nobody is hurt, or the report is not in yet — and Wednesday's practice report
