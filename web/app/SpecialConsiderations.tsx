@@ -62,8 +62,19 @@ function RefereeCell({ crew }: { crew: { referee: string; tendency: string; pen:
       <b>{crew.referee}</b> — {read}, ~{crew.pen} pen/g
       {s && (
         <span className="impspec__refhist">
-          <span>{s.total} pts a game · {s.over}% over</span>
-          <span>favourites covered {s.atsFav}% · home teams {s.homeCover}% · home teams won {s.homeWin}%</span>
+          {/* A stat ROW rather than three wrapped sentences. The block now spans the full width of
+              the column (Derek: "make the referee data use the open space more and look cleaner"),
+              and five short figures read at a glance where the prose version wrapped mid-clause. */}
+          <span className="impspec__refstats">
+            {([["pts/game", s.total], ["over", `${s.over}%`], ["favs cover", `${s.atsFav}%`],
+               ["home cover", `${s.homeCover}%`], ["home win", `${s.homeWin}%`]] as const)
+              .map(([label, val]) => (
+                <span className="impspec__refstat" key={label}>
+                  <b>{val}</b>
+                  <span className="impspec__h">{label}</span>
+                </span>
+              ))}
+          </span>
           <span className="impspec__note">his last {s.games} games — history, not a tendency that carries</span>
         </span>
       )}
@@ -162,7 +173,7 @@ export function SpecialConsiderations({ ctx }: { ctx: SpecialCtx }) {
           )}
           {/* Printed on every game: "assigned closer to kickoff" is a true statement with a date
               on it, and it comes true within the week. */}
-          <div className="impspec__blk">
+          <div className="impspec__blk impspec__blk--ref">
             <span className="impspec__bh">Referee</span>
             <span className="impspec__v">{crew ? <RefereeCell crew={crew} /> : <span className="impspec__none">Crew assigned closer to kickoff</span>}</span>
           </div>

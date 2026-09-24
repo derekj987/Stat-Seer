@@ -1135,9 +1135,13 @@ a.sportstrip__i:hover{color:var(--ink)}
    rule between cards. */
 .impgame{background:var(--surface);border:1px solid var(--line);border-radius:12px;
   box-shadow:0 1px 3px rgba(0,0,0,.05)}
-.impgame + .impgame{margin-top:18px;position:relative}
-.impgame + .impgame::before{content:"";position:absolute;left:8%;right:8%;top:-10px;height:1px;
-  background:linear-gradient(90deg,transparent,var(--line) 15%,var(--line) 85%,transparent)}
+/* A GOLD BAR between games (Derek: "let's put a gold bar to separate the games"). The faint
+   hairline it replaces read as another table rule among many; a game card carries three labelled
+   sections now, so the break between one game and the next needs to be the heaviest line on the
+   board, not the lightest. --gold is defined in every theme block, so it inverts with the page. */
+.impgame + .impgame{margin-top:26px;position:relative}
+.impgame + .impgame::before{content:"";position:absolute;left:0;right:0;top:-14px;height:3px;
+  border-radius:2px;background:var(--gold)}
 .impgame .improw{border:0;background:transparent;border-radius:0;padding-bottom:4px}
 .impgame .improw--head{padding-top:8px;padding-bottom:2px;border-bottom:1px solid var(--line);
   margin:0 12px;padding-left:0;padding-right:0}
@@ -5159,8 +5163,12 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 .impspec__k{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--mkt)}
 /* The game column is content-sized and the two team columns split what is left equally, so the
    injuries sit right rather than bunching in the middle. 1px rules divide them. */
-.impspec__cols{display:grid;grid-template-columns:minmax(300px,1.15fr) minmax(0,1fr) minmax(0,1fr);
+.impspec__cols{display:grid;grid-template-columns:minmax(380px,1.55fr) minmax(0,1fr) minmax(0,1fr);
   gap:0;align-items:stretch}
+/* The game column keeps its blocks stacked. Side by side was tried and measured: the block is
+   ~360px wide in practice, the scoring table needs ~190 and the weather line ~230, so pairing them
+   only moved the wrapping from the referee to the weather. The width went into the column itself
+   instead — which is what pushes the injuries right — and into the referee strip below. */
 .impspec__col{min-width:0;display:flex;flex-direction:column;gap:14px;padding:0 20px}
 .impspec__col:first-child{padding-left:0}
 .impspec__col:last-child{padding-right:0}
@@ -5175,7 +5183,15 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 .impspec__none{color:var(--muted);font-style:italic;line-height:1.4}
 .impspec__note{font-size:9.5px;font-weight:600;letter-spacing:.04em;text-transform:none;color:var(--muted)}
 /* The crew's historical splits, one line each under the tendency. */
-.impspec__refhist{display:flex;flex-direction:column;gap:1px;margin-top:2px;font-size:11px;color:var(--muted)}
+.impspec__refhist{display:flex;flex-direction:column;gap:5px;margin-top:5px;font-size:11px;color:var(--muted)}
+/* The crew's historical splits as a row of figures. auto-fit lets them spread across whatever
+   width the column has instead of leaving a gap at the end — the grid-dead-space rule in the audit
+   skill is about auto-FILL keeping empty tracks, which is why this is auto-fit. */
+.impspec__refstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(58px,1fr));
+  gap:4px 8px;padding:6px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.impspec__refstat{display:flex;flex-direction:column;gap:1px;min-width:0}
+.impspec__refstat b{font-size:13px;color:var(--ink);font-weight:700;line-height:1.1}
+.impspec__refstat .impspec__h{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* Scoring: each team once, units named in the heading. */
 .impspec__grid{display:grid;grid-template-columns:auto 1fr 1fr;gap:6px 22px;align-items:baseline;
   color:var(--ink);font-size:12.5px}
