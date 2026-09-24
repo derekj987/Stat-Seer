@@ -5,6 +5,11 @@ import { weekRefs } from "@/lib/refAssignments";
 import { GAME_WEATHER, WEATHER_WEEK } from "@/lib/weatherData";
 import { weekInjuries, type InjuryNote } from "@/lib/nflInactives";
 import { SpecialConsiderations, type SpecialCtx } from "../SpecialConsiderations";
+import { upsetMeter } from "@/lib/upsetMeter";
+import { TEAM_RATINGS } from "@/lib/teamRatings";
+import { REF_LEAGUE } from "@/lib/refStats";
+import { NFL_CHAOS, NFL_IMPROVE, NFL_ENV } from "@/lib/chaosTraits";
+import { scoreChaos, returnFromSpread, comfortInfo } from "@/lib/chaos";
 import { Brand, FlowSteps, ModelSubnav, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
 import Tip from "../Tip";
@@ -74,17 +79,24 @@ function ImpTable({ rows, refs, spec, today, tomorrow, cap }: {
         return (
         <div key={grp.key} className={groupHidden ? "hb-row--more" : undefined}>
           <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
-          <div className="improw improw--head" role="row">
-            <span>game</span><span>spread</span><span>total</span>
-            <span className="improw__modh improw__modstart">model spread</span>
-            <span className="improw__modh">model total</span>
-          </div>
           {grp.items.map((e) => {
         const rowHidden = cap != null && gi >= cap && !groupHidden;
         gi++;
         const bl = bottomLine(e);
         return (
           <div className={rowHidden ? "impgame hb-row--more" : "impgame"} key={e.eventId}>
+            {/* Each game carries its own column header. One header per BOARD is the house rule,
+                and it is the right one for a plain list — but the games are now separated by a
+                tall Special Considerations block, so a single header at the top of the day is off
+                screen by the second game. Derek: "Each game should have the Game, Spread, Total,
+                Model Spread, and Model Total headers to start." Bottom line joins them as a
+                sixth column rather than the loose strip it was underneath. */}
+            <div className="improw improw--head" role="row">
+              <span>game</span><span>spread</span><span>total</span>
+              <span className="improw__modh improw__modstart">model spread</span>
+              <span className="improw__modh">model total</span>
+              <span className="improw__blh">bottom line</span>
+            </div>
             <div className="improw" role="row">
               <span className="improw__g">
                 {e.away}<span className="at">@</span>{e.home}
@@ -103,12 +115,11 @@ function ImpTable({ rows, refs, spec, today, tomorrow, cap }: {
                 {e.modelDisagree && <span className="offcmark" title="Off consensus — our model favors a different side than the market">⚑</span>}
               </span>
               <span className="improw__mod">{e.modelTotal !== null ? e.modelTotal.toFixed(1) : "—"}</span>
-            </div>
-            <div className="impbottom">
-              <span className="impbottom__k">Bottom line</span>
-              {bl
-                ? <span className="impbottom__txt"><b>{bl.spread}</b>{bl.total && <> and <b>{bl.total}</b></>}</span>
-                : <span className="impbottom__txt impbottom__none">No model read yet</span>}
+              <span className="improw__bl">
+                {bl
+                  ? <><b>{bl.spread}</b>{bl.total && <> and <b>{bl.total}</b></>}</>
+                  : <span className="impbottom__none">No model read yet</span>}
+              </span>
             </div>
             {/* The Context page's Special Considerations, moved under the line it informs — the
                 crew line that used to sit in the Bottom Line is one of its rows now. */}
@@ -257,12 +268,52 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
     const team = key.split("|")[1] ?? "";
     (injByTeam.get(team) ?? injByTeam.set(team, []).get(team)!).push({ player: note.player, team, note });
   }
+  // The Upset Meter, per game. The chaos index that used to be its own Upset Lab page is one
+  // component of it now (see lib/upsetMeter.ts for the weights and the honesty rules).
+  const LEAGUE_PTS = 22.5;                       // NFL points per team per game, long-run
+  const upsetByEvent = new Map<string, ReturnType<typeof upsetMeter>>();
+  for (const g of built) {
+    const spread = g.spread.consensus;
+    const mp = modelById.get(g.eventId);
+    if (spread === null || spread === 0) continue;
+    const fav = spread < 0 ? g.home : g.away;
+    const dog = spread < 0 ? g.away : g.home;
+    const line = Math.abs(spread);
+    const wx = week === WEATHER_WEEK ? wxByEvent.get(g.eventId) : undefined;
+    const dogMl = g.ml[dog]?.price;
+    const profit = typeof dogMl === "number" ? (dogMl > 0 ? dogMl : 10000 / -dogMl) : null;
+    const dogEnv = NFL_ENV[dog], venueEnv = NFL_ENV[g.home];
+    const cz = dog !== g.home && dogEnv && venueEnv ? comfortInfo(dog, dogEnv, venueEnv, week) : null;
+    const chaos = scoreChaos({
+      sport: "NFL", away: g.away, home: g.home, dog, fav, line, week,
+      dogReturn: profit !== null ? Math.round((100 + profit) / 10) * 10 : returnFromSpread(line, "NFL"),
+      returnEst: profit === null,
+      favTrait: NFL_CHAOS[fav], dogTrait: NFL_CHAOS[dog],
+      windMph: wx && !wx.indoor ? wx.windMph : null,
+      comfortPct: cz ? cz.score : dog === g.home ? 100 : undefined,
+      comfortNote: cz?.note || undefined,
+      improvePct: NFL_IMPROVE[dog]?.improvePct,
+    });
+    const crew = refs.get(g.home);
+    upsetByEvent.set(g.eventId, upsetMeter({
+      marketSpreadHome: spread,
+      modelMarginHome: mp ? mp.predMargin : null,
+      windMph: wx && !wx.indoor ? wx.windMph : null,
+      refPen: crew ? crew.pen : null,
+      refLeaguePen: REF_LEAGUE.pen,
+      dogOff: TEAM_RATINGS[dog]?.off ?? null,
+      favDef: TEAM_RATINGS[fav]?.def ?? null,
+      leaguePts: LEAGUE_PTS,
+      chaosIndex: chaos.index,
+    }, dog, fav));
+  }
   const spec = new Map<string, SpecialCtx>(built.map((g) => [g.eventId, {
     away: g.away, home: g.home,
     crew: refs.get(g.home),
     wx: week === WEATHER_WEEK ? wxByEvent.get(g.eventId) : undefined,
     injuries: [...(injByTeam.get(g.away) ?? []), ...(injByTeam.get(g.home) ?? [])],
     feedHasAny: injAll.size > 0,
+    upset: upsetByEvent.get(g.eventId) ?? null,
   }]));
   // `consensus` is FanDuel's line where posted (lib/board.ts LINE_BOOK), the US-book median only
   // where it is not — so this column matches the app on Derek's phone.

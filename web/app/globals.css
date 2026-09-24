@@ -1102,10 +1102,11 @@ a.sportstrip__i:hover{color:var(--ink)}
 .imptable{display:flex;flex-direction:column;align-items:stretch;gap:8px;
   max-width:none;width:100%;min-width:min-content}
 .improw{display:grid;
-  /* game | spread | total | model spread | model total — market pair then model pair. The two
-     "team + number" columns (spread, model spread) are wider than the bare-number totals. */
-  grid-template-columns:minmax(150px,1.9fr) minmax(90px,1.15fr) minmax(66px,.9fr) minmax(90px,1.15fr) minmax(66px,.9fr);
-  gap:20px;align-items:center;padding:7px 12px;background:var(--surface);border:1px solid var(--line);
+  /* game | spread | total | model spread | model total | bottom line — market pair, model pair,
+     then the read. The two "team + number" columns are wider than the bare-number totals, and
+     the bottom line takes what is left (it is a sentence, not a figure). */
+  grid-template-columns:minmax(140px,1.5fr) minmax(84px,1fr) minmax(60px,.8fr) minmax(84px,1fr) minmax(60px,.8fr) minmax(130px,1.6fr);
+  gap:18px;align-items:center;padding:7px 12px;background:var(--surface);border:1px solid var(--line);
   border-radius:8px;font-size:13px}
 /* A subtle divider before the model pair keeps the market/model grouping legible. */
 .improw__modstart{border-left:1px solid var(--line);padding-left:14px;margin-left:-6px}
@@ -1129,6 +1130,13 @@ a.sportstrip__i:hover{color:var(--ink)}
 .improw__tot{font-family:var(--font-mono);font-weight:700;text-align:left;color:var(--accent)}
 .impgame{background:var(--surface);border:1px solid var(--line);border-radius:9px}
 .impgame .improw{border:0;background:transparent;border-radius:0;padding-bottom:4px}
+.impgame .improw--head{padding-top:8px;padding-bottom:2px;border-bottom:1px solid var(--line);
+  margin:0 12px;padding-left:0;padding-right:0}
+/* The bottom line is a COLUMN now, not a strip under the row (Derek: "Bottom Line can also be
+   added to the headers section. It looks out of place where it is currently at"). */
+.improw__blh{color:var(--accent)}
+.improw__bl{font-size:12.5px;color:var(--muted);line-height:1.35}
+.improw__bl b{color:var(--ink);font-weight:700}
 .impbottom{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:5px 12px 8px;
   font-size:12.5px;color:var(--muted);border-top:1px dashed var(--line)}
 .impbottom__k{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
@@ -5119,26 +5127,27 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
    headings are 11px caps in the ink colour over a rule of their own. */
 .impspec{display:flex;flex-direction:column;gap:8px;padding:9px 12px 12px;
   border-top:1px dashed var(--line);background:var(--surface-2);font-size:12px;color:var(--muted)}
-.impspec__k{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--mkt)}
+.impspec__k{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--mkt)}
 /* The game column is content-sized and the two team columns split what is left equally, so the
    injuries sit right rather than bunching in the middle. 1px rules divide them. */
-.impspec__cols{display:grid;grid-template-columns:minmax(200px,auto) minmax(0,1fr) minmax(0,1fr);
+.impspec__cols{display:grid;grid-template-columns:minmax(300px,1.15fr) minmax(0,1fr) minmax(0,1fr);
   gap:0;align-items:stretch}
-.impspec__col{min-width:0;display:flex;flex-direction:column;gap:9px;padding:0 18px}
+.impspec__col{min-width:0;display:flex;flex-direction:column;gap:14px;padding:0 20px}
 .impspec__col:first-child{padding-left:0}
 .impspec__col:last-child{padding-right:0}
 .impspec__col + .impspec__col{border-left:1px solid var(--line)}
-.impspec__blk{display:flex;flex-direction:column;gap:3px;min-width:0}
+.impspec__blk{display:flex;flex-direction:column;gap:5px;min-width:0}
 /* Section headings: bigger, inked, and sitting on their own rule so each block reads as a unit. */
 .impspec__bh,.impspec__colt{display:flex;align-items:baseline;gap:8px;font-size:11px;font-weight:800;
   text-transform:uppercase;letter-spacing:.08em;color:var(--ink);
   border-bottom:1px solid var(--line);padding-bottom:3px}
 .impspec__colt{border:0;padding:0}
-.impspec__v{color:var(--ink);line-height:1.4}
+.impspec__v{color:var(--ink);line-height:1.5;font-size:12.5px}
 .impspec__none{color:var(--muted);font-style:italic;line-height:1.4}
 .impspec__note{font-size:9.5px;font-weight:600;letter-spacing:.04em;text-transform:none;color:var(--muted)}
 /* Scoring: each team once, units named in the heading. */
-.impspec__grid{display:grid;grid-template-columns:auto 1fr 1fr;gap:3px 16px;align-items:baseline;color:var(--ink)}
+.impspec__grid{display:grid;grid-template-columns:auto 1fr 1fr;gap:6px 22px;align-items:baseline;
+  color:var(--ink);font-size:12.5px}
 .impspec__h{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
 .impspec__tm{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
 .impspec__rank{font-size:10.5px;color:var(--muted);font-weight:400}
@@ -5148,11 +5157,11 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 .impspec__coln{font-size:10px;color:var(--muted);white-space:nowrap}
 .impspec__inj{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
 /* status | player | detail, one line each, on tracks so every column lines up down the list. */
-.impspec__inj li{display:grid;grid-template-columns:58px minmax(0,1fr) auto;gap:10px;
-  align-items:center;line-height:1.5;padding:3px 0;border-bottom:1px dotted var(--line)}
+.impspec__inj li{display:grid;grid-template-columns:52px max-content minmax(0,1fr);gap:8px;
+  align-items:center;line-height:1.4;padding:2px 0;border-bottom:1px dotted var(--line)}
 .impspec__inj li:last-child{border-bottom:0}
 .impspec__p{color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.impspec__det{font-size:10.5px;color:var(--muted);white-space:nowrap;text-align:right}
+.impspec__det{font-size:10.5px;color:var(--muted);white-space:nowrap;text-align:left}
 .impspec__st{justify-self:stretch;text-align:center;font-size:9px;font-weight:800;
   text-transform:uppercase;letter-spacing:.03em;padding:2px 0;border-radius:4px;
   background:var(--surface);color:var(--muted)}
@@ -5183,4 +5192,40 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
   .impspec__col{padding:0}
   .impspec__col:nth-child(3){border-left:0;border-top:1px solid var(--line);padding-top:9px}
   .impspec__det{text-align:left}
+}
+
+/* ---- Upset Meter, at the head of each game's Special Considerations block --------------------
+   The Chaos Board, folded into the game it is about (Derek: "move our Chaos Board data into each
+   game ... I want each game to have an Upset Meter ... rate each game's upset potential based on
+   our model, special considerations and chaos potential"). Every driver is shown with its own
+   bar, because the parts are the point — a single number that hides what produced it is the
+   "appearance of rigor" this project has a rule against. */
+.upmeter{display:flex;flex-direction:column;gap:5px;padding:9px 12px 10px;border-radius:9px;
+  border:1px solid var(--line);background:var(--surface)}
+.upmeter__head{display:flex;align-items:baseline;gap:10px}
+.upmeter__k{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.upmeter__score{font-family:var(--font-mono);font-size:22px;font-weight:700;line-height:1;color:var(--ink)}
+.upmeter__tier{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
+  padding:2px 8px;border-radius:999px;background:var(--surface-2);color:var(--muted)}
+.upmeter--high .upmeter__score,.upmeter--high .upmeter__tier{color:var(--mkt)}
+.upmeter--high .upmeter__tier{background:color-mix(in srgb,var(--mkt) 14%,transparent)}
+.upmeter--notable .upmeter__score,.upmeter--notable .upmeter__tier{color:var(--accent)}
+.upmeter--notable .upmeter__tier{background:color-mix(in srgb,var(--accent) 13%,transparent)}
+.upmeter__bar{height:6px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.upmeter__fill{display:block;height:100%;border-radius:999px;background:var(--muted)}
+.upmeter--high .upmeter__fill{background:var(--mkt)}
+.upmeter--notable .upmeter__fill{background:var(--accent)}
+.upmeter__say{margin:1px 0 2px;font-size:12.5px;color:var(--ink);line-height:1.4}
+/* Drivers: label, bar, value — on tracks so the bars line up and can be compared down the list. */
+.upmeter__drivers{list-style:none;margin:0;padding:0;display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:3px 22px}
+.upmeter__d{display:grid;grid-template-columns:62px minmax(40px,1fr) 24px;gap:8px;align-items:center}
+.upmeter__dl{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.upmeter__dbar{height:4px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.upmeter__dfill{display:block;height:100%;border-radius:999px;background:var(--model)}
+.upmeter__d--chaos .upmeter__dfill{background:var(--muted)}
+.upmeter__dv{font-family:var(--font-mono);font-size:10.5px;color:var(--muted);text-align:right}
+.upmeter__foot{margin:3px 0 0;font-size:10.5px;color:var(--muted);line-height:1.4}
+@media (max-width:560px){
+  .upmeter__drivers{grid-template-columns:1fr}
 }

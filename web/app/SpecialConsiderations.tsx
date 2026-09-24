@@ -3,6 +3,8 @@ import { REF_STATS } from "@/lib/refStats";
 import { TEAM_RATINGS, RATINGS_SEASON, RATINGS_IS_PRIOR } from "@/lib/teamRatings";
 import type { GameWeather } from "@/lib/weatherData";
 import type { InjuryNote } from "@/lib/nflInactives";
+import type { UpsetRead } from "@/lib/upsetMeter";
+import { UpsetMeter } from "./UpsetMeter";
 
 // Special Considerations, on the MODEL board under each game's Bottom Line.
 //
@@ -36,6 +38,9 @@ export interface SpecialCtx {
    *  report routinely lists 40+ players with no designation, so early in the week the honest
    *  answer really is the second. */
   feedHasAny: boolean;
+  /** The game's Upset Meter — the Chaos Board, folded in beside the model and the context
+   *  factors. Null when there is no market line to read a disagreement against. */
+  upset?: UpsetRead | null;
 }
 
 const refByName = new Map(REF_STATS.map((s) => [s.name, s]));
@@ -111,12 +116,13 @@ function TeamInjuries({ team, list, feedHasAny }: {
 }
 
 export function SpecialConsiderations({ ctx }: { ctx: SpecialCtx }) {
-  const { away, home, crew, wx, injuries, feedHasAny } = ctx;
+  const { away, home, crew, wx, injuries, feedHasAny, upset } = ctx;
   const ra = TEAM_RATINGS[away], rh = TEAM_RATINGS[home];
   const byTeam = (t: string) => injuries.filter((i) => i.team === t);
   return (
     <section className="impspec" aria-label={`Special considerations, ${away} at ${home}`}>
       <span className="impspec__k">Special considerations</span>
+      {upset && <UpsetMeter read={upset} />}
       <div className="impspec__cols">
         {/* Column 1 — the game's own facts. */}
         <div className="impspec__col impspec__col--game">

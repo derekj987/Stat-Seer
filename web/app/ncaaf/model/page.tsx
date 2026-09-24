@@ -24,7 +24,9 @@ export const metadata = {
 
 const M = NCAAF_MODEL;
 
-function CardRows({ games, scores }: { games: readonly NcaafCardGame[]; scores?: CfbScores }) {
+function CardRows({ games, scores, week }: {
+  games: readonly NcaafCardGame[]; scores?: CfbScores; week: number;
+}) {
   return (
     <>
       {games.map((g) => {
@@ -55,7 +57,7 @@ function CardRows({ games, scores }: { games: readonly NcaafCardGame[]; scores?:
           {/* Special Considerations, spanning the row — the same block the NFL board carries,
               with the factors college actually has. See NcaafSpecialConsiderations. */}
           <tr className="hb-specrow">
-            <td colSpan={5}><NcaafSpecialConsiderations g={g} /></td>
+            <td colSpan={5}><NcaafSpecialConsiderations g={g} week={week} /></td>
           </tr>
           </Fragment>
         );
@@ -91,7 +93,7 @@ export default async function Page({ searchParams }: {
       <div className="hb-formwrap">
         <table className="hb-form hb-form--mkt hb-form--cards">
           {i === 0 && <NcaafCardHead />}
-          <tbody><CardRows games={grp.items} scores={scores} /></tbody>
+          <tbody><CardRows games={grp.items} scores={scores} week={c.week} /></tbody>
         </table>
       </div>
     </div>

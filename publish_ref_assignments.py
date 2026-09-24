@@ -61,6 +61,11 @@ def fetch_games():
 ESPN_BOARD = ("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
               "?year=%d&seasontype=2&week=%d")
 ESPN_SUMMARY = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=%s"
+# Second attempt when the summary carries no officials. The core API exposes them as their own
+# collection, and it has been populated pre-game on days the summary was not. Cheap: one request
+# per game, and only for games whose summary came back empty.
+ESPN_OFFICIALS = ("https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/%s"
+                  "/competitions/%s/officials?lang=en&region=us")
 # ESPN abbreviates two clubs differently from nflverse (which is what ref_assignments stores).
 ESPN_ALIAS = {"LAR": "LA", "WSH": "WAS"}
 
@@ -109,6 +114,27 @@ def fetch_espn_crews(season, weeks=range(1, 19)):
             officials = ((summary or {}).get("gameInfo") or {}).get("officials") or []
             ref = next((o.get("fullName") for o in officials
                         if ((o.get("position") or {}).get("name") == "Referee")), None)
+            if not ref:
+                # The summary endpoint stopped carrying pre-game officials at some point this
+                # season: every run from week 2 on printed "+0 pre-game crews from ESPN" while
+                # the board sat on "Crew assigned closer to kickoff" for games kicking off that
+                # night. A row that can never resolve before kickoff is the placeholder problem
+                # this project has a rule about, so try the core API's own officials collection
+                # before giving up on the game.
+                core = _espn_json(ESPN_OFFICIALS % (ev["id"], ev["id"]))
+                for item in (core or {}).get("items", []) or []:
+                    pos = (item.get("position") or {}).get("name") or ""
+                    if pos != "Referee":
+                        continue
+                    name = (item.get("official") or {}).get("displayName")
+                    if not name:
+                        # The official is usually a $ref; follow it once.
+                        link = (item.get("official") or {}).get("$ref")
+                        if link:
+                            name = (_espn_json(link.replace("http://", "https://")) or {}).get("displayName")
+                    if name:
+                        ref = name
+                        break
             if not ref:
                 continue
             out.append({"season": int(season), "week": int(wk),

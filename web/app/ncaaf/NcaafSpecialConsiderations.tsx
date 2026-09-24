@@ -1,6 +1,10 @@
 import { NCAAF_MODEL, NCAAF_SCORING, type NcaafCardGame } from "./model-data";
 import { CFB_GAME_WEATHER, type CfbGameWeather } from "@/lib/cfbWeatherData";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
+import { upsetMeter } from "@/lib/upsetMeter";
+import { UpsetMeter } from "../UpsetMeter";
+import { CFB_CHAOS } from "@/lib/chaosTraits";
+import { scoreChaos, returnFromSpread } from "@/lib/chaos";
 
 // Special Considerations for the NCAAF model board, under each game's row — the college
 // counterpart of app/SpecialConsiderations.tsx, built after Derek said "move the NCAAF context
@@ -71,12 +75,44 @@ function TeamCol({ team, ap }: { team: string; ap?: number | null }) {
   );
 }
 
-export function NcaafSpecialConsiderations({ g }: { g: NcaafCardGame }) {
+// College scores more than the NFL; the Upset Meter reads each team's rate against this.
+const CFB_LEAGUE_PTS = 27.0;
+
+export function NcaafSpecialConsiderations({ g, week }: { g: NcaafCardGame; week: number }) {
   const wx = WX.get(`${g.away} @ ${g.home}`);
   const season = CX.scoringSeason;
+  // The Upset Meter — the Chaos Board folded into the game it is about. College has no referee
+  // crew, so that driver simply does not appear and the remaining weights renormalise.
+  const ms = g.marketSpread;
+  let read = null;
+  if (ms) {
+    const fav = ms.fav;
+    const dog = fav === g.home ? g.away : g.home;
+    const line = Math.abs(ms.num);
+    const chaos = line >= 3 ? scoreChaos({
+      sport: "CFB", away: g.away, home: g.home, dog, fav, line, week,
+      dogReturn: returnFromSpread(line, "CFB"), returnEst: true,
+      favTrait: CFB_CHAOS[fav], dogTrait: CFB_CHAOS[dog],
+      windMph: wx && !wx.indoor ? wx.windMph : null,
+      improvePct: fav === g.home ? g.awayRiser : g.homeRiser,
+    }).index : null;
+    // Both numbers as the HOME side's margin, which is what upsetMeter expects.
+    const marketHome = ms.fav === g.home ? -Math.abs(ms.num) : Math.abs(ms.num);
+    const projHome = g.projSpread.fav === g.home ? Math.abs(g.projSpread.num) : -Math.abs(g.projSpread.num);
+    read = upsetMeter({
+      marketSpreadHome: marketHome,
+      modelMarginHome: g.rated === false ? null : projHome,
+      windMph: wx && !wx.indoor ? wx.windMph : null,
+      dogOff: NCAAF_SCORING[dog]?.off ?? null,
+      favDef: NCAAF_SCORING[fav]?.def ?? null,
+      leaguePts: CFB_LEAGUE_PTS,
+      chaosIndex: chaos,
+    }, abbrevTeam(dog), abbrevTeam(fav));
+  }
   return (
     <section className="impspec" aria-label={`Special considerations, ${g.away} at ${g.home}`}>
       <span className="impspec__k">Special considerations</span>
+      {read && <UpsetMeter read={read} />}
       <div className="impspec__cols">
         <div className="impspec__col impspec__col--game">
           <div className="impspec__blk">

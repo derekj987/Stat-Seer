@@ -1,124 +1,13 @@
-import { Brand, FlowSteps, ContextSubnav, WeekBadge } from "../../Nav";
-import { NcaafWeekNav, NcaafWeekNote, readNcaafWeek } from "../NcaafWeek";
-import { liveNcaafCard } from "../liveCard";
-import { NCAAF_MODEL, type NcaafUpset } from "../model-data";
-import { ChaosBoard } from "../../ChaosBoard";
-import Tip from "../../Tip";
-import { buildChaosBoard, returnFromSpread, type ChaosInput } from "@/lib/chaos";
-import { CFB_CHAOS, CHAOS_WINDOW } from "@/lib/chaosTraits";
+import { redirect } from "next/navigation";
 
-// College Football — Context · Upset Watch (Context landing). Mirrors the NFL Context
-// page: underdogs our line-blind rating backs against the market, then every game's line
-// beside our own read, then the honest roadmap of what's still arriving. The rating is
-// compressed and doesn't beat the spread, so nothing here is a cover pick — it flags
-// where our independent read diverges, to arm your judgment. Panels inform; they don't vote.
-export const metadata = {
-  title: "StatSeer — CFB Upset Watch",
-  description: "College-football underdogs our model backs against the market, plus every game's line beside our line-blind read.",
-};
-
-const M = NCAAF_MODEL;
-
-export default async function Page({ searchParams }: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const week = readNcaafWeek((await searchParams).week, M.card.week);
-  const c = await liveNcaafCard(week);
-  const upsets: readonly NcaafUpset[] = c.upsets;
-
-  // Speculative Chaos Board — every game with a real underdog, scored on chaos potential
-  // (not probability). Payout is derived from the spread (no live CFB moneyline).
-  const chaosInputs: ChaosInput[] = c.games
-    .filter((g) => g.marketSpread && Math.abs(g.marketSpread.num) >= 3)
-    .map((g) => {
-      const fav = g.marketSpread!.fav;
-      const dog = fav === g.home ? g.away : g.home;
-      const line = Math.abs(g.marketSpread!.num);
-      return {
-        sport: "CFB" as const, away: g.away, home: g.home, dog, fav, line, week: c.week,
-        dogReturn: returnFromSpread(line, "CFB"), returnEst: true,
-        favTrait: CFB_CHAOS[fav], dogTrait: CFB_CHAOS[dog], windMph: null,
-        improvePct: fav === g.home ? g.awayRiser : g.homeRiser,
-      };
-    });
-  const chaos = buildChaosBoard(chaosInputs, 6);
-  const winLabel = `${CHAOS_WINDOW[0]}–${CHAOS_WINDOW[1].slice(2)}`;
-
-  return (
-    <main className="wrap">
-      <header className="masthead">
-        <Brand
-          sub={<><span className="brand__sport">NCAAF</span> · Upset Watch</>}
-          art={{ src: "/upset.png?v=1", alt: "Upset Watch" }}
-        />
-      </header>
-
-      <WeekBadge week={c.week} />
-      <FlowSteps active="context" base="ncaaf" />
-      <ContextSubnav active="upset" base="ncaaf" />
-      <NcaafWeekNav base="/ncaaf/context" week={week} />
-      <NcaafWeekNote card={c} />
-
-      {/* --- Chaos Board leads the page: the speculative upset lab, first thing members see --- */}
-      <ChaosBoard sport="NCAAF" entries={chaos} windowLabel={winLabel} />
-
-      {/* --- Upset Model: where our rating backs the market's underdog --- */}
-      <section className="ctxsec">
-        <h2 className="ncf-h">Upset Model</h2>
-        {upsets.length === 0 ? (
-          <p className="foot">No upset flags this week — our rating agrees with the market&apos;s favorite in every game on the board.</p>
-        ) : (
-          <div className="upsets">
-            {upsets.map((u) => (
-              <div className="upset" key={`${u.dog}-${u.matchup}`}>
-                <span className="upset__game">{u.dog} <span className="upset__mspread">{u.matchup}</span></span>
-                <span className="upset__pick">
-                  model: win <b>{u.modelPct}%</b> <span className="upset__mspread">(by {u.byPoints.toFixed(1)})</span>
-                </span>
-                <span className="upset__mkt">market: {u.spread} · {u.marketPct}%</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <p className="ctxsec__d">
-        Looking for the market&apos;s line beside our read on every game? That full model view lives on{" "}
-        <a href="/ncaaf/model">The Model</a>.
-      </p>
-
-      {/* --- Honest roadmap: data-dependent panels not yet live for CFB --- */}
-      <section className="ctxsec">
-        <h2 className="ctxsec__h">Arriving this season <Tip label="Arriving this season" text={<>
-          <span className="tip__lead">The panels below need live in-season data we&apos;re capturing as the year runs. We&apos;d rather show nothing than fake it — here&apos;s what&apos;s coming and why it isn&apos;t here yet.</span>
-        </>} /></h2>
-        <div className="soongrid">
-          <div className="soon">
-            <span className="soon__h">Weather</span>
-            <p>Wind is the one measured lead in football totals — the market under-sets ~1.3 pts at 15+ mph. Wires in once we pull game-site forecasts.</p>
-          </div>
-          <div className="soon">
-            <span className="soon__h">Injury &amp; availability</span>
-            <p>College depth charts swing games. Availability can&apos;t be backfilled — the daily capture starts as the season&apos;s reports and two-deeps post.</p>
-          </div>
-          <div className="soon">
-            <span className="soon__h">Live weekly odds</span>
-            <p>The board above is a Tuesday snapshot of the openers. The full weekly line — moving through kickoff — turns on as the NCAAF odds capture feeds the site.</p>
-          </div>
-          <div className="soon">
-            <span className="soon__h">Rivalry &amp; letdown spots</span>
-            <p>A marker of <em>uncertainty</em> around a game, never a direction to bet — flagged once the schedule context (rivalry weeks, look-aheads) is wired in.</p>
-          </div>
-        </div>
-      </section>
-
-      <footer className="foot">
-        <p>
-          <b>Context informs; it doesn&apos;t vote.</b> The measured context — home field and conference strength — is
-          live on <a href="/ncaaf/considerations">Special Considerations</a>; the line-blind rating and its honest
-          record are on <a href="/ncaaf/model">The Model</a>.
-        </p>
-      </footer>
-    </main>
-  );
+// RETIRED with the Context section. Derek: "I want to remove the Context section completely
+// because I received feedback that there is too much data spread across the app and website. We
+// need to centralize." What was worth keeping moved onto the model board, under each game:
+// Special Considerations (scoring, weather, referee, injuries) and the Upset Meter, which is
+// where the Upset Lab's chaos index now lives.
+//
+// A redirect rather than a 404 — these routes are pinned on dashboards and linked from the
+// homepage, and the board they land on carries the same facts, per game.
+export default function Page() {
+  redirect("/ncaaf/model");
 }

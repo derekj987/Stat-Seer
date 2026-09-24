@@ -1811,6 +1811,45 @@ grep -rn "order=week.asc&limit=1\|week.asc" --include=*.py --include=*.ts . | gr
 And the audit check that catches it without reading code: **a "current" data file whose week stamp
 is not this week.** `grep -n "WEEK = " web/lib/*.ts` — every one of those should be the live week.
 
+### The Context SECTION is gone — one game, one place
+Derek, after moving Special Considerations onto the board: *"I want to remove the Context section
+completely because I received feedback that there is too much data spread across the app and
+website. We need to centralize."* So the three-step flow is two steps (The Model → Value Finder),
+`ContextSubnav` is deleted, and `/context`, `/local-intelligence`, `/tailgate` and their NCAAF
+twins redirect to their model board. The Chaos Board became the **Upset Meter** on each game.
+
+**When you retire a whole section, the checklist is: FlowSteps, the drawer, the top nav, the
+landing panels, the sub-nav component itself, and every route.** Each of those held a reference
+here; `tsc` catches none of them because they are all strings.
+
+### 🚨 An "Upset Meter" is a composite score — name its parts or it launders them
+This project's founding rule is *"panels inform, they do not vote"*: combining zero-edge signals
+produces zero edge while the appearance of rigor rises sharply. A single 0-100 upset number is
+exactly that machine — unless it shows what produced it. `lib/upsetMeter.ts` therefore:
+- weights **our model's own disagreement with the market** highest (40), because that is the only
+  component with a graded track record;
+- carries scoring, weather and referee as context (18 / 14 / 12), each measured, none an edge;
+- gives the non-predictive chaos index the smallest share (16) and **says so on the card**;
+- renders EVERY driver with its own bar, so a reader who disagrees can see which factor carried
+  the reading, and renormalises when a component is missing (college has no referee crew).
+
+If you ever find yourself writing a composite that hides its inputs, that is the tell. Publish the
+breakdown or do not publish the number.
+
+### One board = one column header, EXCEPT when the rows are far apart
+The rule above ("One board = ONE column header") is right for a plain list and wrong once rows are
+separated by tall panels. With Special Considerations and an Upset Meter under every game, a single
+header at the top of a day group is off screen by the second game — Derek: *"Each game should have
+the Game, Spread, Total, Model Spread, and Model Total headers to start."* So each `.impgame` card
+carries its own header, and the Bottom Line stopped being a loose strip underneath and became the
+sixth column. Verify the header and its data row share column edges rather than trusting the CSS:
+```js
+const L = (r) => [...r.children].map(c => Math.round(c.getBoundingClientRect().left));
+JSON.stringify(L(head)) === JSON.stringify(L(data))   // must be true
+```
+The distinction that keeps both rules true: a header per CARD is fine, a header repeated inside
+one continuous table is the bug the original rule was written for.
+
 ### Context lives WITH the number, not on its own page
 Both sports' "Special Considerations" pages are retired; their factors sit under each game's row
 on the model board (`app/SpecialConsiderations.tsx`, `app/ncaaf/NcaafSpecialConsiderations.tsx`).

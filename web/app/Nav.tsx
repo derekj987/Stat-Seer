@@ -62,10 +62,13 @@ export function FlowSteps({ active, base = "nfl" }: {
   // branch in every nav component. The three steps are the same everywhere by design: that
   // sameness across sports IS the product.
   const hrefs = SPORT_PATHS[base];
+  // TWO steps. Context was the third and is retired — Derek: "I want to remove the Context section
+  // completely because I received feedback that there is too much data spread across the app and
+  // website. We need to centralize." Its factors are on the model board under each game (Special
+  // Considerations + the Upset Meter), which is where the decision is made anyway.
   const steps = [
     { key: "analyze", n: "1", label: "The Model", sub: "make your analysis", href: hrefs.analyze },
-    { key: "context", n: "2", label: "Context", sub: "read the room", href: hrefs.context },
-    { key: "value", n: "3", label: "Value Finder", sub: "find the best price", href: hrefs.value },
+    { key: "value", n: "2", label: "Value Finder", sub: "find the best price", href: hrefs.value },
   ] as const;
   return (
     <nav className="flow" aria-label="How to use StatSeer">
@@ -292,31 +295,8 @@ export function TopNav({ active }: { active: "value" | "model" | "context" }) {
   );
 }
 
-/** Sub-tabs inside Context. */
-export function ContextSubnav({ active, base = "nfl" }: {
-  active: "upset" | "fan" | "special"; base?: "nfl" | "ncaaf";
-}) {
-  const h = base === "ncaaf"
-    ? { upset: "/ncaaf/context", special: null, fan: "/ncaaf/local-intelligence" }
-    : { upset: "/context", special: null, fan: "/local-intelligence" };
-  return (
-    <nav className="subnav subnav--context" aria-label="Context view">
-      {/* Retired in BOTH sports: the factors moved onto each model board under the game's row
-          ("remove the Special Considerations section completely from the Context section", then
-          "move the NCAAF context data over too"). `special` is null for every sport now; the
-          slot stays so a future sport can fill it without reshaping this nav. */}
-      {h.special && (
-        <a href={h.special} className={active === "special" ? "subnav__t active" : "subnav__t"}
-          aria-current={active === "special" ? "page" : undefined}>Special Considerations</a>
-      )}
-      <a href={h.upset} className={active === "upset" ? "subnav__t active" : "subnav__t"}
-        aria-current={active === "upset" ? "page" : undefined}>Upset Watch</a>
-      <a href={h.fan} className={active === "fan" ? "subnav__t active" : "subnav__t"}
-        aria-current={active === "fan" ? "page" : undefined}>Local Intelligence</a>
-    </nav>
-  );
-}
-
+// ContextSubnav removed with the Context section — its three tabs (Special Considerations,
+// Upset Watch, Local Intelligence) are retired and their routes redirect to the model board.
 /** Mobile-only "there's more to the right" nudge for horizontally-scrolling tables.
  *  Hidden on desktop; shown (with an animated arrow) only on phone widths. */
 export function ScrollHint({ label = "Scroll for more" }: { label?: string }) {
