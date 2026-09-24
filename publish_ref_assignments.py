@@ -27,6 +27,7 @@ import argparse
 import datetime as dt
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -143,6 +144,85 @@ def fetch_espn_crews(season, weeks=range(1, 19)):
     return out
 
 
+# ---- Football Zebras: the PRE-GAME source -----------------------------------------------------
+# ESPN stopped carrying officials before kickoff this season (every run from week 2 logged
+# "+0 pre-game crews from ESPN"), so the board's Referee row could only ever fill in AFTER a game
+# was played -- which is the "placeholder that never resolves" this project has a rule against.
+# Derek, on a Thursday game: "Is the referee data for tonight's game not available anywhere?"
+#
+# It is. Football Zebras publishes the league's weekly assignments days ahead, one post per week,
+# listing every game and its referee. Measured on 2026 week 3, fetched the morning of the Thursday
+# game: all 16 games present, "Falcons at Packers - Shawn Smith" included.
+#
+# Nicknames only ("Falcons at Packers"), so they map through NFL_NICK below. A name this scrape
+# cannot resolve is SKIPPED and counted, never guessed.
+FZ_INDEX = "https://www.footballzebras.com/"
+FZ_UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+NFL_NICK = {
+    "Cardinals": "ARI", "Falcons": "ATL", "Ravens": "BAL", "Bills": "BUF", "Panthers": "CAR",
+    "Bears": "CHI", "Bengals": "CIN", "Browns": "CLE", "Cowboys": "DAL", "Broncos": "DEN",
+    "Lions": "DET", "Packers": "GB", "Texans": "HOU", "Colts": "IND", "Jaguars": "JAX",
+    "Chiefs": "KC", "Raiders": "LV", "Chargers": "LAC", "Rams": "LA", "Dolphins": "MIA",
+    "Vikings": "MIN", "Patriots": "NE", "Saints": "NO", "Giants": "NYG", "Jets": "NYJ",
+    "Eagles": "PHI", "Steelers": "PIT", "49ers": "SF", "Seahawks": "SEA", "Buccaneers": "TB",
+    "Titans": "TEN", "Commanders": "WAS",
+}
+
+
+def _fz_html(url):
+    try:
+        req = urllib.request.Request(url, headers=FZ_UA)
+        with urllib.request.urlopen(req, timeout=45) as r:
+            return r.read().decode("utf-8", "replace")
+    except Exception as e:                      # noqa: BLE001 — a supplement, never fatal
+        print(f"  Football Zebras unavailable ({e})", file=sys.stderr)
+        return None
+
+
+def fetch_zebras_crews(season, week):
+    """[{season, week, home_team, away_team, referee}] from Football Zebras' weekly post.
+
+    The post is found from the site index rather than by guessing a slug: the URL carries the
+    publication month, which moves through the season. Entries read
+    "<Away> at <Home>" (or "vs" for a neutral site) followed by the referee's name."""
+    home = _fz_html(FZ_INDEX)
+    if not home:
+        return []
+    m = re.search(r'href="(https://www\.footballzebras\.com/[^"]*week-%d-referee-assignments-%d/)"'
+                  % (week, season), home)
+    if not m:
+        print(f"  Football Zebras: no week-{week} post linked from the index yet")
+        return []
+    page = _fz_html(m.group(1))
+    if not page:
+        return []
+    body = re.sub(r"<script.*?</script>", "", page, flags=re.S)
+    text = re.sub(r"<[^>]+>", "\n", body)
+    text = re.sub(r"[ \t]+", " ", text)
+    lines = [ln.strip() for ln in text.split("\n") if ln.strip()]
+    out, unmapped = [], []
+    for i, ln in enumerate(lines):
+        mm = re.fullmatch(r"([A-Za-z0-9'. ]+?) (?:at|vs\.?) ([A-Za-z0-9'. ]+)", ln)
+        if not mm:
+            continue
+        away_nick, home_nick = mm.group(1).strip(), mm.group(2).strip()
+        away, hometm = NFL_NICK.get(away_nick), NFL_NICK.get(home_nick)
+        if not away or not hometm:
+            if away_nick in NFL_NICK or home_nick in NFL_NICK:
+                unmapped.append(ln)
+            continue
+        # The referee's name is the next non-empty line; anything else means the layout moved.
+        ref = lines[i + 1] if i + 1 < len(lines) else ""
+        if not re.fullmatch(r"[A-Z][A-Za-z'.\-]+(?: [A-Z][A-Za-z'.\-]+){1,2}", ref):
+            unmapped.append(f"{ln} -> {ref!r}")
+            continue
+        out.append({"season": int(season), "week": int(week),
+                    "home_team": hometm, "away_team": away, "referee": ref})
+    if unmapped:
+        print(f"  Football Zebras: {len(unmapped)} line(s) not parsed: {unmapped[:3]}")
+    return out
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--season", type=int, default=2026)
@@ -173,7 +253,24 @@ def main(argv=None):
     espn_rows = fetch_espn_crews(args.season)
     added = [r for r in espn_rows if (r["week"], r["home_team"]) not in have]
     rows += added
+    have |= {(r["week"], r["home_team"]) for r in added}
     print(f"{args.season}: +{len(added)} pre-game crews from ESPN")
+
+    # Football Zebras for the weeks still uncovered — this is the source that actually carries an
+    # assignment BEFORE kickoff (see fetch_zebras_crews). Only the current and next week are
+    # fetched: the league posts one week at a time and every earlier week is already filled by
+    # nflverse once played.
+    upcoming = sorted({int(w) for w in g[(g.season == args.season) & (g.game_type == "REG")
+                                         & g.home_score.isna()].week.unique()})[:2]
+    zeb_added = []
+    for wk in upcoming:
+        for r in fetch_zebras_crews(args.season, wk):
+            if (r["week"], r["home_team"]) not in have:
+                zeb_added.append(r)
+                have.add((r["week"], r["home_team"]))
+    rows += zeb_added
+    print(f"{args.season}: +{len(zeb_added)} pre-game crews from Football Zebras "
+          f"(weeks {upcoming or '—'})")
 
     print(f"{args.season}: {len(rows)} games with an assigned crew")
     for r in rows[:5]:

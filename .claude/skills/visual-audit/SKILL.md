@@ -1871,6 +1871,46 @@ Three things that pass forward to any block like it:
   into a two-column card at 375px, which squeezed the spanning cell into half the width and
   ellipsized it. `tr.hb-specrow{display:block}` + `td{grid-column:1/-1}`.
 
+### 🚨 A Tip bubble inherits `white-space` from wherever you put it
+The Upset Meter's scroll went into a `<td>` on the NCAAF board, and `.hb-form td` is
+`white-space:nowrap` — so the bubble's prose laid out on ONE 2,129px line and drove the table
+wrapper's scrollWidth to 2,071px against an 878px box. Nine `table-overflows-container` findings
+from one paragraph. `.tip__bubble` now sets `white-space:normal` itself: a bubble is prose and
+must wrap wherever it lands. Same family as the `.hb-books` nowrap overflow.
+
+Two other things that pass forward from the same fix:
+- **A popover inside a NARROW header hangs off the card.** A 460px bubble centred on a 22px seal
+  near a card's right edge overflowed by 194px (measured: 983px box, 1,176px of content). It now
+  anchors to the section header (a declared wrapper it is always inside — not "whatever happens to
+  be positioned above it") with an explicit `width:min(520px, 100vw - 48px)`. `left`+`right` with
+  `width:auto` was not enough: inside a table cell the containing block resolved differently.
+- **Put the seal at the END the bubble opens from.** With the bubble anchored left and the seal
+  pushed right by `margin-left:auto`, `popover-unanchored` fired at 662px from its trigger — and
+  it was right.
+
+### ⚠️ On a STALLED page, a manual DOM measurement is as blind as the probe
+Chasing the above, three hand-written measurements in the real tab came back "no overflow" while
+the probe reported nine. Both were right about what they measured: `next dev` had the page in a
+Suspense stall, so the live tree was 8 characters and every element I queried was the 0×0 copy
+inside `#S:0`. The probe splices; my snippets did not.
+
+**If you are measuring geometry on a page that might be stalled, splice FIRST — in a snippet
+exactly as in the probe — or you will "disprove" a real finding.** The tell is the live tree's
+character count:
+```js
+const live = document.querySelector('.siteshift main.wrap');
+live.textContent.trim().length     // < 200 => you are measuring nothing
+```
+This is the mirror image of the rule above it: a splice can invent geometry findings, and NOT
+splicing can hide them. Check the character count before believing either answer.
+
+### Say it in words a reader has, not in the trade's slang
+The Upset Meter's low tier read "Chalk holds up". Derek: *"What does chalk holds up mean? That
+needs to be different."* Chalk is the favourite — obvious inside betting, opaque outside it, and
+this product is aimed at people arriving with data questions rather than a glossary. The tiers are
+now "Upset in play" / "Some upset risk" / "Favourite should hold". Worth a scan of any label that
+came out of a betting habit rather than a plain description.
+
 ### A fixed track must be wider than its widest LABEL, or the label lands on its neighbour
 The injury pill sits in a fixed column so every player's name starts at the same x. "QUESTIONABLE"
 is ~78px of ink in a 44px track, so it printed straight over the name — Derek: *"there is also

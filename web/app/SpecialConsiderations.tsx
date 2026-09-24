@@ -121,8 +121,7 @@ export function SpecialConsiderations({ ctx }: { ctx: SpecialCtx }) {
   const byTeam = (t: string) => injuries.filter((i) => i.team === t);
   return (
     <section className="impspec" aria-label={`Special considerations, ${away} at ${home}`}>
-      <span className="impspec__k">Special considerations</span>
-      {upset && <UpsetMeter read={upset} />}
+      <h4 className="impsec">Special considerations</h4>
       <div className="impspec__cols">
         {/* Column 1 — the game's own facts. */}
         <div className="impspec__col impspec__col--game">
@@ -161,6 +160,9 @@ export function SpecialConsiderations({ ctx }: { ctx: SpecialCtx }) {
         <TeamInjuries team={away} list={byTeam(away)} feedHasAny={feedHasAny} />
         <TeamInjuries team={home} list={byTeam(home)} feedHasAny={feedHasAny} />
       </div>
+      {/* The meter reads the factors ABOVE it, so it sits under them (Derek: "move the Upset
+          Meter under the Scoring, Weather, and Referee data"). */}
+      {upset && <UpsetMeter read={upset} />}
     </section>
   );
 }

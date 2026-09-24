@@ -32,6 +32,12 @@ export interface UpsetInput {
   refPen?: number | null;
   /** League-average penalties per game, to read `refPen` against. */
   refLeaguePen?: number | null;
+  /** % of this crew's games that went OVER the total, and the league's rate. */
+  refOverPct?: number | null;
+  refLeagueOverPct?: number | null;
+  /** % of this crew's games the FAVOURITE covered, and the league's rate. */
+  refFavCoverPct?: number | null;
+  refLeagueFavCoverPct?: number | null;
   /** Points per game the underdog scores, and the favourite allows (season to date). */
   dogOff?: number | null;
   favDef?: number | null;
@@ -116,15 +122,37 @@ export function upsetMeter(g: UpsetInput, dogName: string | null, favName: strin
     });
   }
 
-  // --- Referee: a flag-heavy crew adds variance, which helps the side with less to lose. ---
+  // --- Referee. Three readings, and they are NOT equal in standing.
+  //
+  // The penalty rate is the one crew tendency measured to persist year to year, so it leads: a
+  // flag-heavy crew adds variance, which helps the side with less to lose. The over rate and the
+  // favourite-cover rate are what Derek asked for ("do they favor over/unders, underdogs or
+  // spreads covering") and they are HISTORY, not a tendency that carries — the referee analysis
+  // this project published says so explicitly. They are included at half weight for that reason,
+  // and the scroll on the card says which is which.
   if (g.refPen != null && g.refLeaguePen) {
-    const rel = g.refPen / g.refLeaguePen;
-    const score = clamp(50 + (rel - 1) * 160);
-    drivers.push({
-      key: "referee", label: "Referee", score,
-      note: rel >= 1.06 ? `flag-heavy crew (~${g.refPen}/g) — more swing`
-        : rel <= 0.94 ? `crew lets them play (~${g.refPen}/g) — fewer swings`
+    const pen = clamp(50 + (g.refPen / g.refLeaguePen - 1) * 160);
+    const parts = [{ v: pen, w: 2 }];
+    const bits: string[] = [
+      g.refPen / g.refLeaguePen >= 1.06 ? `flag-heavy (~${g.refPen}/g)`
+        : g.refPen / g.refLeaguePen <= 0.94 ? `lets them play (~${g.refPen}/g)`
         : `average flags (~${g.refPen}/g)`,
+    ];
+    if (g.refFavCoverPct != null && g.refLeagueFavCoverPct != null) {
+      // A crew whose games see the favourite cover LESS often reads as upset-friendlier.
+      parts.push({ v: clamp(50 + (g.refLeagueFavCoverPct - g.refFavCoverPct) * 2.2), w: 1 });
+      bits.push(`favourites covered ${g.refFavCoverPct}% of his games`);
+    }
+    if (g.refOverPct != null && g.refLeagueOverPct != null) {
+      // A high-scoring environment gives a dog more ways back into a game.
+      parts.push({ v: clamp(50 + (g.refOverPct - g.refLeagueOverPct) * 2.2), w: 1 });
+      bits.push(`${g.refOverPct}% went over`);
+    }
+    const wsumR = parts.reduce((a, b) => a + b.w, 0);
+    drivers.push({
+      key: "referee", label: "Referee",
+      score: parts.reduce((a, b) => a + b.v * b.w, 0) / wsumR,
+      note: bits.join(" · "),
     });
   }
 

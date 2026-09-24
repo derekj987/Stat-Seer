@@ -3820,6 +3820,11 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   background:var(--surface);border:1px solid var(--gold);border-radius:10px;padding:11px 13px;
   font-size:12.5px;line-height:1.5;color:var(--ink);font-style:normal;font-weight:400;letter-spacing:0;
   text-transform:none;text-align:left;box-shadow:0 12px 32px rgba(0,0,0,.32);
+  /* A bubble is PROSE and must always wrap. Inside the NCAAF board it sits in a `.hb-form td`,
+     which is `white-space:nowrap` — so its text laid out on one 2,129px line and drove the
+     table wrapper's scrollWidth to 2,071px against an 878px box (audit,
+     table-overflows-container x9). Same family as the `.hb-books` nowrap overflow. */
+  white-space:normal;
   opacity:0;visibility:hidden;pointer-events:none;transition:opacity .13s ease}
 .tip__bubble b{color:var(--gold);font-weight:800}
 .tip:has(.tip__chk:checked) .tip__bubble{opacity:1;visibility:visible;pointer-events:auto}
@@ -5127,6 +5132,14 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
    headings are 11px caps in the ink colour over a rule of their own. */
 .impspec{display:flex;flex-direction:column;gap:8px;padding:9px 12px 12px;
   border-top:1px dashed var(--line);background:var(--surface-2);font-size:12px;color:var(--muted)}
+/* ONE section header for every block inside a game card — "Market vs model breakdown", "Special
+   considerations", "Upset meter". Derek: "Make all the headers uniform." They sit outside their
+   boxes, so a reader scanning a card sees three labelled sections rather than three different
+   treatments. Inline-flex so a Tip scroll rides beside the text without dropping a line. */
+.impsec{display:flex;align-items:center;gap:8px;margin:12px 12px 6px;font-size:12px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.09em;color:var(--mkt)}
+.impsec--first{margin-top:10px}
+.impspec .impsec{margin-left:0;margin-right:0}
 .impspec__k{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--mkt)}
 /* The game column is content-sized and the two team columns split what is left equally, so the
    injuries sit right rather than bunching in the middle. 1px rules divide them. */
@@ -5200,9 +5213,24 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
    our model, special considerations and chaos potential"). Every driver is shown with its own
    bar, because the parts are the point — a single number that hides what produced it is the
    "appearance of rigor" this project has a rule against. */
-.upmeter{display:flex;flex-direction:column;gap:5px;padding:9px 12px 10px;border-radius:9px;
-  border:1px solid var(--line);background:var(--surface)}
+.upmeter{display:flex;flex-direction:column;gap:5px;padding:10px 12px;border-radius:9px;
+  border:1px solid var(--line);background:var(--surface);margin-top:2px}
 .upmeter__head{display:flex;align-items:baseline;gap:10px}
+.upmeter{margin-top:0}
+/* The Tip explaining every number here. It anchors to the METER, not to its own 22px seal: a
+   460px bubble centred on an icon near the card's right edge hangs 194px past the card, which the
+   audit reports as `content-escapes-card` + `table-overflows-container` (measured: 983px box,
+   1176px of content). Anchoring to the meter is safe because .upmeter is a declared wrapper the
+   Tip is always inside — the trap the skill warns about is a bubble anchoring to whatever
+   HAPPENS to be positioned above it. */
+.impspec .impsec{position:relative}
+.impsec .tip{position:static}
+.impsec .tip__bubble{left:0;right:auto;transform:none;top:calc(100% + 6px);
+  /* An explicit width, not left+right: inside the NCAAF board the bubble sits in a <td colSpan>,
+     where resolving `width:auto` against the containing block let its text drive the TABLE's
+     scrollWidth to 2,083px against an 812px box. A width that cannot exceed 520px cannot do
+     that whatever the containing block turns out to be. */
+  width:min(520px,calc(100vw - 48px));max-width:none}
 .upmeter__k{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .upmeter__score{font-family:var(--font-mono);font-size:22px;font-weight:700;line-height:1;color:var(--ink)}
 .upmeter__tier{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
@@ -5225,7 +5253,6 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 .upmeter__dfill{display:block;height:100%;border-radius:999px;background:var(--model)}
 .upmeter__d--chaos .upmeter__dfill{background:var(--muted)}
 .upmeter__dv{font-family:var(--font-mono);font-size:10.5px;color:var(--muted);text-align:right}
-.upmeter__foot{margin:3px 0 0;font-size:10.5px;color:var(--muted);line-height:1.4}
 @media (max-width:560px){
   .upmeter__drivers{grid-template-columns:1fr}
 }

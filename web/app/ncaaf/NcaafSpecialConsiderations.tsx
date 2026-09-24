@@ -111,8 +111,7 @@ export function NcaafSpecialConsiderations({ g, week }: { g: NcaafCardGame; week
   }
   return (
     <section className="impspec" aria-label={`Special considerations, ${g.away} at ${g.home}`}>
-      <span className="impspec__k">Special considerations</span>
-      {read && <UpsetMeter read={read} />}
+      <h4 className="impsec">Special considerations</h4>
       <div className="impspec__cols">
         <div className="impspec__col impspec__col--game">
           <div className="impspec__blk">
@@ -139,6 +138,8 @@ export function NcaafSpecialConsiderations({ g, week }: { g: NcaafCardGame; week
         <TeamCol team={g.away} ap={g.apAway} />
         <TeamCol team={g.home} ap={g.apHome} />
       </div>
+      {/* Under the factors it reads — same order as the NFL block. */}
+      {read && <UpsetMeter read={read} />}
       <span className="impspec__foot">
         Scoring is points per game this season ({season}{CX.scoringIsPrior ? ", prior season — no games played yet" : ""});
         our rating is line-blind. Context, not a pick.

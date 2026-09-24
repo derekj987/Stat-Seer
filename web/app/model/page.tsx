@@ -7,7 +7,7 @@ import { weekInjuries, type InjuryNote } from "@/lib/nflInactives";
 import { SpecialConsiderations, type SpecialCtx } from "../SpecialConsiderations";
 import { upsetMeter } from "@/lib/upsetMeter";
 import { TEAM_RATINGS } from "@/lib/teamRatings";
-import { REF_LEAGUE } from "@/lib/refStats";
+import { REF_LEAGUE, REF_STATS } from "@/lib/refStats";
 import { NFL_CHAOS, NFL_IMPROVE, NFL_ENV } from "@/lib/chaosTraits";
 import { scoreChaos, returnFromSpread, comfortInfo } from "@/lib/chaos";
 import { Brand, FlowSteps, ModelSubnav, WeekBadge } from "../Nav";
@@ -91,6 +91,7 @@ function ImpTable({ rows, refs, spec, today, tomorrow, cap }: {
                 screen by the second game. Derek: "Each game should have the Game, Spread, Total,
                 Model Spread, and Model Total headers to start." Bottom line joins them as a
                 sixth column rather than the loose strip it was underneath. */}
+            <h4 className="impsec impsec--first">Market vs model breakdown</h4>
             <div className="improw improw--head" role="row">
               <span>game</span><span>spread</span><span>total</span>
               <span className="improw__modh improw__modstart">model spread</span>
@@ -295,12 +296,17 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
       improvePct: NFL_IMPROVE[dog]?.improvePct,
     });
     const crew = refs.get(g.home);
+    const rs = crew ? REF_STATS.find((x) => x.name === crew.referee) : undefined;
     upsetByEvent.set(g.eventId, upsetMeter({
       marketSpreadHome: spread,
       modelMarginHome: mp ? mp.predMargin : null,
       windMph: wx && !wx.indoor ? wx.windMph : null,
       refPen: crew ? crew.pen : null,
       refLeaguePen: REF_LEAGUE.pen,
+      refOverPct: rs ? rs.over : null,
+      refLeagueOverPct: REF_LEAGUE.over,
+      refFavCoverPct: rs ? rs.atsFav : null,
+      refLeagueFavCoverPct: REF_LEAGUE.atsFav,
       dogOff: TEAM_RATINGS[dog]?.off ?? null,
       favDef: TEAM_RATINGS[fav]?.def ?? null,
       leaguePts: LEAGUE_PTS,
