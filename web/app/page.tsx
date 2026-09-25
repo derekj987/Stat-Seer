@@ -22,7 +22,7 @@ const SEASON = 2026;
 
 export default async function Landing({ searchParams }: PageProps<"/">) {
   const sp = await searchParams;
-  const initialSport = sp.sport === "ncaaf" ? "ncaaf" : "nfl";
+  const initialSport = sp.sport === "ncaaf" ? "ncaaf" : sp.sport === "mlb" ? "mlb" : "nfl";
 
   let nfl: { week: number; card: CardRow[]; upsets: UpsetRow[]; players: PlayerPick[] } = { week: 0, card: [], upsets: [], players: [] };
   try {

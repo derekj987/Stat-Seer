@@ -214,6 +214,39 @@ export default async function Page() {
     }
   }
 
+  // IS THE TOTALS COLUMN A READ, OR ONE OFFSET REPEATED?
+  //
+  // Derek: "All of our baseball totals are reflecting overs... Not every MLB game will be an over.
+  // Period." He was right, and the cause is not the projection.
+  //
+  // Measured 25 September. League scoring across 2,387 completed 2026 games is 8.95 runs and our
+  // projection averages 8.91 — within 0.04. Against the 224 completed games we hold a closing
+  // number for, the market's totals average 8.15: a 0.74-run LEVEL offset. It is only the level.
+  // Those same closing numbers correlate +0.25 with what the games actually produced and beat a
+  // flat league-mean guess by 2.2% on MAE (3.2% once the 0.74 is shifted out), so the market's
+  // per-game shape is real — better than ours, in fact. Every book also agrees with itself (all
+  // eight post 6.5 on BAL @ NYY), so this is not a capture picking alternate lines.
+  //
+  // A 1.5-run gap on 43 of 44 games is ONE offset shown 43 times, not 43 findings, and a reader
+  // scanning the column cannot tell those apart. So the board measures its own gap and says so
+  // when it is systematic. It is self-cancelling: when the two sides agree again the line stops
+  // rendering, with nothing to remember to take out.
+  const totalGaps = upcoming
+    .map((g) => {
+      const mt = mktFor.get(g.gameKey)?.total?.consensus;
+      return mt == null ? null : g.total - mt;
+    })
+    .filter((x): x is number => x != null)
+    .sort((a, b) => a - b);
+  const medianGap = totalGaps.length
+    ? totalGaps[Math.floor(totalGaps.length / 2)] : 0;
+  const overShare = totalGaps.length
+    ? totalGaps.filter((x) => x > 0).length / totalGaps.length : 0;
+  // Needs a real sample, a gap worth naming, and near-unanimity — three conditions so an ordinary
+  // day where we happen to lean one way does not trip it.
+  const totalsOffset = totalGaps.length >= 6 && Math.abs(medianGap) >= 0.75
+    && (overShare >= 0.85 || overShare <= 0.15);
+
   const keys = upcoming.map((g) => g.gameKey);
   const byKey = new Map(upcoming.map((g) => [g.gameKey, g]));
   const kick = new Map(upcoming.map((g) => [g.gameKey, g.commence]));
@@ -297,7 +330,18 @@ export default async function Page() {
         </summary>
         <div className="hb-body">
           {/* No copy on the board: the scroll in the panel bar carries the legend and the caveats.
-              Derek: "I do not want text like that anywhere." */}
+              Derek: "I do not want text like that anywhere."
+              The one exception is the line below, and it is not copy — it is a measurement of the
+              board's own numbers that only appears when they stop being comparable. */}
+          {totalsOffset && (
+            <p className="foot foot--warn">
+              Our totals are running <b>{medianGap > 0 ? "+" : "−"}{Math.abs(medianGap).toFixed(1)} runs</b>{" "}
+              {medianGap > 0 ? "above" : "below"} this book&apos;s on{" "}
+              <b>{Math.round((medianGap > 0 ? overShare : 1 - overShare) * 100)}%</b> of today&apos;s
+              games. That is one offset across the whole slate, not a read on any single game —
+              treat the column as our number, not as an over/under lean, until it closes.
+            </p>
+          )}
 
           {upcoming.length === 0 ? (
             <p className="foot">No upcoming games projected yet. The board fills as probable starters post.</p>

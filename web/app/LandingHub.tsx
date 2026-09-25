@@ -14,6 +14,7 @@ import { INCENTIVE_WATCH } from "@/lib/incentiveWatch";
 import { COACH_TENDENCIES } from "@/lib/coachTendencies";
 import { CONTENTION } from "@/lib/contention";
 import { DEPTH } from "@/lib/depthChart";
+import { MLB_GAMES } from "@/lib/mlbGameModel";
 import { HighlightBanner } from "./HighlightBanner";
 import PinButton from "./PinButton";
 import type { Pin } from "@/lib/dashboard";
@@ -133,7 +134,7 @@ function NcaafConsiderations() {
   );
 }
 
-type Sport = "nfl" | "ncaaf";
+type Sport = "nfl" | "ncaaf" | "mlb";
 type NflData = { week: number; card: CardRow[]; upsets: UpsetRow[]; players: PlayerPick[] };
 type NcaafData = { week: number; games: NcaafCardGame[]; upsets: NcaafUpset[] };
 export type VfRow = { eventId: string; away: string; home: string; line: string; price: number; books: string[] };
@@ -384,6 +385,45 @@ function NflValueTable({ rows }: { rows: VfRow[] }) {
   );
 }
 
+/** MLB snapshot: tonight's slate with our line-blind projected score.
+ *
+ *  Deliberately NOT a "where we disagree" panel like the football ones. Our totals currently sit a
+ *  measured 0.74 runs above the book's on essentially every game -- a LEVEL offset in the feed, not
+ *  a per-game read (see the note on /mlb/model) -- so a disagreement panel would rank games by an
+ *  artefact and present one constant as fifteen findings. Our own numbers, and a link. */
+function MlbSnapshot() {
+  const now = new Date().toISOString();
+  const games = MLB_GAMES.filter((g) => g.commence > now)
+    .sort((a, b) => a.commence.localeCompare(b.commence))
+    .slice(0, 4);
+  if (!games.length) return <p className="lp-cardfoot">No games projected yet — the board fills as probable starters post.</p>;
+  const sp = (n: string | null) => {
+    if (!n) return "not posted";
+    const parts = n.trim().split(/\s+/);
+    return parts.length < 2 ? n : `${parts[0][0]}. ${parts.slice(1).join(" ")}`;
+  };
+  return (
+    <>
+      <div className="hb-formwrap">
+        <table className="hb-form hb-form--mkt">
+          <thead><tr><th className="hb-l">Game</th><th>Starting pitchers</th><th>Our score</th><th>Our total</th></tr></thead>
+          <tbody>
+            {games.map((g) => (
+              <tr key={g.gameKey}>
+                <td className="hb-l"><span className="hb-game">{g.awayAbbr}<span className="hb-at">at</span>{g.homeAbbr}</span></td>
+                <td>{sp(g.awaySpName)} / {sp(g.homeSpName)}</td>
+                <td className="hb-num hb-model">{g.awayRuns.toFixed(1)}&ndash;{g.homeRuns.toFixed(1)}</td>
+                <td className="hb-num hb-model">{g.total.toFixed(1)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="lp-cardfoot"><a href="/mlb/model">See the full MLB model &rarr;</a></p>
+    </>
+  );
+}
+
 export interface SpotlightProp { ctx: SpecialCtx; row: CardRow }
 
 export default function LandingHub({ initialSport, nfl, ncaaf, vf, isMember, spotlight }: { initialSport: Sport; nfl: NflData; ncaaf: NcaafData; vf: VfRow[]; isMember?: boolean; spotlight?: SpotlightProp | null }) {
@@ -399,6 +439,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf, vf, isMember, spo
       {/* pure-CSS sport toggle — no client JS needed */}
       <input type="radio" name="lpsport" id="lps-nfl" className="lp-r" defaultChecked={initialSport === "nfl"} />
       <input type="radio" name="lpsport" id="lps-ncaaf" className="lp-r" defaultChecked={initialSport === "ncaaf"} />
+      <input type="radio" name="lpsport" id="lps-mlb" className="lp-r" defaultChecked={initialSport === "mlb"} />
 
 
       {/* NFL panel */}
@@ -409,6 +450,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf, vf, isMember, spo
           <div className="lpf__toggle" role="tablist" aria-label="Choose a sport">
             <label htmlFor="lps-nfl" className="lpf__t">NFL</label>
             <label htmlFor="lps-ncaaf" className="lpf__t">NCAAF</label>
+            <label htmlFor="lps-mlb" className="lpf__t">MLB</label>
           </div>
         </div>
         <HighlightBanner sport="nfl" />
@@ -447,6 +489,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf, vf, isMember, spo
           <div className="lpf__toggle" role="tablist" aria-label="Choose a sport">
             <label htmlFor="lps-nfl" className="lpf__t">NFL</label>
             <label htmlFor="lps-ncaaf" className="lpf__t">NCAAF</label>
+            <label htmlFor="lps-mlb" className="lpf__t">MLB</label>
           </div>
         </div>
         <HighlightBanner sport="ncaaf" />
@@ -474,6 +517,28 @@ export default function LandingHub({ initialSport, nfl, ncaaf, vf, isMember, spo
         <Panel title="The context a number misses" count="context" hint={TIPS.considNcaaf} open
           pin={pin("considerations", "NCAAF · Special Considerations", "/ncaaf/considerations")}>
           <NcaafConsiderations />
+        </Panel>
+      </div>
+
+      {/* MLB panel (Derek: "also place the MLB toggle on the homepage"). Leaner than the two
+          football panels on purpose: baseball is a nightly slate rather than a weekly board, and
+          the model's own held-out card is honest that only the starting pitcher moves its number —
+          so the snapshot is tonight's games, their starters, and our score. No disagreement panel
+          here; see MlbSnapshot for why that would rank games by an artefact. */}
+      <div className="lp-sport lp-sport--mlb">
+        <div className="lpf__sportbar">
+          <div className="lpf__toggle" role="tablist" aria-label="Choose a sport">
+            <label htmlFor="lps-nfl" className="lpf__t">NFL</label>
+            <label htmlFor="lps-ncaaf" className="lpf__t">NCAAF</label>
+            <label htmlFor="lps-mlb" className="lpf__t">MLB</label>
+          </div>
+        </div>
+        <div className="lpf__head lpf__head--snap">
+          <div className="lp-snaplabel">MLB &mdash; TONIGHT&apos;S SLATE</div>
+        </div>
+        <Panel title="Tonight&apos;s games" count="line-blind" hint={TIPS.gameModel} open
+          pin={pin("model", "MLB · Game Model", "/mlb/model")}>
+          <MlbSnapshot />
         </Panel>
       </div>
     </section>
