@@ -127,15 +127,37 @@ const winProb = (marginForSide: number) => 0.5 * (1 + erf(marginForSide / W.sd /
  *  The run-line side is whichever of {favourite −1.5, dog +1.5} we give the better chance;
  *  favourites cover only 39% of the time, so the dog +1.5 is our side more often than not, and
  *  that is the sport, not timidity. Whether either side is a good BET is the price's business. */
-const ourCall = (os: number, homeAbbr: string, awayAbbr: string) => {
+const ourCall = (os: number, homeAbbr: string, awayAbbr: string, mktHomeFav?: boolean) => {
   const homeFav = os >= 0;
   const fav = homeFav ? homeAbbr : awayAbbr, dog = homeFav ? awayAbbr : homeAbbr;
   const m = Math.abs(os);
   const win = winProb(m);
-  const cover = coverProb(m);
-  return cover >= 0.5
-    ? { fav, win, rlSide: fav, rlPt: "−1.5", rlProb: cover }
-    : { fav, win, rlSide: dog, rlPt: "+1.5", rlProb: 1 - cover };
+  // Anchor the run-line read to the MARKET's posted sides, not to our own favourite.
+  //
+  // Two things were wrong with picking our own. Derek: "our spreads are suggesting to take the
+  // +1.5 for every team. This is not correct."
+  //
+  // 1. IT NAMED SIDES THAT ARE NOT POSTED. With our favourite driving it, a game where we
+  //    disagree with the market produced rows like "PIT +1.5" while the book had PIT at −1.5.
+  //    There is no such bet. A run line has exactly two sides and both belong to the market.
+  // 2. IT MADE THE ROW READ BACKWARDS. The market column shows the de-vigged chance the
+  //    MARKET's favourite covers −1.5, and this column showed our chance for whichever side we
+  //    rated higher — nearly always the dog, because favourites cover only 39% of the time. So
+  //    the row put "fair 37%" beside "BOS +1.5 56%" and a reader compared 37 with 56 and saw a
+  //    huge lean to the dog. The two numbers were about OPPOSITE sides. Read properly the market
+  //    implied BOS +1.5 at 63% against our 56% — we were LESS keen on that dog than the price
+  //    was, on 8 of 11 games. The board said "take the run" on exactly the side where our own
+  //    number argued against it.
+  //
+  // Keyed on the market favourite, both percentages describe the same team at the same number and
+  // the comparison is the one the reader thinks they are making.
+  const mFav = mktHomeFav === undefined ? homeFav : mktHomeFav;
+  const marginForMktFav = mFav ? os : -os;
+  const coverMktFav = coverProb(marginForMktFav);
+  const mktFavAbbr = mFav ? homeAbbr : awayAbbr, mktDogAbbr = mFav ? awayAbbr : homeAbbr;
+  return coverMktFav >= 0.5
+    ? { fav, win, rlSide: mktFavAbbr, rlPt: "−1.5", rlProb: coverMktFav, oursIsMktFav: true }
+    : { fav, win, rlSide: mktDogAbbr, rlPt: "+1.5", rlProb: 1 - coverMktFav, oursIsMktFav: false };
 };
 
 export default async function Page() {
@@ -203,12 +225,14 @@ export default async function Page() {
               than the home-team base rate on Brier and our favourite won <b>{W.favAcc}%</b>;
               within two points of what happened in three of four confidence buckets, five high
               in the 60–65% one. Small and real.<br /><br />
-              <b>Our run line.</b> Whichever of favourite −1.5 and underdog +1.5 we give the better
-              chance. Favourites cover −1.5 in only <b>{C.favBase}%</b> of games, so the underdog
-              +1.5 is our side more often than not — that is baseball, where a third of games are
-              decided by one run, and it is exactly why the run line pays plus money on the
-              favourite. Compare our chance with the market&apos;s fair % under its line: it says
-              whether the price is paying you for the side we like. Held out over{" "}
+              <b>Our run line.</b> Whichever of the market&apos;s two posted sides — favourite
+              −1.5, underdog +1.5 — we give the better chance, with the market&apos;s own fair %
+              for <i>that same side</i> printed underneath. Favourites cover −1.5 in only{" "}
+              <b>{C.favBase}%</b> of games, so the underdog is the higher number more often than
+              not; that is baseball, where a third of games are decided by one run, and it is
+              exactly why the run line pays plus money on the favourite. Because the dog side is
+              near-automatic, the number that carries information is the <i>gap</i> between the
+              two percentages, not which side is named — and the gap runs both ways. Held out over{" "}
               {C.n.toLocaleString()} sides the cover chance scores <b>{C.gain}%</b> better than the
               base rate and lands within three points in every bucket below 46%; above 46% it runs
               high (said 51%, saw 43%), so treat a big number there with extra suspicion.<br /><br />
@@ -274,7 +298,13 @@ export default async function Page() {
                         // Home minus away, the same sign convention as the market column, so a
                         // reader compares two numbers that mean the same thing.
                         const os = g.homeRuns - g.awayRuns;
-                        const call = ourCall(os, g.homeAbbr, g.awayAbbr);
+                        const call = ourCall(os, g.homeAbbr, g.awayAbbr, rl?.homeFav);
+                        // The market's own de-vigged chance for THE SIDE WE NAME. rl.fair is the
+                        // favourite covering −1.5, so the dog +1.5 is its complement — the two
+                        // posted sides of one run line. Printed beside ours so the row compares
+                        // like with like instead of one team against the other.
+                        const mktSame = rl?.fair == null ? null
+                          : call.oursIsMktFav ? rl.fair : 1 - rl.fair;
                         // First initial plus surname. "Hunter Brown (HOU) / Cristopher Sánchez
                         // (PHI)" is 285px of ink, and no honest budget fits that at 1440 — it was
                         // the one cell on the site that had to wrap, and a wrapping cell is what
@@ -313,7 +343,15 @@ export default async function Page() {
                             </span>
                             <span className="pmcell pmcell--proj pmcover">
                               {call.rlSide} {call.rlPt} <span className="pmcover__who">{pct(call.rlProb)}</span>
-                              <span className="pmcover__sub">{call.rlPt === "−1.5" ? "lay the run" : "take the run"}</span>
+                              {/* Was "take the run" / "lay the run". That is an instruction, and
+                                  this panel does not vote — the scroll above it already says "a
+                                  gap here is a difference to notice, not an edge to act on", while
+                                  the cell underneath told you to act. It now prints the market's
+                                  fair % for the SAME side, which is the only thing that makes our
+                                  number mean anything. */}
+                              {mktSame != null && (
+                                <span className="pmcover__sub">market {pct(mktSame)}</span>
+                              )}
                             </span>
                             <span className="pmcell pmcell--proj">{g.total.toFixed(1)}</span>
                           </div>
