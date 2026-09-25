@@ -76,3 +76,26 @@ jobs:
             echo "push attempt $i lost the race; retrying..."; sleep $((RANDOM % 5 + 2))
           done
           echo "push still rejected after 5 attempts"; exit 1
+
+      # The college half of the guardrail set. College football has NO injury report, so unlike
+      # the NFL and MLB versions there is no availability news to fall behind -- what rots here is
+      # coverage and staleness: a scheduled game the board never got, an artifact that stopped
+      # regenerating, a market that stopped being captured, and a player the books price that our
+      # projection board has no row for.
+      #
+      # That last one has form. A scraped depth chart decides who gets projected, and when it
+      # truncates it does so silently: 195 of 813 priced players -- 24% -- were being dropped at
+      # one point, including the shortest price in one game. This is the assertion that the fix
+      # has not regressed.
+      #
+      # Checks CFBD and cfb_prop_snapshots directly rather than going through cfb_export or
+      # cfb_player_proj, so it cannot go blind in the same instant as the thing it is checking.
+      #
+      # LAST, after the commit, for the same reason as the MLB one: a red check must not stop the
+      # rebuilt board from shipping, or a failure would leave the STALER board live.
+      - name: NCAAF guardrail
+        env:
+          CFBD_API_KEY:         ${{ secrets.CFBD_API_KEY }}
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python analysis/ncaaf_guardrail.py

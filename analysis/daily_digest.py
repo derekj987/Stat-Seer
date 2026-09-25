@@ -179,6 +179,75 @@ def mlb_changes(hours):
     return starters, totals
 
 
+# ---- College football ---------------------------------------------------------------------
+#
+# Same shape as the baseball half and for the same reason: NCAAF has no append-only table either,
+# just a generated board that refresh-cfb-ratings commits every six hours. Git is the change log.
+#
+# What is worth saying is narrow. College has no injury report, so there is no availability news to
+# report; the rating only moves when games are PLAYED, so a mid-week move in our own number is
+# genuinely notable rather than noise. The other half is the market arriving: books post college
+# lines a few days out, so "this game now has a price" is the change a reader actually acts on.
+NCAAF_FILE = "web/app/ncaaf/model-data.ts"
+# Our projected margin has to move by this much to be worth a line. The rating is a function of
+# completed games, so between Tuesday and Friday the honest expectation is that nothing moves at
+# all -- a point is already a lot when nothing has been played.
+NCAAF_MOVE = 1.0
+
+
+def _ncaaf_parse(text):
+    """{(away, home): game} for the board's CURRENT week, out of a generated model-data.ts."""
+    i = text.index("export const NCAAF_MODEL")
+    card = json.loads(text[text.index("= {", i) + 2:text.rindex("}") + 1])["card"]
+    wk = next((w for w in card.get("weeks", []) if w["week"] == card["week"]), None)
+    games = wk["games"] if wk else card.get("games", [])
+    return card["week"], {(g["away"], g["home"]): g for g in games}
+
+
+def ncaaf_changes():
+    """(model-spread moves, games that just got a market line) since the previous commit."""
+    import subprocess
+
+    def git(*args):
+        return subprocess.run(["git", *args], cwd=ROOT, capture_output=True,
+                              text=True, encoding="utf-8", errors="replace").stdout
+
+    shas = [s for s in git("log", "-3", "--format=%H", "--", NCAAF_FILE).split() if s]
+    if len(shas) < 2:
+        print(f"  NCAAF: only {len(shas)} commit(s) of {NCAAF_FILE} reachable — nothing to diff. "
+              "If this is CI, the checkout needs fetch-depth: 0.", file=sys.stderr)
+        return [], []
+    try:
+        wk_now, now = _ncaaf_parse(git("show", f"{shas[0]}:{NCAAF_FILE}"))
+        wk_prev, prev = _ncaaf_parse(git("show", f"{shas[1]}:{NCAAF_FILE}"))
+    except Exception:  # noqa: BLE001
+        return [], []
+    if wk_now != wk_prev:
+        return [], []                      # the board rolled to a new week; everything "changed"
+    moves, priced = [], []
+    for key, cur in now.items():
+        old = prev.get(key)
+        if not old:
+            continue
+        a, b = (old.get("projSpread") or {}), (cur.get("projSpread") or {})
+        if a.get("num") is not None and b.get("num") is not None:
+            # projSpread is always the FAVOURITE's negative number, so compare signed margins
+            # about the home team or a flip reads as a 7-point move when it is a 0.2 wobble.
+            sa = -float(a["num"]) if a.get("fav") == key[1] else float(a["num"])
+            sb_ = -float(b["num"]) if b.get("fav") == key[1] else float(b["num"])
+            if abs(sb_ - sa) >= NCAAF_MOVE:
+                moves.append({"game": f"{key[0]} @ {key[1]}",
+                              "was": f"{a.get('fav')} {a.get('num')}",
+                              "now": f"{b.get('fav')} {b.get('num')}",
+                              "delta": sb_ - sa})
+        if not old.get("marketSpread") and cur.get("marketSpread"):
+            ms = cur["marketSpread"]
+            priced.append({"game": f"{key[0]} @ {key[1]}",
+                           "line": f"{ms.get('fav')} {ms.get('num')}"})
+    moves.sort(key=lambda m: -abs(m["delta"]))
+    return moves, priced
+
+
 def send_mail(subject, text):
     """Resend, when the key and a recipient are configured. Silent no-op otherwise."""
     key = os.environ.get("RESEND_API_KEY")
@@ -219,9 +288,10 @@ def main():
     moves = number_moves(env, args.season, since)
     mlb_sp, mlb_totals = mlb_changes(args.hours)
     mlb_swaps = [s for s in mlb_sp if s["was"]]
+    cfb_moves, cfb_priced = ncaaf_changes()
     depth = depth_chart()
 
-    if not out and not back and not moves and not mlb_sp and not mlb_totals:
+    if not out and not back and not moves and not mlb_sp and not mlb_totals             and not cfb_moves and not cfb_priced:
         print(f"nothing changed in the last {args.hours:.0f}h — no digest sent")
         return 0
 
@@ -308,6 +378,24 @@ def main():
                 "or swapped — the game model measured no gain from anything else.")
             say()
 
+    # College football. Its own heading for the same reason baseball has one.
+    if cfb_moves or cfb_priced:
+        say("## College football")
+        say()
+        if cfb_moves:
+            say(f"  Our number moved ({len(cfb_moves)})")
+            for m in cfb_moves[:12]:
+                say(f"    {m['game'][:42]:42s} {m['was']:>16s} -> {m['now']:<16s}"
+                    f" ({m['delta']:+.1f})")
+            say("    The rating is a function of completed games, so a mid-week move means "
+                "results landed — not that the market pulled us.")
+            say()
+        if cfb_priced:
+            say(f"  Newly priced by the books ({len(cfb_priced)})")
+            for g in cfb_priced[:12]:
+                say(f"    {g['game'][:42]:42s} {g['line']}")
+            say()
+
     text = "\n".join(LINES)
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
@@ -330,6 +418,10 @@ def main():
                         f"{'' if len(mlb_swaps) == 1 else 's'} changed")
         elif mlb_totals:
             bits.append(f"{len(mlb_totals)} MLB total{'' if len(mlb_totals) == 1 else 's'} moved")
+        if cfb_moves:
+            bits.append(f"{len(cfb_moves)} NCAAF moved")
+        elif cfb_priced:
+            bits.append(f"{len(cfb_priced)} NCAAF priced")
         sent = send_mail(f"StatSeer — {', '.join(bits)}", text)
         if sent is None:
             print("\n(no RESEND_API_KEY / DIGEST_TO — printed only)")
