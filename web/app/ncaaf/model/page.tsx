@@ -5,7 +5,7 @@ import { NcaafSpecialConsiderations } from "../NcaafSpecialConsiderations";
 import { Fragment } from "react";
 import { StatCard } from "../StatCard";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
-import { NcaafCardHead, NcaafGameCell } from "../CardCells";
+import { NcaafCardHead, NcaafGameCell, NcaafBottomCell } from "../CardCells";
 import { fetchCfbScores, scoreFor, type CfbScores } from "@/lib/cfbScores";
 import { NcaafWeekNav, NcaafWeekNote, NcaafLinesAsOf, readNcaafWeek } from "../NcaafWeek";
 import { liveNcaafCard } from "../liveCard";
@@ -53,11 +53,14 @@ function CardRows({ games, scores, week }: {
                 <td className="hb-num hb-model" data-l="Model O/U">{g.projTotal}</td>
               </>
             )}
+            {/* Bottom line — which side of the MARKET number our projection covers, plus the O/U
+                lean. Sixth column, exactly as on the NFL board. */}
+            <NcaafBottomCell g={g} />
           </tr>
           {/* Special Considerations, spanning the row — the same block the NFL board carries,
               with the factors college actually has. See NcaafSpecialConsiderations. */}
           <tr className="hb-specrow">
-            <td colSpan={5}><NcaafSpecialConsiderations g={g} week={week} /></td>
+            <td colSpan={6}><NcaafSpecialConsiderations g={g} week={week} /></td>
           </tr>
           </Fragment>
         );
@@ -92,7 +95,7 @@ export default async function Page({ searchParams }: {
       {!grp.cont && <DayHeader label={grp.label} tone={grp.tone} count={grp.total ?? grp.items.length} />}
       <div className="hb-formwrap">
         <table className="hb-form hb-form--mkt hb-form--cards">
-          {i === 0 && <NcaafCardHead />}
+          {i === 0 && <NcaafCardHead bl />}
           <tbody><CardRows games={grp.items} scores={scores} week={c.week} /></tbody>
         </table>
       </div>

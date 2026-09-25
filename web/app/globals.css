@@ -1142,6 +1142,18 @@ a.sportstrip__i:hover{color:var(--ink)}
 .impgame + .impgame{margin-top:26px;position:relative}
 .impgame + .impgame::before{content:"";position:absolute;left:0;right:0;top:-14px;height:3px;
   border-radius:2px;background:var(--gold)}
+/* The same gold bar on the NCAAF boards (Derek: "put the gold bars that separates each game in
+   the NCAAF section as well"). College is built differently to the NFL card: one <table> per day
+   group, each game a PAIR of rows — the five numbers, then its Special Considerations row
+   spanning all five columns. So there is no `.impgame + .impgame` to hang the bar off; the
+   equivalent "start of the next game" is the row that FOLLOWS a .hb-specrow, which is every game
+   but the first of its day.
+   Drawn on the CELLS rather than the row because a <tr> only paints a border under
+   `border-collapse:collapse`, and these tables set `separate` on mobile. Side-by-side cells make
+   one continuous line; the phone layout stacks them into a 2x2 grid, where per-cell borders would
+   draw three stripes instead of one, so that width moves the bar onto the row (see the card
+   layout block below). */
+.hb-form--cards .hb-specrow + tr > td{border-top:3px solid var(--gold);padding-top:15px}
 .impgame .improw{border:0;background:transparent;border-radius:0;padding-bottom:4px}
 .impgame .improw--head{padding-top:8px;padding-bottom:2px;border-bottom:1px solid var(--line);
   margin:0 12px;padding-left:0;padding-right:0}
@@ -4013,6 +4025,12 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-lean--even,.hb-lean--defer{color:var(--muted);background:color-mix(in srgb,var(--muted) 15%,transparent)}
 .hb-model{color:var(--offc-ink);font-weight:700;font-variant-numeric:tabular-nums}
 .hb-model--down{color:var(--mkt)}
+/* Bottom Line column on the NCAAF board, mirroring .improw__bl on the NFL card: the connective
+   words recede and the read itself is bold, so a scan down the column picks up "CLEM -1.5 and the
+   under" without reading the joins. Not tabular-nums — this is a sentence, not a figure. */
+.hb-bl{color:var(--muted);font-size:12.5px;line-height:1.35}
+.hb-bl b{color:var(--ink);font-weight:700}
+.hb-bl__none{color:var(--muted)}
 /* Off-consensus (model disagrees with the market) — flag the disagreeing pick in
    blue so it jumps out: blue row wash, blue ◆, blue model-spread pick + lean chip. */
 .hb-off td{background:color-mix(in srgb,var(--offc) 13%,transparent)}
@@ -4288,6 +4306,15 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .hb-form.hb-form--cards tr.hb-specrow{display:block;border:0;padding:0;margin:-6px 0 8px;
     background:none;border-radius:0}
   .hb-form.hb-form--cards tr.hb-specrow > td{display:block;grid-column:1 / -1;width:auto}
+  /* The gold game separator moves off the cells and onto the row here: the card layout stacks the
+     four number cells into a 2x2 grid, so a per-cell border-top draws three short stripes instead
+     of one bar. The row is display:grid — a block box — so it paints its own border fine. */
+  .hb-form.hb-form--cards .hb-specrow + tr{border-top:3px solid var(--gold);padding-top:14px}
+  .hb-form.hb-form--cards .hb-specrow + tr > td{border-top:0;padding-top:0}
+  /* The Bottom Line is a sentence, not a figure, so it takes the full card width rather than
+     sitting in a half-width grid cell where "CLEM -1.5 and the under" wraps mid-phrase. It is
+     also the 5th number cell, which would otherwise be left stranded alone on its own row. */
+  .hb-form.hb-form--cards td.hb-bl{grid-column:1 / -1}
 }
 /* Seer. Mobile: a wide image across the very bottom (hb-side stacks under content).
    Desktop (>=1100px): a 2-column grid, content left + a STICKY seer right that

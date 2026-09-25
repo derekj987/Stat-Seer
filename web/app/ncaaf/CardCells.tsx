@@ -19,7 +19,12 @@ export const kickET = (iso?: string | null): string => {
 };
 
 // The five-column header used by every NCAAF model/market table.
-export function NcaafCardHead() {
+//
+// `bl` adds the Bottom Line column (Derek: "we also need our bottom line row in the NCAAF section
+// as well"). It is OPT-IN rather than always-on because LandingHub renders this same header over
+// rows that carry five cells — adding a sixth <th> unconditionally would leave that table one
+// header wider than its body, which is the column-misalignment bug in its purest form.
+export function NcaafCardHead({ bl }: { bl?: boolean } = {}) {
   return (
     <thead>
       <tr>
@@ -28,8 +33,32 @@ export function NcaafCardHead() {
         <th>Market O/U</th>
         <th>Model Spread</th>
         <th>Model O/U</th>
+        {bl && <th>Bottom Line</th>}
       </tr>
     </thead>
+  );
+}
+
+/** The Bottom Line cell: which side of the MARKET spread our projection covers, plus the O/U lean.
+ *
+ *  Both numbers already exist in the export — `pick` and `totalLean` in cfb_export.py — so this
+ *  renders them rather than recomputing anything. It deliberately mirrors the NFL board's wording
+ *  (`bottomLine()` in app/model/page.tsx) so the two sports read the same.
+ *
+ *  Note the two boards use different O/U thresholds: the NFL leans at a 1-point gap, college at 2
+ *  (cfb_export). That is college's existing choice and not something to quietly harmonise here —
+ *  college totals are both higher and noisier, so the wider band is doing real work. */
+export function NcaafBottomCell({ g }: { g: NcaafCardGame }) {
+  // No market number, or a side we cannot rate, means there is no read to state.
+  if (g.rated === false || !g.pick) {
+    return <td className="hb-num hb-bl" data-l="Bottom line"><span className="hb-bl__none">—</span></td>;
+  }
+  const num = g.pick.num > 0 ? `+${g.pick.num}` : `${g.pick.num}`;
+  return (
+    <td className="hb-num hb-bl" data-l="Bottom line">
+      <b>{abbrevTeam(g.pick.side)} {num}</b>
+      {g.totalLean && <span className="hb-bl__t"> and <b>the {g.totalLean.dir.toLowerCase()}</b></span>}
+    </td>
   );
 }
 
