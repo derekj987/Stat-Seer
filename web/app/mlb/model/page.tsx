@@ -312,7 +312,13 @@ export default async function Page() {
               <b>What it is worth.</b> Over {S.n} held-out games, <b>{S.gain}%</b> closer than
               assuming {S.meanTotal} runs every time. That is small because of the sport: one game
               averages {S.meanTotal} runs with an SD of <b>{S.sd}</b>. Team quality alone measured{" "}
-              <b>0.0%</b> — only the starting pitcher moved the number.<br /><br />
+              <b>0.0%</b>; the starting pitcher and the <b>ballpark</b> are what move it. Park came
+              in late and only worked one way round — each club&apos;s rates are computed with the
+              park divided OUT of every game it played, so they describe the team rather than the
+              team plus its stadium, and the venue is then applied once to the game being
+              projected. Bolted onto the finished number instead it measured <b>−0.13%</b>, because
+              a club plays half its games at home and that stadium was already inside its rates.
+              <br /><br />
               <b>The gaps you can see.</b> Our totals sit above the market&apos;s on most games,
               and our spreads below it. Neither is us running hot: against real results our total
               averages <b>{S.resid >= 0 ? "+" : ""}{S.resid.toFixed(2)}</b> runs of error and has

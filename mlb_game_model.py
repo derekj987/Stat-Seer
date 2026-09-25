@@ -114,6 +114,53 @@ PRIOR_REGRESS = 0.65                   # pull last season toward league before u
 MIN_PRIOR_GAMES = 50                   # below this a club has no usable prior; fall back to league
 CACHE_PRIOR = os.path.join("data", f"mlb_team_runs_{PRIOR_SEASON}.json")
 
+# ---- Park -----------------------------------------------------------------------------------
+#
+# Derek: "We have to look at team strength, defense, pitching, stadium, etc." Stadium was the one
+# input never in this model and never even on the tried list.
+#
+# The first attempt bolted a venue multiplier onto the finished projection and measured -0.13% held
+# out (analysis/mlb_park_factor.py). It failed for a structural reason, not a tuning one: a club
+# plays half its games in its own stadium, so `rs`/`ra` already carry that stadium inside them, and
+# multiplying again counts it twice.
+#
+# So the park has to come OUT of the team rates before it can go back in at projection time. Runs
+# are divided by the factor of the park they were scored in as they are accumulated, which leaves
+# rates that describe the TEAM; the venue factor is then applied once, to the game being projected.
+# The league mean is neutralised the same way, or the rates and the mean would be on two scales.
+#
+# Every factor is built only from games already played — the same chronological discipline as the
+# team rates — so a park's factor early in the year is heavily regressed toward 1.0 and the model
+# is never neutralising a game by a number that saw it.
+CACHE_V = os.path.join("data", f"mlb_venues_{SEASON}.json")
+K_PARK = 40                            # swept on the TRAIN split only; see --sweep-park
+PARK_ADJUST = True                     # False restores the pre-park model exactly, for comparison
+
+
+def venue_map(refresh=False):
+    """{gamePk: venue name} for this season. One schedule walk, cached."""
+    if not refresh and os.path.exists(CACHE_V):
+        try:
+            return json.load(open(CACHE_V, encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            pass
+    out, d = {}, _dt.date(SEASON, 3, 1)
+    # Past today, so UPCOMING games carry their venue too and the export does not have to fall
+    # back to where the home club usually hosts.
+    end = _dt.date.today() + _dt.timedelta(days=7)
+    while d <= end:
+        hi = min(d + _dt.timedelta(days=20), end)
+        j = av._get(f"{API}/schedule?sportId=1&startDate={d}&endDate={hi}&gameType=R") or {}
+        for day in j.get("dates", []):
+            for g in day.get("games", []):
+                v = (g.get("venue") or {}).get("name")
+                if v:
+                    out[str(g["gamePk"])] = v
+        d = hi + _dt.timedelta(days=1)
+    os.makedirs(os.path.dirname(CACHE_V), exist_ok=True)
+    json.dump(out, open(CACHE_V, "w", encoding="utf-8"), ensure_ascii=False)
+    return out
+
 # Held out over 554 games, straight from this script's own --validate. Kept here so the board
 # cannot drift from what was measured. `resid` is the mean signed error against ACTUAL totals --
 # published because the board leans over the MARKET, and this is the number that says that lean is
@@ -129,9 +176,9 @@ CACHE_PRIOR = os.path.join("data", f"mlb_team_runs_{PRIOR_SEASON}.json")
 # The trade is explicit: a tenth of a point of total accuracy for a third of a point of margin, and
 # a model that is meaningfully less timid. Margins are where the prior was expected to help and
 # where it does.
-SCORES = {"model": 3.5355, "base": 3.5634, "gain": 0.8, "sd": 4.52, "meanTotal": 8.96,
-          "n": 554, "resid": 0.02,
-          "marModel": 3.3377, "marBase": 3.4296, "marGain": 2.7, "marMean": 0.79, "marActual": 3.43,
+SCORES = {"model": 3.5152, "base": 3.5637, "gain": 1.4, "sd": 4.52, "meanTotal": 8.96,
+          "n": 554, "resid": 0.03,
+          "marModel": 3.3373, "marBase": 3.4296, "marGain": 2.7, "marMean": 0.80, "marActual": 3.43,
           # RUN-LINE COVER. P(a side wins by 2+ | our margin m for that side) = sigmoid(a + b*m),
           # fitted on the train split with both sides of every game (so m=0 gives the pick'em
           # cover rate, 36%, and a negative margin is handled rather than extrapolated). Held out
@@ -141,13 +188,13 @@ SCORES = {"model": 3.5355, "base": 3.5634, "gain": 0.8, "sd": 4.52, "meanTotal":
           # A plain normal on the margin (sd 4.65) ran 4 points high across the board and was
           # replaced by this. The number is honest and nearly flat: our favourite covers -1.5 in
           # 39% of held-out games, and the fit moves it between ~30% and ~50% on this slate.
-          "cover": {"a": -0.5717, "b": 0.3622, "brier": 0.2270, "brierBase": 0.2291, "gain": 0.9,
-                    "base": 35.6, "favBase": 39.4, "n": 1108},
+          "cover": {"a": -0.5721, "b": 0.3643, "brier": 0.2269, "brierBase": 0.2291, "gain": 1.0,
+                    "base": 35.6, "favBase": 39.3, "n": 1108},
           # WINNER. P(home wins) = Phi(margin / sd), sd = residual SD of the margin on the train
           # split. Held out: Brier 0.2444 vs 0.2480 for the home base rate (+1.4%); our favourite
           # won 55.0% of games. Calibrated within 2 points in three of four buckets, 5 high at
           # 60-65% (said 62, saw 57). Real, small, and honest about being small.
-          "win": {"sd": 4.65, "brier": 0.2444, "brierBase": 0.2480, "gain": 1.4, "favAcc": 55.0,
+          "win": {"sd": 4.65, "brier": 0.2443, "brierBase": 0.2480, "gain": 1.5, "favAcc": 55.0,
                   "n": 554},
           # WHAT WAS TRIED AND LEFT OUT (walk-forward, scored on the same held-out dates; see
           # analysis in the 2026-09-11 session). Lineup strength from the POSTED nine (each
@@ -157,7 +204,8 @@ SCORES = {"model": 3.5355, "base": 3.5634, "gain": 0.8, "sd": 4.52, "meanTotal":
           # TEST split (home margin +0.19 there) and is absent from the TRAIN split (+0.005), so
           # it fails the choose-on-train rule and stays out. The sport is the ceiling, not the
           # feature list.
-          "tried": ["lineup strength", "bullpen", "recent form", "home field"]}
+          "tried": ["lineup strength", "bullpen", "recent form", "home field",
+                    "park factor bolted onto the projection"]}
 
 
 def _outs(ip):
@@ -305,7 +353,7 @@ def pair_games(rows, starters):
 
 
 class State:
-    def __init__(self, games, poff=None, pdfn=None, plg=0.0):
+    def __init__(self, games, poff=None, pdfn=None, plg=0.0, venues=None, k_park=None):
         # The league run environment, per team per game, accumulated from games ALREADY PLAYED.
         #
         # It used to be statistics.mean(g["total"] for g in games) / 2 -- the mean over the whole
@@ -329,10 +377,20 @@ class State:
         self._poff = poff or {}
         self._pdfn = pdfn or {}
         self._plg = plg
-        self.rs = collections.defaultdict(int); self.ra = collections.defaultdict(int)
+        # FLOAT, not int: runs are divided by a park factor on the way in, so these stopped being
+        # counts the moment the park adjustment landed.
+        self.rs = collections.defaultdict(float); self.ra = collections.defaultdict(float)
         self.n = collections.defaultdict(int)
         self.er = collections.defaultdict(int); self.outs = collections.defaultdict(int)
         self.tot_er = 0; self.tot_outs = 0
+        # Park state. `_vn` is the venue per gamePk; the rest accumulates chronologically beside
+        # the team rates, so a factor is only ever built from games already played.
+        self._vn = venues or {}
+        self._k_park = K_PARK if k_park is None else k_park
+        self.pk_runs = collections.defaultdict(float); self.pk_n = collections.defaultdict(int)
+        self.pk_tot = 0.0; self.pk_games = 0
+        # Where a club hosts, so project() knows which park a future game is in without being told.
+        self.home_venue = {}
 
     @property
     def lg(self):
@@ -345,6 +403,21 @@ class State:
     @property
     def lg_rpo(self):
         return self.tot_er / self.tot_outs if self.tot_outs else 0.0
+
+    def park(self, venue):
+        """Runs at this venue relative to league, regressed toward 1.0 by n / (n + K_PARK).
+
+        1.0 for an unknown venue and for every venue until it has history — the same honest default
+        as sp_factor. Built from completed games only."""
+        if not PARK_ADJUST or not venue or not self.pk_games:
+            return 1.0
+        n = self.pk_n.get(venue, 0)
+        lg_all = self.pk_tot / self.pk_games
+        if not n or not lg_all:
+            return 1.0
+        raw = (self.pk_runs[venue] / n) / lg_all
+        k = self._k_park
+        return 1.0 + (n / (n + k)) * (raw - 1.0)
 
     def _target(self, tbl, t):
         """What this club is shrunk TOWARD: its own prior-season rate, rescaled into this season's
@@ -370,32 +443,81 @@ class State:
         rate = (self.er[pid] + K_SP * self.lg_rpo) / (self.outs[pid] + K_SP)
         return rate / self.lg_rpo
 
-    def project(self, home, away, hsp, asp):
+    def project(self, home, away, hsp, asp, venue=None):
         if self.n[home] < MIN_TEAM_GAMES or self.n[away] < MIN_TEAM_GAMES or self.tot_outs < 2000:
             return None
         fh, fa = self.sp_factor(asp), self.sp_factor(hsp)
-        eh = self.off(home) * self.dfn(away) / self.lg * (1 + W_SP * (fh - 1))
-        ea = self.off(away) * self.dfn(home) / self.lg * (1 + W_SP * (fa - 1))
+        # The rates and the league mean are both park-neutral, so the projection is park-neutral
+        # too — put the park back, once, for the stadium this game is actually played in. Falls
+        # back to where the home club normally hosts, which is what a future game gives us.
+        pf = self.park(venue or self.home_venue.get(home))
+        eh = self.off(home) * self.dfn(away) / self.lg * (1 + W_SP * (fh - 1)) * pf
+        ea = self.off(away) * self.dfn(home) / self.lg * (1 + W_SP * (fa - 1)) * pf
         # NOT "home"/"away" — those keys already hold the TEAM NAMES on the exported row, and
         # spreading this dict over them silently replaced the names with run counts.
         return {"homeRuns": round(eh, 2), "awayRuns": round(ea, 2), "total": round(eh + ea, 2),
                 "homeSpFactor": round(fa, 3), "awaySpFactor": round(fh, 3)}
 
     def advance(self, g, spby):
-        self._recent.append(g["total"])
-        self.rs[g["home"]] += g["hr"]; self.ra[g["home"]] += g["ar"]; self.n[g["home"]] += 1
-        self.rs[g["away"]] += g["ar"]; self.ra[g["away"]] += g["hr"]; self.n[g["away"]] += 1
+        # The factor is read BEFORE this game updates the park counters, so a game is never
+        # neutralised by a number that already saw it.
+        v = self._vn.get(str(g.get("pk")))
+        f = self.park(v) or 1.0
+        self._recent.append(g["total"] / f)
+        self.rs[g["home"]] += g["hr"] / f; self.ra[g["home"]] += g["ar"] / f; self.n[g["home"]] += 1
+        self.rs[g["away"]] += g["ar"] / f; self.ra[g["away"]] += g["hr"] / f; self.n[g["away"]] += 1
+        if v:
+            self.pk_runs[v] += g["total"]; self.pk_n[v] += 1
+            self.home_venue[g["home"]] = v
+        self.pk_tot += g["total"]; self.pk_games += 1
         for pid in (g["hsp"], g["asp"]):
             for e in spby.get((g["date"], pid), []):
                 self.er[pid] += e["er"]; self.outs[pid] += e["outs"]
                 self.tot_er += e["er"]; self.tot_outs += e["outs"]
 
 
-def validate(games, spby, prior=None):
-    st = State(games, *(prior or ()))
+def sweep_park(games, spby, prior=None, venues=None):
+    """Choose K_PARK on the TRAIN split, then report the chosen value once on held-out.
+
+    K_PARK arrived from the earlier bolt-on experiment (analysis/mlb_park_factor.py), which is a
+    different formulation — and picking it by held-out MAE would be choosing on the test set, the
+    exact mistake that made depth-chart movement look like a +0.85 signal. So: sweep on train,
+    choose there, and let the held-out number be a report rather than an input."""
+    cut = None
+    per_k = {}
+    for k in (0, 10, 20, 40, 80, 150, 300, 600):
+        st_ = State(games, *(prior or ()), venues=venues, k_park=k)
+        rows = []
+        for g in games:
+            p = st_.project(g["home"], g["away"], g["hsp"], g["asp"],
+                            (venues or {}).get(str(g["pk"])))
+            if p:
+                rows.append({"date": g["date"], "y": g["total"], "p": p["total"]})
+            st_.advance(g, spby)
+        if cut is None:
+            dates = sorted({r["date"] for r in rows})
+            cut = dates[int(len(dates) * 0.70)]
+        tr = [r for r in rows if r["date"] <= cut]
+        ho = [r for r in rows if r["date"] > cut]
+        f = lambda rs: statistics.mean(abs(r["p"] - r["y"]) for r in rs)
+        per_k[k] = (f(tr), f(ho), len(tr), len(ho))
+    print(f"\nK_PARK sweep — chosen on TRAIN ({per_k[0][2]:,} games), held-out reported only")
+    print(f"  {'K':>5s} {'train MAE':>10s} {'held MAE':>10s}")
+    for k, (a, b, _, _) in per_k.items():
+        print(f"  {k:5d} {a:10.4f} {b:10.4f}")
+    best = min(per_k, key=lambda k: per_k[k][0])
+    print(f"\n  train picks K_PARK = {best}  (shipping {K_PARK})")
+    print(f"  held-out at that K: {per_k[best][1]:.4f}   vs no park (K=inf ~ 600): "
+          f"{per_k[600][1]:.4f}")
+    return best
+
+
+def validate(games, spby, prior=None, venues=None):
+    st = State(games, *(prior or ()), venues=venues)
     rows = []
     for g in games:
-        p = st.project(g["home"], g["away"], g["hsp"], g["asp"])
+        p = st.project(g["home"], g["away"], g["hsp"], g["asp"],
+                       (venues or {}).get(str(g["pk"])))
         if p:
             # The baseline is captured HERE, at prediction time. Scoring it against the final
             # league mean let the baseline see games it was being tested on -- a small leak, but
@@ -506,6 +628,8 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--validate", action="store_true")
+    ap.add_argument("--sweep-park", action="store_true",
+                    help="choose K_PARK on the train split and report held-out once")
     ap.add_argument("--refresh", action="store_true")
     ap.add_argument("--days", type=int, default=2)
     ap.add_argument("--out", default=os.path.join("web", "lib", "mlbGameModel.ts"))
@@ -524,18 +648,22 @@ def main(argv=None):
     # and passed to every State so validation and the export cannot disagree — a model scored with
     # one prior and published with another is not the model that was measured.
     prior = prior_rates(prior_team_runs(refresh=args.refresh))
+    venues = venue_map(refresh=args.refresh)
     print(f"{len(games):,} completed games, {len(sp):,} starts")
     if len(games) < 300:
         print("WARNING: too little history — refusing to write", file=sys.stderr)
         return 1
+    if args.sweep_park:
+        sweep_park(games, spby, prior, venues)
+        return 0
     if args.validate:
-        validate(games, spby, prior)
+        validate(games, spby, prior, venues)
         return 0
 
-    st = State(games, *prior)
+    st = State(games, *prior, venues=venues)
     for g in games:
         st.advance(g, spby)
-    base, mod = validate(games, spby, prior)
+    base, mod = validate(games, spby, prior, venues)
 
     name = {r["team"]: r["name"] for r in rows}
     # Club abbreviations for the board: a pitcher's name means little without the club beside it,
@@ -555,7 +683,8 @@ def main(argv=None):
         home_id = r["team"] if r["side"] == "home" else opp_id
         away_id = opp_id if r["side"] == "home" else r["team"]
         p = st.project(home_id, away_id,
-                       starters.get((r["gamePk"], home_id)), starters.get((r["gamePk"], away_id)))
+                       starters.get((r["gamePk"], home_id)), starters.get((r["gamePk"], away_id)),
+                       venues.get(str(r["gamePk"])))
         if not p:
             continue
         seen.add(r["gamePk"])
@@ -579,7 +708,7 @@ def main(argv=None):
     header = (f"// AUTO-GENERATED by mlb_game_model.py -- do not edit by hand.\n"
               f"// Projected runs. Held-out MAE {mod:.4f} vs {base:.4f} for the league mean total"
               f" ({(base-mod)/base*100:+.1f}%).\n"
-              f"// Team quality alone was worth 0.0%; only the starting pitcher adds anything.\n"
+              f"// Team quality alone was worth 0.0%; the starting pitcher and the park move it.\n"
               f"// Generated {_dt.datetime.now(_dt.timezone.utc).isoformat(timespec='seconds')}\n")
     ts = (header +
           "export type MlbGame = { gameKey: string; game: string; commence: string;\n"
