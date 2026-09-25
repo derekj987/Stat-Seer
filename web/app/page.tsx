@@ -176,9 +176,17 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
             page, which told a first-time visitor nothing about what the site actually contains —
             these go straight into The Model for each sport, and the secondary links name the other
             two sections by name so the whole structure is visible from the hero. */}
+        {/* Three sports, three buttons (Derek: "we also need to place an MLB button on the home
+            page next to the NFL and NCAAF buttons").
+            The labels lost "the Model's ... predictions" to make room. At three buttons the old
+            wording summed to 861px inside a 760px column, so the row wrapped 2 + 1 and left MLB
+            orphaned on its own line at every width including a 1400px desktop. Shorter labels put
+            all three side by side (525px) and still name the destination, which is the whole point
+            of these buttons — the section they land in is called The Model. */}
         <div className="lp-lead__cta">
-          <a href="/model" className="btn btn--primary lp-lead__go">Explore the Model&apos;s NFL predictions</a>
-          <a href="/ncaaf/model" className="btn btn--primary lp-lead__go">Explore the Model&apos;s NCAAF predictions</a>
+          <a href="/model" className="btn btn--primary lp-lead__go">Explore the NFL Model</a>
+          <a href="/ncaaf/model" className="btn btn--primary lp-lead__go">Explore the NCAAF Model</a>
+          <a href="/mlb/model" className="btn btn--primary lp-lead__go">Explore the MLB Model</a>
         </div>
         <div className="lp-lead__cta lp-lead__cta--alt">
           <a href="/considerations" className="lp-lead__alt">See the Context that shapes a game →</a>
