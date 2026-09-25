@@ -5,7 +5,7 @@ export const metadata = {
   description: "How StatSeer collects, uses, and protects your information.",
 };
 
-const UPDATED = "August 27, 2026";
+const UPDATED = "September 25, 2026";
 
 export default function Privacy() {
   return (
@@ -26,7 +26,9 @@ export default function Privacy() {
           <ul>
             <li><b>Account information</b> — the email address and username you provide when you sign up, and a securely hashed password (we never store your password in plain text).</li>
             <li><b>Content you create</b> — forum threads, replies, wall posts, profile details, and any feedback you send us.</li>
-            <li><b>Technical &amp; usage data</b> — standard information your browser sends (such as IP address, device/browser type) and basic, aggregate usage data used to keep the site running and understand overall traffic.</li>
+            <li><b>Technical &amp; usage data</b> — standard information your browser sends (such as IP address, device/browser type) and basic, aggregate usage data used to keep the site running and understand overall traffic. We use your IP address to rate-limit requests and to exclude our own visits from traffic counts.</li>
+            <li><b>Questions you ask our assistant</b> — if you use the in-app assistant, the text you type is sent to our AI provider (Anthropic) to generate a reply. Do not put anything sensitive in it.</li>
+            <li><b>Push notifications</b> — if you turn them on, your browser gives us a subscription token so we can send them. You can revoke it at any time in your browser or device settings.</li>
           </ul>
           <p>We do not knowingly collect payment-card details, government IDs, or other sensitive personal data.</p>
         </section>
@@ -53,9 +55,18 @@ export default function Privacy() {
         <section className="legal__sec">
           <h2>4. How your information is shared</h2>
           <p>
-            <b>We do not sell your personal information.</b> We share it only with the service providers that run our
-            infrastructure — for example our hosting and database providers (such as Vercel and Supabase) — strictly to
-            operate the Service, and when required by law or to protect our rights and users&rsquo; safety. Your public
+            <b>We do not sell your personal information.</b> We share it only with the service providers that run the
+            Service, and only so that it works:
+          </p>
+          <ul>
+            <li><b>Vercel</b> — hosting. Receives the technical data your browser sends when you load a page.</li>
+            <li><b>Supabase</b> — our database and sign-in system. Holds your account, profile and anything you post.</li>
+            <li><b>Google</b> — only if you choose &ldquo;Sign in with Google&rdquo;, in which case Google handles that sign-in and tells us your email address.</li>
+            <li><b>Resend</b> — email delivery. Receives your email address to send account and beta messages.</li>
+            <li><b>Anthropic</b> — our AI provider, and only if you use the assistant. Receives the text of your question.</li>
+          </ul>
+          <p>
+            We also share information when required by law or to protect our rights and users&rsquo; safety. Your public
             profile (username and anything you post publicly) is visible to others by design.
           </p>
         </section>
