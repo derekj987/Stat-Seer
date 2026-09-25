@@ -48,7 +48,21 @@ export function capDayGroups<T>(groups: DayGroup<T>[], limit: number): {
 } {
   const head: DayGroup<T>[] = [];
   let shown = 0, i = 0;
-  // Take whole days while they fit.
+  // TODAY IS NEVER TRUNCATED. Derek: "I'm not seeing tonight's Clemson game in our NCAAF model?"
+  // It was there. Friday carried 5 games, the cap is 4, and Clemson @ California kicks last of
+  // the five at 10:30pm ET — so the day header read "Today · 5 games", four rows rendered, and the
+  // fifth went behind a disclosure labelled with the other 67 games of the week. A reader scanning
+  // tonight's slate cannot tell that apart from the game being missing, and reasonably concludes
+  // the board is broken.
+  //
+  // Capping exists for the 65-game Saturday further down the page, which genuinely needs
+  // collapsing. It was never meant to hide a game that kicks off in three hours. So today's group
+  // is taken whole however big it is, and the limit applies to everything after it.
+  if (groups.length && groups[0].tone === "today") {
+    head.push(groups[0]);
+    i = 1;                    // deliberately NOT added to `shown` — today does not spend the budget
+  }
+  // Then take whole days while they fit.
   for (; i < groups.length && shown + groups[i].items.length <= limit; i++) {
     head.push(groups[i]);
     shown += groups[i].items.length;

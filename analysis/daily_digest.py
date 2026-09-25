@@ -107,6 +107,78 @@ def number_moves(env, season, since_iso):
     return sorted(moves, key=lambda m: -abs(m["now"] - m["was"]))
 
 
+# ---- Baseball -----------------------------------------------------------------------------
+#
+# MLB has no append-only log to diff. Its four boards are AUTO-GENERATED files that
+# refresh-mlb-availability.yml overwrites and commits once a day, so yesterday's numbers are not
+# in a table anywhere -- they are in git. That turns out to be a better change log than the one
+# football has: one commit per day, every day, with the whole board in each.
+#
+# So the same "diff two change logs" shape holds, with `git show <sha>:<path>` standing in for the
+# second log. What is worth reporting is what baseball's guardrail cannot see: not whether the
+# board is right NOW, but what moved since yesterday -- a starter swapped, a projected total that
+# shifted, a regular who stopped being a regular.
+MLB_FILE = "web/lib/mlbGameModel.ts"
+# A projected total has to move by at least this much to be worth a line. Held-out MAE on the
+# game model is 3.49 runs, so anything under a run is well inside the noise it already admits to.
+MLB_TOTAL_MOVE = 1.0
+
+
+def _mlb_parse(text):
+    """{gameKey: row} from a generated mlbGameModel.ts blob.
+
+    Anchors on '= [' rather than the first '[': the first bracket on the line belongs to the type
+    annotation (`MlbGame[]`), and slicing from there yields '[] = [{...' and a JSON error that
+    names column 4 of a 400KB line."""
+    for line in text.splitlines():
+        if line.startswith("export const MLB_GAMES"):
+            rows = json.loads(line[line.index("= [") + 2:line.rindex("]") + 1])
+            return {str(r["gameKey"]): r for r in rows}
+    return {}
+
+
+def mlb_changes(hours):
+    """(starter changes, total moves) between the newest MLB commit and the last one before it."""
+    import subprocess
+    root = ROOT
+
+    def git(*args):
+        return subprocess.run(["git", *args], cwd=root, capture_output=True,
+                              text=True, encoding="utf-8", errors="replace").stdout
+
+    shas = [s for s in git("log", "-3", "--format=%H", "--", MLB_FILE).split() if s]
+    if len(shas) < 2:
+        # Almost always a SHALLOW CHECKOUT rather than a genuinely new file -- Actions fetches one
+        # commit by default, which leaves exactly one sha here and makes the baseball section
+        # disappear without a word. Say so rather than returning a quiet empty.
+        print(f"  MLB: only {len(shas)} commit(s) of {MLB_FILE} are reachable, so there is nothing "
+              "to diff. If this is CI, the checkout needs fetch-depth: 0.", file=sys.stderr)
+        return [], []
+    try:
+        now = _mlb_parse(git("show", f"{shas[0]}:{MLB_FILE}"))
+        prev = _mlb_parse(git("show", f"{shas[1]}:{MLB_FILE}"))
+    except Exception:  # noqa: BLE001 — a malformed old blob must not take the digest down
+        return [], []
+    starters, totals = [], []
+    for key, cur in now.items():
+        old = prev.get(key)
+        if not old:
+            continue                       # a new day's slate, not a change
+        for side, fld in (("home", "homeSpName"), ("away", "awaySpName")):
+            a, b = old.get(fld) or "", cur.get(fld) or ""
+            if a != b and b:               # announced, or swapped; losing a name is not news
+                starters.append({"game": cur.get("game"), "side": side, "was": a, "now": b,
+                                 # Doubleheaders are two gameKeys with one matchup name, so the
+                                 # first cut printed "Dodgers @ Giants away" twice with different
+                                 # pitchers and no way to tell which game was which.
+                                 "when": str(cur.get("commence") or "")[5:16].replace("T", " ")})
+        ta, tb = old.get("total"), cur.get("total")
+        if ta is not None and tb is not None and abs(float(tb) - float(ta)) >= MLB_TOTAL_MOVE:
+            totals.append({"game": cur.get("game"), "was": float(ta), "now": float(tb)})
+    totals.sort(key=lambda m: -abs(m["now"] - m["was"]))
+    return starters, totals
+
+
 def send_mail(subject, text):
     """Resend, when the key and a recipient are configured. Silent no-op otherwise."""
     key = os.environ.get("RESEND_API_KEY")
@@ -145,9 +217,11 @@ def main():
 
     out, back = player_changes(env, since)
     moves = number_moves(env, args.season, since)
+    mlb_sp, mlb_totals = mlb_changes(args.hours)
+    mlb_swaps = [s for s in mlb_sp if s["was"]]
     depth = depth_chart()
 
-    if not out and not back and not moves:
+    if not out and not back and not moves and not mlb_sp and not mlb_totals:
         print(f"nothing changed in the last {args.hours:.0f}h — no digest sent")
         return 0
 
@@ -202,6 +276,38 @@ def main():
             "publish-predictions.yml is the thing that would have failed.")
         say()
 
+    # Baseball. Its own heading rather than mixed in with football: the two sports fail in
+    # different places, and a reader scanning for "did anything happen to my sport" should not have
+    # to filter. Silent when the slate simply rolled over with nothing changing.
+    if mlb_sp or mlb_totals:
+        say("## Baseball")
+        say()
+        # A SWAP gets a line; a first announcement gets counted. Every day's refresh names a dozen
+        # starters that were blank the day before, because probables are announced a day or two
+        # out -- that is the calendar working, not news, and listing all thirteen every morning is
+        # how this section stops being read. A starter REPLACED after being announced is the real
+        # event: it is the baseball equivalent of a quarterback going on injured reserve, and it
+        # moves the only input the game model gains anything from.
+        swaps, named = mlb_swaps, len(mlb_sp) - len(mlb_swaps)
+        if swaps:
+            say(f"  Starting pitchers CHANGED ({len(swaps)})")
+            for s in swaps:
+                say(f"    {s['when']} {s['game'][:40]:40s} {s['side']:4s} "
+                    f"{s['was']} -> {s['now']}")
+            say()
+        if named:
+            say(f"  ...and {named} starter{'' if named == 1 else 's'} announced for the first "
+                "time, which is the normal day-ahead rhythm.")
+            say()
+        if mlb_totals:
+            say(f"  Projected totals that moved a run or more ({len(mlb_totals)})")
+            for m in mlb_totals:
+                say(f"    {m['game'][:44]:44s} {m['was']:5.2f} -> {m['now']:5.2f}"
+                    f"  ({m['now'] - m['was']:+.2f})")
+            say("    A run-plus move on a baseball total is almost always a starter being named "
+                "or swapped — the game model measured no gain from anything else.")
+            say()
+
     text = "\n".join(LINES)
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
@@ -219,6 +325,11 @@ def main():
             bits.append(f"{len(back)} back")
         if moves:
             bits.append(f"{len(moves)} numbers moved")
+        if mlb_swaps:
+            bits.append(f"{len(mlb_swaps)} MLB starter"
+                        f"{'' if len(mlb_swaps) == 1 else 's'} changed")
+        elif mlb_totals:
+            bits.append(f"{len(mlb_totals)} MLB total{'' if len(mlb_totals) == 1 else 's'} moved")
         sent = send_mail(f"StatSeer — {', '.join(bits)}", text)
         if sent is None:
             print("\n(no RESEND_API_KEY / DIGEST_TO — printed only)")

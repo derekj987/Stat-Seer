@@ -104,3 +104,24 @@ jobs:
             echo "push attempt $i lost the race; retrying..."; sleep $((RANDOM % 5 + 2))
           done
           echo "push still rejected after 5 attempts"; exit 1
+
+      # The baseball half of the assertion Derek should never have to make by hand.
+      #
+      # It does NOT check an injury merge -- baseball has none to get wrong, because
+      # mlb_availability feeds the game model and the props directly. It checks the three things
+      # that CAN silently rot: a game missing from the board entirely, files that stopped being
+      # regenerated, and a starting pitcher announced or changed after our last refresh. That third
+      # one matters most: sp_factor() falls back to a league-average 1.0 for an unknown arm, and
+      # the game model's own held-out numbers say the starter is the only input it gained anything
+      # from -- so a blank starter is the league mean wearing the model's name.
+      #
+      # It reads statsapi directly rather than through mlb_availability, for the reason the
+      # football guardrail had to learn twice: a check that shares a dependency with its subject
+      # goes blind at the same moment its subject does, and reports all-clear.
+      #
+      # DELIBERATELY LAST, after the commit. A red guardrail must not stop the rebuilt board from
+      # shipping -- a board with one unknown starter still beats yesterday's board entirely, and
+      # gating the commit on the check would leave the STALER files live exactly when something is
+      # wrong. So the files publish, and then the job goes red to say what is still off.
+      - name: MLB guardrail
+        run: python analysis/mlb_guardrail.py
