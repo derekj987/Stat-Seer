@@ -28,7 +28,7 @@ jobs:
     permissions:
       contents: write   # commit the regenerated projections file
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0   # full history so the rebase-before-push works cleanly
       - uses: actions/setup-python@v5
