@@ -117,7 +117,11 @@ const SHORT: Record<string, string> = {
  *  depth slot so the quarterback leads. */
 function BackRow({ list }: { list: ReturningNote[] }) {
   if (!list.length) return null;
-  const sorted = [...list].sort((a, b) => a.slot.localeCompare(b.slot));
+  // Slot first where we have one (the quarterback leads), then everyone else by name.
+  const sorted = [...list].sort((a, b) =>
+    (a.slot ? 0 : 1) - (b.slot ? 0 : 1)
+    || (a.slot ?? "").localeCompare(b.slot ?? "")
+    || a.player.localeCompare(b.player));
   return (
     <div className="impspec__back">
       <span className="impspec__backh">Back</span>
@@ -125,7 +129,7 @@ function BackRow({ list }: { list: ReturningNote[] }) {
         {sorted.map((r) => (
           <li key={r.player}>
             <b>{r.player}</b>
-            <span className="impspec__rank"> {r.slot}</span>
+            {r.slot && <span className="impspec__rank"> {r.slot}</span>}
             {r.missed > 0 && (
               <span className="impspec__det">
                 {" "}· missed {r.missed} {r.missed === 1 ? "game" : "games"}

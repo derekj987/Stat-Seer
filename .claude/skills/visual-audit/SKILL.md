@@ -2052,7 +2052,51 @@ cannot invert the curve and shove the stars back down.
   it.** Bucketing by our own projection mixed players of different true levels together and flattened
   the very curve the fit existed to find.
 
-### 🚨 NCAAF has the same tilt — and its cause is VOLUME, not skew
+### 🚨 "Volume inflation" on the NCAAF board — hypothesis RETIRED, it was never over-projecting
+Chased because `weekly_flags` had NCAAF at median proj/line **1.87** in the bottom band with rows at
+2x a real line, which looks exactly like the `rolevol` ratchet this file documents. Four measurements
+killed it, in order, and each one is a reusable check:
+
+1. **The inflated rows are not thin samples.** They carry 14-27 games of history, so the role
+   baseline has almost no weight on them.
+2. **Board-wide at 6+ games of history, median proj/line is exactly 1.00.** The problem is confined
+   to the low-LINE band, not to low-sample players.
+3. **Our number tracks each player's OWN production**, median proj/own 1.07 / 0.93 / 0.91 / 0.85
+   across line bands. We are not inventing anything.
+4. **Which of his production, though?** `_decay_for` hands every non-promoted player
+   `DECAY_RETURN = 0.94` — an 11-game half-life — so three current-season games carry ~17% of the
+   weight and the board publishes career rates:
+
+       player            own 2026   own all-time   published
+       Dylan Wade           17.5         40.5         43.9
+       Colton Joseph        27.3         72.5         64.8
+
+That looked conclusive. **It was not.** Sweeping the decay against what players did NEXT, and then
+splitting by whether a player's recent form sits BELOW or ABOVE his own history (held out on 2026):
+
+    carries     0.94   0.86   0.74        receptions   0.94   0.86   0.74
+    declining  +0.14  -0.36  -1.10                    -0.04  -0.17  -0.40
+    rising     -1.49  -0.72  +0.22                    -0.55  -0.33  -0.03
+    MAE         3.78   3.76   3.76                     1.415  1.411  1.420
+
+**At the shipped 0.94 the bias on declining players is already ~zero.** We were never
+over-projecting them. What 0.94 actually does is UNDER-project players whose role is GROWING, by
+1.5 carries a game — the opposite defect. Volume decay is now split from efficiency decay
+(`VOL_DECAY_RETURN`) and set to 0.86 on bias, since the MAE curve is flat enough to be useless for
+choosing — the same trap the NFL efficiency constants fell into. `pass_att` keeps 0.70, where the
+MAE gain is real (+3.09% held-out).
+
+**The tilt is still 38 points and is NOT explained.** Left visibly failing its own checks rather
+than declared fixed. What is now ruled out: the role ratchet, thin samples, the level, and
+over-projection of declining players. The remaining candidate is that the low-line NCAAF rows are
+players the market has repriced for a reason our feeds cannot see — college has no injury report and
+the scraped depth chart lags the portal, both already documented here.
+
+**The transferable part: when a board looks inflated, check the bias SEPARATELY for players trending
+down and trending up.** An aggregate bias near zero can hide two opposite errors, and "we project
+decliners too high" is a different bug from "we project risers too low" with an opposite fix.
+
+### 🚨 NCAAF has the same tilt (cause still open — see the entry above)
 Applying the NFL day's work to college, measured rather than assumed. The same defect is there:
 
     market        n    over    TILT rec_yds: top half 59% over, bottom half 88%, gap 30 pts

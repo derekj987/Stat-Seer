@@ -552,7 +552,49 @@ def infer_td_pos(games):
 
 DECAY = 0.82           # default recency weight (each game back counts DECAY x)
 DECAY_MOVED = 0.78     # promoted / new starter: the recent role dominates
-DECAY_RETURN = 0.94    # returning starter: mostly their full body of work
+DECAY_RETURN = 0.94    # returning starter: mostly their full body of work -- EFFICIENCY only
+
+# How fast to forget old VOLUME for a returning starter. Split out from DECAY_RETURN because the
+# two quantities want opposite things, and sharing one number was the NCAAF board's "volume
+# inflation": at 0.94 a player's three current-season games carry ~17% of the weight across a
+# 25-game log, so the board published career rates for players whose role had shrunk --
+#
+#     player            own 2026   own all-time   published
+#     Dylan Wade           17.5         40.5         43.9
+#     Colton Joseph        27.3         72.5         64.8
+#     Trent Walker         21.3         68.8         57.0
+#
+# -- which read as our number being nearly double the book's line at the bottom of the board
+# (median proj/line 1.87 there), while actually tracking the player's own history faithfully.
+#
+# Swept against what players did NEXT, train 2024-25 and held out on 2026
+# (analysis/cfb_decay_sweep.py). Volume wants a fast decay and yardage does not, which is why one
+# shared constant could not serve both:
+#
+#     field         best   held-out MAE at 0.94 -> best
+#     pass_att      0.70      8.712 -> 8.443   +3.09%
+#     carries       0.74      3.601 -> 3.576   +0.70%
+#     receptions    0.90      1.355 -> 1.352   +0.21%
+#     rec_yds       0.94     21.405 -> 21.405   0.00%   <- the OUTPUT, and it prefers the slow one
+#     rush_yds      0.86     24.337 -> 24.290  +0.20%
+#
+# So volume is forgotten fast, efficiency slowly. Only the RETURNING-starter branch changes; a
+# promoted player already leans on recent games through DECAY_MOVED.
+# Chosen on BIAS, not MAE. The MAE curve is almost flat (carries 3.757-3.780 across the whole
+# range), so it cannot pick a value -- the same trap the NFL efficiency constants fell into. Split
+# by whether a player's recent form is below or above his own history, held out on 2026:
+#
+#     carries     0.94   0.86   0.74        receptions   0.94   0.86   0.74
+#     declining  +0.14  -0.36  -1.10                    -0.04  -0.17  -0.40
+#     rising     -1.49  -0.72  +0.22                    -0.55  -0.33  -0.03
+#     MAE         3.78   3.76   3.76                     1.415  1.411  1.420
+#
+# This also RETIRES the hypothesis this change started from. The NCAAF board looked like it was
+# over-projecting declining players ("volume inflation"), and it is not: at the shipped 0.94 the
+# bias on declining players is already about zero. What 0.94 actually does is UNDER-project players
+# whose role is growing, by 1.5 carries a game. 0.86 splits the difference at the best MAE in the
+# table. pass_att keeps the fast setting because there the MAE gain is real and large (+3.09%).
+VOL_DECAY_RETURN = {"carries": 0.86, "receptions": 0.86, "pass_att": 0.70}
 LEAGUE_EFF = {"ypc": 4.7, "ypr": 12.0, "ypa": 7.6, "tdpt": 0.05, "passtd": 0.045}
 REG = {"ypc": 40.0, "ypr": 24.0, "ypa": 80.0, "tdpt": 22.0, "passtd": 25.0}
 
@@ -747,7 +789,10 @@ def project_role(games, market, pos, rank, team, per_team, league):
         if pos == "TE" and field == "receptions":
             base *= TE_VOL_FACTOR
         decay = _decay_for(games, field, base)
-        own = _recent_avg(games, field, decay) or 0.0
+        # Volume forgets faster than efficiency does. The returned `decay` is the EFFICIENCY one
+        # and is left alone -- only the workload estimate below uses the quicker setting.
+        vdecay = VOL_DECAY_RETURN.get(field, decay) if decay == DECAY_RETURN else decay
+        own = _recent_avg(games, field, vdecay) or 0.0
         if ROLE_MODE == "blend2":
             # As "blend", but the player's own volume earns its weight from THIS season's games
             # in full and last season's only at PRIOR_GAME_W each: before a snap is played the

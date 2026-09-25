@@ -196,7 +196,7 @@ interface SleeperRow {
 /** A player who was out and is not any more. `missed` is distinct weeks he appeared on the report
  *  as Out/Doubtful/IR; 0 when the only evidence is a cleared news designation, which carries no
  *  week of its own (someone activated off IR, say). */
-export interface ReturningNote { player: string; team: string; slot: string; missed: number }
+export interface ReturningNote { player: string; team: string; slot: string | null; missed: number }
 
 // "NA" is deliberately absent: Sleeper uses it for "no current information", and healthy starters
 // carry it. Mapping it to a tag would put a pill on players with nothing wrong.
@@ -323,19 +323,26 @@ export async function weekReturning(
   if (!url || !key || week < 2) return byTeam;
 
   const seen = new Set<string>();
-  const add = (player: string, team: string, missed: number) => {
+  const add = (player: string, team: string, missed: number, slotOnly = false) => {
     const k = injuryKey(player, team);
     const now = current.get(k);
     // Still designated in any form -> not back.
     if (now) return;
     if (seen.has(k)) return;
+    // The slot is a LABEL, not a gate. Requiring one silently restricted this row to skill
+    // players: `depthChart.ts` is the OFFENSIVE chart (WR/RB/QB/FB/TE only), so every returning
+    // lineman, linebacker and defensive back was dropped. Derek: "I'm not seeing players listed
+    // as back in the injury sections for any other team except the falcons" — and he was right,
+    // 35 of the 50 players who were designated last week and are clear now were being thrown away
+    // for having no entry, leaving four names across two teams.
+    //
+    // The list directly above this one shows injuries at EVERY position, so the returns have to as
+    // well or the two disagree on screen. What keeps it honest instead is the status gate in the
+    // caller: he has to have been genuinely OUT, not merely doubtful.
     const slot = playerSlot(player, "nfl");
-    // "Key" is the depth chart's call rather than ours. Without an entry we cannot say he matters,
-    // so he is left off instead of guessed at.
-    if (!slot || !/^(QB[12]|RB[12]|WR[123]|TE1)$/.test(slot)) return;
     seen.add(k);
     const list = byTeam.get(team) ?? [];
-    list.push({ player, team, slot, missed });
+    list.push({ player, team, slot: slot ?? null, missed });
     byTeam.set(team, list);
   };
 
@@ -374,7 +381,9 @@ export async function weekReturning(
           ?? { player: r.scraped_name, team: r.team, missed: new Set<number>(), lastWeek: false };
         const st = (r.game_status || "").toUpperCase();
         if (st === "OUT" || st === "IR") e.missed.add(r.week);
-        if (r.week === week - 1) e.lastWeek = true;
+        // Only a genuine absence counts as a return. Doubtful is a designation, not an outcome,
+        // and "back" should mean he was actually missing.
+        if (r.week === week - 1 && (st === "OUT" || st === "IR")) e.lastWeek = true;
         seenWk.set(k, e);
       }
       for (const e of seenWk.values()) {
