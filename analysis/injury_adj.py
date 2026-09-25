@@ -239,7 +239,29 @@ _SHARE_CACHE = {}
 # gsis and Sleeper's own gsis field is populated on only a fifth of players. Verified 8 of 8 on the
 # quarterbacks it currently lists as unavailable.
 _NEWS_CACHE = {}
-NEWS_OUT = {"OUT", "IR", "PUP", "NFI", "DNR", "SUS"}
+# DOUBTFUL belongs here, and its absence cost us Chicago.
+#
+# Derek: "Bears winning without their starting QBs." Caleb Williams holds 94.8% of Chicago's pass
+# attempts and the news feed had him DOUBTFUL; the league's own week-3 report had no CHI
+# designation at all. This set excluded DOUBTFUL, so the model subtracted exactly nothing and
+# published the Bears as though their quarterback were fine.
+#
+# It was also internally inconsistent: the OFFICIAL report path a hundred lines up has always used
+# OUT_STATUS = ("Out", "Doubtful"), and daily_digest.py counts DOUBTFUL too. Only this path
+# disagreed, so whether a doubtful starter moved the number depended on which feed happened to
+# carry him first.
+#
+# Measured before changing it, on the 7,093 designations given to touch-taking players 2016-2026
+# (players with 3+ touch weeks that season -- scoring linemen and defenders by whether they
+# recorded a carry rates every one of them absent and puts Questionable at a nonsense 83%):
+#
+#     Out            n=2,674   100.0% did not play
+#     Doubtful       n=  468    99.1% did not play
+#     Questionable   n=3,951    39.9% did not play
+#
+# Doubtful is Out. Questionable stays out of this set for the same reason it always has -- it is a
+# game-time decision that plays 60% of the time, and alerting on it would fire on half the league.
+NEWS_OUT = {"OUT", "IR", "PUP", "NFI", "DNR", "SUS", "DOUBTFUL"}
 
 
 def _news_out(season):

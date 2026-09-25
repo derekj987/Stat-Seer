@@ -41,8 +41,12 @@ sys.path.insert(0, ROOT)
 from weekly_flags import depth_chart, norm, sb, slot_of  # noqa: E402
 
 # Out-type designations. Questionable is deliberately absent: it is a game-time decision, not an
-# absence, and alerting on it would fire on half the league every Friday.
-OUT_LIKE = {"OUT", "IR", "PUP", "NFI", "DNR", "SUS"}
+# absence, and alerting on it would fire on half the league every Friday. Measured over 2016-2026
+# on players who take touches: Questionable plays 60% of the time, Doubtful does not play 99.1% of
+# the time -- indistinguishable from Out, which is why DOUBTFUL counts here. See injury_adj.NEWS_OUT
+# for the full table; these two sets must agree or the check and the model disagree about who is
+# even absent.
+OUT_LIKE = {"OUT", "IR", "PUP", "NFI", "DNR", "SUS", "DOUBTFUL"}
 # How much the model must subtract before we accept that it has noticed. A quarterback is the only
 # position where the coefficient is big enough to demand a real number; everything else is a WARN,
 # because injury_adj's own measurement found RB/WR/TE individually insignificant.
@@ -51,6 +55,20 @@ OTHER_MIN_POINTS = 0.2
 # The publisher's own threshold. If the live model and the published number differ by more than
 # this, a revision was due and did not happen.
 STALE_MARGIN = 0.75
+# How old the newest availability CHANGE may be before it is worth a mention.
+#
+# This is a WARN, not a FAIL, and the distinction cost a false alarm on the guardrail's first real
+# run. `sleeper_availability` is written only when something CHANGES -- the capture's own log line
+# for a quiet run is "nothing to write" -- so the newest row's timestamp is when the league last
+# had news, NOT when the job last ran. capture-sleeper.yml runs every 4h; it ran successfully at
+# 13:36, wrote nothing because nothing had changed, and this check failed the whole workflow at
+# 18:09 for a feed that was working perfectly.
+#
+# A check that goes red on a healthy system is worse than no check, because it teaches you to
+# ignore the red. The table cannot answer "did the job run" -- it has no heartbeat row -- so this
+# no longer pretends to ask that. 12h is a provisional bound: news does not stay quiet much longer
+# than that mid-season, but the table has only a day of history so far, so re-derive it from the
+# real distribution of gaps once there is a season of them.
 FEED_MAX_AGE_H = 12.0
 
 OUT_LINES: list[str] = []
@@ -118,11 +136,29 @@ def check_news_to_adjustment(env, season, week, depth):
         import injury_adj
         adj = injury_adj.team_adjustment(season, week)
         u = injury_adj._usage_for(season)
-        sh = injury_adj._shares(u, season, week)
     except Exception as e:  # noqa: BLE001
         fail(f"injury adjustment could not be computed at all ({e})")
         say()
         return
+    # The INPUT check, before any conclusion is drawn from the output.
+    #
+    # team_adjustment() answers "no absences" and "I cannot see any absences" with the same empty
+    # dict, by design -- a backtest season with no usage file must predict unadjusted rather than
+    # crash. On the LIVE path those two are opposites, and the difference is a published number.
+    #
+    # This is what actually broke: data/ is gitignored and publish-predictions.yml never fetched
+    # the stats CSVs, so load_usage() returned None on every scheduled run and the whole adjustment
+    # silently evaluated to {}. The first version of this check then did `_shares(None, ...)` and
+    # died with 'NoneType' object has no attribute 'season' -- which at least went red, but named
+    # the messenger instead of the message.
+    if u is None or not len(u):
+        fail(f"no usage data for {season} — data/stats_{season}.csv and stats_{season - 1}.csv are "
+             "missing, so injury_adj.load_usage() returns None, team_adjustment() returns {} and "
+             "EVERY prediction is published with no injury adjustment at all. This is silent: the "
+             "model does not error, it just prices a team as though nobody were hurt.")
+        say()
+        return False
+    sh = injury_adj._shares(u, season, week)
 
     # INDEPENDENT out-set, straight from the tables.
     rows = sb(env, "sleeper_availability_current?select=player,team,status"
@@ -137,7 +173,7 @@ def check_news_to_adjustment(env, season, week, depth):
         fail("neither feed lists a single unavailable player — that is a broken feed, not a "
              "healthy league")
         say()
-        return
+        return False
 
     gmap = _gsis_map(season)
     out_by_team = {}
@@ -175,12 +211,29 @@ def check_news_to_adjustment(env, season, week, depth):
     else:
         say(f"  checked {flagged} teams carrying a material absence")
     say()
+    return True
 
 
-def check_published_is_current(env, season, week):
-    """B. The model's number now, against the number the site is serving."""
+def check_published_is_current(env, season, week, data_ok=True):
+    """B. The model's number now, against the number the site is serving.
+
+    `data_ok` is not decoration. This check recomputes the model IN THE SAME PROCESS that publishes
+    it, so when the environment is missing the usage data both sides go blind together and the
+    comparison agrees -- on the wrong number. That is exactly what it did the day the injury
+    adjustment was silently off: check A crashed, and B printed "every unplayed game's published
+    margin is within 0.75 of the live model" while the site served NYG at +6.0 with a quarterback
+    on injured reserve.
+
+    A comparison between two copies of the same broken thing is an echo, not a check. When A says
+    the inputs are gone, B declines to certify rather than passing."""
     say("## B. Does the PUBLISHED number match the model?")
     say()
+    if not data_ok:
+        warn("not comparing — check A found the model's injury inputs missing, and this check "
+             "recomputes the model in the same process. Both sides would be blind in the same "
+             "way and agree with each other. Fix A first; this says nothing until then.")
+        say()
+        return
     try:
         import game_model as gm
         g = gm.load(os.path.join(ROOT, "data", "games.csv"))
@@ -235,8 +288,8 @@ def check_feeds(env, season, week):
     else:
         seen = dt.datetime.fromisoformat(avail[0]["captured_at"].replace("Z", "+00:00"))
         age = (dt.datetime.now(dt.timezone.utc) - seen).total_seconds() / 3600
-        (ok if age < FEED_MAX_AGE_H else fail)(
-            f"availability feed last captured {age:.1f}h ago")
+        (ok if age < FEED_MAX_AGE_H else warn)(
+            f"newest availability CHANGE is {age:.1f}h old")
     rep = sb(env, f"practice_reports?select=team&season=eq.{season}&week=eq.{week}&limit=2000")
     teams = len({r["team"] for r in rep})
     (ok if teams >= 2 else warn)(f"practice report has {teams} teams filed for week {week}")
@@ -266,8 +319,8 @@ def main():
     say(f"_ran {dt.datetime.now(dt.timezone.utc):%Y-%m-%d %H:%M} UTC_")
     say()
     depth = depth_chart()
-    check_news_to_adjustment(env, args.season, week, depth)
-    check_published_is_current(env, args.season, week)
+    data_ok = check_news_to_adjustment(env, args.season, week, depth)
+    check_published_is_current(env, args.season, week, data_ok=bool(data_ok))
     check_feeds(env, args.season, week)
 
     say("---")

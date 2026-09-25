@@ -45,6 +45,9 @@ concurrency:
   group: publish-predictions
   cancel-in-progress: false   # never interrupt a write to an append-only ledger
 
+env:
+  SEASON: "2026"   # bump each year
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -59,6 +62,33 @@ jobs:
       # No games.csv step: publish_predictions.load_games() fetches it itself (same canonical
       # nflverse URL as grade_predictions), creates the gitignored data/ dir, and degrades to a
       # clean skip on a network blip rather than emailing a failure.
+
+      # ...but the INJURY ADJUSTMENT has no such self-fetch, and that cost us a published number.
+      #
+      # injury_adj.load_usage() reads data/stats_<season>.csv for this season and last, to work out
+      # what share of his team's carries/targets/attempts an absent player held. data/ is
+      # gitignored, nothing here ever created it, and load_usage returns None when the files are
+      # missing -- at which point team_adjustment() returns {} and the caller "predicts
+      # unadjusted". Quietly. Every scheduled run since the injury work landed published
+      # injury-BLIND numbers.
+      #
+      # It was not merely stale, it actively reverted a correct number. Jaxson Dart went on IR;
+      # NYG was published at +6.0 on the 22nd, corrected to +3.1 by hand on the 25th, and the
+      # scheduled run four hours later recomputed +6.0 with no adjustment, saw a 2.9-point gap,
+      # and "revised" the good number back to the bad one. The ledger keeps all three rows.
+      #
+      # Two seasons is all load_usage asks for (range(season-1, season+1)). Both are required: a
+      # miss here means silently unadjusted predictions, so no `|| rm -f` forgiveness on the
+      # current season the way player-projections.yml can afford.
+      - name: Fetch nflverse player stats (injury adjustment needs them)
+        run: |
+          mkdir -p data
+          for Y in $((SEASON-1)) $SEASON; do
+            echo "fetching stats_$Y.csv"
+            curl -fsSL --retry 3 -o "data/stats_$Y.csv" \
+              "https://github.com/nflverse/nflverse-data/releases/download/stats_player/stats_player_week_$Y.csv"
+          done
+
       - name: Publish -> prediction_ledger
         env:
           SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
