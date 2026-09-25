@@ -8,6 +8,10 @@ import { NCAAF_MODEL, type NcaafCardGame, type NcaafUpset } from "./ncaaf/model-
 import LandingHub, { type VfRow } from "./LandingHub";
 import { createClient } from "@/lib/supabase/server";
 import HomePromo from "./HomePromo";
+import { weatherSpotlight } from "@/lib/weatherSpotlight";
+import { weekRefs } from "@/lib/refAssignments";
+import { weekInjuries, weekReturning, type InjuryNote, type ReturningNote } from "@/lib/nflInactives";
+import type { SpecialCtx } from "./SpecialConsiderations";
 
 export const metadata = {
   title: "StatSeer — the model vs the market, every sport",
@@ -38,6 +42,40 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
       return [{ eventId: g.eventId, away: g.away, home: g.home, line: `${team} ${line.point > 0 ? "+" : ""}${line.point}`, price: line.price, books: line.books }];
     });
   } catch { /* odds not up yet */ }
+
+  // The weather spotlight carries the SAME block the model board shows for that game -- scoring,
+  // weather, referee and both injury lists (Derek: "add the referee data as well, add all the
+  // analysis from that chart"). It is fetched for ONE game rather than the slate, so the homepage
+  // pays for one crew lookup and one injury read, not sixteen.
+  let spotlight: { ctx: SpecialCtx; row: CardRow; wx: ReturnType<typeof weatherSpotlight> } | null = null;
+  try {
+    const pick = weatherSpotlight(nfl.card);
+    if (pick) {
+      const [refs, injAll] = await Promise.all([
+        weekRefs(nfl.week, SEASON).catch(() => new Map()),
+        weekInjuries(SEASON, nfl.week).catch(() => new Map<string, InjuryNote>()),
+      ]);
+      let backAll = new Map<string, ReturningNote[]>();
+      try { backAll = await weekReturning(SEASON, nfl.week, injAll); } catch { /* no feed, no row */ }
+      const injuries: { player: string; team: string; note: InjuryNote }[] = [];
+      for (const [key, note] of injAll) {
+        const team = key.split("|")[1] ?? "";
+        if (team === pick.wx.home || team === pick.wx.away) injuries.push({ player: note.player, team, note });
+      }
+      spotlight = {
+        row: pick.row, wx: pick,
+        ctx: {
+          away: pick.wx.away, home: pick.wx.home,
+          crew: refs.get(pick.wx.home),
+          wx: pick.wx,
+          injuries,
+          feedHasAny: injAll.size > 0,
+          returning: Object.fromEntries(backAll),
+          upset: null,
+        },
+      };
+    }
+  } catch { /* the spotlight is an enhancement — never break the homepage for it */ }
 
   // Members see ＋ Add-to-dashboard on the homepage panels; signed-out visitors don't.
   let isMember = false;
@@ -223,7 +261,8 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
         </ol>
       </section>
 
-      <LandingHub initialSport={initialSport} nfl={nfl} ncaaf={ncaaf} vf={vf} isMember={isMember} />
+      <LandingHub initialSport={initialSport} nfl={nfl} ncaaf={ncaaf} vf={vf} isMember={isMember}
+        spotlight={spotlight ? { ctx: spotlight.ctx, row: spotlight.row } : null} />
 
       {/* Public track record — the trust engine. Honest preseason state until games grade. */}
       <section className="lp-record" aria-label="Track record">

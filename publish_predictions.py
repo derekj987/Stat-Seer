@@ -9,7 +9,8 @@ probability (for the HOME team) BEFORE kickoff.
     python publish_predictions.py --week 1            # dry run
     python publish_predictions.py --week 1 --write    # publish (permanent)
 
-Re-running is safe: it skips games already published for this model_version + week
+Re-running is safe: a game already on the ledger is republished only when the model's
+margin has moved by REVISE_MARGIN or more, and always as a NEW row -- never an overwrite
 (the ledger has no UPDATE/DELETE, so we must not double-insert).
 """
 import argparse
@@ -77,11 +78,22 @@ def event_map(env, season, week):
     return {(r["home_team"], r["away_team"]): (r["event_id"], r["commence_time"]) for r in rows}
 
 
-def already_published(env, model_version, season, week):
+# How far the model's margin has to move before we publish a REVISION. Below this a game is left
+# alone, so the ledger does not fill with noise from a rating drifting a tenth of a point.
+REVISE_MARGIN = 0.75
+
+
+def published_so_far(env, model_version, season, week):
+    """{event_id: (published_at, pred_margin)} for the NEWEST row we have on each game."""
     rows = _get(env, "prediction_ledger",
                 f"?season=eq.{season}&week=eq.{week}"
-                f"&model_version=eq.{model_version}&select=event_id")
-    return {r["event_id"] for r in rows}
+                f"&model_version=eq.{model_version}"
+                "&select=event_id,published_at,reasoning&order=published_at.asc")
+    out = {}
+    for r in rows:                                # ascending, so the last write per key wins
+        margin = (r.get("reasoning") or {}).get("pred_margin")
+        out[r["event_id"]] = (r.get("published_at"), margin)
+    return out
 
 
 GAMES_LOCAL = "data/games.csv"
@@ -165,18 +177,34 @@ def main(argv=None):
 
     preds = gm.predict_week(g, args.season, week)
     emap = event_map(env, args.season, week)
-    done = already_published(env, gm.MODEL_VERSION, args.season, week)
+    done = published_so_far(env, gm.MODEL_VERSION, args.season, week)
 
-    rows, skipped = [], []
+    rows, skipped, revised = [], [], []
     for p in preds:
         eid_meta = emap.get((p["home"], p["away"]))
         if not eid_meta:
             skipped.append(f"no event_id: {p['away']}@{p['home']}")
             continue
         eid, commence = eid_meta
-        if eid in done:
-            skipped.append(f"already published: {p['away']}@{p['home']}")
-            continue
+        prev = done.get(eid)
+        if prev is not None:
+            # A game already on the ledger is REPUBLISHED, not skipped, when the model's number has
+            # genuinely moved. Derek: "we have to be able to trust when guys like Dart and Daniels
+            # go down on IR, our model #'s are updated accordingly." Skipping meant the opposite:
+            # Jaxson Dart went on injured reserve after Monday's publish, the model correctly
+            # dropped New York by ~3 points, and the site went on showing the pre-injury number all
+            # week because the game had been published once.
+            #
+            # Nothing is overwritten. The ledger is append-only by design -- no unique key, a
+            # published_at on every row, and a CHECK that it precedes kickoff -- so a revision is a
+            # NEW row and the number we stood behind on Monday stays on the record beside it. The
+            # site and the grader both read the latest pre-kickoff row.
+            was = prev[1]
+            moved = was is None or abs(float(p["pred_margin"]) - float(was)) >= REVISE_MARGIN
+            if not moved:
+                skipped.append(f"unchanged: {p['away']}@{p['home']}")
+                continue
+            revised.append(f"{p['away']}@{p['home']}: {was} -> {round(p['pred_margin'], 1)}")
         rows.append({
             "commence_time": commence, "season": args.season, "week": week,
             "event_id": eid, "section": "MODEL", "model_version": gm.MODEL_VERSION,
@@ -188,7 +216,9 @@ def main(argv=None):
         })
 
     print(f"MODEL {gm.MODEL_VERSION} — {args.season} Week {week}")
-    print(f"  to publish: {len(rows)}   skipped: {len(skipped)}")
+    print(f"  to publish: {len(rows)}   skipped: {len(skipped)}   revised: {len(revised)}")
+    for r in revised:
+        print(f"    ~ REVISED {r}")
     for s in skipped:
         print(f"    - {s}")
     for r in rows[:3]:

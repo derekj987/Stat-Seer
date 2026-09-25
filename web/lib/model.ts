@@ -83,8 +83,18 @@ async function pg(table: string, query: string): Promise<Record<string, unknown>
 export async function fetchModelWeek(week: number, season = 2026): Promise<ModelPrediction[]> {
   const preds = await pg("prediction_ledger",
     `?section=eq.MODEL&season=eq.${season}&week=eq.${week}&model_version=eq.${MODEL_VERSION}` +
-    `&select=event_id,subject,model_prob,commence_time,published_at,reasoning&order=commence_time`);
+    `&select=event_id,subject,model_prob,commence_time,published_at,reasoning&order=published_at`);
   if (!preds.length) return [];
+
+  // The ledger is append-only and a game is REPUBLISHED when its number genuinely moves -- a
+  // starting quarterback going on injured reserve, say. So a week can hold several rows for one
+  // game, and what a reader must see is the CURRENT one. Ordered by published_at ascending, the
+  // last write per event wins; the superseded rows stay on the record, which is the point of
+  // publishing this way rather than overwriting.
+  const latest = new Map<string, Record<string, unknown>>();
+  for (const p of preds) latest.set(`${p.event_id}|${p.subject}`, p);
+  const current = [...latest.values()].sort((a, b) =>
+    String(a.commence_time).localeCompare(String(b.commence_time)));
 
   // One consistent snapshot of the week's odds — gives us both team names and the
   // current de-vigged moneyline to compare each locked prediction against.
@@ -101,7 +111,7 @@ export async function fetchModelWeek(week: number, season = 2026): Promise<Model
     (oddsByEvent.get(r.event_id) ?? oddsByEvent.set(r.event_id, []).get(r.event_id)!).push(r);
   }
 
-  return preds.map((p) => {
+  return current.map((p) => {
     const reason = (p.reasoning ?? {}) as Record<string, unknown>;
     const id = p.event_id as string;
     const t = teams.get(id) ?? { home: p.subject as string, away: "?" };

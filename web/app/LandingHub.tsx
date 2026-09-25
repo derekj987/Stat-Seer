@@ -8,6 +8,7 @@ import { NCAAF_MODEL } from "./ncaaf/model-data";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
 import { NcaafCardHead, NcaafGameCell } from "./ncaaf/CardCells";
 import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
+import { SpecialConsiderations, type SpecialCtx } from "./SpecialConsiderations";
 import { PLAYER_PROJECTIONS, type PlayerProj } from "@/lib/playerProjections";
 import { INCENTIVE_WATCH } from "@/lib/incentiveWatch";
 import { COACH_TENDENCIES } from "@/lib/coachTendencies";
@@ -139,55 +140,19 @@ export type VfRow = { eventId: string; away: string; home: string; line: string;
 
 const numStr = (v: number | null) => (v === null ? "—" : String(v));
 
-/** The one game whose forecast is worth stopping for.
- *
- *  Derek: "always use an interesting game that has terrible weather or high wind to highlight what
- *  our analysis can provide." Weather is the most legible thing this app knows that a reader cannot
- *  get from a line — a number on a screen does not tell you it is blowing 20 in Buffalo — so one
- *  game gets pulled out of the week's board and shown in full.
- *
- *  Ranked on how much the forecast actually matters: wind, then gusts, then rain, with a jump for
- *  freezing. Indoor games and anything already kicked off are out. If nothing on the slate clears
- *  the bar the panel does not render at all — a "weather spotlight" on a calm 6 mph afternoon would
- *  teach a reader to ignore it.
- *
- *  Honest about what wind IS: above roughly 15 mph it measurably shrinks the passing game, which is
- *  context worth having. It is not an edge claim and it does not move our model's number. */
-function weatherPick(card: CardRow[]): { wx: GameWeather; row: CardRow } | null {
-  const now = Date.now();
-  const byEvent = new Map(card.map((r) => [r.eventId, r]));
-  const ranked = GAME_WEATHER
-    .filter((w) => !w.indoor && w.status === "ok" && Date.parse(w.commence) > now)
-    .map((w) => ({
-      wx: w,
-      row: byEvent.get(w.eventId),
-      score: (w.windMph ?? 0) + 0.5 * (w.gustMph ?? 0) + (w.precipPct ?? 0) / 8
-        + ((w.tempF ?? 99) <= 32 ? 12 : 0),
-    }))
-    .filter((x): x is { wx: GameWeather; row: CardRow; score: number } => !!x.row)
-    .sort((a, b) => b.score - a.score);
-  const top = ranked[0];
-  if (!top) return null;
-  const w = top.wx;
-  const notable = (w.windMph ?? 0) >= 12 || (w.gustMph ?? 0) >= 18
-    || (w.precipPct ?? 0) >= 40 || (w.tempF ?? 99) <= 32;
-  return notable ? { wx: w, row: top.row } : null;
-}
-
-function WeatherSpotlight({ card, week }: { card: CardRow[]; week: number | string }) {
-  const pick = weatherPick(card);
-  if (!pick) return null;
-  const { wx, row } = pick;
+function WeatherSpotlight({ spot, week }: { spot: SpotlightProp | null; week: number | string }) {
+  if (!spot) return null;
+  const { ctx, row } = spot;
+  const wx = ctx.wx!;
   const bits = [
     wx.windMph != null ? `${wx.windMph} mph wind${wx.gustMph ? ` (${wx.gustMph} gust)` : ""}` : null,
     wx.tempF != null ? `${wx.tempF}°` : null,
     wx.conditions,
     (wx.precipPct ?? 0) >= 40 ? `${wx.precipPct}% precip` : null,
   ].filter(Boolean);
-  // What this forecast actually does, in plain words. Only claims what has been measured.
   const read = (wx.windMph ?? 0) >= 15
     ? "Enough wind to shrink the passing game — deep throws and kicks are the first to go."
-    : (wx.precipPct ?? 0) >= 40 ? "Rain on the ball: expect more of the run game than the box score usually shows."
+    : (wx.precipPct ?? 0) >= 40 ? "Rain on the ball: more of the run game than a box score usually shows."
     : (wx.tempF ?? 99) <= 32 ? "Cold enough to matter for the kicking game and ball security."
     : "Worth knowing before you read the total.";
   const bottom = [row.spreadLean ? `${row.spreadLean.side} ${row.spreadLean.num}` : null,
@@ -196,19 +161,17 @@ function WeatherSpotlight({ card, week }: { card: CardRow[]; week: number | stri
   // Say the quiet part. Our total is weather-BLIND on purpose -- weather is context here, never a
   // model input -- while the market has already marked a windy game's total down. So on exactly
   // these games our number sits above theirs, and a reader who spots "wind shrinks the passing
-  // game" next to a model total 8 points OVER the market is right to be suspicious. Explaining it
-  // is the point of the panel; hiding the number would be worse.
+  // game" next to a model total 8 points OVER the market is right to be suspicious.
   const windy = (wx.windMph ?? 0) >= 15 || (wx.precipPct ?? 0) >= 40;
   const gap = row.modelTotal != null && row.marketTotal != null
     ? row.modelTotal - row.marketTotal : null;
   const caveat = windy && gap != null && gap > 2
-    ? `Note the gap: the market has already marked this total down for the weather. Our number `
-      + `does not — we keep the model weather-blind and publish the forecast beside it, so you can `
-      + `apply it yourself rather than have it baked in where you cannot see it.`
+    ? "Note the gap: the market has already marked this total down for the weather. Our number "
+      + "does not — we keep the model weather-blind and publish the forecast beside it, so you "
+      + "can apply it yourself rather than have it baked in where you cannot see it."
     : null;
   return (
-    <Panel title={`Week ${week} numbers crunched`} count="weather game" hint={TIPS.gameModel} open
-      pin={undefined}>
+    <Panel title={`Week ${week} numbers crunched`} count="weather game" hint={TIPS.gameModel} open>
       <div className="lpwx">
         <div className="lpwx__head">
           <span className="lpwx__game">{row.away} @ {row.home}</span>
@@ -228,6 +191,10 @@ function WeatherSpotlight({ card, week }: { card: CardRow[]; week: number | stri
         {bottom && <p className="lpwx__bottom"><b>Bottom line:</b> {bottom}</p>}
         {caveat && <p className="lpwx__caveat">{caveat}</p>}
       </div>
+      {/* The SAME block the model board shows for this game -- scoring, weather, referee, both
+          injury lists and who is back. Rendered from the shared component rather than rebuilt, so
+          the homepage can never drift from /model. */}
+      <SpecialConsiderations ctx={ctx} />
       <p className="lp-cardfoot"><a href="/model">See every game, with injuries and the referee →</a></p>
     </Panel>
   );
@@ -417,7 +384,9 @@ function NflValueTable({ rows }: { rows: VfRow[] }) {
   );
 }
 
-export default function LandingHub({ initialSport, nfl, ncaaf, vf, isMember }: { initialSport: Sport; nfl: NflData; ncaaf: NcaafData; vf: VfRow[]; isMember?: boolean }) {
+export interface SpotlightProp { ctx: SpecialCtx; row: CardRow }
+
+export default function LandingHub({ initialSport, nfl, ncaaf, vf, isMember, spotlight }: { initialSport: Sport; nfl: NflData; ncaaf: NcaafData; vf: VfRow[]; isMember?: boolean; spotlight?: SpotlightProp | null }) {
   // AP Top 25 matchups this week (either team ranked), kept in kickoff order — the
   // homepage's ranked-games snapshot, mirroring the full table on /ncaaf/model.
   const ncaafRanked = ncaaf.games.filter((g) => g.apAway || g.apHome)
@@ -448,7 +417,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf, vf, isMember }: {
         </div>
         {/* Aggressive curation: 3 disagreements + 3 player reads + 1 context. Everything else
             lives on its own section page (linked from each panel + the feature cards below). */}
-        <WeatherSpotlight card={nfl.card} week={nfl.week} />
+        <WeatherSpotlight spot={spotlight ?? null} week={nfl.week} />
         <Panel title="Where the model disagrees most" count={`${nfl.card.filter((r) => r.off).length || "—"} off-consensus`} hint={TIPS.gameModel} open
           pin={pin("model", "The Model · Game Model", "/model")}>
           <NflCardTable rows={[...nfl.card].sort((a, b) => Number(b.off) - Number(a.off)).slice(0, 3)} />

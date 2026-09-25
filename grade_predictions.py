@@ -161,7 +161,17 @@ def live(write, fetch):
     try:
         preds = _get(env, "prediction_ledger",
                      f"?section=eq.MODEL&model_version=eq.{gm.MODEL_VERSION}"
-                     "&select=id,event_id,season,week,subject,model_prob&limit=5000")
+                     "&select=id,event_id,season,week,subject,model_prob,published_at"
+                     "&order=published_at&limit=5000")
+        # One grade per GAME, not per ledger row. A game is republished when its number moves
+        # (see publish_predictions.REVISE_MARGIN), so grading every row would count the same game
+        # two or three times and quietly inflate the published record -- the opposite of what the
+        # ledger exists for. Ascending by published_at, the last row per game wins: the number we
+        # actually stood behind going into kickoff. The superseded rows stay unGRADED, not deleted.
+        _latest = {}
+        for _r in preds:
+            _latest[(_r["event_id"], _r["subject"])] = _r
+        preds = list(_latest.values())
         graded = {r["prediction_id"] for r in
                   _get(env, "prediction_results", "?select=prediction_id&limit=10000")}
     except (urllib.error.URLError, urllib.error.HTTPError) as e:

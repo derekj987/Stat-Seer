@@ -51,6 +51,7 @@ The adjustment is ZERO whenever injury data is unavailable (preseason, or before
 are filed), so the model degrades to its uninjured self rather than to something arbitrary.
 """
 import os
+import sys
 import urllib.request
 
 import numpy as np
@@ -65,7 +66,19 @@ VOLUME = {"QB": "attempts", "RB": "carries", "WR": "targets", "TE": "targets"}
 MIN_SHARE = 0.02
 
 INJ_URL = "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_%d.csv"
-INJ_LOCAL = "data/inj_%d.csv"
+ROSTER_URL = "https://github.com/nflverse/nflverse-data/releases/download/rosters/roster_%d.csv"
+
+# Every path here is anchored to the REPO, not to the working directory. game_model.py is written
+# to run from analysis/ (its default games path is ../data/games.csv) while this module used plain
+# "data/..." -- so invoked that way it found no injuries, no usage, and returned {} for every team.
+# The model then predicted unadjusted and said so nowhere: the correction silently switched itself
+# off depending on which directory you happened to be in. A relative path in a module that other
+# modules import is a bug waiting for a different caller.
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROSTER_LOCAL = os.path.join(_ROOT, "data", "roster_%d.csv")
+# The season the news feed is allowed to apply to; older weeks stay on the official report.
+CUR_SEASON = 2026
+INJ_LOCAL = os.path.join(_ROOT, "data", "inj_%d.csv")
 # "Doubtful" is included: historically it plays like Out far more often than like Questionable.
 OUT_STATUS = ("Out", "Doubtful")
 
@@ -81,7 +94,7 @@ def load_injuries(season, refresh=False):
             import odds_client as oc
             oc.ensure_ssl_certs()
             data = urllib.request.urlopen(INJ_URL % season, timeout=120).read()
-            os.makedirs("data", exist_ok=True)
+            os.makedirs(os.path.join(_ROOT, "data"), exist_ok=True)
             with open(path, "wb") as f:
                 f.write(data)
         except Exception:                       # noqa: BLE001 — absence is a valid state
@@ -102,7 +115,7 @@ def load_usage(seasons):
     """Per-player per-week volume, for computing share of a team's workload."""
     frames = []
     for y in seasons:
-        p = f"data/stats_{y}.csv"
+        p = os.path.join(_ROOT, "data", f"stats_{y}.csv")
         if not os.path.exists(p):
             continue
         s = pd.read_csv(p, low_memory=False)
@@ -206,6 +219,80 @@ def _inj_for(season):
 _SHARE_CACHE = {}
 
 
+# ---- The news feed, for the absences the official report cannot express --------------------
+#
+# Derek, looking at the homepage spotlight: "Jaxson Dart is now out for the season and Jameis
+# Winston is the new QB. Has this been updated in our model analysis? Or do we feel that NYG will
+# not only cover the market's -2.5 but as much as -6?"
+#
+# It had not been. Dart is on injured reserve, and a player on IR drops OFF the weekly injury
+# report entirely -- he is no longer on the active roster, so there is nothing to designate. The
+# report had no NYG quarterback on it at all and this function returned +0.00 for New York: the
+# model was pricing them as though nothing had happened, and publishing a number well clear of the
+# market on the strength of it.
+#
+# `sleeper_availability` (written by capture-sleeper.yml) already knew. It is the same source that
+# put Dart on the injury board hours before the league's own report would have, and it carries IR.
+# Joining it here closes the loop between what the board SHOWS a reader and what the model USES.
+#
+# Names are mapped to gsis ids through the season roster, because the shares below are keyed on
+# gsis and Sleeper's own gsis field is populated on only a fifth of players. Verified 8 of 8 on the
+# quarterbacks it currently lists as unavailable.
+_NEWS_CACHE = {}
+NEWS_OUT = {"OUT", "IR", "PUP", "NFI", "DNR", "SUS"}
+
+
+def _news_out(season):
+    """{team: {gsis_id}} the news feed says will not play. {} on any failure -- this is an
+    enhancement to the official report, never a replacement for it."""
+    if season in _NEWS_CACHE:
+        return _NEWS_CACHE[season]
+    out = {}
+    try:
+        import json as _json
+        import urllib.request as _url
+        import re as _re
+        here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        sys.path.insert(0, os.path.join(here, "ingest"))
+        import injuries_nflverse as _inj
+        env = _inj.load_env()
+        base, key = env.get("SUPABASE_URL"), env.get("SUPABASE_SERVICE_KEY")
+        if not base or not key:
+            _NEWS_CACHE[season] = {}
+            return {}
+        req = _url.Request(
+            base.rstrip("/") + "/rest/v1/sleeper_availability_current"
+            "?select=player,team,status&status=not.is.null&limit=2000",
+            headers={"apikey": key, "Authorization": f"Bearer {key}", "Range": "0-1999"})
+        rows = _json.load(_url.urlopen(req, timeout=60))
+
+        def _n(x):
+            y = _re.sub(r"[^a-z ]", "", str(x).lower())
+            y = _re.sub(r"(jr|sr|ii|iii|iv|v)", "", y)
+            return _re.sub(r"\s+", " ", y).strip()
+
+        ros = pd.read_csv(ROSTER_LOCAL % season, low_memory=False)             if os.path.exists(ROSTER_LOCAL % season) else None
+        if ros is None:
+            import odds_client as oc
+            oc.ensure_ssl_certs()
+            data = _url.urlopen(ROSTER_URL % season, timeout=120).read()
+            os.makedirs(os.path.join(_ROOT, "data"), exist_ok=True)
+            open(ROSTER_LOCAL % season, "wb").write(data)
+            ros = pd.read_csv(ROSTER_LOCAL % season, low_memory=False)
+        gsis = {(_n(r.full_name), str(r.team)): str(r.gsis_id)
+                for _, r in ros.iterrows() if pd.notna(r.get("gsis_id"))}
+        for x in rows:
+            if str(x.get("status") or "").upper() not in NEWS_OUT:
+                continue
+            g = gsis.get((_n(x.get("player")), str(x.get("team"))))
+            if g:
+                out.setdefault(str(x["team"]), set()).add(g)
+    except Exception:  # noqa: BLE001 — never let the enhancement break the model
+        out = {}
+    _NEWS_CACHE[season] = out
+    return out
+
+
 def team_adjustment(season, week, u=None, inj=None):
     """{team: points} to ADD to that team's predicted margin. Negative = weakened by absences.
 
@@ -223,9 +310,16 @@ def team_adjustment(season, week, u=None, inj=None):
         _SHARE_CACHE[ck] = _shares(u, season, week)
     sh = _SHARE_CACHE[ck]
     wk = inj[inj.week == week]
+    out_by_team = {str(t): set(g.gsis_id) for t, g in wk.groupby("team")}
+    # The news feed is merged ONLY for the live week of the current season. Applying today's IR
+    # list to a 2021 backtest would be a look-ahead, and the whole point of the historical path is
+    # that it only knows what was knowable then.
+    live_week = int(pd.to_numeric(inj.week, errors="coerce").max() or 0)
+    if season >= CUR_SEASON and week >= live_week:
+        for team, ids in _news_out(season).items():
+            out_by_team.setdefault(team, set()).update(ids)
     adj = {}
-    for team, grp in wk.groupby("team"):
-        ids = set(grp.gsis_id)
+    for team, ids in out_by_team.items():
         pts = 0.0
         for pos, coef in COEF.items():
             missing = sum(v for k, v in sh.get((team, pos), {}).items()

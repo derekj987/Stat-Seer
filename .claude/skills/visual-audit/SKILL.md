@@ -59,6 +59,49 @@ the control that triggers it — the "the scroll doesn't work any more" family) 
 scroll — the "too wordy" family).
 Console errors + network 4xx/5xx are collected separately (see step 4).
 
+### 🚨 A published number that never REPUBLISHES goes stale the moment news breaks
+Derek, on the homepage spotlight: *"Jaxson Dart is now out for the season and Jameis Winston is the
+new QB. Has this been updated in our model analysis?"* It had not, and three separate things had to
+be wrong at once for that to happen. All three are the same lesson from different angles.
+
+**1. The absence was invisible.** Dart is on injured reserve, and an IR player drops OFF the weekly
+injury report entirely — he is not on the active roster, so there is nothing to designate. The
+report had no NYG quarterback on it and `injury_adj` returned **+0.00** for New York. The news feed
+already knew (`sleeper_availability` had him as IR) and is now merged into `team_adjustment`, mapped
+to gsis ids through the season roster. NYG went +0.00 → **−2.86**, the biggest on the board, and
+Washington picked up −2.52 for Jayden Daniels at the same time.
+
+**2. The correction switched itself off depending on the working directory.** `injury_adj` used
+plain `"data/..."` paths while `game_model.py` is written to run from `analysis/`. Invoked that way
+it found no injuries, no usage, and returned `{}` for every team — predicting unadjusted and saying
+so nowhere. Every path in that module is now anchored to the repo. **A relative path inside a module
+other modules import is a bug waiting for a different caller.**
+
+**3. The publisher skipped games it had already published.** `TEN @ NYG` was on the ledger from
+Monday at +6.0; the daily job saw it and moved on, so the corrected +3.1 could never reach the site.
+The skip existed to protect the locked record, which is the right instinct and the wrong mechanism —
+`prediction_ledger` is append-only BY DESIGN (no unique key, `published_at` on every row, a CHECK
+that it precedes kickoff), so a revision is simply a new row:
+
+```
+2026-09-22 17:50   home win 66.2%   margin 6.0
+2026-09-25 15:08   home win 58.9%   margin 3.1   <- after the IR move
+```
+
+Nothing is overwritten and Monday's number stays on the record. It republishes only when the margin
+moves by `REVISE_MARGIN` (0.75) or more, so a rating drifting a tenth of a point does not fill the
+ledger with noise — 5 of 16 games revised, 11 correctly left alone.
+
+**Both readers had to change with it**, and missing either would have been worse than the bug:
+`fetchModelWeek` now keeps the newest row per game (the site was about to render duplicates), and
+`grade_predictions` grades only the latest pre-kickoff row per game — grading every row would have
+counted one game two or three times and quietly inflated the published record, which is the exact
+thing the ledger exists to prevent.
+
+**The general rule: "published" and "final" are not the same thing.** A number locked before kickoff
+must still be free to move while the facts move, as long as every version stays on the record and
+exactly one of them is the one you are graded on.
+
 ### ▶ RUN THIS FIRST for anything about the numbers
 
 ```bash
