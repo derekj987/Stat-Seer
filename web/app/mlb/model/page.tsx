@@ -174,10 +174,45 @@ export default async function Page() {
   // are static and the odds are a network read, so the board degrades to "—" in the market column
   // rather than to an error page.
   const { board } = await mlbBoard().catch(() => ({ board: [] as Awaited<ReturnType<typeof mlbBoard>>["board"] }));
-  // Joined on the EASTERN day plus the matchup. Not the UTC day: a 9:40pm Pacific first pitch is
-  // already tomorrow in UTC, which is precisely the collision that made the model's own game keys
-  // wrong. Both sides derive the ET day from the same real timestamp, so this holds.
-  const mkt = new Map(board.map((g) => [`${etDayKey(g.commence)}|${g.matchup}`, g]));
+  // Joined on the EASTERN day plus the matchup, then FIRST PITCH to separate a doubleheader.
+  //
+  // The ET day matters because a 9:40pm Pacific first pitch is already tomorrow in UTC, which is
+  // the collision that made the model's own game keys wrong. But day-plus-matchup alone is not
+  // unique: a doubleheader is two games between the same clubs on the same day, and keying a Map
+  // on it silently kept whichever arrived last, so BOTH games rendered ONE game's market numbers.
+  //
+  // Nearest first pitch separates them, and the two clocks disagree by more than you would guess.
+  // BAL @ NYY on 25 September: statsapi lists game 1 at 20:05 and game 2 at 20:10, because game 2
+  // starts when game 1 ends and 20:10 is a placeholder. The books post 20:05 and 23:06 — a real
+  // estimate. So the pairing has to tolerate a ~3h disagreement while still never crossing games.
+  //
+  // Hence greedy ONE-TO-ONE on the smallest gap rather than nearest-wins: closest pair is matched
+  // first and both sides are then consumed, so game 1 takes 20:05 exactly and game 2 is left with
+  // 23:06 — the only remaining candidate — instead of both grabbing the closer one. A model game
+  // with no candidate left keeps "—", which is the honest answer and beats another game's price.
+  const mktFor = new Map<string, (typeof board)[number]>();
+  {
+    const byMatchup = new Map<string, (typeof board)[number][]>();
+    for (const b of board) {
+      const k = `${etDayKey(b.commence)}|${b.matchup}`;
+      const list = byMatchup.get(k);
+      if (list) list.push(b); else byMatchup.set(k, [b]);
+    }
+    const pairs: { key: string; b: (typeof board)[number]; gap: number }[] = [];
+    for (const g of upcoming) {
+      for (const b of byMatchup.get(`${etDayKey(g.commence)}|${g.game}`) ?? []) {
+        pairs.push({ key: g.gameKey, b,
+                     gap: Math.abs(Date.parse(b.commence) - Date.parse(g.commence)) });
+      }
+    }
+    pairs.sort((x, y) => x.gap - y.gap);
+    const takenBoard = new Set<(typeof board)[number]>();
+    for (const p of pairs) {
+      if (mktFor.has(p.key) || takenBoard.has(p.b)) continue;
+      mktFor.set(p.key, p.b);
+      takenBoard.add(p.b);
+    }
+  }
 
   const keys = upcoming.map((g) => g.gameKey);
   const byKey = new Map(upcoming.map((g) => [g.gameKey, g]));
@@ -292,7 +327,7 @@ export default async function Page() {
                       </div>
                       {grp.items.map((k, i) => {
                         const g = byKey.get(k)!;
-                        const m = mkt.get(`${etDayKey(g.commence)}|${g.game}`);
+                        const m = mktFor.get(g.gameKey);
                         const mt = m?.total?.consensus ?? null;
                         const rl = m ? runLine(m, g.homeAbbr, g.awayAbbr) : null;
                         // Home minus away, the same sign convention as the market column, so a
