@@ -59,6 +59,30 @@ the control that triggers it — the "the scroll doesn't work any more" family) 
 scroll — the "too wordy" family).
 Console errors + network 4xx/5xx are collected separately (see step 4).
 
+### The daily digest: a DIFF of two change logs, not a report
+`analysis/daily_digest.py` answers the half of Derek's question the guardrail does not: not "did
+something break" but "what changed, and what did we do about it". It works because both halves are
+already append-on-change by design, which is the payoff for building them that way:
+
+- `sleeper_availability` is written only when a status actually changes, so a row in the last day IS
+  the news -- including a NULL status, which is someone being cleared.
+- `prediction_ledger` keeps revisions instead of overwriting, so a row published in the last day on a
+  game that already had one IS the number moving.
+
+Joining them by team turns two logs into one sentence: **"Dart to IR. NYG +6.0 -> +3.1."**
+
+Three things that make it survive past week three:
+
+- **It sends nothing on a quiet day.** A digest that arrives every morning regardless is one nobody
+  opens, and then the day it matters it is already invisible.
+- **Starters get a line, depth gets a tally.** The first run named every move including WR9s, TE5s
+  and fourth-string backs -- 90 names. It now names the six that matter and says "...and 84 squad
+  players below the top of the depth chart", so nothing is hidden and nothing is skimmed past.
+- **It degrades instead of failing.** `RESEND_API_KEY` and `DIGEST_TO` are not Actions secrets (the
+  web app gets Resend from Vercel), so it writes the digest to the job summary and mails it only
+  once those exist. Building the delivery path before the credential exists is fine; blocking on
+  the credential is not.
+
 ### 🚨 A guardrail that shares a dependency with its subject is an ECHO, not a check
 `analysis/injury_guardrail.py` asserts the thing Derek should never have to ask: *a starter is
 unavailable and the model has not noticed.* It took two wrong designs to get there, and both are

@@ -1,0 +1,56 @@
+name: Daily digest
+
+# "What changed since yesterday" -- who went out, who came back, and which model numbers moved
+# because of it. Derek: "I do not want to ask every day 'Hey Player X is now out for the season.
+# Do you know this and have our numbers been updated?'"
+#
+# The guardrail in publish-predictions.yml covers the failure case by going red when the model has
+# NOT noticed. This covers the ordinary case, where everything worked and he still wants to know.
+#
+# 14:30 UTC, half an hour after publish-predictions runs at 14:00, so the numbers it reports are
+# the ones that were just published rather than yesterday's.
+#
+# It sends nothing on a quiet day. A digest that arrives every morning regardless is one nobody
+# opens by week three, and the whole point is that it stays worth reading.
+#
+# DELIVERY: e-mails through Resend when RESEND_API_KEY and DIGEST_TO are set as repository secrets.
+# Neither exists yet -- the web app gets its Resend key from Vercel, not from Actions -- so until
+# they are added this still runs and writes the digest to the job summary. Add the two secrets and
+# the mail starts flowing with no code change.
+#
+# All times UTC.
+
+on:
+  schedule:
+    - cron: "30 14 * 9-12,1 *"
+  workflow_dispatch:
+    inputs:
+      hours:
+        description: "look-back window in hours"
+        required: false
+        default: "26"
+
+concurrency:
+  group: daily-digest
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet pandas numpy certifi -c requirements.txt
+      - name: What changed since yesterday
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DIGEST_TO: ${{ secrets.DIGEST_TO }}
+          DIGEST_FROM: ${{ secrets.DIGEST_FROM }}
+        run: |
+          python analysis/daily_digest.py \
+            --hours "${{ github.event.inputs.hours || '26' }}" --send
