@@ -64,3 +64,14 @@ jobs:
           SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: python publish_predictions.py --week "${{ github.event.inputs.week || 'auto' }}" --write
+
+      # The assertion Derek should never have to make by hand: a starter is unavailable and the
+      # model has not noticed. It runs AFTER publishing so it validates the whole chain -- news
+      # feed, injury adjustment, and the number actually on the site -- and it FAILS the job, which
+      # is what turns a silent staleness into an e-mail. Warnings do not fail it: a back-up missing
+      # with no measurable adjustment is normal and must not train anyone to ignore this.
+      - name: Injury guardrail
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python analysis/injury_guardrail.py

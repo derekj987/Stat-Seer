@@ -59,6 +59,43 @@ the control that triggers it — the "the scroll doesn't work any more" family) 
 scroll — the "too wordy" family).
 Console errors + network 4xx/5xx are collected separately (see step 4).
 
+### 🚨 A guardrail that shares a dependency with its subject is an ECHO, not a check
+`analysis/injury_guardrail.py` asserts the thing Derek should never have to ask: *a starter is
+unavailable and the model has not noticed.* It took two wrong designs to get there, and both are
+general.
+
+**1. Do not key on a status the failure itself changes.** The first version asked "is a QB1
+unavailable". It cannot catch the case it was built for, because **the depth chart DEMOTES a player
+the moment he lands on IR** — by the time the guardrail looked, Jaxson Dart read QB2 and Jameis
+Winston read QB1, and the chart agreed the starter was fine. It now keys on the USAGE SHARE, which
+is the quantity the adjustment is actually built from and does not move when someone is hurt.
+
+**2. Do not reach the evidence through the code you are checking.** The second version rebuilt its
+out-list by calling `injury_adj`'s own helpers. Two-way testing it — disabling the news merge to
+re-create the bug — produced **0 failures**: the model and the check went blind at the same instant,
+so it reported all-clear on the exact failure it exists to catch. It now reads
+`sleeper_availability_current` and `practice_reports` straight from the database, so it still sees
+the player when the model has lost him. Re-run with the merge disabled: **12 failures**, naming ATL,
+CIN, CLE, HOU, SEA, SF, WAS. With it enabled: all clear.
+
+The check itself is a comparison of two independently-derived numbers:
+
+```
+expected = sum(COEF[pos] * share) over unavailable players   # from the feeds + the model's shares
+actual   = team_adjustment(season, week)[team]               # what the model is really subtracting
+FAIL when |expected - actual| > 0.5
+```
+
+It covers the whole chain, because any one link breaking looks identical from outside: **A** news →
+adjustment, **B** adjustment → the number actually published, **C** whether the feeds are even
+running. It runs in `publish-predictions.yml` right after the publish, and FAILS the job — which is
+what turns silent staleness into an e-mail. Warnings never fail it; a back-up missing with no
+measurable adjustment is normal and must not train anyone to ignore the red ones.
+
+**The rule to carry: two-way test every guardrail by re-creating the bug it was written for.** A
+check that has only ever passed has demonstrated nothing, and one that passes while the bug is
+present is worse than none — it is a false all-clear on the thing you most wanted to know.
+
 ### 🚨 A published number that never REPUBLISHES goes stale the moment news breaks
 Derek, on the homepage spotlight: *"Jaxson Dart is now out for the season and Jameis Winston is the
 new QB. Has this been updated in our model analysis?"* It had not, and three separate things had to
