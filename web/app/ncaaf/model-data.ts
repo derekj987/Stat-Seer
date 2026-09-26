@@ -1438,7 +1438,7 @@ export const NCAAF_MODEL = {
         "conf": "SEC",
         "marketSpread": {
           "fav": "Texas",
-          "num": -4.5
+          "num": -5.5
         },
         "marketTotal": 54.5,
         "projSpread": {
@@ -1450,7 +1450,7 @@ export const NCAAF_MODEL = {
         "awayRiser": 8,
         "pick": {
           "side": "Tennessee",
-          "num": 4.5
+          "num": 5.5
         },
         "totalLean": {
           "dir": "OVER",
@@ -1473,7 +1473,7 @@ export const NCAAF_MODEL = {
           "fav": "Ohio State",
           "num": -27.5
         },
-        "marketTotal": 53.5,
+        "marketTotal": 54.5,
         "projSpread": {
           "fav": "Ohio State",
           "num": -26.4
@@ -1487,7 +1487,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "UNDER",
-          "num": 53.5
+          "num": 54.5
         },
         "off": false,
         "rated": true,
@@ -2313,7 +2313,7 @@ export const NCAAF_MODEL = {
           "fav": "Marshall",
           "num": -23.5
         },
-        "marketTotal": 51.5,
+        "marketTotal": 53.5,
         "projSpread": {
           "fav": "Marshall",
           "num": -21.4
@@ -2327,7 +2327,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "OVER",
-          "num": 51.5
+          "num": 53.5
         },
         "off": false,
         "rated": true,
@@ -3541,20 +3541,20 @@ export const NCAAF_MODEL = {
         "byPoints": 3.3
       },
       {
+        "dog": "Tennessee",
+        "matchup": "vs Texas",
+        "spread": "+5.5",
+        "modelPct": 51,
+        "marketPct": 38,
+        "byPoints": 0.6
+      },
+      {
         "dog": "Nevada",
         "matchup": "vs Air Force",
         "spread": "+5.5",
         "modelPct": 51,
         "marketPct": 38,
         "byPoints": 0.4
-      },
-      {
-        "dog": "Tennessee",
-        "matchup": "vs Texas",
-        "spread": "+4.5",
-        "modelPct": 51,
-        "marketPct": 40,
-        "byPoints": 0.6
       },
       {
         "dog": "Maryland",
@@ -12189,7 +12189,7 @@ export const NCAAF_MODEL = {
             "conf": "SEC",
             "marketSpread": {
               "fav": "Texas",
-              "num": -4.5
+              "num": -5.5
             },
             "marketTotal": 54.5,
             "projSpread": {
@@ -12201,7 +12201,7 @@ export const NCAAF_MODEL = {
             "awayRiser": 8,
             "pick": {
               "side": "Tennessee",
-              "num": 4.5
+              "num": 5.5
             },
             "totalLean": {
               "dir": "OVER",
@@ -12224,7 +12224,7 @@ export const NCAAF_MODEL = {
               "fav": "Ohio State",
               "num": -27.5
             },
-            "marketTotal": 53.5,
+            "marketTotal": 54.5,
             "projSpread": {
               "fav": "Ohio State",
               "num": -26.4
@@ -12238,7 +12238,7 @@ export const NCAAF_MODEL = {
             },
             "totalLean": {
               "dir": "UNDER",
-              "num": 53.5
+              "num": 54.5
             },
             "off": false,
             "rated": true,
@@ -13064,7 +13064,7 @@ export const NCAAF_MODEL = {
               "fav": "Marshall",
               "num": -23.5
             },
-            "marketTotal": 51.5,
+            "marketTotal": 53.5,
             "projSpread": {
               "fav": "Marshall",
               "num": -21.4
@@ -13078,7 +13078,7 @@ export const NCAAF_MODEL = {
             },
             "totalLean": {
               "dir": "OVER",
-              "num": 51.5
+              "num": 53.5
             },
             "off": false,
             "rated": true,
@@ -14292,20 +14292,20 @@ export const NCAAF_MODEL = {
             "byPoints": 3.3
           },
           {
+            "dog": "Tennessee",
+            "matchup": "vs Texas",
+            "spread": "+5.5",
+            "modelPct": 51,
+            "marketPct": 38,
+            "byPoints": 0.6
+          },
+          {
             "dog": "Nevada",
             "matchup": "vs Air Force",
             "spread": "+5.5",
             "modelPct": 51,
             "marketPct": 38,
             "byPoints": 0.4
-          },
-          {
-            "dog": "Tennessee",
-            "matchup": "vs Texas",
-            "spread": "+4.5",
-            "modelPct": 51,
-            "marketPct": 40,
-            "byPoints": 0.6
           },
           {
             "dog": "Maryland",
