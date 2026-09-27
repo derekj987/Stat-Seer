@@ -365,6 +365,26 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                           && r.book != null && r.proj != null && r.book > 0
                           && Math.abs(r.proj - r.book) / r.book >= 0.20
                           && Math.abs(r.volNow - r.volPrior) >= 1.0;
+                        // THIN SAMPLE: his season so far disagrees sharply with his established
+                        // role, so the projection is built on very little.
+                        //
+                        // Derek: "Sam Darnold is coming back from injury today... We are projecting
+                        // his passing yards way under." 130 against a 221.5 line, off a single week
+                        // of two attempts and five snaps — he was hurt in the first quarter.
+                        //
+                        // The number is NOT corrected, because five separate backtests say no rule
+                        // can (analysis/snap_weight_backtest.py, analysis/returning_starter_backtest.py):
+                        // dropping low-snap weeks, snap-weighting the sample, ignoring degenerate
+                        // samples, a QB-specific no-start rule, and a returning-starter role fallback
+                        // all lost to the shipped blend on train AND held-out. Most players who look
+                        // like this genuinely are not starting — their small sample is real
+                        // information — and nothing observable separates them from the one who is.
+                        //
+                        // So the row says the number is weakly supported instead of pretending
+                        // otherwise. Threshold is a THIRD of last season's rate over at most three
+                        // games: enough of a collapse that it is a role question, not a slow week.
+                        const thin = r.volNow != null && r.volPrior != null && r.volPrior > 0
+                          && (r.volGames ?? 0) <= 3 && r.volNow < 0.35 * r.volPrior;
                         const ppct = r.pG ? Math.round((100 * r.pOver) / r.pG) : null;
                         const hpct = r.hG ? Math.round((100 * r.hOver) / r.hG) : null;
                         const rpct = r.rG ? Math.round((100 * r.rOver) / r.rG) : null;
@@ -490,9 +510,11 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
                                 this cell reads as "our projection is under the line" and flatly
                                 contradicted the figure beside it (proj 193.2 vs a 180.5 line, arrow
                                 down). It now lives on the % over column it is actually computed from. */}
-                            <span className={`pmcell pmcell--num pmcell--proj${enough ? "" : " pmcell--thin"}`}
+                            <span className={`pmcell pmcell--num pmcell--proj${enough && !thin ? "" : " pmcell--thin"}`}
                               title={r.proj === null
                                 ? `No projection: ${r.player} has no prior-season NFL history, so there is nothing to build one from. He is on the board because a sportsbook priced him — that is the market saying he matters, and omitting him was worse than showing you an honest blank.`
+                                : thin
+                                ? `Our line-blind projection, and a weakly supported one: ${r.player} is at ${r.volNow} ${VOL_WORD[r.volUnit!] ?? r.volUnit} per game across ${r.volGames} game${r.volGames === 1 ? "" : "s"} this season against ${r.volPrior} last season — a collapse that big is a question about his ROLE, not a slow start, and the projection is built on the small number. We do not correct it: every rule we tested for this lost to the plain blend out of sample, because most players who look like this really have lost the job. Read his own history beside it and decide which role you believe.`
                                 : enough
                                 ? `Our line-blind projection: ${r.player}'s expected ${propLabel(r.market).toLowerCase()}, an AVERAGE. Averages sit above the middle on these markets, so this can read higher than the book's line even when he clears that line less than half the time — the % over columns are what say how often he actually gets there.`
                                 : `Our line-blind projection, built on only ${r.g} game${r.g === 1 ? "" : "s"} of ${r.player}'s own history — read it as a thin one. We publish it rather than hide it, and we hold back the over/under lean until ${MIN_PROJ_GAMES} games, because a lean is a claim and a projection is a measurement.`}>
