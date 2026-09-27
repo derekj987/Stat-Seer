@@ -42,7 +42,7 @@ def main():
             continue
         st = pd.read_csv(path, low_memory=False)
         st = st[st.season_type == "REG"].copy()
-        for c in ("targets", "attempts"):
+        for c in ("targets", "attempts", "receiving_yards"):
             st[c] = pd.to_numeric(st.get(c), errors="coerce").fillna(0.0)
         st["week"] = pd.to_numeric(st.week, errors="coerce")
         charts = ranks_by_week(season)
@@ -69,6 +69,7 @@ def main():
             sick = outs.get((wk, team), set())
             rows.append({"season": season, "pid": str(r.player_id), "team": team, "week": wk,
                          "tgt": float(r.targets),
+                         "yds": float(r.receiving_yards),
                          "qb_out": 1 if any(q in sick for q in qb1) else 0})
     d = pd.DataFrame(rows)
     if d.empty:
@@ -96,6 +97,26 @@ def main():
         d0, d1 = s2[0].mean(), s2[1].mean()
         print(f"  {lab:>18s} {len(s2):5,d} {d0:9.2f} {d1:8.2f} {d1 - d0:+7.2f} "
               f"{(d1 / d0 - 1) * 100:+6.1f}%")
+
+    # YARDS is what a prop line is priced in, and it is not the same question as targets: a backup
+    # quarterback throws a bit less often AND less well, so the yardage hit compounds the volume
+    # hit with an efficiency one. The board projects volume x a regressed efficiency baseline and
+    # carries no QB term at all, so whatever this number is, it is currently zero in the model.
+    py = sub.groupby(["pid", "qb_out"]).yds.mean().unstack().dropna()
+    print("\n  the same split on receiving YARDS (what the prop is priced in):")
+    print(f"  {'role':>18s} {'n':>5s} {'with QB1':>9s} {'QB1 out':>8s} {'delta':>7s} {'as %':>7s}")
+    joined = pv.join(py, lsuffix="_t", rsuffix="_y").dropna()
+    for lo, hi, lab in ((0, 3, "fringe (<3)"), (3, 5, "rotation (3-5)"),
+                        (5, 7, "starter (5-7)"), (7, 99, "primary (7+)")):
+        s3 = joined[(joined["0_t"] >= lo) & (joined["0_t"] < hi)]
+        if len(s3) < 15:
+            continue
+        y0, y1 = s3["0_y"].mean(), s3["1_y"].mean()
+        print(f"  {lab:>18s} {len(s3):5,d} {y0:9.1f} {y1:8.1f} {y1 - y0:+7.1f} "
+              f"{(y1 / y0 - 1) * 100:+6.1f}%")
+    a0, a1 = joined["0_y"].mean(), joined["1_y"].mean()
+    print(f"  {'ALL':>18s} {len(joined):5,d} {a0:9.1f} {a1:8.1f} {a1 - a0:+7.1f} "
+          f"{(a1 / a0 - 1) * 100:+6.1f}%")
 
 
 if __name__ == "__main__":

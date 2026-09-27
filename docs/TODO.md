@@ -41,6 +41,39 @@ What's left, split by who's blocked on what.
 - [ ] **Value Finder depth** — alternate-lines fair value (direction B) + **one
   unified slip across Game Lines and Player Props** with best-single-book /
   savings math.
+- [ ] **MLB total model — give it something new to say** (tabled 2026-09-27,
+  Derek: "Let's table this MLB adjustment for now. Keep it as a to-do.")
+
+  The board projects over the market on ~every game. Two separate causes, and
+  only the second is ours to fix:
+  - **Level.** The odds feed's totals sit 0.74 runs under what games actually
+    produce (8.15 closing vs 8.95 actual, n=224). Our 8.91 matches reality. Not
+    a model problem; `/mlb/model` now measures and states the gap itself.
+  - **Shape.** The model has run out of things to say. `--sweep-shrink` proved
+    re-tuning cannot help: the train split picks exactly the shipped K_SP=300 /
+    W_SP=1.0, and turning the pitcher weight up widens the board (sd 1.31 → 3.14)
+    while making MAE worse at every setting. It needs new INPUTS, not a bigger
+    multiplier.
+
+  Derek's list of what actually drives a total, against what we hold today —
+  park landed 2026-09-25 (+0.8% → +1.4% held out), the rest is open:
+
+  1. **Pitcher skill rates — do this first, it is free.** `sp_runs()` already
+     calls the pitching game log and keeps only `outs` and `earnedRuns`, throwing
+     away `battersFaced`, `strikeOuts`, `baseOnBalls`, `homeRuns`, `groundOuts`,
+     `airOuts` from the same response. ER/outs is the noisy estimator; K% and BB%
+     are the stable ones. No extra API call.
+  2. **Weather / wind** — absent from MLB entirely, though `weather_capture.py`
+     (Open-Meteo, free) already serves NFL and CFB. Wind out at Wrigley is worth
+     a run or more.
+  3. **Bullpen usage** — rejected once on a crude proxy (runs allowed minus the
+     starter's ER); retest on recent workload and availability.
+  4. **Handedness splits** (team wRC+ vs LHP/RHP), then lineup strength, umpire,
+     and a run distribution rather than a point estimate.
+
+  Same discipline as park: choose on train, confirm held-out, ship only if it
+  survives. Expect single-digit percentage gains — single-game SD is 4.52 runs
+  against a mean of 8.96, and that variance is the ceiling.
 
 ## Polish / later
 
