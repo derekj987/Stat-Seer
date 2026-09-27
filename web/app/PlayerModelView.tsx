@@ -67,8 +67,23 @@ const MARKET_D: Record<string, string> = {
 const POS_D: Record<string, string> = {
   QB: "run D", RB: "run D", FB: "run D", WR: "pass D", TE: "pass D",
 };
-const defenceLabel = (market: string, pos?: string | null) =>
-  MARKET_D[market] ?? POS_D[pos ?? ""] ?? "defence";
+// ...AND AGAINST WHOM. Derek: "Looks like the tags we have on players is buggy."
+//
+// Cleveland's Harold Fannin read "soft pass D" while Cleveland's Denzel Boston read "tough pass D"
+// — two players, same team, same opponent, opposite verdicts on one defence. Both were correct:
+// matchup_tag() is keyed on (opponent, POSITION), and Carolina really was soft against tight ends
+// and tough against receivers. The label was what lied, by printing only half the key.
+//
+// So the pill names the position group it was computed for. Two rows about the same defence can
+// now differ without reading as a contradiction, which is the whole complaint.
+const POS_GRP: Record<string, string> = {
+  QB: "QBs", RB: "RBs", FB: "RBs", WR: "WRs", TE: "TEs",
+};
+const defenceLabel = (market: string, pos?: string | null) => {
+  const d = MARKET_D[market] ?? POS_D[pos ?? ""] ?? "defence";
+  const g = POS_GRP[pos ?? ""];
+  return g ? `${d} vs ${g}` : d;
+};
 
 export default async function PlayerModelView({ base, cat, week }: { base: "nfl" | "ncaaf"; cat: string; week: number }) {
   const active = playerCatByKey(cat);
