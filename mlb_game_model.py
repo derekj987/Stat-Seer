@@ -353,7 +353,8 @@ def pair_games(rows, starters):
 
 
 class State:
-    def __init__(self, games, poff=None, pdfn=None, plg=0.0, venues=None, k_park=None):
+    def __init__(self, games, poff=None, pdfn=None, plg=0.0, venues=None, k_park=None,
+                 k_team=None, k_sp=None, w_sp=None):
         # The league run environment, per team per game, accumulated from games ALREADY PLAYED.
         #
         # It used to be statistics.mean(g["total"] for g in games) / 2 -- the mean over the whole
@@ -387,6 +388,11 @@ class State:
         # the team rates, so a factor is only ever built from games already played.
         self._vn = venues or {}
         self._k_park = K_PARK if k_park is None else k_park
+        # Overridable so --sweep-shrink can re-choose them on the train split now that
+        # park is in the model; the shipped values remain the module constants.
+        self._k_team = K_TEAM if k_team is None else k_team
+        self._k_sp = K_SP if k_sp is None else k_sp
+        self._w_sp = W_SP if w_sp is None else w_sp
         self.pk_runs = collections.defaultdict(float); self.pk_n = collections.defaultdict(int)
         self.pk_tot = 0.0; self.pk_games = 0
         # Where a club hosts, so project() knows which park a future game is in without being told.
@@ -429,10 +435,12 @@ class State:
         return v * (self.lg / self._plg)
 
     def off(self, t):
-        return (self.rs[t] + K_TEAM * self._target(self._poff, t)) / (self.n[t] + K_TEAM)
+        k = self._k_team
+        return (self.rs[t] + k * self._target(self._poff, t)) / (self.n[t] + k)
 
     def dfn(self, t):
-        return (self.ra[t] + K_TEAM * self._target(self._pdfn, t)) / (self.n[t] + K_TEAM)
+        k = self._k_team
+        return (self.ra[t] + k * self._target(self._pdfn, t)) / (self.n[t] + k)
 
     def sp_factor(self, pid):
         """>1 = this starter gives up more than league; <1 = suppresses runs. 1.0 when unknown,
@@ -440,7 +448,8 @@ class State:
         otherwise beats inventing a number."""
         if not pid or self.outs[pid] < MIN_SP_OUTS or not self.tot_outs:
             return 1.0
-        rate = (self.er[pid] + K_SP * self.lg_rpo) / (self.outs[pid] + K_SP)
+        k = self._k_sp
+        rate = (self.er[pid] + k * self.lg_rpo) / (self.outs[pid] + k)
         return rate / self.lg_rpo
 
     def project(self, home, away, hsp, asp, venue=None):
@@ -451,8 +460,9 @@ class State:
         # too — put the park back, once, for the stadium this game is actually played in. Falls
         # back to where the home club normally hosts, which is what a future game gives us.
         pf = self.park(venue or self.home_venue.get(home))
-        eh = self.off(home) * self.dfn(away) / self.lg * (1 + W_SP * (fh - 1)) * pf
-        ea = self.off(away) * self.dfn(home) / self.lg * (1 + W_SP * (fa - 1)) * pf
+        w = self._w_sp
+        eh = self.off(home) * self.dfn(away) / self.lg * (1 + w * (fh - 1)) * pf
+        ea = self.off(away) * self.dfn(home) / self.lg * (1 + w * (fa - 1)) * pf
         # NOT "home"/"away" — those keys already hold the TEAM NAMES on the exported row, and
         # spreading this dict over them silently replaced the names with run counts.
         return {"homeRuns": round(eh, 2), "awayRuns": round(ea, 2), "total": round(eh + ea, 2),
@@ -509,6 +519,57 @@ def sweep_park(games, spby, prior=None, venues=None):
     print(f"\n  train picks K_PARK = {best}  (shipping {K_PARK})")
     print(f"  held-out at that K: {per_k[best][1]:.4f}   vs no park (K=inf ~ 600): "
           f"{per_k[600][1]:.4f}")
+    return best
+
+
+def sweep_shrink(games, spby, prior=None, venues=None):
+    """Re-choose K_SP and W_SP on the TRAIN split, now that the park is in the model.
+
+    Derek: "No we should be able to predict an under even if we are wrong... If we can predict
+    unders in football, we can in baseball."
+
+    The board projects over the market on nearly every game, and only part of that is the feed's
+    level offset. The other part is that our totals barely move: they were sd 0.94 before the park
+    went in, against a market that varies by 0.95, and the two correlate only 0.42. A projection
+    that hardly moves cannot produce an under except when the market is extreme.
+
+    The starting pitcher is the only input this model gains anything from, and K_SP = 300 outs
+    (~33 innings) is heavy shrinkage — a real ace is pulled most of the way back to league. These
+    constants were swept BEFORE the park adjustment existed, so the optimum may have moved.
+
+    Choose on train. The held-out column is printed for information and must not pick the winner."""
+    dates_cut = [None]
+    results = []
+    for k_sp in (60, 120, 200, 300, 450):
+        for w_sp in (1.0, 1.3, 1.6, 2.0):
+            st_ = State(games, *(prior or ()), venues=venues, k_sp=k_sp, w_sp=w_sp)
+            rows = []
+            for g in games:
+                p = st_.project(g["home"], g["away"], g["hsp"], g["asp"],
+                                (venues or {}).get(str(g["pk"])))
+                if p:
+                    rows.append({"date": g["date"], "y": g["total"], "p": p["total"]})
+                st_.advance(g, spby)
+            if dates_cut[0] is None:
+                ds = sorted({r["date"] for r in rows})
+                dates_cut[0] = ds[int(len(ds) * 0.70)]
+            cut = dates_cut[0]
+            tr = [r for r in rows if r["date"] <= cut]
+            ho = [r for r in rows if r["date"] > cut]
+            f = lambda rs: statistics.mean(abs(r["p"] - r["y"]) for r in rs)
+            sd = statistics.pstdev([r["p"] for r in ho]) if len(ho) > 2 else 0.0
+            results.append((k_sp, w_sp, f(tr), f(ho), sd))
+
+    print(f"\nK_SP / W_SP sweep — chosen on TRAIN, held-out and spread reported only")
+    print(f"  {'K_SP':>5s} {'W_SP':>5s} {'train MAE':>10s} {'held MAE':>9s} {'held sd':>8s}")
+    for k, w, a, b, sd in results:
+        star = "  <- train best" if (a == min(r[2] for r in results)) else ""
+        print(f"  {k:5d} {w:5.1f} {a:10.4f} {b:9.4f} {sd:8.3f}{star}")
+    best = min(results, key=lambda r: r[2])
+    print(f"\n  train picks K_SP={best[0]} W_SP={best[1]}  (shipping K_SP={K_SP} W_SP={W_SP})")
+    cur = next(r for r in results if r[0] == K_SP and r[1] == W_SP)
+    print(f"  held-out  chosen {best[3]:.4f} (spread {best[4]:.3f})   "
+          f"shipping {cur[3]:.4f} (spread {cur[4]:.3f})")
     return best
 
 
@@ -628,6 +689,8 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--validate", action="store_true")
+    ap.add_argument("--sweep-shrink", action="store_true",
+                    help="re-choose K_SP / W_SP on the train split now that park is in")
     ap.add_argument("--sweep-park", action="store_true",
                     help="choose K_PARK on the train split and report held-out once")
     ap.add_argument("--refresh", action="store_true")
@@ -653,6 +716,9 @@ def main(argv=None):
     if len(games) < 300:
         print("WARNING: too little history — refusing to write", file=sys.stderr)
         return 1
+    if args.sweep_shrink:
+        sweep_shrink(games, spby, prior, venues)
+        return 0
     if args.sweep_park:
         sweep_park(games, spby, prior, venues)
         return 0
