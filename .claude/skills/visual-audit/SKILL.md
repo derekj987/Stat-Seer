@@ -3829,6 +3829,40 @@ touch weeks that season:
 player projection. The real figure was **16 (1.5%)**. Shipping the unfiltered check would have made
 it fire forever on a non-problem.
 
+### 🚨 A shrinkage that "works" may just be shrinkage — test it against RANDOM rows
+The control that killed a correction everything else said was real, and the cheapest high-value
+test in this file.
+
+A receiver whose depth-chart QB1 is out loses ~8% of his receiving yards (within-player, n=330,
+2021–2026). Mechanism obvious, knowable before kickoff, and the three teams our board sat furthest
+above the market on were exactly the three with a quarterback out. Everything pointed one way.
+
+Then the backtest: train picked h = 0.20, **the edge of the sweep**, in both populations, while
+held-out turned earlier and got worse at 0.20. *Train preferring the boundary is the tell* — it is
+not locating an optimum, it is discovering that shrinking a high baseline lowers MAE.
+
+So apply the identical haircut to a **random** set of rows of the same size, 200 draws:
+
+| | real QB1-out rows | random rows (mean) | draws beating the real one |
+|---|---|---|---|
+| all | +0.083% | +0.264% | 83.5% |
+| priced-like | +0.023% | +0.380% | **91.0%** |
+
+**A haircut on random weeks did better than one on the actual quarterback-out weeks.** The gain was
+never about the quarterback.
+
+Three reasons a true descriptive effect can predict nothing, all worth checking before building on
+one:
+- **The baseline already absorbs it.** A recency-weighted projection of a receiver whose QB has been
+  out for weeks already reflects that; there is nothing left to correct.
+- **Scale.** −8% of a 40-yard projection is 3.2 yards against a weekly MAE of 25.
+- **Descriptive ≠ predictive.** A within-player average across players seen in both states answers
+  a different question from "does knowing this improve next week's number", and the two can
+  disagree completely.
+
+Whenever a subgroup adjustment shows a small out-of-sample gain, run the placebo before believing
+it. `analysis/qb_out_backtest.py` is the pattern.
+
 ### One guardrail per sport, because each rots somewhere different
 Writing the same three checks three times produces two sets that cannot fire.
 
