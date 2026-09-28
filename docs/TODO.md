@@ -31,9 +31,32 @@ What's left, split by who's blocked on what.
 
 ## Build — product (in priority order)
 
-- [ ] **Touch-share layer** — convert the snap-share model (the one real edge,
-  +8.2%) into projected prop numbers. This is what makes Player Props answer
-  *"is this line beatable?"* instead of only line-shopping.
+- [x] **Touch-share layer** — MEASURED 2026-09-28, and it does not ship. The
+  three stages already existed (`analysis/stage_a_availability.py`,
+  `stage_b_touch.py`, `stage_c_props.py`); what was missing was wiring, and the
+  wiring is not worth doing.
+
+  The headline numbers were scored against `props_projection.py` as it stood in
+  2024 — a flat season-to-date mean pulled toward last season at K=4. Production
+  has since replaced both halves (EWMA at half-life 2.5, CUR_K 1.0), and that
+  absorbed nearly all of the gain. Rescored against what actually ships today:
+
+  | prop | vs the 2024 baseline | **vs today's production** |
+  |---|---|---|
+  | rushing yards | +4.3% | **+0.8%** |
+  | receiving yards | +1.8% | **+0.2%** |
+  | receptions | +2.2% | **−0.0%** |
+
+  At the volume layer it is the same story: carries **−0.4%** (the model is
+  WORSE than production), targets +1.1%, and +2.1% on change weeks — where the
+  original snap-share edge lives, attenuated from +8.2% by two conversions
+  (snap share → touches → yards).
+
+  Not worth an sklearn dependency in the publish path, a weekly `panel_feat.csv`
+  rebuild and a walk-forward inference step for +0.8% on one market. Revisit only
+  if the volume path regresses or if change-week targets become the thing being
+  sold. **CLAUDE.md still describes this as converting "the one real edge
+  (+8.2%)" into prop numbers — that framing is now stale.**
 - [ ] **Stage A availability model** — the player pipeline currently assumes a
   player is active; this predicts that.
 - [ ] **Sept 11: prop yardage → projection-vs-line** — the queued reminder; wire

@@ -32,7 +32,9 @@ from sklearn.ensemble import HistGradientBoostingRegressor
 HERE = Path(__file__).resolve().parent
 PANEL = HERE.parent / "panel_feat.csv"
 TEST_SEASONS = (2022, 2023, 2024)
-K = 4.0  # regression-blend strength (matches props_projection.py)
+K = 4.0  # regression-blend strength (matches props_projection.py, 2024 vintage)
+PROD_HALF_LIFE = 2.5   # player_proj_export.HALF_LIFE
+PROD_CUR_K = 1.0       # player_proj_export.CUR_K
 
 ROLE_FEATS = ["ewm1", "ewm3", "ewm8", "prior_season_share", "games_prior",
               "stdm_prior", "played_last_wk", "depth_rank", "grp_prior_sum",
@@ -50,6 +52,12 @@ def add_vol_history(df, col):
                         .transform(lambda s: s.ewm(halflife=3, min_periods=1).mean()))
     df[f"{col}_sd"] = (g.shift(1).groupby([df.pfr_id, df.season], sort=False)
                        .transform(lambda s: s.expanding(min_periods=1).mean()))
+    # Computed HERE, beside the other lagged features, and deliberately not after the merge
+    # below: that merge returns a NEW frame, so a groupby built on the old one misaligns and
+    # produced a carries MAE of 2.854 -- worse than a season average, which is the tell.
+    df[f"{col}_ew25"] = (g.shift(1).groupby([df.pfr_id, df.season], sort=False)
+                         .transform(lambda s: s.ewm(halflife=PROD_HALF_LIFE,
+                                                    min_periods=1).mean()))
     pg = (df.groupby(["pfr_id", "season"])[col].mean().rename(f"{col}_ps").reset_index())
     pg["season"] = pg["season"] + 1
     df = df.merge(pg, on=["pfr_id", "season"], how="left")
@@ -58,6 +66,18 @@ def add_vol_history(df, col):
     w = df["nprior"] / (df["nprior"] + K)
     blend = w * df[f"{col}_sd"] + (1 - w) * df[f"{col}_ps"]
     df[f"{col}_blend"] = blend.where(df[f"{col}_ps"].notna(), df[f"{col}_sd"])
+    # TODAY'S PRODUCTION BASELINE, which is not the same thing as the blend above.
+    #
+    # `*_blend` is props_projection.py as it stood in 2024: a flat season-to-date MEAN pulled
+    # toward last season with K = 4. player_proj_export has since replaced both halves -- the
+    # current season is a recency-weighted EWMA at HALF_LIFE 2.5, and CUR_K is 1.0, not 4. Scoring
+    # the touch model against the old baseline flatters it, so this adds the real one.
+    #
+    # The role pull is deliberately absent: role_k_for returns 0 from the second game onward, and
+    # every graded row here has at least four, so in this population production applies none.
+    ew = df[f"{col}_ew25"]
+    prod = (df["nprior"] * ew + PROD_CUR_K * df[f"{col}_ps"]) / (df["nprior"] + PROD_CUR_K)
+    df[f"{col}_prod"] = prod.where(df[f"{col}_ps"].notna(), ew)
     return df
 
 
@@ -108,15 +128,16 @@ def grade(df, col):
     tbl = pd.DataFrame([
         row("persistence (last wk)", f"{col}_l1"),
         row("season average", f"{col}_sd"),
-        row("regression blend", f"{col}_blend"),
+        row("regression blend (2024)", f"{col}_blend"),
+        row("production (EWMA 2.5 + CUR_K 1)", f"{col}_prod"),
         row("Stage B model", f"{col}_model"),
     ], columns=cols)
 
-    base = tbl.loc[tbl.method == "regression blend"].iloc[0]
+    base = tbl.loc[tbl.method == "production (EWMA 2.5 + CUR_K 1)"].iloc[0]
     mod = tbl.loc[tbl.method == "Stage B model"].iloc[0]
     print(f"\n===== {col.upper()}  (n={len(d):,}; change weeks={chg.mean():.0%}) =====")
     print(tbl.to_string(index=False, float_format=lambda v: f"{v:.3f}"))
-    print(f"  model vs regression blend:  all {(base['MAE all']-mod['MAE all'])/base['MAE all']*100:+.1f}%"
+    print(f"  model vs PRODUCTION baseline:  all {(base['MAE all']-mod['MAE all'])/base['MAE all']*100:+.1f}%"
           f"   change {(base['MAE change']-mod['MAE change'])/base['MAE change']*100:+.1f}%"
           f"   stable {(base['MAE stable']-mod['MAE stable'])/base['MAE stable']*100:+.1f}%")
 

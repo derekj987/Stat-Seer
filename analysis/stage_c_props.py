@@ -113,10 +113,16 @@ def main():
     # assemble projections
     df["pj_rush"] = df.carries_model * df.ypc
     df["bl_rush"] = df.carries_blend * df.ypc
+    # The baseline that MATTERS: today's production volume, not the 2024 blend. stage_b_touch
+    # builds `*_prod` (EWMA half-life 2.5 toward prior season at CUR_K 1.0). Scoring against the
+    # old blend flatters the touch model, because production has since absorbed most of that gain.
+    df["pd_rush"] = df.carries_prod * df.ypc
     df["pj_recpt"] = df.targets_model * df["catch"]
     df["bl_recpt"] = df.targets_blend * df["catch"]
+    df["pd_recpt"] = df.targets_prod * df["catch"]
     df["pj_recyd"] = df.pj_recpt * df.ypr
     df["bl_recyd"] = df.bl_recpt * df.ypr
+    df["pd_recyd"] = df.pd_recpt * df.ypr
 
     # grade: test seasons, model produced a projection, real volume floor + >=4 games
     df["nprior"] = df.groupby(["pfr_id", "season"]).cumcount()
@@ -124,24 +130,29 @@ def main():
 
     print(f"Stage C prop projections  --  test {TEST}   graded rows: {len(d):,}\n")
     specs = [
-        ("rushing yards", "rushing_yards", "bl_rush", "pj_rush", d.pos_grp == "RB"),
-        ("receiving yards", "receiving_yards", "bl_recyd", "pj_recyd", d.pos_grp.isin(["WR", "TE"])),
-        ("receptions", "receptions", "bl_recpt", "pj_recpt", d.pos_grp.isin(["WR", "TE"])),
+        ("rushing yards", "rushing_yards", "bl_rush", "pd_rush", "pj_rush", d.pos_grp == "RB"),
+        ("receiving yards", "receiving_yards", "bl_recyd", "pd_recyd", "pj_recyd",
+         d.pos_grp.isin(["WR", "TE"])),
+        ("receptions", "receptions", "bl_recpt", "pd_recpt", "pj_recpt",
+         d.pos_grp.isin(["WR", "TE"])),
     ]
-    for name, actual, blend, model, mask in specs:
+    for name, actual, blend, prod, model, mask in specs:
         dd = d[mask]
         y = dd[actual].to_numpy()
         base = {
             "persistence": mae(y, dd[f"{actual}_last"].to_numpy()),
             "season avg": mae(y, dd[f"{actual}_savg"].to_numpy()),
-            "regression blend x eff": mae(y, dd[blend].to_numpy()),
+            "regression blend 2024 x eff": mae(y, dd[blend].to_numpy()),
+            "PRODUCTION (EWMA 2.5) x eff": mae(y, dd[prod].to_numpy()),
             "Stage C (touch model x eff)": mae(y, dd[model].to_numpy()),
         }
         print(f"===== {name}  (n={len(dd):,}) =====")
         for k, v in base.items():
             print(f"   {k:<30} MAE {v:6.3f}")
-        b, m = base["regression blend x eff"], base["Stage C (touch model x eff)"]
-        print(f"   -> Stage C vs regression blend: {(b - m) / b * 100:+.1f}%\n")
+        old = base["regression blend 2024 x eff"]
+        b, m = base["PRODUCTION (EWMA 2.5) x eff"], base["Stage C (touch model x eff)"]
+        print(f"   -> vs the 2024 blend:      {(old - m) / old * 100:+.1f}%  (the headline)")
+        print(f"   -> vs TODAY'S production:  {(b - m) / b * 100:+.1f}%  (what shipping it buys)\n")
 
 
 if __name__ == "__main__":
