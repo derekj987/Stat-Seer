@@ -7,8 +7,7 @@ export interface GameWeather { eventId: string; game: string; home: string; away
   gustMph: number|null; precipPct: number|null; conditions: string|null; windFlag: boolean }
 export const WEATHER_SEASON = 2026;
 export const WEATHER_WEEK = 3;
-export const WEATHER_UPDATED = "2026-09-28T03:22Z";
+export const WEATHER_UPDATED = "2026-09-28T16:24Z";
 export const GAME_WEATHER: GameWeather[] = [
-  {"eventId": "3bfd8bfb4b8e9a365a0877879b73b16b", "game": "LA @ DEN", "home": "DEN", "away": "LA", "commence": "2026-09-28T00:20:00+00:00", "neutral": false, "venue": "Empower Field at Mile High", "city": "Denver", "state": "CO", "roof": "outdoor", "indoor": false, "status": "pending", "tempF": null, "windMph": null, "gustMph": null, "precipPct": null, "conditions": null, "windFlag": false},
-  {"eventId": "47dc7baa254659f3beb2ed2b38c207b6", "game": "PHI @ CHI", "home": "CHI", "away": "PHI", "commence": "2026-09-29T00:15:00+00:00", "neutral": false, "venue": "Soldier Field", "city": "Chicago", "state": "IL", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 61, "windMph": 4, "gustMph": 10, "precipPct": 1, "conditions": "Clear", "windFlag": false},
+  {"eventId": "47dc7baa254659f3beb2ed2b38c207b6", "game": "PHI @ CHI", "home": "CHI", "away": "PHI", "commence": "2026-09-29T00:15:00+00:00", "neutral": false, "venue": "Soldier Field", "city": "Chicago", "state": "IL", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 62, "windMph": 4, "gustMph": 7, "precipPct": 1, "conditions": "Clear", "windFlag": false},
 ];
