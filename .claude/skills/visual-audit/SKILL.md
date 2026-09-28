@@ -3863,6 +3863,40 @@ one:
 Whenever a subgroup adjustment shows a small out-of-sample gain, run the placebo before believing
 it. `analysis/qb_out_backtest.py` is the pattern.
 
+### 🚨 A validator must construct its prediction the way PRODUCTION constructs it
+Three separate instances of this in one day, which is why it gets its own entry rather than a line
+in another. Each time, the validator silently measured a model nobody ships:
+
+| where | the drift | what it cost |
+|---|---|---|
+| `mlb_game_model` export | called `validate()` **without the venue map** | the generated file's header advertised the pre-park **+0.8%** while the board beneath it used the new model |
+| `stage_b_touch` / `stage_c_props` | baseline was `props_projection.py` **as it stood in 2024** | headline "+4.3%" against a superseded path; against today's production it is **+0.8%** |
+| `grade_predictions --backtest` | full prior-season ratings, and `winprob()` **without `week`** | reported the model as **systematically overconfident** when it is calibrated |
+
+The last one is the sharpest. The backtest exists *specifically* to validate the calibration math,
+and it had drifted two generations behind `predict_week`. Same 1,355 games:
+
+```
+old estimator   predicted 64.0%   actual 58.1%   Brier 0.2423   "overconfident"
+production      predicted 63.4%   actual 63.8%   Brier 0.2253   calibrated
+```
+
+The bucket gaps went from −6.7/−7.3/−7.0/−10.5/−6.9/−12.0 — negative in six of eight and widening
+with confidence, which is exactly what a real miscalibration looks like — to small and two-sided.
+
+**Two rules:**
+- **Prefer reading what was PUBLISHED over recomputing it.** `prediction_ledger` stores `model_prob`;
+  recomputing the probability from `pred_margin` with a hand-built curve call is how the wrong
+  answer was produced in the first place. If a number was published, grade *that* number.
+- **When you must recompute, share the code path.** A validator that builds its own margin, its own
+  ratings or its own probability call will drift the moment production changes, and it drifts
+  silently — nothing errors, the number just quietly describes something else.
+
+```bash
+grep -rn "winprob(\|predict_week(\|ratings_asof(\|ratings(" --include=*.py . | grep -v worktrees
+# every prediction construction site — they should agree on arguments, not just on function names
+```
+
 ### 🚨 Grading a REGENERATED file grades hindsight — and it scores 85%
 The track record is the product, and this is the failure that corrupts it silently.
 
