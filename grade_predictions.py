@@ -71,23 +71,37 @@ def calibration_table(df):
 def backtest(seasons):
     g = pd.read_csv(GAMES_LOCAL, low_memory=False)
     rows = []
+    # 🚨 THIS BACKTEST HAS TO PREDICT THE WAY PRODUCTION PREDICTS, and for two generations it did
+    # not — so the number it reported was about a model nobody ships.
+    #
+    # It drifted twice. `ratings(g, season - 1)` is the FULL prior season held fixed all year, but
+    # predict_week has used `ratings_asof(g, season, week)` since the in-season blend landed. And
+    # `winprob(mag, curve)` drops the `week` argument that predict_week passes, which is the whole
+    # point of the week-conditioned curve — winprob's own docstring measures the unconditioned
+    # version at -6.5 points in weeks 3-5.
+    #
+    # Together they made the backtest report 64.0% predicted against 58.1% actual over 1,355 games
+    # and look like a systematically overconfident model. The probabilities actually PUBLISHED this
+    # season say 61.9% against 61.7% — calibrated. The backtest was measuring the old estimator.
     for season in seasons:
-        prior = gm.ratings(g, season - 1)
-        if not prior:
+        if not gm.ratings(g, season - 1):
             continue
         curve = gm.model_win_curve(g, before_season=season)  # self-calibrated on prior seasons
         s = g[(g.season == season) & (g.game_type == "REG") & g.home_score.notna()]
-        for _, r in s.iterrows():
-            h, a = r.home_team, r.away_team
-            neutral = str(r.get("location")) == "Neutral"
-            hfa = 0.0 if neutral else gm.HFA
-            margin = gm.REGRESS * (prior.get(h, 0.0) - prior.get(a, 0.0)) + hfa
-            fav = h if margin >= 0 else a
-            p_home = gm.winprob(abs(margin), curve) if margin >= 0 else 1 - gm.winprob(abs(margin), curve)
-            graded = grade_game(fav, h, r.home_score - r.away_score, p_home, margin)
-            if graded is None:
-                continue
-            rows.append({"fav_prob": graded[0], "fav_won": graded[1]})
+        for week in sorted(s.week.unique()):
+            rt = gm.ratings_asof(g, season, int(week))
+            for _, r in s[s.week == week].iterrows():
+                h, a = r.home_team, r.away_team
+                neutral = str(r.get("location")) == "Neutral"
+                hfa = 0.0 if neutral else gm.HFA
+                margin = gm.REGRESS * (rt.get(h, 0.0) - rt.get(a, 0.0)) + hfa
+                fav = h if margin >= 0 else a
+                p = gm.winprob(abs(margin), curve, int(week))
+                p_home = p if margin >= 0 else 1 - p
+                graded = grade_game(fav, h, r.home_score - r.away_score, p_home, margin)
+                if graded is None:
+                    continue
+                rows.append({"fav_prob": graded[0], "fav_won": graded[1]})
     df = pd.DataFrame(rows)
     print(f"Backtest — model {gm.MODEL_VERSION}, seasons {min(seasons)}-{max(seasons)}")
     calibration_table(df)
