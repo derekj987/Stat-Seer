@@ -3863,6 +3863,43 @@ one:
 Whenever a subgroup adjustment shows a small out-of-sample gain, run the placebo before believing
 it. `analysis/qb_out_backtest.py` is the pattern.
 
+### 🚨 Grading a REGENERATED file grades hindsight — and it scores 85%
+The track record is the product, and this is the failure that corrupts it silently.
+
+`grade_ncaaf_day.py` read `web/app/ncaaf/model-data.ts` **from the working copy**. That file is
+rebuilt by `refresh-cfb-ratings` every six hours, and `cfb_export` recomputes **every week in it**
+from ratings that now include the games just played. Measured on the 2026-09-26 slate: of 71
+week-4 games, **70 projections and 53 PICKS changed after kickoff** — Wake Forest @ Louisville
+went from "Louisville −12.5" to "Wake Forest +11.2", a side flip decided by the result.
+
+Graded that way the day scored **55-10 against the spread, 85%**. Graded against what was actually
+published: **36-29, 55%**. The only thing that caught it was that 85% is not a number anyone should
+believe — break-even is 52.4% and the best documented handicappers live near 55%.
+
+It was hiding behind a second bug that made it invisible for weeks: the grader built its lookup
+from `card["games"]`, which is the **current** week, and the board rolls forward every six hours.
+By Sunday morning Saturday's games had moved into `card["weeks"]`, so every run printed
+*"finals that day: 274 | on our published board: 0"* and blamed Division II. **A zero that explains
+itself is the most durable kind of bug.**
+
+**The rule: grade only from an artifact that provably predates the games.**
+- An append-only ledger is the strong form — `prediction_ledger` has `published_at < commence_time`
+  enforced at the database, so the NFL grader *cannot* make this mistake.
+- A timestamped capture table is equally safe — `mlb_player_props` discards any snapshot whose
+  `snapshot_at` is after first pitch.
+- A **generated file** has neither, so **git is the only record of what was published**. Read the
+  last commit before kickoff (`git log --before=... -1 -- <path>` then `git show <sha>:<path>`) and
+  say so in the output. Never fall back to the working copy silently.
+
+Check every input, not just the obvious one: the board was fixed first and `load_proj` — the player
+projections, rebuilt twice daily — still had the identical defect.
+
+**The check that works, and the one that doesn't.** "Published board and working copy must agree"
+is red *every day* on a healthy system, because the file is always rebuilt. Compute both records
+independently, then run the real grader and assert **which one its answer matches**.
+`analysis/grading_guardrail.py` is the pattern, with a plausibility ceiling at 65% ATS as the
+backstop that caught this in the first place.
+
 ### One guardrail per sport, because each rots somewhere different
 Writing the same three checks three times produces two sets that cannot fire.
 
