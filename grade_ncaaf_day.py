@@ -77,24 +77,44 @@ def load_card(before_iso=None):
     Falls back to the working copy only when git cannot answer, and says so, because a silent
     fallback here re-creates the bug."""
     if before_iso:
-        sha = subprocess.run(
-            ["git", "log", "--format=%H", f"--before={before_iso}", "-1", "--", str(CARD)],
-            capture_output=True, text=True, cwd=str(CARD.parent if hasattr(CARD, "parent") else ".")
-        ).stdout.strip()
-        if sha:
-            blob = subprocess.run(["git", "show", f"{sha}:web/app/ncaaf/model-data.ts"],
-                                  capture_output=True, text=True, encoding="utf-8").stdout
-            if blob.strip():
-                print(f"  board as published: commit {sha[:8]} (last before {before_iso})")
-                return _parse_card(blob)
+        blob, sha = _git_blob("web/app/ncaaf/model-data.ts", before_iso)
+        if blob.strip():
+            print(f"  board as published:  commit {sha[:8]} (last before {before_iso})")
+            return _parse_card(blob)
         print(f"  WARNING: no committed board before {before_iso}; falling back to the working "
               "copy, which has been rebuilt since and grades hindsight", file=sys.stderr)
     return _parse_card(open(CARD, encoding="utf-8").read())
 
 
-def load_proj():
-    """The projections file emits one JSON object per line."""
-    s = open(PROJ, encoding="utf-8").read()
+def _git_blob(path_in_repo, before_iso):
+    """The last committed version of `path_in_repo` strictly before `before_iso`, or "" if none."""
+    sha = subprocess.run(["git", "log", "--format=%H", f"--before={before_iso}", "-1",
+                          "--", path_in_repo], capture_output=True, text=True).stdout.strip()
+    if not sha:
+        return "", ""
+    blob = subprocess.run(["git", "show", f"{sha}:{path_in_repo}"],
+                          capture_output=True, text=True, encoding="utf-8").stdout
+    return blob, sha
+
+
+def load_proj(before_iso=None):
+    """The player projections AS PUBLISHED. Same hazard as load_card, same fix.
+
+    refresh-cfb-player-proj rebuilds ncaafPlayerProjections.ts twice a day, so the working copy the
+    morning after a slate is not the board anyone saw before kickoff. Grading props off it would
+    score projections that were rebuilt knowing the results — the same defect that made the spread
+    card read 85%, just one file over and not yet caught by anything."""
+    if before_iso:
+        blob, sha = _git_blob("web/lib/ncaafPlayerProjections.ts", before_iso)
+        if blob.strip():
+            print(f"  props as published:  commit {sha[:8]} (last before {before_iso})")
+            s = blob
+        else:
+            print(f"  WARNING: no committed projections before {before_iso}; using the working "
+                  "copy, which has been rebuilt since and grades hindsight", file=sys.stderr)
+            s = open(PROJ, encoding="utf-8").read()
+    else:
+        s = open(PROJ, encoding="utf-8").read()
     out = []
     for m in re.findall(r"^\s*(\{.*\}),?\s*$", s, re.M):
         try:
@@ -140,7 +160,11 @@ def lean_centres(rows):
 
 def prop_lean(r, cen):
     """Mirrors lib/projLean.ts so the record grades what the BOARD actually showed."""
-    if r.get("book") is None:
+    # `proj` is null for a player with no prior-season history — the board shows a dash for him
+    # rather than a number (see the pmcell--thin branch in PlayerModelView). A row with no
+    # projection has no lean to grade, and comparing None to a float raised here the moment the
+    # grader started reading the AS-PUBLISHED file instead of the working copy.
+    if r.get("book") is None or r.get("proj") is None:
         return None
     if r["cat"] == "td":
         return "over" if r["proj"] >= r["book"] else "under"
@@ -260,7 +284,11 @@ def grade_props(day, proj, key):
                 td[0 if ((L == "over") == scored) else 1] += 1
             continue
         sk = STAT.get(r["market"])
-        if a is None or sk is None or num(a.get(sk)) is None:
+        # A row with no projection or no posted line cannot be scored against either. Both are
+        # real states on the published board -- a player with no prior-season history shows a dash,
+        # and not every priced row carries a line in the snapshot we kept.
+        if (a is None or sk is None or num(a.get(sk)) is None
+                or r.get("proj") is None or r.get("book") is None):
             miss += 1
             continue
         real = num(a[sk])
@@ -303,7 +331,7 @@ def main(argv=None):
     # and the board refreshes at 02:00/08:00/14:00/20:00 UTC, so this picks the last rebuild before
     # any of the day's games started.
     before = f"{day}T04:00:00Z"
-    card, proj = load_card(before_iso=before), load_proj()
+    card, proj = load_card(before_iso=before), load_proj(before_iso=before)
     fin = finals(day, key)
     # EVERY WEEK ON THE BOARD, not just the current one.
     #

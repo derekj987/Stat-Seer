@@ -19,7 +19,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      # fetch-depth: 0 is LOAD-BEARING. The grading guardrail reconstructs the board AS
+      # PUBLISHED from the last commit before kickoff -- NCAAF has no append-only ledger, so git
+      # is the only record of what the site showed. A shallow checkout leaves one commit reachable
+      # and the check silently degrades to grading the working copy, which is the bug it exists
+      # to catch.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -29,3 +36,21 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: python grade_predictions.py --live --write
+
+      # Does the RECORD hold up? The three model guardrails ask whether the numbers reflect the
+      # news; this asks whether the track record we publish about ourselves was honestly computed.
+      #
+      # It exists because the NCAAF report card failed twice in one weekend and neither failure
+      # looked like an error: it graded nothing at all (reading only the CURRENT week from a board
+      # that rolls forward every six hours), and then, once it could see the games, it graded the
+      # future (cfb_export rebuilds every week from ratings that now include the results -- 53 of
+      # 71 picks changed after kickoff, and the slate "scored" 85% against the spread).
+      #
+      # Runs AFTER grading, like the other guardrails, so a red check reports on a record that has
+      # already been written rather than blocking it.
+      - name: Grading guardrail
+        env:
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          CFBD_API_KEY:         ${{ secrets.CFBD_API_KEY }}
+        run: python analysis/grading_guardrail.py
