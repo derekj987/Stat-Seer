@@ -24,7 +24,7 @@ jobs:
       # is the only record of what the site showed. A shallow checkout leaves one commit reachable
       # and the check silently degrades to grading the working copy, which is the bug it exists
       # to catch.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v5
