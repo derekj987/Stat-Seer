@@ -25,6 +25,7 @@ import json
 import os
 import re
 import statistics
+import subprocess
 import sys
 import unicodedata
 from datetime import datetime, timedelta, timezone
@@ -51,12 +52,44 @@ def norm(s):
     return re.sub(r"[^a-z]", "", unicodedata.normalize("NFKD", s or "").encode("ascii", "ignore").decode().lower())
 
 
-def load_card():
-    """The published board. model-data.ts is pretty-printed JSON assigned to one const, so parse the
-    whole object -- do NOT walk braces looking for sub-objects, which is easy to get into a loop."""
-    s = open(CARD, encoding="utf-8").read()
+def _parse_card(s):
+    """model-data.ts is pretty-printed JSON assigned to one const, so parse the whole object -- do
+    NOT walk braces looking for sub-objects, which is easy to get into a loop."""
     m = re.search(r"export const NCAAF_MODEL[^=]*=\s*", s)
     return json.loads(s[s.index("{", m.end() - 1): s.rindex("}") + 1])["card"]
+
+
+def load_card(before_iso=None):
+    """The board AS PUBLISHED, which is not the board on disk.
+
+    🚨 Grading the working copy grades HINDSIGHT. refresh-cfb-ratings rebuilds model-data.ts every
+    six hours and recomputes EVERY week in it from ratings that now include the games just played.
+    Measured on the 26 September slate: of 71 week-4 games, 70 projections and 53 PICKS changed
+    after kickoff -- Wake Forest @ Louisville went from "Louisville -12.5" to "Wake Forest +11.2",
+    a side flip. Graded that way the day scored 55-10 against the spread, 85%, which is not a
+    result anyone should have believed for a second.
+
+    The NFL side cannot make this mistake: prediction_ledger is append-only and the database
+    enforces published_at < commence_time. NCAAF has no ledger -- its board is a regenerated file,
+    so GIT is the only record of what was on the site before kickoff. This reads the last commit
+    of that file strictly before `before_iso` and parses it instead.
+
+    Falls back to the working copy only when git cannot answer, and says so, because a silent
+    fallback here re-creates the bug."""
+    if before_iso:
+        sha = subprocess.run(
+            ["git", "log", "--format=%H", f"--before={before_iso}", "-1", "--", str(CARD)],
+            capture_output=True, text=True, cwd=str(CARD.parent if hasattr(CARD, "parent") else ".")
+        ).stdout.strip()
+        if sha:
+            blob = subprocess.run(["git", "show", f"{sha}:web/app/ncaaf/model-data.ts"],
+                                  capture_output=True, text=True, encoding="utf-8").stdout
+            if blob.strip():
+                print(f"  board as published: commit {sha[:8]} (last before {before_iso})")
+                return _parse_card(blob)
+        print(f"  WARNING: no committed board before {before_iso}; falling back to the working "
+              "copy, which has been rebuilt since and grades hindsight", file=sys.stderr)
+    return _parse_card(open(CARD, encoding="utf-8").read())
 
 
 def load_proj():
@@ -266,9 +299,27 @@ def main(argv=None):
         print("ERROR: CFBD_API_KEY missing in .env", file=sys.stderr)
         return 1
 
-    card, proj = load_card(), load_proj()
+    # The cutoff is the day itself at 00:00 ET (04:00 UTC). Every FBS kickoff is later than that,
+    # and the board refreshes at 02:00/08:00/14:00/20:00 UTC, so this picks the last rebuild before
+    # any of the day's games started.
+    before = f"{day}T04:00:00Z"
+    card, proj = load_card(before_iso=before), load_proj()
     fin = finals(day, key)
-    byg = {(c["away"], c["home"]): c for c in card["games"]}
+    # EVERY WEEK ON THE BOARD, not just the current one.
+    #
+    # `card["games"]` is the CURRENT week, and refresh-cfb-ratings rolls that forward every six
+    # hours. So by Sunday morning the board already says week 5 and Saturday's 65 games live only
+    # in card["weeks"], where this could not see them: grading the slate the morning after always
+    # reported "finals that day: 274 | on our published board: 0" and blamed Division II.
+    #
+    # It read as a data quirk rather than a bug, which is why it survived — the college report card
+    # has been grading nothing at all. Walk every week; the date filter downstream still decides
+    # which games count, so a wider dictionary cannot pull in the wrong day.
+    byg = {}
+    for wk in (card.get("weeks") or [{"games": card.get("games", [])}]):
+        for c in wk.get("games", []):
+            byg[(c["away"], c["home"])] = c
+    byg.update({(c["away"], c["home"]): c for c in card.get("games", [])})
     rows = [(k, byg[k], fin[k]) for k in fin if k in byg]
     print("\nNCAAF REPORT CARD -- %s (ET)" % day)
     print("finals that day: %d   |  on our published board: %d\n" % (len(fin), len(rows)))
