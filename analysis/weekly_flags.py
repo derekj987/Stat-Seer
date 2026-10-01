@@ -350,6 +350,28 @@ def section_calibration(rows, depth, label="NFL"):
     say()
 
 
+def schedule_week(season):
+    """The current NFL week, derived from the SCHEDULE — independent of anything we generate.
+
+    The first REG week still holding a game that has not kicked off, which is what the site means
+    by "this week" (web/lib/board.ts currentWeek picks the first future commence_time the same
+    way). Returns None when the schedule is unavailable, so a missing file degrades to "cannot
+    tell" rather than to a false alarm."""
+    path = os.path.join(ROOT, "data", "games.csv")
+    if not os.path.exists(path):
+        return None
+    try:
+        g = pd.read_csv(path, low_memory=False)
+    except Exception:                               # noqa: BLE001
+        return None
+    g = g[(g.season == season) & (g.game_type == "REG")]
+    if not len(g):
+        return None
+    today = pd.Timestamp.utcnow().tz_localize(None).normalize()
+    up = g[pd.to_datetime(g.gameday, errors="coerce") >= today]
+    return int(up.week.min()) if len(up) else int(g.week.max())
+
+
 def section_staleness(env, season, week, proj_week, depth):
     say("## 5. Is anything stale?")
     say()
@@ -361,8 +383,16 @@ def section_staleness(env, season, week, proj_week, depth):
             ok = False
         say(f"  [{'ok' if good else 'STALE'}] {label}: {detail}")
 
-    check("prop projections", proj_week == week,
-          f"generated for week {proj_week}, current week is {week}")
+    # 🚨 THIS COMPARED A VARIABLE TO ITSELF. `week` is assigned `args.week or proj_week` in main,
+    # so with no --week the check read `proj_week == proj_week` and could not fail. It printed
+    # "[ok] prop projections: generated for week 3, current week is 3" on the morning of week 4 —
+    # a stale-projections detector that reports the staleness as agreement.
+    #
+    # The schedule is the one source the projections file cannot influence, which is the whole
+    # requirement: a staleness check must not read its answer from the thing it is checking.
+    sched_week = schedule_week(season)
+    check("prop projections", sched_week is None or proj_week == sched_week,
+          f"generated for week {proj_week}, schedule says week {sched_week}")
     check("depth chart", bool(depth), f"{len(depth)} players loaded")
     avail = sb(env, "sleeper_availability_current?select=captured_at"
                     "&order=captured_at.desc&limit=1")
