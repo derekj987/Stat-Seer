@@ -919,7 +919,24 @@ PUBLISH_RATIO = {
 
 
 def to_fifty_fifty(market, mu):
-    """Convert an expected value to the point a player is as likely to beat as not."""
+    """Convert an expected value to the point a player is as likely to beat as not.
+
+    🚨 FITTED ON ONE SCALE, APPLIED ON ANOTHER — see EMPIRICAL_REFERENCE §13 before touching
+    this. cfb_median_fit buckets its (line, actual) pairs by the BOOK'S LINE; the lookup below
+    picks its band with `mu`, our own mean. The gap between those two numbers is precisely the
+    error this ratio exists to remove, so the lookup lands a band too HIGH, where the shrink is
+    weaker — 62% of rec_yds rows and 51% of rush_yds rows take a ratio fitted for a different band.
+
+    It is self-reinforcing, which is what makes it worth a comment this long: the more inflated
+    `mu` is, the higher the band it selects and the LESS it is corrected. TJ Thomas, line 27.5,
+    mu 57.3, lands in band 3 and takes a 4% shrink where his line's band says 28%.
+
+    Do NOT "fix" it by banding on the output alone: measured, that over-shrinks the board to 40%
+    over. And do not paste a fresh cfb_median_fit run on top of it — the 2026-10-01 refit RAISES
+    the rec_yds 0-18 band from 0.616 to 0.789, loosening the band that is already worst. Both
+    measurements are in §13. The real fix needs median(actual) as a function of OUR mean, which
+    cannot be fitted until the pre-conversion `mu` is stored with each published row.
+    """
     r = PUBLISH_RATIO.get(market)
     if not r or mu is None or mu <= 0:
         return mu

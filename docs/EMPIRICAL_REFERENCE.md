@@ -837,3 +837,59 @@ Fixed by keying on the line and filtering to the one the board asks about. Díaz
 
 The function's own comment had asserted *"the LINE carries no information — it is 0.5 on every
 row"*, which is why nobody checked. **A comment stating a data invariant is a claim, not a fact.**
+
+## §13. NCAAF prop conversion — the 50/50 ratio is fitted and applied on DIFFERENT SCALES (2026-10-01)
+
+`weekly_flags` flagged the NCAAF board at median(proj/line) **1.094** (n=149) with 8 rows projecting
+≥2× a non-trivial line. The headline is misleading in both directions, so all of it is recorded.
+
+**It is not a uniform over-lean.** The per-market leans are fine (rec 59%, rush 53%, pass 40%,
+receptions 44%). The ratio falls monotonically with the level, in every market:
+
+| market | Q1 (low lines) | Q2 | Q3 | Q4 (high) |
+|---|---|---|---|---|
+| rec_yds | **1.474** | 1.004 | 1.036 | 0.921 |
+| rush_yds | 1.091 | 1.124 | 1.116 | 0.887 |
+| receptions | **1.200** | 1.020 | 0.944 | 0.945 |
+| pass_yds | 1.025 | 0.973 | 0.924 | 0.933 |
+
+**It is not thin samples.** Pooled over all rows the ratio does fall with sample size (0–4 games
+1.405, 21+ games 1.017), but every one of the 149 flagged rows already has g ≥ 8, and restricting to
+g ≥ 13 leaves it at 1.091. `MIN_PROJ_GAMES = 5` is doing its job; this is a separate defect.
+
+**The defect: `PUBLISH_RATIO` is FITTED on bands of the BOOK'S LINE and APPLIED on bands of our own
+mean.** `cfb_median_fit.py` buckets its `(line, actual)` pairs by the line; `to_fifty_fifty` selects
+its band with `mu`. Those are different scales, and the gap between them is precisely the error the
+ratio exists to remove — so the lookup lands a band too high, where the shrink is weaker:
+
+- **62% of `rec_yds` rows and 51% of `rush_yds` rows** get a ratio fitted for a different band.
+- It is **self-reinforcing**: the more inflated `mu` is, the higher the band it selects and the less
+  it is shrunk. TJ Thomas (line 27.5) has `mu` 57.3, lands in band 3 and takes a **4%** shrink where
+  his line's band says **28%** — published 55.1, which is 2.00× and one of the 8 flagged rows.
+
+**Re-running the fit makes the low end WORSE, and the instruction to paste it is now qualified.**
+The 2026-10-01 refit (573 receiving pairs, up from 391) raises `rec_yds` 0–18 from 0.616 to **0.789**
+— a weaker shrink on the band that is already 1.47. Measured on the current board:
+
+| variant | rec_yds median r | %over | Q1 median r |
+|---|---|---|---|
+| current (band by `mu`, old ratios) | 1.047 | 56% | 1.349 |
+| band by OUTPUT, old ratios | 0.901 | 40% | 1.158 |
+| band by `mu`, refit | 1.060 | 58% | 1.484 |
+| band by OUTPUT, refit | 1.032 | 54% | 1.484 |
+
+**NOTHING WAS SHIPPED, because no variant is defensible.** Correcting only the scale over-shrinks the
+board to 40% over; the refit alone worsens the low band. A 1.45 cannot be brought to 1.0 by any ratio
+in the 0.6–0.9 range, which says the residual low-line error is **not in the conversion at all** —
+`mu` itself is too high for players the book lines under ~25 yards.
+
+**Why it cannot be settled yet, and the one thing that unblocks it.** `med/mean` inside a line band
+is an aggregate property of that band, not of the player we are converting; it is only the right
+estimator when our `mu` equals the band's mean actual, which is exactly what is false here. The
+honest fit is "median(actual) as a function of OUR mean" — and it cannot be estimated, because **we
+have never stored the historical `mu`**. Storing the pre-conversion mean alongside each published
+NCAAF projection costs nothing and is the prerequisite for validating any version of this out of
+sample. Until then the conversion is unfalsifiable, which is the real finding.
+
+`receptions` stays deliberately uncorrected: the refit offers a flat 0.771, and the board's overall
+receptions lean is already 44% over — applying it would repeat the overshoot to 35% measured before.

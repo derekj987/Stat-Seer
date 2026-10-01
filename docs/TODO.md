@@ -28,6 +28,15 @@ What's left, split by who's blocked on what.
   job is written but the source is undecided.
 - [ ] **Verify grading + calibration after Week 1** — confirm the daily grading
   Action is writing results and the calibration numbers look sane on real games.
+- [ ] **Store the pre-conversion `mu` with every published NCAAF prop row** — cheap,
+  and it cannot be backfilled, so it belongs on this list rather than the next one.
+  Without it the 50/50 conversion (`PUBLISH_RATIO` / `to_fifty_fifty`) is
+  **unfalsifiable**: its ratios are fitted on bands of the book's line but applied on
+  bands of our own mean, 62% of receiving rows take a ratio fitted for a different
+  band, and no variant can be validated because we have never kept the input. Full
+  measurement in EMPIRICAL_REFERENCE §13. Until this exists, do not paste a fresh
+  `cfb_median_fit.py` run into `cfb_player_proj.py` — today's refit makes the worst
+  band looser.
 
 ## Build — product (in priority order)
 

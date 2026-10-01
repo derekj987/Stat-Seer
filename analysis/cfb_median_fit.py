@@ -26,6 +26,17 @@ pulled every ratio to ~0.95, nothing like the NFL's 0.68-1.02 curve. `cfb.db` ha
 result game by game.
 
     python analysis/cfb_median_fit.py
+
+🚨 DO NOT PASTE THE OUTPUT STRAIGHT IN ANY MORE. These ratios are bucketed by the BOOK'S LINE,
+but cfb_player_proj.to_fifty_fifty selects its band with OUR MEAN — a different scale, and the
+difference between them is the very error being corrected. Pasting the 2026-10-01 refit raises the
+rec_yds 0-18 band from 0.616 to 0.789 and makes the worst band (already 1.47 proj/line) looser
+still. Read EMPIRICAL_REFERENCE §13 first; it has the four variants measured end to end.
+
+This fit also cannot settle the question on its own: med/mean inside a line band describes that
+BAND, not the player being converted, and is the right estimator only when our mu equals the band's
+mean actual — which is exactly what is false. The honest version is median(actual) as a function of
+our mean, and it needs the pre-conversion mu stored per published row. Nobody has that yet.
 """
 from __future__ import annotations
 
