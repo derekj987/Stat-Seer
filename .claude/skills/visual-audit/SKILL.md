@@ -3974,6 +3974,111 @@ for p in sorted(glob.glob(".github/workflows/*.yml")):
 EOF
 ```
 
+### 🚨 THE SPLICE IS A MEASUREMENT INSTRUMENT — a sloppy one MANUFACTURES findings
+The `#S:0` splice is not a convenience, it is the apparatus. Both ways of getting it wrong produce
+confident, specific, completely false results, and one of them cost most of a session.
+
+**1. Replace the fallback — never append into it.** `loading.tsx` renders its own
+`<main class="wrap">`, and `main.wrap` carries `padding:0 44px`. Appending the spliced page *into*
+that element nests one `main.wrap` inside another, so the content loses **88px** of width it has in
+the real browser. That reported `table-overflows-container` on `/model`, `/report` (x5) and
+`/ncaaf/model` (x4) — ten findings, every one an artifact. Two "fixes" were written against it
+before the nesting was spotted, and both had to be reverted.
+
+```js
+const kids = [...s0.children];
+const fb = [...document.querySelectorAll('main.wrap')].find(m => !kids.some(k => k.contains(m)));
+fb ? fb.replaceWith(...kids) : document.body.append(...kids);
+s0.remove();
+```
+
+**2. Move ALL of `#S:0`'s children.** It is not always one node — the homepage keeps **3** (10,161
+chars). `appendChild(s0.firstElementChild)` silently drops the rest and the page then audits clean
+because most of it is gone.
+
+**The tell both times: a measurement that contradicts the page.** `main.wrap` inside `main.wrap` is
+not something the app could render — `<main>` does not nest. When a probe reports a defect, check
+that the DOM you measured is the DOM the server sent before writing a fix for it.
+
+### 🚨 ALWAYS re-run a page before believing it — the second run disagrees often enough to matter
+`/audit` audited clean. Re-run on request, it came back `mains: 0`, `bodyLen: 492`, zero cards — the
+page had not rendered at all, and the probe still said **0 findings**, because a page with no content
+has nothing that can fail a check. The first "clean" result was luck about splice timing.
+
+So a 0 is only a pass when the page is **proved** to have rendered. Assert it in the same expression
+that runs the probe, and never report a finding count from a run whose assertion failed:
+
+```js
+const ok = !!document.querySelector('main.wrap') && document.body.innerText.length > 1200;
+if (ok) { /* only now run the probe */ }
+```
+
+`bodyLen` is the cheapest signal and the threshold is per-page — `/model/players` renders at 1,483
+chars, so a 1,500 cut-off rejects a perfectly good page. Prefer a structural assertion (a known
+heading, a card count) over a length, and when a page reports "nothing", say which it is: an honest
+empty state (`/mlb/model` after the regular season: *"No upcoming games projected yet"*) or a page
+that never arrived.
+
+### 🚨 A probe whose REMEDY would damage the page is worse than one that stays quiet
+Three checks fired on `/model` and `/ncaaf/model` where doing what they said would have made the page
+worse. Each needed a discriminator, and in each case the obvious one did not work.
+
+| check | what it hit | why the obvious test fails | the discriminator |
+|---|---|---|---|
+| `repeated-row-label` | the OUT/IR/QUES **status pill** on injury rows | "count the contiguous runs" — but the lists are SORTED, so a status enum forms one run exactly like a grouping key | the cell is a filled **badge** (own background), and the labels come from a small closed vocabulary shared across sibling lists — 209 rows over 32 lists drew on 5 labels |
+| `repeated-row-label` | `· missed 1 game`, a **detail**, reported as a repeated label | `querySelector("td,th,li,span,div")` omits `<b>`, so on `<li><b>Name</b><span>detail</span></li>` it returned the detail | "first cell" means **`firstElementChild`** — first by position, no tag whitelist |
+| `chart-rows-uneven` | game **cards** stacked at mobile, differing 6px | width and `display` look identical to a chart's rows | **contiguity**: in a real chart row N+1 starts where row N ends. These sat ~900px apart, with a screenful between them |
+
+Blanking the second player's "OUT" would have made his status unreadable — the exact opposite of a
+fix. **Two-way test the guard as well as the check**: silence the false case, and keep a synthetic
+positive control that must still fire, or you have only taught the probe to say nothing.
+
+### 🚨 Truncating is not fixing — it trades one finding for several
+The first fix for the Special Considerations overflow let `.impspec__det` ellipsize. It cleared the
+single `table-overflows-container` and produced **7 `clipped-text`** findings in its place, cutting
+`knee - mcl` down to 21px of the 49 it needed. The overflow number went to zero and the page got
+worse.
+
+The row carries three things — a 52px status pill, a player name and an injury detail — inside a
+210px column, and as one line it needs 242. Three things do not fit on one line; the answer is a
+second line, not a smaller third thing:
+
+```css
+.impspec__inj li{grid-template-columns:52px minmax(0,1fr);gap:1px 8px}
+.impspec__inj li .impspec__st {grid-column:1;grid-row:1 / span 2}
+.impspec__inj li .impspec__p  {grid-column:2;grid-row:1}
+.impspec__inj li .impspec__det{grid-column:2;grid-row:2}
+```
+
+Note also that `max-content` on the name track made the row **unshrinkable**, so the ellipsis already
+declared on `.impspec__p` could never engage. `minmax(0,max-content)` keeps the natural width when
+there is room and allows the squeeze when there is not.
+
+### 🚨 A desktop column budget keeps applying after the row becomes a card
+`.hb-form--cards` rows turn into a two-track `display:grid` at 375px, but every cell still carried its
+desktop `width:25%/15%/7%…`. A percentage width does not stop applying because the row changed
+`display`, so each cell shrank to a fraction of the track it sat in: `Alabama -5.5` got **20px of a
+131px cell** and ellipsized while the row had **92px going spare** — 12 `chart-truncated-with-space`
+findings at mobile from a rule written for desktop.
+
+Cancel the budget inside the mobile block, at **matching specificity**:
+
+```css
+.hb-form--mkt.hb-form--cards td:nth-child(n),
+.hb-form--mkt.hb-form--cards th:nth-child(n){width:auto}
+```
+
+`:nth-child(n)` matches every cell and scores the same as the `:nth-child(1..6)` rules it must beat.
+A plain `td` selector loses to them and does nothing at all — silently, which is the dangerous part.
+**Whenever you add a column to a card table, check the mobile block in the same edit.**
+
+### Clearing the viewport emulation can leave the pane at width 0
+`resize_window {preset:"desktop"}` mid-run returned a tab measuring `innerWidth: 0`, and the probe
+duly reported `page-overflow-x` ("scrollWidth 223 > viewport 0") and `clipped-text` with
+`clientW: 5` — eight findings from a collapsed pane. Set an explicit `{width:1440,height:900}` for
+the desktop pass and keep `preset:"desktop"` for the cleanup at the end. **`vw` belongs in every
+result line**, for the same reason `bodyLen` does: it is how you spot that the apparatus moved.
+
 ## Prerequisites (already in the repo)
 - **QA preview mode** is automatic on the local dev server: `web/proxy.ts` opens the gate when
   `NODE_ENV==="development"`, and `web/lib/supabase/client.ts` mocks `auth.getUser/getSession` so
@@ -3995,13 +4100,26 @@ EOF
    - **Expand collapsibles first** (some bugs — `split-group`, mid-list collapse controls, hidden
      overflow rows — only show when expanded): before the probe, run
      `document.querySelectorAll('details:not([open])').forEach(d=>{try{d.open=true}catch{}}); document.querySelectorAll('.hb-moretbl__chk').forEach(c=>{c.checked=true});`
-   - **Splice `#S:0` on EVERY page, not just the ones that look broken** (snippet above). A page
-     still showing `Loading…` reports **zero findings** because every element measures invisible —
-     `/mlb/model` returned a clean sweep at both viewports and had 22 findings once spliced.
+   - **Splice `#S:0` on EVERY page, not just the ones that look broken.** A page still showing
+     `Loading…` reports **zero findings** because every element measures invisible — `/mlb/model`
+     returned a clean sweep at both viewports and had 22 findings once spliced. Use exactly this —
+     it replaces the `loading.tsx` fallback instead of nesting inside it, and moves every child.
+     Getting either wrong fabricates findings (see "THE SPLICE IS A MEASUREMENT INSTRUMENT"):
+     ```js
+     for (let i=0;i<22;i++){ const s0=document.getElementById('S:0');
+       if (s0 && s0.children.length){ const kids=[...s0.children];
+         const fb=[...document.querySelectorAll('main.wrap')].find(m=>!kids.some(k=>k.contains(m)));
+         fb ? fb.replaceWith(...kids) : document.body.append(...kids); s0.remove(); }
+       if (document.body.innerText.length>2500) break;
+       await new Promise(r=>setTimeout(r,1300)); }
+     ```
    - `navigate` to the URL, then in `javascript_tool`:
      `await new Promise(r=>setTimeout(r,1500)); JSON.parse(eval(await (await fetch('/__ss_audit.js?v='+Date.now())).text()))`
    - **Sanity-check the count before trusting a 0**: `document.querySelectorAll('.pmrow--data, .hb-form tbody tr').length`
      must be non-zero on any board page. A zero-finding sweep of an empty DOM is not a pass.
+   - **Report `vw` and `bodyLen` on every line, and run the probe only behind a rendered-assertion.**
+     A collapsed pane (`vw: 0`) and a page that never arrived both produce confident nonsense — the
+     first invents findings, the second invents a clean bill of health.
    - Sizes: `resize_window {width:1440,height:900}` (desktop, exercises the rail gutter),
      `resize_window {preset:"mobile"}` (overflow hides here). Themes: add `colorScheme:"dark"` /
      `"light"`. Reset with `resize_window {preset:"desktop"}` when done.

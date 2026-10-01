@@ -3975,6 +3975,35 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 .hb-form--mkt th:nth-child(3),.hb-form--mkt td:nth-child(3){width:14%}
 .hb-form--mkt th:nth-child(4),.hb-form--mkt td:nth-child(4){width:21%}
 .hb-form--mkt th:nth-child(5),.hb-form--mkt td:nth-child(5){width:14%}
+/* SIX columns on the NCAAF model board, which is the only table carrying --cards.
+ *
+ * The budget above declares 1-5 and sums to exactly 100%, so when the Bottom Line column was added
+ * the sixth fell outside it entirely: measured at 1440, the header row was 248/174/116/174/116/**0**
+ * and the table overflowed its 827px wrapper to 1062. That is the failure this file already
+ * documents for .hb-form--psnap — after adding a column, count the <th>s against the nth-child
+ * rules — and it went in anyway, which is why it is now a two-class override rather than prose.
+ *
+ * Sized from the widest INK on the board at 827px -- measured across all 87 games, header's longest
+ * word against the whole data string, PLUS each cell's own horizontal padding:
+ *
+ *     Game 205 | Market Spread 119 | Market O/U 50 | Model Spread 126 | Model O/U 42
+ *     Bottom Line 235 + its 16px left padding = 251
+ *
+ * 793 against 827, so it fits with 34px to spare. The padding is the part that caught me out: the
+ * first budget gave Bottom Line 248 and read that as 13px of slack, but its content box is only
+ * 232 -- three short -- so it wrapped and the board reported rows at 58 and 65px. Every other cell
+ * here has zero horizontal padding, which is exactly why assuming is not good enough.
+ * Percentages give 207/124/58/132/50/256.
+ *
+ * Doubled up (0,3,1) so it beats the five-column rules regardless of source order, and scoped to
+ * --cards so the four LandingHub tables and the NFL model card, which are all still five columns,
+ * are untouched. */
+.hb-form--mkt.hb-form--cards th:nth-child(1),.hb-form--mkt.hb-form--cards td:nth-child(1){width:25%}
+.hb-form--mkt.hb-form--cards th:nth-child(2),.hb-form--mkt.hb-form--cards td:nth-child(2){width:15%}
+.hb-form--mkt.hb-form--cards th:nth-child(3),.hb-form--mkt.hb-form--cards td:nth-child(3){width:7%}
+.hb-form--mkt.hb-form--cards th:nth-child(4),.hb-form--mkt.hb-form--cards td:nth-child(4){width:18%}
+.hb-form--mkt.hb-form--cards th:nth-child(5),.hb-form--mkt.hb-form--cards td:nth-child(5){width:6%}
+.hb-form--mkt.hb-form--cards th:nth-child(6),.hb-form--mkt.hb-form--cards td:nth-child(6){width:29%}
 /* single Model values sit centered against the two-chip Market cells (even vertical rhythm) */
 .hb-form--mkt td{vertical-align:middle}
 /* player-snapshot 4-col: Player · Team · Prop(book) · Our proj */
@@ -4323,6 +4352,16 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
      sitting in a half-width grid cell where "CLEM -1.5 and the under" wraps mid-phrase. It is
      also the 5th number cell, which would otherwise be left stranded alone on its own row. */
   .hb-form.hb-form--cards td.hb-bl{grid-column:1 / -1}
+  /* 🚨 THE DESKTOP COLUMN BUDGET MUST BE CANCELLED HERE, or it fights the card grid. The row is
+     `display:grid` with two equal tracks at this width, but every cell still carried its desktop
+     `width:25%/15%/7%…`, so each one shrank to a fraction of the track it was sitting in: "Alabama
+     -5.5" got 20px of a 131px cell and ellipsized while the row had 92px going spare (audit,
+     chart-truncated-with-space ×12 at 375). A percentage width set for a table does not stop
+     applying because the row became a grid.
+     `:nth-child(n)` matches every cell at the SAME specificity as the `:nth-child(1..6)` rules it
+     has to override — a plain `td` selector loses to them and silently does nothing. */
+  .hb-form--mkt.hb-form--cards td:nth-child(n),
+  .hb-form--mkt.hb-form--cards th:nth-child(n){width:auto}
 }
 /* Seer. Mobile: a wide image across the very bottom (hb-side stacks under content).
    Desktop (>=1100px): a 2-column grid, content left + a STICKY seer right that
@@ -5240,12 +5279,26 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
   border-bottom:1px solid var(--line);padding-bottom:3px}
 .impspec__coln{font-size:10px;color:var(--muted);white-space:nowrap}
 .impspec__inj{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
-/* status | player | detail, one line each, on tracks so every column lines up down the list. */
-.impspec__inj li{display:grid;grid-template-columns:52px max-content minmax(0,1fr);gap:8px;
-  align-items:center;line-height:1.4;padding:2px 0;border-bottom:1px dotted var(--line)}
+/* 🚨 THREE THINGS DO NOT FIT ON ONE 170px LINE. This row carries a 52px status pill, a player
+   name and an injury detail inside a 210px column, and as a single line it needed 242 -- so the
+   Special Considerations block overflowed its card on /model (confirmed by restoring the old rule
+   at the true 949px width: the overflow comes back).
+   Truncating the detail instead was the first fix and it was WRONG: it cleared the overflow and
+   produced 7 clipped-text findings in its place, cutting "knee - mcl" to 21px of its 49. Trading an
+   overflow for shredded text is not a fix.
+   The detail gets its own line under the name, with the pill spanning both. Nothing is cut, the
+   card holds, and the status/name columns still line up down the list. */
+.impspec__inj li{display:grid;grid-template-columns:52px minmax(0,1fr);gap:1px 8px;
+  align-items:center;line-height:1.4;padding:3px 0;border-bottom:1px dotted var(--line)}
+.impspec__inj li .impspec__st{grid-column:1;grid-row:1 / span 2;align-self:center}
+.impspec__inj li .impspec__p{grid-column:2;grid-row:1}
+.impspec__inj li .impspec__det{grid-column:2;grid-row:2}
 .impspec__inj li:last-child{border-bottom:0}
 .impspec__p{color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.impspec__det{font-size:10.5px;color:var(--muted);white-space:nowrap;text-align:left}
+/* Its own line now (see .impspec__inj li), so it has the width to be read in full. The ellipsis
+   stays as the backstop for an unusually long detail rather than as the normal case. */
+.impspec__det{font-size:10.5px;color:var(--muted);white-space:nowrap;text-align:left;
+  min-width:0;overflow:hidden;text-overflow:ellipsis}
 .impspec__st{justify-self:stretch;text-align:center;font-size:9px;font-weight:800;
   text-transform:uppercase;letter-spacing:.03em;padding:2px 0;border-radius:4px;
   background:var(--surface);color:var(--muted)}

@@ -403,15 +403,59 @@
       if (cap(findings, "repeated-row-label")) break;
       const rows = [...c.children].filter(vis);
       if (rows.length < 2) continue;
+      // 🚨 "First cell" means FIRST BY POSITION, not first match of a tag whitelist. This read
+      // `querySelector("td,th,li,span,div")`, which does not include <b> -- so on
+      // `<li><b>Saquon Barkley</b><span>· missed 2 games</span></li>` it skipped the name and
+      // returned the DETAIL. It was then comparing details across rows, which legitimately repeat,
+      // and reporting "· missed 1 game" as a repeated row LABEL. Three findings on /model, all
+      // pointing at a cell that is not a label at all.
+      //
+      // firstElementChild is the whole rule and needs no whitelist: <td> for a table row, <b> for
+      // this one, the status pill for the injury lists. A row whose leading content is a bare text
+      // node has no element to take, so use that text.
+      const cellOf = (row) => row.firstElementChild;
       const labelOf = (row) => {
-        const cell = row.querySelector("td,th,li,span,div");
-        return cell ? (cell.textContent || "").trim() : "";
+        const cell = cellOf(row);
+        if (cell) return (cell.textContent || "").trim();
+        const lead = [...row.childNodes].find((n) => n.nodeType === 3 && n.textContent.trim());
+        return lead ? lead.textContent.trim() : "";
       };
       const fullOf = (row) => (row.textContent || "").replace(/\s+/g, " ").trim();
+      // 🚨 A STATUS BADGE IS NOT A GROUPING KEY, and this check could not tell them apart. It fired
+      // 10 times on /model's injury lists, where the first cell is the OUT/IR/QUES pill. Its own
+      // remedy -- "blank the continuation" -- would have made the second player's status
+      // UNREADABLE: the exact opposite of the fix. A probe whose advice damages the page is worse
+      // than one that stays quiet.
+      //
+      // The obvious structural tell does not work. A grouping key forms ONE contiguous run, so
+      // "count the runs" looks like it separates them -- but these lists are SORTED by status, so
+      // OUT and IR each form exactly one run too. Identical shape, opposite meaning.
+      //
+      // Two signals do separate them, and both were measured on /model:
+      //   - the cell is a filled PILL (its own background, distinct from the row). A badge is drawn
+      //     to be read on every row; nobody blanks one.
+      //   - the label comes from a small CLOSED vocabulary shared across sibling lists. 209 injury
+      //     rows over 32 lists drew on 5 labels (OUT/IR/QUES/DOUBT/SUSP). A real grouping key -- a
+      //     date, a team -- is local to its own list, not a page-wide enum.
+      const bgOf = (el) => {
+        const bg = getComputedStyle(el).backgroundColor;
+        return bg && bg !== "transparent" && !/,\s*0\s*\)$/.test(bg) && !/\/\s*0\s*\)/.test(bg);
+      };
+      const vocab = new Map();
+      for (const r of rows) {
+        const t = labelOf(r);
+        if (t) vocab.set(t, (vocab.get(t) || 0) + 1);
+      }
+      // A grouping key names few rows each; an enum names many. >=4 rows per distinct label over a
+      // list of 6+ is a category column, not a set of group headers.
+      const enumLike = rows.length >= 6 && vocab.size > 0 && rows.length / vocab.size >= 4;
       for (let i = 1; i < rows.length; i++) {
         const a = labelOf(rows[i - 1]), b = labelOf(rows[i]);
         if (!b || a !== b) continue;
         if (fullOf(rows[i - 1]) === fullOf(rows[i])) continue;   // truly identical row — different bug
+        const cell = cellOf(rows[i]);
+        if (cell && bgOf(cell)) continue;                        // a badge — per-row data, must stay
+        if (enumLike) continue;                                  // a category column, not a key
         add("repeated-row-label", "medium", rows[i],
           `row label "${b.slice(0, 28)}" repeats on consecutive rows that otherwise differ — group it (blank the continuation) so it doesn't read as a duplicate`);
         break;   // one finding per container is enough
@@ -836,7 +880,36 @@
     const rows = [...tbl.querySelectorAll('[class*="--data"], tbody tr')].filter(
       (r) => r !== head && vis(r) && !r.classList.contains("hb-row--more") && !spanRow(r));
     if (rows.length < 3) continue;
-    const hs = rows.map((r) => Math.round(r.getBoundingClientRect().height));
+    // Measure the CONTENT box, not the border box. A deliberate row SEPARATOR — the gold rule the
+    // NCAAF board draws between games (`.hb-specrow + tr > td`, 3px border + extra padding-top) —
+    // makes every row after a detail panel 7px taller than the first row of its day. That is the
+    // divider doing its job, not a cell wrapping, and the check said "a cell is wrapping" on 79
+    // rows whose ink measured identical to the 8 short ones (39/17/17/17/17/17 in both).
+    //
+    // Same family as spanRow above: the markup's shape, not a ragged column. Subtracting each
+    // row's own vertical padding and border leaves the height its CONTENT actually needs, which is
+    // what "a cell is wrapping" is a claim about.
+    const contentH = (r) => {
+      const c = [...r.children].find((x) => x.tagName === "TD" || x.tagName === "TH");
+      if (!c) return Math.round(r.getBoundingClientRect().height);
+      const cs = getComputedStyle(c);
+      const chrome = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) +
+                     parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
+      return Math.round(r.getBoundingClientRect().height - chrome);
+    };
+    // 🚨 STACKED CARDS ARE NOT RAGGED ROWS. This check is about a chart whose rows sit directly on
+    // top of one another, where one row being taller reads as a broken grid. At 375 the NCAAF board
+    // turns each `<tr>` into a full-width CARD and spaces them ~900px apart down the page, so their
+    // heights differ by whatever their content needs — and the check called that a defect three
+    // times on a board nobody could see it on.
+    //
+    // The tell is contiguity, not width: in a real chart row N+1 starts where row N ends. Once the
+    // rows have a screenful of other content between them, no reader can compare their heights.
+    const boxes = rows.map((r) => r.getBoundingClientRect());
+    const gaps = boxes.slice(1).map((b, i) => b.top - boxes[i].bottom);
+    if (gaps.some((g) => g > 24)) continue;   // stacked cards, not a chart's rows
+
+    const hs = rows.map(contentH);
     const spread = Math.max(...hs) - Math.min(...hs);
     if (spread <= 2) continue;
     add("chart-rows-uneven", "medium", tbl,
