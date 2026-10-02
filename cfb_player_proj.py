@@ -739,6 +739,7 @@ QB_BLEND_K = float(os.environ.get("CFB_QB_K", "3"))
 # week 2 under "both" and the board still got worse, so he is an outlier rather than the visible end
 # of a systematic error. The knob stays, defaulted off, so the next person re-runs instead of
 # re-reasoning. EMPIRICAL_REFERENCE §13d.
+DEFAULT_OUT = "web/lib/ncaafPlayerProjections.ts"   # the PUBLISHED board; guarded in main()
 CFB_TRANSFER = os.environ.get("CFB_TRANSFER", "off")
 TRANSFER_TEAM_ATTR = CFB_TRANSFER in ("team", "both")
 TRANSFER_VOL = CFB_TRANSFER in ("vol", "both")
@@ -1472,11 +1473,29 @@ def build_slate(slate, depth, prop_index, key):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--probe", action="store_true", help="list props + match status, write nothing")
-    ap.add_argument("--out", default="web/lib/ncaafPlayerProjections.ts")
+    ap.add_argument("--out", default=DEFAULT_OUT)
     ap.add_argument("--week", type=int, default=None,
                     help="BACKTEST: project this (played) week from what was knowable before it")
     ap.add_argument("--all-rows", action="store_true", help="keep unpriced rows (backtests)")
     args = ap.parse_args(argv)
+
+    # 🚨 AN EXPERIMENT MUST NOT OVERWRITE THE PUBLISHED BOARD. Every knob here is read from the
+    # environment, so `CFB_TRANSFER=both python cfb_player_proj.py` silently rewrites the real file
+    # with a variant — which is exactly what happened while backtesting the transfer rule: four
+    # diagnostic scripts called main() to trace one player, and the last left the REJECTED variant
+    # on the board (Evan Dickens published at 68.4 instead of 102.9) where it was committed. It
+    # only missed production because an unrelated push was rejected.
+    #
+    # A backtest already passes --out, so refusing the default path costs nothing and makes the
+    # mistake impossible rather than merely unlikely.
+    _exp = {"CFB_TRANSFER": (CFB_TRANSFER, "off"), "CFB_ROLE_MODE": (ROLE_MODE, "blend2"),
+            "CFB_ROLE_K": (ROLE_BLEND_K, 3.0), "CFB_QB_K": (QB_BLEND_K, 3.0),
+            "CFB_PRIOR_W": (PRIOR_GAME_W, 0.25)}
+    _set = [f"{k}={v!r}" for k, (v, dflt) in _exp.items() if v != dflt]
+    if _set and os.path.abspath(args.out) == os.path.abspath(DEFAULT_OUT):
+        raise SystemExit(
+            "refusing to write the published board with a non-default setting: "
+            + ", ".join(_set) + "\nPass --out to a scratch path for experiments.")
 
     oc.ensure_ssl_certs()
     key = oc.load_env().get("CFBD_API_KEY")
