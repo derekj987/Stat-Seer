@@ -1135,5 +1135,62 @@ difference and mis-place every FCS team.
 
 **NOT a cure.** A residual positive bias of ~+0.7 to +2.4 remains — we still over-predict the home
 margin. ATS is unchanged in substance (49.3% published, below the 52.38% breakeven), so this is a
-calibration correction and not an edge claim. The next candidate is the fitted HFA itself: college
-home advantage has compressed over this period and 3.2 may simply be high for 2026.
+calibration correction and not an edge claim.
+
+~~The next candidate is the fitted HFA itself: college home advantage has compressed over this
+period and 3.2 may simply be high for 2026.~~ **Measured and WRONG in both halves — see §13g.**
+Home advantage has RISEN (1.53 → 3.50 since 2020) and 3.2 is slightly LOW, not high. That sentence
+was speculation written into the record as if it were a lead; it should not have been.
+
+
+### §13g. The fitted HFA is right — and home advantage is RISING, not compressing (2026-10-02)
+
+§13f named the fitted HFA as the next suspect for the residual home bias, on the reasoning that
+college home advantage has compressed. Both halves of that are wrong.
+
+**The naive benchmarks mislead, so they are shown and then discarded.** `mean(actual home margin)`
+is 5.23 in 2025 and `mean(-spread)` is 4.54, both far above our fitted 3.18 — which looks damning
+until you notice neither controls for schedule. P5 teams host weak non-conference opponents, so both
+numbers are home advantage PLUS a scheduling imbalance. The ridge is the only one of the three that
+separates them.
+
+**Fitting the SAME ridge to the market's own spreads makes it apples-to-apples** — team dummies plus
+a home flag, response `-spread` instead of `margin`:
+
+| season | HFA from RESULTS | HFA the MARKET prices | gap |
+|---|---|---|---|
+| 2020 | 1.53 | 2.42 | −0.89 |
+| 2021 | 2.21 | 3.10 | −0.89 |
+| 2022 | 2.53 | 3.47 | −0.94 |
+| 2023 | 2.79 | 3.26 | −0.47 |
+| 2024 | 3.36 | 3.29 | +0.07 |
+| 2025 | **3.50** | **3.33** | +0.16 |
+
+Two findings, neither of them the one expected:
+
+1. **Home advantage has risen steadily since the 2020 trough** (1.53 → 3.50), consistent with crowds
+   returning. The "HFA is compressing" intuition is a real trend in some sports and is not what this
+   data shows.
+2. **The market over-priced home advantage from 2020-2022** by ~0.9 points a year and converged with
+   results by 2024. We anchor and de-bias toward the market, so in those seasons we inherit its home
+   lean — which is a plausible source of the residual bias §13f left open, and it is the market's,
+   not ours.
+
+Our card's 3.2 sits just below both 2025 benchmarks. **No change made:** it is correctly fitted and,
+if anything, mildly conservative.
+
+**CARD_SCALE swept at the same time and it is FLAT.** Walk-forward, HFA outside, choose 2021-23 /
+confirm 2024-25:
+
+| scale | 1.00 | 1.10 | 1.20 | 1.25 | **1.33** | 1.40 |
+|---|---|---|---|---|---|---|
+| choose MAE | 12.79 | 12.76 | 12.76 | 12.77 | **12.78** | 12.81 |
+| confirm MAE | 12.52 | 12.48 | 12.46 | 12.46 | **12.47** | 12.47 |
+
+A 0.02 spread across the whole range is noise; the nominal optimum (~1.20) is indistinguishable from
+the shipped 1.33. Bias falls monotonically as the scale rises, which is the trap §13d already named
+— do not pick a knob on bias when MAE is flat. **Nothing changed.**
+
+So the residual home bias is not HFA and not the scale. The live suspect is the de-bias pass itself,
+which centres on the MARKET rather than on results, and therefore imports whatever home lean the
+market is carrying.
