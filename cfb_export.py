@@ -216,7 +216,10 @@ def rate_non_fbs(db, start, end, fbs_ratings, hfa):
         h_new, a_new = h in out, a in out
         if h_new == a_new or h not in board or a not in board:
             continue                                    # need exactly one non-FBS side
-        m = CARD_SCALE * (board[h] - board[a] + (0.0 if g["neutral"] else hfa))
+        # Same HFA-outside-the-scale form as anchored_margin — this offset is FITTED against the
+        # published formula, so the two must not drift apart or the division offset absorbs the
+        # difference and silently mis-places every FCS team.
+        m = CARD_SCALE * (board[h] - board[a]) + (0.0 if g["neutral"] else hfa)
         resid.append((m - g["margin"]) * (-1 if h_new else 1))
     if resid:
         off_r = statistics.median(resid) / CARD_SCALE
@@ -501,7 +504,28 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
         market, so the board doesn't show a systematic dog-lean on every big favorite. Zero anchor
         at/below ANCHOR_LO — close/mid games stay fully ours."""
         rh, ra = ratings.get(home, NEWCOMER_R), ratings.get(away, NEWCOMER_R)
-        m = max(-DISPLAY_CAP, min(DISPLAY_CAP, CARD_SCALE * (rh - ra + (0.0 if neu else hfa))))
+        # 🚨 HFA IS ADDED AFTER THE SCALE, NOT INSIDE IT. It used to sit inside, so CARD_SCALE
+        # de-compressed the home advantage along with the rating gap and the board played a
+        # 1.33 * 3.2 = 4.26 point home edge it never intended. The visible symptom: on the week-5
+        # board we inflated HOME favourites by a median 4.10 points against the market while
+        # leaving away favourites flat at -0.20 (EMPIRICAL_REFERENCE §13e) — an asymmetry a
+        # symmetric de-compression cannot produce.
+        #
+        # Scaling the rating difference is the part that was wanted (our ratings are compressed by
+        # the ridge); scaling a measured field advantage is not. Backtested on the published card
+        # number — which nothing had ever scored, cfb_ats only scores the raw rating — with
+        # analysis/cfb_card_backtest.py, walk-forward 2021-2025:
+        #
+        #     season   MAE in   MAE out   bias in   bias out   home-fav infl in / out
+        #     2021      13.21    13.16     +2.33     +1.59       -0.36 / -0.81
+        #     2022      12.57    12.43     +3.38     +2.35       +0.39 / -0.34
+        #     2023      13.31    13.25     +1.64     +0.77       +0.43 / +0.00
+        #     2024      12.59    12.50     +1.70     +0.72       +0.83 / +0.00
+        #     2025      12.65    12.48     +2.48     +1.26       +1.16 / +0.19
+        #
+        # Lower MAE in 5 of 5 seasons and lower bias in 5 of 5. A residual positive bias remains
+        # (we still over-predict the home margin by ~1 point), so this is a correction, not a cure.
+        m = max(-DISPLAY_CAP, min(DISPLAY_CAP, CARD_SCALE * (rh - ra) + (0.0 if neu else hfa)))
         if hsp is not None:
             line = abs(float(hsp))
             w = 0.0 if line <= ANCHOR_LO else min(

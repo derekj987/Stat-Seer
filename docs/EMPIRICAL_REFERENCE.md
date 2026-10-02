@@ -1093,3 +1093,47 @@ is the first mechanism found that is specific enough to test.
 NOT FIXED — it is a model change and belongs behind a backtest, the same bar the transfer rule was
 held to in §13d. The cheap first experiment is to re-measure with HFA excluded from the scaled term
 (scale the rating difference, add HFA after) and score it on played weeks.
+
+
+### §13f. HFA belongs OUTSIDE the card scale — SHIPPED 2026-10-02
+
+§13e's suspect was right. `anchored_margin` computed
+
+    m = CARD_SCALE * (rh - ra + hfa)
+
+so the de-compression meant to widen a compressed rating gap also widened a measured field
+advantage: the board played **1.33 × 3.2 = 4.26** points of home edge it never intended.
+
+**The published card number had never been backtested.** `cfb_ats.py` scores the RAW rating
+(`ratings[home] − ratings[away] + hfa`); the card publishes that run through CARD_SCALE, a market
+anchor and two de-bias passes. `analysis/cfb_card_backtest.py` now mirrors build_card step for step
+— anchor and both de-bias passes included — because a validator that predicts differently from
+production measures a model nobody ships, which this repo has been bitten by twice.
+
+Walk-forward 2021–2025, HFA inside vs outside the scale:
+
+| season | MAE in | MAE out | bias in | bias out | home-fav infl in / out |
+|---|---|---|---|---|---|
+| 2021 | 13.21 | **13.16** | +2.33 | **+1.59** | −0.36 / −0.81 |
+| 2022 | 12.57 | **12.43** | +3.38 | **+2.35** | +0.39 / −0.34 |
+| 2023 | 13.31 | **13.25** | +1.64 | **+0.77** | +0.43 / +0.00 |
+| 2024 | 12.59 | **12.50** | +1.70 | **+0.72** | +0.83 / +0.00 |
+| 2025 | 12.65 | **12.48** | +2.48 | **+1.26** | +1.16 / +0.19 |
+
+**Lower MAE in 5 of 5 seasons and lower bias in 5 of 5** — a stronger result than the transfer rule
+cleared (§13d), where `off` was merely best-or-tied. Split choose-2021/23 / confirm-2024/25 agrees:
+MAE 12.84→12.78 and 12.55→12.47.
+
+On the live week-5 board the asymmetry narrows as predicted: we take the home side against the
+market in **59% → 52%** of games, and the home/away inflation gap closes from 4.30 points
+(+4.10 / −0.20) to 2.30 (+3.10 / +0.80). Both sides positive is CARD_SCALE doing its intended,
+symmetric job — our ratings really are compressed by the ridge.
+
+`rate_non_fbs`'s division-offset fit was changed in the same commit: it is fitted against the
+published formula, so leaving it on the old one would let the FCS offset quietly absorb the
+difference and mis-place every FCS team.
+
+**NOT a cure.** A residual positive bias of ~+0.7 to +2.4 remains — we still over-predict the home
+margin. ATS is unchanged in substance (49.3% published, below the 52.38% breakeven), so this is a
+calibration correction and not an edge claim. The next candidate is the fitted HFA itself: college
+home advantage has compressed over this period and 3.2 may simply be high for 2026.
