@@ -306,10 +306,24 @@ def check_one_scale():
 
 
 def _ncaaf_rows():
-    """The generated board, parsed. Reuses weekly_flags' parser rather than repeating its regex."""
-    sys.path.insert(0, os.path.join(ROOT, "analysis"))
-    import weekly_flags
-    return weekly_flags.ncaaf_projections()
+    """The generated board, parsed.
+
+    🚨 PARSED HERE RATHER THAN BY IMPORTING weekly_flags, which is what the first version did to
+    avoid repeating four lines of regex. weekly_flags imports pandas at module level, and
+    refresh-cfb-ratings.yml installs only `numpy certifi` — so reusing it took a guardrail that
+    needs nothing but the standard library and gave it a heavyweight dependency the job does not
+    have. The run died with ModuleNotFoundError: No module named 'pandas' AFTER the ratings and
+    the card had already been written and committed, so the work was fine and only the check that
+    confirms it was lost.
+    A guardrail must not be able to fail for a reason unrelated to what it guards. Three duplicated
+    lines are cheaper than an import graph, and this file deliberately stays stdlib-only.
+    """
+    path = os.path.join(ROOT, "web/lib/ncaafPlayerProjections.ts")
+    if not os.path.exists(path):
+        return []
+    txt = open(path, encoding="utf-8").read()
+    return [json.loads(m.group(0))
+            for m in re.finditer(r'\{"game":.*?\}(?=,\n|\n\])', txt, re.S)]
 
 
 def main():
