@@ -1062,3 +1062,34 @@ Tooling note: `cfb_role_backtest` ran the child with `encoding="utf-8"` and no e
 cp1252 byte in a team name ("San José State") raised UnicodeDecodeError in the pipe reader thread.
 The child still ran so the results were fine — but a REAL projector failure could be swallowed the
 same way and scored as a variant. Now `errors="replace"`.
+
+
+### §13e. The NCAAF card inflates HOME FAVOURITES by ~4 points, and only them (2026-10-02)
+
+Measured on the week-5 board, FBS-vs-FBS only, as |our margin| − |market margin|:
+
+| the market favours | n | median \|model\| − \|market\| | we side with the favourite |
+|---|---|---|---|
+| HOME | 31 | **+4.10** | 65% |
+| AWAY | 23 | −0.20 | 48% |
+
+Across all 106 priced games we take the home side against the market in **61%** of them, median
+edge −2.35 points.
+
+**It is not CARD_SCALE.** A symmetric de-compression (1.33) would enlarge away favourites by the
+same proportion, and they sit flat at −0.20. Whatever is adding the points is conditioned on the
+home side, so the suspects are HFA (3.2) entering the scaled margin, or the spread-aware market
+anchor behaving asymmetrically — not the scale on its own.
+
+**Pre-existing, not from the FCS change.** The same measurement on the 59-game board from before
+that commit gives +4.10 / −0.10 — identical. Adding 49 FCS games moved the pooled number to +2.60
+only by mixing in a different population.
+
+Consistent with the published record rather than contradicting it: card ATS is **49.3%** against a
+52.38% breakeven, and the standing finding is that the CFB rating ties Elo without beating the
+spread. A systematic 4-point inflation on one side of the board is a plausible contributor, and it
+is the first mechanism found that is specific enough to test.
+
+NOT FIXED — it is a model change and belongs behind a backtest, the same bar the transfer rule was
+held to in §13d. The cheap first experiment is to re-measure with HFA excluded from the scaled term
+(scale the rating difference, add HFA after) and score it on played weeks.
