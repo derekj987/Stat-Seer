@@ -893,3 +893,48 @@ sample. Until then the conversion is unfalsifiable, which is the real finding.
 
 `receptions` stays deliberately uncorrected: the refit offers a flat 0.771, and the board's overall
 receptions lean is already 44% over — applying it would repeat the overshoot to 35% measured before.
+
+
+### §13a. ...and 38% of the board never reaches the conversion at all (2026-10-02)
+
+Storing `mu` paid for itself the first time the board was regenerated. A row that was never
+converted is exactly one where `mu == proj`, and that made a second defect visible immediately:
+
+**`cfb_player_proj.py` builds rows on three paths and only two of them call `to_fifty_fifty`.** The
+second pass — players the market priced but the depth chart never listed — appends `proj` raw. Those
+rows go on the board as a recency-weighted MEAN beside a line the book set near a MEDIAN, which is
+the precise defect the conversion exists to remove. Ja'Kyrian Turner carried both at once: his
+`rush_yds` came through the depth-chart pass and converted, his `rec_yds` came through the second
+pass and did not.
+
+It hid for so long because both numbers look like yards from outside, and because the population is
+the one with no depth-chart slot — the same rows measured at 1.141 in §13 and 37 of the 51 in the
+1.474 bottom quartile. Week 5, 2026, 392 yardage rows with a posted line:
+
+| population | n | median proj/line |
+|---|---|---|
+| converted (`to_fifty_fifty` ran) | 243 | **0.984** |
+| unconverted (`mu == proj`) | 149 (38%) | **1.197** |
+
+The converted half of the board is already right. Essentially all of the visible over-lean is the
+unconverted half — which revises §13's reading that the residual error "is not in the conversion at
+all": much of it is the conversion never running.
+
+**Applying it uniformly was measured and NOT shipped, because it trades one bias for another:**
+
+| market | n | now | if converted |
+|---|---|---|---|
+| rec_yds | 102 | 1.252 (80% over) | **0.981** (46%) |
+| rush_yds | 44 | 1.059 (52% over) | **0.820** (27%) |
+
+`rec_yds` is fixed outright; `rush_yds` is currently near-fair and would be pushed to 27% over. The
+whole yardage board moves 1.056 → 0.968. Fixing only the market that improves would be fitting to one
+week's board at n=44, which is the overfitting this project forbids. And the ≥2× rows barely move
+(7 → 6), so this is not the cause of the extreme rows either.
+
+The reason it cannot be settled today is still §13: the band ratios themselves are fitted on one
+scale and applied on another, so converting *more* rows with them propagates that error to a bigger
+population. Both fixes want the same prerequisite — enough stored `mu` to fit median(actual) against
+our own mean. **`ncaaf_guardrail.check_one_scale` now reports the split as a WARN** (not a FAIL: it
+is true of 38% of rows today, and a check that is red every morning is one nobody reads). It turns
+green the day the second pass is fixed, and red again only on a regression.

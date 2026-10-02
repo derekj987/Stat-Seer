@@ -1149,14 +1149,17 @@ def build(props, key, depth):
             proj = project(games, mk)
         if proj is None:
             continue
-        # Published on the same scale as the line it sits beside.
+        # Published on the same scale as the line it sits beside. `mu` is that number BEFORE the
+        # conversion — see the note at the other emit site for why it is kept.
+        mu = round(proj, 1) if isinstance(proj, (int, float)) else None
         proj = to_fifty_fifty(mk, proj)
         out.append({
             "game": f"{p['away']} @ {p['home']}",
             "commence": p["commence"], "player": e["display"], "team": e["team"], "pos": pos,
             "slot": f"{dpos}{drank}" if dpos and drank else None,
             "cat": cat, "market": mk, "book": p["book"],
-            "proj": proj, "g": len([g for g in games if g.get(mk) is not None]) if mk != "anytime_td" else len(games),
+            "proj": proj, "mu": mu,
+            "g": len([g for g in games if g.get(mk) is not None]) if mk != "anytime_td" else len(games),
             "cOver": cO, "cG": cG, "pOver": pO, "pG": pG, "hOver": hO, "hG": hG, "rOver": rO, "rG": rG,
         })
     print(f"  role-adjusted {roled} of {matched} matched rows from the depth chart")
@@ -1266,6 +1269,17 @@ def build_slate(slate, depth, prop_index, key):
                         proj = project_role(games, mk, pos, rank, team, per_team, league)
                         if proj is None:
                             continue
+                        # 🚨 KEEP THE PRE-CONVERSION MEAN. to_fifty_fifty's ratios are fitted on
+                        # bands of the BOOK'S LINE but chosen with THIS number, which is a different
+                        # scale (EMPIRICAL_REFERENCE §13). The conversion could not be checked at
+                        # all, because its input was computed, used once and thrown away — storing
+                        # it is what makes median(actual) ~ f(mu) fittable.
+                        #
+                        # It CANNOT be backfilled. Recomputing mu for a past week from today's game
+                        # logs would condition on the outcome — the same hindsight that scored the
+                        # NCAAF report card at 85%. Only forward capture counts, so this starts
+                        # earning the day it ships and not a week before.
+                        mu = round(proj, 1) if isinstance(proj, (int, float)) else None
                         proj = to_fifty_fifty(mk, proj)
                         book = prop_index.get(sig)    # posted line/% if a book has it, else None
                         # Hit-rates are "% over the LINE", so they only mean something when a book
@@ -1288,7 +1302,7 @@ def build_slate(slate, depth, prop_index, key):
                             "game": gk, "commence": commence, "player": e["display"],
                             "team": team, "pos": pos, "slot": f"{pos}{rank}",
                             "cat": cat, "market": mk, "book": book,
-                            "proj": proj,
+                            "proj": proj, "mu": mu,
                             "g": len([g for g in games if g.get(mk) is not None]) if mk != "anytime_td" else len(games),
                             "cOver": cO, "cG": cG, "pOver": pO, "pG": pG,
                             "hOver": hO, "hG": hG, "rOver": rO, "rG": rG,
@@ -1351,7 +1365,7 @@ def build_slate(slate, depth, prop_index, key):
                 out.append({
                     "game": gk, "commence": commence, "player": display.get(pname, pname),
                     "team": team, "pos": POS_OF_MARKET.get(mk, ""), "cat": cat, "market": mk,
-                    "book": book, "proj": None, "g": 0,
+                    "book": book, "proj": None, "mu": None, "g": 0,
                     "cOver": 0, "cG": 0, "pOver": 0, "pG": 0, "hOver": 0, "hG": 0, "rOver": 0, "rG": 0,
                     "matchup": None,
                 })
@@ -1371,7 +1385,13 @@ def build_slate(slate, depth, prop_index, key):
             out.append({
                 "game": gk, "commence": commence, "player": e["display"],
                 "team": team, "pos": _pos_from_usage(games), "cat": cat, "market": mk,
-                "book": book, "proj": proj,
+                # 🚨 NOTE THE MISSING CONVERSION: this pass publishes `proj` RAW. Both other emit
+                # sites run it through to_fifty_fifty first, so these rows go on the board as a
+                # recency-weighted MEAN sitting beside a line the book set near a MEDIAN — the
+                # exact defect the conversion exists to remove. `mu` is therefore equal to `proj`
+                # here, and that equality is the signal: any row where mu == proj was never
+                # converted. Measured consequence in EMPIRICAL_REFERENCE §13a.
+                "book": book, "proj": proj, "mu": proj,
                 "g": len([g for g in games if g.get(mk) is not None]) if mk != "anytime_td" else len(games),
                 "cOver": cO, "cG": cG, "pOver": pO, "pG": pG,
                 "hOver": hO, "hG": hG, "rOver": rO, "rG": rG,
@@ -1519,6 +1539,13 @@ def main(argv=None):
         "// First-pass NCAAF player-prop projections: prior-season per-game baseline (line-blind)\n"
         "// + historical over-rates vs the current book line. PRESEASON — not graded yet.\n"
         "import type { PlayerProj } from \"./playerProjections\";\n"
+        # `mu` is declared HERE rather than relied on from PlayerProj, because the two files are
+        # regenerated by SEPARATE workflows (refresh-cfb-player-proj.yml and player-projections.yml)
+        # and nothing orders them. Widening the shared interface alone would break the build on
+        # whichever ordering ran this file first — an object literal with an unknown property is a
+        # tsc error, which is how the projLean helpers took production down once. Intersecting
+        # locally makes this file correct on its own, whenever it is regenerated.
+        "type NcaafProj = PlayerProj & { mu?: number | null };\n"
         f"export const NCAAF_PROJ_SEASON = {CUR_SEASON};\n"
         f"export const NCAAF_PROJ_PRIOR = {PRIOR_SEASON};\n"
         # The week this slate was built for. Without it the board had no way to tell which week the
@@ -1527,11 +1554,11 @@ def main(argv=None):
         # Emitted in chunks: one 1,300-row literal made tsc give up with TS2590 ("union type too
         # complex") once rows mixed null and string slots — smaller literals type-check fine.
         + "".join(
-            f"const P{i}: PlayerProj[] = [\n"
+            f"const P{i}: NcaafProj[] = [\n"
             + "".join("  " + json.dumps(r) + ",\n" for r in rows[j:j + CHUNK])
             + "];\n"
             for i, j in enumerate(range(0, len(rows), CHUNK)))
-        + "export const NCAAF_PLAYER_PROJECTIONS: PlayerProj[] = ["
+        + "export const NCAAF_PLAYER_PROJECTIONS: NcaafProj[] = ["
         + ", ".join(f"...P{i}" for i in range(len(range(0, len(rows), CHUNK))))
         + "];\n"
     )

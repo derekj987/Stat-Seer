@@ -1517,6 +1517,12 @@ def main():
     # usage_ranks); the NFL side reads its slots from the depth chart at render and leaves it out.
     ts += "  slot?: string | null;\n"
     ts += "  proj: number | null; g: number;\n"
+    # `mu` is `proj` BEFORE the 50/50 conversion. NCAAF writes it (cfb_player_proj.py) so the
+    # conversion can be validated at all: its ratios are fitted on bands of the book's line but
+    # chosen with mu, and until mu was stored the input was computed, used and discarded, which
+    # left the whole correction unfalsifiable (EMPIRICAL_REFERENCE §13). Optional because the NFL
+    # exporter does not write it yet, and never rendered — this is an audit trail, not a column.
+    ts += "  mu?: number | null;\n"
     ts += "  cOver: number; cG: number; pOver: number; pG: number;\n"
     ts += "  hOver: number; hG: number; rOver: number; rG: number;\n"
     ts += "  env?: number | null; envDelta?: number | null;\n"
