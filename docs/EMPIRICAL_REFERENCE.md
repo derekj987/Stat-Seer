@@ -971,3 +971,55 @@ this edit.
 **The lesson worth keeping: a subset measurement is not a market measurement.** I came within one
 sentence of refusing a change that was correct, because I measured the population I was changing
 instead of the population the user sees.
+
+
+### §13c. Why Evan Dickens projects 102.9 — a transfer's old school becomes his new team's role
+
+Traced end to end. Not a data bug, not a name collision (one athlete id, 5076122, across both
+seasons), and not the conversion. The arithmetic is exactly right and every input is wrong in the
+same direction.
+
+    18.81 projected carries  x  5.457 recency-weighted ypc  =  102.7      (then x1.002 -> 102.9)
+
+**His 2025 was genuinely enormous — at another school.** 1,539 yards on 273 carries over 11 games
+(217, 127, 106, 228, 267 in the back half) for a Conference USA team. At Boston College in 2026 he
+is 214 yards on 45 carries across 4 games: **11.2 car/g, 53.5 yds/g, 4.76 ypc**. The book line is
+39.5.
+
+**The role prior is himself.** `build()` re-tags a transfer's whole log entry to his current team
+(`_e["team"] = _t`) and `rank_baselines` immediately groups by that field and reads
+`recent = PRIOR_SEASON games`. So Dickens's 11 games elsewhere are attributed to Boston College,
+rank him BC's RB1, and *become* BC's RB1 carries baseline:
+
+    BC RB1 baseline = 20.73 car/g        Dickens' 2025 = 20.7 car/g
+
+`rank_baselines`' docstring promises "the workload a role implies, independent of who filled it".
+For a transfer it is one player's production at a different program, so the blend
+`v = (own*n + base*k)/(n+k)` has no independent anchor — it is his own prior season on both sides.
+Each game already carries its own `g["team"]`, so the information needed to fix it is present.
+
+**Meanwhile BC's actual 2026 lead back is Mason McKenzie**, 18.5 car/g for 90.8 yds/g. Dickens is the
+complement. The model has the depth chart inverted because the ranking counts games played elsewhere.
+
+**Scope, measured on the week-5 board:** 1,462 players have prior-season games for a different team
+than their current one, and **61 of them define their new team's rank-1 baseline**. It is heaviest at
+QB, where the transfer portal moves starters every year — Iowa State's QB1 attempt baseline is
+Arkansas State's offense (38.46/g), Miami's is Duke's, LSU's is Arizona State's.
+
+**It is NOT a board-wide inflation, which is why it survived.** Across the 483 rows with both a prior
+and a current season, the shipped projection is a median **0.917x** of a current-season-only one — the
+prior season usually damps correctly. Only 45 rows (9%) are inflated more than 25%, and Dickens is
+4th worst. This is a tail that the averages hide.
+
+**Two separate contaminations, and the architecture already says which way to split them.** The
+project's standing finding is *volume persists, efficiency doesn't* — but volume persists as a
+property of a ROLE on a TEAM. A transfer's workload (20.7 carries) is not portable; his efficiency
+(5.64 ypc) plausibly is. So the candidate fix is: attribute each game to `g["team"]` when building
+role baselines, and exclude prior-school games from the VOLUME estimate while keeping them for
+efficiency. NOT SHIPPED — it is a model change and belongs behind `analysis/cfb_role_backtest.py`
+out of sample, the way ROLE_BLEND_K and QB_BLEND_K were settled.
+
+Note the conversion is innocent here but not harmless: `mu` of 102.7 lands in the 80+ band whose
+ratio is 1.002, so it escaped correction entirely, where its line's own band (28-45) carries 0.722.
+That is §13's scale mismatch producing its worst case — the more wrong the mean, the less it is
+corrected.
