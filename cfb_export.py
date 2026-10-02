@@ -290,13 +290,32 @@ def fetch_ncaaf_odds():
     if not key:
         return []
     oc.ensure_ssl_certs()
-    url = ("https://api.the-odds-api.com/v4/sports/americanfootball_ncaaf/odds"
-           "?apiKey=%s&regions=us,us2&markets=spreads,totals&oddsFormat=american" % key)
+    out = []
+    for sport in NCAAF_SPORTS:
+        out += _fetch_sport(sport, key)
+    return out
+
+
+# 🚨 FCS LIVES BEHIND ITS OWN SPORT KEY, and we never asked for it. Derek: "according to fanduel
+# there are 4 games tonight. I am only seeing 3." The 4th was Montana State @ Idaho — an FCS-vs-FCS
+# game the books price (MSU -14.5, O/U 56.5) that neither of our line sources carried: the
+# americanfootball_ncaaf feed returned 0 of 55 FCS-vs-FCS games in week 5, and db_lines had 0 too.
+# It was never a matching bug or a filter alone; we were asking the wrong endpoint.
+NCAAF_SPORTS = ("americanfootball_ncaaf", "americanfootball_ncaaf_fcs")
+
+
+def _fetch_sport(sport, key):
+    """One sport key's spreads + totals, in the shape fetch_ncaaf_odds returns.
+
+    A failure on one key must not take the other down with it — an FCS outage should cost the FCS
+    rows, not the whole card."""
+    url = ("https://api.the-odds-api.com/v4/sports/%s/odds"
+           "?apiKey=%s&regions=us,us2&markets=spreads,totals&oddsFormat=american" % (sport, key))
     try:
         with urllib.request.urlopen(url, timeout=60) as r:
             data = json.loads(r.read())
     except Exception as e:  # noqa: BLE001
-        print("  odds fetch failed: %s" % e, file=sys.stderr)
+        print("  odds fetch failed for %s: %s" % (sport, e), file=sys.stderr)
         return []
     out = []
     for e in data:
@@ -446,12 +465,20 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
     # the books price and members bet. The rating FIT stays FBS-vs-FBS (that is the right sample);
     # this is only about what the board DISPLAYS. Non-FBS-vs-FBS noise (D-II/D-III) is excluded by
     # requiring an FBS side.
+    # ...and FCS-vs-FCS games THE MARKET PRICES. Same argument as the paragraph above, one division
+    # down: Montana State @ Idaho was on the book at -14.5 and missing from our board. The test is
+    # "does a book price it", not "is it FCS" — that is self-limiting (it can only ever admit games
+    # members can actually bet) and it keeps D-II/D-III out without naming them, since no book
+    # prices those. Requires the FCS sport key; see NCAAF_SPORTS.
     rows = conn.execute(
         """SELECT away_team, home_team, neutral_site, start_date, id,
                   home_class, away_class FROM games
-             WHERE season=? AND week=? AND (home_class='fbs' OR away_class='fbs')""",
+             WHERE season=? AND week=? AND (home_class='fbs' OR away_class='fbs'
+                                            OR (home_class='fcs' AND away_class='fcs'))""",
         (season, week)).fetchall()
     conn.close()
+    rows = [r for r in rows
+            if r[5] == "fbs" or r[6] == "fbs" or match_odds(r[0], r[1], odds) is not None]
     dbl = db_lines(db, season, week)
 
     def market_for(away, home, gid):
@@ -581,7 +608,21 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
         # Potential upset — only on competitive lines (a single-digit dog our model
         # flips to win outright), never a naive blowout-dog flip, and never on a
         # newcomer we couldn't rate.
-        if hsp is not None and off_flag and abs(hsp) <= 9.5 and rated:
+        # 🚨 ...and only where the PUBLISHED RECORD covers the claim. The validation line on this
+        # page — SU 71.0%, ATS 49.3% — is computed on FBS-vs-FBS games only. FCS ratings come from
+        # the secondary wide fit with a -13.0 division offset and have no measured record of their
+        # own, so an upset flag on an FCS-vs-FCS game is a confident claim with nothing behind it.
+        # Admitting the FCS feed put 7 of 12 upsets on FCS games and the top three, which is the
+        # trust engine leading with its least verified number. The games stay ON the board (they are
+        # real and the market prices them); only the upset CALL is held to the validated sample.
+        # Lift this the week FCS-vs-FCS gets its own published accuracy, not before.
+        # NB `hcls`/`acls` — this loop's own names. Writing `_hc`/`_ac` here (the names the two
+        # earlier passes over `rows` use) is not a NameError: they are still in scope holding the
+        # LAST row of the previous loop, so the guard silently evaluated True for every game and
+        # filtered nothing. A stale binding from a sibling loop fails quietly, which is worse.
+        validated = hcls == "fbs" and acls == "fbs"
+
+        if hsp is not None and off_flag and abs(hsp) <= 9.5 and rated and validated:
             dog = away if hsp <= 0 else home
             dog_margin = float(margin if dog == home else -margin)
             if dog_margin > 0:
