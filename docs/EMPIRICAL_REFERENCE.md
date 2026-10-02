@@ -1194,3 +1194,49 @@ the shipped 1.33. Bias falls monotonically as the scale rises, which is the trap
 So the residual home bias is not HFA and not the scale. The live suspect is the de-bias pass itself,
 which centres on the MARKET rather than on results, and therefore imports whatever home lean the
 market is carrying.
+
+
+### §13h. The de-bias was centred on the wrong axis — SHIPPED 2026-10-02
+
+The big-spread de-bias exists, by its own comment, so the board's divergences "straddle the market
+(~50% cover), not a systematic dog-lean". It had never been measured against that promise. It was
+delivering **18–24%**, every season, on games where favourites actually cover **44–53%**. The board
+was calling the dog on four of every five big games.
+
+**The axis was wrong, not the size.** The residual was taken as (our HOME margin − the market's) and
+subtracted from the home margin — which shrinks a home favourite and *grows* an away one. One
+constant pushes the two groups in opposite directions on "does the favourite cover", so no value of
+it can centre both. Measured on 2024–25 anchored games:
+
+| anchored | n | median \|ours\|−\|market\| | we said fav covers |
+|---|---|---|---|
+| home favourite | 104 | −0.30 | 30.8% |
+| away favourite | 33 | **−4.43** | **6.1%** |
+
+The home group was roughly centred all along; the away group was 4.4 points adrift and essentially
+never called a favourite.
+
+**Fix: centre in FAVOURITE space.** Residual is `|ours| − |market|`, and the correction is applied to
+the favourite's margin with the picked side preserved, so it means the same thing whichever team is
+favoured. Walk-forward 2021–2025:
+
+| season | home-space (was) | favourite-space (now) | ACTUAL | MAE was / now |
+|---|---|---|---|---|
+| 2021 | 18.3% | **47.3%** | 52.7% | 13.16 / 13.17 |
+| 2022 | 19.7% | **45.9%** | 50.8% | 12.43 / 12.50 |
+| 2023 | 20.3% | **46.4%** | 49.3% | 13.25 / 13.21 |
+| 2024 | 23.9% | **46.5%** | 43.7% | 12.50 / 12.46 |
+| 2025 | 19.7% | **45.5%** | 48.5% | 12.48 / 12.49 |
+
+Closer to the realised cover rate in **5 of 5 seasons**, and MAE is a tie (12.78/12.79 choose,
+12.47/12.45 confirm) — the calibration is bought for nothing. Live week-5 board: 45.8% against the
+~20–25% it was publishing this morning.
+
+**Two variants tested and rejected.** Centring on past RESULTS instead of the market (`--debias
+results`) reaches the cover rate too but costs MAE in the choose era (12.87 vs 12.78) and needs a
+number that does not exist at publish time. Separate constants per side (`favside`) is marginally
+better on MAE and marginally worse on the objective, for twice the parameters — the single median
+wins on both simplicity and the thing being fixed.
+
+**Still not an edge claim.** ATS is unchanged (~50%). This makes a published number mean what it says
+it means; it does not make it beat the market.

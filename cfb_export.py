@@ -547,7 +547,17 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
     for away, home, neu, date, gid, _hc, _ac in rows:
         _hsp, _ = market_for(away, home, gid)
         if _hsp is not None and abs(float(_hsp)) > ANCHOR_LO:
-            _resid.append(anchored_margin(home, away, neu, _hsp) - (-float(_hsp)))
+            # 🚨 CENTRED IN FAVOURITE SPACE, NOT HOME-MARGIN SPACE. This used to take the residual
+            # as (our home margin − the market's), and the correction below subtracted it from the
+            # home margin — which SHRINKS a home favourite and GROWS an away one. One constant
+            # therefore pushed the two groups in OPPOSITE directions on "does the favourite cover",
+            # and no value of it could centre both. Measured on 2024-25 anchored games: home
+            # favourites sat at a median |ours|−|market| of −0.30, away favourites at −4.43.
+            #
+            # The symptom is the one this whole block exists to prevent. Its own comment promises
+            # "~50% projected cover"; it was delivering 18-24%, every season, against favourites
+            # that actually cover 44-53%. The board was calling the dog on four of five big games.
+            _resid.append(abs(anchored_margin(home, away, neu, _hsp)) - abs(float(_hsp)))
     debias = statistics.median(_resid) if _resid else 0.0
 
     # Totals de-bias (same idea as the spread anchor). Our projected total sits a HAIR below the
@@ -574,7 +584,24 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
         # De-bias big-spread games so their divergences straddle the market (~50% cover), not a
         # systematic dog-lean. Close/mid games (<=ANCHOR_LO) keep their full independent read.
         if hsp is not None and abs(float(hsp)) > ANCHOR_LO:
-            margin = max(-DISPLAY_CAP, min(DISPLAY_CAP, margin - debias))
+            # Correct the FAVOURITE's margin and keep the side we picked, so the correction means
+            # the same thing whichever team is favoured. Backtested walk-forward 2021-2025
+            # (analysis/cfb_card_backtest.py --debias), "we say the favourite covers" vs what
+            # favourites actually did on the same anchored games:
+            #
+            #     season   home-space (was)   favourite-space (now)   ACTUAL
+            #      2021         18.3%                 47.3%            52.7%
+            #      2022         19.7%                 45.9%            50.8%
+            #      2023         20.3%                 46.4%            49.3%
+            #      2024         23.9%                 46.5%            43.7%
+            #      2025         19.7%                 45.5%            48.5%
+            #
+            # Closer in 5 of 5 seasons, and MAE is a tie (12.78/12.79 choose, 12.47/12.45 confirm)
+            # so this buys the calibration for nothing. max(0, …) guards a correction larger than
+            # the margin; in practice the smallest anchored margin stays around 8 points.
+            _mag = max(0.0, abs(margin) - debias)
+            margin = _mag if margin >= 0 else -_mag
+            margin = max(-DISPLAY_CAP, min(DISPLAY_CAP, margin))
 
         # Our read beside the market: our projected favorite + margin, an ATS pick (which
         # side of the MARKET spread our projection covers), and an over/under lean.
