@@ -58,8 +58,23 @@ MODEL_DATA = "web/app/ncaaf/model-data.ts"
 # (path, hours before it is stale). The cadences are the crons in the workflows that write them:
 # refresh-cfb-ratings every 6h, refresh-cfb-player-proj at 01:00 and 13:00. The allowance is
 # roughly a cadence and a half, so one skipped run warns rather than fails on the next.
+#
+# 🚨 THE ALLOWANCE HAS TO MATCH HOW OFTEN THE FILE CHANGES, NOT HOW OFTEN THE JOB RUNS. These
+# workflows commit only when the generated file actually differs, so a file whose CONTENT is stable
+# shows no commit however faithfully the job ran. ncaafDepth.ts is the one that bites: the scrape
+# runs twice a day and succeeds, but a depth chart that nobody edited produces an identical file and
+# no commit. Measured over its last 14 gaps — 10.7, 12.0, 12.0, 12.1, 12.2, 12.5, 13.5, 23.6, 23.9,
+# 24.2, 24.3, 36.1, 84.1h — FIVE exceed 20h, and the 84h one failed this job eight times in a row
+# (Sep 28-30) while refresh-cfb-player-proj was green on every single run.
+#
+# That is a check red for a reason unrelated to what it guards, which is the failure mode that
+# teaches people to ignore the red ones. 96h still catches a genuinely dead scraper within a day of
+# it mattering, because a depth chart really does move every game week.
+#
+# The projections file is left at 20h deliberately: its numbers move whenever a book line moves, so
+# it DOES change on essentially every run and commit-time is a fair proxy for the job there.
 ARTIFACTS = [(MODEL_DATA, 10.0), ("web/lib/ncaafPlayerProjections.ts", 20.0),
-             ("web/lib/ncaafDepth.ts", 20.0)]
+             ("web/lib/ncaafDepth.ts", 96.0)]
 # A prop on a TEAM, not a person. These have no player projection by design.
 TEAM_MARKET = ("D/ST", "Defense", "Special Teams")
 MISS_FAIL, MISS_WARN = 0.10, 0.05
