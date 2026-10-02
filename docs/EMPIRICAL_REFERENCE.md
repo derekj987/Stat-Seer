@@ -1023,3 +1023,42 @@ Note the conversion is innocent here but not harmless: `mu` of 102.7 lands in th
 ratio is 1.002, so it escaped correction entirely, where its line's own band (28-45) carries 0.722.
 That is §13's scale mismatch producing its worst case — the more wrong the mean, the less it is
 corrected.
+
+
+### §13d. The transfer fix — TESTED AND REJECTED, the hypothesis was backwards (2026-10-02)
+
+§13c found that a transfer's prior-school production is attributed to his new team, so Evan Dickens'
+20.7 car/g at a CUSA school became Boston College's RB1 baseline and he was blended toward himself.
+The reasoning was that workload is a property of a ROLE on a TEAM and should not travel, while
+efficiency should. Both halves were implemented behind `CFB_TRANSFER` and scored on played weeks
+against what players actually did — choose on week 2, confirm on week 3:
+
+| transfer rule | wk2 MAE | wk3 MAE | wk2 bias | wk3 bias | rushing MAE wk2 / wk3 |
+|---|---|---|---|---|---|
+| **off** (ships) | **21.2** | **22.8** | +0.3 | −5.0 | **30.1 / 34.3** |
+| team | 21.6 | 22.8 | +1.5 | −3.6 | 30.8 / 34.5 |
+| vol | 21.5 | 23.1 | +1.9 | −3.2 | 31.4 / 35.1 |
+| both | 22.4 | 23.2 | +3.4 | −1.7 | 34.5 / 35.8 |
+
+`off` is best-or-tied on MAE in both weeks, and **rushing — the category the fix was written for —
+degrades monotonically with how much of the prior school is removed.** Removing the information made
+the prediction worse, which means the information is real: **a transfer's prior-school workload does
+predict his new workload, better than his new team's role baseline does.** The conceptual complaint
+in §13c stands — the baseline really is contaminated — but correcting it costs more than it saves,
+so the contamination is apparently carrying signal rather than noise.
+
+**The bias column is a trap, and it is the one I would have fallen into.** The rule shifts
+projections reliably UP, so it reads as a fix in week 3 (−5.0 → −1.7) and as damage in week 2
+(+0.3 → +3.4). Bias swings sign between weeks at a FIXED setting, exactly as the QB_BLEND_K table
+shows, so it is week-to-week variance in how teams played, not evidence about the knob. MAE is the
+criterion. Had I run only week 3 and looked at bias, I would have shipped a change that makes the
+board less accurate.
+
+Dickens moved 122.1 → 99.3 at week 2 under `both` and the board still got worse. So he is a genuine
+outlier, not the visible end of a systematic error — which is also why §13c's measurement found the
+median affected row at 0.917× and only 9% inflated past 25%. The knob stays, defaulted `off`.
+
+Tooling note: `cfb_role_backtest` ran the child with `encoding="utf-8"` and no error handler, and a
+cp1252 byte in a team name ("San José State") raised UnicodeDecodeError in the pipe reader thread.
+The child still ran so the results were fine — but a REAL projector failure could be swallowed the
+same way and scored as a variant. Now `errors="replace"`.

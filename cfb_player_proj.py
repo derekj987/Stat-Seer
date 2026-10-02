@@ -703,6 +703,45 @@ ROLE_MODE = os.environ.get("CFB_ROLE_MODE", "blend2")
 ROLE_BLEND_K = float(os.environ.get("CFB_ROLE_K", "3"))
 PRIOR_GAME_W = float(os.environ.get("CFB_PRIOR_W", "0.25"))
 QB_BLEND_K = float(os.environ.get("CFB_QB_K", "3"))
+# A TRANSFER's prior-school production is attributed to his NEW team, because build() re-tags the
+# whole log entry and rank_baselines then groups by that field — so Evan Dickens' 20.7 car/g at a
+# CUSA school BECAME Boston College's RB1 baseline, and he was blended toward himself
+# (EMPIRICAL_REFERENCE §13c). 1,462 players have prior-season games for another team; 61 define
+# their new team's rank-1 baseline. Two independent halves, switchable so the backtest can tell
+# which one does the work:
+#   "team" — role baselines attribute each GAME to the team it was played for (g["team"])
+#   "vol"  — a player's OWN volume estimate counts only games for his current team. Efficiency
+#            still uses everything: a transfer's workload does not travel, his yards-per-carry
+#            plausibly does, which is the project's volume/efficiency split applied to the move.
+#   "both" / "off"
+#
+# 🚨 TESTED AND REJECTED — the hypothesis was backwards. Scored on played weeks against what the
+# players actually did (analysis/cfb_role_backtest.py --weeks 2 3; choose on 2, confirm on 3):
+#
+#     transfer   wk2 MAE  wk3 MAE   wk2 bias  wk3 bias   rushing MAE wk2 / wk3
+#     off         21.2     22.8      +0.3      -5.0       30.1 / 34.3   <- ships
+#     team        21.6     22.8      +1.5      -3.6       30.8 / 34.5
+#     vol         21.5     23.1      +1.9      -3.2       31.4 / 35.1
+#     both        22.4     23.2      +3.4      -1.7       34.5 / 35.8
+#
+# `off` is best-or-tied on MAE in BOTH weeks, and rushing — the category the whole thing was written
+# for — gets monotonically WORSE the more of the prior school you remove. Removing information made
+# the prediction worse, which means the information is real: **a transfer's prior-school workload
+# does predict his new workload**, better than his new team's role baseline does. "Volume is a
+# property of the team" was my reasoning and the data rejects it.
+#
+# The bias column is a trap worth naming. The rule reliably shifts projections UP, so it looks like
+# a fix in week 3 (-5.0 -> -1.7) and like damage in week 2 (+0.3 -> +3.4). Bias swings sign between
+# weeks at a FIXED setting, exactly as QB_BLEND_K's table shows, so it is week-to-week variance in
+# how teams played and must not be used to pick a knob. MAE is the criterion.
+#
+# Evan Dickens still projects high, and the backtest says this is not why. He moved 122.1 -> 99.3 at
+# week 2 under "both" and the board still got worse, so he is an outlier rather than the visible end
+# of a systematic error. The knob stays, defaulted off, so the next person re-runs instead of
+# re-reasoning. EMPIRICAL_REFERENCE §13d.
+CFB_TRANSFER = os.environ.get("CFB_TRANSFER", "off")
+TRANSFER_TEAM_ATTR = CFB_TRANSFER in ("team", "both")
+TRANSFER_VOL = CFB_TRANSFER in ("vol", "both")
 # ...and how many games of that stat we need before the cap is allowed to bite at all.
 #
 # The cap is multiplicative on a player's own volume, so on a near-zero own volume ANY multiple is
@@ -735,7 +774,17 @@ def rank_baselines(logs):
     pool; the top gets rank 1, etc. This is the workload a role implies, independent of who filled it."""
     by_team = {}
     for e in logs.values():
-        by_team.setdefault(e["team"], []).append(e)
+        if TRANSFER_TEAM_ATTR:
+            # Credit each game to the team it was actually played for. Without this a transfer's
+            # old school's workload defines his new team's role, which is the opposite of what a
+            # role baseline is for ("independent of who filled it", above).
+            byt = {}
+            for g in e["games"]:
+                byt.setdefault(g.get("team") or e["team"], []).append(g)
+            for t, gs in byt.items():
+                by_team.setdefault(t, []).append({"team": t, "display": e["display"], "games": gs})
+        else:
+            by_team.setdefault(e["team"], []).append(e)
     per_team, league = {}, {}
     for team, entries in by_team.items():
         by_pool = {}
@@ -780,6 +829,10 @@ def project_role(games, market, pos, rank, team, per_team, league):
     for a returning one. A promoted back is projected on a starter's carries at his own YPC,
     not last year's back-up average."""
     pool = POOL.get(pos, "WR")
+    # Games that count toward WORKLOAD. Efficiency below still reads `games` in full — a move
+    # resets how often you touch the ball, not how many yards you get when you do. A player with
+    # no games yet for his new team falls through to the role baseline, which is the right prior.
+    vgames = [g for g in games if g.get("team") == team] if TRANSFER_VOL else games
 
     def rolevol(field):
         # QB volumes are ranked among QBs; a receiver's/back's field baseline is at their rank.
@@ -792,13 +845,13 @@ def project_role(games, market, pos, rank, team, per_team, league):
         # Volume forgets faster than efficiency does. The returned `decay` is the EFFICIENCY one
         # and is left alone -- only the workload estimate below uses the quicker setting.
         vdecay = VOL_DECAY_RETURN.get(field, decay) if decay == DECAY_RETURN else decay
-        own = _recent_avg(games, field, vdecay) or 0.0
+        own = _recent_avg(vgames, field, vdecay) or 0.0
         if ROLE_MODE == "blend2":
             # As "blend", but the player's own volume earns its weight from THIS season's games
             # in full and last season's only at PRIOR_GAME_W each: before a snap is played the
             # depth role leads (a promoted backup projects near a starter's workload), and one
             # or two played games move the number most of the way to what he is actually doing.
-            n = _gp([g for g in games if g.get("season") == CUR_SEASON], field)                 + PRIOR_GAME_W * _gp([g for g in games if g.get("season") != CUR_SEASON], field)
+            n = _gp([g for g in vgames if g.get("season") == CUR_SEASON], field)                 + PRIOR_GAME_W * _gp([g for g in vgames if g.get("season") != CUR_SEASON], field)
             # QB_BLEND_K exists because passing looked over-corrected — week 3 graded at -8.6
             # yards of bias against +5.8 under the old rule — and a quarterback's attempt volume
             # is arguably a TEAM property the role median should not pull. TESTED AND LEFT EQUAL:
@@ -823,14 +876,14 @@ def project_role(games, market, pos, rank, team, per_team, league):
             # sits above his slot's typical workload is pulled DOWN toward it. The max() below
             # could only lift, which is why the projections ran 5-12 yards high (report card,
             # 2026 week 2: rushing bias +11.6, proj > line on 66% of rows vs 44% that went over).
-            n = _gp(games, field)
+            n = _gp(vgames, field)
             v = (own * n + base * ROLE_BLEND_K) / (n + ROLE_BLEND_K) if n else base
             return v, decay
         v = max(base, own)
         # Cap the role lift against what the player has actually done -- but only when his own
         # volume is worth trusting. Too few games and this clamps a genuine promotion to his
         # backup workload; see CAP_MIN_GAMES.
-        if own > 0 and _gp(games, field) >= CAP_MIN_GAMES:
+        if own > 0 and _gp(vgames, field) >= CAP_MIN_GAMES:
             v = min(v, ROLE_VOL_CAP * own)
         return v, decay
 

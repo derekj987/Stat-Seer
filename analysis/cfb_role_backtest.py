@@ -27,8 +27,11 @@ import weekly_report as wr  # noqa: E402
 
 SCRATCH = os.path.join(ROOT, "data", "cfb_role_bt")
 # (mode, role K, QB K) -- QB attempts get their own weight; see cfb_player_proj.QB_BLEND_K.
-VARIANTS = [("max", None, 3), ("blend2", 3, 3), ("blend2", 3, 1), ("blend2", 3, 0.5),
-            ("blend2", 2, 1), ("blend2", 4, 1)]
+# (mode, role K, QB K, transfer rule). The role/QB weights were settled earlier and are held at
+# the shipped setting here so the only thing moving is the transfer rule -- see EMPIRICAL_REFERENCE
+# §13c. "off" is what ships today and is the control.
+VARIANTS = [("blend2", 3, 3, "off"), ("blend2", 3, 3, "team"),
+            ("blend2", 3, 3, "vol"), ("blend2", 3, 3, "both")]
 CATS = ("passing", "rushing", "receiving", "receptions")
 
 
@@ -45,13 +48,20 @@ def actuals_from_cards():
     return out
 
 
-def run(week, mode, k, qk=3):
+def run(week, mode, k, qk=3, tr="off"):
     os.makedirs(SCRATCH, exist_ok=True)
-    out = os.path.join(SCRATCH, f"w{week}_{mode}{k or ''}_q{qk}.ts")
+    out = os.path.join(SCRATCH, f"w{week}_{mode}{k or ''}_q{qk}_t{tr}.ts")
     if not os.path.exists(out):
-        env = dict(os.environ, CFB_ROLE_MODE=mode, CFB_ROLE_K=str(k or 6), CFB_QB_K=str(qk))
+        env = dict(os.environ, CFB_ROLE_MODE=mode, CFB_ROLE_K=str(k or 6), CFB_QB_K=str(qk),
+                   CFB_TRANSFER=tr)
+        # errors="replace": a team name carrying a cp1252 byte (0x97 in "San José State") made the
+        # reader thread raise UnicodeDecodeError. The child still ran, so the backtest looked fine —
+        # but the exception happens in the pipe reader, which means a REAL projector failure could
+        # have been swallowed the same way and scored as a variant. Never let the log encoding
+        # decide whether a run is believed.
         r = subprocess.run([sys.executable, "cfb_player_proj.py", "--week", str(week), "--all-rows", "--out", out],
-                           cwd=ROOT, env=env, capture_output=True, text=True, encoding="utf-8")
+                           cwd=ROOT, env=env, capture_output=True, text=True,
+                           encoding="utf-8", errors="replace")
         if r.returncode != 0:
             print(r.stdout[-800:], r.stderr[-800:])
             raise SystemExit(f"projector failed for week {week} {mode} {k}")
@@ -87,13 +97,13 @@ def main(argv=None):
     for week in args.weeks:
         print(f"\n=== week {week}")
         print(f"  {'variant':10} {'cat':11} {'n':>4} {'MAE':>6} {'book':>6} {'bias':>6} {'proj>line':>9}")
-        for mode, k, qk in VARIANTS:
-            rows = run(week, mode, k, qk)
+        for mode, k, qk, tr in VARIANTS:
+            rows = run(week, mode, k, qk, tr)
             sc = score(rows, actual, week)
             tot_n = sum(v["n"] for v in sc.values())
             tot_mae = sum(v["mae"] * v["n"] for v in sc.values()) / max(tot_n, 1)
             tot_bias = sum(v["bias"] * v["n"] for v in sc.values()) / max(tot_n, 1)
-            label = f"{mode}{k or ''}/q{qk}"
+            label = f"transfer={tr}"
             for cat in CATS:
                 v = sc.get(cat)
                 if v:

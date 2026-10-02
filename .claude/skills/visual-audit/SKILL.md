@@ -212,6 +212,7 @@ negative result here is a season of work someone does not have to repeat.
 | `priced_median_fit.py` | …on rows that carried a line | **shipped**, but the first cut bucketed by our own estimate and came out flat, fixing the average and not the tilt. Refit by LEVEL: ratios 0.68→1.02, halves 26/65 → 40/55 |
 | `qb_out_receivers.py` | do receivers lose volume when QB1 is out? | primary −6.9%, fringe +17.2%. Small; nothing shipped |
 | `discount_qbless_games.py` | should QB1-less games count less? | **No.** W=1.0 optimal and monotone on both splits — they are exactly as predictive |
+| `cfb_role_backtest.py --weeks 2 3` (`CFB_TRANSFER`) | a transfer's prior-school production defines his NEW team's role baseline — strip it? | **No, backwards.** `off` best-or-tied on MAE in both weeks; rushing degrades monotonically the more of the old school you remove (30.1→34.5 wk2). **Prior-school workload DOES predict the new workload**, better than the new team's role baseline. Bias improves and is a trap — it swings sign between weeks at a fixed setting. EMPIRICAL_REFERENCE §13d |
 
 ### 🚨 Never hand-edit an AUTO-GENERATED file
 Several `web/lib/*.ts` files are written by scripts and rewritten by scheduled jobs. Anything added to
