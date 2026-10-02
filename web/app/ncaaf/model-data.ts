@@ -1393,6 +1393,36 @@ export const NCAAF_MODEL = {
         "featured": true
       },
       {
+        "away": "Memphis",
+        "home": "Charlotte",
+        "neutral": 0,
+        "commence": "2026-10-03T15:00:00.000Z",
+        "apAway": null,
+        "apHome": null,
+        "conf": "American Athletic",
+        "marketSpread": {
+          "fav": "Memphis",
+          "num": -20.5
+        },
+        "marketTotal": 52.5,
+        "projSpread": {
+          "fav": "Memphis",
+          "num": -23.2
+        },
+        "projTotal": 51.9,
+        "homeRiser": 0,
+        "awayRiser": 0,
+        "pick": {
+          "side": "Memphis",
+          "num": -20.5
+        },
+        "totalLean": null,
+        "off": false,
+        "rated": true,
+        "crossDiv": false,
+        "featured": false
+      },
+      {
         "away": "Alabama",
         "home": "Mississippi State",
         "neutral": 0,
@@ -1437,7 +1467,7 @@ export const NCAAF_MODEL = {
           "fav": "Notre Dame",
           "num": -21.5
         },
-        "marketTotal": 47.5,
+        "marketTotal": 46.5,
         "projSpread": {
           "fav": "Notre Dame",
           "num": -21.5
@@ -1451,7 +1481,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "OVER",
-          "num": 47.5
+          "num": 46.5
         },
         "off": false,
         "rated": true,
@@ -2218,36 +2248,6 @@ export const NCAAF_MODEL = {
         "featured": false
       },
       {
-        "away": "Memphis",
-        "home": "Charlotte",
-        "neutral": 0,
-        "commence": "2026-10-03T19:30:00.000Z",
-        "apAway": null,
-        "apHome": null,
-        "conf": "American Athletic",
-        "marketSpread": {
-          "fav": "Memphis",
-          "num": -20.5
-        },
-        "marketTotal": 52.5,
-        "projSpread": {
-          "fav": "Memphis",
-          "num": -23.2
-        },
-        "projTotal": 51.9,
-        "homeRiser": 0,
-        "awayRiser": 0,
-        "pick": {
-          "side": "Memphis",
-          "num": -20.5
-        },
-        "totalLean": null,
-        "off": false,
-        "rated": true,
-        "crossDiv": false,
-        "featured": false
-      },
-      {
         "away": "Samford",
         "home": "UAB",
         "neutral": 0,
@@ -2352,7 +2352,7 @@ export const NCAAF_MODEL = {
           "fav": "New Mexico",
           "num": -22.5
         },
-        "marketTotal": 48.5,
+        "marketTotal": 47.5,
         "projSpread": {
           "fav": "New Mexico",
           "num": -33.1
@@ -2366,7 +2366,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "OVER",
-          "num": 48.5
+          "num": 47.5
         },
         "off": false,
         "rated": true,
@@ -2710,7 +2710,7 @@ export const NCAAF_MODEL = {
         "conf": "ACC",
         "marketSpread": {
           "fav": "Miami",
-          "num": -15.5
+          "num": -16.5
         },
         "marketTotal": 47.5,
         "projSpread": {
@@ -2722,7 +2722,7 @@ export const NCAAF_MODEL = {
         "awayRiser": 1,
         "pick": {
           "side": "Clemson",
-          "num": 15.5
+          "num": 16.5
         },
         "totalLean": null,
         "off": false,
@@ -14095,6 +14095,36 @@ export const NCAAF_MODEL = {
             "featured": true
           },
           {
+            "away": "Memphis",
+            "home": "Charlotte",
+            "neutral": 0,
+            "commence": "2026-10-03T15:00:00.000Z",
+            "apAway": null,
+            "apHome": null,
+            "conf": "American Athletic",
+            "marketSpread": {
+              "fav": "Memphis",
+              "num": -20.5
+            },
+            "marketTotal": 52.5,
+            "projSpread": {
+              "fav": "Memphis",
+              "num": -23.2
+            },
+            "projTotal": 51.9,
+            "homeRiser": 0,
+            "awayRiser": 0,
+            "pick": {
+              "side": "Memphis",
+              "num": -20.5
+            },
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": false
+          },
+          {
             "away": "Alabama",
             "home": "Mississippi State",
             "neutral": 0,
@@ -14139,7 +14169,7 @@ export const NCAAF_MODEL = {
               "fav": "Notre Dame",
               "num": -21.5
             },
-            "marketTotal": 47.5,
+            "marketTotal": 46.5,
             "projSpread": {
               "fav": "Notre Dame",
               "num": -21.5
@@ -14153,7 +14183,7 @@ export const NCAAF_MODEL = {
             },
             "totalLean": {
               "dir": "OVER",
-              "num": 47.5
+              "num": 46.5
             },
             "off": false,
             "rated": true,
@@ -14920,36 +14950,6 @@ export const NCAAF_MODEL = {
             "featured": false
           },
           {
-            "away": "Memphis",
-            "home": "Charlotte",
-            "neutral": 0,
-            "commence": "2026-10-03T19:30:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "American Athletic",
-            "marketSpread": {
-              "fav": "Memphis",
-              "num": -20.5
-            },
-            "marketTotal": 52.5,
-            "projSpread": {
-              "fav": "Memphis",
-              "num": -23.2
-            },
-            "projTotal": 51.9,
-            "homeRiser": 0,
-            "awayRiser": 0,
-            "pick": {
-              "side": "Memphis",
-              "num": -20.5
-            },
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": false
-          },
-          {
             "away": "Samford",
             "home": "UAB",
             "neutral": 0,
@@ -15054,7 +15054,7 @@ export const NCAAF_MODEL = {
               "fav": "New Mexico",
               "num": -22.5
             },
-            "marketTotal": 48.5,
+            "marketTotal": 47.5,
             "projSpread": {
               "fav": "New Mexico",
               "num": -33.1
@@ -15068,7 +15068,7 @@ export const NCAAF_MODEL = {
             },
             "totalLean": {
               "dir": "OVER",
-              "num": 48.5
+              "num": 47.5
             },
             "off": false,
             "rated": true,
@@ -15412,7 +15412,7 @@ export const NCAAF_MODEL = {
             "conf": "ACC",
             "marketSpread": {
               "fav": "Miami",
-              "num": -15.5
+              "num": -16.5
             },
             "marketTotal": 47.5,
             "projSpread": {
@@ -15424,7 +15424,7 @@ export const NCAAF_MODEL = {
             "awayRiser": 1,
             "pick": {
               "side": "Clemson",
-              "num": 15.5
+              "num": 16.5
             },
             "totalLean": null,
             "off": false,
