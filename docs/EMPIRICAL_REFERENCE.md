@@ -938,3 +938,36 @@ population. Both fixes want the same prerequisite — enough stored `mu` to fit 
 our own mean. **`ncaaf_guardrail.check_one_scale` now reports the split as a WARN** (not a FAIL: it
 is true of 38% of rows today, and a check that is red every morning is one nobody reads). It turns
 green the day the second pass is fixed, and red again only on a regression.
+
+
+### §13b. The second pass converts — SHIPPED 2026-10-02 (Derek's call)
+
+Shipped against my own hesitation, and the board is better than the subset measurement predicted.
+That measurement was the error: §13a measured the 44 previously-unconverted `rush_yds` rows in
+isolation (0.820) and read it as a market-level regression. The MARKET includes the rows that were
+already converting, and it lands at 0.945.
+
+| market | n | before | after |
+|---|---|---|---|
+| rec_yds | 222 | 1.112 | **0.985** (47% over) |
+| rush_yds | 110 | 1.105 | **0.945** (44% over) |
+| pass_yds | 59 | 0.995 | 0.958 (34% over) |
+| receptions | 145 | 1.160 | 1.044 (57% over) — still uncorrected by design |
+
+The two flags that started this are resolved:
+
+- **proj/line on mid-range players 1.094 → 1.049**, inside the 0.93–1.07 band.
+- **rec_yds tilt 19pts → 5pts.** The tilt was the structural signature of the whole defect — the
+  bottom of each game leaning over while the top did not — and it is now flat.
+- `ncaaf_guardrail.check_one_scale` reports all 391 yardage rows on one scale and was promoted from
+  WARN to **FAIL** the same day: with the backlog cleared, a red means a regression.
+
+**Still open, and not caused by this change.** Rows ≥2× a non-trivial line went 8 → 6 (Evan Dickens
+39.5 → 102.9). Those are rows where `mu` itself is wrong, not rows the conversion mis-scaled, and
+they are the §13 problem. `pass_yds` moved 40% → 34% over, but its ratio is 1.006 — effectively the
+identity — and only 3 pass rows were ever unconverted, so that is line drift and the market, not
+this edit.
+
+**The lesson worth keeping: a subset measurement is not a market measurement.** I came within one
+sentence of refusing a change that was correct, because I measured the population I was changing
+instead of the population the user sees.

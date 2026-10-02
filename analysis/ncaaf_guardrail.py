@@ -285,10 +285,10 @@ def check_one_scale():
     visible in the data only because `mu` (the pre-conversion mean) is now stored, and a row that
     was never converted is exactly one where mu == proj.
 
-    WARN, not FAIL, deliberately. It is a real defect and it is currently true of ~38% of yardage
-    rows, so failing the job would paint the run red every day and train everyone to ignore it —
-    which is the failure mode the injury guardrail's notes warn about. It becomes worth failing on
-    the day the second pass is fixed, when a red means a regression instead of a backlog.
+    It was a WARN for exactly one day, while 38% of rows were still raw and a red every morning
+    would have trained everyone to ignore it. The second pass now converts, so the board is on one
+    scale and a red here means a REGRESSION rather than a backlog — which is the condition under
+    which it is worth failing the job, so it does.
     """
     rows = _ncaaf_rows()
     yd = [r for r in rows if r.get("market") in ("rec_yds", "rush_yds", "pass_yds")
@@ -300,9 +300,9 @@ def check_one_scale():
     if not raw:
         ok(f"published scale: all {len(yd)} yardage rows went through the 50/50 conversion")
         return
-    warn(f"published scale: {len(raw)} of {len(yd)} yardage rows "
-         f"({100.0 * len(raw) / len(yd):.0f}%) are a raw MEAN rather than a 50/50 number — the "
-         f"second pass skips to_fifty_fifty (EMPIRICAL_REFERENCE §13a)")
+    fail(f"published scale: {len(raw)} of {len(yd)} yardage rows "
+         f"({100.0 * len(raw) / len(yd):.0f}%) are a raw MEAN rather than a 50/50 number — some "
+         f"emit path is skipping to_fifty_fifty again (EMPIRICAL_REFERENCE §13a)")
 
 
 def _ncaaf_rows():

@@ -1382,16 +1382,25 @@ def build_slate(slate, depth, prop_index, key):
                 hO, hG = over_split(games, mk, book, lambda g: g["homeAway"] == "home")
                 rO, rG = over_split(games, mk, book, lambda g: g["homeAway"] == "away")
             cat, _unit = MARKET_CAT[mk]
+            # 🚨 THIS PASS USED TO PUBLISH THE RAW MEAN. Both other emit sites convert, so for 38%
+            # of yardage rows the board carried a recency-weighted MEAN beside a line the book sets
+            # near a MEDIAN — the exact defect to_fifty_fifty exists to remove. Ja'Kyrian Turner
+            # had it both ways at once: rush_yds converted, rec_yds not. One board must publish one
+            # statistic, whichever path a player happened to arrive on.
+            #
+            # Converting them is NOT free, and the cost is recorded rather than hidden
+            # (EMPIRICAL_REFERENCE §13a): rec_yds goes 1.252 -> 0.981 against the line, while
+            # rush_yds goes 1.059 -> 0.820 and is now biased UNDER. The reason is §13's scale
+            # mismatch, measured: each band's ratio was fitted on a population running a particular
+            # mean/line — 1.48 for the aggressive rush 0.72 band — and these rows run 1.059, so they
+            # are not inflated enough to deserve that shrink. The fix for that is the band lookup,
+            # not this call, and it needs the stored `mu` history to validate.
+            mu = round(proj, 1) if isinstance(proj, (int, float)) else None
+            proj = to_fifty_fifty(mk, proj)
             out.append({
                 "game": gk, "commence": commence, "player": e["display"],
                 "team": team, "pos": _pos_from_usage(games), "cat": cat, "market": mk,
-                # 🚨 NOTE THE MISSING CONVERSION: this pass publishes `proj` RAW. Both other emit
-                # sites run it through to_fifty_fifty first, so these rows go on the board as a
-                # recency-weighted MEAN sitting beside a line the book set near a MEDIAN — the
-                # exact defect the conversion exists to remove. `mu` is therefore equal to `proj`
-                # here, and that equality is the signal: any row where mu == proj was never
-                # converted. Measured consequence in EMPIRICAL_REFERENCE §13a.
-                "book": book, "proj": proj, "mu": proj,
+                "book": book, "proj": proj, "mu": mu,
                 "g": len([g for g in games if g.get(mk) is not None]) if mk != "anytime_td" else len(games),
                 "cOver": cO, "cG": cG, "pOver": pO, "pG": pG,
                 "hOver": hO, "hG": hG, "rOver": rO, "rG": rG,
