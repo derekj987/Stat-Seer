@@ -7,8 +7,7 @@ export interface GameWeather { eventId: string; game: string; home: string; away
   gustMph: number|null; precipPct: number|null; conditions: string|null; windFlag: boolean }
 export const WEATHER_SEASON = 2026;
 export const WEATHER_WEEK = 4;
-export const WEATHER_UPDATED = "2026-10-05T03:49Z";
+export const WEATHER_UPDATED = "2026-10-05T16:44Z";
 export const GAME_WEATHER: GameWeather[] = [
-  {"eventId": "a73a76599a4f3422803e57bd8f61b626", "game": "DET @ CAR", "home": "CAR", "away": "DET", "commence": "2026-10-05T00:20:00+00:00", "neutral": false, "venue": "Bank of America Stadium", "city": "Charlotte", "state": "NC", "roof": "outdoor", "indoor": false, "status": "pending", "tempF": null, "windMph": null, "gustMph": null, "precipPct": null, "conditions": null, "windFlag": false},
   {"eventId": "8bd90781e17e6d97df3941063cedae1e", "game": "ATL @ NO", "home": "NO", "away": "ATL", "commence": "2026-10-06T00:15:00+00:00", "neutral": false, "venue": "Caesars Superdome", "city": "New Orleans", "state": "LA", "roof": "dome", "indoor": true, "status": "indoor", "tempF": null, "windMph": null, "gustMph": null, "precipPct": null, "conditions": null, "windFlag": false},
 ];
