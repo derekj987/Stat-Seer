@@ -1,0 +1,49 @@
+name: Capture NHL odds
+
+# NHL game lines (moneyline, puck line, total) -> Supabase nhl_odds_snapshots.
+#
+# The game-line half of the NHL foundation; nhl_props.py captures the player markets. Same reason
+# both ship before any modelling: a line not captured before puck drop cannot be recovered, so
+# without this there is no closing line to grade against and nothing for Value Finder to shop.
+#
+# CADENCE. Every 30 minutes, matching the CFB and MLB game-line captures. NHL lines move all day on
+# the morning's goalie confirmations, and the boards read the newest sweep at render — at anything
+# slower the published number is stale against the app, which is the exact complaint that forced
+# the CFB capture from four-times-daily to every 30 minutes.
+#
+# COST. One call per sweep: regions x markets = 2 x 3 = 6 credits, whatever the slate size, because
+# the bulk odds endpoint is priced per CALL and never per game. Measured on 2026-10-09: 6 credits
+# for 18 games across 19 books, 1,538 rows. 48 sweeps a day is ~288 credits/day — about 0.006% of
+# the 4.97M remaining.
+#
+# A separate PRE_KICKOFF sweep is NOT scheduled here yet. The closing line matters for grading and
+# CLV, but it needs a per-game trigger near puck drop rather than a fixed cron, and the 30-minute
+# sweep already lands within half an hour of every start. Worth adding once grading exists.
+#
+# All times UTC.
+
+on:
+  schedule:
+    - cron: "*/30 * * 10-12,1-6 *"   # every 30 min, October - June (regular season + playoffs)
+  workflow_dispatch: {}               # manual "Run workflow" for testing
+
+concurrency:
+  group: capture-nhl-odds
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi -c requirements.txt
+      - name: Capture NHL game lines -> Supabase
+        env:
+          ODDS_API_KEY:         ${{ secrets.ODDS_API_KEY }}
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python nhl_capture.py --supabase --within-days 2
