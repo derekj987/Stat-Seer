@@ -387,8 +387,22 @@ def build_nfl(season, week):
         kick_of[(r.away_team, r.home_team)] = t.astimezone(dt.timezone.utc)
 
     ledger = cpp.sb_get(f"prediction_ledger?section=eq.MODEL&season=eq.{season}&week=eq.{week}"
-                        f"&model_version=eq.{NFL_MODEL_VERSION}"
-                        f"&select=event_id,subject,model_prob,commence_time,reasoning")
+                        f"&model_version=eq.{NFL_MODEL_VERSION}&order=published_at"
+                        f"&select=event_id,subject,model_prob,commence_time,reasoning,published_at")
+    # 🚨 ONE GRADE PER GAME, NOT PER LEDGER ROW. prediction_ledger is append-only by design and a
+    # game is REPUBLISHED whenever its number moves (publish_predictions.REVISE_MARGIN), so looping
+    # the raw ledger counts the same game two or three times. Week 4 graded 29 "games" for a 16-game
+    # slate — PIT@CLE, IND@WAS, NYJ@CHI and MIA@MIN all appeared three times — which inflates the
+    # published record with duplicates of whichever games happened to be revised most.
+    #
+    # grade_predictions.py was fixed for exactly this and carries the same comment; this reader was
+    # missed. Ordered by published_at ascending, the last row per game wins: the number we actually
+    # stood behind going into kickoff. Superseded rows stay on the ledger, ungraded, as the audit
+    # trail they exist to be.
+    _latest = {}
+    for _r in ledger:
+        _latest[(_r["event_id"], _r["subject"])] = _r
+    ledger = list(_latest.values())
     # model totals + projections as published: one ref per kickoff day
     refs = {}
     def ref_for(when):
@@ -429,6 +443,22 @@ def build_nfl(season, week):
     # ---- props
     stats = pd.read_csv(os.path.join(ROOT, "data", "stats_2026.csv"), low_memory=False)
     st = stats[(stats.season == season) & (stats.week == week)]
+    # 🚨 A STALE STATS FILE GRADES EVERY PROP AS UNGRADED AND SAYS NOTHING. data/ is gitignored and
+    # NOTHING in this script downloads stats_2026.csv — it is fetched by analysis/fetch_data.py,
+    # which skips files that already exist. A copy from two weeks ago therefore has none of the
+    # week being graded, every prop row comes back with actual=None, and the card prints
+    # "graded 0" per category as though that were a result. Week 4 was written that way: 987 prop
+    # rows, 0 actuals, no error.
+    #
+    # Empty output is not the same as broken, and the operator cannot tell them apart from the
+    # summary line. Say which it is.
+    if st.empty:
+        have = sorted(stats[stats.season == season].week.unique().tolist())
+        raise SystemExit(
+            f"data/stats_2026.csv has no rows for {season} week {week} (it has weeks {have}).\n"
+            f"Refresh it before grading — props would all come back ungraded:\n"
+            f"  rm data/stats_{season}.csv && python analysis/fetch_data.py\n"
+            f"or pull stats_player_week_{season}.csv from the nflverse releases directly.")
     actual = {}
     for _, r in st.iterrows():
         if not isinstance(r.player_display_name, str):
