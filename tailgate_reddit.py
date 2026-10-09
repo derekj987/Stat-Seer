@@ -434,6 +434,26 @@ def fetch_national():
 
 
 # --------------------------------------------------------------------- extract
+# 🚨 ACCOUNT-LEVEL ANTHROPIC FAILURES ARE SYSTEMIC ON THE FIRST ONE — STOP, DON'T GRIND.
+# The per-team `except` below exists so one bad team never kills a shard, and that is right for a
+# parse error or a flaky request. It is wrong for "your credit balance is too low": that answer
+# will not change for team 2, and on 2026-10-08 and 10-09 both tailgate jobs worked through every
+# team in the league getting the identical 400 before exiting 1 — minutes of doomed calls, and a
+# failure email whose first 130 lines all say the same thing.
+#
+# Matching on the MESSAGE rather than the type on purpose: the script talks to the SDK, and billing
+# and auth both surface as a 400/401 BadRequestError/AuthenticationError whose text is the only part
+# that distinguishes "this account cannot call the API at all" from "this one request was bad".
+# Anything not matched here keeps the old per-team tolerance.
+_FATAL_API = ("credit balance is too low", "invalid x-api-key", "authentication_error",
+              "could not resolve authentication", "permission_error")
+
+
+def is_fatal_api_error(e) -> bool:
+    """True when the API is refusing the ACCOUNT, not this request — no point trying more teams."""
+    return any(s in f"{e}".lower() for s in _FATAL_API)
+
+
 def extract(nickname, snippets, env):
     """Claude call -> list of buzz dicts (player, angle, heat, take, quotes)."""
     import anthropic  # lazy: only needed when extracting
@@ -640,6 +660,12 @@ def main(argv=None):
             errored += 1
             print(f"  {abbrev}: extract/write failed ({type(e).__name__}: {e}); "
                   f"skipping this team", file=sys.stderr)
+            if is_fatal_api_error(e):
+                print(f"\nERROR: the Anthropic API is refusing this account, not this request "
+                      f"({type(e).__name__}). Stopping after {errored} team(s) instead of calling "
+                      f"it once per remaining team -- every one would get the same answer.\n"
+                      f"  -> {e}", file=sys.stderr)
+                return 1
 
     if empty_teams and empty_teams == done:
         print("\nWARNING: every team attempted returned 0 snippets -- Reddit is rate-"

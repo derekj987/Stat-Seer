@@ -436,6 +436,14 @@ def main(argv=None):
         except Exception as e:                            # noqa: BLE001 — one team never kills the run
             errored += 1
             print(f"  {school}: extract/write failed ({type(e).__name__}: {e}); skipping", file=sys.stderr)
+            # Account-level refusal (no credit, bad key) — systemic on the first one, so stop
+            # rather than ask ~130 more schools the same question. See tailgate_reddit for why
+            # this matches the message and not the exception type.
+            if tr.is_fatal_api_error(e):
+                print(f"\nERROR: the Anthropic API is refusing this account, not this request "
+                      f"({type(e).__name__}). Stopping after {errored} school(s) instead of "
+                      f"calling it once per remaining school.\n  -> {e}", file=sys.stderr)
+                return 1
 
     print(f"\n{total_rows} buzz row(s) {'written' if args.write else 'found (dry run)'} across {done} team(s).")
     if extracted and errored == extracted:
