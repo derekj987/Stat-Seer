@@ -134,7 +134,7 @@ function NcaafConsiderations() {
   );
 }
 
-type Sport = "nfl" | "ncaaf" | "mlb";
+type Sport = "nfl" | "ncaaf" | "mlb" | "nhl";
 type NflData = { week: number; card: CardRow[]; upsets: UpsetRow[]; players: PlayerPick[] };
 type NcaafData = { week: number; games: NcaafCardGame[]; upsets: NcaafUpset[] };
 export type VfRow = { eventId: string; away: string; home: string; line: string; price: number; books: string[] };
@@ -353,6 +353,16 @@ function PlayerSnapshot({ base }: { base: Sport }) {
   );
 }
 
+/** Same four columns as the football table — it is the same arithmetic — but its own empty state.
+ *  "the week's odds" is wrong for a sport that plays most nights and does not play every night, so
+ *  an empty NHL board has to read as a gap between slates rather than as something broken. */
+function NhlValueTable({ rows }: { rows: VfRow[] }) {
+  if (!rows.length) {
+    return <p className="hb-empty">No NHL games priced right now — the board fills as books post the next slate. See <a href="/nhl/lines">Line Shopping →</a></p>;
+  }
+  return <NflValueTable rows={rows} />;
+}
+
 function NflValueTable({ rows }: { rows: VfRow[] }) {
   if (!rows.length) {
     return <p className="hb-empty">Live line shopping opens with the week&apos;s odds — see the <a href="/lines">Value Finder →</a></p>;
@@ -426,7 +436,7 @@ function MlbSnapshot() {
 
 export interface SpotlightProp { ctx: SpecialCtx; row: CardRow }
 
-export default function LandingHub({ initialSport, nfl, ncaaf, vf, isMember, spotlight }: { initialSport: Sport; nfl: NflData; ncaaf: NcaafData; vf: VfRow[]; isMember?: boolean; spotlight?: SpotlightProp | null }) {
+export default function LandingHub({ initialSport, nfl, ncaaf, vf, vfNhl = [], isMember, spotlight }: { initialSport: Sport; nfl: NflData; ncaaf: NcaafData; vf: VfRow[]; vfNhl?: VfRow[]; isMember?: boolean; spotlight?: SpotlightProp | null }) {
   // AP Top 25 matchups this week (either team ranked), kept in kickoff order — the
   // homepage's ranked-games snapshot, mirroring the full table on /ncaaf/model.
   const ncaafRanked = ncaaf.games.filter((g) => g.apAway || g.apHome)
@@ -440,6 +450,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf, vf, isMember, spo
       <input type="radio" name="lpsport" id="lps-nfl" className="lp-r" defaultChecked={initialSport === "nfl"} />
       <input type="radio" name="lpsport" id="lps-ncaaf" className="lp-r" defaultChecked={initialSport === "ncaaf"} />
       <input type="radio" name="lpsport" id="lps-mlb" className="lp-r" defaultChecked={initialSport === "mlb"} />
+      <input type="radio" name="lpsport" id="lps-nhl" className="lp-r" defaultChecked={initialSport === "nhl"} />
 
 
       {/* NFL panel */}
@@ -451,6 +462,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf, vf, isMember, spo
             <label htmlFor="lps-nfl" className="lpf__t">NFL</label>
             <label htmlFor="lps-ncaaf" className="lpf__t">NCAAF</label>
             <label htmlFor="lps-mlb" className="lpf__t">MLB</label>
+            <label htmlFor="lps-nhl" className="lpf__t">NHL</label>
           </div>
         </div>
         <HighlightBanner sport="nfl" />
@@ -490,6 +502,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf, vf, isMember, spo
             <label htmlFor="lps-nfl" className="lpf__t">NFL</label>
             <label htmlFor="lps-ncaaf" className="lpf__t">NCAAF</label>
             <label htmlFor="lps-mlb" className="lpf__t">MLB</label>
+            <label htmlFor="lps-nhl" className="lpf__t">NHL</label>
           </div>
         </div>
         <HighlightBanner sport="ncaaf" />
@@ -531,6 +544,7 @@ export default function LandingHub({ initialSport, nfl, ncaaf, vf, isMember, spo
             <label htmlFor="lps-nfl" className="lpf__t">NFL</label>
             <label htmlFor="lps-ncaaf" className="lpf__t">NCAAF</label>
             <label htmlFor="lps-mlb" className="lpf__t">MLB</label>
+            <label htmlFor="lps-nhl" className="lpf__t">NHL</label>
           </div>
         </div>
         <div className="lpf__head lpf__head--snap">
@@ -539,6 +553,37 @@ export default function LandingHub({ initialSport, nfl, ncaaf, vf, isMember, spo
         <Panel title="Tonight&apos;s games" count="line-blind" hint={TIPS.gameModel} open
           pin={pin("model", "MLB · Game Model", "/mlb/model")}>
           <MlbSnapshot />
+        </Panel>
+      </div>
+
+      {/* NHL panel. The leanest of the four, and deliberately a DIFFERENT SHAPE: hockey is the one
+          live sport here with no model, so this panel leads with Value Finder instead of opening
+          with a model snapshot the section cannot back up. The flow the rest of the site teaches
+          (Model → Context → Value) still holds; NHL simply starts at the third step. */}
+      <div className="lp-sport lp-sport--nhl">
+        <div className="lpf__sportbar">
+          <div className="lpf__toggle" role="tablist" aria-label="Choose a sport">
+            <label htmlFor="lps-nfl" className="lpf__t">NFL</label>
+            <label htmlFor="lps-ncaaf" className="lpf__t">NCAAF</label>
+            <label htmlFor="lps-mlb" className="lpf__t">MLB</label>
+            <label htmlFor="lps-nhl" className="lpf__t">NHL</label>
+          </div>
+        </div>
+        <div className="lpf__head lpf__head--snap">
+          <div className="lp-snaplabel">NHL &mdash; TONIGHT&apos;S SLATE</div>
+        </div>
+        <Panel title="Where the value is" count="line shopping" hint={TIPS.valueFinder} open
+          pin={pin("lines", "NHL · Line Shopping", "/nhl/lines")}>
+          <NhlValueTable rows={vfNhl} />
+          <p className="lp-cardfoot"><a href="/nhl/lines">Shop every NHL line →</a></p>
+        </Panel>
+        <Panel title="Player props" count="shots · points · assists · goals" hint={TIPS.valueFinder} open
+          pin={pin("props", "NHL · Player Props", "/nhl/props")}>
+          <p className="lpf__sub">
+            Shots on goal, points, assists and anytime goal scorer &mdash; every side at the{" "}
+            <b>single best US book</b>, with a fair-price check on the two-sided markets.
+          </p>
+          <p className="lp-cardfoot"><a href="/nhl/props">Shop NHL player props →</a></p>
         </Panel>
       </div>
     </section>

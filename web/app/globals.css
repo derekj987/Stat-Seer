@@ -5056,6 +5056,7 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 #lps-nfl:checked ~ .lp-sport--nfl{display:block}
 #lps-ncaaf:checked ~ .lp-sport--ncaaf{display:block}
 #lps-mlb:checked ~ .lp-sport--mlb{display:block}
+#lps-nhl:checked ~ .lp-sport--nhl{display:block}
 .lpf__head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
 .lpf__h{font-size:clamp(20px,3.4vw,26px);margin:0;color:var(--ink)}
 /* The sport toggle now leads each panel, above the rotating banner — it switches the WHOLE panel, so
@@ -5067,7 +5068,16 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
   font-weight:800;font-size:13px;letter-spacing:.03em;padding:6px 18px;border-radius:999px;color:var(--muted)}
 #lps-nfl:checked ~ .lp-sport label[for="lps-nfl"],
 #lps-ncaaf:checked ~ .lp-sport label[for="lps-ncaaf"],
-#lps-mlb:checked ~ .lp-sport label[for="lps-mlb"]{background:var(--accent);color:#fff}
+#lps-mlb:checked ~ .lp-sport label[for="lps-mlb"],
+#lps-nhl:checked ~ .lp-sport label[for="lps-nhl"]{background:var(--accent);color:#fff}
+/* Measured at 375px with the fourth sport added: the pill is 284px inside a 342px container, so it
+   does NOT overflow — 58px spare. The tightening is for the tab after this one. At the old 18px
+   side padding a FIFTH sport comes to ~355px and does overflow, and the pill is the control that
+   switches the entire panel, so it must not be the thing that breaks when hockey's neighbour
+   arrives. 11px padding takes four tabs to 216px and leaves room for two more. */
+@media (max-width:420px){
+  .lpf__t{padding:6px 11px;font-size:12px;letter-spacing:.02em}
+}
 .lp-r:focus-visible ~ .lp-sport .lpf__toggle{outline:2px solid var(--accent);outline-offset:2px;border-radius:999px}
 .lpf__sub{margin:8px 0 16px;font-size:13.5px;color:var(--muted);max-width:none;line-height:1.55}
 .lpf__sub b{color:var(--ink)}

@@ -4,6 +4,7 @@
 // homepages. Then the bet-slip + community invites. Sections live at /model, /ncaaf/model, …
 import { fetchHome, type CardRow, type UpsetRow, type PlayerPick } from "@/lib/home";
 import { fetchWeek, buildBoard } from "@/lib/board";
+import { nhlBoard } from "@/lib/nhlBoard";
 import { NCAAF_MODEL, type NcaafCardGame, type NcaafUpset } from "./ncaaf/model-data";
 import LandingHub, { type VfRow } from "./LandingHub";
 import { createClient } from "@/lib/supabase/server";
@@ -15,14 +16,15 @@ import type { SpecialCtx } from "./SpecialConsiderations";
 
 export const metadata = {
   title: "StatSeer — the model vs the market, every sport",
-  description: "See the Model, read the Room, find the Value — NFL and College Football. Published probabilities, an honest track record, and the best price on every pick.",
+  description: "See the Model, read the Room, find the Value — NFL, College Football, MLB and NHL. Published probabilities, an honest track record, and the best price on every pick.",
 };
 
 const SEASON = 2026;
 
 export default async function Landing({ searchParams }: PageProps<"/">) {
   const sp = await searchParams;
-  const initialSport = sp.sport === "ncaaf" ? "ncaaf" : sp.sport === "mlb" ? "mlb" : "nfl";
+  const initialSport = sp.sport === "ncaaf" ? "ncaaf" : sp.sport === "mlb" ? "mlb"
+    : sp.sport === "nhl" ? "nhl" : "nfl";
 
   let nfl: { week: number; card: CardRow[]; upsets: UpsetRow[]; players: PlayerPick[] } = { week: 0, card: [], upsets: [], players: [] };
   try {
@@ -42,6 +44,27 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
       return [{ eventId: g.eventId, away: g.away, home: g.home, line: `${team} ${line.point > 0 ? "+" : ""}${line.point}`, price: line.price, books: line.books }];
     });
   } catch { /* odds not up yet */ }
+
+  // NHL teaser. The ONLY sport here with no model, so its panel is Value Finder outright rather
+  // than a model snapshot — which is also why this reads the MONEYLINE rather than the puck line:
+  // the puck line is ±1.5 on every game in the league, so a "best line" column would print the
+  // same number four times. In hockey the size of a favourite lives in the moneyline (see
+  // lib/nhlBoard.ts), so that is the number worth teasing.
+  let vfNhl: VfRow[] = [];
+  try {
+    const { board } = await nhlBoard();
+    vfNhl = board.slice(0, 4).flatMap((g) => {
+      const home = g.ml?.[g.home], away = g.ml?.[g.away];
+      if (!home || !away) return [];
+      // The favourite is the shorter price. American odds are not ordered by magnitude across the
+      // sign (-150 is shorter than +120 but a smaller number), so compare implied probability.
+      const imp = (p: number) => (p > 0 ? 100 / (p + 100) : -p / (-p + 100));
+      const favHome = imp(home.price) >= imp(away.price);
+      const side = favHome ? home : away;
+      return [{ eventId: g.eventId, away: g.away, home: g.home,
+                line: `${favHome ? g.home : g.away} ML`, price: side.price, books: side.books }];
+    });
+  } catch { /* no NHL odds captured yet — the panel says so */ }
 
   // The weather spotlight carries the SAME block the model board shows for that game -- scoring,
   // weather, referee and both injury lists (Derek: "add the referee data as well, add all the
@@ -176,17 +199,23 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
             page, which told a first-time visitor nothing about what the site actually contains —
             these go straight into The Model for each sport, and the secondary links name the other
             two sections by name so the whole structure is visible from the hero. */}
-        {/* Three sports, three buttons (Derek: "we also need to place an MLB button on the home
-            page next to the NFL and NCAAF buttons").
-            The labels lost "the Model's ... predictions" to make room. At three buttons the old
-            wording summed to 861px inside a 760px column, so the row wrapped 2 + 1 and left MLB
-            orphaned on its own line at every width including a 1400px desktop. Shorter labels put
-            all three side by side (525px) and still name the destination, which is the whole point
-            of these buttons — the section they land in is called The Model. */}
+        {/* One button per live sport (Derek: "we also need to place an MLB button on the home page
+            next to the NFL and NCAAF buttons").
+            🚨 THIS ROW WRAPS BADLY AND HAS DONE TWICE — measure before adding a sport. At three
+            buttons the original wording summed to 861px inside a 760px column and left MLB
+            orphaned on its own line; "Explore the ..." was dropped to fix it. Adding hockey broke
+            it again the same way (744px, NHL alone on line two), so the labels lost the verb
+            entirely: "The NFL Model" and friends measure 607px and sit on one line with room for
+            a fifth sport.
+            HOCKEY NAMES A DIFFERENT DESTINATION BECAUSE IT HAS ONE. There is no NHL model, so a
+            fourth "...Model" button would land on a 404 — it points at Value Finder instead. It
+            still belongs in this row: a visitor scanning the hero counts the sports here, and
+            leaving hockey out reads as "no NHL" rather than "NHL starts at the third step". */}
         <div className="lp-lead__cta">
-          <a href="/model" className="btn btn--primary lp-lead__go">Explore the NFL Model</a>
-          <a href="/ncaaf/model" className="btn btn--primary lp-lead__go">Explore the NCAAF Model</a>
-          <a href="/mlb/model" className="btn btn--primary lp-lead__go">Explore the MLB Model</a>
+          <a href="/model" className="btn btn--primary lp-lead__go">The NFL Model</a>
+          <a href="/ncaaf/model" className="btn btn--primary lp-lead__go">The NCAAF Model</a>
+          <a href="/mlb/model" className="btn btn--primary lp-lead__go">The MLB Model</a>
+          <a href="/nhl/lines" className="btn btn--primary lp-lead__go">NHL Value Finder</a>
         </div>
         <div className="lp-lead__cta lp-lead__cta--alt">
           <a href="/considerations" className="lp-lead__alt">See the Context that shapes a game →</a>
@@ -269,7 +298,7 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
         </ol>
       </section>
 
-      <LandingHub initialSport={initialSport} nfl={nfl} ncaaf={ncaaf} vf={vf} isMember={isMember}
+      <LandingHub initialSport={initialSport} nfl={nfl} ncaaf={ncaaf} vf={vf} vfNhl={vfNhl} isMember={isMember}
         spotlight={spotlight ? { ctx: spotlight.ctx, row: spotlight.row } : null} />
 
       {/* Public track record — the trust engine. Honest preseason state until games grade. */}

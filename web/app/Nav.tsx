@@ -105,6 +105,10 @@ export const SPORTS = [
   { key: "nfl", label: "NFL", live: true, home: "/model" },
   { key: "ncaaf", label: "NCAAF", live: true, home: "/ncaaf/model" },
   { key: "mlb", label: "MLB", live: true, home: "/mlb/model" },
+  // NHL's home is Value Finder, not The Model — it is the one live sport with no model, and
+  // pointing its tab at /nhl/model would land on a 404. A sport is "live" here when it has a
+  // section worth visiting, not when it has all three.
+  { key: "nhl", label: "NHL", live: true, home: "/nhl/lines" },
   { key: "nba", label: "NBA", live: false, home: "" },
   { key: "wnba", label: "WNBA", live: false, home: "" },
   { key: "soccer", label: "Soccer", live: false, home: "" },

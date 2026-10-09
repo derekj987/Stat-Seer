@@ -184,6 +184,44 @@ export default function SiteNav() {
               </div>
             </details>
 
+            {/* MLB — same template. This drawer had fallen behind the site: baseball has been live
+                with five pages and was reachable only from the sport strip, never from here. */}
+            <details className="snav__pgroup snav__sportgroup">
+              <summary className="snav__sportsum">
+                <a href="/mlb/model" className="snav__sportname" onClick={(e) => e.stopPropagation()}>MLB</a>
+                <span className="snav__sportchev" aria-hidden="true">▾</span>
+              </summary>
+              <div className="snav__sportkids">
+                <a href="/mlb/model" className="snav__dfeat">The Model</a>
+
+                <details className="snav__pgroup snav__pgroup--feat">
+                  <summary className="snav__dfeat snav__psum">Value Finder</summary>
+                  <a href="/mlb/lines" className="snav__dsub">Game Lines</a>
+                  <a href="/mlb/props" className="snav__dsub">Player Props</a>
+                  <a href="/mlb/best" className="snav__dsub">Sweet Spots</a>
+                </details>
+              </div>
+            </details>
+
+            {/* NHL — the one live sport with NO model, so the group breaks the template on purpose:
+                its name links to Value Finder and there is no "The Model" row, because listing one
+                would promise a page that does not exist. Sweet Spots is absent for the same reason
+                it is absent from the NHL subnav — the puck line is ±1.5 on every game, so there is
+                no half-point to find. */}
+            <details className="snav__pgroup snav__sportgroup">
+              <summary className="snav__sportsum">
+                <a href="/nhl/lines" className="snav__sportname" onClick={(e) => e.stopPropagation()}>NHL</a>
+                <span className="snav__sportchev" aria-hidden="true">▾</span>
+              </summary>
+              <div className="snav__sportkids">
+                <details className="snav__pgroup snav__pgroup--feat" open>
+                  <summary className="snav__dfeat snav__psum">Value Finder</summary>
+                  <a href="/nhl/lines" className="snav__dsub">Game Lines</a>
+                  <a href="/nhl/props" className="snav__dsub">Player Props</a>
+                </details>
+              </div>
+            </details>
+
             {SPORTS.filter((s) => !s.live).map((s) => (
               <span key={s.key} className="snav__dsport snav__dsport--soon">{s.label}<em>Soon</em></span>
             ))}
