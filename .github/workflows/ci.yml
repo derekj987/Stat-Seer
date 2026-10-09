@@ -7,6 +7,17 @@ name: CI
 # Deliberately fast and reliable (typecheck + dependency audit). `next build` is NOT run here: several
 # routes are force-dynamic and read Supabase/API env vars, so a CI build would fail for reasons that
 # have nothing to do with code quality. Vercel runs the real build on deploy.
+#
+# 🚨 TYPECHECK AND AUDIT ARE SEPARATE JOBS SO THE FAILURE MAIL NAMES THE REAL CAUSE. They were one
+# job called "Typecheck + dependency audit", and twice in a week an upstream advisory with nothing
+# to do with our code — the next/og RCE, then sharp + source-map-js — arrived as a mail whose
+# subject implied the typecheck had broken. Each time the log showed `tsc` passing cleanly a few
+# lines above the actual failure. A job name is the first and sometimes only thing read, and a run
+# that fails for two unrelated reasons should not share one.
+#
+# The audit stays BLOCKING rather than advisory: the next/og advisory was real exposure (we call
+# ImageResponse in app/icon.tsx and lib/ogImage.tsx), and a high/critical in a production dependency
+# is worth stopping a deploy for. The change is which name goes red, not whether one does.
 
 on:
   push:
@@ -23,7 +34,7 @@ concurrency:
 
 jobs:
   web:
-    name: Typecheck + dependency audit
+    name: Typecheck
     runs-on: ubuntu-latest
     timeout-minutes: 10
     defaults:
@@ -50,8 +61,35 @@ jobs:
       - name: Typecheck
         run: npx tsc --noEmit
 
+  # ---------------------------------------------------------------------------
+  # Its own job on purpose — see the note at the top. This one goes red for things upstream did,
+  # not for anything in the diff that triggered it, and the name has to say so.
+  #
+  # Runs in PARALLEL with the typecheck rather than after it, so a dependency advisory never hides
+  # a real type error behind a skipped job (and the reverse). Both re-run `npm ci`; it is cached and
+  # takes ~8s, which is a fair price for two failures that can be read independently.
+  audit:
+    name: Dependency audit (high+)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install (locked)
+        run: npm ci
+
       # Fails the run on a HIGH/CRITICAL advisory in a production dependency. Moderate and below are
-      # reported by Dependabot as PRs rather than blocking a deploy.
+      # reported by Dependabot as PRs rather than blocking a deploy. When this is the only red job,
+      # the fix is almost always `npm audit fix` (in range, lockfile only) or a pinned version bump
+      # — nothing in the application code is implicated.
       - name: Dependency audit (high+)
         run: npm audit --omit=dev --audit-level=high
 
