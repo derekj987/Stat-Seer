@@ -31,6 +31,17 @@ export interface Candidate {
 }
 
 const fmtPt = (n: number) => (n > 0 ? `+${n}` : `${n}`);
+
+/** Format a game line's number for display, deciding by MARKET rather than by sign.
+ *
+ *  A spread's sign is information — "+3.5" and "-3.5" are opposite bets, so the plus has to be
+ *  there. A total's sign is noise: a total is always positive, so the same helper turned an over
+ *  into "Over +6.5", a plus sign with nothing to say. (NCAAF never had it, because its builder
+ *  happens to interpolate the number directly instead of going through the shared helper.)
+ *
+ *  Keyed on the market so a sport added later gets it right by default — the bug existed in two
+ *  builders at once precisely because both called one `push` that signed everything. */
+const fmtLine = (market: string, n: number) => (market === "spread" ? fmtPt(n) : `${n}`);
 const normName = (s: string) => s.toLowerCase().replace(/[^a-z]/g, "");
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 20);
 
@@ -65,7 +76,7 @@ export async function buildCandidates(week: number, season = 2026): Promise<Cand
       const mk = `${g.away} @ ${g.home}`;
       const push = (id: string, group: CandGroup, market: string, title: string, l: { point: number | null; price: number; books: string[]; byBook: Record<string, number> } | null) => {
         if (l && l.point !== null && Number.isFinite(l.price)) {
-          out.push({ id, kind: "line", group, market, title: title.replace("{pt}", fmtPt(l.point)), detail: mk, price: l.price, books: l.books, byBook: l.byBook });
+          out.push({ id, kind: "line", group, market, title: title.replace("{pt}", fmtLine(market, l.point)), detail: mk, price: l.price, books: l.books, byBook: l.byBook });
         }
       };
       push(`sp-${g.eventId}-h`, "spread", "spread", `${g.home} {pt}`, g.spread.home);
@@ -256,7 +267,7 @@ export async function buildCandidatesNhl(): Promise<Candidate[]> {
       const push = (id: string, group: CandGroup, market: string, title: string,
                     l: { point: number | null; price: number; books: string[]; byBook: Record<string, number> } | null) => {
         if (l && l.point !== null && Number.isFinite(l.price)) {
-          out.push({ id, kind: "line", group, market, title: title.replace("{pt}", fmtPt(l.point)), detail: mk, price: l.price, books: l.books, byBook: l.byBook });
+          out.push({ id, kind: "line", group, market, title: title.replace("{pt}", fmtLine(market, l.point)), detail: mk, price: l.price, books: l.books, byBook: l.byBook });
         }
       };
       // The puck line is ±1.5 on every game in the league, so the number is never the decision —
