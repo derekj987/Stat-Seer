@@ -4,6 +4,7 @@ import PropsGrid from "../../PropsGrid";
 import { etToday } from "@/lib/gameDays";
 import { nhlPropBoard, NHL_CATEGORIES, NHL_PROP_LABELS, nhlCategoryByKey, ONE_SIDED } from "@/lib/nhlProps";
 import { US_BOOKS, bookLegend } from "@/lib/bookLabel";
+import { nhlTeamFor } from "@/lib/nhlTeamTag";
 import Tip from "../../Tip";
 
 // NHL · Value Finder · Player Props. The same grid the baseball board uses (one row per player,
@@ -44,11 +45,19 @@ export default async function Page({ searchParams }: PageProps<"/nhl/props">) {
   const cat = nhlCategoryByKey(typeof sp.cat === "string" ? sp.cat : "shots");
   const catSet = new Set<string>(cat.markets);
   const all = await nhlPropBoard().catch(() => []);
-  // Only this category's markets, and only games that still have something in it. No team tag
-  // beside a name yet: the prop feed carries the two clubs per GAME, not the club per player, and
-  // a card already names only those two. Inventing one from a name match would be worse than none.
+  // Only this category's markets, and only games that still have something in it — plus the club
+  // beside each name. The prop feed carries the two clubs per GAME and none per PLAYER, so the tag
+  // is resolved against those two rosters (lib/nhlTeamTag.ts). It returns null rather than guess,
+  // and the grid simply omits the tag then, which is why a player on long-term injury reserve
+  // shows up untagged instead of wrongly tagged.
   const games = all
-    .map((g) => ({ ...g, markets: g.markets.filter((m) => catSet.has(m.market)) }))
+    .map((g) => ({
+      ...g,
+      markets: g.markets.filter((m) => catSet.has(m.market)).map((m) => ({
+        ...m,
+        quotes: m.quotes.map((q) => ({ ...q, team: nhlTeamFor(q.player, g.home, g.away) ?? undefined })),
+      })),
+    }))
     .filter((g) => g.markets.length > 0);
   const oneSided = cat.markets.every((m) => ONE_SIDED.has(m));
 
@@ -68,8 +77,9 @@ export default async function Page({ searchParams }: PageProps<"/nhl/props">) {
                 // The "main line" sentence below would be false here: there is no line on an anytime-goal
                 // row and no second side, so the grid copy has to say something different rather than
                 // something generic.
-                <><b>The grid.</b> One row per skater, highest-scoring players first, each at the single
-                  best price across books. <b>Anytime goal</b> is quoted as one <b>Yes</b> price rather
+                <><b>The grid.</b> One row per skater with his club beside the name, highest-scoring
+                  players first, each at the single best price across books. <b>Anytime goal</b> is
+                  quoted as one <b>Yes</b> price rather
                   than two sides, so this tab is pure shopping — on a market priced this long, the gap
                   between the best book and the rest is where the difference lives. The <b>✓</b>
                   fair-price tag compares the two posted sides of a market, so it appears on the Shots,
@@ -77,8 +87,9 @@ export default async function Page({ searchParams }: PageProps<"/nhl/props">) {
               ) : (
                 <><b>The grid.</b> Each cell is the player&apos;s <b>main line</b> for that market — the
                   line the most books post both sides of — with the best price for each side and the book
-                  that has it. Rows run highest line first, so the heavy-usage players lead the card. A
-                  dash means no book has posted that market for him.<br /><br /></>
+                  that has it. His club sits beside his name, and rows run highest line first, so the
+                  heavy-usage players lead the card. A dash means no book has posted that market for
+                  him.<br /><br /></>
               )}
               {!oneSided && (
                 <><b>The ✓.</b> It marks a price that beats the de-vigged market — the{" "}

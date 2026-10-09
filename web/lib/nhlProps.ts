@@ -52,8 +52,9 @@ async function pgAll(query: string): Promise<Row[]> {
   return out;
 }
 
-export const norm = (s: string) =>
-  s.normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+// (A name normaliser used to live here, copied from the baseball board. It is gone: name matching
+// for the team tag belongs in lib/nhlTeamTag.ts, which has to agree character-for-character with
+// player_norm() in nhl_rosters.py. Two normalisers that only mostly agree is the worse outcome.)
 
 export const NHL_PROP_LABELS: Record<string, string> = {
   player_goal_scorer_anytime: "Anytime Goal",

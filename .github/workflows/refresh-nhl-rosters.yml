@@ -1,0 +1,74 @@
+name: Refresh NHL rosters
+
+# Regenerates web/lib/nhlRosters.ts from the NHL public API, then commits it (which triggers a
+# Vercel redeploy). It is the team tag beside a player's name on /nhl/props: the prop feed carries
+# the two clubs per GAME and none per PLAYER, so without this file the board names eighteen
+# skaters and says which bench none of them sits on.
+#
+# WHY DAILY AND NOT HOURLY. A roster changes on trades, waivers, call-ups and IR moves — real but
+# slow. A stale entry costs one missing tag (nhlTeamFor returns null and the grid omits it), never
+# a wrong one, so there is nothing here worth polling for. 11:00 UTC ~= 7am ET, before the day's
+# props are captured and well after any overnight transaction.
+#
+# UNLIKE EVERY OTHER CAPTURE IN THIS REPO, NOTHING HERE IS PERISHABLE. Rosters are current-state,
+# not a snapshot: a missed run is picked up whole by the next one. That is the opposite of
+# capture-nhl-props.yml, where a day not captured is a day of history gone for good.
+#
+# All times UTC. Oct-June, matching the NHL season.
+
+on:
+  schedule:
+    - cron: "0 11 * 10-12,1-6 *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: refresh-nhl-rosters
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write   # commit the regenerated roster file
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so the rebase-before-push works cleanly
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi -c requirements.txt
+
+      # nhl_rosters.py refuses to write a file holding fewer than 32 clubs or an undersized
+      # roster, so a degraded API response fails the job here rather than quietly stripping the
+      # tags off a club's players on the live board.
+      - name: Build roster map
+        run: python nhl_rosters.py
+
+      - name: Commit if changed
+        run: |
+          FILE="web/lib/nhlRosters.ts"
+          # The generated header carries a timestamp, so the file differs on every run even when
+          # no player moved. Compare everything EXCEPT that line, or this commits daily forever
+          # and buries the real transactions in noise.
+          if git diff -- "$FILE" | grep -E '^[+-]' | grep -vE '^[+-]{3}' | grep -qv '^[+-]// Generated '; then
+            echo "roster changes found:"
+            git diff --stat -- "$FILE"
+          else
+            echo "No roster changes (timestamp only) — nothing to commit."
+            git checkout -- "$FILE"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$FILE"
+          git commit -m "chore: refresh NHL rosters (auto)"
+          # Several bots push this branch; a push can lose the race (non-fast-forward) even right
+          # after a rebase. Retry before failing, so a lost race does not email a FAILURE.
+          for i in 1 2 3 4 5; do
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || git rebase --abort || true
+            if git push; then echo "pushed on attempt $i"; exit 0; fi
+            echo "push attempt $i lost the race; retrying..."; sleep $((RANDOM % 5 + 2))
+          done
+          echo "push still rejected after 5 attempts"; exit 1
