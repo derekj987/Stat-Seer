@@ -99,7 +99,7 @@ const GAME_CAP = 4;
  *  the label on the handicap market (a football spread is a baseball run line), the copy, the pin,
  *  and whether the week wheel exists (baseball has days, not weeks) — so the card, the chips, the
  *  slip wiring and the day grouping stay identical, which is the point of sharing it. */
-export type BoardSport = "nfl" | "mlb" | "ncaaf";
+export type BoardSport = "nfl" | "mlb" | "ncaaf" | "nhl";
 const SPORT = {
   nfl: { label: "NFL", spread: "Spread", weeks: true, pin: "/lines", propsHref: "/props",
          foot: <>Line shopping — the <b>best available number across books</b> on every game, plus where a
@@ -113,6 +113,14 @@ const SPORT = {
          foot: <>Line shopping — the <b>best available number across books</b> on every game, plus where a
            half-point sits on a <b>sweet spot</b> (a 3 or 7 — college margins land there a little less often
            than the NFL&apos;s; the card says how much the half-point is worth).</> },
+  // NHL: the puck line is ±1.5 on every game (284 of 284 rows on a live sweep), so like baseball's
+  // run line the shopping is entirely in the PRICE, never in the number. No week wheel — hockey
+  // runs on days. propsHref is EMPTY on purpose: /nhl/props is not built, and the footer omits the
+  // sentence rather than linking to a 404, exactly as the subnav omits the tab.
+  nhl: { label: "NHL", spread: "Puck line", weeks: false, pin: "/nhl/lines", propsHref: "",
+         foot: <>Line shopping — the <b>best available price across books</b> on every game&apos;s moneyline,
+           puck line and total. The puck line is ±1.5 everywhere, so the shopping is all in the price —
+           and with <b>43% of games finishing within one goal</b>, that price moves a long way.</> },
 } as const;
 
 function GameCard({
@@ -226,7 +234,11 @@ export default function BoardView({
           <DayBadge pin={<PinButton size="sm" pin={{ id: S.pin, kind: "lines", label: `${S.label} · Line Shopping`, detail: "today's slate", href: S.pin }} />} />
         ))}
         <FlowSteps active="value" base={sport} />
-        <div className="subnavrow"><ShopSubnav active="lines" base={sport} /></div>
+        <div className="subnavrow">
+          {/* A new sport arrives one surface at a time; hide the tabs whose pages do not exist
+              yet rather than linking to a 404. */}
+          <ShopSubnav active="lines" base={sport} only={sport === "nhl" ? ["lines"] : undefined} />
+        </div>
 
         {nav ?? (S.weeks && <WeekNav min={min} max={max} current={week} base="/lines" />)}
 
@@ -295,8 +307,14 @@ export default function BoardView({
 
             <footer className="foot">
               <p>
-                <b>No model. No pick.</b> {S.foot} For player props, shop them
-                on <a href={S.propsHref}>Player Props</a>. Prices move; this updates automatically as new odds are captured.
+                <b>No model. No pick.</b> {S.foot}{" "}
+                {/* A sport arrives one surface at a time. Offer the props link only where the page
+                    exists — the subnav is gated the same way, and a sentence pointing at a 404 is
+                    the same broken promise whether it is a tab or a line of prose. */}
+                {S.propsHref ? (
+                  <>For player props, shop them on <a href={S.propsHref}>Player Props</a>. </>
+                ) : null}
+                Prices move; this updates automatically as new odds are captured.
               </p>
             </footer>
           </>

@@ -1293,3 +1293,65 @@ reserves are ~70% proportional error").
 The machinery is kept and inert: `PUBLISH_BANDS_BY_MARKET` is correct and needed the moment any
 market's fit comes back non-flat, and `CFB_RECEPTIONS` defaults off so the published board is
 byte-identical. Re-run rather than re-reason.
+
+
+## §14. NHL — what the market looks like, measured before anything was built (2026-10-09)
+
+Derek: "I want to get a NHL Hockey section in for the next sport." Everything below was measured
+off the live feeds before a line of model code existed, because what is buildable is decided by
+what the data supports.
+
+### 14a. The goal-margin distribution, and hockey's key number
+
+All 1,312 completed 2025-26 regular-season games (NHL public API, club-schedule-season across 32
+clubs, deduped by game id):
+
+| | |
+|---|---|
+| home margin | mean **+0.130**, SD **2.569** |
+| home win rate | 52.2% |
+| ties | **0** — hockey has none |
+
+| \|margin\| | 1 | 2 | 3 | 4 | 5 |
+|---|---|---|---|---|---|
+| share | **43.2%** | 17.5% | **23.1%** | 10.7% | 4.0% |
+
+**One goal is hockey's key number and it dwarfs football's.** NFL margins land on exactly 3 in 15.0%
+of games; NHL games land on exactly 1 in **43.2%**. Two things cause it and both are structural:
+there are no ties, and 24.8% of games (OT 207 + SO 119) are decided past regulation where the
+winning margin can ONLY be one. That floor is in the rules and will be there every season.
+
+**Three goals is more common than two** (23.1% vs 17.5%), which is the empty net: a team protecting
+a two-goal lead pulls its goalie, so late goals convert two into three rather than the reverse.
+
+### 14b. The puck line is not a spread
+
+On a live sweep (18 games × 19 books) the `spreads` market returned **1.5 on 284 of 284 rows**, no
+exceptions. It is a second moneyline with a goal and a half attached, sitting directly on top of the
+43.2% spike, so it is decided almost entirely by whether the game is a one-goal game. Comparing it
+to a projected margin is the mistake the MLB board made with the run line (§12d). `nhl_capture.py`
+prints a warning if a value other than ±1.5 ever appears.
+
+Totals came in threes: **5.5, 6.0, 6.5**. Note the 6.0 — a whole number, so an NHL total CAN push
+and grading needs W-L-Push. Moneylines ran −285 to +230, far tighter than football.
+
+### 14c. What line shopping is worth — the Value Finder's honest pitch
+
+Measured on one sweep, 144 legs, median 14 books quoting each:
+
+| market | legs | median gain | p90 | max |
+|---|---|---|---|---|
+| moneyline | 36 | 0.92% | 1.53% | 2.14% |
+| puck line | 38 | **1.32%** | 2.47% | 3.19% |
+| total | 50 | 0.97% | 1.68% | 2.83% |
+
+(implied-probability points saved by taking the best book instead of the median one)
+
+Against a median two-way vig of **4.62%**, shopping recovers roughly **a quarter of the house edge**
+on essentially every bet, with no model and no opinion about the game.
+
+**And the contrast that sets the copy.** Quotes that BEAT the de-vigged consensus — a genuinely
+mispriced number — turned up on **7 of 1,048 book quotes (1%)**, worth a median 0.30% and a maximum
+0.66%, clustered in reduced-juice books (lowvig, betonlineag). So the NHL Value Finder's honest
+pitch is **shopping, not mispricing**: the routine 1% is real and repeatable, the 0.30% outlier is
+neither. The page says exactly that.

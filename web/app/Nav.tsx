@@ -45,7 +45,7 @@ export function DayBadge({ pin, tip }: { pin?: import("react").ReactNode; tip?: 
  *  MLB is live for The Model and the Value Finder; its Context route is empty here so the flow
  *  renders the same three steps and says plainly which one is not built yet, rather than the nav
  *  pretending it is missing. */
-export type Sport = "nfl" | "ncaaf" | "mlb";
+export type Sport = "nfl" | "ncaaf" | "mlb" | "nhl";
 export const SPORT_PATHS: Record<Sport, { analyze: string; context: string; value: string }> = {
   nfl:   { analyze: "/model",       context: "/context",              value: "/lines" },
   ncaaf: { analyze: "/ncaaf/model", context: "/ncaaf/context",       value: "/ncaaf/lines" },
@@ -53,6 +53,10 @@ export const SPORT_PATHS: Record<Sport, { analyze: string; context: string; valu
   // than a link to a 404 — the reader sees the same three-step flow every sport has, and sees
   // honestly which parts of it exist for this one.
   mlb:   { analyze: "/mlb/model",   context: "",                      value: "/mlb/lines" },
+  // NHL arrives Value-Finder-first, which is the architecture's own order: the Value Finder is
+  // arithmetic and needs no model, while a model needs a season of prop and line captures to
+  // validate against — and those only started on 2026-10-09. So analyze is honestly blank.
+  nhl:   { analyze: "",             context: "",                      value: "/nhl/lines" },
 };
 
 export function FlowSteps({ active, base = "nfl" }: {
@@ -349,20 +353,25 @@ export function ModelSubnav({ active = "game", base = "nfl" }: {
 }
 
 /** Sub-tabs inside Value Finder (Game Lines · Player Props · Sweet Spots). */
-export function ShopSubnav({ active, base = "nfl" }: {
-  active: "lines" | "props" | "best" | "auditor"; base?: "nfl" | "ncaaf" | "mlb";
+export function ShopSubnav({ active, base = "nfl", only }: {
+  active: "lines" | "props" | "best" | "auditor"; base?: "nfl" | "ncaaf" | "mlb" | "nhl";
+  /** Tabs this sport actually has. A subnav is a promise that the page exists; a new sport
+   *  arrives one surface at a time, and a tab pointing at a 404 is worse than a missing tab.
+   *  Omit to show all of them, which is what every established sport does. */
+  only?: Array<"lines" | "props" | "best">;
 }) {
   const h = base === "nfl"
     ? { lines: "/lines", props: "/props", best: "/best" }
     : { lines: `/${base}/lines`, props: `/${base}/props`, best: `/${base}/best` };
+  const show = (t: "lines" | "props" | "best") => !only || only.includes(t);
   return (
     <nav className="subnav subnav--value" aria-label="Value Finder view">
-      <a href={h.lines} className={active === "lines" ? "subnav__t active" : "subnav__t"}
-        aria-current={active === "lines" ? "page" : undefined}>Line Shopping</a>
-      <a href={h.props} className={active === "props" ? "subnav__t active" : "subnav__t"}
-        aria-current={active === "props" ? "page" : undefined}>Player Props</a>
-      <a href={h.best} className={active === "best" ? "subnav__t active" : "subnav__t"}
-        aria-current={active === "best" ? "page" : undefined}>Sweet Spots</a>
+      {show("lines") && <a href={h.lines} className={active === "lines" ? "subnav__t active" : "subnav__t"}
+        aria-current={active === "lines" ? "page" : undefined}>Line Shopping</a>}
+      {show("props") && <a href={h.props} className={active === "props" ? "subnav__t active" : "subnav__t"}
+        aria-current={active === "props" ? "page" : undefined}>Player Props</a>}
+      {show("best") && <a href={h.best} className={active === "best" ? "subnav__t active" : "subnav__t"}
+        aria-current={active === "best" ? "page" : undefined}>Sweet Spots</a>}
       <a href="/audit" className={active === "auditor" ? "subnav__t active" : "subnav__t"}
         aria-current={active === "auditor" ? "page" : undefined}>Pick Auditor</a>
     </nav>
