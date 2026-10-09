@@ -99,7 +99,7 @@ def events(key, within_days):
     return out
 
 
-def pull(key, ev):
+def pull(key, ev, snap):
     """One event's props, flattened to rows. Returns (rows, credits_used)."""
     url = (f"https://api.the-odds-api.com/v4/sports/{SPORT}/events/{ev['id']}/odds"
            f"?apiKey={key}&regions={REGIONS}&markets={','.join(MARKETS)}&oddsFormat=american")
@@ -120,7 +120,12 @@ def pull(key, ev):
     except urllib.error.URLError as e:
         print(f"    transient network error ({e.reason}) — skipping this event")
         return [], 0, None
-    snap = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat()
+    # 🚨 `snap` IS PASSED IN, NOT TAKEN HERE. Generating it per event gave every game in one sweep
+    # a different snapshot_at — the first live capture produced four timestamps 20:01:42 to :45 for
+    # a single run. Any "newest sweep" read (max(snapshot_at), then rows AT that value, which is
+    # how board.ts and every grader work) would then return ONE game instead of the slate. This is
+    # the lost-season bug mlb_snapshots.sql documents on the NFL prop table, and the reason the
+    # rule is one clock time per sweep, never derived from event data.
     rows = []
     for b in data.get("bookmakers", []):
         for m in b.get("markets", []):
@@ -196,10 +201,12 @@ def main(argv=None):
         print("nothing to capture (no games in the window) — not an error")
         return 0
 
+    # ONE clock time for the whole sweep, taken before any call and reused for every row.
+    snap = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat()
     rows, credits, remaining = [], 0, None
     priced = 0
     for e in evs:
-        r, used, rem = pull(key, e)
+        r, used, rem = pull(key, e, snap)
         credits += used
         remaining = rem or remaining
         if r:
