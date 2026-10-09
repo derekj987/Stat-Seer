@@ -1240,3 +1240,56 @@ wins on both simplicity and the thing being fixed.
 
 **Still not an edge claim.** ATS is unchanged (~50%). This makes a published number mean what it says
 it means; it does not make it beat the market.
+
+
+### §13i. Receptions got its own bands — fitted, backtested, NOT shipped (2026-10-09)
+
+§13a left receptions unconverted because the yardage bands (0/18/28/45/62/80) put its whole 0.5-8.5
+range in band 0, so the fit could only return a flat ratio — "a uniform shrink, which does not
+correct a tilt, it just moves the level". The week-6 board showed the tilt plainly: median proj/line
+1.567 at a 0.5-2.5 line and 0.965 at 4.5-8.5, 88% over down to 36%. So receptions was given its own
+bands and refit.
+
+`cfb_median_fit.py` now takes per-market bands (`BANDS_BY_MARKET`) and emits them alongside the
+ratios, because ratios fitted on one band structure and looked up against another is the silent
+mis-application of §13. Receptions on [0, 2, 3, 4, 5, 7], 358 joined pairs:
+
+| band | 0-2 | 2-3 | 3-4 | 4-5 | 5-7 | 7+ |
+|---|---|---|---|---|---|---|
+| ratio | 0.852 | 0.852 | 0.876 | 0.876 | 0.905 | 0.905 |
+
+**THE DECISIVE MEASUREMENT IS THAT THE REAL TILT IS ZERO.** Scored against what players actually
+caught, the over-rate does not vary with the line at all — 48.2% on the low half of lines against
+48.6% on the high half (weeks 2-3), 58.6% against 56.9% (week 5). The book prices receptions fairly
+across its whole range, so every point of our tilt is ours.
+
+Our error against that benchmark, by line half:
+
+| | low half | high half |
+|---|---|---|
+| **off** (ships) wk2-3 | +41.8 | +9.0 |
+| **on** wk2-3 | +26.4 | **−24.3** |
+| **off** (ships) wk5 | +29.3 | −19.0 |
+| **on** wk5 | **+3.4** | **−36.2** |
+
+The curve fixes the low end and breaks the high end. Pre-registered bar was: the tilt narrows in
+BOTH eras, no overshoot, lean and MAE not degraded. The tilt **widened** on the choose weeks
+(32.3 → 50.2pts) and the high half overshoots to −24.3 / −36.2. Lean and MAE are a wash
+(52.8→57.8% and 1.74→1.68 choose; 60.6→59.1% and 1.45→1.47 confirm). **Not shipped.**
+
+**Why the bands did not help, which is the finding worth keeping.** They were supposed to stop the
+fit coming back flat — and it came back nearly flat anyway: 0.852 to 0.905 is a 5.3% spread against
+an error running from +41.8 to +9.0. That is not a failure of the band structure; it says
+**med/mean genuinely does not vary with receptions level**, so the mean→median conversion is not
+where this error lives. A near-uniform shrink can only slide the curve down, which is exactly what
+it did.
+
+So the receptions error is in `mu` — our projected mean is too high for low-usage receivers and
+about right for high-usage ones — and that is the same conclusion §13 reached for the yardage
+markets. Conversion cannot repair a mean. The next candidate is the volume estimate at the bottom of
+the depth chart, where the project's own standing finding already says we are weakest ("deep
+reserves are ~70% proportional error").
+
+The machinery is kept and inert: `PUBLISH_BANDS_BY_MARKET` is correct and needed the moment any
+market's fit comes back non-flat, and `CFB_RECEPTIONS` defaults off so the published board is
+byte-identical. Re-run rather than re-reason.

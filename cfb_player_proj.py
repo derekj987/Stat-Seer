@@ -960,11 +960,21 @@ CFB_MATCHUP_LO, CFB_MATCHUP_HI = 0.94, 1.06
 # 267 rushing), because NCAAF prop history starts when we began capturing it and cannot be
 # backfilled. Re-run cfb_median_fit.py as the season accumulates.
 PUBLISH_BANDS = [0.0, 18.0, 28.0, 45.0, 62.0, 80.0]
+# A market whose range does not span the yardage bands needs its OWN. Receptions runs 0.5-8.5, so
+# against the structure above every row lands in band 0 and the fit can only return a flat ratio —
+# a uniform shrink, which moves the level and cannot touch a tilt. That is why it was left
+# unconverted (§13a) and why the tilt is still there: 1.567 proj/line at a 0.5-2.5 line against
+# 0.965 at 4.5-8.5. Fitted on these bands instead (analysis/cfb_median_fit.py, 358 joined pairs).
+PUBLISH_BANDS_BY_MARKET = {"receptions": [0.0, 2.0, 3.0, 4.0, 5.0, 7.0]}
 PUBLISH_RATIO = {
     "rec_yds":    [0.616, 0.616, 0.740, 0.911, 0.911, 0.911],
     "rush_yds":   [0.722, 0.722, 0.722, 0.961, 1.002, 1.002],
     "pass_yds":   [1.006, 1.006, 1.006, 1.006, 1.006, 1.006],
 }
+# Gated until backtested. "on" adds the fitted receptions curve; default stays off so the shipped
+# board is unchanged while the measurement runs.
+if os.environ.get("CFB_RECEPTIONS", "off") == "on":
+    PUBLISH_RATIO["receptions"] = [0.852, 0.852, 0.876, 0.876, 0.905, 0.905]
 # RECEPTIONS is deliberately absent, the same call the NFL side made. Its whole range fits inside
 # one band, so the fit produces a single flat 0.79 -- and a flat ratio is a uniform shrink, which
 # does not correct a tilt, it just moves the level. Applied, it drove the board from 62% over to
@@ -994,8 +1004,9 @@ def to_fifty_fifty(market, mu):
     r = PUBLISH_RATIO.get(market)
     if not r or mu is None or mu <= 0:
         return mu
+    bands = PUBLISH_BANDS_BY_MARKET.get(market, PUBLISH_BANDS)
     i = 0
-    while i + 1 < len(PUBLISH_BANDS) and mu >= PUBLISH_BANDS[i + 1]:
+    while i + 1 < len(bands) and mu >= bands[i + 1]:
         i += 1
     return round(mu * r[min(i, len(r) - 1)], 1)
 

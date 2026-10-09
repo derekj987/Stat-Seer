@@ -61,6 +61,14 @@ MARKETS = {
     "player_receptions": "receptions",
 }
 BANDS = [0.0, 18.0, 28.0, 45.0, 62.0, 80.0]
+# 🚨 RECEPTIONS NEEDS ITS OWN BANDS OR THE FIT CANNOT SEE ITS TILT. Its lines run 0.5-8.5, so every
+# single row lands in band 0 of the yardage structure above and the fit returns ONE flat ratio. A
+# flat ratio is a uniform shrink: it moves the level and cannot touch a tilt, which is why the first
+# attempt overshot the board from 62% over to 35% and receptions was left unconverted
+# (EMPIRICAL_REFERENCE §13/§13a). The tilt is real and large — measured on the week-6 board, median
+# proj/line runs 1.567 at a 0.5-2.5 line and 0.965 at 4.5-8.5, 88% over down to 36%.
+BANDS_BY_MARKET = {"player_receptions": [0.0, 2.0, 3.0, 4.0, 5.0, 7.0]}
+MIN_BAND_N = 40          # a band thinner than this borrows its neighbour's ratio
 
 
 def norm(n):
@@ -187,12 +195,13 @@ def main():
         A = np.array([x[1] for x in pr], float)
         print(f"\n{mk}   pairs {len(pr)}   actual over the line {100 * (A > L).mean():.0f}%")
         print(f"  {'line band':>12s} {'n':>6s} {'mean act':>9s} {'med act':>8s} {'med/mean':>9s}")
+        bands = BANDS_BY_MARKET.get(mk, BANDS)
         ratios = []
-        for i in range(len(BANDS)):
-            lo = BANDS[i]
-            hi = BANDS[i + 1] if i + 1 < len(BANDS) else 1e9
+        for i in range(len(bands)):
+            lo = bands[i]
+            hi = bands[i + 1] if i + 1 < len(bands) else 1e9
             sel = (L >= lo) & (L < hi)
-            if int(sel.sum()) < 40:
+            if int(sel.sum()) < MIN_BAND_N:
                 ratios.append(None)
                 continue
             mu, md = float(A[sel].mean()), float(np.median(A[sel]))
@@ -212,6 +221,11 @@ def main():
 
     print("\n\n# paste into cfb_player_proj.py")
     print(f"PUBLISH_BANDS = {BANDS}")
+    # A market fitted on its OWN bands must carry them across, or its ratios get looked up against
+    # the yardage structure and every row lands in band 0 again — the silent mis-application this
+    # whole receptions exercise exists to fix.
+    bym = {MARKETS[mk]: b for mk, b in BANDS_BY_MARKET.items() if MARKETS.get(mk) in emit}
+    print(f"PUBLISH_BANDS_BY_MARKET = {bym}")
     print("PUBLISH_RATIO = {")
     for f, r in emit.items():
         print(f'    "{f}": {r},')
