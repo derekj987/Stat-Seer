@@ -37,7 +37,7 @@ export default async function Page() {
         <header className="masthead">
           <Brand sub={<><span className="brand__sport">NHL</span> · Line Shopping</>} />
         </header>
-        <ShopSubnav active="lines" base="nhl" only={["lines"]} />
+        <ShopSubnav active="lines" base="nhl" only={["lines", "props"]} />
         <p className="foot">Couldn&apos;t load odds: {err}</p>
       </main>
     );

@@ -1,6 +1,6 @@
 import { Brand, FlowSteps, ShopSubnav, DayBadge } from "../../Nav";
 import PinButton from "../../PinButton";
-import BatterGrid from "./BatterGrid";
+import PropsGrid from "../../PropsGrid";
 import { etToday } from "@/lib/gameDays";
 import { mlbPropBoard, MLB_CATEGORIES, MLB_PROP_LABELS, mlbCategoryByKey, norm } from "@/lib/mlbProps";
 import { US_BOOKS, bookLegend } from "@/lib/bookLabel";
@@ -90,7 +90,7 @@ export default async function Page({ searchParams }: PageProps<"/mlb/props">) {
               codes, the ✓ meaning and the links. Derek: "I do not want text like that anywhere." */}
           <CatNav current={cat.key} />
           {games.length ? (
-            <BatterGrid games={games} markets={cat.markets} labels={MLB_PROP_LABELS} {...etToday()} />
+            <PropsGrid games={games} markets={cat.markets} labels={MLB_PROP_LABELS} {...etToday()} />
           ) : (
             <p className="ncf-note">
               No <b>{cat.label.toLowerCase()}</b> props posted for the upcoming slate yet — books post them

@@ -4,12 +4,18 @@ import { useCallback } from "react";
 import type { PropGame, Quote } from "@/lib/props";
 import { useSlip } from "@/lib/slip";
 import { groupByGameDay } from "@/lib/gameDays";
-import { DayHeader } from "../../DayHeader";
+import { DayHeader } from "./DayHeader";
 import { audit } from "@/lib/fairValue";
 import { bookLabel, booksCode } from "@/lib/bookLabel";
 
-// The batter grid: one row per hitter in LINEUP order, one column per market, each cell the
-// player's main line with the best price for each side and the book that has it.
+// The props grid: one row per PLAYER, one column per market, each cell the player's main line
+// with the best price for each side and the book that has it.
+//
+// Shared by every sport rather than copied per sport — it was `BatterGrid` under web/app/mlb/
+// until the NHL board needed exactly the same thing, and its signature was already sport-
+// agnostic ({games, markets, labels, today, tomorrow}). The only sport-specific touch is the
+// optional `q.team` tag beside a name, which simply does not render where a sport has no team
+// map yet.
 //
 // The market-block layout (PropsView) stacks six blocks per game and lists players inside each,
 // so a reader assembling one player's sheet reads six lists; and because every row was its own
@@ -140,7 +146,7 @@ function GameGrid({ g, markets, labels, has, toggle, cls }: {
   );
 }
 
-export default function BatterGrid({ games, markets, labels, today, tomorrow }: {
+export default function PropsGrid({ games, markets, labels, today, tomorrow }: {
   games: PropGame[]; markets: string[]; labels: Record<string, string>; today: string; tomorrow: string;
 }) {
   const { has, toggle: slipToggle } = useSlip();

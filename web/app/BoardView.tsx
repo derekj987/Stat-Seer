@@ -115,9 +115,8 @@ const SPORT = {
            than the NFL&apos;s; the card says how much the half-point is worth).</> },
   // NHL: the puck line is ±1.5 on every game (284 of 284 rows on a live sweep), so like baseball's
   // run line the shopping is entirely in the PRICE, never in the number. No week wheel — hockey
-  // runs on days. propsHref is EMPTY on purpose: /nhl/props is not built, and the footer omits the
-  // sentence rather than linking to a 404, exactly as the subnav omits the tab.
-  nhl: { label: "NHL", spread: "Puck line", weeks: false, pin: "/nhl/lines", propsHref: "",
+  // runs on days.
+  nhl: { label: "NHL", spread: "Puck line", weeks: false, pin: "/nhl/lines", propsHref: "/nhl/props",
          foot: <>Line shopping — the <b>best available price across books</b> on every game&apos;s moneyline,
            puck line and total. The puck line is ±1.5 everywhere, so the shopping is all in the price —
            and with <b>43% of games finishing within one goal</b>, that price moves a long way.</> },
@@ -237,7 +236,7 @@ export default function BoardView({
         <div className="subnavrow">
           {/* A new sport arrives one surface at a time; hide the tabs whose pages do not exist
               yet rather than linking to a 404. */}
-          <ShopSubnav active="lines" base={sport} only={sport === "nhl" ? ["lines"] : undefined} />
+          <ShopSubnav active="lines" base={sport} only={sport === "nhl" ? ["lines", "props"] : undefined} />
         </div>
 
         {nav ?? (S.weeks && <WeekNav min={min} max={max} current={week} base="/lines" />)}
