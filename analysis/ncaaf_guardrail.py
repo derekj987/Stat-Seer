@@ -71,9 +71,13 @@ MODEL_DATA = "web/app/ncaaf/model-data.ts"
 # teaches people to ignore the red ones. 96h still catches a genuinely dead scraper within a day of
 # it mattering, because a depth chart really does move every game week.
 #
-# The projections file is left at 20h deliberately: its numbers move whenever a book line moves, so
-# it DOES change on essentially every run and commit-time is a fair proxy for the job there.
-ARTIFACTS = [(MODEL_DATA, 10.0), ("web/lib/ncaafPlayerProjections.ts", 20.0),
+# I left the projections file at 20h on the reasoning that its numbers move whenever a book line
+# moves, so it changes on essentially every run. MEASURED, AND WRONG: its last 15 gaps run 0.6, 5.3,
+# 5.6, 10.1, 10.7, 11.0, 11.6, 11.8, 11.8, 12.0, 12.1, 12.4, 13.6, 24.1, 27.7h — two of fifteen over
+# 20h, and the 27.7h one failed this job on Oct 5. Early in the week the next slate's props have not
+# posted, so the file is genuinely identical and nothing is committed. Same structural trap as the
+# depth chart, one step less obvious. 36h is three missed runs against a twice-daily cron.
+ARTIFACTS = [(MODEL_DATA, 10.0), ("web/lib/ncaafPlayerProjections.ts", 36.0),
              ("web/lib/ncaafDepth.ts", 96.0)]
 # A prop on a TEAM, not a person. These have no player projection by design.
 TEAM_MARKET = ("D/ST", "Defense", "Special Teams")
@@ -310,6 +314,20 @@ def check_one_scale():
           and r.get("mu") is not None and r.get("proj") is not None]
     if not yd:
         warn("no rows carry `mu` yet — regenerate the board to enable the published-scale check")
+        return
+    # 🚨 A CONVERSION THAT IS A NO-OP BY DESIGN IS NOT A SKIPPED CONVERSION. to_fifty_fifty returns
+    # a non-positive mu untouched (`if not r or mu is None or mu <= 0: return mu`) — scaling a
+    # negative number by 0.72 would make it LESS negative, which is meaningless — so mu == proj is
+    # the correct outcome there, not evidence the row missed the conversion.
+    #
+    # This failed the job on exactly one row of 380: a Michigan State QB at mu = -6.6 rushing yards,
+    # which is a real number in college (sacks are charged against rushing). Equality cannot tell
+    # "declined by design" from "never ran", so the rows the conversion declines are excluded rather
+    # than the test being loosened. Checking `proj == to_fifty_fifty(mu)` directly would be stronger
+    # still, but it means importing cfb_player_proj, and this file stays stdlib-only on purpose.
+    yd = [r for r in yd if r["mu"] > 0]
+    if not yd:
+        ok("published scale: no positive-mu yardage rows to check")
         return
     raw = [r for r in yd if abs(r["mu"] - r["proj"]) < 1e-9]
     if not raw:
