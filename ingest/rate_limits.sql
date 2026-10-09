@@ -36,4 +36,14 @@ end $$;
 -- Server-only: clients cannot call it directly (the routes invoke it with the service key).
 revoke all on function public.rate_limit_hit(text, int, int) from public, anon, authenticated;
 
+-- 🚨 AND THE SERVICE ROLE MUST BE GRANTED BACK IN, OR THE LIMITER IS INERT. CREATE FUNCTION grants
+-- EXECUTE to PUBLIC by default; the revoke above strips that from everyone not named explicitly,
+-- and service_role was never named -- so the routes' own calls came back
+-- `42501 permission denied for function rate_limit_hit`. lib/ratelimit.ts FAILS OPEN by design
+-- (`if (!r.ok) return true`), which is right for a limiter outage and is exactly why this went
+-- unnoticed: every paid /api/assistant and /api/dashboard-chart call was waved through while the
+-- throttle looked installed. A limiter that silently permits everything is worse than none,
+-- because nobody goes looking for it.
+grant execute on function public.rate_limit_hit(text, int, int) to service_role;
+
 commit;
