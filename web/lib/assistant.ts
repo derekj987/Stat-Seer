@@ -8,10 +8,13 @@ import { weekProps } from "./props";
 import { PLAYER_PROJECTIONS } from "./playerProjections";
 import { toDecimal, decToAmerican } from "./slipPricing";
 import { NCAAF_MODEL } from "@/app/ncaaf/model-data";
+import { nhlBoard } from "./nhlBoard";
+import { nhlPropBoard } from "./nhlProps";
 
-export type Sport = "nfl" | "ncaaf";
+export type Sport = "nfl" | "ncaaf" | "nhl";
 
-export type CandGroup = "spread" | "total" | "moneyline" | "td" | "passing" | "rushing" | "receiving";
+export type CandGroup = "spread" | "total" | "moneyline" | "td" | "passing" | "rushing" | "receiving"
+  | "goals" | "shots" | "points" | "assists";
 
 export interface Candidate {
   id: string;
@@ -208,6 +211,93 @@ export async function buildCandidatesNcaaf(): Promise<Candidate[]> {
       const mk = `${r.away_team} @ ${r.home_team}`;
       const title = isTd ? `${r.player} Anytime TD` : `${r.player} o${r.line} ${PROP_LABEL[r.market] ?? r.market}`;
       out.push({ id: `ncpr-${slug(r.player!)}-${r.market}`, kind: "prop", group: PROP_CAT[r.market], market: r.market, title, detail: mk, price: best, books, byBook });
+    }
+  } catch { /* props not up yet */ }
+
+  return out;
+}
+
+const NHL_PROP_CAT: Record<string, CandGroup> = {
+  player_goal_scorer_anytime: "goals",
+  player_shots_on_goal: "shots",
+  player_points: "points",
+  player_assists: "assists",
+};
+const NHL_PROP_LABEL: Record<string, string> = {
+  player_shots_on_goal: "Shots", player_points: "Points", player_assists: "Assists",
+};
+
+/** The NHL menu: game lines from nhl_odds_snapshots and props from nhl_prop_snapshots, every leg
+ *  a real market at the best price across US books.
+ *
+ *  🚨 TWO THINGS HERE ARE NOT TRUE OF THE FOOTBALL MENUS, and both have to reach the prompt.
+ *
+ *  NO LEG CARRIES `model` OR `off`. There is no NHL model, so there is no model percentage to rank
+ *  by and no off-consensus flag to ask for. buildMenuSlip already degrades correctly — with no
+ *  candidate carrying a model %, rankByModel falls back to shortest-price, which for a goal-scorer
+ *  selection means "the likeliest scorers" and is the right answer anyway. What must NOT happen is
+ *  the assistant being told to look for off-consensus games in this sport, so the system prompt and
+ *  the worked examples are both sport-specific.
+ *
+ *  ANYTIME GOAL SCORER IS THE LONG-ODDS ENGINE, not the moneyline. Hockey moneylines are short
+ *  (roughly -250 to +200 — there are no 14-point favourites), so a parlay of game lines tops out
+ *  early. Goal scorer runs from about +190 out past +2500, which is a far better ladder to a long
+ *  target than football's anytime-TD market. It is also the one market quoted ONE-SIDED (a Yes
+ *  price and no No), which costs nothing here because the Yes side is the only side a member would
+ *  put on a slip. */
+export async function buildCandidatesNhl(): Promise<Candidate[]> {
+  const out: Candidate[] = [];
+
+  // ---- Game lines: moneyline both sides, puck line both sides, total over/under ----
+  try {
+    const { board } = await nhlBoard();
+    for (const g of board) {
+      const mk = `${g.away} @ ${g.home}`;
+      const push = (id: string, group: CandGroup, market: string, title: string,
+                    l: { point: number | null; price: number; books: string[]; byBook: Record<string, number> } | null) => {
+        if (l && l.point !== null && Number.isFinite(l.price)) {
+          out.push({ id, kind: "line", group, market, title: title.replace("{pt}", fmtPt(l.point)), detail: mk, price: l.price, books: l.books, byBook: l.byBook });
+        }
+      };
+      // The puck line is ±1.5 on every game in the league, so the number is never the decision —
+      // the price is. It still belongs on the menu; it just cannot be shopped for a better number.
+      push(`nhsp-${g.eventId}-h`, "spread", "spread", `${g.home} {pt}`, g.spread.home);
+      push(`nhsp-${g.eventId}-a`, "spread", "spread", `${g.away} {pt}`, g.spread.away);
+      push(`nhtot-${g.eventId}-o`, "total", "total", `${mk}: Over {pt}`, g.total.over);
+      push(`nhtot-${g.eventId}-u`, "total", "total", `${mk}: Under {pt}`, g.total.under);
+      for (const [team, ml] of Object.entries(g.ml)) {
+        if (ml && Number.isFinite(ml.price)) {
+          out.push({ id: `nhml-${g.eventId}-${slug(team)}`, kind: "line", group: "moneyline", market: "moneyline", title: `${team} ML`, detail: mk, price: ml.price, books: ml.books, byBook: ml.byBook });
+        }
+      }
+    }
+  } catch { /* odds not up */ }
+
+  // ---- Props: anytime goal (Yes) + shots / points / assists (Over) ----
+  try {
+    const games = await nhlPropBoard();
+    for (const pg of games) {
+      const mk = `${pg.away} @ ${pg.home}`;
+      for (const mb of pg.markets) {
+        const group = NHL_PROP_CAT[mb.market];
+        if (!group) continue;
+        const isGoal = mb.market === "player_goal_scorer_anytime";
+        // Goal scorer keeps a deep pool because it is the ladder to a long target; the O/U
+        // markets keep a handful, which nhlPropBoard has already ordered by line then price —
+        // so these are the heavy-usage skaters rather than the first names alphabetically.
+        for (const q of mb.quotes.slice(0, isGoal ? 30 : 10)) {
+          if (!Number.isFinite(q.price)) continue;
+          if (isGoal ? q.side !== "Yes" : q.side !== "Over") continue;
+          const title = isGoal
+            ? `${q.player} Anytime Goal`
+            : `${q.player} o${q.line} ${NHL_PROP_LABEL[mb.market] ?? mb.market}`;
+          out.push({
+            id: `nhpr-${slug(q.player)}-${mb.market}`,
+            kind: "prop", group, market: mb.market, title, detail: mk,
+            price: q.price, books: q.books, byBook: q.byBook,
+          });
+        }
+      }
     }
   } catch { /* props not up yet */ }
 

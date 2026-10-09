@@ -12,10 +12,13 @@ type Result = { legs: SlipItem[]; combined: { american: string; decimal: number 
 type Opt = { mkt: string; label: string; og: "Game lines" | "Player props" };
 
 // Every bet type is its own checkbox, so a slip can mix markets (e.g. rec yds + rush yds + TD).
-const OPTS: Opt[] = [
-  { mkt: "spread", label: "Spreads", og: "Game lines" },
-  { mkt: "total", label: "Totals", og: "Game lines" },
-  { mkt: "moneyline", label: "Moneylines", og: "Game lines" },
+//
+// PER SPORT, not one list with exclusions. This was a single football list plus an
+// MKT_UNAVAILABLE set that hid college moneylines — workable for two football codes, but hockey
+// shares only the three game lines and none of the props, so the exclusion set would have had to
+// name seven markets for NHL and four for each football sport to say the same thing. The NCAAF
+// moneyline gap is now simply a market that college's own list omits.
+const FOOTBALL_PROPS: Opt[] = [
   { mkt: "player_anytime_td", label: "Anytime TD scorers", og: "Player props" },
   { mkt: "player_pass_yds", label: "QB passing yards", og: "Player props" },
   { mkt: "player_pass_tds", label: "QB passing TDs", og: "Player props" },
@@ -25,13 +28,44 @@ const OPTS: Opt[] = [
   { mkt: "player_receptions", label: "Receptions", og: "Player props" },
 ];
 const OGROUPS: Array<"Game lines" | "Player props"> = ["Game lines", "Player props"];
-type SportId = "nfl" | "ncaaf";
+type SportId = "nfl" | "ncaaf" | "nhl";
 const SPORTS: { id: SportId; label: string; sub: string }[] = [
   { id: "nfl", label: "NFL", sub: "Pro football" },
   { id: "ncaaf", label: "NCAAF", sub: "College football" },
+  { id: "nhl", label: "NHL", sub: "Ice hockey" },
 ];
-// NCAAF has no per-book moneyline capture yet, so that market is hidden for college.
-const MKT_UNAVAILABLE: Record<SportId, Set<string>> = { nfl: new Set(), ncaaf: new Set(["moneyline"]) };
+const OPTS_BY_SPORT: Record<SportId, Opt[]> = {
+  nfl: [
+    { mkt: "spread", label: "Spreads", og: "Game lines" },
+    { mkt: "total", label: "Totals", og: "Game lines" },
+    { mkt: "moneyline", label: "Moneylines", og: "Game lines" },
+    ...FOOTBALL_PROPS,
+  ],
+  // College has no per-book moneyline capture, so it is absent rather than shown-and-broken.
+  ncaaf: [
+    { mkt: "spread", label: "Spreads", og: "Game lines" },
+    { mkt: "total", label: "Totals", og: "Game lines" },
+    ...FOOTBALL_PROPS,
+  ],
+  // Hockey's four markets. "Puck line" rather than "Spreads" because that is what a hockey bettor
+  // calls it and because it is ±1.5 on every game — the label should not suggest a number to shop.
+  nhl: [
+    { mkt: "moneyline", label: "Moneylines", og: "Game lines" },
+    { mkt: "spread", label: "Puck line (±1.5)", og: "Game lines" },
+    { mkt: "total", label: "Totals", og: "Game lines" },
+    { mkt: "player_goal_scorer_anytime", label: "Anytime goal scorers", og: "Player props" },
+    { mkt: "player_shots_on_goal", label: "Shots on goal", og: "Player props" },
+    { mkt: "player_points", label: "Points", og: "Player props" },
+    { mkt: "player_assists", label: "Assists", og: "Player props" },
+  ],
+};
+// Selecting ONLY the anytime-scorer market means "give me the likeliest scorers", so the builder
+// ranks instead of chasing a target price. Football ranks by the model's TD%; hockey has no model,
+// and buildMenuSlip falls back to shortest-price — which in a market quoted this long IS the
+// ranking a member means by "likeliest".
+const SCORER_MKT: Record<SportId, string> = {
+  nfl: "player_anytime_td", ncaaf: "player_anytime_td", nhl: "player_goal_scorer_anytime",
+};
 const EXAMPLES_BY_SPORT: Record<SportId, string[]> = {
   nfl: [
     "What are the off-consensus picks this week? Add those to my slip.",
@@ -42,6 +76,13 @@ const EXAMPLES_BY_SPORT: Record<SportId, string[]> = {
     "What are the off-consensus picks this week? Add those to my slip.",
     "Make me a 4-leg anytime-TD parlay of this weekend's likeliest scorers.",
     "Build a 4-leg parlay around +2500 using props and game lines.",
+  ],
+  // 🚨 NO "off-consensus" EXAMPLE HERE. There is no NHL model, so nothing is ever flagged and that
+  // prompt would send a member straight into the one question hockey cannot answer.
+  nhl: [
+    "Build me a 3-leg parlay from tonight's best moneyline prices.",
+    "Make a 4-leg anytime-goal parlay of tonight's likeliest scorers.",
+    "Build a 4-leg parlay around +2500 using goal scorers and totals.",
   ],
 };
 const TARGETS = [
@@ -86,13 +127,16 @@ export default function AssistantPanel() {
     }
   }
 
-  const onlyTd = selected.length === 1 && selected[0] === "player_anytime_td";
+  const onlyScorers = selected.length === 1 && selected[0] === SCORER_MKT[sport ?? "nfl"];
   const toggle = (m: string) => setSelected((s) => (s.includes(m) ? s.filter((x) => x !== m) : [...s, m]));
-  const runMenu = () => build({ mode: "menu", sport, markets: selected, rankByModel: onlyTd, legs, targetOdds: onlyTd ? null : (target || null) });
+  const runMenu = () => build({ mode: "menu", sport, markets: selected, rankByModel: onlyScorers, legs, targetOdds: onlyScorers ? null : (target || null) });
   const runText = () => prompt.trim() && build({ mode: "text", sport, prompt: prompt.trim() });
   const reset = () => { setResult(null); setAdded(false); setError(""); };
+  // Reset the market selection on every sport switch: the checkboxes are sport-specific now, so
+  // carrying "player_rush_yds" from football into hockey would post a market the NHL menu has
+  // never heard of and quietly return nothing.
   const pickSport = (s: SportId) => { setSport(s); setSelected(["spread", "total"]); setResult(null); setError(""); setPrompt(""); };
-  const opts = sport ? OPTS.filter((o) => !MKT_UNAVAILABLE[sport].has(o.mkt)) : OPTS;
+  const opts = OPTS_BY_SPORT[sport ?? "nfl"];
   const examples = EXAMPLES_BY_SPORT[sport ?? "nfl"];
 
   if (me === null) {
@@ -190,7 +234,7 @@ export default function AssistantPanel() {
                 {[2, 3, 4, 5, 6, 7, 8].map((n) => <option key={n} value={n}>{n}</option>)}
               </select>
             </label>
-            {!onlyTd && (
+            {!onlyScorers && (
               <label className="asst__field">Target payout
                 <select value={target} onChange={(e) => setTarget(Number(e.target.value))}>
                   {TARGETS.map((t) => <option key={t.v} value={t.v}>{t.label}</option>)}
