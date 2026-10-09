@@ -502,7 +502,7 @@ OUT_FOR_SEASON = re.compile(
 def build_rows(abbrev, nickname, buzz, snippets, season, week):
     # boards this team's snippets came from, for a generic fallback attribution
     boards = list(dict.fromkeys(s.get("board") for s in snippets if s.get("board")))
-    rows = []
+    rows, used_ids = [], set()
     for b in buzz:
         player = (b.get("player") or "").strip()
         if not player:
@@ -523,9 +523,23 @@ def build_rows(abbrev, nickname, buzz, snippets, season, week):
                     break
         if not srcs:
             srcs = [{"board": boards[0] if boards else "fan boards"}]
+        # One player can carry two legitimate angles in the same week (the boards sold
+        # Justin Herbert's completions AND his passing yards), but the id carries no
+        # angle, so the repeat is a duplicate primary key. Postgres rejects the whole
+        # batch -- PostgREST returns 409 -- and since the rows go up in a single POST
+        # the team loses EVERY row, not just the duplicate. (Week 5 2026: LAC, NO and
+        # TEN each had one repeated player and each wrote nothing.) Suffix repeats so
+        # both angles survive; the loop also covers a player whose own name happens to
+        # slug onto a suffix we already handed out.
+        rid = base = f"w{week}-{abbrev}-{slug(player)}"
+        n = 1
+        while rid in used_ids:
+            n += 1
+            rid = f"{base}-{n}"
+        used_ids.add(rid)
         rows.append({
             "season": season, "week": week,
-            "id": f"w{week}-{abbrev}-{slug(player)}",
+            "id": rid,
             "player": player, "team": nickname,
             "angle": (b.get("angle") or "").strip(),
             "direction": "down" if str(b.get("direction", "up")).lower() == "down" else "up",
