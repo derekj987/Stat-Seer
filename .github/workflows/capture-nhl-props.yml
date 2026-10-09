@@ -1,0 +1,51 @@
+name: Capture NHL props
+
+# NHL player-prop capture -> Supabase nhl_prop_snapshots (goals, shots, points, assists).
+#
+# 🚨 PROP HISTORY CANNOT BE BACKFILLED. Books post these a day or two before puck drop and the
+# number moves until it, so a snapshot exists only if it was taken that day. Every day this is not
+# running is a day of validation data gone for good — the CFB and NFL prop pipelines both learned
+# that the expensive way. This is the one part of an NHL module that loses value while anything
+# else is being decided, which is why it ships before any modelling.
+#
+# It writes to SUPABASE, not data/nhl.db: a GitHub runner's filesystem is ephemeral and a SQLite
+# file written there is discarded when the job ends.
+#
+# CADENCE. Every 3 hours through the season. The NHL posts ~15 games a night, and unlike college
+# football the whole slate is same-day — props appear the morning of and move until puck drop, so a
+# twice-daily sweep would publish numbers hours stale against the app. That was exactly Derek's
+# complaint on the CFB board (a receiver at +550 on ours against +900 on FanDuel), and the fix
+# there was a 2-hourly cadence; 3 hours is its NHL equivalent at a fraction of the volume.
+#
+# COST. Measured, not guessed: a 2026-10-09 dry run polled 18 events, 10 of which had props, for
+# 28 credits and 2,811 rows. Events with no props posted cost 0. At 8 sweeps a day that is ~225
+# credits/day against 4.97M remaining — about 0.005% of the allowance.
+#
+# --within-days 2 keeps it to the near-term slate; NHL props do not post further out than that in
+# any useful form. All times UTC.
+
+on:
+  schedule:
+    - cron: "0 */3 * 10-12,1-6 *"   # every 3 hours, October - June (NHL regular season + playoffs)
+  workflow_dispatch: {}              # manual "Run workflow" for testing
+
+concurrency:
+  group: capture-nhl-props
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi -c requirements.txt
+      - name: Capture NHL props -> Supabase
+        env:
+          ODDS_API_KEY:         ${{ secrets.ODDS_API_KEY }}
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python nhl_props.py --supabase --within-days 2 --max-events 20
