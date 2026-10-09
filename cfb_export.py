@@ -260,6 +260,11 @@ US_BOOKS = {"draftkings", "fanduel", "betmgm", "williamhill_us", "fanatics", "be
             "espnbet", "hardrockbet", "ballybet", "betparx"}
 
 _TEAM_ALIASES = {
+    # The feed abbreviates where CFBD spells out. Found by analysis/slate_audit.py: LIU @
+    # Duquesne was priced and off the board because no token of "LIU" prefixes "Long Island
+    # University".
+    "long island university": "liu",
+    "liu": "long island university",
     "massachusetts": "umass",
     "umass": "massachusetts",
     "nc state": "north carolina state",
@@ -345,15 +350,55 @@ def _fetch_sport(sport, key):
                         if b.get("key") == "fanduel":
                             fd_tot = pts[0]
         out.append({"away_n": _norm(af), "home_n": _norm(hf),
+                    "commence": e.get("commence_time"),
                     "home_spread": fd_hsp if fd_hsp is not None else (round(statistics.median(hsp), 1) if hsp else None),
                     "total": fd_tot if fd_tot is not None else (round(statistics.median(tot), 1) if tot else None)})
     return out
+
+
+def _toks(s):
+    """Team name as comparable tokens.
+
+    🚨 THREE SPELLING GAPS EACH DROPPED A PRICED GAME OFF THE BOARD, silently, because an
+    FCS-vs-FCS game is only admitted when match_odds finds its line (see build_card). Found by
+    analysis/slate_audit.py, which compares the schedule, the market and the board:
+
+        CFBD "The Citadel"      vs feed "citadel bulldogs"        leading "The"
+        CFBD "William & Mary"   vs feed "william and mary tribe"  & vs and
+        CFBD "Youngstown State" vs feed "youngstown st penguins"  State vs St
+
+    The old test was pure string prefix, so each of these read as "no such game". Tokens handle all
+    three at once and keep the mascot-suffix behaviour that already worked. "st" -> "state" is done
+    per-token rather than by string replace, so "St. Francis" is untouched.
+    """
+    # "and" is dropped rather than expanded: _norm has already turned "&" into a space by the time
+    # this sees the name, so CFBD's "William & Mary" arrives as "william mary" while the feed says
+    # "william and mary tribe". Dropping the word makes the two agree from either direction.
+    # "Texas A&M" is unaffected — it normalises to the tokens a / m, not to "and".
+    t = [w for w in _norm(s).split() if w and w != "and"]
+    if t and t[0] == "the":
+        t = t[1:]
+    return ["state" if w == "st" else w for w in t]
+
+
+CFBD_TBD = "T04:00:00.000Z"      # CFBD's "kickoff not announced yet" value: midnight ET
+
+
+def _kickoff(date, away, home, odds):
+    """CFBD's kickoff, unless it is the TBD placeholder and a book already has a real one."""
+    if not date or not str(date).endswith(CFBD_TBD):
+        return date
+    od = match_odds(away, home, odds)
+    return (od or {}).get("commence") or date
 
 
 def match_odds(away, home, odds):
     a, h = _norm(away), _norm(home)
     def m(x, y):
         if y == x or y.startswith(x + " ") or x.startswith(y + " "):
+            return True
+        xt, yt = _toks(x), _toks(y)
+        if xt and yt and (yt[:len(xt)] == xt or xt[:len(yt)] == yt):
             return True
         alt = _TEAM_ALIASES.get(x)
         return bool(alt) and (y == alt or y.startswith(alt + " "))
@@ -629,7 +674,14 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
 
         cards.append({
             "away": away, "home": home, "neutral": 1 if neu else 0,
-            "commence": date,                              # kickoff (ISO, from games.start_date)
+            # 🚨 CFBD WRITES MIDNIGHT ET WHEN A KICKOFF HAS NOT BEEN ANNOUNCED. start_date comes
+            # back as exactly 04:00:00.000Z, which is 12:00 AM ET, and the board published that as
+            # though it were the real time — 0% of week 5-6 games but 13% of week 9, so every slate
+            # a fortnight out carried fake midnights. A book usually knows the time well before
+            # CFBD fills it in, so prefer the market's kickoff for those rows and keep CFBD's
+            # otherwise. Found by analysis/slate_audit.py.
+            "commence": _kickoff(date, away, home, odds),
+
             # AP Top 25 rank per side (the recognizable media poll, null if unranked) — this
             # is what labels a game "ranked" on the board, NOT our power rating.
             "apAway": (ap or {}).get(away), "apHome": (ap or {}).get(home),

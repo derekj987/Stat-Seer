@@ -4080,6 +4080,53 @@ duly reported `page-overflow-x` ("scrollWidth 223 > viewport 0") and `clipped-te
 the desktop pass and keep `preset:"desktop"` for the cleanup at the end. **`vw` belongs in every
 result line**, for the same reason `bodyLen` does: it is how you spot that the apparatus moved.
 
+### 🚨 IS EVERY GAME BEING PLAYED ACTUALLY ON THE BOARD, ON THE RIGHT DAY?
+```bash
+python analysis/slate_audit.py            # next 8 days, NFL + NCAAF
+```
+Derek, twice: *"according to fanduel there are 4 games tonight. I am only seeing 3"*, then *"last
+week we had a game being played on a thursday that did not show up on our site."* Both were real and
+neither was visible from the board — the only way to see a missing game is to compare against
+something that knows it exists.
+
+Three sets per sport, which is the whole idea: **SCHEDULE** (what is played) vs **MARKET** (what a
+book priced) vs **BOARD** (what we publish). FanDuel is not scraped — their terms — so the licensed
+Odds API feed stands in; it carries FanDuel's own prices.
+
+What it has caught, all of it invisible from the page itself:
+
+| finding | cause |
+|---|---|
+| Montana State @ Idaho priced at −14.5, absent | FCS lives behind its OWN sport key (`americanfootball_ncaaf_fcs`); we never asked for it |
+| The Citadel, William & Mary, Youngstown State dropped | `match_odds` was a string prefix: leading "The", `&` vs `and`, `State` vs `St` |
+| LIU @ Duquesne dropped | feed abbreviates, CFBD spells out ("Long Island University") |
+| Games published at **12:00 AM ET** | CFBD writes `T04:00:00.000Z` when a kickoff is unannounced — 0% of week 5-6 games, **13% of week 9**. The board printed the placeholder as a real time |
+
+**An FCS-vs-FCS game is only boarded if `match_odds` finds its line**, so every name-matching gap
+silently deletes a game. That is why these never showed up as errors.
+
+#### The audit was wrong five times before it was right — budget for that
+Every one of these looked like a damning finding and was my own bug. A coverage checker that cries
+wolf is worse than none, so verify the checker before believing it:
+
+1. **Three sources, three naming conventions.** Schedule/board say `airforce` and `bal`; the feed
+   says `airforcefalcons` and `baltimoreravens`. Reported 26 missing games, all present.
+2. **`odds_snapshots` truncates.** A row per book × market × outcome × sweep, so any `limit` cuts
+   mid-slate. Narrow to one book/market/outcome first (`board.ts` does exactly this).
+3. **Don't half-reimplement `fetchWeek`.** It back-fills games missing from the newest sweep with
+   their last pregame sweep. Mirroring only the first half reported 7 of 15 real games missing.
+4. **The NCAAF card serves every week** (`card.weeks`), not just `card.games` — an 8-day window
+   crosses into next week's slate.
+5. **Accents must be folded, not stripped.** `San José State` → `sanjosstate`, missing the `e`.
+
+**The audit shares production's tokeniser and alias table by import, not by copy.** An auditor with
+its own private idea of what two names mean will disagree with the thing it audits, and the
+disagreement reads as a finding.
+
+#### Classify the cause, not just the gap
+A priced game absent from our schedule source cannot be boarded at all; one that IS in our schedule
+and missing from the board is ours. The report says which, so the next reader opens the right file.
+
 ## Prerequisites (already in the repo)
 - **QA preview mode** is automatic on the local dev server: `web/proxy.ts` opens the gate when
   `NODE_ENV==="development"`, and `web/lib/supabase/client.ts` mocks `auth.getUser/getSession` so
