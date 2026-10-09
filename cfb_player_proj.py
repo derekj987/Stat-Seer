@@ -703,6 +703,27 @@ ROLE_MODE = os.environ.get("CFB_ROLE_MODE", "blend2")
 ROLE_BLEND_K = float(os.environ.get("CFB_ROLE_K", "3"))
 PRIOR_GAME_W = float(os.environ.get("CFB_PRIOR_W", "0.25"))
 QB_BLEND_K = float(os.environ.get("CFB_QB_K", "3"))
+# Scales the role weight ONLY when a player's own volume sits BELOW his slot's baseline — see the
+# note at the use site in project_role.rolevol. SHIPPED at 0.5, scored on played weeks against what
+# players actually did (choose wk 2-3, confirm wk 5):
+#
+#     asym   ALL MAE ch/cf   receptions MAE   receptions proj>line   rushing MAE   passing MAE
+#     1.0    22.10 / 25.53    1.74 / 1.45        74% / 63%          32.47/39.69   30.94/34.68
+#     0.5    22.07 / 25.50    1.69 / 1.42        65% / 54%          31.78/38.95   31.27/35.03  <-
+#     0.33   22.19 / 25.53    1.67 / 1.41        62% / 53%          31.83/38.69   31.54/35.23
+#     0      23.07 / 25.68    1.63 / 1.43        46% / 45%          31.32/37.88   33.83/35.78
+#
+# Actual over-rates on the same rows are 48% and 58%, so 0.5 moves receptions toward reality in both
+# eras without the overshoot 0 produces (46%/45% — right in one era, 13 points under in the other).
+# 0.5 is best-or-tied on ALL MAE in BOTH eras, which is the criterion ROLE_BLEND_K and QB_BLEND_K
+# were settled on.
+#
+# HONEST ABOUT THE MARGIN: the ALL-MAE win is 0.03 in both eras, which is a tie, not a victory. What
+# earns the change is the receptions over-lean, which is what it was built for. Passing pays ~0.35
+# MAE consistently while rushing gains ~0.7 — a QB below his attempt baseline is usually game script
+# rather than a lost role, so exempting pass_att is the obvious refinement. NOT done here: that idea
+# arrived after seeing this table, and tuning on the confirm week is how you launder a guess.
+ASYM_DOWN = float(os.environ.get("CFB_ASYM", "0.5"))
 # A TRANSFER's prior-school production is attributed to his NEW team, because build() re-tags the
 # whole log entry and rank_baselines then groups by that field — so Evan Dickens' 20.7 car/g at a
 # CUSA school BECAME Boston College's RB1 baseline, and he was blended toward himself
@@ -868,6 +889,18 @@ def project_role(games, market, pos, rank, team, per_team, league):
             # how much college offenses threw, not a weight that is mis-set. The knob stays,
             # defaulted to the role weight, so the next person can re-run rather than re-reason.
             k = QB_BLEND_K if field == "pass_att" else ROLE_BLEND_K
+            # 🚨 THE PULL IS SYMMETRIC, AND THE DAMAGE IS ONE-SIDED. A player ABOVE his slot's
+            # workload gets pulled down (usually right — volume regresses); a player BELOW it gets
+            # pulled UP to the slot, which is wrong whenever he has quietly lost the role or the
+            # depth label is stale. Measured on week 5 receptions: the quartile where the role is
+            # 62% of the blend goes over the line on 90% of rows and over-projects actuals by +0.78
+            # catches, on a median line of 1.5 (§13j). Every one of those used a TEAM baseline, so
+            # it is not a league fallback being generous — it is the slot overriding the player.
+            #
+            # CFB_ASYM scales the role weight only on the DOWN side: 1.0 is the symmetric blend that
+            # ships, 0.0 trusts a below-slot player's own volume completely. Off by default.
+            if ASYM_DOWN != 1.0 and own < base:
+                k *= ASYM_DOWN
             v = (own * n + base * k) / (n + k) if n else base
             return v, decay
         if ROLE_MODE == "blend":
@@ -1488,6 +1521,8 @@ def main(argv=None):
     ap.add_argument("--week", type=int, default=None,
                     help="BACKTEST: project this (played) week from what was knowable before it")
     ap.add_argument("--all-rows", action="store_true", help="keep unpriced rows (backtests)")
+    ap.add_argument("--force", action="store_true",
+                    help="write the published board even if the row count collapses")
     args = ap.parse_args(argv)
 
     # 🚨 AN EXPERIMENT MUST NOT OVERWRITE THE PUBLISHED BOARD. Every knob here is read from the
@@ -1654,6 +1689,24 @@ def main(argv=None):
         + ", ".join(f"...P{i}" for i in range(len(range(0, len(rows), CHUNK))))
         + "];\n"
     )
+    # 🚨 NEVER REPLACE A POPULATED BOARD WITH AN EMPTY ONE. data/cfb.db holds the upcoming slate and
+    # is gitignored, so a local copy that has not been rebuilt reports no upcoming games: the props
+    # fetch still succeeds, nothing joins, and this writes a 0-row board over the live one with an
+    # exit code of 0. It has happened twice — the workflow rebuilds cfb.db first (cfb_backfill) and
+    # a hand run usually does not.
+    #
+    # An empty slate IS legitimate out of season, so this refuses only when it would DESTROY rows
+    # that are already published. --force is the deliberate escape hatch.
+    if os.path.abspath(args.out) == os.path.abspath(DEFAULT_OUT) and not args.force:
+        prev = 0
+        if os.path.exists(args.out):
+            prev = open(args.out, encoding="utf-8").read().count('{"game":')
+        if prev and len(rows) < prev * 0.5:
+            raise SystemExit(
+                f"refusing to overwrite {args.out}: {prev} rows published, this run produced "
+                f"{len(rows)}.\nThe usual cause is a stale data/cfb.db — rebuild the slate first:\n"
+                f"  python cfb_backfill.py --start {CUR_SEASON} --end {CUR_SEASON}\n"
+                f"Pass --force if the collapse is real (end of season).")
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
     with open(args.out, "w", encoding="utf-8") as f:
         f.write(body)
