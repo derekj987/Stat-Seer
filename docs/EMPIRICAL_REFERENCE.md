@@ -1355,3 +1355,44 @@ mispriced number — turned up on **7 of 1,048 book quotes (1%)**, worth a media
 0.66%, clustered in reduced-juice books (lowvig, betonlineag). So the NHL Value Finder's honest
 pitch is **shopping, not mispricing**: the routine 1% is real and repeatable, the 0.30% outlier is
 neither. The page says exactly that.
+
+### 14d. The TOTAL is 68% odd — and a Poisson misprices the push by 5 points (2026-10-10)
+
+`nhl_results.py` (NHL public API, free) + `nhl_totals_study.py`. **6,560 completed regular-season
+games, 2021-22 through 2025-26** — five full 82-game seasons, so five times §14a's sample.
+
+§14a measured the *margin* and found hockey's key number. This is the same structural force acting
+on the **total**, which is what the 5.5/6.0/6.5 market actually prices.
+
+| | |
+|---|---|
+| mean total | **6.242** goals |
+| odd totals | **68.2%** (4,476) |
+| even totals | **31.8%** (2,084) |
+| ended OT / SO | 15.0% / 7.2% — **22.2%** past regulation |
+
+**Mechanism, stated before measuring.** A tie at 60 minutes is not a regulation game, so every even
+"tie" composition (2-2, 3-3, …) is removed from regulation and returns as OT/SO having added
+**exactly one** goal — even plus one is odd. Even totals are therefore suppressed twice. The
+measurement matches the mechanism: OT and SO are 100% odd by construction, and regulation alone is
+already **59.1%** odd because the ties have been taken out of it.
+
+**Stable in every season** — 67.8%, 69.0%, 68.3%, 65.2%, 70.8%. Not a sampling artefact.
+
+**What it costs to ignore.** A fitted Poisson (λ = 6.242) against the empirical distribution:
+
+| total | actual | Poisson | error |
+|---|---|---|---|
+| 5 | **22.1%** | 15.4% | +6.7% |
+| 6 | **11.0%** | 16.0% | **−5.0%** |
+| 7 | **20.5%** | 14.3% | +6.3% |
+
+So a smooth fair price **overstates the push on a 6.0 total by 5.0 points** (16.0% → 11.0% actual)
+and understates 5.0 and 7.0 by ~6.5 each. §14b already flagged that 6.0 can push and needs
+W-L-Push grading; this is the size of the error if that push is priced off a smooth curve.
+
+**This is the NHL analogue of the NFL key-number rule in CLAUDE.md** ("never use a Gaussian where
+key numbers matter"). It is a constraint on how we may compute a fair price, **not an edge** — books
+post 5.5/6.5 far more often than 6.0 precisely because they know. Any NHL fair price must come from
+the empirical distribution, or from a model that treats the OT/SO goal separately from goals scored
+in play. `nhl_results.last_period_type` is kept on every row so both views stay available.
