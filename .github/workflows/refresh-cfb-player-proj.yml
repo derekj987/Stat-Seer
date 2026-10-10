@@ -68,6 +68,19 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: python cfb_player_proj.py
 
+      # Reads the board that was just generated and reports the per-market lean. It runs HERE
+      # rather than on its own schedule so it always describes the board in the commit below,
+      # and BEFORE the commit so a gross miscalibration is visible beside the change that caused
+      # it. continue-on-error: a lean report that can break the refresh it rides on is worse than
+      # no lean report — the FAIL path is for a board that is unusable, not for one to review.
+      - name: Board guardrail (coverage, freshness, lean)
+        continue-on-error: true
+        env:
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          CFBD_API_KEY:         ${{ secrets.CFBD_API_KEY }}
+        run: python analysis/ncaaf_guardrail.py
+
       - name: Commit if changed
         run: |
           if git diff --quiet -- web/lib/ncaafPlayerProjections.ts web/lib/ncaafDepth.ts cfb_depth.json; then

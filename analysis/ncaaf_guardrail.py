@@ -18,6 +18,7 @@ has never heard of.
   B. FRESHNESS        a generated artifact stopped regenerating
   C. MARKET LINES     games are going lineless -- capture-cfb-odds has stopped landing
   D. PRICED PLAYERS   the market prices a player our projection board has no row for
+  E. LEAN             a market's projections sit over the book's number far more often than half
 
 D is the one with history behind it. A scraped depth chart decides who gets projected, and when it
 silently truncates, the board loses players without any error: 195 of 813 priced players -- 24% --
@@ -338,6 +339,94 @@ def check_one_scale():
          f"emit path is skipping to_fifty_fifty again (EMPIRICAL_REFERENCE §13a)")
 
 
+# Markets whose projection should sit near the book's number about half the time. anytime_td is
+# NOT here: a TD projection is a probability and sits near 32-37% over by construction, so holding
+# it to 50% would fire forever on a non-problem (the NFL flag report learned the same thing).
+LEAN_MARKETS = ("rec_yds", "rush_yds", "pass_yds", "receptions", "pass_tds", "rush_att")
+LEAN_MIN_N = 40          # below this a lean is noise, not a signal
+# 🚨 THESE BANDS WARN; THEY CANNOT PROVE. At n=198 the standard error on a 50% rate is about
+# 3.6 points, so one market at 45.5% is ~1.3 SE from fair — real enough to look at, nowhere near
+# enough to fail a job on. The 2026-10-09 regression was 3-4 points on every market at once, and
+# the honest statement is that no single-week test can call that significant market by market.
+# What catches it is the POOLED line below plus a human reading three markets that all moved the
+# same way, which is why this check reports every market every run instead of staying silent when
+# it is happy. FAIL is reserved for a lean too large to be sampling noise at any of these sizes.
+LEAN_WARN = (46.0, 54.0)
+LEAN_FAIL = (40.0, 60.0)
+# The markets that carry the mean->median conversion and should each sit near 50%. Pooled, they
+# are the single most sensitive thing available in one week's board: a global bias moves all of
+# them together, while one genuinely mispriced market moves only itself.
+LEAN_POOL = ("rec_yds", "rush_yds", "pass_yds")
+
+# 🚨 KNOWN-MISCALIBRATED, AND DELIBERATELY ONLY A WARNING. These two have leaned over since the
+# median conversion was fitted (receptions ~63%, pass_tds ~57%) because neither carries a
+# conversion — the receptions bands were fitted and REJECTED on backtest (they did not clear the
+# bar), so nothing corrects them yet. They are listed rather than silently excluded, and they warn
+# loudly every run. Failing the job on a pre-existing issue is how a red stops meaning anything,
+# which is the one outcome a guardrail must never produce. Delete an entry the day it is refitted.
+LEAN_WARN_ONLY = {"receptions": "bands fitted and rejected on backtest — no conversion applied",
+                  "pass_tds": "no conversion applied"}
+
+
+def check_lean():
+    """Is the board leaning one way, per market?
+
+    🚨 THIS EXISTS BECAUSE DEREK CAUGHT A REGRESSION BY EYE THAT NOTHING ELSE WOULD HAVE CAUGHT.
+    On 2026-10-09 an asymmetric role-pull shipped at CFB_ASYM=0.5 — fitted on low-usage receivers,
+    where it genuinely improves MAE, but applied to every player sitting under their role baseline
+    and only ever downward. Receiving yards went from 49.0% over (median proj/book 1.000) to 45.5%,
+    and every other market moved the same direction with it. The board was quietly under-leaning
+    for a day. No check here looked at the numbers the board publishes, only at coverage and
+    staleness, so the first and only alarm was a person looking at it.
+
+    LEAN IS MEASURED PER MARKET, NEVER POOLED. Pooling hides exactly this: anytime_td's structural
+    30% and receptions' 63% average out to something that looks fine while both are wrong.
+    """
+    rows = _ncaaf_rows()
+    by = {}
+    for r in rows:
+        mk, p, b = r.get("market"), r.get("proj"), r.get("book")
+        if mk in LEAN_MARKETS and p is not None and b:
+            by.setdefault(mk, []).append(1 if p > b else 0)
+    if not by:
+        warn("no priced rows to measure lean on")
+        return
+    for mk in sorted(by, key=lambda m: -len(by[m])):
+        hits = by[mk]
+        n = len(hits)
+        if n < LEAN_MIN_N:
+            continue
+        pct = sum(hits) / n * 100.0
+        if LEAN_WARN[0] <= pct <= LEAN_WARN[1]:
+            say(f"- lean `{mk}` {pct:.1f}% over ({n} rows) — balanced")
+            continue
+        note = LEAN_WARN_ONLY.get(mk)
+        msg = (f"`{mk}` leans {pct:.1f}% over across {n} priced rows "
+               f"(a fair board sits near 50%)")
+        if note:
+            warn(msg + f" — known: {note}")
+        elif LEAN_FAIL[0] <= pct <= LEAN_FAIL[1]:
+            warn(msg)
+        else:
+            fail(msg + " — a board where one market leans this hard is a projection bug, not a read")
+
+    # Pooled across the conversion-carrying yardage markets. Reported every run, warned on when it
+    # drifts, because a global bias shows here before it is provable in any one market.
+    pool = [h for mk in LEAN_POOL for h in by.get(mk, [])]
+    if len(pool) >= LEAN_MIN_N:
+        n = len(pool)
+        pct = sum(pool) / n * 100.0
+        se = 50.0 / (n ** 0.5)
+        sigma = abs(pct - 50.0) / se if se else 0.0
+        line = (f"lean POOLED {'/'.join(LEAN_POOL)} {pct:.1f}% over ({n} rows, "
+                f"{sigma:.1f} SE from fair)")
+        if LEAN_WARN[0] <= pct <= LEAN_WARN[1]:
+            say(f"- {line} — balanced")
+        else:
+            warn(line + " — every conversion-carrying market drifting the same way is the "
+                        "fingerprint of a board-wide bias, not of one mispriced market")
+
+
 def _ncaaf_rows():
     """The generated board, parsed.
 
@@ -376,6 +465,7 @@ def main():
     check_lines(card)
     check_priced_players()
     check_one_scale()
+    check_lean()
 
     say("---")
     if FAILS:

@@ -723,7 +723,27 @@ QB_BLEND_K = float(os.environ.get("CFB_QB_K", "3"))
 # MAE consistently while rushing gains ~0.7 — a QB below his attempt baseline is usually game script
 # rather than a lost role, so exempting pass_att is the obvious refinement. NOT done here: that idea
 # arrived after seeing this table, and tuning on the confirm week is how you launder a guess.
-ASYM_DOWN = float(os.environ.get("CFB_ASYM", "0.5"))
+# 🚨 BACK TO 1.0 (SYMMETRIC) AFTER A MEASURED CALIBRATION REGRESSION. This shipped at 0.5 on
+# 2026-10-09 because it improved MAE on low-usage receivers — and it does. The error was the
+# SCOPE: the rule below fires for every player whose own rate sits under their role baseline,
+# which is roughly half the board across every position and market, and it only ever pulls DOWN.
+# A one-directional correction fit on one band and applied league-wide is a board-wide bias.
+#
+# Measured on week 6, same lines, only this knob changed:
+#
+#     market       ASYM=1.0  ->  ASYM=0.5        (over%, and median proj/book)
+#     rec_yds      49.0% 1.000 -> 45.5% 0.983
+#     rush_yds     48.5% 0.989 -> 45.4% 0.981
+#     pass_yds     49.0% 0.985 -> 44.9% 0.985
+#     receptions   62.9%       -> 59.6%
+#     anytime_td   32.2% 0.793 -> 30.1% 0.763
+#
+# Every market moved the same way, and receiving yards went from essentially perfect (49.0%,
+# ratio 1.000) to a visible under-lean — which is how Derek caught it, by eye, on the live board.
+# A board where every row leans one way is the exact failure this project's own notes say to
+# treat as a bug rather than a signal, so calibration wins over the MAE gain until the pull is
+# scoped to the band it was actually fit on.
+ASYM_DOWN = float(os.environ.get("CFB_ASYM", "1.0"))
 # A TRANSFER's prior-school production is attributed to his NEW team, because build() re-tags the
 # whole log entry and rank_baselines then groups by that field — so Evan Dickens' 20.7 car/g at a
 # CUSA school BECAME Boston College's RB1 baseline, and he was blended toward himself
@@ -897,8 +917,10 @@ def project_role(games, market, pos, rank, team, per_team, league):
             # catches, on a median line of 1.5 (§13j). Every one of those used a TEAM baseline, so
             # it is not a league fallback being generous — it is the slot overriding the player.
             #
-            # CFB_ASYM scales the role weight only on the DOWN side: 1.0 is the symmetric blend that
-            # ships, 0.0 trusts a below-slot player's own volume completely. Off by default.
+            # CFB_ASYM scales the role weight only on the DOWN side: 1.0 is the symmetric blend
+            # that ships, 0.0 trusts a below-slot player's own volume completely. OFF by default
+            # (1.0) — see the regression note on ASYM_DOWN above. Still settable for backtests,
+            # but anything below 1.0 drags the WHOLE board under, not just the band it was fit on.
             if ASYM_DOWN != 1.0 and own < base:
                 k *= ASYM_DOWN
             v = (own * n + base * k) / (n + k) if n else base
