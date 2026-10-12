@@ -364,8 +364,12 @@ LEAN_POOL = ("rec_yds", "rush_yds", "pass_yds")
 # bar), so nothing corrects them yet. They are listed rather than silently excluded, and they warn
 # loudly every run. Failing the job on a pre-existing issue is how a red stops meaning anything,
 # which is the one outcome a guardrail must never produce. Delete an entry the day it is refitted.
-LEAN_WARN_ONLY = {"receptions": "bands fitted and rejected on backtest — no conversion applied",
-                  "pass_tds": "no conversion applied"}
+LEAN_WARN_ONLY = {
+    "receptions": "no conversion — every shrink tested overshoots to ~35% over and worsens MAE "
+                  "(EMPIRICAL_REFERENCE §13k)",
+    "pass_tds":   "no conversion — the fitted ratio flips direction with the train/test split "
+                  "(0.667 vs 1.333), i.e. noise at n=191 (§13k)",
+}
 
 
 def check_lean():

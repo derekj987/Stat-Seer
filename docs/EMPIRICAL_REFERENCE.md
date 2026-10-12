@@ -1355,3 +1355,67 @@ mispriced number — turned up on **7 of 1,048 book quotes (1%)**, worth a media
 0.66%, clustered in reduced-juice books (lowvig, betonlineag). So the NHL Value Finder's honest
 pitch is **shopping, not mispricing**: the routine 1% is real and repeatable, the 0.30% outlier is
 neither. The page says exactly that.
+
+---
+
+### §13k. Receptions and pass TDs: the mean→median conversion is the WRONG INSTRUMENT — NOT shipped (2026-10-12)
+
+Derek, on the live board: *"a lot more unders than overs for receiving yards, passing yards, rushing
+yards."* That turned out to be a separate regression (§13l), but it surfaced the two markets leaning
+the other way and never corrected: **receptions 62.9% over, pass_tds 57.1% over**.
+
+`to_fifty_fifty`'s docstring and `cfb_median_fit`'s both said the honest fit needs *median(actual) as
+a function of OUR mean*, blocked on `mu` not being stored per row. `mu` is stored now, so
+`analysis/cfb_mu_median_fit.py` does that fit: it bands on **mu** (the scale the lookup actually
+uses, closing the §13 "fitted on one scale, applied on another" error), trains on early weeks and
+scores on later ones it never saw.
+
+**The harness is validated, because it re-derives a known-good answer.** On rec_yds — already
+converted and shipped — it independently takes the held-out board from **69.8% over to 49.0%**. So
+the method works where the market suits it.
+
+**It does not suit these two.** The decisive table, 6 weeks of backtested `mu` joined to CFBD
+actuals and the posted line:
+
+| market | n | actual > line | our mu > line | med actual | med line | med mu |
+|---|---|---|---|---|---|---|
+| receptions | 301 | 53.5% | **70.1%** | 3.00 | 2.50 | 3.50 |
+| pass_tds | 191 | 49.7% | 55.5% | 1.00 | 1.50 | 1.50 |
+| rec_yds | 357 | 52.9% | 75.1% | 40.00 | 39.50 | 48.40 |
+| rush_yds | 239 | 43.1% | 57.7% | 49.00 | 59.50 | 60.40 |
+
+**The book is calibrated on both** — actual beats the line 53.5% and 49.7%, within noise of half
+(SE ≈ 2.9 and 3.6 points). So there is no mispricing to harvest, only our own number to align.
+
+Every correction tested overshoots, and by about as much as it was missing by:
+
+| market | fit | held-out over | MAE |
+|---|---|---|---|
+| receptions | banded on mu | 64.7% → **34.1%** | 1.401 → 1.509 **worse** |
+| receptions | flat 0.822 (train 1-4) | 64.7% → **36.5%** | 1.401 → 1.490 **worse** |
+| receptions | flat 0.833 (train 1-3) | 67.5% → **35.0%** | 1.457 → 1.480 **worse** |
+| pass_tds | flat 0.667 (train 1-4) | 52.1% → **20.8%** | 1.023 → 1.033 **worse** |
+| pass_tds | flat 1.333 (train 1-3) | 61.8% → **89.9%** | 0.993 → 1.147 **worse** |
+
+**pass_tds cannot even agree with itself on the DIRECTION**: train on weeks 1-4 and the fitted ratio
+is 0.667, train on 1-3 and it is 1.333. A correction whose sign flips with the split is noise, and
+n=191 over six weeks is why.
+
+**WHY A MULTIPLICATIVE SHRINK IS THE WRONG INSTRUMENT HERE, which is the transferable part.** These
+are small counts priced against half-point lines. Median mu (3.65) sits only ~1.15 above median line
+(2.50), so a ratio that moves the median onto the line in aggregate pushes a large share of
+individual rows clean past it — the shrink is proportional to mu, and the high-mu rows take the
+biggest absolute cut. The medians line up and the row-by-row comparison does not. Yardage markets
+are continuous with a wide range and do not have this problem, which is exactly why §13 works there
+and dies here.
+
+The raw per-band receptions ratios also refuse to be monotone — **0.556, 0.980, 0.882, 0.889,
+0.741** — so the "skew can only shrink as the level rises" constraint that is sound for yardage
+forced every band up to 0.98 and erased the correction entirely. That constraint is market-specific
+and must not be applied by default.
+
+**Verdict: ship nothing.** Both markets stay unconverted and are on an explicit WARN-only allowlist
+in `analysis/ncaaf_guardrail.py` so they stay visible without turning the job red daily. What would
+actually move this: a line-aware conversion that publishes P(X > line) from the player's own count
+distribution rather than scaling a mean, and several times this sample. Re-run
+`cfb_mu_median_fit.py` once the season is deep enough to make the ratio stable across splits.
