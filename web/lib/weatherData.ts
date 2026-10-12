@@ -7,8 +7,7 @@ export interface GameWeather { eventId: string; game: string; home: string; away
   gustMph: number|null; precipPct: number|null; conditions: string|null; windFlag: boolean }
 export const WEATHER_SEASON = 2026;
 export const WEATHER_WEEK = 5;
-export const WEATHER_UPDATED = "2026-10-12T04:05Z";
+export const WEATHER_UPDATED = "2026-10-12T17:18Z";
 export const GAME_WEATHER: GameWeather[] = [
-  {"eventId": "86457f91112732f21ad4bb7d37bd291c", "game": "BAL @ ATL", "home": "ATL", "away": "BAL", "commence": "2026-10-12T00:23:00+00:00", "neutral": false, "venue": "Mercedes-Benz Stadium", "city": "Atlanta", "state": "GA", "roof": "retractable", "indoor": true, "status": "indoor", "tempF": null, "windMph": null, "gustMph": null, "precipPct": null, "conditions": null, "windFlag": false},
   {"eventId": "e6d00eedd87d367e510314bd8cab8f6f", "game": "BUF @ LA", "home": "LA", "away": "BUF", "commence": "2026-10-13T00:15:00+00:00", "neutral": false, "venue": "SoFi Stadium", "city": "Inglewood", "state": "CA", "roof": "dome", "indoor": true, "status": "indoor", "tempF": null, "windMph": null, "gustMph": null, "precipPct": null, "conditions": null, "windFlag": false},
 ];
