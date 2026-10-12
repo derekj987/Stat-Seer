@@ -8,11 +8,11 @@ export const RATINGS_SEASON = 2026;
 export const RATINGS_IS_PRIOR = false;
 export const TEAM_RATINGS: Record<string, TeamRating> = {
   "ARI": { team: "ARI", off: 21.6, def: 32.4, offRank: 22, defRank: 32, games: 5 },
-  "ATL": { team: "ATL", off: 24.0, def: 23.0, offRank: 13, defRank: 20, games: 4 },
-  "BAL": { team: "BAL", off: 29.0, def: 24.0, offRank: 6, defRank: 21, games: 4 },
+  "ATL": { team: "ATL", off: 23.8, def: 24.4, offRank: 14, defRank: 21, games: 5 },
+  "BAL": { team: "BAL", off: 29.2, def: 23.8, offRank: 6, defRank: 20, games: 5 },
   "BUF": { team: "BUF", off: 31.8, def: 26.8, offRank: 2, defRank: 25, games: 4 },
   "CAR": { team: "CAR", off: 30.2, def: 27.2, offRank: 4, defRank: 26, games: 4 },
-  "CHI": { team: "CHI", off: 23.8, def: 19.2, offRank: 14, defRank: 5, games: 5 },
+  "CHI": { team: "CHI", off: 23.8, def: 19.2, offRank: 13, defRank: 5, games: 5 },
   "CIN": { team: "CIN", off: 25.6, def: 21.8, offRank: 10, defRank: 11, games: 5 },
   "CLE": { team: "CLE", off: 18.6, def: 22.4, offRank: 27, defRank: 17, games: 5 },
   "DAL": { team: "DAL", off: 27.6, def: 27.2, offRank: 7, defRank: 27, games: 5 },
