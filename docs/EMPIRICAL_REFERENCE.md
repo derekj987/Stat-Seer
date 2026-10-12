@@ -1509,3 +1509,60 @@ between the closing total and the truth is 1.88% the wrong way. The remaining ca
 list is the one with a *timing* mechanism rather than a priced-variable one — goalie confirmation,
 which lands the morning of the game — and that is Value Finder arithmetic on a stale price, not a
 model. §14c's verdict stands: the NHL module's honest pitch is shopping.
+
+### 14g. Goalie confirmation — NO timing edge; the apparent one is price extremity (2026-10-12)
+
+Derek: "build the goalie confirmation value finder." **The premise fails, so it was not built.**
+
+§14f settled that the closing total is efficient, leaving one item on the NHL factor list whose
+mechanism is *timing* rather than a priced variable: NHL starters are confirmed on the morning of
+the game, so a book slow to reprice a backup start would be offering a stale number — Value Finder
+arithmetic, not a model. Tested with `nhl_goalies.py` + `nhl_goalie_value.py`.
+
+**Data.** 1,312 games (2024-25), starting goalies from the NHL's own boxscore `starter` flag (free).
+Odds backfilled at **three** lead times — T−24h, T−4h, near-close — 192,772 book-level rows,
+~31k credits. Four-book minimum for a consensus.
+
+**The label has no hindsight, and the first attempt at it was wrong.** A binary "backup started"
+at a <50%-of-starts threshold fired on **60.7%** of games, because NHL teams split starts ~60/40 and
+a 1B starting 30% of the time is routine, not news (New Jersey's Jake Allen was flagged as a
+surprise in every one of his starts). Replaced with a dose-response on the *more surprising* of the
+two starters, using only that goalie's share of the team's starts **before** the game, requiring 10
+prior team games first: 31.1% / 29.9% / 22.8% / 16.2% across #1-both / routine-1B / deep-backup /
+rare-start. Rare-start examples are genuine (Commesso 0% of Chicago's prior starts, Wedgewood 4%).
+
+**Result: flat, and tightest exactly where the hypothesis says it should be loosest.** Share of book
+quotes beating the de-vigged consensus:
+
+| band | totals | h2h |
+|---|---|---|
+| pre-confirm (~24h) | 0.3% | 0.9% |
+| post-confirm (~4h) | **0.2%** | **0.5%** |
+| close (<40m) | 0.5% | 0.8% |
+
+The post-confirmation window is the *least* disperse of the three. Books reprice together. On
+totals the dose-response down the surprise buckets is non-monotonic noise (0.1% / 0.3% / 0.1% /
+0.2%).
+
+**h2h did show a gradient — 0.4% → 0.9% from #1-both to rare-start — and it is a confound.** Two
+independent reasons:
+
+1. **It is strongest 24h out** (0.7% → 1.5%), *before the starter is known*. The information does
+   not exist yet, so it cannot be causing the dispersion.
+2. **Consensus-beating quotes track how lopsided the price is, not goalies:** 0.5% near an even
+   price rising monotonically to **2.7%** at 25%+ from even — a 5× gradient. And rare-start games
+   are more lopsided games (mean 11.4% from even vs 9.4% for #1-vs-#1). The goalie gradient is the
+   extremity gradient wearing a costume.
+
+**Conclusion: no goalie-confirmation timing edge. Do not build the panel.** Median edge never
+exceeded ~0.55% in any window and typically sat at 0.2%, i.e. no better than §14c's 0.30% at the
+close. Three NHL negatives now agree: the total is efficient (§14f), the market is calibrated
+(§14e), and news timing does not strand value (here). §14c's verdict stands unchanged — the NHL
+module's honest pitch is **shopping**, and it should stay Value-Finder-only with no model.
+
+**⚠️ One lead, and a reason to distrust it.** The extremity gradient (0.5% → 2.7%) would be a real
+shopping filter if it survives, but **proportional de-vig is known to be biased on lopsided
+two-way markets** (favourite–longshot bias), which is the exact regime where the gradient appears.
+So the 2.7% may be measuring our own de-vig error rather than a mispriced book. Testing it means
+re-running with a Shin or power de-vig and seeing whether the gradient holds. Until then it is a
+lead, **not a finding**, and nothing should be shipped on it.

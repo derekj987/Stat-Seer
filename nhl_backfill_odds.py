@@ -115,11 +115,13 @@ def main(argv=None):
     g.add_argument("--seasons", help="range or list, e.g. 2021-2025")
     ap.add_argument("--results-csv", default="data/nhl_results.csv",
                     help="schedule source, built by nhl_results.py (free)")
-    ap.add_argument("--offset-minutes", type=float, default=6.0,
-                    help="snapshot this many minutes before puck drop (default 6 = closing)")
+    ap.add_argument("--offset-minutes", default="6",
+                    help="minutes before puck drop to snapshot; comma list for several "
+                         "(default 6 = near-closing). e.g. '240,6' straddles the morning "
+                         "goalie confirmation.")
     ap.add_argument("--window-minutes", type=float, default=30.0,
-                    help="keep events dropping within this long after the snapshot -- the games "
-                         "this snapshot was planned for")
+                    help="how far an event's puck drop may sit from the drop time this snapshot "
+                         "targets, so each game is recorded at its intended lead time")
     ap.add_argument("--regions", default="us")
     ap.add_argument("--markets", default="h2h,spreads,totals")
     ap.add_argument("--max-credits", type=int, default=100000, help="hard budget for the run")
@@ -148,12 +150,19 @@ def main(argv=None):
               file=sys.stderr)
         return 1
 
+    # One planned snapshot per (puck-drop time, offset). Several offsets let us see the line
+    # BEFORE and AFTER the morning goalie confirmation, not just at the close.
+    offsets = [float(x) for x in str(args.offset_minutes).split(",") if x.strip()]
+    plan = [(drop, off) for drop in drops for off in offsets]
+
     n_games = sum(drops.values())
     per_call = 10 * len(args.markets.split(",")) * len(args.regions.split(","))
-    est = len(drops) * per_call
+    est = len(plan) * per_call
     print(f"PLAN: season(s) {sorted(seasons)} -- {n_games:,} game(s) across "
           f"{len(drops):,} distinct puck-drop time(s).")
-    print(f"      {per_call} credits per call x {len(drops):,} calls = ~{est:,} credits "
+    print(f"      offsets before puck drop (min): {', '.join(f'{o:g}' for o in offsets)}"
+          f"  ->  {len(plan):,} snapshot(s)")
+    print(f"      {per_call} credits per call x {len(plan):,} calls = ~{est:,} credits "
           f"(markets={args.markets}, regions={args.regions}).")
     print(f"      discovery cost 0 -- schedule came from the NHL feed, not the odds API.")
     if args.plan_only:
@@ -168,13 +177,15 @@ def main(argv=None):
         args.dry_run = True
 
     total_rows, done, empty, in_progress_skipped = 0, 0, 0, 0
-    for drop, n_at in drops.items():
+    for drop, off in plan:
+        n_at = drops[drop]
         if max_snaps and done >= max_snaps:
             print(f"\nstopping at --max-snaps ({max_snaps})."); break
         if _used[0] >= args.max_credits:
             print(f"\nstopping: credit budget {args.max_credits:,} reached ({_used[0]:,} used)."); break
         done += 1
-        snap_req = iso_z(parse_iso(drop) - _dt.timedelta(minutes=args.offset_minutes))
+        target = parse_iso(drop)
+        snap_req = iso_z(target - _dt.timedelta(minutes=off))
         st, resp = hist_get({"apiKey": key, "regions": args.regions, "markets": args.markets,
                              "oddsFormat": "american", "date": snap_req})
         if st != 200 or not resp:
@@ -189,12 +200,14 @@ def main(argv=None):
             ct = e.get("commence_time")
             if not ct:
                 continue
-            mins = (parse_iso(ct) - snap_dt).total_seconds() / 60.0
-            if mins < 0:
-                in_progress_skipped += 1      # already under way: NOT a closing line
+            # Target THIS drop time, whatever the offset: a T-4h snapshot still sees the whole
+            # evening's board, and keeping all of it would record each game at a dozen different
+            # lead times. Match on the intended puck drop, not on nearness to the snapshot.
+            if abs((parse_iso(ct) - target).total_seconds()) / 60.0 > args.window_minutes:
                 continue
-            if mins > args.window_minutes:
-                continue                      # a later game; its own snapshot will catch it
+            if (parse_iso(ct) - snap_dt).total_seconds() < 0:
+                in_progress_skipped += 1      # already under way: NOT a pregame price
+                continue
             keep.append(e)
         if not keep:
             empty += 1
