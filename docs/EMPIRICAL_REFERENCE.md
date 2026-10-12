@@ -1419,3 +1419,54 @@ in `analysis/ncaaf_guardrail.py` so they stay visible without turning the job re
 actually move this: a line-aware conversion that publishes P(X > line) from the player's own count
 distribution rather than scaling a mean, and several times this sample. Re-run
 `cfb_mu_median_fit.py` once the season is deep enough to make the ratio stable across splits.
+
+---
+
+### §14. NHL goalie starts — backfilled 1,399 games, and two findings (2026-10-12)
+
+`nhl_goalies.py` backfills who started in goal and how they did, from the NHL public API:
+**2025-26 complete (1,312 games) plus 2026-27 to date (87)** — 2,953 goalie rows, 2,624 + 174
+starters, exactly **2.00 starters per game** and zero game-sides left ambiguous.
+
+**§14a. THE OFFICIAL FEED HAS NO PROJECTED STARTER.** Checked endpoint by endpoint on a PRE-state
+game: `schedule/now` carries no goalie field, and `gamecenter/{id}/landing.matchup` has
+`goalieComparison` and `goalieSeasonStats`, both of which list EVERY goalie on both rosters with
+season numbers and name no starter — the strings "start", "probable", "confirmed", "expected" and
+"projected" appear **zero** times in that payload. The starter is only visible once the game
+begins.
+
+This splits the goalie problem in two, and the halves have different deadlines:
+
+| | source | perishable? |
+|---|---|---|
+| who started, and how it went | NHL API, any time | **no** — backfillable forever |
+| who is starting tonight, and when it was announced | not in the official feed | **yes** — needs a third party |
+
+So the "capture it now or lose it" argument applies only to the second half. The historical record
+can be rebuilt on demand, which is why this was done as a backfill rather than a daily capture.
+
+**§14b. NEITHER OBVIOUS WAY TO IDENTIFY THE STARTER WORKS.** The boxscore has no `starter` flag.
+Measured across all 2,798 game-sides: both goalies played in **155 (5.5%)**, and in those the
+goalie with MORE ICE TIME is the wrong one **79 times — 51%, a coin flip**. Boxscore order was
+3/6 on a first sample. The reliable answer is the play-by-play's first goalie-in-net for that team,
+which is one extra request and only needed for that 5.5%.
+
+This matters more than the small share suggests: an ambiguous side IS the pulled-starter case —
+a goalie who was announced, started, and got yanked — which is exactly the population a rest or
+workload model is about. A heuristic would have mislabelled 79 of them.
+
+**§14c. BACK-TO-BACKS DO NOT SHOW A FATIGUE PENALTY — the opposite, if anything.**
+
+| rest days | starts | mean save% |
+|---|---|---|
+| 0 (back-to-back) | 452 | **0.8933** |
+| 1 | 1,673 | 0.8857 |
+| 2 | 475 | 0.8854 |
+| 3 | 99 | 0.8918 |
+| 4 | 47 | 0.8700 |
+
+No monotone pattern, and the back-to-back group is the *best* of the large buckets. **Do not put a
+rest-fatigue term in an NHL model on intuition.** The obvious confound is selection — a club often
+starts its BACKUP on the second night, so "back-to-back" is partly "a different goalie" rather than
+"the same goalie, tired" — and the right test therefore conditions on the GOALIE, not on the date.
+Noted here so the naive version is not shipped as a feature.
