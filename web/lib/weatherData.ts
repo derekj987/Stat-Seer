@@ -7,11 +7,8 @@ export interface GameWeather { eventId: string; game: string; home: string; away
   gustMph: number|null; precipPct: number|null; conditions: string|null; windFlag: boolean }
 export const WEATHER_SEASON = 2026;
 export const WEATHER_WEEK = 5;
-export const WEATHER_UPDATED = "2026-10-11T19:53Z";
+export const WEATHER_UPDATED = "2026-10-12T04:05Z";
 export const GAME_WEATHER: GameWeather[] = [
-  {"eventId": "d1d408fdfd272046fb517fe992a1c5a0", "game": "DEN @ LAC", "home": "LAC", "away": "DEN", "commence": "2026-10-11T20:05:00+00:00", "neutral": false, "venue": "SoFi Stadium", "city": "Inglewood", "state": "CA", "roof": "dome", "indoor": true, "status": "indoor", "tempF": null, "windMph": null, "gustMph": null, "precipPct": null, "conditions": null, "windFlag": false},
-  {"eventId": "f8e7f43f73aa983c5c99c189587f0118", "game": "DET @ ARI", "home": "ARI", "away": "DET", "commence": "2026-10-11T20:25:00+00:00", "neutral": false, "venue": "State Farm Stadium", "city": "Glendale", "state": "AZ", "roof": "retractable", "indoor": true, "status": "indoor", "tempF": null, "windMph": null, "gustMph": null, "precipPct": null, "conditions": null, "windFlag": false},
-  {"eventId": "8e5d515b10d8a5ffb324640ed60bcc55", "game": "SF @ SEA", "home": "SEA", "away": "SF", "commence": "2026-10-11T20:25:00+00:00", "neutral": false, "venue": "Lumen Field", "city": "Seattle", "state": "WA", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 57, "windMph": 7, "gustMph": 10, "precipPct": 0, "conditions": "Clear", "windFlag": false},
-  {"eventId": "86457f91112732f21ad4bb7d37bd291c", "game": "BAL @ ATL", "home": "ATL", "away": "BAL", "commence": "2026-10-12T00:20:00+00:00", "neutral": false, "venue": "Mercedes-Benz Stadium", "city": "Atlanta", "state": "GA", "roof": "retractable", "indoor": true, "status": "indoor", "tempF": null, "windMph": null, "gustMph": null, "precipPct": null, "conditions": null, "windFlag": false},
+  {"eventId": "86457f91112732f21ad4bb7d37bd291c", "game": "BAL @ ATL", "home": "ATL", "away": "BAL", "commence": "2026-10-12T00:23:00+00:00", "neutral": false, "venue": "Mercedes-Benz Stadium", "city": "Atlanta", "state": "GA", "roof": "retractable", "indoor": true, "status": "indoor", "tempF": null, "windMph": null, "gustMph": null, "precipPct": null, "conditions": null, "windFlag": false},
   {"eventId": "e6d00eedd87d367e510314bd8cab8f6f", "game": "BUF @ LA", "home": "LA", "away": "BUF", "commence": "2026-10-13T00:15:00+00:00", "neutral": false, "venue": "SoFi Stadium", "city": "Inglewood", "state": "CA", "roof": "dome", "indoor": true, "status": "indoor", "tempF": null, "windMph": null, "gustMph": null, "precipPct": null, "conditions": null, "windFlag": false},
 ];
