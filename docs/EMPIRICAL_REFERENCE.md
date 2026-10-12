@@ -1453,7 +1453,9 @@ connection resets; the writer is idempotent, so a re-run would recover them.)
 That **independently corroborates §14c's 4.62%**, which came from a single live sweep by a different
 code path. Two measurements, two methods, same number — the bar is solid.
 
-**The result — nothing to take:**
+**The result — nothing to take.** (Single season only; **§14f extends this to four seasons and is
+the number to quote** — the −0.69% below turns out to sit inside a 4.9-point band, and the winning
+side flips between seasons.)
 
 | | |
 |---|---|
@@ -1472,3 +1474,38 @@ sets 52.23% as the out-of-sample hurdle any such candidate must clear. The place
 the one thing on Derek's list with a *timing* mechanism rather than a priced-variable mechanism —
 goalie confirmation, which lands the morning of the game — and that is Value Finder arithmetic on a
 stale price, not a model. Consistent with §14c: the NHL module's honest pitch is shopping.
+
+### 14f. ...and it does not hold — the "best side" flips between seasons (2026-10-12)
+
+Derek: "backfill 2021-2023 and see if it holds." It does not. Backfilled three more seasons
+(2,310 snapshots, 379,994 rows, 69,300 credits, zero write failures) and re-ran §14e per season.
+**5,061 games with a near-closing consensus total; 4,812 decided bets.**
+
+| season | games | coverage | hold | break-even | under | best side | vs break-even |
+|---|---|---|---|---|---|---|---|
+| 2021-22 | 1,267 | 96.6% | 4.51% | 52.26% | 46.7% | **over 53.3%** | **+1.09%** |
+| 2022-23 | 1,270 | 96.8% | 4.55% | 52.27% | 49.8% | over 50.2% | −2.02% |
+| 2023-24 | 1,284 | 97.9% | 4.51% | 52.25% | 50.6% | under 50.6% | −1.64% |
+| 2024-25 | 1,240 | 94.5% | 4.45% | 52.23% | 51.5% | under 51.5% | −0.69% |
+| **POOLED** | **5,061** | | **4.50%** | **52.25%** | 49.6% | over 50.37% | **−1.88%** |
+
+**The side that "won" flips from over to under halfway through the sample.** The under-rate swings
+46.7% → 51.5%, a 4.9-point band, and §14e's −0.69% sits comfortably inside it. Pooled across 4,812
+decided bets the best available side misses break-even by **1.88%** — close to the full hold, which
+is what an efficient market looks like.
+
+**And 2021-22 on its own would have looked like an edge: the over cleared break-even by +1.09%.**
+Stopping there would have produced a publishable "NHL overs beat the market" claim that the very
+next season contradicts. That is the Week 1 power-rating trap from CLAUDE.md repeating in a second
+sport — the reason the standing rule demands out-of-sample confirmation before anything ships.
+
+**What IS stable is the hold:** 4.45%–4.55% across four seasons, and §14c measured 4.62% by a
+different code path on a live sweep. The bar is 52.25% and it is solid. Coverage held at 94.5%–97.9%
+with no season degrading.
+
+**Conclusion: the NHL closing total is efficient, confirmed out of sample.** No side, no season, no
+direction. A goaltending/xG/pace model must clear 52.25% out of sample, and the measured room
+between the closing total and the truth is 1.88% the wrong way. The remaining candidate on Derek's
+list is the one with a *timing* mechanism rather than a priced-variable one — goalie confirmation,
+which lands the morning of the game — and that is Value Finder arithmetic on a stale price, not a
+model. §14c's verdict stands: the NHL module's honest pitch is shopping.

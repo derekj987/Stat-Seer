@@ -46,7 +46,9 @@ import json
 import os
 import statistics
 import sys
+import time
 import unicodedata
+import urllib.error
 import urllib.request
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -76,16 +78,30 @@ def parse_iso(s):
     return _dt.datetime.fromisoformat(str(s).replace("Z", "+00:00"))
 
 
-def sb_get(env, table, query, page=1000):
-    """Paged PostgREST select -- the snapshot table is far bigger than one response."""
+def sb_get(env, table, query, page=1000, tries=4):
+    """Paged PostgREST select -- the snapshot table is far bigger than one response.
+
+    Four seasons of totals is ~400k rows, so this makes hundreds of sequential requests and
+    Supabase WILL reset one of them (WinError 10054) partway through. Retry the page rather
+    than losing the whole read; a page that fails every attempt raises, so a genuine outage
+    still surfaces instead of silently returning a short result that looks like a finding."""
     base = env["SUPABASE_URL"].rstrip("/") + f"/rest/v1/{table}"
     key = env["SUPABASE_SERVICE_KEY"]
     out, offset = [], 0
     while True:
         h = {"apikey": key, "Authorization": f"Bearer {key}",
              "Range-Unit": "items", "Range": f"{offset}-{offset + page - 1}"}
-        chunk = json.loads(urllib.request.urlopen(
-            urllib.request.Request(f"{base}{query}", headers=h), timeout=180).read())
+        chunk = None
+        for attempt in range(tries):
+            try:
+                chunk = json.loads(urllib.request.urlopen(
+                    urllib.request.Request(f"{base}{query}", headers=h), timeout=180).read())
+                break
+            except (urllib.error.URLError, ConnectionError, TimeoutError) as e:
+                if attempt == tries - 1:
+                    raise RuntimeError(
+                        f"{table}: page at offset {offset:,} failed {tries} times ({e})") from e
+                time.sleep(2 * (attempt + 1))
         out += chunk
         if len(chunk) < page:
             return out
@@ -147,19 +163,14 @@ def consensus(rows):
             "n_books": len(fair), "n_lines_posted": len(lines)}
 
 
-def run(args):
-    oc.ensure_ssl_certs()
-    env = oc.load_env()
-    if not (env.get("SUPABASE_URL") and env.get("SUPABASE_SERVICE_KEY")):
-        print("ERROR: SUPABASE_URL / SUPABASE_SERVICE_KEY missing", file=sys.stderr)
-        return 1
+def collect_joined(env, season, results_csv, max_gap, quiet=False):
+    """Fetch one season's backfilled totals and join them to results.
 
-    results = load_results(args.results_csv, args.season)
+    Returns (joined, diag) -- diag carries what the caller must report rather than assume:
+    how many priced games found a result, and how close to puck drop the snapshot really was."""
+    results = load_results(results_csv, season)
     if not results:
-        print(f"no completed {args.season} games in {args.results_csv}. Run:\n"
-              f"  python nhl_results.py --seasons {args.season} --csv {args.results_csv}",
-              file=sys.stderr)
-        return 1
+        return [], {"error": f"no completed {season} games in {results_csv}"}
 
     lo = min(r["start_time_utc"] for r in results)
     hi = max(r["start_time_utc"] for r in results)
@@ -167,26 +178,23 @@ def run(args):
          f"&commence_time=gte.{lo}&commence_time=lte.{hi}"
          "&select=snapshot_at,commence_time,home_team,away_team,book,outcome_name,"
          "outcome_point,price_american")
-    print(f"NHL closing totals -- season {args.season}\nfetching backfilled totals rows ...")
+    if not quiet:
+        print(f"fetching backfilled totals rows for {season} ...")
     odds_rows = sb_get(env, "nhl_odds_snapshots", q)
-    print(f"  {len(odds_rows):,} book-level totals row(s) in the archive window")
     games = build_games(odds_rows)
-    print(f"  {len(games):,} distinct game(s) priced\n")
 
-    # -------------------------------------------------------------- join to results
     idx = collections.defaultdict(list)
     for r in results:
         idx[norm_team(r["home_team"])].append((parse_iso(r["start_time_utc"]), r))
     joined, unmatched, gaps = [], 0, []
     for g in games.values():
         ct = parse_iso(g["commence_time"])
-        cands = idx.get(norm_team(g["home_team"]), [])
         best, bestgap = None, None
-        for st, r in cands:
+        for st, r in idx.get(norm_team(g["home_team"]), []):
             gap = abs((st - ct).total_seconds()) / 3600.0
             if bestgap is None or gap < bestgap:
                 best, bestgap = r, gap
-        if best is None or bestgap > args.max_join_gap_hours:
+        if best is None or bestgap > max_gap:
             unmatched += 1
             continue
         c = consensus(g["rows"])
@@ -195,8 +203,80 @@ def run(args):
             continue
         lead = (ct - parse_iso(g["snapshot_at"])).total_seconds() / 60.0
         gaps.append(lead)
-        joined.append({**c, "total": int(best["total_goals"]),
+        joined.append({**c, "season": season, "total": int(best["total_goals"]),
                        "end": best["last_period_type"], "lead_min": lead})
+    return joined, {"n_odds_rows": len(odds_rows), "n_priced": len(games),
+                    "n_results": len(results), "unmatched": unmatched, "gaps": gaps}
+
+
+def summary_row(joined, holds_bar=None):
+    """The one line that answers 'does it hold' -- under rate vs the break-even it must clear."""
+    n = len(joined)
+    over = sum(1 for j in joined if j["total"] > j["line"])
+    under = sum(1 for j in joined if j["total"] < j["line"])
+    push = n - over - under
+    dec = over + under
+    hold = statistics.fmean(j["hold"] for j in joined)
+    be = 0.5 + hold / 2
+    best = max(over, under) / dec if dec else 0
+    return {"n": n, "over": over, "under": under, "push": push, "dec": dec,
+            "hold": hold, "be": be, "under_rate": under / dec if dec else 0,
+            "best": best, "edge": best - be,
+            "side": "under" if under >= over else "over"}
+
+
+def run(args):
+    oc.ensure_ssl_certs()
+    env = oc.load_env()
+    if not (env.get("SUPABASE_URL") and env.get("SUPABASE_SERVICE_KEY")):
+        print("ERROR: SUPABASE_URL / SUPABASE_SERVICE_KEY missing", file=sys.stderr)
+        return 1
+
+    # ---------------------------------------------- multi-season: does the result hold?
+    if args.seasons:
+        seasons = sorted({int(x) for part in args.seasons.split(",")
+                          for x in (range(int(part.split("-")[0]), int(part.split("-")[1]) + 1)
+                                    if "-" in part else [int(part)])})
+        print(f"NHL closing totals -- seasons {seasons[0]}-{seasons[-1]}\n")
+        allj, rows = [], []
+        for s in seasons:
+            j, d = collect_joined(env, s, args.results_csv, args.max_join_gap_hours)
+            if d.get("error") or not j:
+                print(f"  {s}: {d.get('error', 'nothing joined')}", file=sys.stderr)
+                continue
+            allj += j
+            rows.append((s, summary_row(j), d))
+        if not allj:
+            print("nothing joined for any season.", file=sys.stderr)
+            return 1
+        print(f"\n{'season':<9}{'games':>7}{'cover':>8}{'hold':>8}{'break-even':>12}"
+              f"{'under':>8}{'best side':>11}{'vs b/e':>9}")
+        for s, m, d in rows:
+            print(f"{s}-{str(s + 1)[2:]:<4}{m['n']:>7}{m['n'] / d['n_results']:>8.1%}"
+                  f"{m['hold']:>8.2%}{m['be']:>12.2%}{m['under_rate']:>8.1%}"
+                  f"{m['side'] + ' ' + format(m['best'], '.1%'):>11}{m['edge']:>+9.2%}")
+        p = summary_row(allj)
+        print(f"{'POOLED':<9}{p['n']:>7}{'':>8}{p['hold']:>8.2%}{p['be']:>12.2%}"
+              f"{p['under_rate']:>8.1%}{p['side'] + ' ' + format(p['best'], '.1%'):>11}"
+              f"{p['edge']:>+9.2%}")
+        print(f"\nPooled: {p['dec']:,} decided bets across {len(rows)} season(s). The best side "
+              f"({p['side']}) hits {p['best']:.2%}\nand must clear {p['be']:.2%} to break even -- "
+              f"{'MISSES by ' + format(-p['edge'], '.2%') if p['edge'] <= 0 else 'BEATS it by ' + format(p['edge'], '.2%')}.")
+        swing = max(m["under_rate"] for _s, m, _d in rows) - min(m["under_rate"] for _s, m, _d in rows)
+        print(f"Season-to-season under-rate swing: {swing:.1%} -- the size of the noise any "
+              f"single-season\nresult sits inside.")
+        print("\nNothing here is a model and none of it is a pick.")
+        return 0
+
+    results = load_results(args.results_csv, args.season)
+    joined, diag = collect_joined(env, args.season, args.results_csv, args.max_join_gap_hours)
+    if diag.get("error"):
+        print(diag["error"], file=sys.stderr)
+        return 1
+    print(f"NHL closing totals -- season {args.season}")
+    print(f"  {diag['n_odds_rows']:,} book-level totals row(s) in the archive window")
+    print(f"  {diag['n_priced']:,} distinct game(s) priced\n")
+    games, unmatched, gaps = range(diag["n_priced"]), diag["unmatched"], diag["gaps"]
 
     n = len(joined)
     print("1. JOIN INTEGRITY + HOW CLOSE TO PUCK DROP")
@@ -283,7 +363,10 @@ def run(args):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--season", type=int, required=True)
+    g = ap.add_mutually_exclusive_group(required=True)
+    g.add_argument("--season", type=int, help="full report for one season")
+    g.add_argument("--seasons", help="range or list, e.g. 2021-2024 -- per-season comparison "
+                                     "plus the pooled result, to see whether it holds")
     ap.add_argument("--results-csv", default="data/nhl_results.csv")
     ap.add_argument("--max-join-gap-hours", type=float, default=6.0,
                     help="max |odds commence_time - NHL puck drop| to call it the same game")
