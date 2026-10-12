@@ -1392,7 +1392,83 @@ and understates 5.0 and 7.0 by ~6.5 each. §14b already flagged that 6.0 can pus
 W-L-Push grading; this is the size of the error if that push is priced off a smooth curve.
 
 **This is the NHL analogue of the NFL key-number rule in CLAUDE.md** ("never use a Gaussian where
-key numbers matter"). It is a constraint on how we may compute a fair price, **not an edge** — books
-post 5.5/6.5 far more often than 6.0 precisely because they know. Any NHL fair price must come from
-the empirical distribution, or from a model that treats the OT/SO goal separately from goals scored
-in play. `nhl_results.last_period_type` is kept on every row so both views stay available.
+key numbers matter"). It is a constraint on how we may compute a fair price, **not an edge**. Any
+NHL fair price must come from the empirical distribution, or from a model that treats the OT/SO goal
+separately from goals scored in play. `nhl_results.last_period_type` is kept on every row so both
+views stay available.
+
+**And the push is the CENTRAL case, not a corner case** — corrected 2026-10-12. This section first
+claimed books post 5.5/6.5 more often than 6.0 "because they know". That was an assumption and it
+is **wrong**. Measured on the backfilled 2024-25 season (§14e, n=1,240 games with a near-closing
+total): **6.0 is the single most-posted line**, and whole numbers are 41.5% of the board.
+
+| posted total | games |
+|---|---|
+| **6.0** | **510** |
+| 5.5 | 407 |
+| 6.5 | 318 |
+| 7.0 / 5.0 | 3 / 2 |
+
+So the pushable number is the modal number, and 2 games in 5 can push. Conditional on the market
+setting a whole number, the realised push rate is **12.8%** (n=515) — a touch above the 11.0%
+unconditional rate, as expected, since those are the games the market judged to land near 6. A
+fitted Poisson would still say ~16%, so it overstates the push by **~3.2 points on the population
+where it actually matters**. Getting this right is not an edge, but getting it wrong misprices the
+most common NHL total there is.
+
+### 14e. The NHL closing total is efficient — the bar, measured (2026-10-12)
+
+`nhl_backfill_odds.py --season 2024 --write` then `nhl_totals_validation.py --season 2024`.
+**1,240 games with a near-closing consensus total** — 94.5% of the 1,312 completed 2024-25 regular
+season games. 780 snapshots, 76,758 rows, 23,400 Odds API credits. Discovery cost **zero** credits
+(the schedule came from the NHL's own free feed, not the odds API).
+
+This exists because Derek asked for an NHL totals model built on goaltending/GSAx, xG, pace and
+special teams. Those are mechanisms, not measurements, and the standing rule is that nothing enters
+The Model unless it beats the closing line out of sample. Before building anything, measure what it
+would have to beat.
+
+**Data integrity, reported rather than assumed:**
+
+| | |
+|---|---|
+| priced games joined to a result | 93.8% (1,240 / 1,322) |
+| season coverage | 94.5% (1,240 / 1,312) |
+| snapshot lead before puck drop | median **9 min** (p90 19, max 24) |
+| in-progress events rejected | 2,065 |
+
+The lead time is why this is called **near-closing**, not the close: the archive's snapshot cadence
+sets the floor, not our request. The 2,065 rejections are the filter earning its keep — the
+historical endpoint returns games already under way, and an in-progress price recorded as a closing
+line would have corrupted every number below. (2 of 780 snapshots lost their write to transient
+connection resets; the writer is idempotent, so a re-run would recover them.)
+
+**The bar:**
+
+| | |
+|---|---|
+| mean two-way hold | **4.45%** (median 4.48%) |
+| break-even win rate | **52.23%** of decided bets |
+
+That **independently corroborates §14c's 4.62%**, which came from a single live sweep by a different
+code path. Two measurements, two methods, same number — the bar is solid.
+
+**The result — nothing to take:**
+
+| | |
+|---|---|
+| over / under / push | 45.9% / 48.8% / 5.3% |
+| of decided bets | over 48.5% / under 51.5% (n=1,174) |
+| best side (under) vs break-even | **−0.69%** |
+
+The under wins 51.5% and needs 52.23%. **It misses the vig bar**, exactly as the NFL work predicted
+it would (§4: ~50 hypotheses, essentially none beat the vig; even the wind survivor failed by 0.18
+points). Calibration says the same thing: the market implied 50.2% over and 48.5% came in, a −1.8%
+tilt that is *smaller than the hold it would have to pay*.
+
+**So: no systematic side on the NHL total at the close.** This is a negative result and it is the
+useful kind — it says a goaltending/xG/pace model is not competing against a sloppy number, and it
+sets 52.23% as the out-of-sample hurdle any such candidate must clear. The place left to look is
+the one thing on Derek's list with a *timing* mechanism rather than a priced-variable mechanism —
+goalie confirmation, which lands the morning of the game — and that is Value Finder arithmetic on a
+stale price, not a model. Consistent with §14c: the NHL module's honest pitch is shopping.
