@@ -1566,3 +1566,54 @@ two-way markets** (favourite–longshot bias), which is the exact regime where t
 So the 2.7% may be measuring our own de-vig error rather than a mispriced book. Testing it means
 re-running with a Shin or power de-vig and seeing whether the gradient holds. Until then it is a
 lead, **not a finding**, and nothing should be shipped on it.
+
+### 14h. The extremity gradient was our own de-vig error (2026-10-12)
+
+`nhl_devig_extremity.py --season 2024 --market h2h`. Same data, same join, same four-book
+consensus and same both-sides edge test as §14g — **only the de-vig changes**.
+
+§14g logged a lead: consensus-beating NHL moneyline quotes rose monotonically with how lopsided the
+price was, 0.5% near even to 2.7% at 25%+ from even. At face value that is a free shopping filter.
+It was flagged as suspect because proportional de-vig is biased in precisely that regime. It was.
+
+| consensus from even | quotes | proportional | **Shin** | difference |
+|---|---|---|---|---|
+| 0-5% | 16,764 | 0.5% | 0.4% | −0.0% |
+| 5-10% | 21,320 | 0.4% | 0.2% | −0.1% |
+| 10-15% | 14,368 | 0.6% | 0.3% | −0.3% |
+| 15-20% | 9,164 | 1.1% | 0.2% | −0.9% |
+| 20-25% | 4,394 | 1.9% | 0.1% | −1.8% |
+| 25%+ | 1,574 | **2.7%** | **0.1%** | **−2.6%** |
+
+| | near-even | lopsided (20%+) | ratio |
+|---|---|---|---|
+| proportional | 0.47% | 2.13% | **4.5x** |
+| Shin | 0.44% | 0.11% | **0.3x** |
+
+**The gradient does not merely vanish, it reverses** — under a bias-aware de-vig a lopsided game
+has *fewer* consensus-beating quotes, not more. And the size of the correction tracks lopsidedness
+exactly (−0.0% → −2.6%), which is the signature of a method artifact rather than a market effect.
+**There is no shopping filter here. Nothing ships.**
+
+Shin (1993), inverse per Štrumbelj (2014): p_i = [√(z² + 4(1−z)·r_i²/S) − z] / (2(1−z)), with z
+bisected so Σp = 1. `--selftest` checks it against known properties: balanced books come out 50/50,
+fair probabilities sum to 1, the favourite sits above its proportional share, and the correction
+grows with lopsidedness (+0.0000, +0.0053, +0.0131, +0.0158 at −110/−110 → −1000/+650).
+
+**§14e and §14f are unaffected, verified not assumed.** Run on totals, the two methods agree to
+rounding (0.3% vs 0.3%; 0.5% vs 0.5%) because NHL totals sit within 10% of an even price — 56,202
+of 56,934 quotes are inside 5%. And §14f's headline never used a de-vig at all: the over/under
+hit rate compares the realised total to the line, and the hold is raw overround.
+
+**The app was already right; the analysis was not.** `web/lib/fairValue.ts` deVig() has used the
+POWER method since the MLB hits board read above the book on 77% of rows, and its comment states
+the rule: *the grader and the board must use the same method.* But `weekly_report.py` was still
+de-vigging the **moneyline** proportionally — the lopsided regime — making the market's fair
+favourite probability 1.3 points low at −400/+300 and 1.6 at −1000/+650. Fixed to the power method
+and verified identical to `mlb_player_props._power_devig` across five markets.
+
+**The lesson is the one CLAUDE.md's error log keeps recording.** A plausible mechanism (the
+favourite–longshot bias is real, books do load vig onto longshots) plus a monotone 5x gradient
+across 1,574–16,764 quotes still produced a signal that was entirely an artifact of our own
+arithmetic. The gradient was *more* convincing than the thing it was measuring. It only fell
+because the method was distrusted in the regime where it is known to be weak.

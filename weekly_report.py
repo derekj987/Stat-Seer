@@ -105,9 +105,31 @@ def american_to_prob(a):
 
 
 def devig(pa, pb):
-    """Two-way de-vig (proportional). Returns P(a)."""
+    """Two-way de-vig → P(a), by the POWER method: find k with a^k + b^k = 1, return a^k.
+
+    Was proportional (ia / (ia + ib)), which hands both sides an equal share of the hold and so
+    under-prices favourites — books load more of the vig onto the longshot (favourite–longshot
+    bias). This function is applied to the MONEYLINE (`mkt_home`), which is exactly the lopsided
+    regime where that bias bites: measured 1.3 points low for the favourite at −400/+300 and 1.6
+    at −1000/+650. Identical to proportional at −110/−110, so balanced markets are unchanged.
+
+    Matches web/lib/fairValue.ts deVig() and mlb_player_props._power_devig, per the rule stated
+    in fairValue.ts: the grader and the board must use the same method. This grader did not.
+
+    Found while testing the NHL extremity gradient (EMPIRICAL_REFERENCE §14h): with proportional
+    de-vig, consensus-beating NHL moneyline quotes appeared to rise 4.5x on lopsided games; under
+    a bias-aware de-vig the effect reverses to 0.3x. The whole apparent signal was the method."""
     ia, ib = american_to_prob(pa), american_to_prob(pb)
-    return ia / (ia + ib) if ia + ib else None
+    if ia <= 0 or ib <= 0 or ia + ib <= 1:
+        return ia / (ia + ib) if ia + ib else None
+    lo, hi = 0.5, 4.0
+    for _ in range(60):
+        k = (lo + hi) / 2
+        if ia ** k + ib ** k > 1:
+            lo = k
+        else:
+            hi = k
+    return ia ** ((lo + hi) / 2)
 
 
 def wl(hit, push=False):
