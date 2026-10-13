@@ -11,6 +11,34 @@ export interface ReportNote {
   watch?: string[];                 // contenders vs pretenders — what next week should test
 }
 
+/** Methodology revisions applied to cards ALREADY PUBLISHED, newest first.
+ *
+ *  A published number that changes without explanation is worse than a slightly wrong one — the
+ *  track record is the product's trust claim, so a correction has to be visible and dated rather
+ *  than silent. These render under every card, not per-week, because a method change applies to
+ *  all of them at once. Appending here is part of the job whenever a regeneration moves a number
+ *  that readers have already seen. */
+export interface MethodRevision {
+  date: string;                     // ISO date the recomputation was applied
+  what: string;                     // what changed, how big it is, and why
+}
+
+export const METHOD_REVISIONS: MethodRevision[] = [
+  {
+    date: "2026-10-13",
+    what: "The market's win probability on every card was recomputed. It had been de-vigged " +
+      "proportionally — splitting the bookmaker's margin evenly between the two sides — which " +
+      "understates a favourite, because books load more of their margin onto the longshot. It now " +
+      "uses the same power de-vig the boards and the Pick Auditor already used, so the grader and " +
+      "the board agree. Only the market's probability column and the market Brier moved: no game " +
+      "result, no prop grade, no record changed. The shift is under a point on a near-even game " +
+      "and about 1.5 points on a heavy favourite. Six of the seven published cards moved (NCAAF " +
+      "week 1 had no moneyline data to recompute), and on those six it made the market's " +
+      "calibration look slightly BETTER on four and slightly worse on two — so the correction " +
+      "does not flatter us.",
+  },
+];
+
 export const REPORT_NOTES: Record<string, ReportNote> = {
   "nfl-2026-1": {
     headline: "A losing week against the number: our reads were on the right side of the spread 4 times in 16, and the projections leaned the wrong way on totals 11 times.",

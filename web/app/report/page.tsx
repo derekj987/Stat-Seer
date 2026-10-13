@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Brand } from "../Nav";
 import Tip from "@/app/Tip";
 import { REPORT_CARDS, type ReportCard, type ReportGame, type ReportProp, type Tally, type WL } from "@/lib/reportCards";
-import { REPORT_NOTES, noteKey } from "@/lib/reportNotes";
+import { REPORT_NOTES, METHOD_REVISIONS, noteKey } from "@/lib/reportNotes";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
 
 export const metadata: Metadata = {
@@ -115,6 +115,19 @@ function Card({ c }: { c: ReportCard }) {
             </>
           )}
           {note.caveat && <p className="rc-note__caveat">{note.caveat}</p>}
+        </div>
+      )}
+
+      {/* A published number that changed has to say so. Shown on every card because a method
+          change applies to all of them at once, not to one week. */}
+      {METHOD_REVISIONS.length > 0 && (
+        <div className="rc-revisions">
+          <h3 className="rc-note__h">Corrections to numbers already published</h3>
+          <ul className="rc-note__list">
+            {METHOD_REVISIONS.map((r) => (
+              <li key={r.date}><b>{r.date}</b> — {r.what}</li>
+            ))}
+          </ul>
         </div>
       )}
 

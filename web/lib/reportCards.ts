@@ -35,7 +35,7 @@ export const REPORT_CARDS: ReportCard[] = [
   "season": 2026,
   "week": 5,
   "label": "NCAAF Week 5",
-  "generatedAt": "2026-10-09T14:18:51+00:00",
+  "generatedAt": "2026-10-13T20:35:59+00:00",
   "publishedRefs": [
    "094584a060d8ddaeda2169d63769e54df28e3e00",
    "1d98a0d43fd19d517de1d62bf28a293b0ec49b9a",
@@ -68,7 +68,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -2.5,
      "total": 55.5,
-     "homeProb": 0.531,
+     "homeProb": 0.533,
      "asOf": "2026-10-01T23:41:46+00:00"
     },
     "conf": "Conference USA",
@@ -105,7 +105,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 2.5,
      "total": 56.5,
-     "homeProb": 0.435,
+     "homeProb": 0.431,
      "asOf": "2026-10-01T23:41:46+00:00"
     },
     "conf": "American Athletic",
@@ -142,7 +142,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -2.5,
      "total": 54.5,
-     "homeProb": 0.54,
+     "homeProb": 0.543,
      "asOf": "2026-10-02T20:55:25+00:00"
     },
     "conf": "ACC",
@@ -179,7 +179,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 6.5,
      "total": 51.5,
-     "homeProb": 0.299,
+     "homeProb": 0.285,
      "asOf": "2026-10-02T20:55:25+00:00"
     },
     "conf": "Conference USA",
@@ -216,7 +216,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 2.5,
      "total": 46.5,
-     "homeProb": 0.426,
+     "homeProb": 0.421,
      "asOf": "2026-10-03T00:10:47+00:00"
     },
     "conf": "Big Ten",
@@ -290,7 +290,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 20.5,
      "total": 52.5,
-     "homeProb": 0.097,
+     "homeProb": 0.066,
      "asOf": "2026-10-03T11:10:16+00:00"
     },
     "conf": "American Athletic",
@@ -327,7 +327,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 5.5,
      "total": 62.5,
-     "homeProb": 0.357,
+     "homeProb": 0.347,
      "asOf": "2026-10-03T15:11:37+00:00"
     },
     "conf": "SEC",
@@ -364,7 +364,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -10.5,
      "total": 50.5,
-     "homeProb": 0.783,
+     "homeProb": 0.803,
      "asOf": "2026-10-03T15:11:37+00:00"
     },
     "conf": "Big 12",
@@ -475,7 +475,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 6.5,
      "total": 51.5,
-     "homeProb": 0.317,
+     "homeProb": 0.304,
      "asOf": "2026-10-03T15:11:37+00:00"
     },
     "conf": "FBS Independents",
@@ -512,7 +512,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -21.5,
      "total": 55.5,
-     "homeProb": 0.894,
+     "homeProb": 0.923,
      "asOf": "2026-10-03T15:11:37+00:00"
     },
     "conf": "ACC",
@@ -549,7 +549,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -2.5,
      "total": 45.5,
-     "homeProb": 0.584,
+     "homeProb": 0.589,
      "asOf": "2026-10-03T15:11:37+00:00"
     },
     "conf": "Mountain West",
@@ -586,7 +586,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 21.5,
      "total": 46.5,
-     "homeProb": 0.087,
+     "homeProb": 0.055,
      "asOf": "2026-10-03T15:11:37+00:00"
     },
     "conf": "ACC",
@@ -660,7 +660,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 6.5,
      "total": 41.5,
-     "homeProb": 0.347,
+     "homeProb": 0.336,
      "asOf": "2026-10-03T15:11:37+00:00"
     },
     "conf": "Big Ten",
@@ -697,7 +697,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -14.5,
      "total": 54.5,
-     "homeProb": 0.835,
+     "homeProb": 0.86,
      "asOf": "2026-10-03T15:11:37+00:00"
     },
     "conf": "ACC",
@@ -734,7 +734,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -21.5,
      "total": 50.5,
-     "homeProb": 0.895,
+     "homeProb": 0.925,
      "asOf": "2026-10-03T15:11:37+00:00"
     },
     "conf": "Big 12",
@@ -882,7 +882,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -2.5,
      "total": 52.5,
-     "homeProb": 0.584,
+     "homeProb": 0.589,
      "asOf": "2026-10-03T15:11:37+00:00"
     },
     "conf": "Big 12",
@@ -919,7 +919,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -8.5,
      "total": 43.5,
-     "homeProb": 0.745,
+     "homeProb": 0.761,
      "asOf": "2026-10-03T15:11:37+00:00"
     },
     "conf": "Big Ten",
@@ -1030,7 +1030,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -25.5,
      "total": 50.5,
-     "homeProb": 0.943,
+     "homeProb": 0.973,
      "asOf": "2026-10-03T15:11:37+00:00"
     },
     "conf": "SEC",
@@ -1289,7 +1289,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 12.5,
      "total": 46.5,
-     "homeProb": 0.191,
+     "homeProb": 0.169,
      "asOf": "2026-10-03T15:11:37+00:00"
     },
     "conf": "Mid-American",
@@ -1474,7 +1474,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 20.5,
      "total": 51.5,
-     "homeProb": 0.1,
+     "homeProb": 0.069,
      "asOf": "2026-10-03T15:11:37+00:00"
     },
     "conf": "Mid-American",
@@ -1733,7 +1733,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 5.5,
      "total": 57.5,
-     "homeProb": 0.342,
+     "homeProb": 0.331,
      "asOf": "2026-10-03T18:46:31+00:00"
     },
     "conf": "SEC",
@@ -1770,7 +1770,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 14.5,
      "total": 46.5,
-     "homeProb": 0.16,
+     "homeProb": 0.135,
      "asOf": "2026-10-03T18:46:31+00:00"
     },
     "conf": "Big Ten",
@@ -1807,7 +1807,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -6.5,
      "total": 54.5,
-     "homeProb": 0.67,
+     "homeProb": 0.682,
      "asOf": "2026-10-03T18:46:31+00:00"
     },
     "conf": "SEC",
@@ -1918,7 +1918,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -10.5,
      "total": 41.5,
-     "homeProb": 0.783,
+     "homeProb": 0.803,
      "asOf": "2026-10-03T18:46:31+00:00"
     },
     "conf": "Mid-American",
@@ -1955,7 +1955,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 5.5,
      "total": 57.5,
-     "homeProb": 0.357,
+     "homeProb": 0.347,
      "asOf": "2026-10-03T18:46:31+00:00"
     },
     "conf": "ACC",
@@ -2029,7 +2029,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -17.5,
      "total": 44.5,
-     "homeProb": 0.871,
+     "homeProb": 0.897,
      "asOf": "2026-10-03T18:46:31+00:00"
     },
     "conf": "Other",
@@ -2066,7 +2066,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -7.5,
      "total": 47.5,
-     "homeProb": 0.687,
+     "homeProb": 0.7,
      "asOf": "2026-10-03T18:46:31+00:00"
     },
     "conf": "Mid-American",
@@ -2177,7 +2177,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 3.5,
      "total": 50.5,
-     "homeProb": 0.398,
+     "homeProb": 0.391,
      "asOf": "2026-10-03T18:46:31+00:00"
     },
     "conf": "Mid-American",
@@ -2214,7 +2214,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -2.5,
      "total": 51.5,
-     "homeProb": 0.548,
+     "homeProb": 0.552,
      "asOf": "2026-10-03T18:46:31+00:00"
     },
     "conf": "Sun Belt",
@@ -2251,7 +2251,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -16.5,
      "total": 56.5,
-     "homeProb": 0.84,
+     "homeProb": 0.865,
      "asOf": "2026-10-03T18:46:31+00:00"
     },
     "conf": "Sun Belt",
@@ -2325,7 +2325,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -23.5,
      "total": 48.5,
-     "homeProb": 0.936,
+     "homeProb": 0.969,
      "asOf": "2026-10-03T18:46:31+00:00"
     },
     "conf": "Mountain West",
@@ -2399,7 +2399,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -15.5,
      "total": 52.5,
-     "homeProb": 0.832,
+     "homeProb": 0.856,
      "asOf": "2026-10-03T18:46:31+00:00"
     },
     "conf": "Big Ten",
@@ -2510,7 +2510,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -10.5,
      "total": 61.5,
-     "homeProb": 0.76,
+     "homeProb": 0.778,
      "asOf": "2026-10-03T18:46:31+00:00"
     },
     "conf": "Big Ten",
@@ -2547,7 +2547,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -2.5,
      "total": 52.5,
-     "homeProb": 0.558,
+     "homeProb": 0.562,
      "asOf": "2026-10-03T18:46:31+00:00"
     },
     "conf": "SEC",
@@ -2732,7 +2732,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 6.5,
      "total": 61.5,
-     "homeProb": 0.324,
+     "homeProb": 0.312,
      "asOf": "2026-10-03T21:59:10+00:00"
     },
     "conf": "Mountain West",
@@ -2991,7 +2991,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -13.5,
      "total": 50.5,
-     "homeProb": 0.82,
+     "homeProb": 0.843,
      "asOf": "2026-10-03T21:59:10+00:00"
     },
     "conf": "SEC",
@@ -3028,7 +3028,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 1.5,
      "total": 53.5,
-     "homeProb": 0.469,
+     "homeProb": 0.467,
      "asOf": "2026-10-03T21:59:10+00:00"
     },
     "conf": "Sun Belt",
@@ -3102,7 +3102,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 5.5,
      "total": 48.5,
-     "homeProb": 0.342,
+     "homeProb": 0.331,
      "asOf": "2026-10-03T21:59:10+00:00"
     },
     "conf": "Big 12",
@@ -3176,7 +3176,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 11.5,
      "total": 56.5,
-     "homeProb": 0.191,
+     "homeProb": 0.169,
      "asOf": "2026-10-03T21:59:10+00:00"
     },
     "conf": "American Athletic",
@@ -3250,7 +3250,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -13.5,
      "total": 56.5,
-     "homeProb": 0.816,
+     "homeProb": 0.839,
      "asOf": "2026-10-03T21:59:10+00:00"
     },
     "conf": "Sun Belt",
@@ -3361,7 +3361,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -7.5,
      "total": 57.5,
-     "homeProb": 0.723,
+     "homeProb": 0.739,
      "asOf": "2026-10-03T21:59:10+00:00"
     },
     "conf": "Big Ten",
@@ -3435,7 +3435,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 14.5,
      "total": 48.5,
-     "homeProb": 0.171,
+     "homeProb": 0.147,
      "asOf": "2026-10-03T21:59:10+00:00"
     },
     "conf": "ACC",
@@ -3472,7 +3472,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 13.5,
      "total": 50.5,
-     "homeProb": 0.174,
+     "homeProb": 0.151,
      "asOf": "2026-10-03T21:59:10+00:00"
     },
     "conf": "Big 12",
@@ -3509,7 +3509,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -19.5,
      "total": 51.5,
-     "homeProb": 0.903,
+     "homeProb": 0.934,
      "asOf": "2026-10-03T21:59:10+00:00"
     },
     "conf": "Mountain West",
@@ -3546,7 +3546,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -5.5,
      "total": 50.5,
-     "homeProb": 0.653,
+     "homeProb": 0.664,
      "asOf": "2026-10-03T21:59:10+00:00"
     },
     "conf": "American Athletic",
@@ -3620,7 +3620,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -6.5,
      "total": 49.5,
-     "homeProb": 0.653,
+     "homeProb": 0.664,
      "asOf": "2026-10-03T21:59:10+00:00"
     },
     "conf": "Sun Belt",
@@ -3694,7 +3694,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 24.5,
      "total": 56.5,
-     "homeProb": 0.074,
+     "homeProb": 0.04,
      "asOf": "2026-10-03T21:59:10+00:00"
     },
     "conf": "Big Ten",
@@ -3842,7 +3842,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -2.5,
      "total": 44.5,
-     "homeProb": 0.533,
+     "homeProb": 0.536,
      "asOf": "2026-10-04T00:28:48+00:00"
     },
     "conf": "Pac-12",
@@ -3879,7 +3879,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -3.5,
      "total": 48.5,
-     "homeProb": 0.591,
+     "homeProb": 0.598,
      "asOf": "2026-10-04T00:28:48+00:00"
     },
     "conf": "Big 12",
@@ -3953,7 +3953,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 9.5,
      "total": 57.5,
-     "homeProb": 0.262,
+     "homeProb": 0.246,
      "asOf": "2026-10-04T00:28:48+00:00"
     },
     "conf": "Mountain West",
@@ -3990,7 +3990,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -6.5,
      "total": 55.5,
-     "homeProb": 0.687,
+     "homeProb": 0.7,
      "asOf": "2026-10-04T00:28:48+00:00"
     },
     "conf": "Big 12",
@@ -4027,7 +4027,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -2.5,
      "total": 50.5,
-     "homeProb": 0.574,
+     "homeProb": 0.579,
      "asOf": "2026-10-04T00:28:48+00:00"
     },
     "conf": "Mountain West",
@@ -4086,7 +4086,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "p": 0
    },
    "brier": null,
-   "marketBrier": 0.1632,
+   "marketBrier": 0.1619,
    "marginMae": 13.1,
    "marketMarginMae": 12.9
   },
@@ -32847,7 +32847,7 @@ export const REPORT_CARDS: ReportCard[] = [
   "season": 2026,
   "week": 4,
   "label": "NFL Week 4",
-  "generatedAt": "2026-10-09T14:17:37+00:00",
+  "generatedAt": "2026-10-13T20:28:50+00:00",
   "publishedRefs": [
    "1855e7f76c446e7ff72e49087e74154b98701686",
    "3133fe5e8f91d713c0e207b9dca7168205e203cd",
@@ -32874,7 +32874,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 2.5,
      "total": 37.5,
-     "homeProb": 0.429,
+     "homeProb": 0.425,
      "asOf": "2026-10-01T20:11:39+00:00"
     },
     "su": "loss",
@@ -32908,7 +32908,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 4.5,
      "total": 46.5,
-     "homeProb": 0.327,
+     "homeProb": 0.316,
      "asOf": "2026-10-04T11:57:21+00:00"
     },
     "su": "win",
@@ -32942,7 +32942,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -11.5,
      "total": 42.5,
-     "homeProb": 0.85,
+     "homeProb": 0.873,
      "asOf": "2026-10-04T16:47:03+00:00"
     },
     "su": "win",
@@ -32976,7 +32976,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -6.5,
      "total": 49.5,
-     "homeProb": 0.747,
+     "homeProb": 0.763,
      "asOf": "2026-10-04T16:47:03+00:00"
     },
     "su": "loss",
@@ -33010,7 +33010,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -3.5,
      "total": 43.5,
-     "homeProb": 0.618,
+     "homeProb": 0.625,
      "asOf": "2026-10-04T16:47:03+00:00"
     },
     "su": "win",
@@ -33044,7 +33044,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -2.5,
      "total": 51.5,
-     "homeProb": 0.558,
+     "homeProb": 0.562,
      "asOf": "2026-10-04T16:47:03+00:00"
     },
     "su": "win",
@@ -33078,7 +33078,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -3.0,
      "total": 48.5,
-     "homeProb": 0.586,
+     "homeProb": 0.591,
      "asOf": "2026-10-04T16:47:03+00:00"
     },
     "su": "loss",
@@ -33112,7 +33112,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 2.5,
      "total": 44.5,
-     "homeProb": 0.442,
+     "homeProb": 0.438,
      "asOf": "2026-10-04T16:47:03+00:00"
     },
     "su": "win",
@@ -33146,7 +33146,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 3.5,
      "total": 42.5,
-     "homeProb": 0.37,
+     "homeProb": 0.362,
      "asOf": "2026-10-04T16:47:03+00:00"
     },
     "su": "win",
@@ -33180,7 +33180,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 2.5,
      "total": 38.5,
-     "homeProb": 0.429,
+     "homeProb": 0.425,
      "asOf": "2026-10-04T16:47:03+00:00"
     },
     "su": "win",
@@ -33214,7 +33214,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -9.5,
      "total": 38.5,
-     "homeProb": 0.804,
+     "homeProb": 0.823,
      "asOf": "2026-10-04T19:23:52+00:00"
     },
     "su": "win",
@@ -33248,7 +33248,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 4.5,
      "total": 47.5,
-     "homeProb": 0.345,
+     "homeProb": 0.337,
      "asOf": "2026-10-04T16:47:03+00:00"
     },
     "su": "win",
@@ -33282,7 +33282,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -7.0,
      "total": 43.5,
-     "homeProb": 0.757,
+     "homeProb": 0.773,
      "asOf": "2026-10-04T16:47:03+00:00"
     },
     "su": "win",
@@ -33316,7 +33316,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -2.5,
      "total": 48.5,
-     "homeProb": 0.579,
+     "homeProb": 0.584,
      "asOf": "2026-10-04T16:47:03+00:00"
     },
     "su": "win",
@@ -33350,7 +33350,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 3.5,
      "total": 51.5,
-     "homeProb": 0.359,
+     "homeProb": 0.35,
      "asOf": "2026-10-04T21:00:59+00:00"
     },
     "su": "loss",
@@ -33384,7 +33384,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -1.5,
      "total": 47.5,
-     "homeProb": 0.52,
+     "homeProb": 0.521,
      "asOf": "2026-10-05T21:52:39+00:00"
     },
     "su": "loss",
@@ -33440,7 +33440,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "p": 0
    },
    "brier": 0.1843,
-   "marketBrier": 0.2201,
+   "marketBrier": 0.2203,
    "marginMae": 5.9,
    "marketMarginMae": 7.2
   },
@@ -47403,7 +47403,7 @@ export const REPORT_CARDS: ReportCard[] = [
   "season": 2026,
   "week": 3,
   "label": "NCAAF Week 3",
-  "generatedAt": "2026-09-24T12:03:01+00:00",
+  "generatedAt": "2026-10-13T20:34:48+00:00",
   "publishedRefs": [
    "0460af08e6670f5babd3e80e8772853013a36644",
    "37f70453cc3510524e56ecf735e75b1332ca7f2c",
@@ -47433,7 +47433,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -10.5,
      "total": 51.5,
-     "homeProb": 0.772,
+     "homeProb": 0.792,
      "asOf": "2026-09-17T23:22:43+00:00"
     },
     "conf": "ACC",
@@ -47470,7 +47470,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 19.5,
      "total": 55.5,
-     "homeProb": 0.106,
+     "homeProb": 0.077,
      "asOf": "2026-09-18T23:29:37+00:00"
     },
     "conf": "ACC",
@@ -47507,7 +47507,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -7.5,
      "total": 52.5,
-     "homeProb": 0.723,
+     "homeProb": 0.739,
      "asOf": "2026-09-18T23:29:37+00:00"
     },
     "conf": "Big 12",
@@ -47581,7 +47581,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -4.5,
      "total": 56.5,
-     "homeProb": 0.634,
+     "homeProb": 0.643,
      "asOf": "2026-09-19T15:26:00+00:00"
     },
     "conf": "Conference USA",
@@ -47655,7 +47655,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -2.5,
      "total": 62.5,
-     "homeProb": 0.574,
+     "homeProb": 0.579,
      "asOf": "2026-09-19T15:26:00+00:00"
     },
     "conf": "Sun Belt",
@@ -47692,7 +47692,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -20.5,
      "total": 49.5,
-     "homeProb": 0.911,
+     "homeProb": 0.943,
      "asOf": "2026-09-19T15:26:00+00:00"
     },
     "conf": "Big 12",
@@ -47729,7 +47729,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -23.5,
      "total": 43.5,
-     "homeProb": 0.926,
+     "homeProb": 0.96,
      "asOf": "2026-09-19T15:26:00+00:00"
     },
     "conf": "Big 12",
@@ -47766,7 +47766,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -23.5,
      "total": 48.5,
-     "homeProb": 0.936,
+     "homeProb": 0.969,
      "asOf": "2026-09-19T15:26:00+00:00"
     },
     "conf": "Big Ten",
@@ -47877,7 +47877,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 24.5,
      "total": 54.5,
-     "homeProb": 0.06,
+     "homeProb": 0.031,
      "asOf": "2026-09-19T15:26:00+00:00"
     },
     "conf": "SEC",
@@ -47914,7 +47914,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -2.5,
      "total": 44.5,
-     "homeProb": 0.58,
+     "homeProb": 0.586,
      "asOf": "2026-09-19T15:26:00+00:00"
     },
     "conf": "ACC",
@@ -47988,7 +47988,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -23.5,
      "total": 44.5,
-     "homeProb": 0.936,
+     "homeProb": 0.969,
      "asOf": "2026-09-19T15:26:00+00:00"
     },
     "conf": "Big Ten",
@@ -48025,7 +48025,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -3.5,
      "total": 50.5,
-     "homeProb": 0.594,
+     "homeProb": 0.601,
      "asOf": "2026-09-19T15:26:00+00:00"
     },
     "conf": "SEC",
@@ -48173,7 +48173,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -4.5,
      "total": 48.5,
-     "homeProb": 0.632,
+     "homeProb": 0.641,
      "asOf": "2026-09-19T18:09:50+00:00"
     },
     "conf": "Mid-American",
@@ -48210,7 +48210,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -2.5,
      "total": 58.5,
-     "homeProb": 0.544,
+     "homeProb": 0.547,
      "asOf": "2026-09-19T18:09:50+00:00"
     },
     "conf": "ACC",
@@ -48247,7 +48247,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -27.5,
      "total": 55.5,
-     "homeProb": 0.943,
+     "homeProb": 0.973,
      "asOf": "2026-09-19T18:09:50+00:00"
     },
     "conf": "Big 12",
@@ -48321,7 +48321,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -14.5,
      "total": 50.5,
-     "homeProb": 0.848,
+     "homeProb": 0.873,
      "asOf": "2026-09-19T18:09:50+00:00"
     },
     "conf": "Big 12",
@@ -48432,7 +48432,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -16.5,
      "total": 50.5,
-     "homeProb": 0.861,
+     "homeProb": 0.888,
      "asOf": "2026-09-19T18:09:50+00:00"
     },
     "conf": "SEC",
@@ -48469,7 +48469,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -18.5,
      "total": 50.5,
-     "homeProb": 0.894,
+     "homeProb": 0.923,
      "asOf": "2026-09-19T20:54:36+00:00"
     },
     "conf": "SEC",
@@ -48506,7 +48506,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 21.5,
      "total": 57.5,
-     "homeProb": 0.08,
+     "homeProb": 0.047,
      "asOf": "2026-09-19T18:09:50+00:00"
     },
     "conf": "Big Ten",
@@ -48543,7 +48543,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -34.5,
      "total": 48.5,
-     "homeProb": 0.981,
+     "homeProb": 0.997,
      "asOf": "2026-09-19T18:09:50+00:00"
     },
     "conf": "Big Ten",
@@ -48617,7 +48617,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -14.5,
      "total": 48.5,
-     "homeProb": 0.823,
+     "homeProb": 0.845,
      "asOf": "2026-09-19T18:09:50+00:00"
     },
     "conf": "Conference USA",
@@ -48654,7 +48654,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -9.5,
      "total": 51.5,
-     "homeProb": 0.769,
+     "homeProb": 0.788,
      "asOf": "2026-09-19T18:09:50+00:00"
     },
     "conf": "ACC",
@@ -48728,7 +48728,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -20.5,
      "total": 49.5,
-     "homeProb": 0.9,
+     "homeProb": 0.931,
      "asOf": "2026-09-19T18:09:50+00:00"
     },
     "conf": "Big 12",
@@ -48765,7 +48765,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -3.5,
      "total": 59.5,
-     "homeProb": 0.589,
+     "homeProb": 0.596,
      "asOf": "2026-09-19T20:54:36+00:00"
     },
     "conf": "SEC",
@@ -48839,7 +48839,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -16.5,
      "total": 52.5,
-     "homeProb": 0.865,
+     "homeProb": 0.902,
      "asOf": "2026-09-20T00:40:50+00:00"
     },
     "conf": "Sun Belt",
@@ -48876,7 +48876,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -4.5,
      "total": 62.5,
-     "homeProb": 0.632,
+     "homeProb": 0.641,
      "asOf": "2026-09-19T20:54:36+00:00"
     },
     "conf": "American Athletic",
@@ -48913,7 +48913,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -2.5,
      "total": 49.5,
-     "homeProb": 0.561,
+     "homeProb": 0.565,
      "asOf": "2026-09-19T20:54:36+00:00"
     },
     "conf": "Sun Belt",
@@ -48950,7 +48950,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 4.5,
      "total": 52.5,
-     "homeProb": 0.375,
+     "homeProb": 0.367,
      "asOf": "2026-09-19T20:54:36+00:00"
     },
     "conf": "Conference USA",
@@ -49024,7 +49024,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -3.5,
      "total": 51.5,
-     "homeProb": 0.605,
+     "homeProb": 0.612,
      "asOf": "2026-09-19T22:41:19+00:00"
     },
     "conf": "Conference USA",
@@ -49061,7 +49061,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -17.5,
      "total": 50.5,
-     "homeProb": 0.883,
+     "homeProb": 0.912,
      "asOf": "2026-09-19T22:41:19+00:00"
     },
     "conf": "Big 12",
@@ -49098,7 +49098,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -26.5,
      "total": 50.5,
-     "homeProb": 0.943,
+     "homeProb": 0.973,
      "asOf": "2026-09-19T22:41:19+00:00"
     },
     "conf": "SEC",
@@ -49135,7 +49135,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 3.5,
      "total": 54.5,
-     "homeProb": 0.406,
+     "homeProb": 0.399,
      "asOf": "2026-09-19T22:41:19+00:00"
     },
     "conf": "Sun Belt",
@@ -49209,7 +49209,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -6.5,
      "total": 49.5,
-     "homeProb": 0.687,
+     "homeProb": 0.7,
      "asOf": "2026-09-19T22:41:19+00:00"
     },
     "conf": "Sun Belt",
@@ -49246,7 +49246,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 8.5,
      "total": 43.5,
-     "homeProb": 0.258,
+     "homeProb": 0.242,
      "asOf": "2026-09-19T22:41:19+00:00"
     },
     "conf": "American Athletic",
@@ -49283,7 +49283,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 2.5,
      "total": 53.5,
-     "homeProb": 0.464,
+     "homeProb": 0.461,
      "asOf": "2026-09-19T22:41:19+00:00"
     },
     "conf": "SEC",
@@ -49320,7 +49320,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 3.5,
      "total": 50.5,
-     "homeProb": 0.398,
+     "homeProb": 0.391,
      "asOf": "2026-09-19T22:41:19+00:00"
     },
     "conf": "Conference USA",
@@ -49505,7 +49505,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -29.5,
      "total": 52.5,
-     "homeProb": 0.954,
+     "homeProb": 0.982,
      "asOf": "2026-09-19T22:41:19+00:00"
     },
     "conf": "FBS Independents",
@@ -49542,7 +49542,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -3.5,
      "total": 48.5,
-     "homeProb": 0.612,
+     "homeProb": 0.62,
      "asOf": "2026-09-19T22:41:19+00:00"
     },
     "conf": "Big Ten",
@@ -49579,7 +49579,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 17.5,
      "total": 54.5,
-     "homeProb": 0.117,
+     "homeProb": 0.088,
      "asOf": "2026-09-19T22:41:19+00:00"
     },
     "conf": "Mountain West",
@@ -49653,7 +49653,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 2.5,
      "total": 53.5,
-     "homeProb": 0.426,
+     "homeProb": 0.421,
      "asOf": "2026-09-19T22:41:19+00:00"
     },
     "conf": "Big Ten",
@@ -49690,7 +49690,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 2.5,
      "total": 58.5,
-     "homeProb": 0.433,
+     "homeProb": 0.429,
      "asOf": "2026-09-19T22:41:19+00:00"
     },
     "conf": "SEC",
@@ -49727,7 +49727,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -21.5,
      "total": 46.5,
-     "homeProb": 0.926,
+     "homeProb": 0.96,
      "asOf": "2026-09-19T22:41:19+00:00"
     },
     "conf": "SEC",
@@ -49764,7 +49764,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -35.5,
      "total": 59.5,
-     "homeProb": 0.976,
+     "homeProb": 0.993,
      "asOf": "2026-09-19T22:41:19+00:00"
     },
     "conf": "SEC",
@@ -49801,7 +49801,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -29.5,
      "total": 58.5,
-     "homeProb": 0.958,
+     "homeProb": 0.984,
      "asOf": "2026-09-19T22:41:19+00:00"
     },
     "conf": "SEC",
@@ -49838,7 +49838,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -6.5,
      "total": 55.5,
-     "homeProb": 0.691,
+     "homeProb": 0.704,
      "asOf": "2026-09-19T22:41:19+00:00"
     },
     "conf": "Sun Belt",
@@ -49912,7 +49912,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -19.5,
      "total": 56.5,
-     "homeProb": 0.889,
+     "homeProb": 0.918,
      "asOf": "2026-09-19T22:41:19+00:00"
     },
     "conf": "Big 12",
@@ -49986,7 +49986,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -1.5,
      "total": 46.5,
-     "homeProb": 0.533,
+     "homeProb": 0.536,
      "asOf": "2026-09-20T00:40:50+00:00"
     },
     "conf": "Mountain West",
@@ -50023,7 +50023,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 25.5,
      "total": 50.5,
-     "homeProb": 0.057,
+     "homeProb": 0.027,
      "asOf": "2026-09-20T00:40:50+00:00"
     },
     "conf": "Other",
@@ -50060,7 +50060,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -34.5,
      "total": 49.5,
-     "homeProb": 0.979,
+     "homeProb": 0.995,
      "asOf": "2026-09-20T00:40:50+00:00"
     },
     "conf": "Big 12",
@@ -50097,7 +50097,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -13.5,
      "total": 52.5,
-     "homeProb": 0.835,
+     "homeProb": 0.86,
      "asOf": "2026-09-20T00:40:50+00:00"
     },
     "conf": "Big Ten",
@@ -50171,7 +50171,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 4.5,
      "total": 48.5,
-     "homeProb": 0.357,
+     "homeProb": 0.347,
      "asOf": "2026-09-20T00:40:50+00:00"
     },
     "conf": "Mountain West",
@@ -50230,7 +50230,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "p": 0
    },
    "brier": null,
-   "marketBrier": 0.1069,
+   "marketBrier": 0.104,
    "marginMae": 10.6,
    "marketMarginMae": 9.5
   },
@@ -77927,7 +77927,7 @@ export const REPORT_CARDS: ReportCard[] = [
   "season": 2026,
   "week": 2,
   "label": "NFL Week 2",
-  "generatedAt": "2026-09-24T11:59:44+00:00",
+  "generatedAt": "2026-10-13T20:27:59+00:00",
   "publishedRefs": [
    "27a412388227043114dc89fc04f546caa1a78eec",
    "746f45675e89b309cf5ddb11a2b360144a906746",
@@ -77953,7 +77953,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -5.5,
      "total": 54.5,
-     "homeProb": 0.685,
+     "homeProb": 0.697,
      "asOf": "2026-09-17T21:04:09+00:00"
     },
     "su": "win",
@@ -77987,7 +77987,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 2.5,
      "total": 43.5,
-     "homeProb": 0.426,
+     "homeProb": 0.421,
      "asOf": "2026-09-20T15:41:27+00:00"
     },
     "su": "loss",
@@ -78021,7 +78021,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -8.5,
      "total": 45.5,
-     "homeProb": 0.791,
+     "homeProb": 0.808,
      "asOf": "2026-09-20T15:41:27+00:00"
     },
     "su": "loss",
@@ -78055,7 +78055,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -4.5,
      "total": 47.5,
-     "homeProb": 0.656,
+     "homeProb": 0.666,
      "asOf": "2026-09-20T15:41:27+00:00"
     },
     "su": "loss",
@@ -78089,7 +78089,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -2.5,
      "total": 45.5,
-     "homeProb": 0.582,
+     "homeProb": 0.587,
      "asOf": "2026-09-20T15:41:27+00:00"
     },
     "su": "loss",
@@ -78123,7 +78123,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -5.5,
      "total": 41.5,
-     "homeProb": 0.673,
+     "homeProb": 0.684,
      "asOf": "2026-09-20T15:41:27+00:00"
     },
     "su": "win",
@@ -78157,7 +78157,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 3.5,
      "total": 44.5,
-     "homeProb": 0.382,
+     "homeProb": 0.375,
      "asOf": "2026-09-20T15:41:27+00:00"
     },
     "su": "win",
@@ -78191,7 +78191,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -8.5,
      "total": 41.5,
-     "homeProb": 0.786,
+     "homeProb": 0.804,
      "asOf": "2026-09-20T15:41:27+00:00"
     },
     "su": "loss",
@@ -78225,7 +78225,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 7.0,
      "total": 39.5,
-     "homeProb": 0.243,
+     "homeProb": 0.227,
      "asOf": "2026-09-20T15:41:27+00:00"
     },
     "su": "win",
@@ -78259,7 +78259,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -2.5,
      "total": 45.5,
-     "homeProb": 0.574,
+     "homeProb": 0.579,
      "asOf": "2026-09-20T15:41:27+00:00"
     },
     "su": "loss",
@@ -78293,7 +78293,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -6.5,
      "total": 43.5,
-     "homeProb": 0.721,
+     "homeProb": 0.735,
      "asOf": "2026-09-20T15:41:27+00:00"
     },
     "su": "loss",
@@ -78327,7 +78327,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 4.5,
      "total": 41.5,
-     "homeProb": 0.348,
+     "homeProb": 0.339,
      "asOf": "2026-09-20T15:41:27+00:00"
     },
     "su": "win",
@@ -78361,7 +78361,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -4.5,
      "total": 50.5,
-     "homeProb": 0.646,
+     "homeProb": 0.655,
      "asOf": "2026-09-20T15:41:27+00:00"
     },
     "su": "win",
@@ -78395,7 +78395,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -13.5,
      "total": 45.5,
-     "homeProb": 0.874,
+     "homeProb": 0.898,
      "asOf": "2026-09-20T15:41:27+00:00"
     },
     "su": "win",
@@ -78429,7 +78429,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -6.5,
      "total": 45.5,
-     "homeProb": 0.714,
+     "homeProb": 0.727,
      "asOf": "2026-09-20T23:03:54+00:00"
     },
     "su": "win",
@@ -78463,7 +78463,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -6.5,
      "total": 47.5,
-     "homeProb": 0.721,
+     "homeProb": 0.735,
      "asOf": "2026-09-21T23:54:34+00:00"
     },
     "su": "win",
@@ -78519,7 +78519,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "p": 0
    },
    "brier": 0.2462,
-   "marketBrier": 0.233,
+   "marketBrier": 0.2347,
    "marginMae": 12.6,
    "marketMarginMae": 11.6
   },
@@ -91894,7 +91894,7 @@ export const REPORT_CARDS: ReportCard[] = [
   "season": 2026,
   "week": 2,
   "label": "NCAAF Week 2",
-  "generatedAt": "2026-09-15T21:12:53+00:00",
+  "generatedAt": "2026-10-13T20:31:27+00:00",
   "publishedRefs": [
    "13c1937ae382d51c45d28f8ba7b02756dd82d1c3",
    "2523ae6e71d226866f66f8e5b640fcc103694b8c",
@@ -92076,7 +92076,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -2.5,
      "total": 53.5,
-     "homeProb": 0.565,
+     "homeProb": 0.569,
      "asOf": "2026-09-11T22:47:15+00:00"
     },
     "conf": "ACC",
@@ -92113,7 +92113,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 4.5,
      "total": 51.5,
-     "homeProb": 0.366,
+     "homeProb": 0.357,
      "asOf": "2026-09-11T22:47:15+00:00"
     },
     "conf": "Big 12",
@@ -92150,7 +92150,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 23.5,
      "total": 50.5,
-     "homeProb": 0.064,
+     "homeProb": 0.031,
      "asOf": "2026-09-12T13:22:09+00:00"
     },
     "conf": "American Athletic",
@@ -92187,7 +92187,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -14.5,
      "total": 50.5,
-     "homeProb": 0.848,
+     "homeProb": 0.873,
      "asOf": "2026-09-12T13:22:09+00:00"
     },
     "conf": "SEC",
@@ -92298,7 +92298,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 2.5,
      "total": 49.5,
-     "homeProb": 0.423,
+     "homeProb": 0.418,
      "asOf": "2026-09-12T13:22:09+00:00"
     },
     "conf": "Big Ten",
@@ -92335,7 +92335,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -3.5,
      "total": 45.5,
-     "homeProb": 0.594,
+     "homeProb": 0.601,
      "asOf": "2026-09-12T13:22:09+00:00"
     },
     "conf": "American Athletic",
@@ -92372,7 +92372,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 4.5,
      "total": 43.5,
-     "homeProb": 0.355,
+     "homeProb": 0.348,
      "asOf": "2026-09-12T13:22:09+00:00"
     },
     "conf": "Big Ten",
@@ -92409,7 +92409,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 23.5,
      "total": 56.5,
-     "homeProb": 0.076,
+     "homeProb": 0.043,
      "asOf": "2026-09-12T16:25:44+00:00"
     },
     "conf": "Big 12",
@@ -92446,7 +92446,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -17.5,
      "total": 49.5,
-     "homeProb": 0.886,
+     "homeProb": 0.912,
      "asOf": "2026-09-12T13:22:09+00:00"
     },
     "conf": "Big 12",
@@ -92483,7 +92483,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -18.5,
      "total": 47.5,
-     "homeProb": 0.886,
+     "homeProb": 0.915,
      "asOf": "2026-09-12T13:22:09+00:00"
     },
     "conf": "ACC",
@@ -92520,7 +92520,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -6.5,
      "total": 56.5,
-     "homeProb": 0.676,
+     "homeProb": 0.688,
      "asOf": "2026-09-12T13:22:09+00:00"
     },
     "conf": "American Athletic",
@@ -92890,7 +92890,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -3.5,
      "total": 56.5,
-     "homeProb": 0.602,
+     "homeProb": 0.609,
      "asOf": "2026-09-12T18:35:39+00:00"
     },
     "conf": "ACC",
@@ -92927,7 +92927,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -6.5,
      "total": 48.5,
-     "homeProb": 0.701,
+     "homeProb": 0.715,
      "asOf": "2026-09-12T18:35:39+00:00"
     },
     "conf": "Big 12",
@@ -92964,7 +92964,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 11.5,
      "total": 52.5,
-     "homeProb": 0.213,
+     "homeProb": 0.192,
      "asOf": "2026-09-12T16:25:44+00:00"
     },
     "conf": "FBS Independents",
@@ -93001,7 +93001,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -2.5,
      "total": 65.5,
-     "homeProb": 0.548,
+     "homeProb": 0.552,
      "asOf": "2026-09-12T18:35:39+00:00"
     },
     "conf": "Sun Belt",
@@ -93075,7 +93075,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -17.5,
      "total": 49.5,
-     "homeProb": 0.871,
+     "homeProb": 0.897,
      "asOf": "2026-09-12T18:35:39+00:00"
     },
     "conf": "Big Ten",
@@ -93112,7 +93112,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -8.5,
      "total": 54.5,
-     "homeProb": 0.748,
+     "homeProb": 0.766,
      "asOf": "2026-09-12T18:35:39+00:00"
     },
     "conf": "American Athletic",
@@ -93149,7 +93149,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 9.5,
      "total": 47.5,
-     "homeProb": 0.255,
+     "homeProb": 0.239,
      "asOf": "2026-09-12T18:35:39+00:00"
     },
     "conf": "SEC",
@@ -93297,7 +93297,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -7.5,
      "total": 55.5,
-     "homeProb": 0.701,
+     "homeProb": 0.715,
      "asOf": "2026-09-12T18:35:39+00:00"
     },
     "conf": "ACC",
@@ -93334,7 +93334,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -5.5,
      "total": 51.5,
-     "homeProb": 0.667,
+     "homeProb": 0.679,
      "asOf": "2026-09-12T18:35:39+00:00"
     },
     "conf": "Big Ten",
@@ -93371,7 +93371,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -27.5,
      "total": 55.5,
-     "homeProb": 0.954,
+     "homeProb": 0.982,
      "asOf": "2026-09-12T18:35:39+00:00"
     },
     "conf": "Big Ten",
@@ -93445,7 +93445,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 3.5,
      "total": 58.5,
-     "homeProb": 0.423,
+     "homeProb": 0.418,
      "asOf": "2026-09-12T18:35:39+00:00"
     },
     "conf": "American Athletic",
@@ -93630,7 +93630,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -20.5,
      "total": 54.5,
-     "homeProb": 0.906,
+     "homeProb": 0.937,
      "asOf": "2026-09-12T18:35:39+00:00"
     },
     "conf": "SEC",
@@ -93704,7 +93704,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -9.5,
      "total": 55.5,
-     "homeProb": 0.738,
+     "homeProb": 0.754,
      "asOf": "2026-09-12T21:13:53+00:00"
     },
     "conf": "Mountain West",
@@ -93741,7 +93741,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -10.5,
      "total": 47.5,
-     "homeProb": 0.783,
+     "homeProb": 0.803,
      "asOf": "2026-09-12T21:13:53+00:00"
     },
     "conf": "Conference USA",
@@ -93778,7 +93778,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -2.5,
      "total": 49.5,
-     "homeProb": 0.533,
+     "homeProb": 0.536,
      "asOf": "2026-09-12T21:13:53+00:00"
     },
     "conf": "Mid-American",
@@ -93889,7 +93889,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -9.5,
      "total": 48.5,
-     "homeProb": 0.745,
+     "homeProb": 0.761,
      "asOf": "2026-09-12T21:13:53+00:00"
     },
     "conf": "American Athletic",
@@ -93926,7 +93926,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -7.5,
      "total": 55.5,
-     "homeProb": 0.723,
+     "homeProb": 0.739,
      "asOf": "2026-09-12T21:13:53+00:00"
     },
     "conf": "Conference USA",
@@ -94000,7 +94000,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -13.5,
      "total": 55.5,
-     "homeProb": 0.805,
+     "homeProb": 0.827,
      "asOf": "2026-09-12T21:13:53+00:00"
     },
     "conf": "Sun Belt",
@@ -94037,7 +94037,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -30.5,
      "total": 50.5,
-     "homeProb": 0.973,
+     "homeProb": 0.988,
      "asOf": "2026-09-12T21:13:53+00:00"
     },
     "conf": "Big Ten",
@@ -94074,7 +94074,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 12.5,
      "total": 55.5,
-     "homeProb": 0.202,
+     "homeProb": 0.181,
      "asOf": "2026-09-12T23:09:41+00:00"
     },
     "conf": "ACC",
@@ -94185,7 +94185,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 11.5,
      "total": 51.5,
-     "homeProb": 0.206,
+     "homeProb": 0.185,
      "asOf": "2026-09-12T21:13:53+00:00"
     },
     "conf": "Conference USA",
@@ -94370,7 +94370,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -13.5,
      "total": 54.5,
-     "homeProb": 0.826,
+     "homeProb": 0.849,
      "asOf": "2026-09-12T23:09:41+00:00"
     },
     "conf": "Big Ten",
@@ -94407,7 +94407,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -19.5,
      "total": 54.5,
-     "homeProb": 0.894,
+     "homeProb": 0.923,
      "asOf": "2026-09-13T01:17:40+00:00"
     },
     "conf": "ACC",
@@ -94444,7 +94444,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -14.5,
      "total": 42.5,
-     "homeProb": 0.832,
+     "homeProb": 0.856,
      "asOf": "2026-09-12T23:09:41+00:00"
     },
     "conf": "Big Ten",
@@ -94481,7 +94481,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 26.5,
      "total": 52.5,
-     "homeProb": 0.057,
+     "homeProb": 0.027,
      "asOf": "2026-09-12T23:09:41+00:00"
     },
     "conf": "Pac-12",
@@ -94518,7 +94518,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -1.5,
      "total": 50.5,
-     "homeProb": 0.537,
+     "homeProb": 0.539,
      "asOf": "2026-09-12T23:09:41+00:00"
     },
     "conf": "SEC",
@@ -94555,7 +94555,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -34.5,
      "total": 55.5,
-     "homeProb": 0.973,
+     "homeProb": 0.993,
      "asOf": "2026-09-12T23:09:41+00:00"
     },
     "conf": "SEC",
@@ -94629,7 +94629,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 4.5,
      "total": 59.5,
-     "homeProb": 0.368,
+     "homeProb": 0.359,
      "asOf": "2026-09-12T23:09:41+00:00"
     },
     "conf": "American Athletic",
@@ -94666,7 +94666,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -32.5,
      "total": 56.5,
-     "homeProb": 0.958,
+     "homeProb": 0.984,
      "asOf": "2026-09-12T23:09:41+00:00"
     },
     "conf": "SEC",
@@ -94888,7 +94888,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 2.5,
      "total": 48.5,
-     "homeProb": 0.474,
+     "homeProb": 0.472,
      "asOf": "2026-09-13T01:17:40+00:00"
     },
     "conf": "Mountain West",
@@ -94925,7 +94925,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -12.5,
      "total": 55.5,
-     "homeProb": 0.802,
+     "homeProb": 0.82,
      "asOf": "2026-09-13T01:17:40+00:00"
     },
     "conf": "Big 12",
@@ -94962,7 +94962,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -17.5,
      "total": 44.5,
-     "homeProb": 0.871,
+     "homeProb": 0.897,
      "asOf": "2026-09-13T01:17:40+00:00"
     },
     "conf": "Mountain West",
@@ -95036,7 +95036,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -30.5,
      "total": 58.5,
-     "homeProb": 0.966,
+     "homeProb": 0.987,
      "asOf": "2026-09-13T01:17:40+00:00"
     },
     "conf": "Big Ten",
@@ -95073,7 +95073,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -7.5,
      "total": 49.5,
-     "homeProb": 0.71,
+     "homeProb": 0.723,
      "asOf": "2026-09-13T01:17:40+00:00"
     },
     "conf": "Mountain West",
@@ -95132,7 +95132,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "p": 0
    },
    "brier": null,
-   "marketBrier": 0.1479,
+   "marketBrier": 0.1474,
    "marginMae": 12.6,
    "marketMarginMae": 11.1
   },
@@ -114723,7 +114723,7 @@ export const REPORT_CARDS: ReportCard[] = [
   "season": 2026,
   "week": 1,
   "label": "NFL Week 1",
-  "generatedAt": "2026-09-15T21:11:45+00:00",
+  "generatedAt": "2026-10-13T20:27:04+00:00",
   "publishedRefs": [
    "01708f263695fa48802560a73d41bf271d036a67",
    "059c47cfaab734e7e3f1989083971f7f5971d4ff",
@@ -114750,7 +114750,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -3.5,
      "total": 44.5,
-     "homeProb": 0.613,
+     "homeProb": 0.62,
      "asOf": "2026-09-09T23:02:08+00:00"
     },
     "su": "win",
@@ -114784,7 +114784,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -3.5,
      "total": 47.5,
-     "homeProb": 0.646,
+     "homeProb": 0.655,
      "asOf": "2026-09-10T22:59:09+00:00"
     },
     "su": "loss",
@@ -114818,7 +114818,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 3.0,
      "total": 46.5,
-     "homeProb": 0.403,
+     "homeProb": 0.397,
      "asOf": "2026-09-13T15:49:15+00:00"
     },
     "su": "win",
@@ -114852,7 +114852,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -3.5,
      "total": 50.5,
-     "homeProb": 0.652,
+     "homeProb": 0.661,
      "asOf": "2026-09-13T15:49:15+00:00"
     },
     "su": "win",
@@ -114886,7 +114886,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -6.5,
      "total": 49.5,
-     "homeProb": 0.737,
+     "homeProb": 0.752,
      "asOf": "2026-09-13T15:49:15+00:00"
     },
     "su": "win",
@@ -114920,7 +114920,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 1.5,
      "total": 44.5,
-     "homeProb": 0.48,
+     "homeProb": 0.479,
      "asOf": "2026-09-13T15:49:15+00:00"
     },
     "su": "loss",
@@ -114954,7 +114954,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 3.5,
      "total": 48.5,
-     "homeProb": 0.397,
+     "homeProb": 0.391,
      "asOf": "2026-09-13T15:49:15+00:00"
     },
     "su": "loss",
@@ -114988,7 +114988,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -8.5,
      "total": 40.5,
-     "homeProb": 0.786,
+     "homeProb": 0.804,
      "asOf": "2026-09-13T15:49:15+00:00"
     },
     "su": "win",
@@ -115022,7 +115022,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -6.5,
      "total": 40.5,
-     "homeProb": 0.717,
+     "homeProb": 0.731,
      "asOf": "2026-09-13T15:49:15+00:00"
     },
     "su": "win",
@@ -115056,7 +115056,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -1.5,
      "total": 38.5,
-     "homeProb": 0.52,
+     "homeProb": 0.521,
      "asOf": "2026-09-13T15:49:15+00:00"
     },
     "su": "loss",
@@ -115090,7 +115090,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -8.5,
      "total": 47.5,
-     "homeProb": 0.802,
+     "homeProb": 0.82,
      "asOf": "2026-09-13T15:49:15+00:00"
     },
     "su": "loss",
@@ -115124,7 +115124,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -3.0,
      "total": 40.5,
-     "homeProb": 0.601,
+     "homeProb": 0.607,
      "asOf": "2026-09-13T15:49:15+00:00"
     },
     "su": "loss",
@@ -115158,7 +115158,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -1.5,
      "total": 46.5,
-     "homeProb": 0.547,
+     "homeProb": 0.55,
      "asOf": "2026-09-13T15:49:15+00:00"
     },
     "su": "win",
@@ -115192,7 +115192,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -5.5,
      "total": 44.5,
-     "homeProb": 0.7,
+     "homeProb": 0.713,
      "asOf": "2026-09-13T15:49:15+00:00"
     },
     "su": "win",
@@ -115226,7 +115226,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": 3.0,
      "total": 47.5,
-     "homeProb": 0.4,
+     "homeProb": 0.394,
      "asOf": "2026-09-13T22:58:53+00:00"
     },
     "su": "win",
@@ -115260,7 +115260,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "close": {
      "spreadHome": -2.5,
      "total": 43.5,
-     "homeProb": 0.551,
+     "homeProb": 0.554,
      "asOf": "2026-09-14T23:43:07+00:00"
     },
     "su": "loss",
@@ -115316,7 +115316,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "p": 0
    },
    "brier": 0.2437,
-   "marketBrier": 0.2102,
+   "marketBrier": 0.2094,
    "marginMae": 12.6,
    "marketMarginMae": 11.2
   },
@@ -129041,7 +129041,7 @@ export const REPORT_CARDS: ReportCard[] = [
   "season": 2026,
   "week": 1,
   "label": "NCAAF Week 1",
-  "generatedAt": "2026-09-15T21:13:29+00:00",
+  "generatedAt": "2026-10-13T20:29:47+00:00",
   "publishedRefs": [
    "02a835023de64269535ded74862abfc8c63f4368",
    "0469ae0a00c995fbbf0b5c6b679f364846088ccf",
@@ -129405,6 +129405,80 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
+    "away": "West Georgia",
+    "home": "Kennesaw State",
+    "kickoff": "2026-09-03T23:00:00.000Z",
+    "final": {
+     "away": 0,
+     "home": 47
+    },
+    "model": {
+     "favored": "Kennesaw State",
+     "homeMargin": 14.6,
+     "homeProb": null,
+     "total": 53.7
+    },
+    "close": {
+     "spreadHome": -21.5,
+     "total": 50.0,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "Conference USA",
+    "apAway": null,
+    "apHome": null,
+    "su": "win",
+    "ats": {
+     "side": "away",
+     "num": 21.5,
+     "lay": false,
+     "result": "loss"
+    },
+    "total": {
+     "call": "over",
+     "num": 50.0,
+     "ours": 53.7,
+     "result": "loss"
+    }
+   },
+   {
+    "away": "Merrimack",
+    "home": "Delaware",
+    "kickoff": "2026-09-03T23:00:00.000Z",
+    "final": {
+     "away": 7,
+     "home": 42
+    },
+    "model": {
+     "favored": "Delaware",
+     "homeMargin": 30.8,
+     "homeProb": null,
+     "total": 57.0
+    },
+    "close": {
+     "spreadHome": -31.5,
+     "total": 56.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "Conference USA",
+    "apAway": null,
+    "apHome": null,
+    "su": "win",
+    "ats": {
+     "side": "away",
+     "num": 31.5,
+     "lay": false,
+     "result": "loss"
+    },
+    "total": {
+     "call": "over",
+     "num": 56.5,
+     "ours": 57.0,
+     "result": "loss"
+    }
+   },
+   {
     "away": "Akron",
     "home": "Wake Forest",
     "kickoff": "2026-09-03T23:00:00.000Z",
@@ -129479,43 +129553,6 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
-    "away": "Merrimack",
-    "home": "Delaware",
-    "kickoff": "2026-09-03T23:00:00.000Z",
-    "final": {
-     "away": 7,
-     "home": 42
-    },
-    "model": {
-     "favored": "Delaware",
-     "homeMargin": 30.8,
-     "homeProb": null,
-     "total": 57.0
-    },
-    "close": {
-     "spreadHome": -31.5,
-     "total": 56.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "Conference USA",
-    "apAway": null,
-    "apHome": null,
-    "su": "win",
-    "ats": {
-     "side": "away",
-     "num": 31.5,
-     "lay": false,
-     "result": "loss"
-    },
-    "total": {
-     "call": "over",
-     "num": 56.5,
-     "ours": 57.0,
-     "result": "loss"
-    }
-   },
-   {
     "away": "UAlbany",
     "home": "Buffalo",
     "kickoff": "2026-09-03T23:00:00.000Z",
@@ -129549,80 +129586,6 @@ export const REPORT_CARDS: ReportCard[] = [
      "call": "over",
      "num": 47.5,
      "ours": 51.0,
-     "result": "loss"
-    }
-   },
-   {
-    "away": "West Georgia",
-    "home": "Kennesaw State",
-    "kickoff": "2026-09-03T23:00:00.000Z",
-    "final": {
-     "away": 0,
-     "home": 47
-    },
-    "model": {
-     "favored": "Kennesaw State",
-     "homeMargin": 14.6,
-     "homeProb": null,
-     "total": 53.7
-    },
-    "close": {
-     "spreadHome": -21.5,
-     "total": 50.0,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "Conference USA",
-    "apAway": null,
-    "apHome": null,
-    "su": "win",
-    "ats": {
-     "side": "away",
-     "num": 21.5,
-     "lay": false,
-     "result": "loss"
-    },
-    "total": {
-     "call": "over",
-     "num": 50.0,
-     "ours": 53.7,
-     "result": "loss"
-    }
-   },
-   {
-    "away": "Eastern Illinois",
-    "home": "Minnesota",
-    "kickoff": "2026-09-04T00:00:00.000Z",
-    "final": {
-     "away": 7,
-     "home": 59
-    },
-    "model": {
-     "favored": "Minnesota",
-     "homeMargin": 42.8,
-     "homeProb": null,
-     "total": 49.6
-    },
-    "close": {
-     "spreadHome": -42.5,
-     "total": 52.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "Big Ten",
-    "apAway": null,
-    "apHome": null,
-    "su": "win",
-    "ats": {
-     "side": "home",
-     "num": -42.5,
-     "lay": true,
-     "result": "win"
-    },
-    "total": {
-     "call": "under",
-     "num": 52.5,
-     "ours": 49.6,
      "result": "loss"
     }
    },
@@ -129697,6 +129660,43 @@ export const REPORT_CARDS: ReportCard[] = [
      "call": "under",
      "num": 61.5,
      "ours": 51.2,
+     "result": "loss"
+    }
+   },
+   {
+    "away": "Eastern Illinois",
+    "home": "Minnesota",
+    "kickoff": "2026-09-04T00:00:00.000Z",
+    "final": {
+     "away": 7,
+     "home": 59
+    },
+    "model": {
+     "favored": "Minnesota",
+     "homeMargin": 42.8,
+     "homeProb": null,
+     "total": 49.6
+    },
+    "close": {
+     "spreadHome": -42.5,
+     "total": 52.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "Big Ten",
+    "apAway": null,
+    "apHome": null,
+    "su": "win",
+    "ats": {
+     "side": "home",
+     "num": -42.5,
+     "lay": true,
+     "result": "win"
+    },
+    "total": {
+     "call": "under",
+     "num": 52.5,
+     "ours": 49.6,
      "result": "loss"
     }
    },
@@ -129812,43 +129812,6 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
-    "away": "Indiana State",
-    "home": "Purdue",
-    "kickoff": "2026-09-04T23:00:00.000Z",
-    "final": {
-     "away": 19,
-     "home": 44
-    },
-    "model": {
-     "favored": "Purdue",
-     "homeMargin": 34.9,
-     "homeProb": null,
-     "total": 52.5
-    },
-    "close": {
-     "spreadHome": -35.0,
-     "total": 56.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "Big Ten",
-    "apAway": null,
-    "apHome": null,
-    "su": "win",
-    "ats": {
-     "side": "away",
-     "num": 35.0,
-     "lay": false,
-     "result": "win"
-    },
-    "total": {
-     "call": "under",
-     "num": 56.5,
-     "ours": 52.5,
-     "result": "loss"
-    }
-   },
-   {
     "away": "North Carolina A&T",
     "home": "Georgia State",
     "kickoff": "2026-09-04T23:00:00.000Z",
@@ -129886,40 +129849,40 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
-    "away": "UTEP",
-    "home": "Oklahoma",
-    "kickoff": "2026-09-05T00:00:00.000Z",
+    "away": "Indiana State",
+    "home": "Purdue",
+    "kickoff": "2026-09-04T23:00:00.000Z",
     "final": {
-     "away": 0,
-     "home": 51
+     "away": 19,
+     "home": 44
     },
     "model": {
-     "favored": "Oklahoma",
-     "homeMargin": 41.2,
+     "favored": "Purdue",
+     "homeMargin": 34.9,
      "homeProb": null,
-     "total": 49.0
+     "total": 52.5
     },
     "close": {
-     "spreadHome": -41.0,
-     "total": 51.0,
+     "spreadHome": -35.0,
+     "total": 56.5,
      "homeProb": null,
      "asOf": null
     },
-    "conf": "SEC",
+    "conf": "Big Ten",
     "apAway": null,
-    "apHome": 10,
+    "apHome": null,
     "su": "win",
     "ats": {
-     "side": "home",
-     "num": -41.0,
-     "lay": true,
+     "side": "away",
+     "num": 35.0,
+     "lay": false,
      "result": "win"
     },
     "total": {
      "call": "under",
-     "num": 51.0,
-     "ours": 49.0,
-     "result": "push"
+     "num": 56.5,
+     "ours": 52.5,
+     "result": "loss"
     }
    },
    {
@@ -129997,6 +129960,43 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
+    "away": "UTEP",
+    "home": "Oklahoma",
+    "kickoff": "2026-09-05T00:00:00.000Z",
+    "final": {
+     "away": 0,
+     "home": 51
+    },
+    "model": {
+     "favored": "Oklahoma",
+     "homeMargin": 41.2,
+     "homeProb": null,
+     "total": 49.0
+    },
+    "close": {
+     "spreadHome": -41.0,
+     "total": 51.0,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "SEC",
+    "apAway": null,
+    "apHome": 10,
+    "su": "win",
+    "ats": {
+     "side": "home",
+     "num": -41.0,
+     "lay": true,
+     "result": "win"
+    },
+    "total": {
+     "call": "under",
+     "num": 51.0,
+     "ours": 49.0,
+     "result": "push"
+    }
+   },
+   {
     "away": "Miami",
     "home": "Stanford",
     "kickoff": "2026-09-05T01:00:00.000Z",
@@ -130071,151 +130071,40 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
-    "away": "Oregon State",
-    "home": "Houston",
+    "away": "Tarleton State",
+    "home": "Bowling Green",
     "kickoff": "2026-09-05T16:00:00.000Z",
     "final": {
      "away": 20,
-     "home": 33
+     "home": 13
     },
     "model": {
-     "favored": "Houston",
-     "homeMargin": 18.9,
+     "favored": "Tarleton State",
+     "homeMargin": -4.4,
      "homeProb": null,
-     "total": 51.5
+     "total": 50.4
     },
     "close": {
-     "spreadHome": -21.0,
-     "total": 50.5,
+     "spreadHome": -2.0,
+     "total": 48.0,
      "homeProb": null,
      "asOf": null
     },
-    "conf": "Big 12",
-    "apAway": null,
-    "apHome": 23,
-    "su": "win",
-    "ats": {
-     "side": "away",
-     "num": 21.0,
-     "lay": false,
-     "result": "win"
-    },
-    "total": {
-     "call": "over",
-     "num": 50.5,
-     "ours": 51.5,
-     "result": "win"
-    }
-   },
-   {
-    "away": "East Carolina",
-    "home": "Alabama",
-    "kickoff": "2026-09-05T16:00:00.000Z",
-    "final": {
-     "away": 10,
-     "home": 48
-    },
-    "model": {
-     "favored": "Alabama",
-     "homeMargin": 26.7,
-     "homeProb": null,
-     "total": 51.3
-    },
-    "close": {
-     "spreadHome": -28.0,
-     "total": 52.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "SEC",
-    "apAway": null,
-    "apHome": 13,
-    "su": "win",
-    "ats": {
-     "side": "away",
-     "num": 28.0,
-     "lay": false,
-     "result": "loss"
-    },
-    "total": {
-     "call": "under",
-     "num": 52.5,
-     "ours": 51.3,
-     "result": "loss"
-    }
-   },
-   {
-    "away": "New Hampshire",
-    "home": "Syracuse",
-    "kickoff": "2026-09-05T16:00:00.000Z",
-    "final": {
-     "away": 3,
-     "home": 66
-    },
-    "model": {
-     "favored": "Syracuse",
-     "homeMargin": 33.1,
-     "homeProb": null,
-     "total": 53.1
-    },
-    "close": {
-     "spreadHome": -34.5,
-     "total": 55.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "ACC",
+    "conf": "Mid-American",
     "apAway": null,
     "apHome": null,
     "su": "win",
     "ats": {
      "side": "away",
-     "num": 34.5,
+     "num": 2.0,
      "lay": false,
-     "result": "loss"
-    },
-    "total": {
-     "call": "under",
-     "num": 55.5,
-     "ours": 53.1,
-     "result": "loss"
-    }
-   },
-   {
-    "away": "Ohio",
-    "home": "Nebraska",
-    "kickoff": "2026-09-05T16:00:00.000Z",
-    "final": {
-     "away": 21,
-     "home": 49
-    },
-    "model": {
-     "favored": "Nebraska",
-     "homeMargin": 22.5,
-     "homeProb": null,
-     "total": 50.6
-    },
-    "close": {
-     "spreadHome": -24.0,
-     "total": 46.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "Big Ten",
-    "apAway": null,
-    "apHome": null,
-    "su": "win",
-    "ats": {
-     "side": "away",
-     "num": 24.0,
-     "lay": false,
-     "result": "loss"
+     "result": "win"
     },
     "total": {
      "call": "over",
-     "num": 46.5,
-     "ours": 50.6,
-     "result": "win"
+     "num": 48.0,
+     "ours": 50.4,
+     "result": "loss"
     }
    },
    {
@@ -130252,80 +130141,6 @@ export const REPORT_CARDS: ReportCard[] = [
      "call": "over",
      "num": 56.0,
      "ours": 62.7,
-     "result": "win"
-    }
-   },
-   {
-    "away": "Lafayette",
-    "home": "UConn",
-    "kickoff": "2026-09-05T16:00:00.000Z",
-    "final": {
-     "away": 7,
-     "home": 56
-    },
-    "model": {
-     "favored": "UConn",
-     "homeMargin": 15.8,
-     "homeProb": null,
-     "total": 57.4
-    },
-    "close": {
-     "spreadHome": -19.5,
-     "total": 51.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "FBS Independents",
-    "apAway": null,
-    "apHome": null,
-    "su": "win",
-    "ats": {
-     "side": "away",
-     "num": 19.5,
-     "lay": false,
-     "result": "loss"
-    },
-    "total": {
-     "call": "over",
-     "num": 51.5,
-     "ours": 57.4,
-     "result": "win"
-    }
-   },
-   {
-    "away": "Coastal Carolina",
-    "home": "West Virginia",
-    "kickoff": "2026-09-05T16:00:00.000Z",
-    "final": {
-     "away": 24,
-     "home": 31
-    },
-    "model": {
-     "favored": "West Virginia",
-     "homeMargin": 17.1,
-     "homeProb": null,
-     "total": 56.4
-    },
-    "close": {
-     "spreadHome": -21.0,
-     "total": 54.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "Big 12",
-    "apAway": null,
-    "apHome": null,
-    "su": "win",
-    "ats": {
-     "side": "away",
-     "num": 21.0,
-     "lay": false,
-     "result": "win"
-    },
-    "total": {
-     "call": "over",
-     "num": 54.5,
-     "ours": 56.4,
      "result": "win"
     }
    },
@@ -130367,39 +130182,76 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
-    "away": "Tarleton State",
-    "home": "Bowling Green",
+    "away": "Lafayette",
+    "home": "UConn",
     "kickoff": "2026-09-05T16:00:00.000Z",
     "final": {
-     "away": 20,
-     "home": 13
+     "away": 7,
+     "home": 56
     },
     "model": {
-     "favored": "Tarleton State",
-     "homeMargin": -4.4,
+     "favored": "UConn",
+     "homeMargin": 15.8,
      "homeProb": null,
-     "total": 50.4
+     "total": 57.4
     },
     "close": {
-     "spreadHome": -2.0,
-     "total": 48.0,
+     "spreadHome": -19.5,
+     "total": 51.5,
      "homeProb": null,
      "asOf": null
     },
-    "conf": "Mid-American",
+    "conf": "FBS Independents",
     "apAway": null,
     "apHome": null,
     "su": "win",
     "ats": {
      "side": "away",
-     "num": 2.0,
+     "num": 19.5,
      "lay": false,
-     "result": "win"
+     "result": "loss"
     },
     "total": {
      "call": "over",
-     "num": 48.0,
-     "ours": 50.4,
+     "num": 51.5,
+     "ours": 57.4,
+     "result": "win"
+    }
+   },
+   {
+    "away": "East Carolina",
+    "home": "Alabama",
+    "kickoff": "2026-09-05T16:00:00.000Z",
+    "final": {
+     "away": 10,
+     "home": 48
+    },
+    "model": {
+     "favored": "Alabama",
+     "homeMargin": 26.7,
+     "homeProb": null,
+     "total": 51.3
+    },
+    "close": {
+     "spreadHome": -28.0,
+     "total": 52.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "SEC",
+    "apAway": null,
+    "apHome": 13,
+    "su": "win",
+    "ats": {
+     "side": "away",
+     "num": 28.0,
+     "lay": false,
+     "result": "loss"
+    },
+    "total": {
+     "call": "under",
+     "num": 52.5,
+     "ours": 51.3,
      "result": "loss"
     }
    },
@@ -130441,40 +130293,151 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
-    "away": "Ball State",
-    "home": "Ohio State",
-    "kickoff": "2026-09-05T16:30:00.000Z",
+    "away": "Coastal Carolina",
+    "home": "West Virginia",
+    "kickoff": "2026-09-05T16:00:00.000Z",
     "final": {
-     "away": 3,
-     "home": 56
+     "away": 24,
+     "home": 31
     },
     "model": {
-     "favored": "Ohio State",
-     "homeMargin": 50.0,
+     "favored": "West Virginia",
+     "homeMargin": 17.1,
      "homeProb": null,
-     "total": 44.3
+     "total": 56.4
     },
     "close": {
-     "spreadHome": -50.0,
+     "spreadHome": -21.0,
+     "total": 54.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "Big 12",
+    "apAway": null,
+    "apHome": null,
+    "su": "win",
+    "ats": {
+     "side": "away",
+     "num": 21.0,
+     "lay": false,
+     "result": "win"
+    },
+    "total": {
+     "call": "over",
+     "num": 54.5,
+     "ours": 56.4,
+     "result": "win"
+    }
+   },
+   {
+    "away": "New Hampshire",
+    "home": "Syracuse",
+    "kickoff": "2026-09-05T16:00:00.000Z",
+    "final": {
+     "away": 3,
+     "home": 66
+    },
+    "model": {
+     "favored": "Syracuse",
+     "homeMargin": 33.1,
+     "homeProb": null,
+     "total": 53.1
+    },
+    "close": {
+     "spreadHome": -34.5,
      "total": 55.5,
      "homeProb": null,
      "asOf": null
     },
-    "conf": "Big Ten",
+    "conf": "ACC",
     "apAway": null,
-    "apHome": 1,
+    "apHome": null,
     "su": "win",
     "ats": {
      "side": "away",
-     "num": 50.0,
+     "num": 34.5,
      "lay": false,
      "result": "loss"
     },
     "total": {
      "call": "under",
      "num": 55.5,
-     "ours": 44.3,
+     "ours": 53.1,
      "result": "loss"
+    }
+   },
+   {
+    "away": "Oregon State",
+    "home": "Houston",
+    "kickoff": "2026-09-05T16:00:00.000Z",
+    "final": {
+     "away": 20,
+     "home": 33
+    },
+    "model": {
+     "favored": "Houston",
+     "homeMargin": 18.9,
+     "homeProb": null,
+     "total": 51.5
+    },
+    "close": {
+     "spreadHome": -21.0,
+     "total": 50.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "Big 12",
+    "apAway": null,
+    "apHome": 23,
+    "su": "win",
+    "ats": {
+     "side": "away",
+     "num": 21.0,
+     "lay": false,
+     "result": "win"
+    },
+    "total": {
+     "call": "over",
+     "num": 50.5,
+     "ours": 51.5,
+     "result": "win"
+    }
+   },
+   {
+    "away": "Ohio",
+    "home": "Nebraska",
+    "kickoff": "2026-09-05T16:00:00.000Z",
+    "final": {
+     "away": 21,
+     "home": 49
+    },
+    "model": {
+     "favored": "Nebraska",
+     "homeMargin": 22.5,
+     "homeProb": null,
+     "total": 50.6
+    },
+    "close": {
+     "spreadHome": -24.0,
+     "total": 46.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "Big Ten",
+    "apAway": null,
+    "apHome": null,
+    "su": "win",
+    "ats": {
+     "side": "away",
+     "num": 24.0,
+     "lay": false,
+     "result": "loss"
+    },
+    "total": {
+     "call": "over",
+     "num": 46.5,
+     "ours": 50.6,
+     "result": "win"
     }
    },
    {
@@ -130512,6 +130475,43 @@ export const REPORT_CARDS: ReportCard[] = [
      "num": 47.5,
      "ours": 52.6,
      "result": "win"
+    }
+   },
+   {
+    "away": "Ball State",
+    "home": "Ohio State",
+    "kickoff": "2026-09-05T16:30:00.000Z",
+    "final": {
+     "away": 3,
+     "home": 56
+    },
+    "model": {
+     "favored": "Ohio State",
+     "homeMargin": 50.0,
+     "homeProb": null,
+     "total": 44.3
+    },
+    "close": {
+     "spreadHome": -50.0,
+     "total": 55.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "Big Ten",
+    "apAway": null,
+    "apHome": 1,
+    "su": "win",
+    "ats": {
+     "side": "away",
+     "num": 50.0,
+     "lay": false,
+     "result": "loss"
+    },
+    "total": {
+     "call": "under",
+     "num": 55.5,
+     "ours": 44.3,
+     "result": "loss"
     }
    },
    {
@@ -130589,43 +130589,6 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
-    "away": "Southeast Missouri State",
-    "home": "Iowa State",
-    "kickoff": "2026-09-05T17:00:00.000Z",
-    "final": {
-     "away": 10,
-     "home": 38
-    },
-    "model": {
-     "favored": "Iowa State",
-     "homeMargin": 31.0,
-     "homeProb": null,
-     "total": 50.6
-    },
-    "close": {
-     "spreadHome": -30.2,
-     "total": 52.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "Big 12",
-    "apAway": null,
-    "apHome": null,
-    "su": "win",
-    "ats": {
-     "side": "home",
-     "num": -30.2,
-     "lay": true,
-     "result": "loss"
-    },
-    "total": {
-     "call": "under",
-     "num": 52.5,
-     "ours": 50.6,
-     "result": "win"
-    }
-   },
-   {
     "away": "Duquesne",
     "home": "Air Force",
     "kickoff": "2026-09-05T17:00:00.000Z",
@@ -130660,6 +130623,43 @@ export const REPORT_CARDS: ReportCard[] = [
      "num": 55.5,
      "ours": 56.6,
      "result": "loss"
+    }
+   },
+   {
+    "away": "Southeast Missouri State",
+    "home": "Iowa State",
+    "kickoff": "2026-09-05T17:00:00.000Z",
+    "final": {
+     "away": 10,
+     "home": 38
+    },
+    "model": {
+     "favored": "Iowa State",
+     "homeMargin": 31.0,
+     "homeProb": null,
+     "total": 50.6
+    },
+    "close": {
+     "spreadHome": -30.2,
+     "total": 52.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "Big 12",
+    "apAway": null,
+    "apHome": null,
+    "su": "win",
+    "ats": {
+     "side": "home",
+     "num": -30.2,
+     "lay": true,
+     "result": "loss"
+    },
+    "total": {
+     "call": "under",
+     "num": 52.5,
+     "ours": 50.6,
+     "result": "win"
     }
    },
    {
@@ -130737,77 +130737,77 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
-    "away": "Towson",
-    "home": "Navy",
+    "away": "Boston College",
+    "home": "Cincinnati",
     "kickoff": "2026-09-05T19:30:00.000Z",
     "final": {
      "away": 15,
-     "home": 42
+     "home": 34
     },
     "model": {
-     "favored": "Navy",
-     "homeMargin": 31.7,
+     "favored": "Cincinnati",
+     "homeMargin": 10.4,
      "homeProb": null,
-     "total": 55.0
+     "total": 56.2
     },
     "close": {
-     "spreadHome": -31.5,
-     "total": 50.5,
+     "spreadHome": -7.0,
+     "total": 51.5,
      "homeProb": null,
      "asOf": null
     },
-    "conf": "American Athletic",
+    "conf": "Big 12",
     "apAway": null,
     "apHome": null,
     "su": "win",
     "ats": {
      "side": "home",
-     "num": -31.5,
+     "num": -7.0,
      "lay": true,
-     "result": "loss"
+     "result": "win"
     },
     "total": {
      "call": "over",
-     "num": 50.5,
-     "ours": 55.0,
-     "result": "win"
+     "num": 51.5,
+     "ours": 56.2,
+     "result": "loss"
     }
    },
    {
-    "away": "Marshall",
-    "home": "Penn State",
+    "away": "Maine",
+    "home": "App State",
     "kickoff": "2026-09-05T19:30:00.000Z",
     "final": {
-     "away": 0,
-     "home": 45
+     "away": 3,
+     "home": 55
     },
     "model": {
-     "favored": "Penn State",
-     "homeMargin": 25.8,
+     "favored": "App State",
+     "homeMargin": 18.2,
      "homeProb": null,
-     "total": 57.1
+     "total": 54.8
     },
     "close": {
-     "spreadHome": -23.5,
-     "total": 52.0,
+     "spreadHome": -21.0,
+     "total": 53.5,
      "homeProb": null,
      "asOf": null
     },
-    "conf": "Big Ten",
+    "conf": "Sun Belt",
     "apAway": null,
-    "apHome": 18,
+    "apHome": null,
     "su": "win",
     "ats": {
-     "side": "home",
-     "num": -23.5,
-     "lay": true,
-     "result": "win"
+     "side": "away",
+     "num": 21.0,
+     "lay": false,
+     "result": "loss"
     },
     "total": {
      "call": "over",
-     "num": 52.0,
-     "ours": 57.1,
-     "result": "loss"
+     "num": 53.5,
+     "ours": 54.8,
+     "result": "win"
     }
    },
    {
@@ -130885,187 +130885,39 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
-    "away": "Texas State",
-    "home": "Texas",
+    "away": "Fordham",
+    "home": "North Dakota State",
     "kickoff": "2026-09-05T19:30:00.000Z",
     "final": {
-     "away": 7,
-     "home": 59
+     "away": 0,
+     "home": 38
     },
     "model": {
-     "favored": "Texas",
-     "homeMargin": 29.4,
+     "favored": "North Dakota State",
+     "homeMargin": 42.1,
      "homeProb": null,
-     "total": 59.5
+     "total": 53.3
     },
     "close": {
-     "spreadHome": -29.5,
-     "total": 59.8,
+     "spreadHome": -41.5,
+     "total": 54.5,
      "homeProb": null,
      "asOf": null
     },
-    "conf": "SEC",
-    "apAway": null,
-    "apHome": 5,
-    "su": "win",
-    "ats": {
-     "side": "away",
-     "num": 29.5,
-     "lay": false,
-     "result": "loss"
-    },
-    "total": {
-     "call": "under",
-     "num": 59.8,
-     "ours": 59.5,
-     "result": "loss"
-    }
-   },
-   {
-    "away": "Boston College",
-    "home": "Cincinnati",
-    "kickoff": "2026-09-05T19:30:00.000Z",
-    "final": {
-     "away": 15,
-     "home": 34
-    },
-    "model": {
-     "favored": "Cincinnati",
-     "homeMargin": 10.4,
-     "homeProb": null,
-     "total": 56.2
-    },
-    "close": {
-     "spreadHome": -7.0,
-     "total": 51.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "Big 12",
+    "conf": "Other",
     "apAway": null,
     "apHome": null,
     "su": "win",
     "ats": {
      "side": "home",
-     "num": -7.0,
-     "lay": true,
-     "result": "win"
-    },
-    "total": {
-     "call": "over",
-     "num": 51.5,
-     "ours": 56.2,
-     "result": "loss"
-    }
-   },
-   {
-    "away": "Tulane",
-    "home": "Duke",
-    "kickoff": "2026-09-05T19:30:00.000Z",
-    "final": {
-     "away": 3,
-     "home": 17
-    },
-    "model": {
-     "favored": "Duke",
-     "homeMargin": 12.1,
-     "homeProb": null,
-     "total": 58.4
-    },
-    "close": {
-     "spreadHome": -7.5,
-     "total": 51.0,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "ACC",
-    "apAway": null,
-    "apHome": null,
-    "su": "win",
-    "ats": {
-     "side": "home",
-     "num": -7.5,
-     "lay": true,
-     "result": "win"
-    },
-    "total": {
-     "call": "over",
-     "num": 51.0,
-     "ours": 58.4,
-     "result": "loss"
-    }
-   },
-   {
-    "away": "Furman",
-    "home": "Tennessee",
-    "kickoff": "2026-09-05T19:30:00.000Z",
-    "final": {
-     "away": 9,
-     "home": 56
-    },
-    "model": {
-     "favored": "Tennessee",
-     "homeMargin": 48.9,
-     "homeProb": null,
-     "total": 59.8
-    },
-    "close": {
-     "spreadHome": -48.5,
-     "total": 66.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "SEC",
-    "apAway": null,
-    "apHome": 20,
-    "su": "win",
-    "ats": {
-     "side": "home",
-     "num": -48.5,
+     "num": -41.5,
      "lay": true,
      "result": "loss"
     },
     "total": {
      "call": "under",
-     "num": 66.5,
-     "ours": 59.8,
-     "result": "win"
-    }
-   },
-   {
-    "away": "Maine",
-    "home": "App State",
-    "kickoff": "2026-09-05T19:30:00.000Z",
-    "final": {
-     "away": 3,
-     "home": 55
-    },
-    "model": {
-     "favored": "App State",
-     "homeMargin": 18.2,
-     "homeProb": null,
-     "total": 54.8
-    },
-    "close": {
-     "spreadHome": -21.0,
-     "total": 53.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "Sun Belt",
-    "apAway": null,
-    "apHome": null,
-    "su": "win",
-    "ats": {
-     "side": "away",
-     "num": 21.0,
-     "lay": false,
-     "result": "loss"
-    },
-    "total": {
-     "call": "over",
-     "num": 53.5,
-     "ours": 54.8,
+     "num": 54.5,
+     "ours": 53.3,
      "result": "win"
     }
    },
@@ -131107,40 +130959,188 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
-    "away": "Fordham",
-    "home": "North Dakota State",
+    "away": "Tulane",
+    "home": "Duke",
     "kickoff": "2026-09-05T19:30:00.000Z",
     "final": {
-     "away": 0,
-     "home": 38
+     "away": 3,
+     "home": 17
     },
     "model": {
-     "favored": "North Dakota State",
-     "homeMargin": 42.1,
+     "favored": "Duke",
+     "homeMargin": 12.1,
      "homeProb": null,
-     "total": 53.3
+     "total": 58.4
     },
     "close": {
-     "spreadHome": -41.5,
-     "total": 54.5,
+     "spreadHome": -7.5,
+     "total": 51.0,
      "homeProb": null,
      "asOf": null
     },
-    "conf": "Other",
+    "conf": "ACC",
     "apAway": null,
     "apHome": null,
     "su": "win",
     "ats": {
      "side": "home",
-     "num": -41.5,
+     "num": -7.5,
+     "lay": true,
+     "result": "win"
+    },
+    "total": {
+     "call": "over",
+     "num": 51.0,
+     "ours": 58.4,
+     "result": "loss"
+    }
+   },
+   {
+    "away": "Towson",
+    "home": "Navy",
+    "kickoff": "2026-09-05T19:30:00.000Z",
+    "final": {
+     "away": 15,
+     "home": 42
+    },
+    "model": {
+     "favored": "Navy",
+     "homeMargin": 31.7,
+     "homeProb": null,
+     "total": 55.0
+    },
+    "close": {
+     "spreadHome": -31.5,
+     "total": 50.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "American Athletic",
+    "apAway": null,
+    "apHome": null,
+    "su": "win",
+    "ats": {
+     "side": "home",
+     "num": -31.5,
+     "lay": true,
+     "result": "loss"
+    },
+    "total": {
+     "call": "over",
+     "num": 50.5,
+     "ours": 55.0,
+     "result": "win"
+    }
+   },
+   {
+    "away": "Furman",
+    "home": "Tennessee",
+    "kickoff": "2026-09-05T19:30:00.000Z",
+    "final": {
+     "away": 9,
+     "home": 56
+    },
+    "model": {
+     "favored": "Tennessee",
+     "homeMargin": 48.9,
+     "homeProb": null,
+     "total": 59.8
+    },
+    "close": {
+     "spreadHome": -48.5,
+     "total": 66.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "SEC",
+    "apAway": null,
+    "apHome": 20,
+    "su": "win",
+    "ats": {
+     "side": "home",
+     "num": -48.5,
      "lay": true,
      "result": "loss"
     },
     "total": {
      "call": "under",
-     "num": 54.5,
-     "ours": 53.3,
+     "num": 66.5,
+     "ours": 59.8,
      "result": "win"
+    }
+   },
+   {
+    "away": "Marshall",
+    "home": "Penn State",
+    "kickoff": "2026-09-05T19:30:00.000Z",
+    "final": {
+     "away": 0,
+     "home": 45
+    },
+    "model": {
+     "favored": "Penn State",
+     "homeMargin": 25.8,
+     "homeProb": null,
+     "total": 57.1
+    },
+    "close": {
+     "spreadHome": -23.5,
+     "total": 52.0,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "Big Ten",
+    "apAway": null,
+    "apHome": 18,
+    "su": "win",
+    "ats": {
+     "side": "home",
+     "num": -23.5,
+     "lay": true,
+     "result": "win"
+    },
+    "total": {
+     "call": "over",
+     "num": 52.0,
+     "ours": 57.1,
+     "result": "loss"
+    }
+   },
+   {
+    "away": "Texas State",
+    "home": "Texas",
+    "kickoff": "2026-09-05T19:30:00.000Z",
+    "final": {
+     "away": 7,
+     "home": 59
+    },
+    "model": {
+     "favored": "Texas",
+     "homeMargin": 29.4,
+     "homeProb": null,
+     "total": 59.5
+    },
+    "close": {
+     "spreadHome": -29.5,
+     "total": 59.8,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "SEC",
+    "apAway": null,
+    "apHome": 5,
+    "su": "win",
+    "ats": {
+     "side": "away",
+     "num": 29.5,
+     "lay": false,
+     "result": "loss"
+    },
+    "total": {
+     "call": "under",
+     "num": 59.8,
+     "ours": 59.5,
+     "result": "loss"
     }
    },
    {
@@ -131218,43 +131218,6 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
-    "away": "Northern Illinois",
-    "home": "Iowa",
-    "kickoff": "2026-09-05T20:15:00.000Z",
-    "final": {
-     "away": 0,
-     "home": 40
-    },
-    "model": {
-     "favored": "Iowa",
-     "homeMargin": 32.2,
-     "homeProb": null,
-     "total": 45.7
-    },
-    "close": {
-     "spreadHome": -31.5,
-     "total": 44.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "Big Ten",
-    "apAway": null,
-    "apHome": 22,
-    "su": "win",
-    "ats": {
-     "side": "home",
-     "num": -31.5,
-     "lay": true,
-     "result": "win"
-    },
-    "total": {
-     "call": "over",
-     "num": 44.5,
-     "ours": 45.7,
-     "result": "loss"
-    }
-   },
-   {
     "away": "North Alabama",
     "home": "Arkansas",
     "kickoff": "2026-09-05T20:15:00.000Z",
@@ -131292,6 +131255,43 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
+    "away": "Northern Illinois",
+    "home": "Iowa",
+    "kickoff": "2026-09-05T20:15:00.000Z",
+    "final": {
+     "away": 0,
+     "home": 40
+    },
+    "model": {
+     "favored": "Iowa",
+     "homeMargin": 32.2,
+     "homeProb": null,
+     "total": 45.7
+    },
+    "close": {
+     "spreadHome": -31.5,
+     "total": 44.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "Big Ten",
+    "apAway": null,
+    "apHome": 22,
+    "su": "win",
+    "ats": {
+     "side": "home",
+     "num": -31.5,
+     "lay": true,
+     "result": "win"
+    },
+    "total": {
+     "call": "over",
+     "num": 44.5,
+     "ours": 45.7,
+     "result": "loss"
+    }
+   },
+   {
     "away": "Alcorn State",
     "home": "Southern Miss",
     "kickoff": "2026-09-05T21:00:00.000Z",
@@ -131325,43 +131325,6 @@ export const REPORT_CARDS: ReportCard[] = [
      "call": "over",
      "num": 50.5,
      "ours": 54.9,
-     "result": "win"
-    }
-   },
-   {
-    "away": "Norfolk State",
-    "home": "Old Dominion",
-    "kickoff": "2026-09-05T22:00:00.000Z",
-    "final": {
-     "away": 10,
-     "home": 31
-    },
-    "model": {
-     "favored": "Old Dominion",
-     "homeMargin": 41.8,
-     "homeProb": null,
-     "total": 52.0
-    },
-    "close": {
-     "spreadHome": -41.5,
-     "total": 52.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "Sun Belt",
-    "apAway": null,
-    "apHome": null,
-    "su": "win",
-    "ats": {
-     "side": "home",
-     "num": -41.5,
-     "lay": true,
-     "result": "loss"
-    },
-    "total": {
-     "call": "under",
-     "num": 52.5,
-     "ours": 52.0,
      "result": "win"
     }
    },
@@ -131403,6 +131366,43 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
+    "away": "Norfolk State",
+    "home": "Old Dominion",
+    "kickoff": "2026-09-05T22:00:00.000Z",
+    "final": {
+     "away": 10,
+     "home": 31
+    },
+    "model": {
+     "favored": "Old Dominion",
+     "homeMargin": 41.8,
+     "homeProb": null,
+     "total": 52.0
+    },
+    "close": {
+     "spreadHome": -41.5,
+     "total": 52.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "Sun Belt",
+    "apAway": null,
+    "apHome": null,
+    "su": "win",
+    "ats": {
+     "side": "home",
+     "num": -41.5,
+     "lay": true,
+     "result": "loss"
+    },
+    "total": {
+     "call": "under",
+     "num": 52.5,
+     "ours": 52.0,
+     "result": "win"
+    }
+   },
+   {
     "away": "Houston Christian",
     "home": "Rice",
     "kickoff": "2026-09-05T23:00:00.000Z",
@@ -131440,22 +131440,22 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
-    "away": "Arkansas State",
-    "home": "Memphis",
+    "away": "Florida International",
+    "home": "South Florida",
     "kickoff": "2026-09-05T23:00:00.000Z",
     "final": {
-     "away": 24,
-     "home": 42
+     "away": 9,
+     "home": 19
     },
     "model": {
-     "favored": "Memphis",
-     "homeMargin": 18.1,
+     "favored": "South Florida",
+     "homeMargin": 18.0,
      "homeProb": null,
-     "total": 54.3
+     "total": 61.0
     },
     "close": {
-     "spreadHome": -10.8,
-     "total": 52.5,
+     "spreadHome": -14.5,
+     "total": 53.0,
      "homeProb": null,
      "asOf": null
     },
@@ -131465,52 +131465,52 @@ export const REPORT_CARDS: ReportCard[] = [
     "su": "win",
     "ats": {
      "side": "home",
-     "num": -10.8,
+     "num": -14.5,
      "lay": true,
-     "result": "win"
+     "result": "loss"
     },
     "total": {
      "call": "over",
-     "num": 52.5,
-     "ours": 54.3,
-     "result": "win"
+     "num": 53.0,
+     "ours": 61.0,
+     "result": "loss"
     }
    },
    {
-    "away": "Abilene Christian",
-    "home": "Texas Tech",
+    "away": "Nicholls",
+    "home": "Kansas State",
     "kickoff": "2026-09-05T23:00:00.000Z",
     "final": {
-     "away": 10,
-     "home": 33
+     "away": 3,
+     "home": 71
     },
     "model": {
-     "favored": "Texas Tech",
-     "homeMargin": 44.6,
+     "favored": "Kansas State",
+     "homeMargin": 42.0,
      "homeProb": null,
-     "total": 51.9
+     "total": 54.2
     },
     "close": {
-     "spreadHome": -44.5,
-     "total": 60.5,
+     "spreadHome": -41.5,
+     "total": 54.5,
      "homeProb": null,
      "asOf": null
     },
     "conf": "Big 12",
     "apAway": null,
-    "apHome": 12,
+    "apHome": null,
     "su": "win",
     "ats": {
      "side": "home",
-     "num": -44.5,
+     "num": -41.5,
      "lay": true,
-     "result": "loss"
+     "result": "win"
     },
     "total": {
      "call": "under",
-     "num": 60.5,
-     "ours": 51.9,
-     "result": "win"
+     "num": 54.5,
+     "ours": 54.2,
+     "result": "loss"
     }
    },
    {
@@ -131588,113 +131588,39 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
-    "away": "Idaho State",
-    "home": "Utah State",
+    "away": "Charleston Southern",
+    "home": "Georgia Southern",
     "kickoff": "2026-09-05T23:00:00.000Z",
     "final": {
-     "away": 29,
-     "home": 17
+     "away": 0,
+     "home": 31
     },
     "model": {
-     "favored": "Utah State",
-     "homeMargin": 17.0,
+     "favored": "Georgia Southern",
+     "homeMargin": 28.2,
      "homeProb": null,
      "total": 56.7
     },
     "close": {
-     "spreadHome": -15.5,
-     "total": 59.0,
+     "spreadHome": -28.5,
+     "total": 51.5,
      "homeProb": null,
      "asOf": null
     },
-    "conf": "Mountain West",
-    "apAway": null,
-    "apHome": null,
-    "su": "loss",
-    "ats": {
-     "side": "home",
-     "num": -15.5,
-     "lay": true,
-     "result": "loss"
-    },
-    "total": {
-     "call": "under",
-     "num": 59.0,
-     "ours": 56.7,
-     "result": "win"
-    }
-   },
-   {
-    "away": "Nicholls",
-    "home": "Kansas State",
-    "kickoff": "2026-09-05T23:00:00.000Z",
-    "final": {
-     "away": 3,
-     "home": 71
-    },
-    "model": {
-     "favored": "Kansas State",
-     "homeMargin": 42.0,
-     "homeProb": null,
-     "total": 54.2
-    },
-    "close": {
-     "spreadHome": -41.5,
-     "total": 54.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "Big 12",
+    "conf": "Sun Belt",
     "apAway": null,
     "apHome": null,
     "su": "win",
     "ats": {
-     "side": "home",
-     "num": -41.5,
-     "lay": true,
-     "result": "win"
-    },
-    "total": {
-     "call": "under",
-     "num": 54.5,
-     "ours": 54.2,
+     "side": "away",
+     "num": 28.5,
+     "lay": false,
      "result": "loss"
-    }
-   },
-   {
-    "away": "Missouri State",
-    "home": "Texas A&M",
-    "kickoff": "2026-09-05T23:00:00.000Z",
-    "final": {
-     "away": 0,
-     "home": 50
-    },
-    "model": {
-     "favored": "Texas A&M",
-     "homeMargin": 41.0,
-     "homeProb": null,
-     "total": 55.6
-    },
-    "close": {
-     "spreadHome": -40.5,
-     "total": 53.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "SEC",
-    "apAway": null,
-    "apHome": 8,
-    "su": "win",
-    "ats": {
-     "side": "home",
-     "num": -40.5,
-     "lay": true,
-     "result": "win"
     },
     "total": {
      "call": "over",
-     "num": 53.5,
-     "ours": 55.6,
+     "num": 51.5,
+     "ours": 56.7,
      "result": "loss"
     }
    },
@@ -131736,39 +131662,113 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
-    "away": "Sam Houston",
-    "home": "Troy",
+    "away": "Abilene Christian",
+    "home": "Texas Tech",
     "kickoff": "2026-09-05T23:00:00.000Z",
     "final": {
-     "away": 21,
-     "home": 24
+     "away": 10,
+     "home": 33
     },
     "model": {
-     "favored": "Troy",
-     "homeMargin": 21.3,
+     "favored": "Texas Tech",
+     "homeMargin": 44.6,
      "homeProb": null,
-     "total": 52.0
+     "total": 51.9
     },
     "close": {
-     "spreadHome": -16.5,
-     "total": 52.5,
+     "spreadHome": -44.5,
+     "total": 60.5,
      "homeProb": null,
      "asOf": null
     },
-    "conf": "Sun Belt",
+    "conf": "Big 12",
     "apAway": null,
-    "apHome": null,
+    "apHome": 12,
     "su": "win",
     "ats": {
      "side": "home",
-     "num": -16.5,
+     "num": -44.5,
      "lay": true,
      "result": "loss"
     },
     "total": {
      "call": "under",
+     "num": 60.5,
+     "ours": 51.9,
+     "result": "win"
+    }
+   },
+   {
+    "away": "Missouri State",
+    "home": "Texas A&M",
+    "kickoff": "2026-09-05T23:00:00.000Z",
+    "final": {
+     "away": 0,
+     "home": 50
+    },
+    "model": {
+     "favored": "Texas A&M",
+     "homeMargin": 41.0,
+     "homeProb": null,
+     "total": 55.6
+    },
+    "close": {
+     "spreadHome": -40.5,
+     "total": 53.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "SEC",
+    "apAway": null,
+    "apHome": 8,
+    "su": "win",
+    "ats": {
+     "side": "home",
+     "num": -40.5,
+     "lay": true,
+     "result": "win"
+    },
+    "total": {
+     "call": "over",
+     "num": 53.5,
+     "ours": 55.6,
+     "result": "loss"
+    }
+   },
+   {
+    "away": "Arkansas State",
+    "home": "Memphis",
+    "kickoff": "2026-09-05T23:00:00.000Z",
+    "final": {
+     "away": 24,
+     "home": 42
+    },
+    "model": {
+     "favored": "Memphis",
+     "homeMargin": 18.1,
+     "homeProb": null,
+     "total": 54.3
+    },
+    "close": {
+     "spreadHome": -10.8,
+     "total": 52.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "American Athletic",
+    "apAway": null,
+    "apHome": null,
+    "su": "win",
+    "ats": {
+     "side": "home",
+     "num": -10.8,
+     "lay": true,
+     "result": "win"
+    },
+    "total": {
+     "call": "over",
      "num": 52.5,
-     "ours": 52.0,
+     "ours": 54.3,
      "result": "win"
     }
    },
@@ -131810,59 +131810,22 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
-    "away": "Florida International",
-    "home": "South Florida",
+    "away": "Sam Houston",
+    "home": "Troy",
     "kickoff": "2026-09-05T23:00:00.000Z",
     "final": {
-     "away": 9,
-     "home": 19
+     "away": 21,
+     "home": 24
     },
     "model": {
-     "favored": "South Florida",
-     "homeMargin": 18.0,
+     "favored": "Troy",
+     "homeMargin": 21.3,
      "homeProb": null,
-     "total": 61.0
+     "total": 52.0
     },
     "close": {
-     "spreadHome": -14.5,
-     "total": 53.0,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "American Athletic",
-    "apAway": null,
-    "apHome": null,
-    "su": "win",
-    "ats": {
-     "side": "home",
-     "num": -14.5,
-     "lay": true,
-     "result": "loss"
-    },
-    "total": {
-     "call": "over",
-     "num": 53.0,
-     "ours": 61.0,
-     "result": "loss"
-    }
-   },
-   {
-    "away": "Charleston Southern",
-    "home": "Georgia Southern",
-    "kickoff": "2026-09-05T23:00:00.000Z",
-    "final": {
-     "away": 0,
-     "home": 31
-    },
-    "model": {
-     "favored": "Georgia Southern",
-     "homeMargin": 28.2,
-     "homeProb": null,
-     "total": 56.7
-    },
-    "close": {
-     "spreadHome": -28.5,
-     "total": 51.5,
+     "spreadHome": -16.5,
+     "total": 52.5,
      "homeProb": null,
      "asOf": null
     },
@@ -131871,16 +131834,53 @@ export const REPORT_CARDS: ReportCard[] = [
     "apHome": null,
     "su": "win",
     "ats": {
-     "side": "away",
-     "num": 28.5,
-     "lay": false,
+     "side": "home",
+     "num": -16.5,
+     "lay": true,
      "result": "loss"
     },
     "total": {
-     "call": "over",
-     "num": 51.5,
-     "ours": 56.7,
+     "call": "under",
+     "num": 52.5,
+     "ours": 52.0,
+     "result": "win"
+    }
+   },
+   {
+    "away": "Idaho State",
+    "home": "Utah State",
+    "kickoff": "2026-09-05T23:00:00.000Z",
+    "final": {
+     "away": 29,
+     "home": 17
+    },
+    "model": {
+     "favored": "Utah State",
+     "homeMargin": 17.0,
+     "homeProb": null,
+     "total": 56.7
+    },
+    "close": {
+     "spreadHome": -15.5,
+     "total": 59.0,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "Mountain West",
+    "apAway": null,
+    "apHome": null,
+    "su": "loss",
+    "ats": {
+     "side": "home",
+     "num": -15.5,
+     "lay": true,
      "result": "loss"
+    },
+    "total": {
+     "call": "under",
+     "num": 59.0,
+     "ours": 56.7,
+     "result": "win"
     }
    },
    {
@@ -131917,43 +131917,6 @@ export const REPORT_CARDS: ReportCard[] = [
      "call": "under",
      "num": 49.5,
      "ours": 45.7,
-     "result": "loss"
-    }
-   },
-   {
-    "away": "VMI",
-    "home": "Virginia Tech",
-    "kickoff": "2026-09-05T23:30:00.000Z",
-    "final": {
-     "away": 3,
-     "home": 73
-    },
-    "model": {
-     "favored": "Virginia Tech",
-     "homeMargin": 50.0,
-     "homeProb": null,
-     "total": 53.2
-    },
-    "close": {
-     "spreadHome": -54.5,
-     "total": 59.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "ACC",
-    "apAway": null,
-    "apHome": null,
-    "su": "win",
-    "ats": {
-     "side": "away",
-     "num": 54.5,
-     "lay": false,
-     "result": "loss"
-    },
-    "total": {
-     "call": "under",
-     "num": 59.5,
-     "ours": 53.2,
      "result": "loss"
     }
    },
@@ -131995,43 +131958,6 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
-    "away": "UL Monroe",
-    "home": "Mississippi State",
-    "kickoff": "2026-09-05T23:30:00.000Z",
-    "final": {
-     "away": 13,
-     "home": 62
-    },
-    "model": {
-     "favored": "Mississippi State",
-     "homeMargin": 30.2,
-     "homeProb": null,
-     "total": 55.9
-    },
-    "close": {
-     "spreadHome": -28.5,
-     "total": 54.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "SEC",
-    "apAway": null,
-    "apHome": null,
-    "su": "win",
-    "ats": {
-     "side": "home",
-     "num": -28.5,
-     "lay": true,
-     "result": "win"
-    },
-    "total": {
-     "call": "over",
-     "num": 54.5,
-     "ours": 55.9,
-     "result": "win"
-    }
-   },
-   {
     "away": "Western Michigan",
     "home": "Michigan",
     "kickoff": "2026-09-05T23:30:00.000Z",
@@ -132069,6 +131995,80 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
+    "away": "UL Monroe",
+    "home": "Mississippi State",
+    "kickoff": "2026-09-05T23:30:00.000Z",
+    "final": {
+     "away": 13,
+     "home": 62
+    },
+    "model": {
+     "favored": "Mississippi State",
+     "homeMargin": 30.2,
+     "homeProb": null,
+     "total": 55.9
+    },
+    "close": {
+     "spreadHome": -28.5,
+     "total": 54.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "SEC",
+    "apAway": null,
+    "apHome": null,
+    "su": "win",
+    "ats": {
+     "side": "home",
+     "num": -28.5,
+     "lay": true,
+     "result": "win"
+    },
+    "total": {
+     "call": "over",
+     "num": 54.5,
+     "ours": 55.9,
+     "result": "win"
+    }
+   },
+   {
+    "away": "VMI",
+    "home": "Virginia Tech",
+    "kickoff": "2026-09-05T23:30:00.000Z",
+    "final": {
+     "away": 3,
+     "home": 73
+    },
+    "model": {
+     "favored": "Virginia Tech",
+     "homeMargin": 50.0,
+     "homeProb": null,
+     "total": 53.2
+    },
+    "close": {
+     "spreadHome": -54.5,
+     "total": 59.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "ACC",
+    "apAway": null,
+    "apHome": null,
+    "su": "win",
+    "ats": {
+     "side": "away",
+     "num": 54.5,
+     "lay": false,
+     "result": "loss"
+    },
+    "total": {
+     "call": "under",
+     "num": 59.5,
+     "ours": 53.2,
+     "result": "loss"
+    }
+   },
+   {
     "away": "Florida Atlantic",
     "home": "Florida",
     "kickoff": "2026-09-05T23:45:00.000Z",
@@ -132102,117 +132102,6 @@ export const REPORT_CARDS: ReportCard[] = [
      "call": "under",
      "num": 59.5,
      "ours": 55.6,
-     "result": "loss"
-    }
-   },
-   {
-    "away": "South Dakota State",
-    "home": "Northwestern",
-    "kickoff": "2026-09-06T00:00:00.000Z",
-    "final": {
-     "away": 18,
-     "home": 34
-    },
-    "model": {
-     "favored": "Northwestern",
-     "homeMargin": 17.6,
-     "homeProb": null,
-     "total": 48.9
-    },
-    "close": {
-     "spreadHome": -14.0,
-     "total": 49.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "Big Ten",
-    "apAway": null,
-    "apHome": null,
-    "su": "win",
-    "ats": {
-     "side": "home",
-     "num": -14.0,
-     "lay": true,
-     "result": "win"
-    },
-    "total": {
-     "call": "under",
-     "num": 49.5,
-     "ours": 48.9,
-     "result": "loss"
-    }
-   },
-   {
-    "away": "Utah Tech",
-    "home": "BYU",
-    "kickoff": "2026-09-06T00:00:00.000Z",
-    "final": {
-     "away": 7,
-     "home": 63
-    },
-    "model": {
-     "favored": "BYU",
-     "homeMargin": 50.0,
-     "homeProb": null,
-     "total": 51.8
-    },
-    "close": {
-     "spreadHome": -50.5,
-     "total": 61.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "Big 12",
-    "apAway": null,
-    "apHome": 14,
-    "su": "win",
-    "ats": {
-     "side": "away",
-     "num": 50.5,
-     "lay": false,
-     "result": "loss"
-    },
-    "total": {
-     "call": "under",
-     "num": 61.5,
-     "ours": 51.8,
-     "result": "loss"
-    }
-   },
-   {
-    "away": "Hampton",
-    "home": "Maryland",
-    "kickoff": "2026-09-06T00:00:00.000Z",
-    "final": {
-     "away": 0,
-     "home": 62
-    },
-    "model": {
-     "favored": "Maryland",
-     "homeMargin": 46.2,
-     "homeProb": null,
-     "total": 51.7
-    },
-    "close": {
-     "spreadHome": -45.5,
-     "total": 56.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "Big Ten",
-    "apAway": null,
-    "apHome": null,
-    "su": "win",
-    "ats": {
-     "side": "home",
-     "num": -45.5,
-     "lay": true,
-     "result": "win"
-    },
-    "total": {
-     "call": "under",
-     "num": 56.5,
-     "ours": 51.7,
      "result": "loss"
     }
    },
@@ -132254,6 +132143,117 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
+    "away": "Hampton",
+    "home": "Maryland",
+    "kickoff": "2026-09-06T00:00:00.000Z",
+    "final": {
+     "away": 0,
+     "home": 62
+    },
+    "model": {
+     "favored": "Maryland",
+     "homeMargin": 46.2,
+     "homeProb": null,
+     "total": 51.7
+    },
+    "close": {
+     "spreadHome": -45.5,
+     "total": 56.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "Big Ten",
+    "apAway": null,
+    "apHome": null,
+    "su": "win",
+    "ats": {
+     "side": "home",
+     "num": -45.5,
+     "lay": true,
+     "result": "win"
+    },
+    "total": {
+     "call": "under",
+     "num": 56.5,
+     "ours": 51.7,
+     "result": "loss"
+    }
+   },
+   {
+    "away": "Utah Tech",
+    "home": "BYU",
+    "kickoff": "2026-09-06T00:00:00.000Z",
+    "final": {
+     "away": 7,
+     "home": 63
+    },
+    "model": {
+     "favored": "BYU",
+     "homeMargin": 50.0,
+     "homeProb": null,
+     "total": 51.8
+    },
+    "close": {
+     "spreadHome": -50.5,
+     "total": 61.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "Big 12",
+    "apAway": null,
+    "apHome": 14,
+    "su": "win",
+    "ats": {
+     "side": "away",
+     "num": 50.5,
+     "lay": false,
+     "result": "loss"
+    },
+    "total": {
+     "call": "under",
+     "num": 61.5,
+     "ours": 51.8,
+     "result": "loss"
+    }
+   },
+   {
+    "away": "South Dakota State",
+    "home": "Northwestern",
+    "kickoff": "2026-09-06T00:00:00.000Z",
+    "final": {
+     "away": 18,
+     "home": 34
+    },
+    "model": {
+     "favored": "Northwestern",
+     "homeMargin": 17.6,
+     "homeProb": null,
+     "total": 48.9
+    },
+    "close": {
+     "spreadHome": -14.0,
+     "total": 49.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "Big Ten",
+    "apAway": null,
+    "apHome": null,
+    "su": "win",
+    "ats": {
+     "side": "home",
+     "num": -14.0,
+     "lay": true,
+     "result": "win"
+    },
+    "total": {
+     "call": "under",
+     "num": 49.5,
+     "ours": 48.9,
+     "result": "loss"
+    }
+   },
+   {
     "away": "Mercyhurst",
     "home": "New Mexico State",
     "kickoff": "2026-09-06T01:00:00.000Z",
@@ -132288,43 +132288,6 @@ export const REPORT_CARDS: ReportCard[] = [
      "num": 52.5,
      "ours": 52.9,
      "result": "win"
-    }
-   },
-   {
-    "away": "Portland State",
-    "home": "San Diego State",
-    "kickoff": "2026-09-06T01:30:00.000Z",
-    "final": {
-     "away": 20,
-     "home": 53
-    },
-    "model": {
-     "favored": "San Diego State",
-     "homeMargin": 40.1,
-     "homeProb": null,
-     "total": 48.4
-    },
-    "close": {
-     "spreadHome": -39.5,
-     "total": 62.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "Mountain West",
-    "apAway": null,
-    "apHome": null,
-    "su": "win",
-    "ats": {
-     "side": "home",
-     "num": -39.5,
-     "lay": true,
-     "result": "loss"
-    },
-    "total": {
-     "call": "under",
-     "num": 62.5,
-     "ours": 48.4,
-     "result": "loss"
     }
    },
    {
@@ -132365,96 +132328,22 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
-    "away": "Mississippi Valley State",
-    "home": "Sacramento State",
-    "kickoff": "2026-09-06T02:00:00.000Z",
+    "away": "Portland State",
+    "home": "San Diego State",
+    "kickoff": "2026-09-06T01:30:00.000Z",
     "final": {
-     "away": 0,
-     "home": 52
+     "away": 20,
+     "home": 53
     },
     "model": {
-     "favored": "Sacramento State",
-     "homeMargin": 39.5,
-     "homeProb": null,
-     "total": 53.2
-    },
-    "close": {
-     "spreadHome": -38.5,
-     "total": 55.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "Other",
-    "apAway": null,
-    "apHome": null,
-    "su": "win",
-    "ats": {
-     "side": "home",
-     "num": -38.5,
-     "lay": true,
-     "result": "win"
-    },
-    "total": {
-     "call": "under",
-     "num": 55.5,
-     "ours": 53.2,
-     "result": "win"
-    }
-   },
-   {
-    "away": "Morgan State",
-    "home": "Arizona State",
-    "kickoff": "2026-09-06T02:00:00.000Z",
-    "final": {
-     "away": 7,
-     "home": 70
-    },
-    "model": {
-     "favored": "Arizona State",
-     "homeMargin": 43.8,
-     "homeProb": null,
-     "total": 52.0
-    },
-    "close": {
-     "spreadHome": -43.5,
-     "total": 52.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "Big 12",
-    "apAway": null,
-    "apHome": null,
-    "su": "win",
-    "ats": {
-     "side": "home",
-     "num": -43.5,
-     "lay": true,
-     "result": "win"
-    },
-    "total": {
-     "call": "under",
-     "num": 52.5,
-     "ours": 52.0,
-     "result": "loss"
-    }
-   },
-   {
-    "away": "Central Michigan",
-    "home": "New Mexico",
-    "kickoff": "2026-09-06T02:00:00.000Z",
-    "final": {
-     "away": 7,
-     "home": 38
-    },
-    "model": {
-     "favored": "New Mexico",
-     "homeMargin": 17.8,
+     "favored": "San Diego State",
+     "homeMargin": 40.1,
      "homeProb": null,
      "total": 48.4
     },
     "close": {
-     "spreadHome": -10.5,
-     "total": 47.0,
+     "spreadHome": -39.5,
+     "total": 62.5,
      "homeProb": null,
      "asOf": null
     },
@@ -132464,13 +132353,13 @@ export const REPORT_CARDS: ReportCard[] = [
     "su": "win",
     "ats": {
      "side": "home",
-     "num": -10.5,
+     "num": -39.5,
      "lay": true,
-     "result": "win"
+     "result": "loss"
     },
     "total": {
-     "call": "over",
-     "num": 47.0,
+     "call": "under",
+     "num": 62.5,
      "ours": 48.4,
      "result": "loss"
     }
@@ -132513,40 +132402,114 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
-    "away": "UCLA",
-    "home": "California",
-    "kickoff": "2026-09-06T02:30:00.000Z",
+    "away": "Central Michigan",
+    "home": "New Mexico",
+    "kickoff": "2026-09-06T02:00:00.000Z",
     "final": {
-     "away": 45,
-     "home": 24
+     "away": 7,
+     "home": 38
     },
     "model": {
-     "favored": "California",
-     "homeMargin": 2.4,
+     "favored": "New Mexico",
+     "homeMargin": 17.8,
      "homeProb": null,
-     "total": 53.5
+     "total": 48.4
     },
     "close": {
-     "spreadHome": 2.5,
-     "total": 53.5,
+     "spreadHome": -10.5,
+     "total": 47.0,
      "homeProb": null,
      "asOf": null
     },
-    "conf": "ACC",
+    "conf": "Mountain West",
     "apAway": null,
     "apHome": null,
-    "su": "loss",
+    "su": "win",
     "ats": {
      "side": "home",
-     "num": 2.5,
-     "lay": false,
+     "num": -10.5,
+     "lay": true,
+     "result": "win"
+    },
+    "total": {
+     "call": "over",
+     "num": 47.0,
+     "ours": 48.4,
      "result": "loss"
+    }
+   },
+   {
+    "away": "Morgan State",
+    "home": "Arizona State",
+    "kickoff": "2026-09-06T02:00:00.000Z",
+    "final": {
+     "away": 7,
+     "home": 70
+    },
+    "model": {
+     "favored": "Arizona State",
+     "homeMargin": 43.8,
+     "homeProb": null,
+     "total": 52.0
+    },
+    "close": {
+     "spreadHome": -43.5,
+     "total": 52.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "Big 12",
+    "apAway": null,
+    "apHome": null,
+    "su": "win",
+    "ats": {
+     "side": "home",
+     "num": -43.5,
+     "lay": true,
+     "result": "win"
     },
     "total": {
      "call": "under",
-     "num": 53.5,
-     "ours": 53.5,
+     "num": 52.5,
+     "ours": 52.0,
      "result": "loss"
+    }
+   },
+   {
+    "away": "Mississippi Valley State",
+    "home": "Sacramento State",
+    "kickoff": "2026-09-06T02:00:00.000Z",
+    "final": {
+     "away": 0,
+     "home": 52
+    },
+    "model": {
+     "favored": "Sacramento State",
+     "homeMargin": 39.5,
+     "homeProb": null,
+     "total": 53.2
+    },
+    "close": {
+     "spreadHome": -38.5,
+     "total": 55.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "Other",
+    "apAway": null,
+    "apHome": null,
+    "su": "win",
+    "ats": {
+     "side": "home",
+     "num": -38.5,
+     "lay": true,
+     "result": "win"
+    },
+    "total": {
+     "call": "under",
+     "num": 55.5,
+     "ours": 53.2,
+     "result": "win"
     }
    },
    {
@@ -132583,6 +132546,43 @@ export const REPORT_CARDS: ReportCard[] = [
      "call": "under",
      "num": 51.5,
      "ours": 50.0,
+     "result": "loss"
+    }
+   },
+   {
+    "away": "UCLA",
+    "home": "California",
+    "kickoff": "2026-09-06T02:30:00.000Z",
+    "final": {
+     "away": 45,
+     "home": 24
+    },
+    "model": {
+     "favored": "California",
+     "homeMargin": 2.4,
+     "homeProb": null,
+     "total": 53.5
+    },
+    "close": {
+     "spreadHome": 2.5,
+     "total": 53.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "ACC",
+    "apAway": null,
+    "apHome": null,
+    "su": "loss",
+    "ats": {
+     "side": "home",
+     "num": 2.5,
+     "lay": false,
+     "result": "loss"
+    },
+    "total": {
+     "call": "under",
+     "num": 53.5,
+     "ours": 53.5,
      "result": "loss"
     }
    },
@@ -132624,43 +132624,6 @@ export const REPORT_CARDS: ReportCard[] = [
     }
    },
    {
-    "away": "Wisconsin",
-    "home": "Notre Dame",
-    "kickoff": "2026-09-06T23:30:00.000Z",
-    "final": {
-     "away": 13,
-     "home": 41
-    },
-    "model": {
-     "favored": "Notre Dame",
-     "homeMargin": 22.9,
-     "homeProb": null,
-     "total": 48.3
-    },
-    "close": {
-     "spreadHome": -21.5,
-     "total": 46.5,
-     "homeProb": null,
-     "asOf": null
-    },
-    "conf": "FBS Independents",
-    "apAway": null,
-    "apHome": 4,
-    "su": "win",
-    "ats": {
-     "side": "home",
-     "num": -21.5,
-     "lay": true,
-     "result": "win"
-    },
-    "total": {
-     "call": "over",
-     "num": 46.5,
-     "ours": 48.3,
-     "result": "win"
-    }
-   },
-   {
     "away": "Louisville",
     "home": "Ole Miss",
     "kickoff": "2026-09-06T23:30:00.000Z",
@@ -132695,6 +132658,43 @@ export const REPORT_CARDS: ReportCard[] = [
      "num": 55.0,
      "ours": 54.8,
      "result": "loss"
+    }
+   },
+   {
+    "away": "Wisconsin",
+    "home": "Notre Dame",
+    "kickoff": "2026-09-06T23:30:00.000Z",
+    "final": {
+     "away": 13,
+     "home": 41
+    },
+    "model": {
+     "favored": "Notre Dame",
+     "homeMargin": 22.9,
+     "homeProb": null,
+     "total": 48.3
+    },
+    "close": {
+     "spreadHome": -21.5,
+     "total": 46.5,
+     "homeProb": null,
+     "asOf": null
+    },
+    "conf": "FBS Independents",
+    "apAway": null,
+    "apHome": 4,
+    "su": "win",
+    "ats": {
+     "side": "home",
+     "num": -21.5,
+     "lay": true,
+     "result": "win"
+    },
+    "total": {
+     "call": "over",
+     "num": 46.5,
+     "ours": 48.3,
+     "result": "win"
     }
    },
    {
@@ -132874,146 +132874,6 @@ export const REPORT_CARDS: ReportCard[] = [
     "proj": 57.8,
     "lean": "over",
     "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "John Mateer",
-    "team": "Oklahoma",
-    "pos": "QB",
-    "game": "UTEP @ Oklahoma",
-    "cat": "passing",
-    "market": "pass_yds",
-    "line": 239.5,
-    "lineSrc": "file",
-    "proj": 254.4,
-    "lean": "over",
-    "actual": 225.0,
-    "result": "loss"
-   },
-   {
-    "player": "John Mateer",
-    "team": "Oklahoma",
-    "pos": "QB",
-    "game": "UTEP @ Oklahoma",
-    "cat": "passing",
-    "market": "pass_tds",
-    "line": 2.5,
-    "lineSrc": "file",
-    "proj": 1.7,
-    "lean": null,
-    "actual": 3.0,
-    "result": null
-   },
-   {
-    "player": "John Mateer",
-    "team": "Oklahoma",
-    "pos": "QB",
-    "game": "UTEP @ Oklahoma",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 84.6,
-    "lineSrc": "file",
-    "proj": 42.1,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Xavier Robinson",
-    "team": "Oklahoma",
-    "pos": "RB",
-    "game": "UTEP @ Oklahoma",
-    "cat": "rushing",
-    "market": "rush_yds",
-    "line": 53.5,
-    "lineSrc": "file",
-    "proj": 48.4,
-    "lean": null,
-    "actual": 30.0,
-    "result": null
-   },
-   {
-    "player": "Xavier Robinson",
-    "team": "Oklahoma",
-    "pos": "RB",
-    "game": "UTEP @ Oklahoma",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 64.5,
-    "lineSrc": "file",
-    "proj": 46.0,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Tory Blaylock",
-    "team": "Oklahoma",
-    "pos": "RB",
-    "game": "UTEP @ Oklahoma",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 57.4,
-    "lineSrc": "file",
-    "proj": 12.9,
-    "lean": "under",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Kam Thomas",
-    "team": "UTEP",
-    "pos": "WR",
-    "game": "UTEP @ Oklahoma",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 11.1,
-    "lineSrc": "file",
-    "proj": 11.2,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "Jaylan Brown",
-    "team": "UTEP",
-    "pos": "WR",
-    "game": "UTEP @ Oklahoma",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 6.2,
-    "lineSrc": "file",
-    "proj": 0.0,
-    "lean": "under",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Xavier Robinson",
-    "team": "Oklahoma",
-    "pos": "RB",
-    "game": "UTEP @ Oklahoma",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 10.5,
-    "lineSrc": "file",
-    "proj": 15.1,
-    "lean": "over",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "John Mateer",
-    "team": "Oklahoma",
-    "pos": "QB",
-    "game": "UTEP @ Oklahoma",
-    "cat": "rushing",
-    "market": "rush_yds",
-    "line": 38.5,
-    "lineSrc": "file",
-    "proj": 35.4,
-    "lean": "over",
-    "actual": 7.0,
     "result": "loss"
    },
    {
@@ -133267,6 +133127,146 @@ export const REPORT_CARDS: ReportCard[] = [
     "lean": null,
     "actual": 90.0,
     "result": null
+   },
+   {
+    "player": "John Mateer",
+    "team": "Oklahoma",
+    "pos": "QB",
+    "game": "UTEP @ Oklahoma",
+    "cat": "passing",
+    "market": "pass_yds",
+    "line": 239.5,
+    "lineSrc": "file",
+    "proj": 254.4,
+    "lean": "over",
+    "actual": 225.0,
+    "result": "loss"
+   },
+   {
+    "player": "John Mateer",
+    "team": "Oklahoma",
+    "pos": "QB",
+    "game": "UTEP @ Oklahoma",
+    "cat": "passing",
+    "market": "pass_tds",
+    "line": 2.5,
+    "lineSrc": "file",
+    "proj": 1.7,
+    "lean": null,
+    "actual": 3.0,
+    "result": null
+   },
+   {
+    "player": "John Mateer",
+    "team": "Oklahoma",
+    "pos": "QB",
+    "game": "UTEP @ Oklahoma",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 84.6,
+    "lineSrc": "file",
+    "proj": 42.1,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Xavier Robinson",
+    "team": "Oklahoma",
+    "pos": "RB",
+    "game": "UTEP @ Oklahoma",
+    "cat": "rushing",
+    "market": "rush_yds",
+    "line": 53.5,
+    "lineSrc": "file",
+    "proj": 48.4,
+    "lean": null,
+    "actual": 30.0,
+    "result": null
+   },
+   {
+    "player": "Xavier Robinson",
+    "team": "Oklahoma",
+    "pos": "RB",
+    "game": "UTEP @ Oklahoma",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 64.5,
+    "lineSrc": "file",
+    "proj": 46.0,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Tory Blaylock",
+    "team": "Oklahoma",
+    "pos": "RB",
+    "game": "UTEP @ Oklahoma",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 57.4,
+    "lineSrc": "file",
+    "proj": 12.9,
+    "lean": "under",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Kam Thomas",
+    "team": "UTEP",
+    "pos": "WR",
+    "game": "UTEP @ Oklahoma",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 11.1,
+    "lineSrc": "file",
+    "proj": 11.2,
+    "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "Jaylan Brown",
+    "team": "UTEP",
+    "pos": "WR",
+    "game": "UTEP @ Oklahoma",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 6.2,
+    "lineSrc": "file",
+    "proj": 0.0,
+    "lean": "under",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Xavier Robinson",
+    "team": "Oklahoma",
+    "pos": "RB",
+    "game": "UTEP @ Oklahoma",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 10.5,
+    "lineSrc": "file",
+    "proj": 15.1,
+    "lean": "over",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "John Mateer",
+    "team": "Oklahoma",
+    "pos": "QB",
+    "game": "UTEP @ Oklahoma",
+    "cat": "rushing",
+    "market": "rush_yds",
+    "line": 38.5,
+    "lineSrc": "file",
+    "proj": 35.4,
+    "lean": "over",
+    "actual": 7.0,
+    "result": "loss"
    },
    {
     "player": "Joshua Moore",
@@ -133941,227 +133941,185 @@ export const REPORT_CARDS: ReportCard[] = [
     "result": "win"
    },
    {
-    "player": "Eddie Freauff",
-    "team": "Oregon State",
+    "player": "Baron Tipton",
+    "team": "North Texas",
     "pos": "WR",
-    "game": "Oregon State @ Houston",
+    "game": "North Texas @ Indiana",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 9.1,
+    "lineSrc": "file",
+    "proj": 23.8,
+    "lean": "over",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Charlie Becker",
+    "team": "Indiana",
+    "pos": "WR",
+    "game": "North Texas @ Indiana",
     "cat": "receiving",
     "market": "rec_yds",
-    "line": 36.5,
+    "line": 58.5,
     "lineSrc": "file",
-    "proj": 73.8,
+    "proj": 70.8,
     "lean": null,
-    "actual": null,
+    "actual": 64.0,
     "result": null
    },
    {
-    "player": "Eddie Freauff",
-    "team": "Oregon State",
+    "player": "Charlie Becker",
+    "team": "Indiana",
     "pos": "WR",
-    "game": "Oregon State @ Houston",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 22.7,
-    "lineSrc": "file",
-    "proj": 27.1,
-    "lean": "over",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Cornell Hatcher Jr.",
-    "team": "Oregon State",
-    "pos": "RB",
-    "game": "Oregon State @ Houston",
-    "cat": "rushing",
-    "market": "rush_yds",
-    "line": 45.5,
-    "lineSrc": "file",
-    "proj": 44.6,
-    "lean": null,
-    "actual": 7.0,
-    "result": null
-   },
-   {
-    "player": "Cornell Hatcher Jr.",
-    "team": "Oregon State",
-    "pos": "RB",
-    "game": "Oregon State @ Houston",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 42.6,
-    "lineSrc": "file",
-    "proj": 41.6,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Koby Young",
-    "team": "Houston",
-    "pos": "WR",
-    "game": "Oregon State @ Houston",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 30.8,
-    "lineSrc": "file",
-    "proj": 17.5,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Conner Weigman",
-    "team": "Houston",
-    "pos": "QB",
-    "game": "Oregon State @ Houston",
-    "cat": "passing",
-    "market": "pass_yds",
-    "line": 226.5,
-    "lineSrc": "file",
-    "proj": 204.3,
-    "lean": "under",
-    "actual": 305.0,
-    "result": "loss"
-   },
-   {
-    "player": "Conner Weigman",
-    "team": "Houston",
-    "pos": "QB",
-    "game": "Oregon State @ Houston",
-    "cat": "passing",
-    "market": "pass_tds",
-    "line": 1.5,
-    "lineSrc": "file",
-    "proj": 1.7,
-    "lean": "over",
-    "actual": 1.0,
-    "result": "loss"
-   },
-   {
-    "player": "Conner Weigman",
-    "team": "Houston",
-    "pos": "QB",
-    "game": "Oregon State @ Houston",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 76.2,
-    "lineSrc": "file",
-    "proj": 16.9,
-    "lean": "under",
-    "actual": 100.0,
-    "result": "loss"
-   },
-   {
-    "player": "Amare Thomas",
-    "team": "Houston",
-    "pos": "WR",
-    "game": "Oregon State @ Houston",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 55.6,
-    "lineSrc": "file",
-    "proj": 80.2,
-    "lean": "over",
-    "actual": 100.0,
-    "result": "win"
-   },
-   {
-    "player": "Trent Walker",
-    "team": "Oregon State",
-    "pos": "WR",
-    "game": "Oregon State @ Houston",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 42.6,
-    "lineSrc": "file",
-    "proj": 28.4,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Luke Mcgary",
-    "team": "Houston",
-    "pos": "WR",
-    "game": "Oregon State @ Houston",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 9.5,
-    "lineSrc": "file",
-    "proj": 13.3,
-    "lean": "over",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Cornell Hatcher Jr.",
-    "team": "Oregon State",
-    "pos": "RB",
-    "game": "Oregon State @ Houston",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 6.5,
-    "lineSrc": "file",
-    "proj": 3.5,
-    "lean": null,
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Amare Thomas",
-    "team": "Houston",
-    "pos": "WR",
-    "game": "Oregon State @ Houston",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 70.5,
-    "lineSrc": "file",
-    "proj": 77.6,
-    "lean": "over",
-    "actual": 133.0,
-    "result": "win"
-   },
-   {
-    "player": "Trent Walker",
-    "team": "Oregon State",
-    "pos": "WR",
-    "game": "Oregon State @ Houston",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 37.5,
-    "lineSrc": "file",
-    "proj": 61.0,
-    "lean": "over",
-    "actual": 24.0,
-    "result": "loss"
-   },
-   {
-    "player": "Amare Thomas",
-    "team": "Houston",
-    "pos": "WR",
-    "game": "Oregon State @ Houston",
+    "game": "North Texas @ Indiana",
     "cat": "receptions",
     "market": "receptions",
-    "line": 5.5,
+    "line": 3.5,
     "lineSrc": "file",
-    "proj": 6.3,
+    "proj": 4.7,
     "lean": null,
-    "actual": 8.0,
+    "actual": 4.0,
     "result": null
    },
    {
-    "player": "Conner Weigman",
-    "team": "Houston",
-    "pos": "QB",
-    "game": "Oregon State @ Houston",
-    "cat": "rushing",
-    "market": "rush_yds",
-    "line": 42.5,
+    "player": "Charlie Becker",
+    "team": "Indiana",
+    "pos": "WR",
+    "game": "North Texas @ Indiana",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 63.0,
     "lineSrc": "file",
-    "proj": 66.6,
+    "proj": 28.1,
+    "lean": "under",
+    "actual": 100.0,
+    "result": "loss"
+   },
+   {
+    "player": "Khobie Martin",
+    "team": "Indiana",
+    "pos": "RB",
+    "game": "North Texas @ Indiana",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 65.5,
+    "lineSrc": "file",
+    "proj": 40.1,
+    "lean": "under",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Davion Chandler",
+    "team": "Indiana",
+    "pos": "WR",
+    "game": "North Texas @ Indiana",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 18.2,
+    "lineSrc": "file",
+    "proj": 100.0,
     "lean": "over",
-    "actual": 30.0,
+    "actual": 100.0,
+    "result": "win"
+   },
+   {
+    "player": "Tayven Jackson",
+    "team": "Indiana",
+    "pos": "QB",
+    "game": "North Texas @ Indiana",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 12.1,
+    "lineSrc": "file",
+    "proj": 65.0,
+    "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "Tayven Jackson",
+    "team": "Indiana",
+    "pos": "QB",
+    "game": "North Texas @ Indiana",
+    "cat": "passing",
+    "market": "pass_tds",
+    "line": 0.5,
+    "lineSrc": "file",
+    "proj": 1.0,
+    "lean": null,
+    "actual": 0.0,
+    "result": null
+   },
+   {
+    "player": "LeBron Bond",
+    "team": "Indiana",
+    "pos": "WR",
+    "game": "North Texas @ Indiana",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 16.9,
+    "lineSrc": "file",
+    "proj": 0.0,
+    "lean": "under",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "George Pettaway",
+    "team": "James Madison",
+    "pos": "RB",
+    "game": "Liberty @ James Madison",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 63.6,
+    "lineSrc": "file",
+    "proj": 32.0,
+    "lean": "under",
+    "actual": 100.0,
+    "result": "loss"
+   },
+   {
+    "player": "Jaylon Coleman",
+    "team": "Liberty",
+    "pos": "WR",
+    "game": "Liberty @ James Madison",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 20.8,
+    "lineSrc": "file",
+    "proj": 0.0,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Michael Scott",
+    "team": "James Madison",
+    "pos": "WR",
+    "game": "Liberty @ James Madison",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 20.0,
+    "lineSrc": "file",
+    "proj": 28.6,
+    "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "Braeden Wisloski",
+    "team": "James Madison",
+    "pos": "WR",
+    "game": "Liberty @ James Madison",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 20.0,
+    "lineSrc": "file",
+    "proj": 38.8,
+    "lean": "over",
+    "actual": 0.0,
     "result": "loss"
    },
    {
@@ -134485,6 +134443,454 @@ export const REPORT_CARDS: ReportCard[] = [
     "lean": "under",
     "actual": null,
     "result": null
+   },
+   {
+    "player": "Karmello English",
+    "team": "Coastal Carolina",
+    "pos": "WR",
+    "game": "Coastal Carolina @ West Virginia",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 35.5,
+    "lineSrc": "file",
+    "proj": 34.8,
+    "lean": "under",
+    "actual": 31.0,
+    "result": "win"
+   },
+   {
+    "player": "Karmello English",
+    "team": "Coastal Carolina",
+    "pos": "WR",
+    "game": "Coastal Carolina @ West Virginia",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 13.3,
+    "lineSrc": "file",
+    "proj": 23.3,
+    "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "Zach Courtney",
+    "team": "Coastal Carolina",
+    "pos": "TE",
+    "game": "Coastal Carolina @ West Virginia",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 16.5,
+    "lineSrc": "file",
+    "proj": 25.7,
+    "lean": null,
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Zach Courtney",
+    "team": "Coastal Carolina",
+    "pos": "TE",
+    "game": "Coastal Carolina @ West Virginia",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 11.8,
+    "lineSrc": "file",
+    "proj": 9.3,
+    "lean": "under",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Jevon Edwards",
+    "team": "Coastal Carolina",
+    "pos": "RB",
+    "game": "Coastal Carolina @ West Virginia",
+    "cat": "rushing",
+    "market": "rush_yds",
+    "line": 29.5,
+    "lineSrc": "file",
+    "proj": 47.4,
+    "lean": "over",
+    "actual": 20.0,
+    "result": "loss"
+   },
+   {
+    "player": "Jevon Edwards",
+    "team": "Coastal Carolina",
+    "pos": "RB",
+    "game": "Coastal Carolina @ West Virginia",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 20.0,
+    "lineSrc": "file",
+    "proj": 24.4,
+    "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "Jaden Bray",
+    "team": "West Virginia",
+    "pos": "WR",
+    "game": "Coastal Carolina @ West Virginia",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 35.5,
+    "lineSrc": "file",
+    "proj": 57.5,
+    "lean": null,
+    "actual": 29.0,
+    "result": null
+   },
+   {
+    "player": "Jaden Bray",
+    "team": "West Virginia",
+    "pos": "WR",
+    "game": "Coastal Carolina @ West Virginia",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 34.5,
+    "lineSrc": "file",
+    "proj": 15.0,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Robby Washington",
+    "team": "Coastal Carolina",
+    "pos": "WR",
+    "game": "Coastal Carolina @ West Virginia",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 26.3,
+    "lineSrc": "file",
+    "proj": 35.7,
+    "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "Dominic Knicely",
+    "team": "Coastal Carolina",
+    "pos": "RB",
+    "game": "Coastal Carolina @ West Virginia",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 17.9,
+    "lineSrc": "file",
+    "proj": 48.6,
+    "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "Ryan Ward",
+    "team": "West Virginia",
+    "pos": "WR",
+    "game": "Coastal Carolina @ West Virginia",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 18.2,
+    "lineSrc": "file",
+    "proj": 21.2,
+    "lean": "over",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Robby Washington",
+    "team": "Coastal Carolina",
+    "pos": "WR",
+    "game": "Coastal Carolina @ West Virginia",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 33.5,
+    "lineSrc": "file",
+    "proj": 22.5,
+    "lean": "under",
+    "actual": 80.0,
+    "result": "loss"
+   },
+   {
+    "player": "Ryan Ward",
+    "team": "West Virginia",
+    "pos": "WR",
+    "game": "Coastal Carolina @ West Virginia",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 8.5,
+    "lineSrc": "file",
+    "proj": 6.6,
+    "lean": null,
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Dominic Knicely",
+    "team": "Coastal Carolina",
+    "pos": "RB",
+    "game": "Coastal Carolina @ West Virginia",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 6.5,
+    "lineSrc": "file",
+    "proj": 19.6,
+    "lean": "over",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Dominic Knicely",
+    "team": "Coastal Carolina",
+    "pos": "RB",
+    "game": "Coastal Carolina @ West Virginia",
+    "cat": "receptions",
+    "market": "receptions",
+    "line": 1.5,
+    "lineSrc": "file",
+    "proj": 2.2,
+    "lean": "over",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Dominic Knicely",
+    "team": "Coastal Carolina",
+    "pos": "RB",
+    "game": "Coastal Carolina @ West Virginia",
+    "cat": "rushing",
+    "market": "rush_yds",
+    "line": 30.5,
+    "lineSrc": "file",
+    "proj": 23.5,
+    "lean": null,
+    "actual": 5.0,
+    "result": null
+   },
+   {
+    "player": "Eddie Freauff",
+    "team": "Oregon State",
+    "pos": "WR",
+    "game": "Oregon State @ Houston",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 36.5,
+    "lineSrc": "file",
+    "proj": 73.8,
+    "lean": null,
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Eddie Freauff",
+    "team": "Oregon State",
+    "pos": "WR",
+    "game": "Oregon State @ Houston",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 22.7,
+    "lineSrc": "file",
+    "proj": 27.1,
+    "lean": "over",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Cornell Hatcher Jr.",
+    "team": "Oregon State",
+    "pos": "RB",
+    "game": "Oregon State @ Houston",
+    "cat": "rushing",
+    "market": "rush_yds",
+    "line": 45.5,
+    "lineSrc": "file",
+    "proj": 44.6,
+    "lean": null,
+    "actual": 7.0,
+    "result": null
+   },
+   {
+    "player": "Cornell Hatcher Jr.",
+    "team": "Oregon State",
+    "pos": "RB",
+    "game": "Oregon State @ Houston",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 42.6,
+    "lineSrc": "file",
+    "proj": 41.6,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Koby Young",
+    "team": "Houston",
+    "pos": "WR",
+    "game": "Oregon State @ Houston",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 30.8,
+    "lineSrc": "file",
+    "proj": 17.5,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Conner Weigman",
+    "team": "Houston",
+    "pos": "QB",
+    "game": "Oregon State @ Houston",
+    "cat": "passing",
+    "market": "pass_yds",
+    "line": 226.5,
+    "lineSrc": "file",
+    "proj": 204.3,
+    "lean": "under",
+    "actual": 305.0,
+    "result": "loss"
+   },
+   {
+    "player": "Conner Weigman",
+    "team": "Houston",
+    "pos": "QB",
+    "game": "Oregon State @ Houston",
+    "cat": "passing",
+    "market": "pass_tds",
+    "line": 1.5,
+    "lineSrc": "file",
+    "proj": 1.7,
+    "lean": "over",
+    "actual": 1.0,
+    "result": "loss"
+   },
+   {
+    "player": "Conner Weigman",
+    "team": "Houston",
+    "pos": "QB",
+    "game": "Oregon State @ Houston",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 76.2,
+    "lineSrc": "file",
+    "proj": 16.9,
+    "lean": "under",
+    "actual": 100.0,
+    "result": "loss"
+   },
+   {
+    "player": "Amare Thomas",
+    "team": "Houston",
+    "pos": "WR",
+    "game": "Oregon State @ Houston",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 55.6,
+    "lineSrc": "file",
+    "proj": 80.2,
+    "lean": "over",
+    "actual": 100.0,
+    "result": "win"
+   },
+   {
+    "player": "Trent Walker",
+    "team": "Oregon State",
+    "pos": "WR",
+    "game": "Oregon State @ Houston",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 42.6,
+    "lineSrc": "file",
+    "proj": 28.4,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Luke Mcgary",
+    "team": "Houston",
+    "pos": "WR",
+    "game": "Oregon State @ Houston",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 9.5,
+    "lineSrc": "file",
+    "proj": 13.3,
+    "lean": "over",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Cornell Hatcher Jr.",
+    "team": "Oregon State",
+    "pos": "RB",
+    "game": "Oregon State @ Houston",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 6.5,
+    "lineSrc": "file",
+    "proj": 3.5,
+    "lean": null,
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Amare Thomas",
+    "team": "Houston",
+    "pos": "WR",
+    "game": "Oregon State @ Houston",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 70.5,
+    "lineSrc": "file",
+    "proj": 77.6,
+    "lean": "over",
+    "actual": 133.0,
+    "result": "win"
+   },
+   {
+    "player": "Trent Walker",
+    "team": "Oregon State",
+    "pos": "WR",
+    "game": "Oregon State @ Houston",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 37.5,
+    "lineSrc": "file",
+    "proj": 61.0,
+    "lean": "over",
+    "actual": 24.0,
+    "result": "loss"
+   },
+   {
+    "player": "Amare Thomas",
+    "team": "Houston",
+    "pos": "WR",
+    "game": "Oregon State @ Houston",
+    "cat": "receptions",
+    "market": "receptions",
+    "line": 5.5,
+    "lineSrc": "file",
+    "proj": 6.3,
+    "lean": null,
+    "actual": 8.0,
+    "result": null
+   },
+   {
+    "player": "Conner Weigman",
+    "team": "Houston",
+    "pos": "QB",
+    "game": "Oregon State @ Houston",
+    "cat": "rushing",
+    "market": "rush_yds",
+    "line": 42.5,
+    "lineSrc": "file",
+    "proj": 66.6,
+    "lean": "over",
+    "actual": 30.0,
+    "result": "loss"
    },
    {
     "player": "Eian Pugh",
@@ -134837,412 +135243,6 @@ export const REPORT_CARDS: ReportCard[] = [
     "result": "win"
    },
    {
-    "player": "Baron Tipton",
-    "team": "North Texas",
-    "pos": "WR",
-    "game": "North Texas @ Indiana",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 9.1,
-    "lineSrc": "file",
-    "proj": 23.8,
-    "lean": "over",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Charlie Becker",
-    "team": "Indiana",
-    "pos": "WR",
-    "game": "North Texas @ Indiana",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 58.5,
-    "lineSrc": "file",
-    "proj": 70.8,
-    "lean": null,
-    "actual": 64.0,
-    "result": null
-   },
-   {
-    "player": "Charlie Becker",
-    "team": "Indiana",
-    "pos": "WR",
-    "game": "North Texas @ Indiana",
-    "cat": "receptions",
-    "market": "receptions",
-    "line": 3.5,
-    "lineSrc": "file",
-    "proj": 4.7,
-    "lean": null,
-    "actual": 4.0,
-    "result": null
-   },
-   {
-    "player": "Charlie Becker",
-    "team": "Indiana",
-    "pos": "WR",
-    "game": "North Texas @ Indiana",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 63.0,
-    "lineSrc": "file",
-    "proj": 28.1,
-    "lean": "under",
-    "actual": 100.0,
-    "result": "loss"
-   },
-   {
-    "player": "Khobie Martin",
-    "team": "Indiana",
-    "pos": "RB",
-    "game": "North Texas @ Indiana",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 65.5,
-    "lineSrc": "file",
-    "proj": 40.1,
-    "lean": "under",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Davion Chandler",
-    "team": "Indiana",
-    "pos": "WR",
-    "game": "North Texas @ Indiana",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 18.2,
-    "lineSrc": "file",
-    "proj": 100.0,
-    "lean": "over",
-    "actual": 100.0,
-    "result": "win"
-   },
-   {
-    "player": "Tayven Jackson",
-    "team": "Indiana",
-    "pos": "QB",
-    "game": "North Texas @ Indiana",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 12.1,
-    "lineSrc": "file",
-    "proj": 65.0,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "Tayven Jackson",
-    "team": "Indiana",
-    "pos": "QB",
-    "game": "North Texas @ Indiana",
-    "cat": "passing",
-    "market": "pass_tds",
-    "line": 0.5,
-    "lineSrc": "file",
-    "proj": 1.0,
-    "lean": null,
-    "actual": 0.0,
-    "result": null
-   },
-   {
-    "player": "LeBron Bond",
-    "team": "Indiana",
-    "pos": "WR",
-    "game": "North Texas @ Indiana",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 16.9,
-    "lineSrc": "file",
-    "proj": 0.0,
-    "lean": "under",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Karmello English",
-    "team": "Coastal Carolina",
-    "pos": "WR",
-    "game": "Coastal Carolina @ West Virginia",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 35.5,
-    "lineSrc": "file",
-    "proj": 34.8,
-    "lean": "under",
-    "actual": 31.0,
-    "result": "win"
-   },
-   {
-    "player": "Karmello English",
-    "team": "Coastal Carolina",
-    "pos": "WR",
-    "game": "Coastal Carolina @ West Virginia",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 13.3,
-    "lineSrc": "file",
-    "proj": 23.3,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "Zach Courtney",
-    "team": "Coastal Carolina",
-    "pos": "TE",
-    "game": "Coastal Carolina @ West Virginia",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 16.5,
-    "lineSrc": "file",
-    "proj": 25.7,
-    "lean": null,
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Zach Courtney",
-    "team": "Coastal Carolina",
-    "pos": "TE",
-    "game": "Coastal Carolina @ West Virginia",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 11.8,
-    "lineSrc": "file",
-    "proj": 9.3,
-    "lean": "under",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Jevon Edwards",
-    "team": "Coastal Carolina",
-    "pos": "RB",
-    "game": "Coastal Carolina @ West Virginia",
-    "cat": "rushing",
-    "market": "rush_yds",
-    "line": 29.5,
-    "lineSrc": "file",
-    "proj": 47.4,
-    "lean": "over",
-    "actual": 20.0,
-    "result": "loss"
-   },
-   {
-    "player": "Jevon Edwards",
-    "team": "Coastal Carolina",
-    "pos": "RB",
-    "game": "Coastal Carolina @ West Virginia",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 20.0,
-    "lineSrc": "file",
-    "proj": 24.4,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "Jaden Bray",
-    "team": "West Virginia",
-    "pos": "WR",
-    "game": "Coastal Carolina @ West Virginia",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 35.5,
-    "lineSrc": "file",
-    "proj": 57.5,
-    "lean": null,
-    "actual": 29.0,
-    "result": null
-   },
-   {
-    "player": "Jaden Bray",
-    "team": "West Virginia",
-    "pos": "WR",
-    "game": "Coastal Carolina @ West Virginia",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 34.5,
-    "lineSrc": "file",
-    "proj": 15.0,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Robby Washington",
-    "team": "Coastal Carolina",
-    "pos": "WR",
-    "game": "Coastal Carolina @ West Virginia",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 26.3,
-    "lineSrc": "file",
-    "proj": 35.7,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "Dominic Knicely",
-    "team": "Coastal Carolina",
-    "pos": "RB",
-    "game": "Coastal Carolina @ West Virginia",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 17.9,
-    "lineSrc": "file",
-    "proj": 48.6,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "Ryan Ward",
-    "team": "West Virginia",
-    "pos": "WR",
-    "game": "Coastal Carolina @ West Virginia",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 18.2,
-    "lineSrc": "file",
-    "proj": 21.2,
-    "lean": "over",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Robby Washington",
-    "team": "Coastal Carolina",
-    "pos": "WR",
-    "game": "Coastal Carolina @ West Virginia",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 33.5,
-    "lineSrc": "file",
-    "proj": 22.5,
-    "lean": "under",
-    "actual": 80.0,
-    "result": "loss"
-   },
-   {
-    "player": "Ryan Ward",
-    "team": "West Virginia",
-    "pos": "WR",
-    "game": "Coastal Carolina @ West Virginia",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 8.5,
-    "lineSrc": "file",
-    "proj": 6.6,
-    "lean": null,
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Dominic Knicely",
-    "team": "Coastal Carolina",
-    "pos": "RB",
-    "game": "Coastal Carolina @ West Virginia",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 6.5,
-    "lineSrc": "file",
-    "proj": 19.6,
-    "lean": "over",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Dominic Knicely",
-    "team": "Coastal Carolina",
-    "pos": "RB",
-    "game": "Coastal Carolina @ West Virginia",
-    "cat": "receptions",
-    "market": "receptions",
-    "line": 1.5,
-    "lineSrc": "file",
-    "proj": 2.2,
-    "lean": "over",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Dominic Knicely",
-    "team": "Coastal Carolina",
-    "pos": "RB",
-    "game": "Coastal Carolina @ West Virginia",
-    "cat": "rushing",
-    "market": "rush_yds",
-    "line": 30.5,
-    "lineSrc": "file",
-    "proj": 23.5,
-    "lean": null,
-    "actual": 5.0,
-    "result": null
-   },
-   {
-    "player": "George Pettaway",
-    "team": "James Madison",
-    "pos": "RB",
-    "game": "Liberty @ James Madison",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 63.6,
-    "lineSrc": "file",
-    "proj": 32.0,
-    "lean": "under",
-    "actual": 100.0,
-    "result": "loss"
-   },
-   {
-    "player": "Jaylon Coleman",
-    "team": "Liberty",
-    "pos": "WR",
-    "game": "Liberty @ James Madison",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 20.8,
-    "lineSrc": "file",
-    "proj": 0.0,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Michael Scott",
-    "team": "James Madison",
-    "pos": "WR",
-    "game": "Liberty @ James Madison",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 20.0,
-    "lineSrc": "file",
-    "proj": 28.6,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "Braeden Wisloski",
-    "team": "James Madison",
-    "pos": "WR",
-    "game": "Liberty @ James Madison",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 20.0,
-    "lineSrc": "file",
-    "proj": 38.8,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
     "player": "Braylon Isom",
     "team": "Miami (OH)",
     "pos": "WR",
@@ -135492,6 +135492,538 @@ export const REPORT_CARDS: ReportCard[] = [
     "proj": -0.8,
     "lean": "over",
     "actual": 23.0,
+    "result": "win"
+   },
+   {
+    "player": "Jaedn Skeete",
+    "team": "Boston College",
+    "pos": "WR",
+    "game": "Boston College @ Cincinnati",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 38.5,
+    "lineSrc": "file",
+    "proj": 48.8,
+    "lean": "over",
+    "actual": 8.0,
+    "result": "loss"
+   },
+   {
+    "player": "Jaedn Skeete",
+    "team": "Boston College",
+    "pos": "WR",
+    "game": "Boston College @ Cincinnati",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 26.3,
+    "lineSrc": "file",
+    "proj": 36.0,
+    "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "Zeke Moore",
+    "team": "Boston College",
+    "pos": "TE",
+    "game": "Boston College @ Cincinnati",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 28.2,
+    "lineSrc": "file",
+    "proj": 20.7,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Bo MacCormack III",
+    "team": "Boston College",
+    "pos": "RB",
+    "game": "Boston College @ Cincinnati",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 27.8,
+    "lineSrc": "file",
+    "proj": 50.0,
+    "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "Gavin Grover",
+    "team": "Cincinnati",
+    "pos": "TE",
+    "game": "Boston College @ Cincinnati",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 12.5,
+    "lineSrc": "file",
+    "proj": 42.4,
+    "lean": null,
+    "actual": 8.0,
+    "result": null
+   },
+   {
+    "player": "Gavin Grover",
+    "team": "Cincinnati",
+    "pos": "TE",
+    "game": "Boston College @ Cincinnati",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 25.0,
+    "lineSrc": "file",
+    "proj": 14.5,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Zion Johnson",
+    "team": "Cincinnati",
+    "pos": "RB",
+    "game": "Boston College @ Cincinnati",
+    "cat": "rushing",
+    "market": "rush_yds",
+    "line": 33.5,
+    "lineSrc": "file",
+    "proj": 79.3,
+    "lean": null,
+    "actual": 31.0,
+    "result": null
+   },
+   {
+    "player": "Zion Johnson",
+    "team": "Cincinnati",
+    "pos": "RB",
+    "game": "Boston College @ Cincinnati",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 42.6,
+    "lineSrc": "file",
+    "proj": 56.4,
+    "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "Isaiah Johnson",
+    "team": "Cincinnati",
+    "pos": "WR",
+    "game": "Boston College @ Cincinnati",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 33.6,
+    "lineSrc": "file",
+    "proj": 16.3,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Dawson Pough",
+    "team": "Boston College",
+    "pos": "WR",
+    "game": "Boston College @ Cincinnati",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 19.0,
+    "lineSrc": "file",
+    "proj": 7.3,
+    "lean": "under",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Kaelan Chudzinski",
+    "team": "Boston College",
+    "pos": "WR",
+    "game": "Boston College @ Cincinnati",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 18.2,
+    "lineSrc": "file",
+    "proj": 38.4,
+    "lean": "over",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Isaiah Johnson",
+    "team": "Cincinnati",
+    "pos": "WR",
+    "game": "Boston College @ Cincinnati",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 20.5,
+    "lineSrc": "file",
+    "proj": 21.8,
+    "lean": "over",
+    "actual": -1.0,
+    "result": "loss"
+   },
+   {
+    "player": "Matt Wagner",
+    "team": "Boise State",
+    "pos": "TE",
+    "game": "Boise State @ Oregon",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 13.3,
+    "lineSrc": "file",
+    "proj": 13.1,
+    "lean": "under",
+    "actual": 100.0,
+    "result": "loss"
+   },
+   {
+    "player": "Maddux Madsen",
+    "team": "Boise State",
+    "pos": "QB",
+    "game": "Boise State @ Oregon",
+    "cat": "passing",
+    "market": "pass_yds",
+    "line": 177.5,
+    "lineSrc": "file",
+    "proj": 239.0,
+    "lean": "over",
+    "actual": 181.0,
+    "result": "win"
+   },
+   {
+    "player": "Maddux Madsen",
+    "team": "Boise State",
+    "pos": "QB",
+    "game": "Boise State @ Oregon",
+    "cat": "passing",
+    "market": "pass_tds",
+    "line": 0.5,
+    "lineSrc": "file",
+    "proj": 1.8,
+    "lean": "over",
+    "actual": 3.0,
+    "result": "win"
+   },
+   {
+    "player": "Maddux Madsen",
+    "team": "Boise State",
+    "pos": "QB",
+    "game": "Boise State @ Oregon",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 18.2,
+    "lineSrc": "file",
+    "proj": 16.9,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Dylan Riley",
+    "team": "Boise State",
+    "pos": "RB",
+    "game": "Boise State @ Oregon",
+    "cat": "rushing",
+    "market": "rush_yds",
+    "line": 44.5,
+    "lineSrc": "file",
+    "proj": 103.4,
+    "lean": "over",
+    "actual": 50.0,
+    "result": "win"
+   },
+   {
+    "player": "Dylan Riley",
+    "team": "Boise State",
+    "pos": "RB",
+    "game": "Boise State @ Oregon",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 42.6,
+    "lineSrc": "file",
+    "proj": 63.5,
+    "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "Sire Gaines",
+    "team": "Boise State",
+    "pos": "RB",
+    "game": "Boise State @ Oregon",
+    "cat": "rushing",
+    "market": "rush_yds",
+    "line": 34.5,
+    "lineSrc": "file",
+    "proj": 67.1,
+    "lean": "over",
+    "actual": 39.0,
+    "result": "win"
+   },
+   {
+    "player": "Sire Gaines",
+    "team": "Boise State",
+    "pos": "RB",
+    "game": "Boise State @ Oregon",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 35.7,
+    "lineSrc": "file",
+    "proj": 50.2,
+    "lean": "over",
+    "actual": 100.0,
+    "result": "win"
+   },
+   {
+    "player": "Cameron Bates",
+    "team": "Boise State",
+    "pos": "WR",
+    "game": "Boise State @ Oregon",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 16.7,
+    "lineSrc": "file",
+    "proj": 25.7,
+    "lean": "over",
+    "actual": 100.0,
+    "result": "win"
+   },
+   {
+    "player": "Ben Ford",
+    "team": "Boise State",
+    "pos": "WR",
+    "game": "Boise State @ Oregon",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 16.0,
+    "lineSrc": "file",
+    "proj": 32.3,
+    "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "Quinton Brown",
+    "team": "Boise State",
+    "pos": "WR",
+    "game": "Boise State @ Oregon",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 16.7,
+    "lineSrc": "file",
+    "proj": 28.7,
+    "lean": "over",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Austin Terry",
+    "team": "Boise State",
+    "pos": "WR",
+    "game": "Boise State @ Oregon",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 7.7,
+    "lineSrc": "file",
+    "proj": 0.0,
+    "lean": "under",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Cameron Bates",
+    "team": "Boise State",
+    "pos": "WR",
+    "game": "Boise State @ Oregon",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 26.5,
+    "lineSrc": "file",
+    "proj": 32.8,
+    "lean": "under",
+    "actual": 15.0,
+    "result": "win"
+   },
+   {
+    "player": "Ben Ford",
+    "team": "Boise State",
+    "pos": "WR",
+    "game": "Boise State @ Oregon",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 19.5,
+    "lineSrc": "file",
+    "proj": 40.2,
+    "lean": "over",
+    "actual": 8.0,
+    "result": "loss"
+   },
+   {
+    "player": "Ben Ford",
+    "team": "Boise State",
+    "pos": "WR",
+    "game": "Boise State @ Oregon",
+    "cat": "receptions",
+    "market": "receptions",
+    "line": 2.5,
+    "lineSrc": "file",
+    "proj": 2.8,
+    "lean": null,
+    "actual": 1.0,
+    "result": null
+   },
+   {
+    "player": "Zycarl Lewis Jr.",
+    "team": "Tulane",
+    "pos": "WR",
+    "game": "Tulane @ Duke",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 30.5,
+    "lineSrc": "file",
+    "proj": 33.9,
+    "lean": "under",
+    "actual": 28.0,
+    "result": "win"
+   },
+   {
+    "player": "Zycarl Lewis Jr.",
+    "team": "Tulane",
+    "pos": "WR",
+    "game": "Tulane @ Duke",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 25.0,
+    "lineSrc": "file",
+    "proj": 12.4,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Jayden Moore",
+    "team": "Duke",
+    "pos": "WR",
+    "game": "Tulane @ Duke",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 29.5,
+    "lineSrc": "file",
+    "proj": 49.2,
+    "lean": null,
+    "actual": 11.0,
+    "result": null
+   },
+   {
+    "player": "Jayden Moore",
+    "team": "Duke",
+    "pos": "WR",
+    "game": "Tulane @ Duke",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 25.6,
+    "lineSrc": "file",
+    "proj": 17.1,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Jeremiah Hasley",
+    "team": "Duke",
+    "pos": "TE",
+    "game": "Tulane @ Duke",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 36.5,
+    "lineSrc": "file",
+    "proj": 45.9,
+    "lean": null,
+    "actual": 36.0,
+    "result": null
+   },
+   {
+    "player": "Jeremiah Hasley",
+    "team": "Duke",
+    "pos": "TE",
+    "game": "Tulane @ Duke",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 37.7,
+    "lineSrc": "file",
+    "proj": 42.4,
+    "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "Nate Sheppard",
+    "team": "Duke",
+    "pos": "RB",
+    "game": "Tulane @ Duke",
+    "cat": "rushing",
+    "market": "rush_yds",
+    "line": 87.5,
+    "lineSrc": "file",
+    "proj": 94.7,
+    "lean": null,
+    "actual": 227.0,
+    "result": null
+   },
+   {
+    "player": "Nate Sheppard",
+    "team": "Duke",
+    "pos": "RB",
+    "game": "Tulane @ Duke",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 83.3,
+    "lineSrc": "file",
+    "proj": 64.7,
+    "lean": "under",
+    "actual": 100.0,
+    "result": "loss"
+   },
+   {
+    "player": "Ty Thompson",
+    "team": "Tulane",
+    "pos": "RB",
+    "game": "Tulane @ Duke",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 19.0,
+    "lineSrc": "file",
+    "proj": 35.7,
+    "lean": "over",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Oliver Mitchell Jr.",
+    "team": "Tulane",
+    "pos": "WR",
+    "game": "Tulane @ Duke",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 16.7,
+    "lineSrc": "file",
+    "proj": 0.0,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Nate Sheppard",
+    "team": "Duke",
+    "pos": "RB",
+    "game": "Tulane @ Duke",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 24.5,
+    "lineSrc": "file",
+    "proj": 24.2,
+    "lean": "under",
+    "actual": 19.0,
     "result": "win"
    },
    {
@@ -135814,538 +136346,6 @@ export const REPORT_CARDS: ReportCard[] = [
     "proj": 42.0,
     "lean": null,
     "actual": 6.0,
-    "result": null
-   },
-   {
-    "player": "Jaedn Skeete",
-    "team": "Boston College",
-    "pos": "WR",
-    "game": "Boston College @ Cincinnati",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 38.5,
-    "lineSrc": "file",
-    "proj": 48.8,
-    "lean": "over",
-    "actual": 8.0,
-    "result": "loss"
-   },
-   {
-    "player": "Jaedn Skeete",
-    "team": "Boston College",
-    "pos": "WR",
-    "game": "Boston College @ Cincinnati",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 26.3,
-    "lineSrc": "file",
-    "proj": 36.0,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "Zeke Moore",
-    "team": "Boston College",
-    "pos": "TE",
-    "game": "Boston College @ Cincinnati",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 28.2,
-    "lineSrc": "file",
-    "proj": 20.7,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Bo MacCormack III",
-    "team": "Boston College",
-    "pos": "RB",
-    "game": "Boston College @ Cincinnati",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 27.8,
-    "lineSrc": "file",
-    "proj": 50.0,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "Gavin Grover",
-    "team": "Cincinnati",
-    "pos": "TE",
-    "game": "Boston College @ Cincinnati",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 12.5,
-    "lineSrc": "file",
-    "proj": 42.4,
-    "lean": null,
-    "actual": 8.0,
-    "result": null
-   },
-   {
-    "player": "Gavin Grover",
-    "team": "Cincinnati",
-    "pos": "TE",
-    "game": "Boston College @ Cincinnati",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 25.0,
-    "lineSrc": "file",
-    "proj": 14.5,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Zion Johnson",
-    "team": "Cincinnati",
-    "pos": "RB",
-    "game": "Boston College @ Cincinnati",
-    "cat": "rushing",
-    "market": "rush_yds",
-    "line": 33.5,
-    "lineSrc": "file",
-    "proj": 79.3,
-    "lean": null,
-    "actual": 31.0,
-    "result": null
-   },
-   {
-    "player": "Zion Johnson",
-    "team": "Cincinnati",
-    "pos": "RB",
-    "game": "Boston College @ Cincinnati",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 42.6,
-    "lineSrc": "file",
-    "proj": 56.4,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "Isaiah Johnson",
-    "team": "Cincinnati",
-    "pos": "WR",
-    "game": "Boston College @ Cincinnati",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 33.6,
-    "lineSrc": "file",
-    "proj": 16.3,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Dawson Pough",
-    "team": "Boston College",
-    "pos": "WR",
-    "game": "Boston College @ Cincinnati",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 19.0,
-    "lineSrc": "file",
-    "proj": 7.3,
-    "lean": "under",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Kaelan Chudzinski",
-    "team": "Boston College",
-    "pos": "WR",
-    "game": "Boston College @ Cincinnati",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 18.2,
-    "lineSrc": "file",
-    "proj": 38.4,
-    "lean": "over",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Isaiah Johnson",
-    "team": "Cincinnati",
-    "pos": "WR",
-    "game": "Boston College @ Cincinnati",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 20.5,
-    "lineSrc": "file",
-    "proj": 21.8,
-    "lean": "over",
-    "actual": -1.0,
-    "result": "loss"
-   },
-   {
-    "player": "Zycarl Lewis Jr.",
-    "team": "Tulane",
-    "pos": "WR",
-    "game": "Tulane @ Duke",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 30.5,
-    "lineSrc": "file",
-    "proj": 33.9,
-    "lean": "under",
-    "actual": 28.0,
-    "result": "win"
-   },
-   {
-    "player": "Zycarl Lewis Jr.",
-    "team": "Tulane",
-    "pos": "WR",
-    "game": "Tulane @ Duke",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 25.0,
-    "lineSrc": "file",
-    "proj": 12.4,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Jayden Moore",
-    "team": "Duke",
-    "pos": "WR",
-    "game": "Tulane @ Duke",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 29.5,
-    "lineSrc": "file",
-    "proj": 49.2,
-    "lean": null,
-    "actual": 11.0,
-    "result": null
-   },
-   {
-    "player": "Jayden Moore",
-    "team": "Duke",
-    "pos": "WR",
-    "game": "Tulane @ Duke",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 25.6,
-    "lineSrc": "file",
-    "proj": 17.1,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Jeremiah Hasley",
-    "team": "Duke",
-    "pos": "TE",
-    "game": "Tulane @ Duke",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 36.5,
-    "lineSrc": "file",
-    "proj": 45.9,
-    "lean": null,
-    "actual": 36.0,
-    "result": null
-   },
-   {
-    "player": "Jeremiah Hasley",
-    "team": "Duke",
-    "pos": "TE",
-    "game": "Tulane @ Duke",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 37.7,
-    "lineSrc": "file",
-    "proj": 42.4,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "Nate Sheppard",
-    "team": "Duke",
-    "pos": "RB",
-    "game": "Tulane @ Duke",
-    "cat": "rushing",
-    "market": "rush_yds",
-    "line": 87.5,
-    "lineSrc": "file",
-    "proj": 94.7,
-    "lean": null,
-    "actual": 227.0,
-    "result": null
-   },
-   {
-    "player": "Nate Sheppard",
-    "team": "Duke",
-    "pos": "RB",
-    "game": "Tulane @ Duke",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 83.3,
-    "lineSrc": "file",
-    "proj": 64.7,
-    "lean": "under",
-    "actual": 100.0,
-    "result": "loss"
-   },
-   {
-    "player": "Ty Thompson",
-    "team": "Tulane",
-    "pos": "RB",
-    "game": "Tulane @ Duke",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 19.0,
-    "lineSrc": "file",
-    "proj": 35.7,
-    "lean": "over",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Oliver Mitchell Jr.",
-    "team": "Tulane",
-    "pos": "WR",
-    "game": "Tulane @ Duke",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 16.7,
-    "lineSrc": "file",
-    "proj": 0.0,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Nate Sheppard",
-    "team": "Duke",
-    "pos": "RB",
-    "game": "Tulane @ Duke",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 24.5,
-    "lineSrc": "file",
-    "proj": 24.2,
-    "lean": "under",
-    "actual": 19.0,
-    "result": "win"
-   },
-   {
-    "player": "Matt Wagner",
-    "team": "Boise State",
-    "pos": "TE",
-    "game": "Boise State @ Oregon",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 13.3,
-    "lineSrc": "file",
-    "proj": 13.1,
-    "lean": "under",
-    "actual": 100.0,
-    "result": "loss"
-   },
-   {
-    "player": "Maddux Madsen",
-    "team": "Boise State",
-    "pos": "QB",
-    "game": "Boise State @ Oregon",
-    "cat": "passing",
-    "market": "pass_yds",
-    "line": 177.5,
-    "lineSrc": "file",
-    "proj": 239.0,
-    "lean": "over",
-    "actual": 181.0,
-    "result": "win"
-   },
-   {
-    "player": "Maddux Madsen",
-    "team": "Boise State",
-    "pos": "QB",
-    "game": "Boise State @ Oregon",
-    "cat": "passing",
-    "market": "pass_tds",
-    "line": 0.5,
-    "lineSrc": "file",
-    "proj": 1.8,
-    "lean": "over",
-    "actual": 3.0,
-    "result": "win"
-   },
-   {
-    "player": "Maddux Madsen",
-    "team": "Boise State",
-    "pos": "QB",
-    "game": "Boise State @ Oregon",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 18.2,
-    "lineSrc": "file",
-    "proj": 16.9,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Dylan Riley",
-    "team": "Boise State",
-    "pos": "RB",
-    "game": "Boise State @ Oregon",
-    "cat": "rushing",
-    "market": "rush_yds",
-    "line": 44.5,
-    "lineSrc": "file",
-    "proj": 103.4,
-    "lean": "over",
-    "actual": 50.0,
-    "result": "win"
-   },
-   {
-    "player": "Dylan Riley",
-    "team": "Boise State",
-    "pos": "RB",
-    "game": "Boise State @ Oregon",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 42.6,
-    "lineSrc": "file",
-    "proj": 63.5,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "Sire Gaines",
-    "team": "Boise State",
-    "pos": "RB",
-    "game": "Boise State @ Oregon",
-    "cat": "rushing",
-    "market": "rush_yds",
-    "line": 34.5,
-    "lineSrc": "file",
-    "proj": 67.1,
-    "lean": "over",
-    "actual": 39.0,
-    "result": "win"
-   },
-   {
-    "player": "Sire Gaines",
-    "team": "Boise State",
-    "pos": "RB",
-    "game": "Boise State @ Oregon",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 35.7,
-    "lineSrc": "file",
-    "proj": 50.2,
-    "lean": "over",
-    "actual": 100.0,
-    "result": "win"
-   },
-   {
-    "player": "Cameron Bates",
-    "team": "Boise State",
-    "pos": "WR",
-    "game": "Boise State @ Oregon",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 16.7,
-    "lineSrc": "file",
-    "proj": 25.7,
-    "lean": "over",
-    "actual": 100.0,
-    "result": "win"
-   },
-   {
-    "player": "Ben Ford",
-    "team": "Boise State",
-    "pos": "WR",
-    "game": "Boise State @ Oregon",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 16.0,
-    "lineSrc": "file",
-    "proj": 32.3,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "Quinton Brown",
-    "team": "Boise State",
-    "pos": "WR",
-    "game": "Boise State @ Oregon",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 16.7,
-    "lineSrc": "file",
-    "proj": 28.7,
-    "lean": "over",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Austin Terry",
-    "team": "Boise State",
-    "pos": "WR",
-    "game": "Boise State @ Oregon",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 7.7,
-    "lineSrc": "file",
-    "proj": 0.0,
-    "lean": "under",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Cameron Bates",
-    "team": "Boise State",
-    "pos": "WR",
-    "game": "Boise State @ Oregon",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 26.5,
-    "lineSrc": "file",
-    "proj": 32.8,
-    "lean": "under",
-    "actual": 15.0,
-    "result": "win"
-   },
-   {
-    "player": "Ben Ford",
-    "team": "Boise State",
-    "pos": "WR",
-    "game": "Boise State @ Oregon",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 19.5,
-    "lineSrc": "file",
-    "proj": 40.2,
-    "lean": "over",
-    "actual": 8.0,
-    "result": "loss"
-   },
-   {
-    "player": "Ben Ford",
-    "team": "Boise State",
-    "pos": "WR",
-    "game": "Boise State @ Oregon",
-    "cat": "receptions",
-    "market": "receptions",
-    "line": 2.5,
-    "lineSrc": "file",
-    "proj": 2.8,
-    "lean": null,
-    "actual": 1.0,
     "result": null
    },
    {
@@ -137077,139 +137077,167 @@ export const REPORT_CARDS: ReportCard[] = [
     "result": "win"
    },
    {
-    "player": "Jaylen Bonelli",
-    "team": "Arkansas State",
+    "player": "Maguire Anderson",
+    "team": "Florida International",
     "pos": "WR",
-    "game": "Arkansas State @ Memphis",
+    "game": "Florida International @ South Florida",
     "cat": "td",
     "market": "anytime_td",
-    "line": 26.3,
+    "line": 15.4,
     "lineSrc": "file",
-    "proj": 30.2,
+    "proj": 16.3,
     "lean": "over",
     "actual": 0.0,
     "result": "loss"
    },
    {
-    "player": "Hunter Summers",
-    "team": "Arkansas State",
-    "pos": "WR",
-    "game": "Arkansas State @ Memphis",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 35.7,
-    "lineSrc": "file",
-    "proj": 24.8,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Trey Owens",
-    "team": "Arkansas State",
-    "pos": "QB",
-    "game": "Arkansas State @ Memphis",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 48.8,
-    "lineSrc": "file",
-    "proj": 0.7,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Kenyon Clay",
-    "team": "Arkansas State",
-    "pos": "RB",
-    "game": "Arkansas State @ Memphis",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 61.5,
-    "lineSrc": "file",
-    "proj": 41.2,
-    "lean": "under",
-    "actual": 100.0,
-    "result": "loss"
-   },
-   {
-    "player": "Brady Kluse",
-    "team": "Memphis",
-    "pos": "WR",
-    "game": "Arkansas State @ Memphis",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 26.0,
-    "lineSrc": "file",
-    "proj": 16.8,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Hunter Tipton",
-    "team": "Memphis",
+    "player": "Jackson Verdugo",
+    "team": "Florida International",
     "pos": "TE",
-    "game": "Arkansas State @ Memphis",
+    "game": "Florida International @ South Florida",
     "cat": "td",
     "market": "anytime_td",
-    "line": 35.1,
+    "line": 16.7,
     "lineSrc": "file",
-    "proj": 15.6,
-    "lean": "under",
-    "actual": 100.0,
-    "result": "loss"
-   },
-   {
-    "player": "Manny Covey",
-    "team": "Memphis",
-    "pos": "RB",
-    "game": "Arkansas State @ Memphis",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 63.8,
-    "lineSrc": "file",
-    "proj": 31.2,
+    "proj": 16.1,
     "lean": "under",
     "actual": 0.0,
     "result": "win"
    },
    {
-    "player": "Jaylin Carter",
-    "team": "Memphis",
-    "pos": "RB",
-    "game": "Arkansas State @ Memphis",
+    "player": "J.J. Kohl",
+    "team": "Florida International",
+    "pos": "QB",
+    "game": "Florida International @ South Florida",
     "cat": "td",
     "market": "anytime_td",
-    "line": 72.2,
+    "line": 27.0,
     "lineSrc": "file",
-    "proj": 31.1,
-    "lean": "under",
-    "actual": 100.0,
-    "result": "loss"
-   },
-   {
-    "player": "Dallan Hayden",
-    "team": "Memphis",
-    "pos": "RB",
-    "game": "Arkansas State @ Memphis",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 38.5,
-    "lineSrc": "file",
-    "proj": 15.9,
+    "proj": 16.9,
     "lean": "under",
     "actual": 0.0,
     "result": "win"
    },
    {
-    "player": "Chauncy Cobb",
-    "team": "Arkansas State",
+    "player": "Anthony Carrie",
+    "team": "Florida International",
+    "pos": "RB",
+    "game": "Florida International @ South Florida",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 55.6,
+    "lineSrc": "file",
+    "proj": 49.8,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Devonte Lyons",
+    "team": "Florida International",
+    "pos": "RB",
+    "game": "Florida International @ South Florida",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 33.3,
+    "lineSrc": "file",
+    "proj": 27.2,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Arhmad Branch",
+    "team": "South Florida",
     "pos": "WR",
-    "game": "Arkansas State @ Memphis",
+    "game": "Florida International @ South Florida",
     "cat": "td",
     "market": "anytime_td",
-    "line": 35.1,
+    "line": 40.0,
+    "lineSrc": "file",
+    "proj": 18.7,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Wyatt Sullivan",
+    "team": "South Florida",
+    "pos": "TE",
+    "game": "Florida International @ South Florida",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 27.4,
+    "lineSrc": "file",
+    "proj": 16.4,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Michael Van Buren Jr.",
+    "team": "South Florida",
+    "pos": "QB",
+    "game": "Florida International @ South Florida",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 56.9,
+    "lineSrc": "file",
+    "proj": 16.2,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Chase Garnett",
+    "team": "South Florida",
+    "pos": "RB",
+    "game": "Florida International @ South Florida",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 36.4,
+    "lineSrc": "file",
+    "proj": 0.0,
+    "lean": "under",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Bryson Rodgers",
+    "team": "South Florida",
+    "pos": "WR",
+    "game": "Florida International @ South Florida",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 32.8,
+    "lineSrc": "file",
+    "proj": 24.0,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Jeyquan Smith",
+    "team": "South Florida",
+    "pos": "WR",
+    "game": "Florida International @ South Florida",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 27.4,
+    "lineSrc": "file",
+    "proj": 0.0,
+    "lean": "under",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Kyle Mcneal",
+    "team": "Florida International",
+    "pos": "WR",
+    "game": "Florida International @ South Florida",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 24.4,
     "lineSrc": "file",
     "proj": 19.2,
     "lean": "under",
@@ -137217,60 +137245,60 @@ export const REPORT_CARDS: ReportCard[] = [
     "result": "win"
    },
    {
-    "player": "Tyler Little",
-    "team": "Arkansas State",
-    "pos": "WR",
-    "game": "Arkansas State @ Memphis",
+    "player": "Sterling Joseph",
+    "team": "Florida International",
+    "pos": "RB",
+    "game": "Florida International @ South Florida",
     "cat": "td",
     "market": "anytime_td",
-    "line": 19.2,
+    "line": 22.7,
     "lineSrc": "file",
-    "proj": 37.6,
+    "proj": 32.9,
     "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "Cameron Seldon",
+    "team": "South Florida",
+    "pos": "WR",
+    "game": "Florida International @ South Florida",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 21.3,
+    "lineSrc": "file",
+    "proj": 16.3,
+    "lean": "under",
     "actual": null,
     "result": null
    },
    {
-    "player": "Jemyri Davis",
-    "team": "Memphis",
+    "player": "JoJo Stone",
+    "team": "Florida International",
     "pos": "WR",
-    "game": "Arkansas State @ Memphis",
+    "game": "Florida International @ South Florida",
     "cat": "td",
     "market": "anytime_td",
-    "line": 16.7,
+    "line": 21.3,
     "lineSrc": "file",
-    "proj": 0.0,
+    "proj": 14.1,
     "lean": "under",
     "actual": 0.0,
     "result": "win"
    },
    {
-    "player": "Jermane Hayes",
-    "team": "Memphis",
+    "player": "Mudia Reuben",
+    "team": "South Florida",
     "pos": "WR",
-    "game": "Arkansas State @ Memphis",
+    "game": "Florida International @ South Florida",
     "cat": "td",
     "market": "anytime_td",
-    "line": 16.7,
+    "line": 20.4,
     "lineSrc": "file",
-    "proj": 0.0,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Jabari Bush",
-    "team": "Arkansas State",
-    "pos": "WR",
-    "game": "Arkansas State @ Memphis",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 11.8,
-    "lineSrc": "file",
-    "proj": 0.0,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
+    "proj": 47.3,
+    "lean": "over",
+    "actual": null,
+    "result": null
    },
    {
     "player": "Makai Cope",
@@ -137525,6 +137553,202 @@ export const REPORT_CARDS: ReportCard[] = [
     "result": "loss"
    },
    {
+    "player": "Jaylen Bonelli",
+    "team": "Arkansas State",
+    "pos": "WR",
+    "game": "Arkansas State @ Memphis",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 26.3,
+    "lineSrc": "file",
+    "proj": 30.2,
+    "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "Hunter Summers",
+    "team": "Arkansas State",
+    "pos": "WR",
+    "game": "Arkansas State @ Memphis",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 35.7,
+    "lineSrc": "file",
+    "proj": 24.8,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Trey Owens",
+    "team": "Arkansas State",
+    "pos": "QB",
+    "game": "Arkansas State @ Memphis",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 48.8,
+    "lineSrc": "file",
+    "proj": 0.7,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Kenyon Clay",
+    "team": "Arkansas State",
+    "pos": "RB",
+    "game": "Arkansas State @ Memphis",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 61.5,
+    "lineSrc": "file",
+    "proj": 41.2,
+    "lean": "under",
+    "actual": 100.0,
+    "result": "loss"
+   },
+   {
+    "player": "Brady Kluse",
+    "team": "Memphis",
+    "pos": "WR",
+    "game": "Arkansas State @ Memphis",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 26.0,
+    "lineSrc": "file",
+    "proj": 16.8,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Hunter Tipton",
+    "team": "Memphis",
+    "pos": "TE",
+    "game": "Arkansas State @ Memphis",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 35.1,
+    "lineSrc": "file",
+    "proj": 15.6,
+    "lean": "under",
+    "actual": 100.0,
+    "result": "loss"
+   },
+   {
+    "player": "Manny Covey",
+    "team": "Memphis",
+    "pos": "RB",
+    "game": "Arkansas State @ Memphis",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 63.8,
+    "lineSrc": "file",
+    "proj": 31.2,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Jaylin Carter",
+    "team": "Memphis",
+    "pos": "RB",
+    "game": "Arkansas State @ Memphis",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 72.2,
+    "lineSrc": "file",
+    "proj": 31.1,
+    "lean": "under",
+    "actual": 100.0,
+    "result": "loss"
+   },
+   {
+    "player": "Dallan Hayden",
+    "team": "Memphis",
+    "pos": "RB",
+    "game": "Arkansas State @ Memphis",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 38.5,
+    "lineSrc": "file",
+    "proj": 15.9,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Chauncy Cobb",
+    "team": "Arkansas State",
+    "pos": "WR",
+    "game": "Arkansas State @ Memphis",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 35.1,
+    "lineSrc": "file",
+    "proj": 19.2,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Tyler Little",
+    "team": "Arkansas State",
+    "pos": "WR",
+    "game": "Arkansas State @ Memphis",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 19.2,
+    "lineSrc": "file",
+    "proj": 37.6,
+    "lean": "over",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Jemyri Davis",
+    "team": "Memphis",
+    "pos": "WR",
+    "game": "Arkansas State @ Memphis",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 16.7,
+    "lineSrc": "file",
+    "proj": 0.0,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Jermane Hayes",
+    "team": "Memphis",
+    "pos": "WR",
+    "game": "Arkansas State @ Memphis",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 16.7,
+    "lineSrc": "file",
+    "proj": 0.0,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Jabari Bush",
+    "team": "Arkansas State",
+    "pos": "WR",
+    "game": "Arkansas State @ Memphis",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 11.8,
+    "lineSrc": "file",
+    "proj": 0.0,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
     "player": "Tim Burns Jr.",
     "team": "Sam Houston",
     "pos": "WR",
@@ -137691,230 +137915,6 @@ export const REPORT_CARDS: ReportCard[] = [
     "lean": "under",
     "actual": 100.0,
     "result": "loss"
-   },
-   {
-    "player": "Maguire Anderson",
-    "team": "Florida International",
-    "pos": "WR",
-    "game": "Florida International @ South Florida",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 15.4,
-    "lineSrc": "file",
-    "proj": 16.3,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "Jackson Verdugo",
-    "team": "Florida International",
-    "pos": "TE",
-    "game": "Florida International @ South Florida",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 16.7,
-    "lineSrc": "file",
-    "proj": 16.1,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "J.J. Kohl",
-    "team": "Florida International",
-    "pos": "QB",
-    "game": "Florida International @ South Florida",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 27.0,
-    "lineSrc": "file",
-    "proj": 16.9,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Anthony Carrie",
-    "team": "Florida International",
-    "pos": "RB",
-    "game": "Florida International @ South Florida",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 55.6,
-    "lineSrc": "file",
-    "proj": 49.8,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Devonte Lyons",
-    "team": "Florida International",
-    "pos": "RB",
-    "game": "Florida International @ South Florida",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 33.3,
-    "lineSrc": "file",
-    "proj": 27.2,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Arhmad Branch",
-    "team": "South Florida",
-    "pos": "WR",
-    "game": "Florida International @ South Florida",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 40.0,
-    "lineSrc": "file",
-    "proj": 18.7,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Wyatt Sullivan",
-    "team": "South Florida",
-    "pos": "TE",
-    "game": "Florida International @ South Florida",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 27.4,
-    "lineSrc": "file",
-    "proj": 16.4,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Michael Van Buren Jr.",
-    "team": "South Florida",
-    "pos": "QB",
-    "game": "Florida International @ South Florida",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 56.9,
-    "lineSrc": "file",
-    "proj": 16.2,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Chase Garnett",
-    "team": "South Florida",
-    "pos": "RB",
-    "game": "Florida International @ South Florida",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 36.4,
-    "lineSrc": "file",
-    "proj": 0.0,
-    "lean": "under",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Bryson Rodgers",
-    "team": "South Florida",
-    "pos": "WR",
-    "game": "Florida International @ South Florida",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 32.8,
-    "lineSrc": "file",
-    "proj": 24.0,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Jeyquan Smith",
-    "team": "South Florida",
-    "pos": "WR",
-    "game": "Florida International @ South Florida",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 27.4,
-    "lineSrc": "file",
-    "proj": 0.0,
-    "lean": "under",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Kyle Mcneal",
-    "team": "Florida International",
-    "pos": "WR",
-    "game": "Florida International @ South Florida",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 24.4,
-    "lineSrc": "file",
-    "proj": 19.2,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Sterling Joseph",
-    "team": "Florida International",
-    "pos": "RB",
-    "game": "Florida International @ South Florida",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 22.7,
-    "lineSrc": "file",
-    "proj": 32.9,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "Cameron Seldon",
-    "team": "South Florida",
-    "pos": "WR",
-    "game": "Florida International @ South Florida",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 21.3,
-    "lineSrc": "file",
-    "proj": 16.3,
-    "lean": "under",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "JoJo Stone",
-    "team": "Florida International",
-    "pos": "WR",
-    "game": "Florida International @ South Florida",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 21.3,
-    "lineSrc": "file",
-    "proj": 14.1,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Mudia Reuben",
-    "team": "South Florida",
-    "pos": "WR",
-    "game": "Florida International @ South Florida",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 20.4,
-    "lineSrc": "file",
-    "proj": 47.3,
-    "lean": "over",
-    "actual": null,
-    "result": null
    },
    {
     "player": "Bryant Wesco Jr.",
@@ -138449,300 +138449,6 @@ export const REPORT_CARDS: ReportCard[] = [
     "result": "loss"
    },
    {
-    "player": "Nic Trujillo",
-    "team": "UL Monroe",
-    "pos": "WR",
-    "game": "UL Monroe @ Mississippi State",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 41.5,
-    "lineSrc": "file",
-    "proj": 41.4,
-    "lean": null,
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Nic Trujillo",
-    "team": "UL Monroe",
-    "pos": "WR",
-    "game": "UL Monroe @ Mississippi State",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 26.0,
-    "lineSrc": "file",
-    "proj": 26.0,
-    "lean": "over",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Bryce Anderson",
-    "team": "UL Monroe",
-    "pos": "TE",
-    "game": "UL Monroe @ Mississippi State",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 8.3,
-    "lineSrc": "file",
-    "proj": 11.4,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "Aidan Armenta",
-    "team": "UL Monroe",
-    "pos": "QB",
-    "game": "UL Monroe @ Mississippi State",
-    "cat": "passing",
-    "market": "pass_yds",
-    "line": 141.5,
-    "lineSrc": "file",
-    "proj": 157.3,
-    "lean": "over",
-    "actual": 67.0,
-    "result": "loss"
-   },
-   {
-    "player": "Aidan Armenta",
-    "team": "UL Monroe",
-    "pos": "QB",
-    "game": "UL Monroe @ Mississippi State",
-    "cat": "passing",
-    "market": "pass_tds",
-    "line": 0.5,
-    "lineSrc": "file",
-    "proj": 1.1,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "Aidan Armenta",
-    "team": "UL Monroe",
-    "pos": "QB",
-    "game": "UL Monroe @ Mississippi State",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 23.3,
-    "lineSrc": "file",
-    "proj": 16.9,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Sanfrisco Magee",
-    "team": "Mississippi State",
-    "pos": "WR",
-    "game": "UL Monroe @ Mississippi State",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 36.4,
-    "lineSrc": "file",
-    "proj": 36.3,
-    "lean": "under",
-    "actual": 100.0,
-    "result": "loss"
-   },
-   {
-    "player": "Zion Ragins",
-    "team": "Mississippi State",
-    "pos": "WR",
-    "game": "UL Monroe @ Mississippi State",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 16.7,
-    "lineSrc": "file",
-    "proj": 17.2,
-    "lean": "over",
-    "actual": 100.0,
-    "result": "win"
-   },
-   {
-    "player": "Sam West",
-    "team": "Mississippi State",
-    "pos": "TE",
-    "game": "UL Monroe @ Mississippi State",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 33.9,
-    "lineSrc": "file",
-    "proj": 21.9,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Kamario Taylor",
-    "team": "Mississippi State",
-    "pos": "QB",
-    "game": "UL Monroe @ Mississippi State",
-    "cat": "passing",
-    "market": "pass_yds",
-    "line": 225.5,
-    "lineSrc": "file",
-    "proj": 249.6,
-    "lean": "under",
-    "actual": 354.0,
-    "result": "loss"
-   },
-   {
-    "player": "Kamario Taylor",
-    "team": "Mississippi State",
-    "pos": "QB",
-    "game": "UL Monroe @ Mississippi State",
-    "cat": "passing",
-    "market": "pass_tds",
-    "line": 1.5,
-    "lineSrc": "file",
-    "proj": 1.4,
-    "lean": "under",
-    "actual": 4.0,
-    "result": "loss"
-   },
-   {
-    "player": "Kamario Taylor",
-    "team": "Mississippi State",
-    "pos": "QB",
-    "game": "UL Monroe @ Mississippi State",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 89.5,
-    "lineSrc": "file",
-    "proj": 5.0,
-    "lean": "under",
-    "actual": 100.0,
-    "result": "loss"
-   },
-   {
-    "player": "Fluff Bothwell",
-    "team": "Mississippi State",
-    "pos": "RB",
-    "game": "UL Monroe @ Mississippi State",
-    "cat": "rushing",
-    "market": "rush_yds",
-    "line": 85.5,
-    "lineSrc": "file",
-    "proj": 68.6,
-    "lean": "under",
-    "actual": 52.0,
-    "result": "win"
-   },
-   {
-    "player": "Fluff Bothwell",
-    "team": "Mississippi State",
-    "pos": "RB",
-    "game": "UL Monroe @ Mississippi State",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 81.3,
-    "lineSrc": "file",
-    "proj": 53.5,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Xavier Gayten",
-    "team": "Mississippi State",
-    "pos": "RB",
-    "game": "UL Monroe @ Mississippi State",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 35.7,
-    "lineSrc": "file",
-    "proj": 25.4,
-    "lean": "under",
-    "actual": 100.0,
-    "result": "loss"
-   },
-   {
-    "player": "Kolin Wilson",
-    "team": "Mississippi State",
-    "pos": "RB",
-    "game": "UL Monroe @ Mississippi State",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 43.5,
-    "lineSrc": "file",
-    "proj": 0.0,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Marquis Johnson",
-    "team": "Mississippi State",
-    "pos": "WR",
-    "game": "UL Monroe @ Mississippi State",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 16.7,
-    "lineSrc": "file",
-    "proj": 12.4,
-    "lean": "under",
-    "actual": 100.0,
-    "result": "loss"
-   },
-   {
-    "player": "Ayden Williams",
-    "team": "Mississippi State",
-    "pos": "WR",
-    "game": "UL Monroe @ Mississippi State",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 16.7,
-    "lineSrc": "file",
-    "proj": 0.0,
-    "lean": "under",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "JP Coulter",
-    "team": "UL Monroe",
-    "pos": "WR",
-    "game": "UL Monroe @ Mississippi State",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 14.3,
-    "lineSrc": "file",
-    "proj": 0.0,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Julian Nixon",
-    "team": "UL Monroe",
-    "pos": "WR",
-    "game": "UL Monroe @ Mississippi State",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 7.7,
-    "lineSrc": "file",
-    "proj": 14.9,
-    "lean": "over",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Kamario Taylor",
-    "team": "Mississippi State",
-    "pos": "QB",
-    "game": "UL Monroe @ Mississippi State",
-    "cat": "rushing",
-    "market": "rush_yds",
-    "line": 56.5,
-    "lineSrc": "file",
-    "proj": 59.4,
-    "lean": "under",
-    "actual": 59.0,
-    "result": "loss"
-   },
-   {
     "player": "Aveion Chenault",
     "team": "Western Michigan",
     "pos": "WR",
@@ -139118,6 +138824,300 @@ export const REPORT_CARDS: ReportCard[] = [
     "proj": 31.9,
     "lean": "under",
     "actual": 47.0,
+    "result": "loss"
+   },
+   {
+    "player": "Nic Trujillo",
+    "team": "UL Monroe",
+    "pos": "WR",
+    "game": "UL Monroe @ Mississippi State",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 41.5,
+    "lineSrc": "file",
+    "proj": 41.4,
+    "lean": null,
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Nic Trujillo",
+    "team": "UL Monroe",
+    "pos": "WR",
+    "game": "UL Monroe @ Mississippi State",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 26.0,
+    "lineSrc": "file",
+    "proj": 26.0,
+    "lean": "over",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Bryce Anderson",
+    "team": "UL Monroe",
+    "pos": "TE",
+    "game": "UL Monroe @ Mississippi State",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 8.3,
+    "lineSrc": "file",
+    "proj": 11.4,
+    "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "Aidan Armenta",
+    "team": "UL Monroe",
+    "pos": "QB",
+    "game": "UL Monroe @ Mississippi State",
+    "cat": "passing",
+    "market": "pass_yds",
+    "line": 141.5,
+    "lineSrc": "file",
+    "proj": 157.3,
+    "lean": "over",
+    "actual": 67.0,
+    "result": "loss"
+   },
+   {
+    "player": "Aidan Armenta",
+    "team": "UL Monroe",
+    "pos": "QB",
+    "game": "UL Monroe @ Mississippi State",
+    "cat": "passing",
+    "market": "pass_tds",
+    "line": 0.5,
+    "lineSrc": "file",
+    "proj": 1.1,
+    "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "Aidan Armenta",
+    "team": "UL Monroe",
+    "pos": "QB",
+    "game": "UL Monroe @ Mississippi State",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 23.3,
+    "lineSrc": "file",
+    "proj": 16.9,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Sanfrisco Magee",
+    "team": "Mississippi State",
+    "pos": "WR",
+    "game": "UL Monroe @ Mississippi State",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 36.4,
+    "lineSrc": "file",
+    "proj": 36.3,
+    "lean": "under",
+    "actual": 100.0,
+    "result": "loss"
+   },
+   {
+    "player": "Zion Ragins",
+    "team": "Mississippi State",
+    "pos": "WR",
+    "game": "UL Monroe @ Mississippi State",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 16.7,
+    "lineSrc": "file",
+    "proj": 17.2,
+    "lean": "over",
+    "actual": 100.0,
+    "result": "win"
+   },
+   {
+    "player": "Sam West",
+    "team": "Mississippi State",
+    "pos": "TE",
+    "game": "UL Monroe @ Mississippi State",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 33.9,
+    "lineSrc": "file",
+    "proj": 21.9,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Kamario Taylor",
+    "team": "Mississippi State",
+    "pos": "QB",
+    "game": "UL Monroe @ Mississippi State",
+    "cat": "passing",
+    "market": "pass_yds",
+    "line": 225.5,
+    "lineSrc": "file",
+    "proj": 249.6,
+    "lean": "under",
+    "actual": 354.0,
+    "result": "loss"
+   },
+   {
+    "player": "Kamario Taylor",
+    "team": "Mississippi State",
+    "pos": "QB",
+    "game": "UL Monroe @ Mississippi State",
+    "cat": "passing",
+    "market": "pass_tds",
+    "line": 1.5,
+    "lineSrc": "file",
+    "proj": 1.4,
+    "lean": "under",
+    "actual": 4.0,
+    "result": "loss"
+   },
+   {
+    "player": "Kamario Taylor",
+    "team": "Mississippi State",
+    "pos": "QB",
+    "game": "UL Monroe @ Mississippi State",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 89.5,
+    "lineSrc": "file",
+    "proj": 5.0,
+    "lean": "under",
+    "actual": 100.0,
+    "result": "loss"
+   },
+   {
+    "player": "Fluff Bothwell",
+    "team": "Mississippi State",
+    "pos": "RB",
+    "game": "UL Monroe @ Mississippi State",
+    "cat": "rushing",
+    "market": "rush_yds",
+    "line": 85.5,
+    "lineSrc": "file",
+    "proj": 68.6,
+    "lean": "under",
+    "actual": 52.0,
+    "result": "win"
+   },
+   {
+    "player": "Fluff Bothwell",
+    "team": "Mississippi State",
+    "pos": "RB",
+    "game": "UL Monroe @ Mississippi State",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 81.3,
+    "lineSrc": "file",
+    "proj": 53.5,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Xavier Gayten",
+    "team": "Mississippi State",
+    "pos": "RB",
+    "game": "UL Monroe @ Mississippi State",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 35.7,
+    "lineSrc": "file",
+    "proj": 25.4,
+    "lean": "under",
+    "actual": 100.0,
+    "result": "loss"
+   },
+   {
+    "player": "Kolin Wilson",
+    "team": "Mississippi State",
+    "pos": "RB",
+    "game": "UL Monroe @ Mississippi State",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 43.5,
+    "lineSrc": "file",
+    "proj": 0.0,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Marquis Johnson",
+    "team": "Mississippi State",
+    "pos": "WR",
+    "game": "UL Monroe @ Mississippi State",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 16.7,
+    "lineSrc": "file",
+    "proj": 12.4,
+    "lean": "under",
+    "actual": 100.0,
+    "result": "loss"
+   },
+   {
+    "player": "Ayden Williams",
+    "team": "Mississippi State",
+    "pos": "WR",
+    "game": "UL Monroe @ Mississippi State",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 16.7,
+    "lineSrc": "file",
+    "proj": 0.0,
+    "lean": "under",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "JP Coulter",
+    "team": "UL Monroe",
+    "pos": "WR",
+    "game": "UL Monroe @ Mississippi State",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 14.3,
+    "lineSrc": "file",
+    "proj": 0.0,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Julian Nixon",
+    "team": "UL Monroe",
+    "pos": "WR",
+    "game": "UL Monroe @ Mississippi State",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 7.7,
+    "lineSrc": "file",
+    "proj": 14.9,
+    "lean": "over",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Kamario Taylor",
+    "team": "Mississippi State",
+    "pos": "QB",
+    "game": "UL Monroe @ Mississippi State",
+    "cat": "rushing",
+    "market": "rush_yds",
+    "line": 56.5,
+    "lineSrc": "file",
+    "proj": 59.4,
+    "lean": "under",
+    "actual": 59.0,
     "result": "loss"
    },
    {
@@ -139653,6 +139653,272 @@ export const REPORT_CARDS: ReportCard[] = [
     "result": "win"
    },
    {
+    "player": "Cameron Flowers",
+    "team": "Western Kentucky",
+    "pos": "WR",
+    "game": "Western Kentucky @ Nevada",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 36.4,
+    "lineSrc": "file",
+    "proj": 13.8,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "CC Ezirim",
+    "team": "Western Kentucky",
+    "pos": "TE",
+    "game": "Western Kentucky @ Nevada",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 24.4,
+    "lineSrc": "file",
+    "proj": 29.3,
+    "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "Rodney Tisdale Jr.",
+    "team": "Western Kentucky",
+    "pos": "QB",
+    "game": "Western Kentucky @ Nevada",
+    "cat": "passing",
+    "market": "pass_yds",
+    "line": 258.5,
+    "lineSrc": "file",
+    "proj": 241.4,
+    "lean": "under",
+    "actual": 203.0,
+    "result": "win"
+   },
+   {
+    "player": "Rodney Tisdale Jr.",
+    "team": "Western Kentucky",
+    "pos": "QB",
+    "game": "Western Kentucky @ Nevada",
+    "cat": "passing",
+    "market": "pass_tds",
+    "line": 1.5,
+    "lineSrc": "file",
+    "proj": 1.5,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Rodney Tisdale Jr.",
+    "team": "Western Kentucky",
+    "pos": "QB",
+    "game": "Western Kentucky @ Nevada",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 42.6,
+    "lineSrc": "file",
+    "proj": 15.7,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Ajay Allen",
+    "team": "Western Kentucky",
+    "pos": "RB",
+    "game": "Western Kentucky @ Nevada",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 60.0,
+    "lineSrc": "file",
+    "proj": 52.8,
+    "lean": "under",
+    "actual": 100.0,
+    "result": "loss"
+   },
+   {
+    "player": "Kalib Hicks",
+    "team": "Western Kentucky",
+    "pos": "RB",
+    "game": "Western Kentucky @ Nevada",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 29.4,
+    "lineSrc": "file",
+    "proj": 21.4,
+    "lean": "under",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Marshaun Brown",
+    "team": "Nevada",
+    "pos": "WR",
+    "game": "Western Kentucky @ Nevada",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 15.4,
+    "lineSrc": "file",
+    "proj": 14.2,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Gary Givens III",
+    "team": "Nevada",
+    "pos": "WR",
+    "game": "Western Kentucky @ Nevada",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 22.2,
+    "lineSrc": "file",
+    "proj": 23.0,
+    "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "DJ Asiasi",
+    "team": "Nevada",
+    "pos": "TE",
+    "game": "Western Kentucky @ Nevada",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 11.8,
+    "lineSrc": "file",
+    "proj": 21.9,
+    "lean": "over",
+    "actual": 100.0,
+    "result": "win"
+   },
+   {
+    "player": "Carter Jones",
+    "team": "Nevada",
+    "pos": "QB",
+    "game": "Western Kentucky @ Nevada",
+    "cat": "passing",
+    "market": "pass_yds",
+    "line": 174.5,
+    "lineSrc": "file",
+    "proj": 124.9,
+    "lean": null,
+    "actual": 163.0,
+    "result": null
+   },
+   {
+    "player": "Carter Jones",
+    "team": "Nevada",
+    "pos": "QB",
+    "game": "Western Kentucky @ Nevada",
+    "cat": "passing",
+    "market": "pass_tds",
+    "line": 1.5,
+    "lineSrc": "file",
+    "proj": 0.7,
+    "lean": "under",
+    "actual": 2.0,
+    "result": "loss"
+   },
+   {
+    "player": "Carter Jones",
+    "team": "Nevada",
+    "pos": "QB",
+    "game": "Western Kentucky @ Nevada",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 45.5,
+    "lineSrc": "file",
+    "proj": 16.9,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Herschel Turner",
+    "team": "Nevada",
+    "pos": "RB",
+    "game": "Western Kentucky @ Nevada",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 56.5,
+    "lineSrc": "file",
+    "proj": 20.9,
+    "lean": "under",
+    "actual": 100.0,
+    "result": "loss"
+   },
+   {
+    "player": "Dominic Kelley",
+    "team": "Nevada",
+    "pos": "RB",
+    "game": "Western Kentucky @ Nevada",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 63.6,
+    "lineSrc": "file",
+    "proj": 20.7,
+    "lean": "under",
+    "actual": 100.0,
+    "result": "loss"
+   },
+   {
+    "player": "Moussa Barry",
+    "team": "Western Kentucky",
+    "pos": "WR",
+    "game": "Western Kentucky @ Nevada",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 32.3,
+    "lineSrc": "file",
+    "proj": 11.7,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Jaden McGill",
+    "team": "Western Kentucky",
+    "pos": "RB",
+    "game": "Western Kentucky @ Nevada",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 25.0,
+    "lineSrc": "file",
+    "proj": 54.9,
+    "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "Quincy Burroughs",
+    "team": "Western Kentucky",
+    "pos": "WR",
+    "game": "Western Kentucky @ Nevada",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 23.3,
+    "lineSrc": "file",
+    "proj": 8.0,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "K.D. Hutchinson",
+    "team": "Western Kentucky",
+    "pos": "WR",
+    "game": "Western Kentucky @ Nevada",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 43.5,
+    "lineSrc": "file",
+    "proj": 26.8,
+    "lean": "under",
+    "actual": null,
+    "result": null
+   },
+   {
     "player": "Leland Smith",
     "team": "UCLA",
     "pos": "WR",
@@ -140185,272 +140451,6 @@ export const REPORT_CARDS: ReportCard[] = [
     "result": "loss"
    },
    {
-    "player": "Cameron Flowers",
-    "team": "Western Kentucky",
-    "pos": "WR",
-    "game": "Western Kentucky @ Nevada",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 36.4,
-    "lineSrc": "file",
-    "proj": 13.8,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "CC Ezirim",
-    "team": "Western Kentucky",
-    "pos": "TE",
-    "game": "Western Kentucky @ Nevada",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 24.4,
-    "lineSrc": "file",
-    "proj": 29.3,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "Rodney Tisdale Jr.",
-    "team": "Western Kentucky",
-    "pos": "QB",
-    "game": "Western Kentucky @ Nevada",
-    "cat": "passing",
-    "market": "pass_yds",
-    "line": 258.5,
-    "lineSrc": "file",
-    "proj": 241.4,
-    "lean": "under",
-    "actual": 203.0,
-    "result": "win"
-   },
-   {
-    "player": "Rodney Tisdale Jr.",
-    "team": "Western Kentucky",
-    "pos": "QB",
-    "game": "Western Kentucky @ Nevada",
-    "cat": "passing",
-    "market": "pass_tds",
-    "line": 1.5,
-    "lineSrc": "file",
-    "proj": 1.5,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Rodney Tisdale Jr.",
-    "team": "Western Kentucky",
-    "pos": "QB",
-    "game": "Western Kentucky @ Nevada",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 42.6,
-    "lineSrc": "file",
-    "proj": 15.7,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Ajay Allen",
-    "team": "Western Kentucky",
-    "pos": "RB",
-    "game": "Western Kentucky @ Nevada",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 60.0,
-    "lineSrc": "file",
-    "proj": 52.8,
-    "lean": "under",
-    "actual": 100.0,
-    "result": "loss"
-   },
-   {
-    "player": "Kalib Hicks",
-    "team": "Western Kentucky",
-    "pos": "RB",
-    "game": "Western Kentucky @ Nevada",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 29.4,
-    "lineSrc": "file",
-    "proj": 21.4,
-    "lean": "under",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Marshaun Brown",
-    "team": "Nevada",
-    "pos": "WR",
-    "game": "Western Kentucky @ Nevada",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 15.4,
-    "lineSrc": "file",
-    "proj": 14.2,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Gary Givens III",
-    "team": "Nevada",
-    "pos": "WR",
-    "game": "Western Kentucky @ Nevada",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 22.2,
-    "lineSrc": "file",
-    "proj": 23.0,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "DJ Asiasi",
-    "team": "Nevada",
-    "pos": "TE",
-    "game": "Western Kentucky @ Nevada",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 11.8,
-    "lineSrc": "file",
-    "proj": 21.9,
-    "lean": "over",
-    "actual": 100.0,
-    "result": "win"
-   },
-   {
-    "player": "Carter Jones",
-    "team": "Nevada",
-    "pos": "QB",
-    "game": "Western Kentucky @ Nevada",
-    "cat": "passing",
-    "market": "pass_yds",
-    "line": 174.5,
-    "lineSrc": "file",
-    "proj": 124.9,
-    "lean": null,
-    "actual": 163.0,
-    "result": null
-   },
-   {
-    "player": "Carter Jones",
-    "team": "Nevada",
-    "pos": "QB",
-    "game": "Western Kentucky @ Nevada",
-    "cat": "passing",
-    "market": "pass_tds",
-    "line": 1.5,
-    "lineSrc": "file",
-    "proj": 0.7,
-    "lean": "under",
-    "actual": 2.0,
-    "result": "loss"
-   },
-   {
-    "player": "Carter Jones",
-    "team": "Nevada",
-    "pos": "QB",
-    "game": "Western Kentucky @ Nevada",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 45.5,
-    "lineSrc": "file",
-    "proj": 16.9,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Herschel Turner",
-    "team": "Nevada",
-    "pos": "RB",
-    "game": "Western Kentucky @ Nevada",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 56.5,
-    "lineSrc": "file",
-    "proj": 20.9,
-    "lean": "under",
-    "actual": 100.0,
-    "result": "loss"
-   },
-   {
-    "player": "Dominic Kelley",
-    "team": "Nevada",
-    "pos": "RB",
-    "game": "Western Kentucky @ Nevada",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 63.6,
-    "lineSrc": "file",
-    "proj": 20.7,
-    "lean": "under",
-    "actual": 100.0,
-    "result": "loss"
-   },
-   {
-    "player": "Moussa Barry",
-    "team": "Western Kentucky",
-    "pos": "WR",
-    "game": "Western Kentucky @ Nevada",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 32.3,
-    "lineSrc": "file",
-    "proj": 11.7,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Jaden McGill",
-    "team": "Western Kentucky",
-    "pos": "RB",
-    "game": "Western Kentucky @ Nevada",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 25.0,
-    "lineSrc": "file",
-    "proj": 54.9,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "Quincy Burroughs",
-    "team": "Western Kentucky",
-    "pos": "WR",
-    "game": "Western Kentucky @ Nevada",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 23.3,
-    "lineSrc": "file",
-    "proj": 8.0,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "K.D. Hutchinson",
-    "team": "Western Kentucky",
-    "pos": "WR",
-    "game": "Western Kentucky @ Nevada",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 43.5,
-    "lineSrc": "file",
-    "proj": 26.8,
-    "lean": "under",
-    "actual": null,
-    "result": null
-   },
-   {
     "player": "Darrius Clemons",
     "team": "Washington State",
     "pos": "WR",
@@ -140784,6 +140784,468 @@ export const REPORT_CARDS: ReportCard[] = [
     "proj": 38.3,
     "lean": "under",
     "actual": 61.0,
+    "result": "loss"
+   },
+   {
+    "player": "Treyshun Hurry",
+    "team": "Louisville",
+    "pos": "WR",
+    "game": "Louisville @ Ole Miss",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 28.5,
+    "lineSrc": "file",
+    "proj": 34.0,
+    "lean": null,
+    "actual": 67.0,
+    "result": null
+   },
+   {
+    "player": "Treyshun Hurry",
+    "team": "Louisville",
+    "pos": "WR",
+    "game": "Louisville @ Ole Miss",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 22.7,
+    "lineSrc": "file",
+    "proj": 19.6,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Lawayne McCoy",
+    "team": "Louisville",
+    "pos": "WR",
+    "game": "Louisville @ Ole Miss",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 37.5,
+    "lineSrc": "file",
+    "proj": 48.4,
+    "lean": null,
+    "actual": 62.0,
+    "result": null
+   },
+   {
+    "player": "Lawayne McCoy",
+    "team": "Louisville",
+    "pos": "WR",
+    "game": "Louisville @ Ole Miss",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 26.3,
+    "lineSrc": "file",
+    "proj": 22.2,
+    "lean": "under",
+    "actual": 100.0,
+    "result": "loss"
+   },
+   {
+    "player": "Brody Foley",
+    "team": "Louisville",
+    "pos": "TE",
+    "game": "Louisville @ Ole Miss",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 18.5,
+    "lineSrc": "file",
+    "proj": 57.0,
+    "lean": "over",
+    "actual": 3.0,
+    "result": "loss"
+   },
+   {
+    "player": "Brody Foley",
+    "team": "Louisville",
+    "pos": "TE",
+    "game": "Louisville @ Ole Miss",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 23.1,
+    "lineSrc": "file",
+    "proj": 43.3,
+    "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "Lincoln Kienholz",
+    "team": "Louisville",
+    "pos": "QB",
+    "game": "Louisville @ Ole Miss",
+    "cat": "passing",
+    "market": "pass_yds",
+    "line": 211.5,
+    "lineSrc": "file",
+    "proj": 252.9,
+    "lean": null,
+    "actual": 307.0,
+    "result": null
+   },
+   {
+    "player": "Lincoln Kienholz",
+    "team": "Louisville",
+    "pos": "QB",
+    "game": "Louisville @ Ole Miss",
+    "cat": "passing",
+    "market": "pass_tds",
+    "line": 1.5,
+    "lineSrc": "file",
+    "proj": 1.5,
+    "lean": null,
+    "actual": 2.0,
+    "result": null
+   },
+   {
+    "player": "Lincoln Kienholz",
+    "team": "Louisville",
+    "pos": "QB",
+    "game": "Louisville @ Ole Miss",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 31.7,
+    "lineSrc": "file",
+    "proj": 16.9,
+    "lean": "under",
+    "actual": 100.0,
+    "result": "loss"
+   },
+   {
+    "player": "Isaac Brown",
+    "team": "Louisville",
+    "pos": "RB",
+    "game": "Louisville @ Ole Miss",
+    "cat": "rushing",
+    "market": "rush_yds",
+    "line": 69.5,
+    "lineSrc": "file",
+    "proj": 86.7,
+    "lean": "over",
+    "actual": 36.0,
+    "result": "loss"
+   },
+   {
+    "player": "Isaac Brown",
+    "team": "Louisville",
+    "pos": "RB",
+    "game": "Louisville @ Ole Miss",
+    "cat": "receptions",
+    "market": "receptions",
+    "line": 1.5,
+    "lineSrc": "file",
+    "proj": 3.6,
+    "lean": "over",
+    "actual": 3.0,
+    "result": "win"
+   },
+   {
+    "player": "Isaac Brown",
+    "team": "Louisville",
+    "pos": "RB",
+    "game": "Louisville @ Ole Miss",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 57.3,
+    "lineSrc": "file",
+    "proj": 56.4,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Keyjuan Brown",
+    "team": "Louisville",
+    "pos": "RB",
+    "game": "Louisville @ Ole Miss",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 50.0,
+    "lineSrc": "file",
+    "proj": 46.3,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Deuce Alexander",
+    "team": "Ole Miss",
+    "pos": "WR",
+    "game": "Louisville @ Ole Miss",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 57.5,
+    "lineSrc": "file",
+    "proj": 64.6,
+    "lean": "under",
+    "actual": 159.0,
+    "result": "loss"
+   },
+   {
+    "player": "Deuce Alexander",
+    "team": "Ole Miss",
+    "pos": "WR",
+    "game": "Louisville @ Ole Miss",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 41.7,
+    "lineSrc": "file",
+    "proj": 21.2,
+    "lean": "under",
+    "actual": 100.0,
+    "result": "loss"
+   },
+   {
+    "player": "Darrell Gill Jr.",
+    "team": "Ole Miss",
+    "pos": "WR",
+    "game": "Louisville @ Ole Miss",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 37.2,
+    "lineSrc": "file",
+    "proj": 24.5,
+    "lean": "under",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Luke Hasz",
+    "team": "Ole Miss",
+    "pos": "TE",
+    "game": "Louisville @ Ole Miss",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 29.9,
+    "lineSrc": "file",
+    "proj": 28.4,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Trinidad Chambliss",
+    "team": "Ole Miss",
+    "pos": "QB",
+    "game": "Louisville @ Ole Miss",
+    "cat": "passing",
+    "market": "pass_yds",
+    "line": 272.5,
+    "lineSrc": "file",
+    "proj": 279.9,
+    "lean": "over",
+    "actual": 336.0,
+    "result": "win"
+   },
+   {
+    "player": "Trinidad Chambliss",
+    "team": "Ole Miss",
+    "pos": "QB",
+    "game": "Louisville @ Ole Miss",
+    "cat": "passing",
+    "market": "pass_tds",
+    "line": 1.5,
+    "lineSrc": "file",
+    "proj": 1.6,
+    "lean": null,
+    "actual": 3.0,
+    "result": null
+   },
+   {
+    "player": "Trinidad Chambliss",
+    "team": "Ole Miss",
+    "pos": "QB",
+    "game": "Louisville @ Ole Miss",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 46.5,
+    "lineSrc": "file",
+    "proj": 4.8,
+    "lean": "under",
+    "actual": 100.0,
+    "result": "loss"
+   },
+   {
+    "player": "Kewan Lacy",
+    "team": "Ole Miss",
+    "pos": "RB",
+    "game": "Louisville @ Ole Miss",
+    "cat": "rushing",
+    "market": "rush_yds",
+    "line": 90.5,
+    "lineSrc": "file",
+    "proj": 110.4,
+    "lean": null,
+    "actual": 61.0,
+    "result": null
+   },
+   {
+    "player": "Kewan Lacy",
+    "team": "Ole Miss",
+    "pos": "RB",
+    "game": "Louisville @ Ole Miss",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 74.4,
+    "lineSrc": "file",
+    "proj": 78.8,
+    "lean": "over",
+    "actual": 100.0,
+    "result": "win"
+   },
+   {
+    "player": "Makhi Frazier",
+    "team": "Ole Miss",
+    "pos": "RB",
+    "game": "Louisville @ Ole Miss",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 37.7,
+    "lineSrc": "file",
+    "proj": 26.6,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Joshua Dye",
+    "team": "Ole Miss",
+    "pos": "RB",
+    "game": "Louisville @ Ole Miss",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 37.7,
+    "lineSrc": "file",
+    "proj": 0.0,
+    "lean": "under",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Caleb Odom",
+    "team": "Ole Miss",
+    "pos": "WR",
+    "game": "Louisville @ Ole Miss",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 21.3,
+    "lineSrc": "file",
+    "proj": 13.9,
+    "lean": "under",
+    "actual": 100.0,
+    "result": "loss"
+   },
+   {
+    "player": "Marquise Davis",
+    "team": "Louisville",
+    "pos": "RB",
+    "game": "Louisville @ Ole Miss",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 19.0,
+    "lineSrc": "file",
+    "proj": 59.9,
+    "lean": "over",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Caleb Cunningham",
+    "team": "Ole Miss",
+    "pos": "WR",
+    "game": "Louisville @ Ole Miss",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 18.2,
+    "lineSrc": "file",
+    "proj": 0.0,
+    "lean": "under",
+    "actual": null,
+    "result": null
+   },
+   {
+    "player": "Jaleel Skinner",
+    "team": "Louisville",
+    "pos": "WR",
+    "game": "Louisville @ Ole Miss",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 18.2,
+    "lineSrc": "file",
+    "proj": 9.6,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Michael Smith",
+    "team": "Ole Miss",
+    "pos": "WR",
+    "game": "Louisville @ Ole Miss",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 17.9,
+    "lineSrc": "file",
+    "proj": 11.9,
+    "lean": "under",
+    "actual": 0.0,
+    "result": "win"
+   },
+   {
+    "player": "Horatio Fields",
+    "team": "Ole Miss",
+    "pos": "WR",
+    "game": "Louisville @ Ole Miss",
+    "cat": "td",
+    "market": "anytime_td",
+    "line": 14.3,
+    "lineSrc": "file",
+    "proj": 27.6,
+    "lean": "over",
+    "actual": 0.0,
+    "result": "loss"
+   },
+   {
+    "player": "Kewan Lacy",
+    "team": "Ole Miss",
+    "pos": "RB",
+    "game": "Louisville @ Ole Miss",
+    "cat": "receiving",
+    "market": "rec_yds",
+    "line": 14.5,
+    "lineSrc": "file",
+    "proj": 10.0,
+    "lean": "under",
+    "actual": 19.0,
+    "result": "loss"
+   },
+   {
+    "player": "Trinidad Chambliss",
+    "team": "Ole Miss",
+    "pos": "QB",
+    "game": "Louisville @ Ole Miss",
+    "cat": "rushing",
+    "market": "rush_yds",
+    "line": 26.5,
+    "lineSrc": "file",
+    "proj": 26.8,
+    "lean": "over",
+    "actual": 60.0,
+    "result": "win"
+   },
+   {
+    "player": "Lincoln Kienholz",
+    "team": "Louisville",
+    "pos": "RB",
+    "game": "Louisville @ Ole Miss",
+    "cat": "rushing",
+    "market": "rush_yds",
+    "line": 25.5,
+    "lineSrc": "file",
+    "proj": 13.3,
+    "lean": "under",
+    "actual": 69.0,
     "result": "loss"
    },
    {
@@ -141275,468 +141737,6 @@ export const REPORT_CARDS: ReportCard[] = [
     "lean": null,
     "actual": -6.0,
     "result": null
-   },
-   {
-    "player": "Treyshun Hurry",
-    "team": "Louisville",
-    "pos": "WR",
-    "game": "Louisville @ Ole Miss",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 28.5,
-    "lineSrc": "file",
-    "proj": 34.0,
-    "lean": null,
-    "actual": 67.0,
-    "result": null
-   },
-   {
-    "player": "Treyshun Hurry",
-    "team": "Louisville",
-    "pos": "WR",
-    "game": "Louisville @ Ole Miss",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 22.7,
-    "lineSrc": "file",
-    "proj": 19.6,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Lawayne McCoy",
-    "team": "Louisville",
-    "pos": "WR",
-    "game": "Louisville @ Ole Miss",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 37.5,
-    "lineSrc": "file",
-    "proj": 48.4,
-    "lean": null,
-    "actual": 62.0,
-    "result": null
-   },
-   {
-    "player": "Lawayne McCoy",
-    "team": "Louisville",
-    "pos": "WR",
-    "game": "Louisville @ Ole Miss",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 26.3,
-    "lineSrc": "file",
-    "proj": 22.2,
-    "lean": "under",
-    "actual": 100.0,
-    "result": "loss"
-   },
-   {
-    "player": "Brody Foley",
-    "team": "Louisville",
-    "pos": "TE",
-    "game": "Louisville @ Ole Miss",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 18.5,
-    "lineSrc": "file",
-    "proj": 57.0,
-    "lean": "over",
-    "actual": 3.0,
-    "result": "loss"
-   },
-   {
-    "player": "Brody Foley",
-    "team": "Louisville",
-    "pos": "TE",
-    "game": "Louisville @ Ole Miss",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 23.1,
-    "lineSrc": "file",
-    "proj": 43.3,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "Lincoln Kienholz",
-    "team": "Louisville",
-    "pos": "QB",
-    "game": "Louisville @ Ole Miss",
-    "cat": "passing",
-    "market": "pass_yds",
-    "line": 211.5,
-    "lineSrc": "file",
-    "proj": 252.9,
-    "lean": null,
-    "actual": 307.0,
-    "result": null
-   },
-   {
-    "player": "Lincoln Kienholz",
-    "team": "Louisville",
-    "pos": "QB",
-    "game": "Louisville @ Ole Miss",
-    "cat": "passing",
-    "market": "pass_tds",
-    "line": 1.5,
-    "lineSrc": "file",
-    "proj": 1.5,
-    "lean": null,
-    "actual": 2.0,
-    "result": null
-   },
-   {
-    "player": "Lincoln Kienholz",
-    "team": "Louisville",
-    "pos": "QB",
-    "game": "Louisville @ Ole Miss",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 31.7,
-    "lineSrc": "file",
-    "proj": 16.9,
-    "lean": "under",
-    "actual": 100.0,
-    "result": "loss"
-   },
-   {
-    "player": "Isaac Brown",
-    "team": "Louisville",
-    "pos": "RB",
-    "game": "Louisville @ Ole Miss",
-    "cat": "rushing",
-    "market": "rush_yds",
-    "line": 69.5,
-    "lineSrc": "file",
-    "proj": 86.7,
-    "lean": "over",
-    "actual": 36.0,
-    "result": "loss"
-   },
-   {
-    "player": "Isaac Brown",
-    "team": "Louisville",
-    "pos": "RB",
-    "game": "Louisville @ Ole Miss",
-    "cat": "receptions",
-    "market": "receptions",
-    "line": 1.5,
-    "lineSrc": "file",
-    "proj": 3.6,
-    "lean": "over",
-    "actual": 3.0,
-    "result": "win"
-   },
-   {
-    "player": "Isaac Brown",
-    "team": "Louisville",
-    "pos": "RB",
-    "game": "Louisville @ Ole Miss",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 57.3,
-    "lineSrc": "file",
-    "proj": 56.4,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Keyjuan Brown",
-    "team": "Louisville",
-    "pos": "RB",
-    "game": "Louisville @ Ole Miss",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 50.0,
-    "lineSrc": "file",
-    "proj": 46.3,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Deuce Alexander",
-    "team": "Ole Miss",
-    "pos": "WR",
-    "game": "Louisville @ Ole Miss",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 57.5,
-    "lineSrc": "file",
-    "proj": 64.6,
-    "lean": "under",
-    "actual": 159.0,
-    "result": "loss"
-   },
-   {
-    "player": "Deuce Alexander",
-    "team": "Ole Miss",
-    "pos": "WR",
-    "game": "Louisville @ Ole Miss",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 41.7,
-    "lineSrc": "file",
-    "proj": 21.2,
-    "lean": "under",
-    "actual": 100.0,
-    "result": "loss"
-   },
-   {
-    "player": "Darrell Gill Jr.",
-    "team": "Ole Miss",
-    "pos": "WR",
-    "game": "Louisville @ Ole Miss",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 37.2,
-    "lineSrc": "file",
-    "proj": 24.5,
-    "lean": "under",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Luke Hasz",
-    "team": "Ole Miss",
-    "pos": "TE",
-    "game": "Louisville @ Ole Miss",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 29.9,
-    "lineSrc": "file",
-    "proj": 28.4,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Trinidad Chambliss",
-    "team": "Ole Miss",
-    "pos": "QB",
-    "game": "Louisville @ Ole Miss",
-    "cat": "passing",
-    "market": "pass_yds",
-    "line": 272.5,
-    "lineSrc": "file",
-    "proj": 279.9,
-    "lean": "over",
-    "actual": 336.0,
-    "result": "win"
-   },
-   {
-    "player": "Trinidad Chambliss",
-    "team": "Ole Miss",
-    "pos": "QB",
-    "game": "Louisville @ Ole Miss",
-    "cat": "passing",
-    "market": "pass_tds",
-    "line": 1.5,
-    "lineSrc": "file",
-    "proj": 1.6,
-    "lean": null,
-    "actual": 3.0,
-    "result": null
-   },
-   {
-    "player": "Trinidad Chambliss",
-    "team": "Ole Miss",
-    "pos": "QB",
-    "game": "Louisville @ Ole Miss",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 46.5,
-    "lineSrc": "file",
-    "proj": 4.8,
-    "lean": "under",
-    "actual": 100.0,
-    "result": "loss"
-   },
-   {
-    "player": "Kewan Lacy",
-    "team": "Ole Miss",
-    "pos": "RB",
-    "game": "Louisville @ Ole Miss",
-    "cat": "rushing",
-    "market": "rush_yds",
-    "line": 90.5,
-    "lineSrc": "file",
-    "proj": 110.4,
-    "lean": null,
-    "actual": 61.0,
-    "result": null
-   },
-   {
-    "player": "Kewan Lacy",
-    "team": "Ole Miss",
-    "pos": "RB",
-    "game": "Louisville @ Ole Miss",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 74.4,
-    "lineSrc": "file",
-    "proj": 78.8,
-    "lean": "over",
-    "actual": 100.0,
-    "result": "win"
-   },
-   {
-    "player": "Makhi Frazier",
-    "team": "Ole Miss",
-    "pos": "RB",
-    "game": "Louisville @ Ole Miss",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 37.7,
-    "lineSrc": "file",
-    "proj": 26.6,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Joshua Dye",
-    "team": "Ole Miss",
-    "pos": "RB",
-    "game": "Louisville @ Ole Miss",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 37.7,
-    "lineSrc": "file",
-    "proj": 0.0,
-    "lean": "under",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Caleb Odom",
-    "team": "Ole Miss",
-    "pos": "WR",
-    "game": "Louisville @ Ole Miss",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 21.3,
-    "lineSrc": "file",
-    "proj": 13.9,
-    "lean": "under",
-    "actual": 100.0,
-    "result": "loss"
-   },
-   {
-    "player": "Marquise Davis",
-    "team": "Louisville",
-    "pos": "RB",
-    "game": "Louisville @ Ole Miss",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 19.0,
-    "lineSrc": "file",
-    "proj": 59.9,
-    "lean": "over",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Caleb Cunningham",
-    "team": "Ole Miss",
-    "pos": "WR",
-    "game": "Louisville @ Ole Miss",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 18.2,
-    "lineSrc": "file",
-    "proj": 0.0,
-    "lean": "under",
-    "actual": null,
-    "result": null
-   },
-   {
-    "player": "Jaleel Skinner",
-    "team": "Louisville",
-    "pos": "WR",
-    "game": "Louisville @ Ole Miss",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 18.2,
-    "lineSrc": "file",
-    "proj": 9.6,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Michael Smith",
-    "team": "Ole Miss",
-    "pos": "WR",
-    "game": "Louisville @ Ole Miss",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 17.9,
-    "lineSrc": "file",
-    "proj": 11.9,
-    "lean": "under",
-    "actual": 0.0,
-    "result": "win"
-   },
-   {
-    "player": "Horatio Fields",
-    "team": "Ole Miss",
-    "pos": "WR",
-    "game": "Louisville @ Ole Miss",
-    "cat": "td",
-    "market": "anytime_td",
-    "line": 14.3,
-    "lineSrc": "file",
-    "proj": 27.6,
-    "lean": "over",
-    "actual": 0.0,
-    "result": "loss"
-   },
-   {
-    "player": "Kewan Lacy",
-    "team": "Ole Miss",
-    "pos": "RB",
-    "game": "Louisville @ Ole Miss",
-    "cat": "receiving",
-    "market": "rec_yds",
-    "line": 14.5,
-    "lineSrc": "file",
-    "proj": 10.0,
-    "lean": "under",
-    "actual": 19.0,
-    "result": "loss"
-   },
-   {
-    "player": "Trinidad Chambliss",
-    "team": "Ole Miss",
-    "pos": "QB",
-    "game": "Louisville @ Ole Miss",
-    "cat": "rushing",
-    "market": "rush_yds",
-    "line": 26.5,
-    "lineSrc": "file",
-    "proj": 26.8,
-    "lean": "over",
-    "actual": 60.0,
-    "result": "win"
-   },
-   {
-    "player": "Lincoln Kienholz",
-    "team": "Louisville",
-    "pos": "RB",
-    "game": "Louisville @ Ole Miss",
-    "cat": "rushing",
-    "market": "rush_yds",
-    "line": 25.5,
-    "lineSrc": "file",
-    "proj": 13.3,
-    "lean": "under",
-    "actual": 69.0,
-    "result": "loss"
    },
    {
     "player": "Jalen Cooper",

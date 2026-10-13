@@ -314,13 +314,30 @@ _SNAPS = {}
 
 def nfl_snap_shares(season, week):
     """{norm(player): offense_pct} for the week, and {norm(player): mean offense_pct} for the
-    prior season. Empty when the nflverse snap files are not on disk."""
+    prior season.
+
+    🚨 BOTH FILES ARE REQUIRED, and a missing one is fatal rather than empty. nfl_void() returns
+    False for any player it cannot find a snap share for, so with no snaps on disk NOTHING is ever
+    voided and every injured starter's prop is graded instead. That does not fail loudly -- it
+    produces a complete, plausible-looking report card in which Kyler Murray's 0 passing TDs after
+    leaving in the first quarter scores as a WIN for the under. Regenerating week 1 on a machine
+    without these files silently converted all 18 of its correctly-voided rows into wins and
+    losses, and the only reason it was caught was a diff against the previously published card.
+    This file feeds the published track record, which is the product's trust claim, so it refuses
+    to emit a card it cannot grade correctly."""
     if (season, week) in _SNAPS:
         return _SNAPS[(season, week)]
     import pandas as pd
     cur, prior = {}, {}
     p_cur = os.path.join(ROOT, "data", f"snaps_{season}.csv")
     p_pri = os.path.join(ROOT, "data", f"snaps_{season - 1}.csv")
+    missing = [p for p in (p_cur, p_pri) if not os.path.exists(p)]
+    if missing:
+        raise SystemExit(
+            "ERROR: snap-share file(s) missing, so injured-starter props cannot be voided and the\n"
+            "card would grade them as wins and losses:\n"
+            + "".join(f"  {p}\n" for p in missing)
+            + "Fetch the nflverse snap counts for both seasons before regenerating.")
     if os.path.exists(p_cur):
         d = pd.read_csv(p_cur, low_memory=False)
         d = d[(d.week == week) & (d.game_type == "REG")]
