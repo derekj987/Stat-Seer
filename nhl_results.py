@@ -194,6 +194,16 @@ def write(rows, env, batch=500):
     return written
 
 
+def current_season(today=None):
+    """The season in progress, by start year: 2024 means 2024-25.
+
+    The NHL opens in early October and the regular season ends mid-April, so anything from
+    August onward belongs to the season starting that year. August rather than October gives
+    preseason runs the right answer instead of collecting last season a second time."""
+    today = today or _dt.datetime.now(_dt.timezone.utc).date()
+    return today.year if today.month >= 8 else today.year - 1
+
+
 def parse_seasons(spec):
     out = set()
     for part in str(spec).split(","):
@@ -234,6 +244,8 @@ def main(argv=None):
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--season", type=int, help="one season, by start year (2024 = 2024-25)")
     g.add_argument("--seasons", help="range or list, e.g. 2021-2024 or 2021,2023")
+    g.add_argument("--current", action="store_true",
+                   help="the season in progress, inferred from today's date (for the cron)")
     ap.add_argument("--playoffs", action="store_true",
                     help="include playoff games (gameType 3). Off by default -- a different "
                          "scoring regime, and playoff OT has no shootout.")
@@ -243,7 +255,12 @@ def main(argv=None):
 
     oc.ensure_ssl_certs()
     env = oc.load_env()
-    seasons = [args.season] if args.season else parse_seasons(args.seasons)
+    if args.current:
+        seasons = [current_season()]
+    elif args.season:
+        seasons = [args.season]
+    else:
+        seasons = parse_seasons(args.seasons)
     types = {2, 3} if args.playoffs else {2}
 
     print(f"NHL results -- season(s) {', '.join(str(s) for s in seasons)}, "

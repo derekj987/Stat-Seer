@@ -1379,6 +1379,8 @@ already **59.1%** odd because the ties have been taken out of it.
 
 **Stable in every season** — 67.8%, 69.0%, 68.3%, 65.2%, 70.8%. Not a sampling artefact.
 
+⚠️ **The season got longer in 2026-27.** `nhl_results` holds 1,344 scheduled games for season 2026 against 1,312 for each of the five before it — still 32 teams, but **84 games each, not 82** (verified from the table: every club has 84). Nothing in the code assumes 1,312, but the "five full 82-game seasons" framing above describes 2021-25 only, and any future per-season rate or sample claim has to use 84. Two extra games a club is also two more chances at an OT/SO goal, so the odd/even split should be re-measured once 2026-27 is complete rather than assumed to carry over.
+
 **What it costs to ignore.** A fitted Poisson (λ = 6.242) against the empirical distribution:
 
 | total | actual | Poisson | error |
