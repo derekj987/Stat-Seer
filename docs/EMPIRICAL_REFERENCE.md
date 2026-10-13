@@ -1525,3 +1525,60 @@ A JOIN BUG WORTH REMEMBERING, because it is the third time this class has bitten
 odds feed's commence_time is UTC and the NHL's gameDate is local, so a 10pm ET game is *tomorrow*
 in UTC. Keying on the UTC date alone matched 1,261 of 3,987 events — it silently discarded most of
 the Western conference. With neighbouring dates tried it matches 3,945 of 3,964.
+
+### §15. NHL shots and saves — persistence measured, model built, expectations set (2026-10-13)
+
+**§15a. The hockey version of "volume persists, efficiency doesn't", and it is the strongest this
+project has measured.** Split-half within player-season, Spearman-Brown to full length, 239,197
+skater games and 13,291 goalie starts:
+
+| | split-half r | full-season r |
+|---|---|---|
+| skater time on ice | 0.989 | **0.995** |
+| **skater shots on goal** | 0.902 | **0.949** |
+| skater shots per 60 | 0.829 | 0.907 |
+| skater points | 0.846 | 0.917 |
+| skater goals | 0.743 | 0.853 |
+| skater shooting % | 0.391 | **0.563** |
+| **goalie shots against** | 0.675 | **0.806** |
+| goalie saves | 0.627 | 0.770 |
+| goalie save % | 0.181 | **0.307** |
+
+NFL comparison: carries 0.678, target share 0.623, yards-per-carry 0.058. **Shots on goal at 0.949
+is more persistent than any NFL volume metric.** Not an artefact of the games threshold — r runs
+0.939 at 10 games to 0.956 at 60.
+
+**§15b. And that is exactly why a shots model adds almost nothing.** Trained on 2021-22/22-23/23-24
+/26-27, scored on 2024-25 and 2025-26, prior games only, walking forward:
+
+| target | held-out n | season-mean MAE | model MAE | gain |
+|---|---|---|---|---|
+| skater shots on goal | 85,707 | 1.0400 | 1.0379 | **+0.20%** |
+| goalie shots against | 4,413 | 5.6117 | 5.6140 | **−0.04%** |
+| goalie saves (direct) | 4,413 | 5.6038 | 5.6600 | **−1.00%** |
+
+**A player's own season-to-date mean is the projection.** The fitter picked a 35-game half-life —
+nearly flat weighting — which is it saying the same thing: at r = 0.949 there is no recency
+structure left to exploit. Beating persistence was the bar, and on shots nothing does.
+
+**§15c. The decomposition DOES work for saves, and the optimal shrink is infinite.** Saves
+projected as `projected shots against x save%`, varying how hard the save% is pulled to league:
+
+| save% shrink (shots) | held-out MAE |
+|---|---|
+| 50 | 5.5970 |
+| 400 | 5.5866 |
+| 2,000 | 5.5768 |
+| **league only** | **5.5708** |
+
+Monotone: every step toward the league mean improves it, and the best model **ignores the goalie's
+own save percentage entirely**. That beats the direct projection by +1.58% and the season-mean
+baseline by +0.59%. It is the cleanest confirmation of the project's oldest rule yet — efficiency at
+r = 0.307 is not worth conditioning on, so project the volume and multiply by the league baseline.
+
+**🚨 WHAT THIS IS NOT. Every number above is MAE against the ACTUAL result, not against the book's
+line.** Beating a naive baseline is not beating a market, and this project has already measured that
+its NFL and NCAAF prop projections do NOT beat the closing line (~50% on 6,457 props). NHL shots
+props have been captured since 2026-10-09 and saves since 2026-10-13, so the line comparison cannot
+be run for months. Expect it to come back priced; publish this as a line-blind read, never as an
+edge claim, until that test exists.
