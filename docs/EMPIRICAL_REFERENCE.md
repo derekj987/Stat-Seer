@@ -1470,3 +1470,58 @@ rest-fatigue term in an NHL model on intuition.** The obvious confound is select
 starts its BACKUP on the second night, so "back-to-back" is partly "a different goalie" rather than
 "the same goalie, tired" — and the right test therefore conditions on the GOALIE, not on the date.
 Noted here so the naive version is not shipped as a feature.
+
+### §14d. The starting goalie is PRICED — it does not beat the NHL close (2026-10-13)
+
+The obvious hockey input, tested at the project's standard bar. **3,241 games**, four backfilled
+seasons of closing moneylines joined to who actually started.
+
+**Mechanism stated in advance:** a goalie faces ~30 shots, so a one-point save-percentage gap
+between the starters is worth ~0.3 goals against a ~2.6-goal margin SD. Starters are announced in
+the morning, hours before the close. So either the market has already moved on it, or a cheap
+observable beats the close.
+
+**No look-ahead:** a starter's quality is his save% over games STRICTLY BEFORE this one, shrunk
+toward the league mean by 500 shots, and a game is skipped unless both starters have 200+ prior
+shots. Using season or career numbers leaks the outcome and is the easiest way to fake an edge here.
+
+**TEST 1 — does the goalie gap explain the market's error?**
+
+    slope  +0.0157 win-prob per save% point    SE 0.0087    t = +1.81
+
+Not significant. A market that fully prices the starter gives zero, and this is within noise of it.
+
+**TEST 2 — bet the better goalie, graded at the closing price.**
+
+| split | n | win% | break-even | edge | ROI | SE | t |
+|---|---|---|---|---|---|---|---|
+| **all** | **3,241** | 56.6% | 57.1% | **−0.5** | **+0.15%** | 2.60 | **+0.06** |
+| 2021-22 | 521 | 59.5% | 56.6% | +2.9 | +15.94% | 13.40 | +1.19 |
+| 2022-23 | 782 | 55.9% | 57.3% | −1.4 | −3.66% | 3.25 | −1.13 |
+| 2023-24 | 819 | 55.3% | 58.5% | −3.2 | −6.92% | 3.04 | −2.28 |
+| 2024-25 | 1,105 | 56.9% | 56.2% | +0.7 | +0.87% | 2.79 | +0.31 |
+
+**+0.15% ROI with a standard error of 2.60 is zero.** The per-season swing from +15.9% to −6.9%,
+with every |t| under 2.3, is what noise looks like. Betting the better goalie wins 56.6% of the
+time, which sounds like a lot until you notice the prices imply 57.1% — you are paying for the
+goalie you are backing.
+
+**🚨 ROI WITHOUT A STANDARD ERROR IS NOT A RESULT.** A unit moneyline bet has a payout SD near 1,
+so even 3,000 bets leave an SE around 2.6 points — larger than almost any "edge" anyone quotes. The
+first cut of this test printed +1.22% and no error bar, and that number is indistinguishable from
+the +0.15% it became when a join bug was fixed.
+
+**WHAT THIS DOES AND DOES NOT SAY.** It says the starter is in the CLOSING line, which is the bar
+this project holds everything to. It does NOT test whether the line MOVES on the announcement —
+that is a CLV question needing intraday odds, and the backfilled archive holds one snapshot per
+event, taken near puck drop. So "can you beat the opener by knowing the goalie first" is still open
+and is a different, harder data problem.
+
+**Consequence:** goalie identity is Context for the NHL, not a model feature, and NHL stays
+Value-Finder-only. The goalie table keeps its value for the places the closing line is not the
+benchmark — shots and saves props, where a goalie's workload is the quantity being priced.
+
+A JOIN BUG WORTH REMEMBERING, because it is the third time this class has bitten in one week: the
+odds feed's commence_time is UTC and the NHL's gameDate is local, so a 10pm ET game is *tomorrow*
+in UTC. Keying on the UTC date alone matched 1,261 of 3,987 events — it silently discarded most of
+the Western conference. With neighbouring dates tried it matches 3,945 of 3,964.
