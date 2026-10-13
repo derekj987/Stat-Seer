@@ -48,7 +48,17 @@ import odds_client as oc  # noqa: E402
 
 SPORT = "icehockey_nhl"
 MARKETS = ["player_goal_scorer_anytime", "player_shots_on_goal",
-           "player_points", "player_assists"]
+           "player_points", "player_assists",
+           # GOALIE SAVES, added 2026-10-13. Thinner than the skater markets (4 books rather than
+           # 8 on the probe) but it is the one NHL prop the project's own findings point at: saves
+           # are SHOTS AGAINST times a save percentage, and shots against is volume. Volume
+           # persists, efficiency does not — so of everything the feed offers this is the market
+           # whose structure most resembles the signals that have worked elsewhere here.
+           #
+           # It costs a 5th credit per event per sweep (cost is markets x regions, never per game).
+           # Added the day it was noticed because prop history cannot be backfilled: the model can
+           # be built later from a season of captures and cannot be built later from nothing.
+           "player_total_saves"]
 REGIONS = "us"
 DB = os.path.join(ROOT, "data", "nhl.db")
 

@@ -17,15 +17,24 @@ answer "who is starting tonight", which is not in this feed at all and needs a t
 That distinction matters for planning: the historical record here has no deadline, while the
 pre-game announcement is the perishable half.
 
-🚨 THE STARTER IS NOT THE FIRST ONE LISTED, AND NOT THE ONE WITH THE MOST ICE TIME. There is no
-`starter` flag in the boxscore. Both obvious heuristics were measured on regular-season games where
-both goalies played, and both were coin flips -- boxscore order 3/6, max TOI 3/6. Max TOI is
-actively wrong whenever a starter is pulled early, which is the single case that most matters,
-because that is a goalie who was announced, started, and got yanked.
+🚨 THE STARTER IS NOT THE FIRST ONE LISTED, AND NOT THE ONE WITH THE MOST ICE TIME. Measured on
+regular-season sides where both goalies played, both obvious heuristics are coin flips -- boxscore
+order 3/6, and max TOI wrong 79 of 155 times (51%). Max TOI is actively wrong whenever a starter is
+pulled early, which is the case that matters most: a goalie who was announced, started, and got
+yanked.
 
-The reliable answer is in the play-by-play: the goalie in net for that team's first event. That is
-one extra request, so it is only made when BOTH goalies have ice time -- about 18% of games. When
-one goalie played the whole way there is nothing to disambiguate.
+This resolves it from the play-by-play instead -- the goalie in net for that team's first event --
+which is one extra request, made only when BOTH goalies have ice time (5.5% of sides).
+
+CORRECTION, and it is worth stating because the first version of this file asserted the opposite:
+THE BOXSCORE DOES CARRY A `starter` BOOLEAN on each goalie. I claimed it did not. Cross-checked
+afterwards across 14,115 goalie rows, the flag and the play-by-play answer agree on 14,109 --
+99.96%, and on 1,645 of 1,651 rows where both goalies played. So the flag would have been the
+simpler route and the data here is right either way.
+
+The play-by-play path is kept because it also covers the residue: of the 3 game-sides that differ,
+one (2026020087) has `starter` false on BOTH goalies, so the flag cannot answer it at all. Trust
+the flag first if this is ever rewritten, and fall back to the play-by-play where it is absent.
 
 Preseason (gameType 1) is EXCLUDED. Clubs split those by plan rather than by who is better, so
 "the starter" is not a meaningful label there and including them would poison any rest/workload
