@@ -1582,3 +1582,28 @@ its NFL and NCAAF prop projections do NOT beat the closing line (~50% on 6,457 p
 props have been captured since 2026-10-09 and saves since 2026-10-13, so the line comparison cannot
 be run for months. Expect it to come back priced; publish this as a line-blind read, never as an
 edge claim, until that test exists.
+
+**§15d. Publish a PROBABILITY, not a mean beside a half-point line.** The first cut of the
+/nhl/props model panel printed our projected shots next to the book's line. Measured across the
+live board that made **58% of 262 players read as overs** (median gap +0.11 shots) — a one-way lean
+with no edge behind it, because a mean and a half-point threshold are not the same statistic.
+
+Converting the mean to a median is NOT the fix, and this is §13k confirmed on a far bigger sample.
+Median/mean by band across 227,871 skater games: **1.255, 0.810, 1.156, 0.900, 1.106, 0.934, 0.811,
+0.914** — a sawtooth, not a curve, because the median of a small count snaps to an integer.
+
+What IS comparable to a price is the probability of going over, so that is what the panel publishes.
+Non-parametric, bucketing player-seasons by per-game mean and counting how often a game cleared each
+posted line. Monotone in the mean for every line, thousands of games per cell:
+
+| player's mean | games | P(>1.5) | P(>2.5) | P(>3.5) |
+|---|---|---|---|---|
+| 0.00-1.25 | 78,490 | 0.249 | 0.080 | 0.022 |
+| 1.75-2.25 | 41,487 | 0.578 | 0.320 | 0.149 |
+| 2.75-3.25 | 13,310 | 0.786 | 0.568 | 0.348 |
+| 3.75+ | 3,018 | 0.910 | 0.767 | 0.589 |
+
+**Result on the live board:** our mean P(over) **47.3%** against the market's de-vigged **48.8%**,
+and we read higher than the market on **46.2%** of rows — from a 58% one-way lean to balanced, with
+a 6.6-point mean absolute gap left as the actual disagreement. This is the same reason the football
+boards publish anytime TD as a percentage rather than as a number of touchdowns.

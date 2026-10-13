@@ -5425,3 +5425,44 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
 @media (max-width:560px){
   .upmeter__drivers{grid-template-columns:1fr}
 }
+
+/* FIVE columns on the NHL line-blind model panel. The base .hb-form budget declares 1-4 and sums
+ * to exactly 100% (28/22/16/34), so a fifth column falls outside it and gets no width at all under
+ * table-layout:fixed: measured at a 1024px viewport the table ran to 927px inside a 927px wrapper
+ * and still needed 57px of horizontal scroll, with 13 cells ellipsised and row heights splitting
+ * 40/61 as the long header wrapped.
+ *
+ * This is the third table in this file to hit it (see --psnap and --cards above), so the rule is
+ * worth repeating where it keeps being broken: AFTER ADDING A COLUMN, COUNT THE <th>s AGAINST THE
+ * nth-child RULES. The budget below is 1-5 and sums to 100.
+ *
+ * Player takes the most because it carries a full name plus a club tag; "Chance to go over" takes
+ * 24% because the header is the widest ink in its own column and must not wrap, which is what was
+ * splitting the row heights. */
+.hb-form--nhlmodel th:nth-child(1),.hb-form--nhlmodel td:nth-child(1){width:33%}
+.hb-form--nhlmodel th:nth-child(2),.hb-form--nhlmodel td:nth-child(2){width:14%}
+.hb-form--nhlmodel th:nth-child(3),.hb-form--nhlmodel td:nth-child(3){width:17%}
+.hb-form--nhlmodel th:nth-child(4),.hb-form--nhlmodel td:nth-child(4){width:24%}
+.hb-form--nhlmodel th:nth-child(5),.hb-form--nhlmodel td:nth-child(5){width:12%}
+/* The player cell is the one that can legitimately be long; let it wrap rather than ellipsise,
+ * and keep every other cell on one line so the rows stay the same height. */
+.hb-form--nhlmodel td:nth-child(1){white-space:normal}
+
+/* PHONE: drop the Games column and re-budget the remaining four.
+ *
+ * At 375px the five-column budget leaves the player column ~110px, which is not enough for
+ * "Nathan MacKinnon (COL)" — measured, the names wrapped and the rows split 50/34 with a cell
+ * clipped. Games is the most droppable of the five: it qualifies how much history sits behind the
+ * number rather than carrying the number itself, and it is still there on a wider screen.
+ *
+ * The remaining four are re-declared to sum to 100, because a budget that no longer adds up is the
+ * exact failure the desktop rule above was written for. */
+@media (max-width:560px){
+  .hb-form--nhlmodel th:nth-child(5),.hb-form--nhlmodel td:nth-child(5){display:none}
+  /* 38/16/22/24 — the "Our projection" header needs 65px and 18% gave it 60, so 4 points move
+     from the name column, which measured as having slack (rows were already uniform). */
+  .hb-form--nhlmodel th:nth-child(1),.hb-form--nhlmodel td:nth-child(1){width:38%}
+  .hb-form--nhlmodel th:nth-child(2),.hb-form--nhlmodel td:nth-child(2){width:16%}
+  .hb-form--nhlmodel th:nth-child(3),.hb-form--nhlmodel td:nth-child(3){width:22%}
+  .hb-form--nhlmodel th:nth-child(4),.hb-form--nhlmodel td:nth-child(4){width:24%}
+}

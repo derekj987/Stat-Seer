@@ -5,6 +5,7 @@ import { etToday } from "@/lib/gameDays";
 import { nhlPropBoard, NHL_CATEGORIES, NHL_PROP_LABELS, nhlCategoryByKey, ONE_SIDED } from "@/lib/nhlProps";
 import { US_BOOKS, bookLegend } from "@/lib/bookLabel";
 import { nhlTeamFor } from "@/lib/nhlTeamTag";
+import NhlModelPanel from "./NhlModelPanel";
 import Tip from "../../Tip";
 
 // NHL · Value Finder · Player Props. The same grid the baseball board uses (one row per player,
@@ -109,6 +110,13 @@ export default async function Page({ searchParams }: PageProps<"/nhl/props">) {
       {all.length ? (
         <section className="ncf-sec">
           <CatNav current={cat.key} />
+          {/* The Model panel sits ABOVE the shopping grid on the tabs it has a number for, because
+              the flow this site teaches is Model -> Context -> Value: read our line-blind number
+              first, then go shopping. It renders nothing on the tabs it cannot speak to, which is
+              better than an empty card claiming a projection we do not have. `all` is passed, not
+              the filtered `games`, so the panel is driven by the whole board rather than by which
+              tab happens to be open. */}
+          <NhlModelPanel games={all} />
           {games.length ? (
             <PropsGrid games={games} markets={cat.markets} labels={NHL_PROP_LABELS} {...etToday()} />
           ) : (
