@@ -3,43 +3,49 @@
 // league mean and blended with last season. lib/nhlGame.ts turns two of these into an
 // expected score; helpers belong there, never in this file, which is rewritten on every
 // refresh.
-// 32 teams. League 3.129 goals/game. Home ice +0.130 goals.
+// 32 teams. League 3.069 goals/game. Home ice +0.221 goals.
 
-export interface NhlTeamRating { team: string; attack: number; defence: number }
-export const NHL_LEAGUE_GOALS = 3.129;
-export const NHL_HOME_ICE = 0.130;
+export interface NhlGoalieForm { name: string; starts: number; savePct: number | null }
+export interface NhlTeamRating {
+  team: string; attack: number; defence: number;
+  gfRank: number; gaRank: number;
+  lastGame: string | null;   // this season's most recent game, for days of rest
+  goalies: NhlGoalieForm[];  // who has actually been starting (no projected starter exists)
+}
+export const NHL_LEAGUE_GOALS = 3.069;
+export const NHL_HOME_ICE = 0.221;
 export const NHL_MARGIN_SD = 2.569;
 export const NHL_RATINGS: NhlTeamRating[] = [
-  {"team": "ANA", "attack": 3.231, "defence": 2.981},
-  {"team": "BOS", "attack": 3.444, "defence": 2.675},
-  {"team": "BUF", "attack": 2.905, "defence": 3.444},
-  {"team": "CAR", "attack": 3.555, "defence": 2.698},
-  {"team": "CBJ", "attack": 3.161, "defence": 3.616},
-  {"team": "CGY", "attack": 2.564, "defence": 3.981},
-  {"team": "CHI", "attack": 2.752, "defence": 3.675},
-  {"team": "COL", "attack": 3.981, "defence": 3.148},
-  {"team": "DAL", "attack": 2.648, "defence": 2.481},
-  {"team": "DET", "attack": 2.731, "defence": 3.231},
-  {"team": "EDM", "attack": 3.981, "defence": 3.064},
-  {"team": "FLA", "attack": 2.905, "defence": 2.982},
-  {"team": "LAK", "attack": 2.706, "defence": 3.616},
-  {"team": "MIN", "attack": 3.059, "defence": 2.675},
-  {"team": "MTL", "attack": 3.148, "defence": 3.398},
-  {"team": "NJD", "attack": 2.898, "defence": 3.398},
-  {"team": "NSH", "attack": 2.898, "defence": 3.148},
-  {"team": "NYI", "attack": 3.148, "defence": 2.814},
-  {"team": "NYR", "attack": 3.269, "defence": 2.341},
-  {"team": "OTT", "attack": 3.059, "defence": 2.905},
-  {"team": "PHI", "attack": 2.055, "defence": 3.555},
-  {"team": "PIT", "attack": 3.367, "defence": 3.136},
-  {"team": "SEA", "attack": 3.675, "defence": 2.905},
-  {"team": "SJS", "attack": 2.898, "defence": 3.481},
-  {"team": "STL", "attack": 3.314, "defence": 3.064},
-  {"team": "TBL", "attack": 2.981, "defence": 2.898},
-  {"team": "TOR", "attack": 3.29, "defence": 3.213},
-  {"team": "UTA", "attack": 3.521, "defence": 2.905},
-  {"team": "VAN", "attack": 3.198, "defence": 4.055},
-  {"team": "VGK", "attack": 3.484, "defence": 2.769},
-  {"team": "WPG", "attack": 3.064, "defence": 2.981},
-  {"team": "WSH", "attack": 3.148, "defence": 3.064},
+  {"team": "ANA", "attack": 3.31, "defence": 2.856, "gfRank": 8, "gaRank": 10, "lastGame": "2026-10-10", "goalies": [{"name": "L. Dostal", "starts": 4, "savePct": 0.8842}, {"name": "V. Husso", "starts": 1, "savePct": 0.931}]},
+  {"team": "BOS", "attack": 3.201, "defence": 2.618, "gfRank": 11, "gaRank": 4, "lastGame": "2026-10-10", "goalies": [{"name": "J. Swayman", "starts": 5, "savePct": 0.9323}, {"name": "M. DiPietro", "starts": 1, "savePct": 0.8966}]},
+  {"team": "BUF", "attack": 2.868, "defence": 3.368, "gfRank": 22, "gaRank": 26, "lastGame": "2026-10-12", "goalies": [{"name": "C. Ellis", "starts": 3, "savePct": 0.8644}, {"name": "U. Luukkonen", "starts": 3, "savePct": 0.7818}]},
+  {"team": "CAR", "attack": 3.493, "defence": 2.724, "gfRank": 4, "gaRank": 7, "lastGame": "2026-10-11", "goalies": [{"name": "B. Bussi", "starts": 4, "savePct": 0.871}, {"name": "P. Kochetkov", "starts": 3, "savePct": 0.9123}]},
+  {"team": "CBJ", "attack": 3.141, "defence": 3.241, "gfRank": 14, "gaRank": 24, "lastGame": "2026-10-10", "goalies": [{"name": "J. Greaves", "starts": 3, "savePct": 0.8675}, {"name": "C. Talbot", "starts": 1, "savePct": 0.9091}]},
+  {"team": "CGY", "attack": 2.401, "defence": 4.129, "gfRank": 31, "gaRank": 32, "lastGame": "2026-10-10", "goalies": [{"name": "D. Wolf", "starts": 3, "savePct": 0.8161}, {"name": "D. Cooley", "starts": 2, "savePct": 0.8182}]},
+  {"team": "CHI", "attack": 2.534, "defence": 3.701, "gfRank": 29, "gaRank": 30, "lastGame": "2026-10-10", "goalies": [{"name": "S. Knight", "starts": 4, "savePct": 0.8846}, {"name": "A. Soderblom", "starts": 2, "savePct": 0.82}]},
+  {"team": "COL", "attack": 4.038, "defence": 3.219, "gfRank": 1, "gaRank": 21, "lastGame": "2026-10-10", "goalies": [{"name": "M. Blackwood", "starts": 4, "savePct": 0.8673}, {"name": "S. Wedgewood", "starts": 1, "savePct": 0.8966}]},
+  {"team": "DAL", "attack": 2.674, "defence": 2.401, "gfRank": 27, "gaRank": 1, "lastGame": "2026-10-10", "goalies": [{"name": "J. Oettinger", "starts": 4, "savePct": 0.9634}, {"name": "C. DeSmith", "starts": 1, "savePct": 0.9231}]},
+  {"team": "DET", "attack": 2.583, "defence": 3.038, "gfRank": 28, "gaRank": 18, "lastGame": "2026-10-10", "goalies": [{"name": "J. Gibson", "starts": 4, "savePct": 0.8621}, {"name": "D. Tarasov", "starts": 1, "savePct": 1.0}]},
+  {"team": "EDM", "attack": 3.947, "defence": 3.219, "gfRank": 2, "gaRank": 22, "lastGame": "2026-10-10", "goalies": [{"name": "D. Levi", "starts": 3, "savePct": 0.863}, {"name": "T. Jarry", "starts": 2, "savePct": 0.8372}]},
+  {"team": "FLA", "attack": 2.534, "defence": 2.951, "gfRank": 30, "gaRank": 14, "lastGame": "2026-10-12", "goalies": [{"name": "J. Markstrom", "starts": 5, "savePct": 0.9043}, {"name": "A. Schmid", "starts": 1, "savePct": 0.875}]},
+  {"team": "LAK", "attack": 2.841, "defence": 3.541, "gfRank": 25, "gaRank": 28, "lastGame": "2026-10-10", "goalies": [{"name": "D. Kuemper", "starts": 3, "savePct": 0.8681}, {"name": "A. Forsberg", "starts": 1, "savePct": 0.8}]},
+  {"team": "MIN", "attack": 3.038, "defence": 2.492, "gfRank": 17, "gaRank": 3, "lastGame": "2026-10-10", "goalies": [{"name": "J. Wallstedt", "starts": 5, "savePct": 0.9357}]},
+  {"team": "MTL", "attack": 3.038, "defence": 3.401, "gfRank": 18, "gaRank": 27, "lastGame": "2026-10-10", "goalies": [{"name": "J. Dobes", "starts": 3, "savePct": 0.8556}, {"name": "J. Fowler", "starts": 2, "savePct": 0.9375}]},
+  {"team": "NJD", "attack": 2.841, "defence": 3.241, "gfRank": 26, "gaRank": 25, "lastGame": "2026-10-10", "goalies": [{"name": "J. Allen", "starts": 3, "savePct": 0.8961}, {"name": "N. Daws", "starts": 1, "savePct": 0.8125}]},
+  {"team": "NSH", "attack": 2.947, "defence": 2.947, "gfRank": 20, "gaRank": 12, "lastGame": "2026-10-10", "goalies": [{"name": "J. Saros", "starts": 4, "savePct": 0.9154}, {"name": "M. Murray", "starts": 1, "savePct": 0.9}]},
+  {"team": "NYI", "attack": 3.129, "defence": 2.856, "gfRank": 15, "gaRank": 11, "lastGame": "2026-10-10", "goalies": [{"name": "I. Sorokin", "starts": 4, "savePct": 0.9369}, {"name": "S. Varlamov", "starts": 1, "savePct": 0.8636}]},
+  {"team": "NYR", "attack": 3.186, "defence": 2.416, "gfRank": 13, "gaRank": 2, "lastGame": "2026-10-11", "goalies": [{"name": "I. Shesterkin", "starts": 5, "savePct": 0.9266}, {"name": "D. Garand", "starts": 2, "savePct": 0.9535}]},
+  {"team": "OTT", "attack": 3.038, "defence": 2.674, "gfRank": 19, "gaRank": 5, "lastGame": "2026-10-10", "goalies": [{"name": "L. Ullmark", "starts": 4, "savePct": 0.9419}, {"name": "S. Ersson", "starts": 1, "savePct": 0.8857}]},
+  {"team": "PHI", "attack": 2.032, "defence": 3.57, "gfRank": 32, "gaRank": 29, "lastGame": "2026-10-11", "goalies": [{"name": "J. Woll", "starts": 4, "savePct": 0.9143}, {"name": "D. Vladar", "starts": 3, "savePct": 0.8571}]},
+  {"team": "PIT", "attack": 3.368, "defence": 2.951, "gfRank": 6, "gaRank": 15, "lastGame": "2026-10-10", "goalies": [{"name": "A. Silovs", "starts": 4, "savePct": 0.8854}, {"name": "S. Murashov", "starts": 2, "savePct": 0.939}]},
+  {"team": "SEA", "attack": 3.701, "defence": 2.951, "gfRank": 3, "gaRank": 16, "lastGame": "2026-10-11", "goalies": [{"name": "J. Daccord", "starts": 4, "savePct": 0.913}, {"name": "P. Grubauer", "starts": 2, "savePct": 0.9231}]},
+  {"team": "SJS", "attack": 2.856, "defence": 3.219, "gfRank": 23, "gaRank": 23, "lastGame": "2026-10-10", "goalies": [{"name": "Y. Askarov", "starts": 4, "savePct": 0.8598}, {"name": "A. Nedeljkovic", "starts": 1, "savePct": 0.9231}]},
+  {"team": "STL", "attack": 2.947, "defence": 3.129, "gfRank": 21, "gaRank": 20, "lastGame": "2026-10-10", "goalies": [{"name": "J. Hofer", "starts": 3, "savePct": 0.9296}, {"name": "J. Binnington", "starts": 2, "savePct": 0.8475}]},
+  {"team": "TBL", "attack": 3.129, "defence": 2.765, "gfRank": 16, "gaRank": 8, "lastGame": "2026-10-10", "goalies": [{"name": "A. Vasilevskiy", "starts": 4, "savePct": 0.8916}, {"name": "D. Hildeby", "starts": 1, "savePct": 0.9444}]},
+  {"team": "TOR", "attack": 3.201, "defence": 3.034, "gfRank": 12, "gaRank": 17, "lastGame": "2026-10-10", "goalies": [{"name": "S. Bobrovsky", "starts": 4, "savePct": 0.907}, {"name": "A. Stolarz", "starts": 2, "savePct": 0.9038}]},
+  {"team": "UTA", "attack": 3.368, "defence": 2.784, "gfRank": 7, "gaRank": 9, "lastGame": "2026-10-10", "goalies": [{"name": "K. Vejmelka", "starts": 4, "savePct": 0.9247}, {"name": "S. Cossa", "starts": 2, "savePct": 0.8519}]},
+  {"team": "VAN", "attack": 3.263, "defence": 4.109, "gfRank": 9, "gaRank": 31, "lastGame": "2026-10-11", "goalies": [{"name": "K. Lankinen", "starts": 5, "savePct": 0.7891}, {"name": "L. Meril\u00e4inen", "starts": 2, "savePct": 0.931}]},
+  {"team": "VGK", "attack": 3.451, "defence": 2.701, "gfRank": 5, "gaRank": 6, "lastGame": "2026-10-10", "goalies": [{"name": "C. Hart", "starts": 4, "savePct": 0.91}, {"name": "A. Hill", "starts": 2, "savePct": 0.8864}]},
+  {"team": "WPG", "attack": 2.856, "defence": 3.038, "gfRank": 24, "gaRank": 19, "lastGame": "2026-10-09", "goalies": [{"name": "S. Skinner", "starts": 3, "savePct": 0.92}, {"name": "C. Stevenson", "starts": 2, "savePct": 0.8723}]},
+  {"team": "WSH", "attack": 3.219, "defence": 2.947, "gfRank": 10, "gaRank": 13, "lastGame": "2026-10-11", "goalies": [{"name": "L. Thompson", "starts": 4, "savePct": 0.9018}, {"name": "C. Lindgren", "starts": 1, "savePct": 0.931}]},
 ];

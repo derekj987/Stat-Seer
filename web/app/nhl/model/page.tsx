@@ -7,6 +7,7 @@ import { nhlBoard } from "@/lib/nhlBoard";
 import { projectGame, type NhlGameProj } from "@/lib/nhlGame";
 import { marketMargin } from "@/lib/nhlBoard";
 import type { Game } from "@/lib/board";
+import NhlGameCard from "../NhlGameCard";
 
 // NHL · Game Model — our line-blind expected score, margin and total for every game on the board,
 // beside what the market says. The spreads-and-totals half of the section, matching the shape the
@@ -30,9 +31,6 @@ export const metadata = {
     "NHL line-blind game projections — expected score, margin and total for every game, published before puck drop and graded.",
 };
 export const revalidate = 120;
-
-const fmt1 = (n: number) => n.toFixed(1);
-const fmt2 = (n: number) => n.toFixed(2);
 
 export default async function Page() {
   let board: Game[] = [];
@@ -59,11 +57,16 @@ export default async function Page() {
             <span className="tip__lead">Our own expected score for every game, built from each
               team&apos;s scoring and conceding rates and set <b>without looking at the
               market</b>.</span><br /><br />
-            <b>What the columns are.</b> <b>Our score</b> is the expected goals for each side, and
-            the <b>win chance</b> is what that margin is worth once hockey&apos;s scoring
-            distribution is taken into account. <b>Our total</b> is the two added together. The
-            market column is the moneyline expressed in goals, so there is something to compare
-            against — a puck-line column would print ±1.5 down the page and say nothing.<br /><br />
+            <b>What the columns are.</b> <b>Spread</b> and <b>total</b> are the market&apos;s;
+            <b> model spread</b> and <b>model total</b> are ours. The <b>bottom line</b> is the home
+            side&apos;s win chance — what our margin is worth once hockey&apos;s scoring
+            distribution is taken into account. The market spread is the moneyline expressed in
+            goals, so there is something to compare against — a puck-line column would print ±1.5
+            down the page and say nothing.<br /><br />
+            <b>Special considerations</b> under each game are <b>context, not inputs</b>: each
+            club&apos;s scoring and conceding rate with its league rank, the days of rest either
+            side is carrying, and who has actually been starting in goal. None of it is in the
+            projection above it.<br /><br />
             <b>How it has done.</b> Scored on 2,504 games the model never saw: the margin beats a
             no-information baseline by about 2%, the winner is called right 54% of the time, and
             <b> the total is level with simply using the league average</b>. Those are the numbers;
@@ -78,68 +81,41 @@ export default async function Page() {
       <div className="subnavrow"><ModelSubnav active="game" base="nhl" /></div>
 
       {rows.length ? (
-        <section className="ncf-sec">
-          {days.map((grp) => (
-            <div className="propday" key={grp.key}>
-              <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
-              <div className="hb-formwrap">
-                <table className="hb-form hb-form--nhlgame">
-                  <thead>
-                    <tr>
-                      <th className="hb-l">Game</th>
-                      <th>Market Spread</th>
-                      <th>Market O/U</th>
-                      <th>Model Spread</th>
-                      <th>Model O/U</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {grp.items.map(({ g, p, mkt }) => {
-                      // Favourite-and-number, the way every other board on this site writes a
-                      // spread: the favoured club then its line as a negative.
-                      const spread = (m: number, abbr: [string, string]) =>
-                        `${m > 0 ? abbr[0] : abbr[1]} -${Math.abs(m).toFixed(1)}`;
-                      const ab: [string, string] = [p.homeAbbr, p.awayAbbr];
-                      return (
-                      <tr key={g.eventId}>
-                        {/* Full club names on a wide screen, abbreviations on a phone. Measured at
-                            375px the long names wrapped to different line counts and split the row
-                            heights 67/50 — the same long/short swap the books column already uses. */}
-                        <td className="hb-l">
-                          <span className="hb-books__long">{g.away}<span className="at">@</span>{g.home}</span>
-                          <span className="hb-books__short">{p.awayAbbr}<span className="at">@</span>{p.homeAbbr}</span>
-                        </td>
-                        {/* 🚨 THE MARKET SPREAD IS THE MONEYLINE IN GOALS, NOT THE PUCK LINE, and the
-                            footnote says so. A puck-line column would print ±1.5 down the page and
-                            carry no information — the size of a hockey favourite lives in the price,
-                            exactly as the MLB board found with the run line. */}
-                        <td className="hb-num">
-                          {mkt === null ? <span className="bg__none">&mdash;</span> : spread(mkt, ab)}
-                        </td>
-                        <td className="hb-num">
-                          {g.total.consensus === null
-                            ? <span className="bg__none">&mdash;</span>
-                            : fmt1(g.total.consensus)}
-                        </td>
-                        <td className="hb-num">
-                          <b className="hb-model">{spread(p.margin, ab)}</b>
-                          <span className="propq__slot"> {(p.homeWinPct * 100).toFixed(0)}% {p.homeAbbr}</span>
-                        </td>
-                        <td className="hb-num"><b className="hb-model">{fmt2(p.total)}</b></td>
-                      </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-                <p className="lp-cardfoot">
-                  Market Spread is the <b>moneyline expressed in goals</b> &mdash; the puck line is
-                  &plusmn;1.5 on every game, so the size of a favourite lives in the price. Under our
-                  spread is the home side&apos;s win chance.
-                </p>
+        <>
+          {/* The NFL card layout, reused rather than re-implemented: `imptable` wrapping one
+              `impgame` per game, each with its own column header and a considerations block.
+              The scroller wraps the TABLE ONLY and `.imptable` never carries overflow-x itself —
+              that makes every row size to the phone rather than the content, and the model columns
+              then draw outside the card border (audit, content-escapes-card). */}
+          <div className="imp-wrap">
+            <p className="imp-scrollhint" aria-hidden="true">
+              Swipe for totals <span className="imp-scrollhint__a">&rarr;</span>
+            </p>
+            <div className="imp-scroll">
+              <div className="imptable" role="table" aria-label="NHL lines and the model's read">
+                {days.map((grp) => (
+                  <div key={grp.key}>
+                    <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
+                    {grp.items.map(({ g, p, mkt }) => (
+                      <NhlGameCard
+                        key={g.eventId}
+                        g={{ eventId: g.eventId, home: g.home, away: g.away,
+                             commence: g.commence, total: g.total.consensus }}
+                        p={p}
+                        mkt={mkt}
+                      />
+                    ))}
+                  </div>
+                ))}
               </div>
             </div>
-          ))}
-        </section>
+          </div>
+          <p className="lp-cardfoot">
+            Spread is the <b>moneyline expressed in goals</b> &mdash; the puck line is
+            &plusmn;1.5 on every game, so the size of a favourite lives in the price. The bottom
+            line is the home side&apos;s win chance, which is the question our margin can answer.
+          </p>
+        </>
       ) : (
         <p className="foot">
           No NHL games with posted lines in the next two days — the board fills as books price the

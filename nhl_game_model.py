@@ -320,9 +320,38 @@ def main(argv=None):
     teams = sorted(att)
     print(f"{len(teams)} teams rated; league {lg:.3f} goals/game, home ice {hfa:+.3f}")
 
+    # Per-team context for the game cards — the NHL's honest analogue of the NFL card's scoring /
+    # weather / referee / injury block. Hockey is indoors and we capture neither NHL referees nor an
+    # NHL injury report, so those three rows do not exist and are not faked. What DOES exist and is
+    # genuinely NHL-specific: the scoring ranks, days of rest (a back-to-back is the scheduling fact
+    # that most often decides who starts in goal), and who has actually been starting.
+    last_game = {}
+    for s_, d, h, a, hg, ag in games:
+        if s_ != CURRENT_SEASON:
+            continue
+        last_game[h] = max(last_game.get(h, ""), d)
+        last_game[a] = max(last_game.get(a, ""), d)
+
+    goalies = collections.defaultdict(list)
+    try:
+        for team, name, starts, sa, sv in conn.execute(
+                "select team, goalie_name, count(*) n, sum(shots_against), sum(saves)"
+                "  from nhl_goalie_starts where is_starter = 1 and season = ?"
+                "  group by team, goalie_id order by team, n desc", (CURRENT_SEASON,)):
+            if len(goalies[team]) < 3 and name:
+                goalies[team].append({"name": name, "starts": starts,
+                                      "savePct": round(sv / sa, 4) if sa else None})
+    except sqlite3.Error:
+        pass
+
+    # Ranks are 1 = best: most goals scored, fewest allowed.
+    gf_rank = {t: i + 1 for i, t in enumerate(sorted(teams, key=lambda x: -att[x]))}
+    ga_rank = {t: i + 1 for i, t in enumerate(sorted(teams, key=lambda x: dfn[x]))}
     out = []
     for t in teams:
-        out.append({"team": t, "attack": round(att[t], 3), "defence": round(dfn[t], 3)})
+        out.append({"team": t, "attack": round(att[t], 3), "defence": round(dfn[t], 3),
+                    "gfRank": gf_rank[t], "gaRank": ga_rank[t],
+                    "lastGame": last_game.get(t), "goalies": goalies.get(t, [])})
     if args.dry_run:
         for r in sorted(out, key=lambda r: -r["attack"])[:5]:
             print("   ", r)
@@ -337,7 +366,13 @@ def main(argv=None):
         "// refresh.",
         f"// {len(teams)} teams. League {lg:.3f} goals/game. Home ice {hfa:+.3f} goals.",
         "",
-        "export interface NhlTeamRating { team: string; attack: number; defence: number }",
+        "export interface NhlGoalieForm { name: string; starts: number; savePct: number | null }",
+        "export interface NhlTeamRating {",
+        "  team: string; attack: number; defence: number;",
+        "  gfRank: number; gaRank: number;",
+        "  lastGame: string | null;   // this season's most recent game, for days of rest",
+        "  goalies: NhlGoalieForm[];  // who has actually been starting (no projected starter exists)",
+        "}",
         f"export const NHL_LEAGUE_GOALS = {lg:.3f};",
         f"export const NHL_HOME_ICE = {hfa:.3f};",
         f"export const NHL_MARGIN_SD = {MARGIN_SD};",
