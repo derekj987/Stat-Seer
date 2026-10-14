@@ -13,7 +13,7 @@ import { isRealistic } from "@/lib/depthChart";
 import { projLean, leanCentres, hasProjSample, MIN_PROJ_GAMES } from "@/lib/projLean";
 import PropAdd, { type PricedSide } from "./PropAdd";
 import PinButton from "./PinButton";
-import { playerSlot, normName } from "@/lib/playerSlot";
+import { playerSlot, playerTeam, normName } from "@/lib/playerSlot";
 import { weekProps, fanduelLines } from "@/lib/props";
 import { bookLabel } from "@/lib/bookLabel";
 import { cfbWeekProps, cfbFanduelLines } from "@/lib/cfbProps";
@@ -165,24 +165,42 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
     ? projections.filter((p) => p.cat === active.key
         && (base === "nfl" ? isRealistic(p.player) && !isOut(p) : true))
     : [];
-  // NCAAF: every player the MARKET prices is on the board, whether or not the daily projections
-  // export knew about him. The export runs at 13:00 UTC and books post most college props Friday
-  // night and Saturday morning, so on game day the file was a day behind the market — Isaiah
-  // Sategna III, priced at every book in Oklahoma @ Michigan, had no row (19 of the game's 53
-  // priced players did). A posted prop is the market saying a player matters; he appears with
-  // his live book line and no projection until the next export catches up (the NFL rule, applied
-  // at render because the NCAAF slate moves faster than a daily job). Uses the EXISTENCE of the
-  // prop only — never its value — so the board stays line-blind.
-  if (base === "ncaaf" && onProjWeek) {
-    const CAT_MARKETS: Record<string, string[]> = {
-      td: ["anytime_td"], passing: ["pass_yds", "pass_tds"], rushing: ["rush_yds"],
-      receiving: ["rec_yds", "receptions"],
-    };
+  // 🚨 EVERY PLAYER THE MARKET PRICES IS ON THE BOARD, in BOTH sports, whether or not the daily
+  // projections export knew about him. A posted prop is the market saying a player matters; he
+  // appears with his live book line and no projection until the next export catches up. Uses the
+  // EXISTENCE of the prop only — never its value — so the board stays line-blind.
+  //
+  // It was built for NCAAF, where the export runs at 13:00 UTC and books post most college props
+  // Friday night: Isaiah Sategna III was priced at every book and had no row. The NFL was left out
+  // on the reasoning that its slate moves more slowly, and that reasoning was wrong — it only made
+  // the same hole take a day longer to open.
+  //
+  // MEASURED ON 2026 WEEK 6, which is what put this here. The export ran at 01:37 UTC, when the
+  // books had posted yardage props for 7 of the 14 games. Seventeen hours later the market had
+  // priced all 14 and the board still showed the original 7: SEVEN GAMES CARRIED ANYTIME-TD ROWS
+  // AND NOTHING ELSE, and 62 of 424 priced players (15%) had no row at all — including the
+  // SHORTEST anytime-TD price on the slate (TreVeyon Henderson at -105), plus A.J. Brown, Breece
+  // Hall, Lamar Jackson, Jerry Jeudy and Dallas Goedert. None of that is a market gap: every one
+  // of those players was in the capture, and the Passing/Rushing/Receiving/Receptions tabs were
+  // simply empty for half the board.
+  //
+  // No cadence fixes this. Books keep posting all week, so any export schedule has the same hole
+  // somewhere behind it; the only durable answer is to read the market at request time, which the
+  // page already does for the book LINE on every row it shows.
+  if (onProjWeek) {
+    // NFL splits receptions into its own tab; NCAAF carries it inside receiving.
+    const CAT_MARKETS: Record<string, string[]> = base === "ncaaf"
+      ? { td: ["anytime_td"], passing: ["pass_yds", "pass_tds"], rushing: ["rush_yds"],
+          receiving: ["rec_yds", "receptions"] }
+      : { td: ["anytime_td"], passing: ["pass_yds", "pass_tds"], rushing: ["rush_yds"],
+          receiving: ["rec_yds"], receptions: ["receptions"] };
     const wanted = new Set(CAT_MARKETS[active.key] ?? []);
     const have = new Set(rows.map((r) => `${normName(r.player)}|${r.market}`));
-    // The export names games by school ("Oklahoma @ Michigan"); the feed by school + mascot
-    // ("Oklahoma Sooners @ Michigan Wolverines"). Match on the school being a prefix of the
-    // feed name, so a live row lands in the same card as the exported ones.
+    // The NCAAF export names games by school ("Oklahoma @ Michigan"); the feed by school + mascot
+    // ("Oklahoma Sooners @ Michigan Wolverines"). Match on the school being a prefix of the feed
+    // name, so a live row lands in the same card as the exported ones. The NFL needs none of this:
+    // both sides already use the nflverse abbreviation, so the feed's matchup IS the export's game
+    // string — verified row for row ("SEA @ DEN").
     const schoolOf = (feed: string): string => {
       const f = feed.toLowerCase();
       const hit = [...new Set(projections.flatMap((r) => r.game.split(" @ ")))]
@@ -190,21 +208,44 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
         .sort((a, b) => b.length - a.length)[0];
       return hit ?? feed.replace(/\s+\S+$/, "");        // no export game: drop the mascot
     };
+    // 🚨 THE FEED'S MARKET NAME IS NOT OUR MARKET NAME, and stripping the prefix is not a
+    // translation. The books call receiving yards `player_reception_yds`; every internal name in
+    // this project — the projections file, the category map, PROP_LABELS — calls it `rec_yds`.
+    // So the plain strip produced "reception_yds", matched nothing, and the Receiving tab silently
+    // gained no live rows at all while the other four worked. The export has always known this
+    // (MARKET_MAP in player_proj_export.py maps the two names); the view did not. Aliased rather
+    // than renamed so both spellings resolve and neither sport's feed can break it.
+    const FEED_ALIAS: Record<string, string> = { reception_yds: "rec_yds" };
     const seen = new Set<string>();
     for (const pg of priced) for (const m of pg.markets) for (const q of m.quotes) {
-      const market = m.market.replace(/^player_/, "");
+      const raw = m.market.replace(/^player_/, "");
+      const market = FEED_ALIAS[raw] ?? raw;
       if (!wanted.has(market) || (q.side !== "Over" && q.side !== "Yes")) continue;
       // "Michigan Wolverines D/ST" / "... Defense" is a team scoring prop filed under player
       // anytime TD — not a player, and the export skips it for the same reason.
       if (/(D\/ST| Defense)$/i.test(q.player)) continue;
       const k = `${normName(q.player)}|${market}`;
       if (have.has(k) || seen.has(k)) continue;
+      // A player ruled OUT comes OFF the board, and a live row must obey that rule too — otherwise
+      // this path quietly re-admits the players the filter above just removed. The feed does not
+      // say which side he is on, so both of the game's teams are checked: a false match would need
+      // the same name on both rosters of one game.
+      if (base === "nfl") {
+        const n = injuries.get(injuryKey(q.player, pg.home))
+               ?? injuries.get(injuryKey(q.player, pg.away));
+        if (n && SUPPRESSES.has(n.status)) continue;
+      }
       seen.add(k);
       const fdPrice = (q.byBook as Record<string, number> | undefined)?.fanduel ?? q.price;
       const implied = fdPrice > 0 ? 100 / (fdPrice + 100) : -fdPrice / (-fdPrice + 100);
       rows.push({
-        game: `${schoolOf(pg.away)} @ ${schoolOf(pg.home)}`, commence: pg.commence,
-        player: q.player, team: "", pos: "", cat: active.key, market,
+        game: base === "ncaaf" ? `${schoolOf(pg.away)} @ ${schoolOf(pg.home)}` : pg.matchup,
+        commence: pg.commence,
+        player: q.player,
+        // The depth chart knows the NFL roster, so a live row carries its club and slot rather
+        // than an empty tag — which is also what lets the injury pill and the ＋ chip key correctly.
+        team: base === "nfl" ? (playerTeam(q.player, "nfl") ?? "") : "",
+        pos: "", cat: active.key, market,
         book: market === "anytime_td" ? Math.round(implied * 1000) / 10 : q.line,
         proj: null, g: 0, cOver: 0, cG: 0, pOver: 0, pG: 0, hOver: 0, hG: 0, rOver: 0, rG: 0,
         matchup: null,
