@@ -12,9 +12,16 @@ name: capture-cfb-odds
 # Table: ingest/cfb_odds_snapshots.sql (run once in the Supabase SQL editor). Until it exists the
 # writer gets a 4xx and the job fails loudly rather than silently — that is the intended signal.
 
+# 🚨 THE ODD MINUTE IS DELIBERATE — DO NOT "TIDY" IT BACK TO :00. GitHub runs scheduled
+# workflows on a best-effort queue and the top of the hour is its busiest moment, so a cron at
+# minute 0 is both delayed the most and dropped the most. Measured across this repo over several
+# days: jobs scheduled on the hour arrived a median 58-84 minutes late and delivered 34-75% of
+# their declared runs, and */30 delivered 10%. Every schedule here now sits on a distinct off-peak
+# minute, which also stops our own jobs colliding with each other — three used to fire at 14:00.
+# See EMPIRICAL_REFERENCE §17.
 on:
   schedule:
-    - cron: "*/30 * * 8-12,1 *"   # every 30 min, Aug–Jan (season + bowls + playoff)
+    - cron: "11,41 * * 8-12,1 *"   # every 30 min, Aug–Jan (season + bowls + playoff)
   workflow_dispatch: {}
 
 permissions:

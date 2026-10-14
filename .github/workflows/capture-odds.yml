@@ -17,15 +17,22 @@ name: Capture odds
 # This costs NO extra Odds API credits either way -- filter_commence_window is applied after the API
 # response is parsed, so the request is identical; only the number of rows written to Supabase changes.
 
+# 🚨 THE ODD MINUTE IS DELIBERATE — DO NOT "TIDY" IT BACK TO :00. GitHub runs scheduled
+# workflows on a best-effort queue and the top of the hour is its busiest moment, so a cron at
+# minute 0 is both delayed the most and dropped the most. Measured across this repo over several
+# days: jobs scheduled on the hour arrived a median 58-84 minutes late and delivered 34-75% of
+# their declared runs, and */30 delivered 10%. Every schedule here now sits on a distinct off-peak
+# minute, which also stops our own jobs colliding with each other — three used to fire at 14:00.
+# See EMPIRICAL_REFERENCE §17.
 on:
   schedule:
     # Near-term sweep every 3 hours, Aug-Jan: games kicking off within 10 days (14400 min).
     # Establishes lines and, via the closing_lines view, backs up the pre-kickoff capture.
-    - cron: "0 */3 * 8-12,1 *"
+    - cron: "33 */3 * 8-12,1 *"
     # Long-range sweep once daily: the WHOLE season, no window, so opening lines for later weeks are
     # still captured for line-movement/CLV work. Hour 10 deliberately avoids the */3 hours
     # (0,3,6,9,12,15,18,21) so the two never fire together.
-    - cron: "0 10 * 8-12,1 *"
+    - cron: "49 10 * 8-12,1 *"
     # Pre-kickoff sharpener: every 15 min through the game windows, filtered to games within 45 min
     # of kickoff. Two crons because the windows straddle midnight UTC: 1pm ET kicks off at 17:00
     # UTC, so the sweep must START at 16:00 (a window that opened AT 17:00 never saw a 1pm game),
@@ -33,8 +40,8 @@ on:
     # Tue). The old single window (17-23 UTC, Sun/Mon/Thu) covered only the 4pm slate, and week 1
     # of 2026 has zero PRE_KICKOFF rows to show for it. 45 min > the 15-min interval plus GitHub's
     # usual scheduling delay.
-    - cron: "*/15 16-23 * 8-12,1 0,1,4"
-    - cron: "*/15 0-1 * 8-12,1 1,2,5"
+    - cron: "7,22,37,52 16-23 * 8-12,1 0,1,4"
+    - cron: "7,22,37,52 0-1 * 8-12,1 1,2,5"
   workflow_dispatch: {}   # manual "Run workflow" button for testing
 
 concurrency:

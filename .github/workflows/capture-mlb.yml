@@ -22,7 +22,7 @@ name: Capture MLB odds + props
 
 on:
   schedule:
-    - cron: "0 */6 * 3-10 *"   # every 6h, March–October (regular season + playoffs)
+    - cron: "39 */6 * 3-10 *"   # every 6h, March–October (regular season + playoffs)
   workflow_dispatch: {}         # manual "Run workflow"
 
 concurrency:

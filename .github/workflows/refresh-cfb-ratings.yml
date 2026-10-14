@@ -20,7 +20,7 @@ name: Refresh CFB ratings
 
 on:
   schedule:
-    - cron: "0 2,8,14,20 * 8-12,1 *"   # every 6h, Aug-Jan (through the playoff)
+    - cron: "46 2,8,14,20 * 8-12,1 *"   # every 6h, Aug-Jan (through the playoff)
   workflow_dispatch: {}         # manual "Run workflow"
 
 concurrency:

@@ -18,7 +18,7 @@ name: Refresh NHL rosters
 
 on:
   schedule:
-    - cron: "0 11 * 10-12,1-6 *"
+    - cron: "51 11 * 10-12,1-6 *"
   workflow_dispatch: {}
 
 concurrency:

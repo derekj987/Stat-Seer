@@ -6,7 +6,7 @@ name: Refresh CFB weather
 
 on:
   schedule:
-    - cron: "0 11 * 8-12,1 *"   # daily 11:00 UTC (~6-7am ET), Aug-Jan
+    - cron: "43 11 * 8-12,1 *"   # daily 11:00 UTC (~6-7am ET), Aug-Jan
   workflow_dispatch: {}
 
 concurrency:

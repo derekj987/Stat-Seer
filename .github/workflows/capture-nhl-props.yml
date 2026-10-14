@@ -24,9 +24,16 @@ name: Capture NHL props
 # --within-days 2 keeps it to the near-term slate; NHL props do not post further out than that in
 # any useful form. All times UTC.
 
+# 🚨 THE ODD MINUTE IS DELIBERATE — DO NOT "TIDY" IT BACK TO :00. GitHub runs scheduled
+# workflows on a best-effort queue and the top of the hour is its busiest moment, so a cron at
+# minute 0 is both delayed the most and dropped the most. Measured across this repo over several
+# days: jobs scheduled on the hour arrived a median 58-84 minutes late and delivered 34-75% of
+# their declared runs, and */30 delivered 10%. Every schedule here now sits on a distinct off-peak
+# minute, which also stops our own jobs colliding with each other — three used to fire at 14:00.
+# See EMPIRICAL_REFERENCE §17.
 on:
   schedule:
-    - cron: "0 */3 * 10-12,1-6 *"   # every 3 hours, October - June (NHL regular season + playoffs)
+    - cron: "27 */3 * 10-12,1-6 *"   # every 3 hours, October - June (NHL regular season + playoffs)
   workflow_dispatch: {}              # manual "Run workflow" for testing
 
 concurrency:

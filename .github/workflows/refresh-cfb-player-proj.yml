@@ -11,7 +11,7 @@ name: Refresh CFB player projections
 
 on:
   schedule:
-    - cron: "0 1,13 * 8-12,1 *"   # 01:00 + 13:00 UTC, Aug-Jan (season + bowls)
+    - cron: "58 1,13 * 8-12,1 *"   # 01:00 + 13:00 UTC, Aug-Jan (season + bowls)
   workflow_dispatch: {}         # manual "Run workflow"
 
 concurrency:

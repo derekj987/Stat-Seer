@@ -13,8 +13,8 @@ name: Capture referee assignments
 
 on:
   schedule:
-    - cron: "0 14 * 9-12,1-2 *"   # 14:00 UTC (~9-10am ET), Sep-Feb (through the Super Bowl)
-    - cron: "0 22 * 9-12,1-2 *"   # 22:00 UTC (~5-6pm ET) — catches same-day afternoon assignments
+    - cron: "12 14 * 9-12,1-2 *"   # 14:00 UTC (~9-10am ET), Sep-Feb (through the Super Bowl)
+    - cron: "12 22 * 9-12,1-2 *"   # 22:00 UTC (~5-6pm ET) — catches same-day afternoon assignments
   workflow_dispatch: {}
 
 concurrency:

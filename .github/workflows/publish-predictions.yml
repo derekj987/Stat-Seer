@@ -33,7 +33,7 @@ on:
     # Daily at 14:00 UTC (10am ET), Aug-Jan. Deliberately after the 10:00 full-season odds sweep
     # in capture-odds.yml, so the next week's event ids exist before we try to map predictions
     # onto them.
-    - cron: "0 14 * 8-12,1 *"
+    - cron: "21 14 * 8-12,1 *"
   workflow_dispatch:
     inputs:
       week:

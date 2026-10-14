@@ -7,7 +7,7 @@ name: Grade predictions
 
 on:
   schedule:
-    - cron: "0 15 * 9-12,1 *"   # 15:00 UTC (~10am ET) daily, Sep-Jan
+    - cron: "26 15 * 9-12,1 *"   # 15:00 UTC (~10am ET) daily, Sep-Jan
   workflow_dispatch: {}
 
 concurrency:

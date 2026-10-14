@@ -12,13 +12,20 @@ name: Capture props
 # = ~7-8am ET Sunday, so we grab yardage lines the morning they post.
 # All times UTC.
 
+# 🚨 THE ODD MINUTE IS DELIBERATE — DO NOT "TIDY" IT BACK TO :00. GitHub runs scheduled
+# workflows on a best-effort queue and the top of the hour is its busiest moment, so a cron at
+# minute 0 is both delayed the most and dropped the most. Measured across this repo over several
+# days: jobs scheduled on the hour arrived a median 58-84 minutes late and delivered 34-75% of
+# their declared runs, and */30 delivered 10%. Every schedule here now sits on a distinct off-peak
+# minute, which also stops our own jobs colliding with each other — three used to fire at 14:00.
+# See EMPIRICAL_REFERENCE §17.
 on:
   schedule:
     # Every 2 hours (was 6). The player boards read the newest sweep as "the market", so on a
     # Sunday the 1pm lines were the 8am ET capture and the 4pm lines were captured mid-game by the
     # 18:00 UTC run (props_client now skips games in play). ~16 events x 7 markets x 2 regions =
     # ~224 credits per run at the week's peak, well under 1% of the monthly allowance.
-    - cron: "0 */2 * 8-12,1 *"   # every 2 hours, Aug-Jan
+    - cron: "18 */2 * 8-12,1 *"   # every 2 hours, Aug-Jan
   workflow_dispatch: {}
 
 concurrency:

@@ -11,7 +11,7 @@ name: Player projections
 
 on:
   schedule:
-    - cron: "0 13,23 * 8-12,1 *"   # twice daily, Aug-Jan
+    - cron: "56 13,23 * 8-12,1 *"   # twice daily, Aug-Jan
   workflow_dispatch: {}
 
 concurrency:

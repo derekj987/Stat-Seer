@@ -31,7 +31,7 @@ name: Refresh MLB models
 
 on:
   schedule:
-    - cron: "0 15 * 3-10 *"   # daily 11am ET, March–October
+    - cron: "31 15 * 3-10 *"   # daily 11am ET, March–October
   workflow_dispatch: {}        # manual "Run workflow"
 
 concurrency:

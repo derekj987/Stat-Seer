@@ -13,7 +13,7 @@ name: Capture tailgate
 
 on:
   schedule:
-    - cron: "0 14 * 8-12,1 *"   # daily 14:00 UTC (~9-10am ET), Aug-Jan
+    - cron: "16 14 * 8-12,1 *"   # daily 14:00 UTC (~9-10am ET), Aug-Jan
   workflow_dispatch:
     inputs:
       mode:

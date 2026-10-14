@@ -22,7 +22,7 @@ name: Refresh NHL model
 
 on:
   schedule:
-    - cron: "0 10 * 10-12,1-6 *"
+    - cron: "47 10 * 10-12,1-6 *"
   workflow_dispatch: {}
 
 concurrency:

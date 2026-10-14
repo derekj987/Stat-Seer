@@ -10,7 +10,7 @@ name: Capture CFB tailgate
 
 on:
   schedule:
-    - cron: "30 14 * 8-12,1 *"   # daily 14:30 UTC (~9-10am ET), Aug-Jan
+    - cron: "34 14 * 8-12,1 *"   # daily 14:30 UTC (~9-10am ET), Aug-Jan
   workflow_dispatch:
     inputs:
       mode:

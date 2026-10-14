@@ -27,7 +27,7 @@ name: Capture practice reports
 
 on:
   schedule:
-    - cron: "0 13,23 * 9-12,1 *"   # twice daily, EVERY day, Sep-Jan
+    - cron: "52 13,23 * 9-12,1 *"   # twice daily, EVERY day, Sep-Jan
   workflow_dispatch: {}                   # manual "Run workflow" for testing
 
 concurrency:

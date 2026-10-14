@@ -21,7 +21,7 @@ name: Capture CFB preseason priors
 
 on:
   schedule:
-    - cron: "0 13 * 8-10 *"   # daily 13:00 UTC, Aug-Oct (preseason + convergence window)
+    - cron: "9 13 * 8-10 *"   # daily 13:00 UTC, Aug-Oct (preseason + convergence window)
   workflow_dispatch: {}         # manual "Run workflow"
 
 concurrency:

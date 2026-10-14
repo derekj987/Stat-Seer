@@ -20,9 +20,16 @@ name: Capture CFB props
 # Saturday, ~6.5k/day at the peak, well under 1% of the monthly allowance; weekday runs find far
 # fewer priced events and cost accordingly less. All times UTC.
 
+# 🚨 THE ODD MINUTE IS DELIBERATE — DO NOT "TIDY" IT BACK TO :00. GitHub runs scheduled
+# workflows on a best-effort queue and the top of the hour is its busiest moment, so a cron at
+# minute 0 is both delayed the most and dropped the most. Measured across this repo over several
+# days: jobs scheduled on the hour arrived a median 58-84 minutes late and delivered 34-75% of
+# their declared runs, and */30 delivered 10%. Every schedule here now sits on a distinct off-peak
+# minute, which also stops our own jobs colliding with each other — three used to fire at 14:00.
+# See EMPIRICAL_REFERENCE §17.
 on:
   schedule:
-    - cron: "0 */2 * 8-12,1 *"    # every 2 hours, late Aug - Jan (CFB season + bowls)
+    - cron: "23 */2 * 8-12,1 *"    # every 2 hours, late Aug - Jan (CFB season + bowls)
   workflow_dispatch: {}            # manual "Run workflow" for testing
 
 concurrency:

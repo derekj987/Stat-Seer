@@ -7,7 +7,7 @@ name: Game weather
 
 on:
   schedule:
-    - cron: "0 */8 * 8-12,1 *"   # every 8 hours, Aug-Jan
+    - cron: "42 */8 * 8-12,1 *"   # every 8 hours, Aug-Jan
   workflow_dispatch: {}
 
 concurrency:

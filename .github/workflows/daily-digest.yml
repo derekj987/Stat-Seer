@@ -28,7 +28,7 @@ name: Daily digest
 on:
   schedule:
     # Mar-Jan: football is Sep-Jan, baseball Mar-Oct, so the digest spans both seasons.
-    - cron: "30 15 * 1,3-12 *"
+    - cron: "38 15 * 1,3-12 *"
   workflow_dispatch:
     inputs:
       hours:

@@ -1682,3 +1682,43 @@ sitting almost entirely in the level rather than in the ranking.
 O/U — with one hockey-specific note printed under it: **Market Spread is the moneyline expressed in
 goals**, because the puck line is ±1.5 on every game and a column of that would carry no
 information. Same resolution the MLB board reached for the run line (§12d).
+
+---
+
+### §17. Scheduled captures were delivering a third of their runs (2026-10-14)
+
+Noticed while checking why `player_total_saves` had landed in only one sweep: `capture-nhl-props`
+declares every 3 hours and the sweeps were ~8 hours apart. Measured across the repo's scheduled
+workflows, actual runs against declared:
+
+| workflow | declared | expected/day | actual/day | delivered | median delay |
+|---|---|---|---|---|---|
+| capture-nhl-odds | `*/30` | 48 | 4.7 | **10%** | 26 min |
+| capture-props (NFL) | `0 */2` | 12 | 4.1 | 34% | 58 min |
+| capture-cfb-props | `0 */2` | 12 | 4.4 | 36% | 60 min |
+| capture-nhl-props | `0 */3` | 8 | 3.5 | 43% | 61 min |
+| capture-odds | `0 */3` | 8 | 6.0 | 75% | 84 min |
+
+**Two separate causes, and neither is a bug in our code.**
+
+**1. The top of the hour is GitHub's peak.** Scheduled workflows run on a best-effort queue that is
+delayed during high load, and every hour's :00 is the heaviest moment on the platform — our
+on-the-hour jobs arrived a median 58-84 minutes late. **2. High-frequency crons are dropped
+hardest**: `*/30` delivered one run in ten, because `*/30` is `0,30` and both are peak minutes.
+
+**And we were adding to it ourselves.** Three workflows fired at exactly 14:00 and two more at
+15:00, so our own jobs queued behind each other on top of the platform's load.
+
+**Fix: every schedule in the repo now sits on a distinct off-peak minute.** 29 cron lines changed,
+minute field only — hours, months and weekdays untouched. `*/30` became `11,41` and `14,44`; `*/15`
+became `7,22,37,52`; the rest moved to their own minute between :07 and :58. Frequency is unchanged
+everywhere, so nothing is being given up — this only moves *when* within the hour.
+
+🚨 **THIS IS A MITIGATION, NOT A GUARANTEE.** GitHub's scheduler is explicitly best-effort and will
+still drop runs. Re-measure in a week with the same method before believing it worked; if delivery
+is still poor on the perishable captures (props especially, which cannot be backfilled), the next
+step is an external trigger — a scheduler calling the workflow-dispatch API — rather than more cron
+tuning.
+
+The one-line rule for anyone adding a workflow: **never schedule on minute :00**, and pick a minute
+no other workflow in the repo is using.

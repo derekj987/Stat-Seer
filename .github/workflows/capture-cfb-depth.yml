@@ -23,7 +23,7 @@ name: Capture CFB depth chart
 
 on:
   schedule:
-    - cron: "0 16 * 8-12,1 2"     # Tuesdays 16:00 UTC (noon ET), Aug-Jan
+    - cron: "54 16 * 8-12,1 2"     # Tuesdays 16:00 UTC (noon ET), Aug-Jan
   workflow_dispatch:
     inputs:
       backfill_git:
