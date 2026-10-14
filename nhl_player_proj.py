@@ -49,6 +49,14 @@ OUT = os.path.join(ROOT, "web", "lib", "nhlPlayerProjections.ts")
 CURRENT_SEASON = 20262027
 PRIOR_SEASON = 20252026
 PRIOR_K = 8            # games of prior-season rate blended in before a player's own season carries
+# 🚨 THE SAME MINIMUMS GOVERN BOTH PATHS, OR LOCAL AND CI DISAGREE. The frozen static file only
+# carries a baseline for players with this much prior-season history, so a run reading the DB
+# directly must apply the identical cut — otherwise a player with four prior games gets a real
+# baseline locally and the league rate on the runner, and the committed board changes depending on
+# WHERE it was generated. Measured before this was fixed: 34 of 676 projections differed, one by a
+# full shot (2.23 vs 1.13).
+MIN_PRIOR_SKATER = 10
+MIN_PRIOR_GOALIE = 5
 MIN_GAMES = 2          # fewer than this and we publish nothing rather than a guess
 
 
@@ -66,9 +74,25 @@ def main(argv=None):
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--out", default=OUT)
+    # 🚨 WHY A STATIC FILE EXISTS AT ALL. Only the CURRENT season changes day to day. The
+    # prior-season per-player baselines and the P(over) table are fixed for the whole year, and
+    # they are computed from five seasons / 227,871 games — roughly 6,600 boxscores, over an hour
+    # of fetching. A daily job cannot pay that, and a CI runner has no data/nhl.db to read it from.
+    # So they are frozen once (locally, where the full history lives) and committed, and the
+    # scheduled refresh reads them instead of recomputing them.
+    ap.add_argument("--write-static", metavar="PATH",
+                    help="freeze the prior-season baselines + P(over) table (run locally, full history)")
+    ap.add_argument("--static", metavar="PATH",
+                    help="read those frozen inputs instead of computing them (what CI does)")
     args = ap.parse_args(argv)
 
     conn = sqlite3.connect(DB)
+    static = None
+    if args.static:
+        with open(args.static, encoding="utf-8") as fh:
+            static = json.load(fh)
+        print(f"static inputs: {len(static['skaterPrior'])} skater / "
+              f"{len(static['goaliePrior'])} goalie baselines, {len(static['overTable'])} bands")
 
     # ---- skaters: shots on goal ----
     cur = collections.defaultdict(list)
@@ -89,7 +113,10 @@ def main(argv=None):
     for pid, vals in cur.items():
         if len(vals) < MIN_GAMES:
             continue
-        pr = st.mean(prior[pid]) if prior.get(pid) else None
+        # Rounded to the same precision the static file stores, or the two paths differ in the
+        # third decimal and the published projection moves by 0.01 depending on where it was built.
+        pr = (round(st.mean(prior[pid]), 3) if len(prior.get(pid, [])) >= MIN_PRIOR_SKATER
+              else (static["skaterPrior"].get(str(pid)) if static else None))
         proj, n = blend(vals, pr, league_sog)
         skaters.append({"id": pid, "player": names.get(pid), "team": teams.get(pid),
                         "market": "shots", "proj": round(proj, 2), "games": n,
@@ -120,7 +147,8 @@ def main(argv=None):
     for gid, vals in g_cur_sa.items():
         if len(vals) < MIN_GAMES:
             continue
-        pr = st.mean(g_prior_sa[gid]) if g_prior_sa.get(gid) else None
+        pr = (round(st.mean(g_prior_sa[gid]), 2) if len(g_prior_sa.get(gid, [])) >= MIN_PRIOR_GOALIE
+              else (static["goaliePrior"].get(str(gid)) if static else None))
         shots, n = blend(vals, pr, league_sa)
         goalies.append({"id": gid, "player": g_names.get(gid), "team": g_teams.get(gid),
                         "market": "saves", "proj": round(shots * league_pct, 1), "games": n,
@@ -140,22 +168,41 @@ def main(argv=None):
     # published. Non-parametric: bucket player-seasons by their per-game mean and count how often a
     # game cleared each line. Every cell holds thousands of games and the table is monotone in the
     # mean for all three lines.
-    hist = collections.defaultdict(list)
-    for season, pid, sog in conn.execute(
-            "select season, player_id, sog from nhl_skater_games"
-            " where sog is not null and toi_seconds > 0"):
-        hist[(season, pid)].append(sog)
-    hist = {k: v for k, v in hist.items() if len(v) >= 20}
-    BANDS = [(0, 1.25), (1.25, 1.75), (1.75, 2.25), (2.25, 2.75), (2.75, 3.25), (3.25, 3.75), (3.75, 99)]
-    LINES = [1.5, 2.5, 3.5]
-    over_table = []
-    for lo, hi in BANDS:
-        g = [x for k, v in hist.items() if lo <= st.mean(v) < hi for x in v]
-        if len(g) < 500:
-            continue
-        mid = st.mean([st.mean(v) for k, v in hist.items() if lo <= st.mean(v) < hi])
-        over_table.append({"mean": round(mid, 3), "n": len(g),
-                           "p": {str(L): round(sum(1 for x in g if x > L) / len(g), 4) for L in LINES}})
+    def build_over_table():
+        hist = collections.defaultdict(list)
+        for season, pid, sog in conn.execute(
+                "select season, player_id, sog from nhl_skater_games"
+                " where sog is not null and toi_seconds > 0"):
+            hist[(season, pid)].append(sog)
+        hist = {k: v for k, v in hist.items() if len(v) >= 20}
+        BANDS = [(0, 1.25), (1.25, 1.75), (1.75, 2.25), (2.25, 2.75),
+                 (2.75, 3.25), (3.25, 3.75), (3.75, 99)]
+        LINES = [1.5, 2.5, 3.5]
+        tbl = []
+        for lo, hi in BANDS:
+            members = [v for k, v in hist.items() if lo <= st.mean(v) < hi]
+            g = [x for v in members for x in v]
+            if len(g) < 500:
+                continue
+            tbl.append({"mean": round(st.mean([st.mean(v) for v in members]), 3), "n": len(g),
+                        "p": {str(L): round(sum(1 for x in g if x > L) / len(g), 4) for L in LINES}})
+        return tbl
+
+    over_table = static["overTable"] if static else build_over_table()
+
+    # Freeze the year-constant inputs so a daily job never has to rebuild five seasons.
+    if args.write_static:
+        prior_sk = {str(pid): round(st.mean(v), 3) for pid, v in prior.items() if len(v) >= MIN_PRIOR_SKATER}
+        prior_gl = {str(gid): round(st.mean(v), 2) for gid, v in g_prior_sa.items() if len(v) >= MIN_PRIOR_GOALIE}
+        with open(args.write_static, "w", encoding="utf-8", newline="\n") as fh:
+            json.dump({"_note": "Frozen by nhl_player_proj.py --write-static from the full local "
+                                "history. Prior-season baselines and the P(over) table are constant "
+                                "for a season; the scheduled refresh reads this instead of "
+                                "rebuilding ~6,600 boxscores. Regenerate once per season.",
+                       "priorSeason": PRIOR_SEASON, "overTable": over_table,
+                       "skaterPrior": prior_sk, "goaliePrior": prior_gl}, fh, indent=0)
+        print(f"wrote {args.write_static} "
+              f"({len(prior_sk)} skater / {len(prior_gl)} goalie baselines)")
     conn.close()
 
     rows = sorted(skaters, key=lambda r: -r["proj"]) + sorted(goalies, key=lambda r: -r["proj"])
