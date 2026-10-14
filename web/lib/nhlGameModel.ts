@@ -3,43 +3,43 @@
 // league mean and blended with last season. lib/nhlGame.ts turns two of these into an
 // expected score; helpers belong there, never in this file, which is rewritten on every
 // refresh.
-// 32 teams. League 3.069 goals/game. Home ice +0.221 goals.
+// 32 teams. League 3.129 goals/game. Home ice +0.130 goals.
 
 export interface NhlTeamRating { team: string; attack: number; defence: number }
-export const NHL_LEAGUE_GOALS = 3.069;
-export const NHL_HOME_ICE = 0.221;
+export const NHL_LEAGUE_GOALS = 3.129;
+export const NHL_HOME_ICE = 0.130;
 export const NHL_MARGIN_SD = 2.569;
 export const NHL_RATINGS: NhlTeamRating[] = [
-  {"team": "ANA", "attack": 3.31, "defence": 2.856},
-  {"team": "BOS", "attack": 3.201, "defence": 2.618},
-  {"team": "BUF", "attack": 2.868, "defence": 3.368},
-  {"team": "CAR", "attack": 3.493, "defence": 2.724},
-  {"team": "CBJ", "attack": 3.141, "defence": 3.241},
-  {"team": "CGY", "attack": 2.401, "defence": 4.129},
-  {"team": "CHI", "attack": 2.534, "defence": 3.701},
-  {"team": "COL", "attack": 4.038, "defence": 3.219},
-  {"team": "DAL", "attack": 2.674, "defence": 2.401},
-  {"team": "DET", "attack": 2.583, "defence": 3.038},
-  {"team": "EDM", "attack": 3.947, "defence": 3.219},
-  {"team": "FLA", "attack": 2.534, "defence": 2.951},
-  {"team": "LAK", "attack": 2.841, "defence": 3.541},
-  {"team": "MIN", "attack": 3.038, "defence": 2.492},
-  {"team": "MTL", "attack": 3.038, "defence": 3.401},
-  {"team": "NJD", "attack": 2.841, "defence": 3.241},
-  {"team": "NSH", "attack": 2.947, "defence": 2.947},
-  {"team": "NYI", "attack": 3.129, "defence": 2.856},
-  {"team": "NYR", "attack": 3.186, "defence": 2.416},
-  {"team": "OTT", "attack": 3.038, "defence": 2.674},
-  {"team": "PHI", "attack": 2.032, "defence": 3.57},
-  {"team": "PIT", "attack": 3.368, "defence": 2.951},
-  {"team": "SEA", "attack": 3.701, "defence": 2.951},
-  {"team": "SJS", "attack": 2.856, "defence": 3.219},
-  {"team": "STL", "attack": 2.947, "defence": 3.129},
-  {"team": "TBL", "attack": 3.129, "defence": 2.765},
-  {"team": "TOR", "attack": 3.201, "defence": 3.034},
-  {"team": "UTA", "attack": 3.368, "defence": 2.784},
-  {"team": "VAN", "attack": 3.263, "defence": 4.109},
-  {"team": "VGK", "attack": 3.451, "defence": 2.701},
-  {"team": "WPG", "attack": 2.856, "defence": 3.038},
-  {"team": "WSH", "attack": 3.219, "defence": 2.947},
+  {"team": "ANA", "attack": 3.231, "defence": 2.981},
+  {"team": "BOS", "attack": 3.444, "defence": 2.675},
+  {"team": "BUF", "attack": 2.905, "defence": 3.444},
+  {"team": "CAR", "attack": 3.555, "defence": 2.698},
+  {"team": "CBJ", "attack": 3.161, "defence": 3.616},
+  {"team": "CGY", "attack": 2.564, "defence": 3.981},
+  {"team": "CHI", "attack": 2.752, "defence": 3.675},
+  {"team": "COL", "attack": 3.981, "defence": 3.148},
+  {"team": "DAL", "attack": 2.648, "defence": 2.481},
+  {"team": "DET", "attack": 2.731, "defence": 3.231},
+  {"team": "EDM", "attack": 3.981, "defence": 3.064},
+  {"team": "FLA", "attack": 2.905, "defence": 2.982},
+  {"team": "LAK", "attack": 2.706, "defence": 3.616},
+  {"team": "MIN", "attack": 3.059, "defence": 2.675},
+  {"team": "MTL", "attack": 3.148, "defence": 3.398},
+  {"team": "NJD", "attack": 2.898, "defence": 3.398},
+  {"team": "NSH", "attack": 2.898, "defence": 3.148},
+  {"team": "NYI", "attack": 3.148, "defence": 2.814},
+  {"team": "NYR", "attack": 3.269, "defence": 2.341},
+  {"team": "OTT", "attack": 3.059, "defence": 2.905},
+  {"team": "PHI", "attack": 2.055, "defence": 3.555},
+  {"team": "PIT", "attack": 3.367, "defence": 3.136},
+  {"team": "SEA", "attack": 3.675, "defence": 2.905},
+  {"team": "SJS", "attack": 2.898, "defence": 3.481},
+  {"team": "STL", "attack": 3.314, "defence": 3.064},
+  {"team": "TBL", "attack": 2.981, "defence": 2.898},
+  {"team": "TOR", "attack": 3.29, "defence": 3.213},
+  {"team": "UTA", "attack": 3.521, "defence": 2.905},
+  {"team": "VAN", "attack": 3.198, "defence": 4.055},
+  {"team": "VGK", "attack": 3.484, "defence": 2.769},
+  {"team": "WPG", "attack": 3.064, "defence": 2.981},
+  {"team": "WSH", "attack": 3.148, "defence": 3.064},
 ];
