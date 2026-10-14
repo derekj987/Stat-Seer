@@ -144,6 +144,12 @@ The script then joins Claude's `quotes` back to the snippet permalinks to popula
 `sources` (board name + thread URL), assigns a stable `id`
 (`w{week}-{team}-{slug(player)}`), and attaches `team`/`matchup`.
 
+The id carries no angle, so a player the boards have *two* leans on (Herbert's
+completions and his passing yards) would repeat it. Since the id is the primary key
+and a team's rows go up in one POST, that repeat used to make Postgres reject the
+whole batch — the team wrote **nothing**. Repeats now get a `-2` suffix, keeping both
+angles. Nothing reads the id's shape; it's an opaque key.
+
 > **Copyright guard:** `quotes` are capped short and used only to locate the source
 > thread — we link out, we don't reproduce threads. Keeps us clean the same way the
 > app's other content does.

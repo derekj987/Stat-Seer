@@ -623,7 +623,8 @@ grant select, insert, update on ref_assignments to service_role;
 create table if not exists tailgate_buzz (
     season      smallint    not null,
     week        smallint    not null,
-    id          text        not null,   -- w{week}-{team}-{player-slug}
+    id          text        not null,   -- w{week}-{team}-{player-slug}, "-2" on a repeated player
+                                        -- (two angles on one player are both real buzz)
     player      text        not null,
     team        text        not null,   -- nickname, e.g. "Bills"
     matchup     text,                   -- optional, e.g. "BUF vs NYJ"

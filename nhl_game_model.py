@@ -13,7 +13,7 @@ so hockey having one is consistent with the architecture rather than a departure
 🚨 SET EXPECTATIONS BEFORE READING THE OUTPUT. This is NOT an edge claim and the page must not make
 one. The one hockey input anybody would reach for first, the starting goalie, was already tested
 against four seasons of closing moneylines and came back priced: 3,241 games, ROI +0.15% with a
-standard error of 2.60 (EMPIRICAL_REFERENCE §14d). A team-rating model is a weaker instrument than
+standard error of 2.60 (EMPIRICAL_REFERENCE §18d). A team-rating model is a weaker instrument than
 that, so the honest prior is that it lands on the market rather than beside it. It is published
 because a line-blind number that is graded in public is the trust engine, which is a different job
 from finding a price error.

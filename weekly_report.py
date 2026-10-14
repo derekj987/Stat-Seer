@@ -105,9 +105,31 @@ def american_to_prob(a):
 
 
 def devig(pa, pb):
-    """Two-way de-vig (proportional). Returns P(a)."""
+    """Two-way de-vig → P(a), by the POWER method: find k with a^k + b^k = 1, return a^k.
+
+    Was proportional (ia / (ia + ib)), which hands both sides an equal share of the hold and so
+    under-prices favourites — books load more of the vig onto the longshot (favourite–longshot
+    bias). This function is applied to the MONEYLINE (`mkt_home`), which is exactly the lopsided
+    regime where that bias bites: measured 1.3 points low for the favourite at −400/+300 and 1.6
+    at −1000/+650. Identical to proportional at −110/−110, so balanced markets are unchanged.
+
+    Matches web/lib/fairValue.ts deVig() and mlb_player_props._power_devig, per the rule stated
+    in fairValue.ts: the grader and the board must use the same method. This grader did not.
+
+    Found while testing the NHL extremity gradient (EMPIRICAL_REFERENCE §14h): with proportional
+    de-vig, consensus-beating NHL moneyline quotes appeared to rise 4.5x on lopsided games; under
+    a bias-aware de-vig the effect reverses to 0.3x. The whole apparent signal was the method."""
     ia, ib = american_to_prob(pa), american_to_prob(pb)
-    return ia / (ia + ib) if ia + ib else None
+    if ia <= 0 or ib <= 0 or ia + ib <= 1:
+        return ia / (ia + ib) if ia + ib else None
+    lo, hi = 0.5, 4.0
+    for _ in range(60):
+        k = (lo + hi) / 2
+        if ia ** k + ib ** k > 1:
+            lo = k
+        else:
+            hi = k
+    return ia ** ((lo + hi) / 2)
 
 
 def wl(hit, push=False):
@@ -292,13 +314,30 @@ _SNAPS = {}
 
 def nfl_snap_shares(season, week):
     """{norm(player): offense_pct} for the week, and {norm(player): mean offense_pct} for the
-    prior season. Empty when the nflverse snap files are not on disk."""
+    prior season.
+
+    🚨 BOTH FILES ARE REQUIRED, and a missing one is fatal rather than empty. nfl_void() returns
+    False for any player it cannot find a snap share for, so with no snaps on disk NOTHING is ever
+    voided and every injured starter's prop is graded instead. That does not fail loudly -- it
+    produces a complete, plausible-looking report card in which Kyler Murray's 0 passing TDs after
+    leaving in the first quarter scores as a WIN for the under. Regenerating week 1 on a machine
+    without these files silently converted all 18 of its correctly-voided rows into wins and
+    losses, and the only reason it was caught was a diff against the previously published card.
+    This file feeds the published track record, which is the product's trust claim, so it refuses
+    to emit a card it cannot grade correctly."""
     if (season, week) in _SNAPS:
         return _SNAPS[(season, week)]
     import pandas as pd
     cur, prior = {}, {}
     p_cur = os.path.join(ROOT, "data", f"snaps_{season}.csv")
     p_pri = os.path.join(ROOT, "data", f"snaps_{season - 1}.csv")
+    missing = [p for p in (p_cur, p_pri) if not os.path.exists(p)]
+    if missing:
+        raise SystemExit(
+            "ERROR: snap-share file(s) missing, so injured-starter props cannot be voided and the\n"
+            "card would grade them as wins and losses:\n"
+            + "".join(f"  {p}\n" for p in missing)
+            + "Fetch the nflverse snap counts for both seasons before regenerating.")
     if os.path.exists(p_cur):
         d = pd.read_csv(p_cur, low_memory=False)
         d = d[(d.week == week) & (d.game_type == "REG")]

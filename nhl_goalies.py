@@ -4,6 +4,14 @@ nhl_goalies.py -- backfill who STARTED in goal, and how they did, from the NHL p
     python nhl_goalies.py --season 20262027 --dry-run
     python nhl_goalies.py --season 20262027 20252026          # local SQLite (data/nhl.db)
     python nhl_goalies.py --season 20262027 --supabase        # durable, for CI
+    python nhl_goalies.py --season 20242025 --csv data/nhl_goalies.csv   # for nhl_goalie_value.py
+
+MERGE NOTE (2026-10-14). A parallel session wrote its own nhl_goalies.py against the same feed, for
+the goalie-timing study in nhl_goalie_value.py (§14g). Rather than keep two collectors of the same
+thing, that script's CSV contract lives here as `--csv`: the same columns, including the
+hindsight-honest `starts_before` / `share_before`, so nhl_goalie_value.py runs unchanged. Its
+starter detection used the boxscore `starter` flag, which this file cross-checked afterwards and
+found agrees with the play-by-play on 14,109 of 14,115 rows.
 
 🚨 READ THIS BEFORE ASSUMING THIS FEED CAN DO WHAT YOU WANT. The NHL's public API does NOT publish
 a projected or confirmed starting goalie before a game. Checked endpoint by endpoint on a PRE-state
@@ -48,6 +56,7 @@ Stdlib + odds_client (TLS). The NHL API needs no key and costs nothing.
 from __future__ import annotations
 
 import argparse
+import collections
 import datetime as dt
 import json
 import os
@@ -304,6 +313,8 @@ def main(argv=None):
                     help="NHL season ids, e.g. 20262027 20252026")
     ap.add_argument("--limit", type=int, default=0, help="stop after N games (smoke tests)")
     ap.add_argument("--supabase", action="store_true")
+    ap.add_argument("--csv", metavar="PATH",
+                    help="write the goalie-study CSV (see MERGE NOTE) instead of a database")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args(argv)
 
@@ -327,6 +338,46 @@ def main(argv=None):
     starters = sum(1 for r in all_rows if r[9] == 1)
     print(f"\n{len(all_rows)} goalie rows, {starters} of them starters "
           f"({unresolved} game-side(s) left unresolved rather than guessed)")
+    if args.csv:
+        # 🚨 starts_before / share_before CARRY NO HINDSIGHT. They count a goalie's prior starts for
+        # that team IN THAT SEASON and nothing after, so a "backup start" label built from them is
+        # something a bettor could have known that morning. A goalie's first start of a season has
+        # share_before 0.0 and is correctly unknowable rather than "a backup".
+        import csv as _csv
+        by_team = collections.defaultdict(list)
+        for r in sorted(all_rows, key=lambda x: (x[3] or "", x[0])):
+            by_team[r[4]].append(r)
+        out = []
+        for team, rs in by_team.items():
+            starts = collections.Counter()
+            played = 0
+            for r in rs:
+                if not r[9]:                      # is_starter
+                    continue
+                gid_ = r[7]
+                before = starts[gid_]
+                out.append({
+                    "game_id": r[0], "season": r[1], "game_date": r[2], "start_time_utc": r[3],
+                    "side": "home" if r[6] else "away", "team_abbrev": team, "opp_abbrev": r[5],
+                    "goalie_id": gid_, "goalie": r[8],
+                    "starts_before": before,
+                    "share_before": round(before / played, 4) if played else "",
+                    "toi": r[10], "save_pctg": r[14], "decision": r[15],
+                })
+                starts[gid_] += 1
+                played += 1
+        CSV_COLS = ("game_id", "season", "game_date", "start_time_utc", "side", "team_abbrev",
+                    "opp_abbrev", "goalie_id", "goalie", "starts_before", "share_before",
+                    "toi", "save_pctg", "decision")
+        out.sort(key=lambda r: (r["start_time_utc"] or "", r["game_id"]))
+        os.makedirs(os.path.dirname(os.path.abspath(args.csv)), exist_ok=True)
+        with open(args.csv, "w", encoding="utf-8", newline="") as fh:
+            w = _csv.DictWriter(fh, fieldnames=CSV_COLS)
+            w.writeheader()
+            w.writerows(out)
+        print(f"wrote {args.csv} ({len(out)} starter rows)")
+        return 0
+
     if args.dry_run:
         print("DRY RUN — nothing written.")
         for r in all_rows[:4]:

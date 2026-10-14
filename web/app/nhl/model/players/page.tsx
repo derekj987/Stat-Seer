@@ -9,7 +9,7 @@ import { nhlPropBoard } from "@/lib/nhlProps";
 // 🚨 IT IS A PLAYER MODEL AND THERE IS NO GAME MODEL, WHICH IS A MEASURED DECISION RATHER THAN AN
 // UNFINISHED ONE. The input a hockey game model would be built on is the starting goalie, and that
 // was tested against four seasons of closing moneylines: 3,241 games, ROI +0.15% with a standard
-// error of 2.60, calibration slope t = +1.81 (EMPIRICAL_REFERENCE §14d). The market has it priced.
+// error of 2.60, calibration slope t = +1.81 (EMPIRICAL_REFERENCE §18d). The market has it priced.
 // Publishing a game board anyway would be the "appearance of rigor" this project exists against, so
 // the Model section carries the one thing that measured up — the line-blind player read.
 //

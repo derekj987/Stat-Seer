@@ -1356,6 +1356,269 @@ mispriced number — turned up on **7 of 1,048 book quotes (1%)**, worth a media
 pitch is **shopping, not mispricing**: the routine 1% is real and repeatable, the 0.30% outlier is
 neither. The page says exactly that.
 
+### 14d. The TOTAL is 68% odd — and a Poisson misprices the push by 5 points (2026-10-10)
+
+`nhl_results.py` (NHL public API, free) + `nhl_totals_study.py`. **6,560 completed regular-season
+games, 2021-22 through 2025-26** — five full 82-game seasons, so five times §14a's sample.
+
+§14a measured the *margin* and found hockey's key number. This is the same structural force acting
+on the **total**, which is what the 5.5/6.0/6.5 market actually prices.
+
+| | |
+|---|---|
+| mean total | **6.242** goals |
+| odd totals | **68.2%** (4,476) |
+| even totals | **31.8%** (2,084) |
+| ended OT / SO | 15.0% / 7.2% — **22.2%** past regulation |
+
+**Mechanism, stated before measuring.** A tie at 60 minutes is not a regulation game, so every even
+"tie" composition (2-2, 3-3, …) is removed from regulation and returns as OT/SO having added
+**exactly one** goal — even plus one is odd. Even totals are therefore suppressed twice. The
+measurement matches the mechanism: OT and SO are 100% odd by construction, and regulation alone is
+already **59.1%** odd because the ties have been taken out of it.
+
+**Stable in every season** — 67.8%, 69.0%, 68.3%, 65.2%, 70.8%. Not a sampling artefact.
+
+⚠️ **The season got longer in 2026-27.** `nhl_results` holds 1,344 scheduled games for season 2026 against 1,312 for each of the five before it — still 32 teams, but **84 games each, not 82** (verified from the table: every club has 84). Nothing in the code assumes 1,312, but the "five full 82-game seasons" framing above describes 2021-25 only, and any future per-season rate or sample claim has to use 84. Two extra games a club is also two more chances at an OT/SO goal, so the odd/even split should be re-measured once 2026-27 is complete rather than assumed to carry over.
+
+**What it costs to ignore.** A fitted Poisson (λ = 6.242) against the empirical distribution:
+
+| total | actual | Poisson | error |
+|---|---|---|---|
+| 5 | **22.1%** | 15.4% | +6.7% |
+| 6 | **11.0%** | 16.0% | **−5.0%** |
+| 7 | **20.5%** | 14.3% | +6.3% |
+
+So a smooth fair price **overstates the push on a 6.0 total by 5.0 points** (16.0% → 11.0% actual)
+and understates 5.0 and 7.0 by ~6.5 each. §14b already flagged that 6.0 can push and needs
+W-L-Push grading; this is the size of the error if that push is priced off a smooth curve.
+
+**This is the NHL analogue of the NFL key-number rule in CLAUDE.md** ("never use a Gaussian where
+key numbers matter"). It is a constraint on how we may compute a fair price, **not an edge**. Any
+NHL fair price must come from the empirical distribution, or from a model that treats the OT/SO goal
+separately from goals scored in play. `nhl_results.last_period_type` is kept on every row so both
+views stay available.
+
+**And the push is the CENTRAL case, not a corner case** — corrected 2026-10-12. This section first
+claimed books post 5.5/6.5 more often than 6.0 "because they know". That was an assumption and it
+is **wrong**. Measured on the backfilled 2024-25 season (§14e, n=1,240 games with a near-closing
+total): **6.0 is the single most-posted line**, and whole numbers are 41.5% of the board.
+
+| posted total | games |
+|---|---|
+| **6.0** | **510** |
+| 5.5 | 407 |
+| 6.5 | 318 |
+| 7.0 / 5.0 | 3 / 2 |
+
+So the pushable number is the modal number, and 2 games in 5 can push. Conditional on the market
+setting a whole number, the realised push rate is **12.8%** (n=515) — a touch above the 11.0%
+unconditional rate, as expected, since those are the games the market judged to land near 6. A
+fitted Poisson would still say ~16%, so it overstates the push by **~3.2 points on the population
+where it actually matters**. Getting this right is not an edge, but getting it wrong misprices the
+most common NHL total there is.
+
+### 14e. The NHL closing total is efficient — the bar, measured (2026-10-12)
+
+`nhl_backfill_odds.py --season 2024 --write` then `nhl_totals_validation.py --season 2024`.
+**1,240 games with a near-closing consensus total** — 94.5% of the 1,312 completed 2024-25 regular
+season games. 780 snapshots, 76,758 rows, 23,400 Odds API credits. Discovery cost **zero** credits
+(the schedule came from the NHL's own free feed, not the odds API).
+
+This exists because Derek asked for an NHL totals model built on goaltending/GSAx, xG, pace and
+special teams. Those are mechanisms, not measurements, and the standing rule is that nothing enters
+The Model unless it beats the closing line out of sample. Before building anything, measure what it
+would have to beat.
+
+**Data integrity, reported rather than assumed:**
+
+| | |
+|---|---|
+| priced games joined to a result | 93.8% (1,240 / 1,322) |
+| season coverage | 94.5% (1,240 / 1,312) |
+| snapshot lead before puck drop | median **9 min** (p90 19, max 24) |
+| in-progress events rejected | 2,065 |
+
+The lead time is why this is called **near-closing**, not the close: the archive's snapshot cadence
+sets the floor, not our request. The 2,065 rejections are the filter earning its keep — the
+historical endpoint returns games already under way, and an in-progress price recorded as a closing
+line would have corrupted every number below. (2 of 780 snapshots lost their write to transient
+connection resets; the writer is idempotent, so a re-run would recover them.)
+
+**The bar:**
+
+| | |
+|---|---|
+| mean two-way hold | **4.45%** (median 4.48%) |
+| break-even win rate | **52.23%** of decided bets |
+
+That **independently corroborates §14c's 4.62%**, which came from a single live sweep by a different
+code path. Two measurements, two methods, same number — the bar is solid.
+
+**The result — nothing to take.** (Single season only; **§14f extends this to four seasons and is
+the number to quote** — the −0.69% below turns out to sit inside a 4.9-point band, and the winning
+side flips between seasons.)
+
+| | |
+|---|---|
+| over / under / push | 45.9% / 48.8% / 5.3% |
+| of decided bets | over 48.5% / under 51.5% (n=1,174) |
+| best side (under) vs break-even | **−0.69%** |
+
+The under wins 51.5% and needs 52.23%. **It misses the vig bar**, exactly as the NFL work predicted
+it would (§4: ~50 hypotheses, essentially none beat the vig; even the wind survivor failed by 0.18
+points). Calibration says the same thing: the market implied 50.2% over and 48.5% came in, a −1.8%
+tilt that is *smaller than the hold it would have to pay*.
+
+**So: no systematic side on the NHL total at the close.** This is a negative result and it is the
+useful kind — it says a goaltending/xG/pace model is not competing against a sloppy number, and it
+sets 52.23% as the out-of-sample hurdle any such candidate must clear. The place left to look is
+the one thing on Derek's list with a *timing* mechanism rather than a priced-variable mechanism —
+goalie confirmation, which lands the morning of the game — and that is Value Finder arithmetic on a
+stale price, not a model. Consistent with §14c: the NHL module's honest pitch is shopping.
+
+### 14f. ...and it does not hold — the "best side" flips between seasons (2026-10-12)
+
+Derek: "backfill 2021-2023 and see if it holds." It does not. Backfilled three more seasons
+(2,310 snapshots, 379,994 rows, 69,300 credits, zero write failures) and re-ran §14e per season.
+**5,061 games with a near-closing consensus total; 4,812 decided bets.**
+
+| season | games | coverage | hold | break-even | under | best side | vs break-even |
+|---|---|---|---|---|---|---|---|
+| 2021-22 | 1,267 | 96.6% | 4.51% | 52.26% | 46.7% | **over 53.3%** | **+1.09%** |
+| 2022-23 | 1,270 | 96.8% | 4.55% | 52.27% | 49.8% | over 50.2% | −2.02% |
+| 2023-24 | 1,284 | 97.9% | 4.51% | 52.25% | 50.6% | under 50.6% | −1.64% |
+| 2024-25 | 1,240 | 94.5% | 4.45% | 52.23% | 51.5% | under 51.5% | −0.69% |
+| **POOLED** | **5,061** | | **4.50%** | **52.25%** | 49.6% | over 50.37% | **−1.88%** |
+
+**The side that "won" flips from over to under halfway through the sample.** The under-rate swings
+46.7% → 51.5%, a 4.9-point band, and §14e's −0.69% sits comfortably inside it. Pooled across 4,812
+decided bets the best available side misses break-even by **1.88%** — close to the full hold, which
+is what an efficient market looks like.
+
+**And 2021-22 on its own would have looked like an edge: the over cleared break-even by +1.09%.**
+Stopping there would have produced a publishable "NHL overs beat the market" claim that the very
+next season contradicts. That is the Week 1 power-rating trap from CLAUDE.md repeating in a second
+sport — the reason the standing rule demands out-of-sample confirmation before anything ships.
+
+**What IS stable is the hold:** 4.45%–4.55% across four seasons, and §14c measured 4.62% by a
+different code path on a live sweep. The bar is 52.25% and it is solid. Coverage held at 94.5%–97.9%
+with no season degrading.
+
+**Conclusion: the NHL closing total is efficient, confirmed out of sample.** No side, no season, no
+direction. A goaltending/xG/pace model must clear 52.25% out of sample, and the measured room
+between the closing total and the truth is 1.88% the wrong way. The remaining candidate on Derek's
+list is the one with a *timing* mechanism rather than a priced-variable one — goalie confirmation,
+which lands the morning of the game — and that is Value Finder arithmetic on a stale price, not a
+model. §14c's verdict stands: the NHL module's honest pitch is shopping.
+
+### 14g. Goalie confirmation — NO timing edge; the apparent one is price extremity (2026-10-12)
+
+Derek: "build the goalie confirmation value finder." **The premise fails, so it was not built.**
+
+§14f settled that the closing total is efficient, leaving one item on the NHL factor list whose
+mechanism is *timing* rather than a priced variable: NHL starters are confirmed on the morning of
+the game, so a book slow to reprice a backup start would be offering a stale number — Value Finder
+arithmetic, not a model. Tested with `nhl_goalies.py` + `nhl_goalie_value.py`.
+
+**Data.** 1,312 games (2024-25), starting goalies from the NHL's own boxscore `starter` flag (free).
+Odds backfilled at **three** lead times — T−24h, T−4h, near-close — 192,772 book-level rows,
+~31k credits. Four-book minimum for a consensus.
+
+**The label has no hindsight, and the first attempt at it was wrong.** A binary "backup started"
+at a <50%-of-starts threshold fired on **60.7%** of games, because NHL teams split starts ~60/40 and
+a 1B starting 30% of the time is routine, not news (New Jersey's Jake Allen was flagged as a
+surprise in every one of his starts). Replaced with a dose-response on the *more surprising* of the
+two starters, using only that goalie's share of the team's starts **before** the game, requiring 10
+prior team games first: 31.1% / 29.9% / 22.8% / 16.2% across #1-both / routine-1B / deep-backup /
+rare-start. Rare-start examples are genuine (Commesso 0% of Chicago's prior starts, Wedgewood 4%).
+
+**Result: flat, and tightest exactly where the hypothesis says it should be loosest.** Share of book
+quotes beating the de-vigged consensus:
+
+| band | totals | h2h |
+|---|---|---|
+| pre-confirm (~24h) | 0.3% | 0.9% |
+| post-confirm (~4h) | **0.2%** | **0.5%** |
+| close (<40m) | 0.5% | 0.8% |
+
+The post-confirmation window is the *least* disperse of the three. Books reprice together. On
+totals the dose-response down the surprise buckets is non-monotonic noise (0.1% / 0.3% / 0.1% /
+0.2%).
+
+**h2h did show a gradient — 0.4% → 0.9% from #1-both to rare-start — and it is a confound.** Two
+independent reasons:
+
+1. **It is strongest 24h out** (0.7% → 1.5%), *before the starter is known*. The information does
+   not exist yet, so it cannot be causing the dispersion.
+2. **Consensus-beating quotes track how lopsided the price is, not goalies:** 0.5% near an even
+   price rising monotonically to **2.7%** at 25%+ from even — a 5× gradient. And rare-start games
+   are more lopsided games (mean 11.4% from even vs 9.4% for #1-vs-#1). The goalie gradient is the
+   extremity gradient wearing a costume.
+
+**Conclusion: no goalie-confirmation timing edge. Do not build the panel.** Median edge never
+exceeded ~0.55% in any window and typically sat at 0.2%, i.e. no better than §14c's 0.30% at the
+close. Three NHL negatives now agree: the total is efficient (§14f), the market is calibrated
+(§14e), and news timing does not strand value (here). §14c's verdict stands unchanged — the NHL
+module's honest pitch is **shopping**, and it should stay Value-Finder-only with no model.
+
+**⚠️ One lead, and a reason to distrust it.** The extremity gradient (0.5% → 2.7%) would be a real
+shopping filter if it survives, but **proportional de-vig is known to be biased on lopsided
+two-way markets** (favourite–longshot bias), which is the exact regime where the gradient appears.
+So the 2.7% may be measuring our own de-vig error rather than a mispriced book. Testing it means
+re-running with a Shin or power de-vig and seeing whether the gradient holds. Until then it is a
+lead, **not a finding**, and nothing should be shipped on it.
+
+### 14h. The extremity gradient was our own de-vig error (2026-10-12)
+
+`nhl_devig_extremity.py --season 2024 --market h2h`. Same data, same join, same four-book
+consensus and same both-sides edge test as §14g — **only the de-vig changes**.
+
+§14g logged a lead: consensus-beating NHL moneyline quotes rose monotonically with how lopsided the
+price was, 0.5% near even to 2.7% at 25%+ from even. At face value that is a free shopping filter.
+It was flagged as suspect because proportional de-vig is biased in precisely that regime. It was.
+
+| consensus from even | quotes | proportional | **Shin** | difference |
+|---|---|---|---|---|
+| 0-5% | 16,764 | 0.5% | 0.4% | −0.0% |
+| 5-10% | 21,320 | 0.4% | 0.2% | −0.1% |
+| 10-15% | 14,368 | 0.6% | 0.3% | −0.3% |
+| 15-20% | 9,164 | 1.1% | 0.2% | −0.9% |
+| 20-25% | 4,394 | 1.9% | 0.1% | −1.8% |
+| 25%+ | 1,574 | **2.7%** | **0.1%** | **−2.6%** |
+
+| | near-even | lopsided (20%+) | ratio |
+|---|---|---|---|
+| proportional | 0.47% | 2.13% | **4.5x** |
+| Shin | 0.44% | 0.11% | **0.3x** |
+
+**The gradient does not merely vanish, it reverses** — under a bias-aware de-vig a lopsided game
+has *fewer* consensus-beating quotes, not more. And the size of the correction tracks lopsidedness
+exactly (−0.0% → −2.6%), which is the signature of a method artifact rather than a market effect.
+**There is no shopping filter here. Nothing ships.**
+
+Shin (1993), inverse per Štrumbelj (2014): p_i = [√(z² + 4(1−z)·r_i²/S) − z] / (2(1−z)), with z
+bisected so Σp = 1. `--selftest` checks it against known properties: balanced books come out 50/50,
+fair probabilities sum to 1, the favourite sits above its proportional share, and the correction
+grows with lopsidedness (+0.0000, +0.0053, +0.0131, +0.0158 at −110/−110 → −1000/+650).
+
+**§14e and §14f are unaffected, verified not assumed.** Run on totals, the two methods agree to
+rounding (0.3% vs 0.3%; 0.5% vs 0.5%) because NHL totals sit within 10% of an even price — 56,202
+of 56,934 quotes are inside 5%. And §14f's headline never used a de-vig at all: the over/under
+hit rate compares the realised total to the line, and the hold is raw overround.
+
+**The app was already right; the analysis was not.** `web/lib/fairValue.ts` deVig() has used the
+POWER method since the MLB hits board read above the book on 77% of rows, and its comment states
+the rule: *the grader and the board must use the same method.* But `weekly_report.py` was still
+de-vigging the **moneyline** proportionally — the lopsided regime — making the market's fair
+favourite probability 1.3 points low at −400/+300 and 1.6 at −1000/+650. Fixed to the power method
+and verified identical to `mlb_player_props._power_devig` across five markets.
+
+**The lesson is the one CLAUDE.md's error log keeps recording.** A plausible mechanism (the
+favourite–longshot bias is real, books do load vig onto longshots) plus a monotone 5x gradient
+across 1,574–16,764 quotes still produced a signal that was entirely an artifact of our own
+arithmetic. The gradient was *more* convincing than the thing it was measuring. It only fell
+because the method was distrusted in the regime where it is known to be weak.
 ---
 
 ### §13k. Receptions and pass TDs: the mean→median conversion is the WRONG INSTRUMENT — NOT shipped (2026-10-12)
@@ -1422,109 +1685,6 @@ distribution rather than scaling a mean, and several times this sample. Re-run
 
 ---
 
-### §14. NHL goalie starts — backfilled 1,399 games, and two findings (2026-10-12)
-
-`nhl_goalies.py` backfills who started in goal and how they did, from the NHL public API:
-**2025-26 complete (1,312 games) plus 2026-27 to date (87)** — 2,953 goalie rows, 2,624 + 174
-starters, exactly **2.00 starters per game** and zero game-sides left ambiguous.
-
-**§14a. THE OFFICIAL FEED HAS NO PROJECTED STARTER.** Checked endpoint by endpoint on a PRE-state
-game: `schedule/now` carries no goalie field, and `gamecenter/{id}/landing.matchup` has
-`goalieComparison` and `goalieSeasonStats`, both of which list EVERY goalie on both rosters with
-season numbers and name no starter — the strings "start", "probable", "confirmed", "expected" and
-"projected" appear **zero** times in that payload. The starter is only visible once the game
-begins.
-
-This splits the goalie problem in two, and the halves have different deadlines:
-
-| | source | perishable? |
-|---|---|---|
-| who started, and how it went | NHL API, any time | **no** — backfillable forever |
-| who is starting tonight, and when it was announced | not in the official feed | **yes** — needs a third party |
-
-So the "capture it now or lose it" argument applies only to the second half. The historical record
-can be rebuilt on demand, which is why this was done as a backfill rather than a daily capture.
-
-**§14b. NEITHER OBVIOUS WAY TO IDENTIFY THE STARTER WORKS.** The boxscore has no `starter` flag.
-Measured across all 2,798 game-sides: both goalies played in **155 (5.5%)**, and in those the
-goalie with MORE ICE TIME is the wrong one **79 times — 51%, a coin flip**. Boxscore order was
-3/6 on a first sample. The reliable answer is the play-by-play's first goalie-in-net for that team,
-which is one extra request and only needed for that 5.5%.
-
-This matters more than the small share suggests: an ambiguous side IS the pulled-starter case —
-a goalie who was announced, started, and got yanked — which is exactly the population a rest or
-workload model is about. A heuristic would have mislabelled 79 of them.
-
-**§14c. BACK-TO-BACKS DO NOT SHOW A FATIGUE PENALTY — the opposite, if anything.**
-
-| rest days | starts | mean save% |
-|---|---|---|
-| 0 (back-to-back) | 452 | **0.8933** |
-| 1 | 1,673 | 0.8857 |
-| 2 | 475 | 0.8854 |
-| 3 | 99 | 0.8918 |
-| 4 | 47 | 0.8700 |
-
-No monotone pattern, and the back-to-back group is the *best* of the large buckets. **Do not put a
-rest-fatigue term in an NHL model on intuition.** The obvious confound is selection — a club often
-starts its BACKUP on the second night, so "back-to-back" is partly "a different goalie" rather than
-"the same goalie, tired" — and the right test therefore conditions on the GOALIE, not on the date.
-Noted here so the naive version is not shipped as a feature.
-
-### §14d. The starting goalie is PRICED — it does not beat the NHL close (2026-10-13)
-
-The obvious hockey input, tested at the project's standard bar. **3,241 games**, four backfilled
-seasons of closing moneylines joined to who actually started.
-
-**Mechanism stated in advance:** a goalie faces ~30 shots, so a one-point save-percentage gap
-between the starters is worth ~0.3 goals against a ~2.6-goal margin SD. Starters are announced in
-the morning, hours before the close. So either the market has already moved on it, or a cheap
-observable beats the close.
-
-**No look-ahead:** a starter's quality is his save% over games STRICTLY BEFORE this one, shrunk
-toward the league mean by 500 shots, and a game is skipped unless both starters have 200+ prior
-shots. Using season or career numbers leaks the outcome and is the easiest way to fake an edge here.
-
-**TEST 1 — does the goalie gap explain the market's error?**
-
-    slope  +0.0157 win-prob per save% point    SE 0.0087    t = +1.81
-
-Not significant. A market that fully prices the starter gives zero, and this is within noise of it.
-
-**TEST 2 — bet the better goalie, graded at the closing price.**
-
-| split | n | win% | break-even | edge | ROI | SE | t |
-|---|---|---|---|---|---|---|---|
-| **all** | **3,241** | 56.6% | 57.1% | **−0.5** | **+0.15%** | 2.60 | **+0.06** |
-| 2021-22 | 521 | 59.5% | 56.6% | +2.9 | +15.94% | 13.40 | +1.19 |
-| 2022-23 | 782 | 55.9% | 57.3% | −1.4 | −3.66% | 3.25 | −1.13 |
-| 2023-24 | 819 | 55.3% | 58.5% | −3.2 | −6.92% | 3.04 | −2.28 |
-| 2024-25 | 1,105 | 56.9% | 56.2% | +0.7 | +0.87% | 2.79 | +0.31 |
-
-**+0.15% ROI with a standard error of 2.60 is zero.** The per-season swing from +15.9% to −6.9%,
-with every |t| under 2.3, is what noise looks like. Betting the better goalie wins 56.6% of the
-time, which sounds like a lot until you notice the prices imply 57.1% — you are paying for the
-goalie you are backing.
-
-**🚨 ROI WITHOUT A STANDARD ERROR IS NOT A RESULT.** A unit moneyline bet has a payout SD near 1,
-so even 3,000 bets leave an SE around 2.6 points — larger than almost any "edge" anyone quotes. The
-first cut of this test printed +1.22% and no error bar, and that number is indistinguishable from
-the +0.15% it became when a join bug was fixed.
-
-**WHAT THIS DOES AND DOES NOT SAY.** It says the starter is in the CLOSING line, which is the bar
-this project holds everything to. It does NOT test whether the line MOVES on the announcement —
-that is a CLV question needing intraday odds, and the backfilled archive holds one snapshot per
-event, taken near puck drop. So "can you beat the opener by knowing the goalie first" is still open
-and is a different, harder data problem.
-
-**Consequence:** goalie identity is Context for the NHL, not a model feature, and NHL stays
-Value-Finder-only. The goalie table keeps its value for the places the closing line is not the
-benchmark — shots and saves props, where a goalie's workload is the quantity being priced.
-
-A JOIN BUG WORTH REMEMBERING, because it is the third time this class has bitten in one week: the
-odds feed's commence_time is UTC and the NHL's gameDate is local, so a 10pm ET game is *tomorrow*
-in UTC. Keying on the UTC date alone matched 1,261 of 3,987 events — it silently discarded most of
-the Western conference. With neighbouring dates tried it matches 3,945 of 3,964.
 
 ### §15. NHL shots and saves — persistence measured, model built, expectations set (2026-10-13)
 
@@ -1628,7 +1788,7 @@ average" is not a signal, and it does not become one at any shrink setting teste
 −0.20% to +0.07%). It is published because a line-blind number graded in public is what the Model
 section is for, not because it finds a price error. Nothing here has been scored against the
 closing line, and the starting goalie — the input anyone would reach for first — is already
-priced (§14d).
+priced (§18d).
 
 **§16a. Carrying last season forward HURTS, and a default-argument bug nearly hid it.** Fitted:
 
@@ -1722,3 +1882,113 @@ tuning.
 
 The one-line rule for anyone adding a workflow: **never schedule on minute :00**, and pick a minute
 no other workflow in the repo is using.
+
+---
+
+*Numbering note: §18 continues the NHL goalie work that was drafted as §14a-d in a
+parallel session. It was renumbered on merge because §14d-§14h were already taken by the
+totals and timing studies below, which were written first.*
+
+### §18. NHL goalie starts — backfilled 1,399 games, and two findings (2026-10-12)
+
+`nhl_goalies.py` backfills who started in goal and how they did, from the NHL public API:
+**2025-26 complete (1,312 games) plus 2026-27 to date (87)** — 2,953 goalie rows, 2,624 + 174
+starters, exactly **2.00 starters per game** and zero game-sides left ambiguous.
+
+**§18a. THE OFFICIAL FEED HAS NO PROJECTED STARTER.** Checked endpoint by endpoint on a PRE-state
+game: `schedule/now` carries no goalie field, and `gamecenter/{id}/landing.matchup` has
+`goalieComparison` and `goalieSeasonStats`, both of which list EVERY goalie on both rosters with
+season numbers and name no starter — the strings "start", "probable", "confirmed", "expected" and
+"projected" appear **zero** times in that payload. The starter is only visible once the game
+begins.
+
+This splits the goalie problem in two, and the halves have different deadlines:
+
+| | source | perishable? |
+|---|---|---|
+| who started, and how it went | NHL API, any time | **no** — backfillable forever |
+| who is starting tonight, and when it was announced | not in the official feed | **yes** — needs a third party |
+
+So the "capture it now or lose it" argument applies only to the second half. The historical record
+can be rebuilt on demand, which is why this was done as a backfill rather than a daily capture.
+
+**§18b. NEITHER OBVIOUS WAY TO IDENTIFY THE STARTER WORKS.** The boxscore has no `starter` flag.
+Measured across all 2,798 game-sides: both goalies played in **155 (5.5%)**, and in those the
+goalie with MORE ICE TIME is the wrong one **79 times — 51%, a coin flip**. Boxscore order was
+3/6 on a first sample. The reliable answer is the play-by-play's first goalie-in-net for that team,
+which is one extra request and only needed for that 5.5%.
+
+This matters more than the small share suggests: an ambiguous side IS the pulled-starter case —
+a goalie who was announced, started, and got yanked — which is exactly the population a rest or
+workload model is about. A heuristic would have mislabelled 79 of them.
+
+**§18c. BACK-TO-BACKS DO NOT SHOW A FATIGUE PENALTY — the opposite, if anything.**
+
+| rest days | starts | mean save% |
+|---|---|---|
+| 0 (back-to-back) | 452 | **0.8933** |
+| 1 | 1,673 | 0.8857 |
+| 2 | 475 | 0.8854 |
+| 3 | 99 | 0.8918 |
+| 4 | 47 | 0.8700 |
+
+No monotone pattern, and the back-to-back group is the *best* of the large buckets. **Do not put a
+rest-fatigue term in an NHL model on intuition.** The obvious confound is selection — a club often
+starts its BACKUP on the second night, so "back-to-back" is partly "a different goalie" rather than
+"the same goalie, tired" — and the right test therefore conditions on the GOALIE, not on the date.
+Noted here so the naive version is not shipped as a feature.
+
+### §18d. The starting goalie is PRICED — it does not beat the NHL close (2026-10-13)
+
+The obvious hockey input, tested at the project's standard bar. **3,241 games**, four backfilled
+seasons of closing moneylines joined to who actually started.
+
+**Mechanism stated in advance:** a goalie faces ~30 shots, so a one-point save-percentage gap
+between the starters is worth ~0.3 goals against a ~2.6-goal margin SD. Starters are announced in
+the morning, hours before the close. So either the market has already moved on it, or a cheap
+observable beats the close.
+
+**No look-ahead:** a starter's quality is his save% over games STRICTLY BEFORE this one, shrunk
+toward the league mean by 500 shots, and a game is skipped unless both starters have 200+ prior
+shots. Using season or career numbers leaks the outcome and is the easiest way to fake an edge here.
+
+**TEST 1 — does the goalie gap explain the market's error?**
+
+    slope  +0.0157 win-prob per save% point    SE 0.0087    t = +1.81
+
+Not significant. A market that fully prices the starter gives zero, and this is within noise of it.
+
+**TEST 2 — bet the better goalie, graded at the closing price.**
+
+| split | n | win% | break-even | edge | ROI | SE | t |
+|---|---|---|---|---|---|---|---|
+| **all** | **3,241** | 56.6% | 57.1% | **−0.5** | **+0.15%** | 2.60 | **+0.06** |
+| 2021-22 | 521 | 59.5% | 56.6% | +2.9 | +15.94% | 13.40 | +1.19 |
+| 2022-23 | 782 | 55.9% | 57.3% | −1.4 | −3.66% | 3.25 | −1.13 |
+| 2023-24 | 819 | 55.3% | 58.5% | −3.2 | −6.92% | 3.04 | −2.28 |
+| 2024-25 | 1,105 | 56.9% | 56.2% | +0.7 | +0.87% | 2.79 | +0.31 |
+
+**+0.15% ROI with a standard error of 2.60 is zero.** The per-season swing from +15.9% to −6.9%,
+with every |t| under 2.3, is what noise looks like. Betting the better goalie wins 56.6% of the
+time, which sounds like a lot until you notice the prices imply 57.1% — you are paying for the
+goalie you are backing.
+
+**🚨 ROI WITHOUT A STANDARD ERROR IS NOT A RESULT.** A unit moneyline bet has a payout SD near 1,
+so even 3,000 bets leave an SE around 2.6 points — larger than almost any "edge" anyone quotes. The
+first cut of this test printed +1.22% and no error bar, and that number is indistinguishable from
+the +0.15% it became when a join bug was fixed.
+
+**WHAT THIS DOES AND DOES NOT SAY.** It says the starter is in the CLOSING line, which is the bar
+this project holds everything to. It does NOT test whether the line MOVES on the announcement —
+that is a CLV question needing intraday odds, and the backfilled archive holds one snapshot per
+event, taken near puck drop. So "can you beat the opener by knowing the goalie first" is still open
+and is a different, harder data problem.
+
+**Consequence:** goalie identity is Context for the NHL, not a model feature, and NHL stays
+Value-Finder-only. The goalie table keeps its value for the places the closing line is not the
+benchmark — shots and saves props, where a goalie's workload is the quantity being priced.
+
+A JOIN BUG WORTH REMEMBERING, because it is the third time this class has bitten in one week: the
+odds feed's commence_time is UTC and the NHL's gameDate is local, so a 10pm ET game is *tomorrow*
+in UTC. Keying on the UTC date alone matched 1,261 of 3,987 events — it silently discarded most of
+the Western conference. With neighbouring dates tried it matches 3,945 of 3,964.

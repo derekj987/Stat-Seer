@@ -1,0 +1,65 @@
+name: Refresh NHL results
+
+# Upserts the season-to-date NHL final scores and exact puck-drop times into Supabase
+# `nhl_results` (ingest/nhl_results.sql) from the NHL's own public JSON feed. Free: no API key,
+# no credits, ~30 requests for a whole season because the schedule endpoint returns a week at a
+# time.
+#
+# WHY WEEKLY AND NOT DAILY. NOTHING HERE IS PERISHABLE — this is the opposite of
+# capture-nhl-props.yml, where a day not captured is a day of history gone for good. A final
+# score is a permanent fact the NHL will still serve months later, so a missed run is picked up
+# whole by the next one and there is nothing to race. Weekly is enough to keep the table current
+# for grading; daily would just be 6 extra runs that rewrite the same rows.
+#
+# IT UPSERTS, SO RE-RUNNING IS FREE AND SAFE. nhl_results.py writes with merge-duplicates on
+# game_id, which also means a game collected while still scheduled (null goals) is UPDATED with
+# its score once played, rather than duplicated or left stale.
+#
+# REGULAR SEASON ONLY, deliberately. Playoff hockey is a different scoring regime and playoff OT
+# has no shootout, so pooling them would blur the odd/even structure the table exists to measure
+# (EMPIRICAL_REFERENCE §14d). Pass --playoffs manually if that is ever wanted.
+#
+# Monday 12:00 UTC (~7-8am ET) — after the weekend's games are final and settled.
+# Oct-May, covering the regular season with a month of slack at each end. All times UTC.
+
+# Minute :28 rather than :00 — GitHub delays and drops scheduled runs hardest at the top of
+# the hour, and every other cron in this repo sits on its own off-peak minute. This file
+# arrived on a branch that predated that measurement. See EMPIRICAL_REFERENCE §17.
+on:
+  schedule:
+    - cron: "28 12 * 10-12,1-5 1"
+  workflow_dispatch:
+    inputs:
+      seasons:
+        description: "Seasons to collect, e.g. 2021-2025. Blank = the season in progress."
+        type: string
+        required: false
+
+concurrency:
+  group: refresh-nhl-results
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi -c requirements.txt
+
+      - name: Collect and upsert
+        env:
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          # Dispatch input via env, not inline ${{ }} — an inline value is pasted into the script
+          # as text before bash runs, so a crafted input could execute.
+          IN_SEASONS:           ${{ github.event.inputs.seasons }}
+        run: |
+          if [ -n "$IN_SEASONS" ]; then
+            python nhl_results.py --seasons "$IN_SEASONS" --supabase
+          else
+            python nhl_results.py --current --supabase
+          fi

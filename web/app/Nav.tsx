@@ -56,7 +56,7 @@ export const SPORT_PATHS: Record<Sport, { analyze: string; context: string; valu
   // NHL arrived Value-Finder-first, which is the architecture's own order — the Value Finder is
   // arithmetic and needs no model. `analyze` was honestly blank until 2026-10-14, when the
   // line-blind shots/saves model went live. It is a PLAYER model only: hockey has no game model
-  // here, and the starting goalie was measured as already priced into the close (§14d), so there
+  // here, and the starting goalie was measured as already priced into the close (§18d), so there
   // is nothing to put on a game board that the market has not already said.
   nhl:   { analyze: "/nhl/model",   context: "",                      value: "/nhl/lines" },
 };

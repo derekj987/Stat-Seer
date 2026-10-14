@@ -5,7 +5,7 @@
 create table if not exists cfb_tailgate_buzz (
     season      smallint    not null,
     week        smallint    not null,
-    id          text        not null,   -- w{week}-{team}-{player-slug}
+    id          text        not null,   -- w{week}-{team}-{player-slug}, "-2" on a repeated player
     player      text        not null,
     team        text        not null,   -- CFBD school name, e.g. "USC", "TCU"
     matchup     text,                   -- optional, e.g. "SJSU @ USC"
