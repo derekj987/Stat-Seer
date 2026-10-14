@@ -3465,10 +3465,15 @@ a.snav__dfeat{display:block}
    MacKinnon (COL)", is ~180px of ink. The four numeric columns are each sized to their HEADER
    rather than their value — "3.5" is 24px and "Chance over" is 82px, so the label is what sets the
    track, which is the opposite of the football tables and is why their numbers were reused for
-   neither. Budget: 190+68+62+86+46 = 452 + 4 gaps x 16 + 32 padding = 548. */
+   neither. Budget: ink 190+68+62+86+46 = 452, plus 4 gaps x 16 = 516, plus 32 padding = 548.
+   🚨 THE CONSTANT IN --pmx IS INK **PLUS GAPS** (516), not ink alone. Subtracting 452 handed the
+   five tracks the gap space as well, so each row laid out 64px wider than the box drawn around it
+   and the last columns rendered outside the card — `content-escapes-card`, 7 of them, measured at
+   875px of content in an 827px box. Every sibling budget here does the same sum: --mlb is
+   410 ink + 64 gaps = 474, --mlbk is 480 + 80 = 560. */
 .pmtable--nhlp{min-width:560px;max-width:1120px}
 .pmtable--nhlp .pmrow--data,
-.pmtable--nhlp .pmrow--head{--pmx:max(0px,calc((100% - 452px) / 5));
+.pmtable--nhlp .pmrow--head{--pmx:max(0px,calc((100% - 516px) / 5));
   grid-template-columns:calc(190px + var(--pmx)) calc(68px + var(--pmx)) calc(62px + var(--pmx))
     calc(86px + var(--pmx)) calc(46px + var(--pmx))}
 /* One line per row, so the fixed 62px of .pmtable--data is more than these rows need. */
@@ -5409,7 +5414,15 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
    1176px of content). Anchoring to the meter is safe because .upmeter is a declared wrapper the
    Tip is always inside — the trap the skill warns about is a bubble anchoring to whatever
    HAPPENS to be positioned above it. */
-.impspec .impsec{position:relative}
+/* 🚨 THE ANCHOR TRAVELS WITH THE TRIGGER, NOT WITH THE CONTAINER. This was `.impspec .impsec`,
+   which held only while the meter lived inside a Special Considerations block. The MLB board puts
+   it in its own panel instead, so the heading was never positioned, `position:static` below still
+   applied, and the bubble fell through to the initial containing block — measured 520px wide at
+   left 0, 165px from the seal it belongs to, on both of that board's game cards. Exactly the
+   failure the audit skill documents: a popover must anchor to its own trigger's wrapper, never to
+   whatever happens to be positioned above it. `:has(.tip)` makes the anchor a property of the
+   heading that carries the scroll, so no future placement can break it. */
+.impsec:has(.tip){position:relative}
 .impsec .tip{position:static}
 .impsec .tip__bubble{left:0;right:auto;transform:none;top:calc(100% + 6px);
   /* An explicit width, not left+right: inside the NCAAF board the bubble sits in a <td colSpan>,

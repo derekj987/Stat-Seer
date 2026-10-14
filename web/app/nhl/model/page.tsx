@@ -32,6 +32,9 @@ export const metadata = {
 };
 export const revalidate = 120;
 
+/** Game cards shown before the "show more" control, board-wide. The NFL board's number. */
+const CAP = 4;
+
 export default async function Page() {
   let board: Game[] = [];
   try {
@@ -87,28 +90,50 @@ export default async function Page() {
               The scroller wraps the TABLE ONLY and `.imptable` never carries overflow-x itself —
               that makes every row size to the phone rather than the content, and the model columns
               then draw outside the card border (audit, content-escapes-card). */}
-          <div className="imp-wrap">
+          <div className="imp-wrap hb-moretbl">
             <p className="imp-scrollhint" aria-hidden="true">
               Swipe for totals <span className="imp-scrollhint__a">&rarr;</span>
             </p>
+            {/* Capped at CAP cards, the rest revealed in place by the checkbox — the NFL board's
+                control, for the same reason. A card runs to ~500px with its considerations block
+                and its meter, so a 13-game Tuesday is six screens of scrolling before anything
+                else on the page. Hidden rows stay INSIDE the one table: slicing it into two would
+                duplicate the day header and strand the control mid-list. `gi` counts across day
+                groups so the cap is a board-wide count, not a per-day one. */}
+            <input type="checkbox" id="nhl-gm-more" className="hb-moretbl__chk" aria-hidden="true" tabIndex={-1} />
             <div className="imp-scroll">
               <div className="imptable" role="table" aria-label="NHL lines and the model's read">
-                {days.map((grp) => (
-                  <div key={grp.key}>
+                {(() => { let gi = 0; return days.map((grp) => {
+                  const groupHidden = gi >= CAP;
+                  return (
+                  <div key={grp.key} className={groupHidden ? "hb-row--more" : undefined}>
                     <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
-                    {grp.items.map(({ g, p, mkt }) => (
-                      <NhlGameCard
-                        key={g.eventId}
-                        g={{ eventId: g.eventId, home: g.home, away: g.away,
-                             commence: g.commence, total: g.total.consensus }}
-                        p={p}
-                        mkt={mkt}
-                      />
-                    ))}
+                    {grp.items.map(({ g, p, mkt }) => {
+                      const hidden = gi >= CAP && !groupHidden;
+                      gi++;
+                      return (
+                        <div key={g.eventId} className={hidden ? "hb-row--more" : undefined}>
+                          <NhlGameCard
+                            g={{ eventId: g.eventId, home: g.home, away: g.away,
+                                 commence: g.commence, total: g.total.consensus }}
+                            p={p}
+                            mkt={mkt}
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
+                  );
+                }); })()}
               </div>
             </div>
+            {rows.length > CAP && (
+              <label htmlFor="nhl-gm-more" className="hb-moretbl__sum">
+                <span className="hb-more__chev" aria-hidden="true">&#9656;</span>
+                <span className="hb-moretbl__more">Show {rows.length - CAP} more game{rows.length - CAP === 1 ? "" : "s"}</span>
+                <span className="hb-moretbl__less">Show fewer</span>
+              </label>
+            )}
           </div>
           <p className="lp-cardfoot">
             Spread is the <b>moneyline expressed in goals</b> &mdash; the puck line is
