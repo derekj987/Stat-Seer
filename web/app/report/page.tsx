@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Brand } from "../Nav";
 import Tip from "@/app/Tip";
 import { REPORT_CARDS, type ReportCard, type ReportGame, type ReportProp, type Tally, type WL } from "@/lib/reportCards";
+import SeasonTrend from "./SeasonTrend";
 import { REPORT_NOTES, METHOD_REVISIONS, noteKey } from "@/lib/reportNotes";
 import { abbrevTeam } from "@/lib/ncaafAbbrev";
 
@@ -290,6 +291,10 @@ export default function Page() {
       <nav className="rc-jump" aria-label="Report cards">
         {cards.map((c) => <a key={`${c.sport}-${c.week}`} href={`#${c.sport}-${c.week}`} className="rc-jump__a">{c.label}</a>)}
       </nav>
+      {/* The trend first, the weeks underneath — the question a reader arrives with is "are we
+          getting better", and five separate cards cannot answer it. */}
+      <SeasonTrend sport="nfl" label="NFL" />
+      <SeasonTrend sport="ncaaf" label="NCAAF" />
       {cards.length === 0 ? (
         <p className="rc-muted">No graded weeks yet.</p>
       ) : cards.map((c) => <Card key={`${c.sport}-${c.season}-${c.week}`} c={c} />)}

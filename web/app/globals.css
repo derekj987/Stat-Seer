@@ -3459,6 +3459,33 @@ a.snav__dfeat{display:block}
 .pmtable--mlbk .pmrow--data{height:56px;align-items:center}
 .pmtable--mlbk .pmrow--head{align-items:end}
 .pmtable--mlbk .pmrow--data .pmcell--player{line-height:1.3;white-space:normal}
+/* Report card, week by week — eight columns. Every cell is a record or a pair of numbers, so the
+   tracks are set by the WIDEST DATA value with the header allowed to wrap underneath it ("Against
+   the close" is two words over a "13-2-1 87%" that is 78px of ink).
+   🚨 BUDGETED FOR THE RAIL-BOUNDED WIDTH (861px), NOT FOR 1440. The first cut summed to 878 and
+   the audit reported 19px of scroll on both trend tables — which is exactly 880 min-width inside
+   the 861 the two rails leave. The content column is 826-861 on a 1440 screen and that is the
+   number to design against.
+   Budget: ink 88+48+92+92+92+104+100+96 = 712, plus 7 gaps x 16 = 824, plus 32 padding = 856.
+   The constant in --pmx is ink PLUS GAPS, which is the sum the audit caught me getting wrong on
+   .pmtable--nhlp the same day. */
+.pmtable--rctr{min-width:856px;max-width:1180px}
+.pmtable--rctr .pmrow--data,
+.pmtable--rctr .pmrow--head{--pmx:max(0px,calc((100% - 824px) / 8));
+  grid-template-columns:calc(88px + var(--pmx)) calc(48px + var(--pmx)) calc(92px + var(--pmx))
+    calc(92px + var(--pmx)) calc(92px + var(--pmx)) calc(104px + var(--pmx))
+    calc(100px + var(--pmx)) calc(96px + var(--pmx))}
+.pmtable--rctr .pmrow--data:not(.pmrow--head){height:44px}
+/* The season line is the only row with enough games to argue with, so it is marked as a total
+   rather than left looking like a sixth week. */
+.rctr__season{border-top:2px solid var(--line);background:var(--surface-2)}
+/* The market's number, beside ours — quieter, because ours is the claim. */
+.rctr__vs{font-size:10.5px;color:var(--muted);white-space:nowrap}
+.rctr--good{color:var(--model)}
+.rctr--bad{color:var(--mkt)}
+.rc-trend .pmcell--player a{color:var(--ink);text-decoration:none;font-weight:600}
+.rc-trend .pmcell--player a:hover{text-decoration:underline}
+
 /* NHL player model — five columns, inside a per-game card like the football boards. Hockey rows
    are the simplest on the site (one market per player, no matchup pill, no slip chip), so the
    player column needs far less than football's 205px: the longest line on the board, "Nathan
