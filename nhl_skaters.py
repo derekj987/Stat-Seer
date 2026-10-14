@@ -55,6 +55,23 @@ CREATE TABLE IF NOT EXISTS nhl_skater_games (
 );
 CREATE INDEX IF NOT EXISTS ix_nhls_player ON nhl_skater_games(player_id, game_date);
 CREATE INDEX IF NOT EXISTS ix_nhls_team   ON nhl_skater_games(team, game_date);
+
+-- 🚨 THE OFFICIAL SCORE, because reconstructing it from goalies UNDERCOUNTS BY 0.44 GOALS A GAME.
+-- An empty-net goal is charged to no goalie, and a shootout decider is not charged either, so
+-- summing goals_against across a team's goalies misses both. Measured across 6,646 games: official
+-- mean total 6.241 against 5.804 reconstructed. A game model built on the reconstruction carries
+-- that 0.44 straight into every projected total and reads UNDER on nearly every game.
+CREATE TABLE IF NOT EXISTS nhl_game_results (
+  game_id     INTEGER PRIMARY KEY,
+  season      INTEGER,
+  game_date   TEXT,
+  home        TEXT,
+  away        TEXT,
+  home_score  INTEGER,
+  away_score  INTEGER,
+  last_period TEXT      -- REG / OT / SO
+);
+CREATE INDEX IF NOT EXISTS ix_nhlres_date ON nhl_game_results(game_date);
 """
 
 COLS = ("game_id", "season", "game_date", "team", "opponent", "is_home", "player_id",
@@ -107,7 +124,7 @@ def main(argv=None):
 
     files = sorted(glob.glob(os.path.join(CACHE, "box_*.json")))
     print(f"{len(files)} cached boxscores")
-    rows, games, skipped = [], 0, 0
+    rows, results, games, skipped = [], [], 0, 0
     for f in files:
         try:
             d = json.load(open(f, encoding="utf-8"))
@@ -122,8 +139,15 @@ def main(argv=None):
         if r:
             rows += r
             games += 1
+        hs = (d.get("homeTeam") or {}).get("score")
+        as_ = (d.get("awayTeam") or {}).get("score")
+        if hs is not None and as_ is not None:
+            results.append((int(d["id"]), d.get("season"), d.get("gameDate"),
+                            (d.get("homeTeam") or {}).get("abbrev"),
+                            (d.get("awayTeam") or {}).get("abbrev"),
+                            hs, as_, (d.get("gameOutcome") or {}).get("lastPeriodType")))
     print(f"{games} regular-season games -> {len(rows)} skater rows "
-          f"({skipped} unreadable cache files)")
+          f"({skipped} unreadable cache files); {len(results)} official scores")
     if args.dry_run:
         for r in rows[:3]:
             print("   ", dict(zip(COLS, r)))
@@ -134,9 +158,12 @@ def main(argv=None):
     conn.executescript(SCHEMA)
     conn.executemany(f"INSERT OR REPLACE INTO nhl_skater_games ({','.join(COLS)}) "
                      f"VALUES ({','.join('?' * len(COLS))})", rows)
+    conn.executemany("INSERT OR REPLACE INTO nhl_game_results "
+                     "(game_id,season,game_date,home,away,home_score,away_score,last_period) "
+                     "VALUES (?,?,?,?,?,?,?,?)", results)
     conn.commit()
     conn.close()
-    print(f"wrote {len(rows)} rows to {DB}")
+    print(f"wrote {len(rows)} skater rows and {len(results)} game results to {DB}")
     return 0
 
 

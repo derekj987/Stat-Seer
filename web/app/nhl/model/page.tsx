@@ -87,14 +87,20 @@ export default async function Page() {
                   <thead>
                     <tr>
                       <th className="hb-l">Game</th>
-                      <th>Our score</th>
-                      <th>Win chance</th>
-                      <th>Our total</th>
-                      <th>Market</th>
+                      <th>Market Spread</th>
+                      <th>Market O/U</th>
+                      <th>Model Spread</th>
+                      <th>Model O/U</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {grp.items.map(({ g, p, mkt }) => (
+                    {grp.items.map(({ g, p, mkt }) => {
+                      // Favourite-and-number, the way every other board on this site writes a
+                      // spread: the favoured club then its line as a negative.
+                      const spread = (m: number, abbr: [string, string]) =>
+                        `${m > 0 ? abbr[0] : abbr[1]} -${Math.abs(m).toFixed(1)}`;
+                      const ab: [string, string] = [p.homeAbbr, p.awayAbbr];
+                      return (
                       <tr key={g.eventId}>
                         {/* Full club names on a wide screen, abbreviations on a phone. Measured at
                             375px the long names wrapped to different line counts and split the row
@@ -103,25 +109,32 @@ export default async function Page() {
                           <span className="hb-books__long">{g.away}<span className="at">@</span>{g.home}</span>
                           <span className="hb-books__short">{p.awayAbbr}<span className="at">@</span>{p.homeAbbr}</span>
                         </td>
+                        {/* 🚨 THE MARKET SPREAD IS THE MONEYLINE IN GOALS, NOT THE PUCK LINE, and the
+                            footnote says so. A puck-line column would print ±1.5 down the page and
+                            carry no information — the size of a hockey favourite lives in the price,
+                            exactly as the MLB board found with the run line. */}
                         <td className="hb-num">
-                          <b className="hb-model">{fmt1(p.awayGoals)}&ndash;{fmt1(p.homeGoals)}</b>
+                          {mkt === null ? <span className="bg__none">&mdash;</span> : spread(mkt, ab)}
                         </td>
                         <td className="hb-num">
-                          <b className="hb-model">{(p.homeWinPct * 100).toFixed(0)}%</b>
-                          <span className="propq__slot"> {p.homeAbbr}</span>
+                          {g.total.consensus === null
+                            ? <span className="bg__none">&mdash;</span>
+                            : fmt1(g.total.consensus)}
+                        </td>
+                        <td className="hb-num">
+                          <b className="hb-model">{spread(p.margin, ab)}</b>
+                          <span className="propq__slot"> {(p.homeWinPct * 100).toFixed(0)}% {p.homeAbbr}</span>
                         </td>
                         <td className="hb-num"><b className="hb-model">{fmt2(p.total)}</b></td>
-                        <td className="hb-num">
-                          {mkt === null ? <span className="bg__none">&mdash;</span>
-                            : <>{mkt > 0 ? p.homeAbbr : p.awayAbbr}{" "}
-                               {Math.abs(mkt).toFixed(1)}</>}
-                        </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
                 <p className="lp-cardfoot">
-                  Win chance is for the home side. Market is the moneyline expressed in goals.
+                  Market Spread is the <b>moneyline expressed in goals</b> &mdash; the puck line is
+                  &plusmn;1.5 on every game, so the size of a favourite lives in the price. Under our
+                  spread is the home side&apos;s win chance.
                 </p>
               </div>
             </div>

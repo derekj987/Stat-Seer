@@ -67,31 +67,24 @@ MARGIN_SD = 2.569       # measured, 1,312 games (see lib/nhlBoard.ts)
 
 
 def load_games(conn):
-    """[(season, date, home, away, home_goals, away_goals)] — the score reconstructed from the
-    goalie rows: a team's goals-against, summed over its goalies, IS the opponent's goals."""
+    """[(season, date, home, away, home_goals, away_goals)] from the OFFICIAL score.
+
+    🚨 NOT RECONSTRUCTED FROM THE GOALIE ROWS, and the difference is not small. An empty-net goal is
+    charged to no goalie, and a shootout decider is not charged either, so summing goals_against
+    across a team's goalies misses both: measured across 6,646 games the official mean total is
+    6.241 against 5.804 reconstructed, a gap of 0.437 goals a game. Shootouts are only 7.2% of
+    games, so the bulk of it is empty netters.
+
+    The first version of this model did reconstruct, and it carried that 0.437 into every projected
+    total — against a market averaging 6.095 it would have read UNDER on very nearly every game.
+    That is the one-way-lean failure this project has already been bitten by twice, and it was
+    caught here only by checking our totals against the market's before shipping the column.
+    """
     rows = conn.execute(
-        "select game_id, season, game_date, team, opponent, is_home, goals_against"
-        "  from nhl_goalie_starts order by game_date, game_id").fetchall()
-    by = collections.defaultdict(list)
-    for r in rows:
-        by[r[0]].append(r)
-    out = []
-    for gid, rs in by.items():
-        sides = collections.defaultdict(int)
-        meta = {}
-        for _, season, date_s, team, opp, is_home, ga in rs:
-            sides[team] += ga or 0
-            meta[team] = (is_home, opp, season, date_s)
-        if len(sides) != 2:
-            continue
-        home = [t for t, m in meta.items() if m[0] == 1]
-        away = [t for t, m in meta.items() if m[0] == 0]
-        if len(home) != 1 or len(away) != 1:
-            continue
-        h, a = home[0], away[0]
-        # conceded by the AWAY side = home goals
-        out.append((meta[h][2], meta[h][3], h, a, sides[a], sides[h]))
-    return sorted(out, key=lambda x: (x[1],))
+        "select season, game_date, home, away, home_score, away_score"
+        "  from nhl_game_results where home_score is not null and away_score is not null"
+        "  order by game_date, game_id").fetchall()
+    return [(r[0], r[1], r[2], r[3], r[4], r[5]) for r in rows]
 
 
 def ratings(games, upto_date=None, season=None):

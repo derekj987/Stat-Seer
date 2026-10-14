@@ -1657,3 +1657,28 @@ own and half the league's.
 a margin against that number is not a comparison — the same trap the MLB run line set (§12d). The
 margin converts to a win probability instead, and the market column shows the moneyline expressed
 in goals.
+
+**§16b. 🚨 RECONSTRUCTING A HOCKEY SCORE FROM GOALIES UNDERCOUNTS BY 0.44 GOALS A GAME.** The first
+cut of this model derived each game's score by summing `goals_against` across a team's goalies. An
+empty-net goal is charged to no goalie, and a shootout decider is not charged either, so both are
+missing. Measured across 6,646 games:
+
+    official mean total      6.241
+    GA-reconstructed         5.804      gap +0.437
+    shootout games           480 (7.2%) — so the bulk of it is empty netters
+
+Against a market averaging **6.095**, a model carrying that 0.437 would have read UNDER on very
+nearly every game — the one-way lean this project has already been bitten by twice. It was caught
+only by checking our totals against the market's BEFORE shipping the column, which is now the
+standing check for any new board.
+
+Switching to the official boxscore score fixed the level AND improved the model: the league rate
+moved 2.879 → **3.069** goals a game (a 6.14 total baseline, against the market's 6.095), and on the
+same held-out 2,504 games the **winner called right rose 54.0% → 56.6%** with Brier 0.2465 → 0.2440.
+Margin and total gains over baseline were unchanged at +2.03% and +0.08%, so the error had been
+sitting almost entirely in the level rather than in the ranking.
+
+**The board matches the football layout** — Game · Market Spread · Market O/U · Model Spread · Model
+O/U — with one hockey-specific note printed under it: **Market Spread is the moneyline expressed in
+goals**, because the puck line is ±1.5 on every game and a column of that would carry no
+information. Same resolution the MLB board reached for the run line (§12d).
