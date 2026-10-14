@@ -1,7 +1,9 @@
 import { Fragment } from "react";
-import { NHL_RATINGS, type NhlTeamRating } from "@/lib/nhlGameModel";
+import { NHL_RATINGS, NHL_LEAGUE_GOALS, type NhlTeamRating } from "@/lib/nhlGameModel";
 import type { NhlGameProj } from "@/lib/nhlGame";
 import { etDayKey } from "@/lib/gameDays";
+import { nhlUpsetMeter } from "@/lib/nhlUpset";
+import { UpsetMeter } from "../UpsetMeter";
 
 // One game card on /nhl/model, built to read as closely to the NFL model's cards as hockey allows
 // (Derek: "setup the NHL model as close to the cards on the NFL model as possible"). It reuses the
@@ -75,6 +77,46 @@ function GoalieColumn({ team, rating }: { team: string; rating: NhlTeamRating | 
   );
 }
 
+/** The Upset Meter's scroll, hockey's version. The football one describes weather and referee
+ *  drivers this panel does not have and omits the one it does, so the explanation travels with the
+ *  sport rather than with the component. */
+function NhlUpsetTip() {
+  return (
+    <>
+      <span className="tip__lead">How upset-prone this game looks, 0-100 — and every number behind
+        it. It is context, not a pick, and nothing here feeds The Model or the Value
+        Finder.</span><br /><br />
+      <b>The headline number</b> is a weighted blend of the drivers below. Above <b>62</b> reads as
+      a live upset spot, <b>48-61</b> worth a look, under 48 means the favourite should hold. A
+      driver a game does not have yet drops out and the rest re-weight, so the scale always runs
+      0-100.<br /><br />
+      <b>Each driver is 0-100 too, where 50 is a neutral game.</b> Higher means that factor argues
+      MORE for an upset.<br /><br />
+      <b>Our model (weight 40)</b> — our line-blind projected margin against the market&apos;s
+      number. 40 means we agree with the market; it climbs as our number leans toward the underdog
+      and tops out when we project the dog to win outright. This is the only driver with a graded,
+      published track record, which is why it carries the most. A goal is a big number in hockey, so
+      the dial is scaled to goals: a full goal of disagreement sits where a touchdown sits on the
+      football board.<br /><br />
+      <b>Scoring (18)</b> — the underdog&apos;s goals scored and the favourite&apos;s goals allowed,
+      each against the league rate of {NHL_LEAGUE_GOALS.toFixed(2)} a game.<br /><br />
+      <b>Chaos (16)</b> — how streaky the favourite has been and how big the underdog&apos;s best
+      night has been, over the last three seasons. Deliberately <b>non-predictive</b> — it is
+      flavour. Read the ends of this one gently: NHL clubs are far more alike here than football
+      teams are, and the whole league fits inside about half a goal of game-to-game
+      swing.<br /><br />
+      <b>What is deliberately not in it, and why.</b> No weather — hockey is indoors. No referee —
+      we do not track NHL crews. No rest: a back-to-back is on the card above because it tells you
+      something about the lineup, but the games themselves show no scoring penalty for one. And no
+      goaltending, which is the one most people would expect. We measured it: a goalie&apos;s save
+      percentage barely carries from one stretch to the next, and every step of pulling it toward
+      the league average improved the projection, all the way to using the league average alone. So
+      a driver built on it would move this number on four or five starts of noise. Who has been
+      starting, and what they have stopped, is on the card above as history.
+    </>
+  );
+}
+
 export default function NhlGameCard({ g, p, mkt }: {
   g: { eventId: string; home: string; away: string; commence: string; total: number | null };
   p: NhlGameProj;
@@ -86,6 +128,16 @@ export default function NhlGameCard({ g, p, mkt }: {
   const restH = restDays(rh?.lastGame, g.commence);
   const restA = restDays(ra?.lastGame, g.commence);
   const b2b = restA === 0 || restH === 0;
+
+  // The Upset Meter needs a dog to be about, and only the market names one.
+  const homeIsDog = mkt === null ? null : mkt < 0;
+  const dogName = homeIsDog === null ? null : homeIsDog ? p.homeAbbr : p.awayAbbr;
+  const favName = homeIsDog === null ? null : homeIsDog ? p.awayAbbr : p.homeAbbr;
+  const upset = nhlUpsetMeter(
+    { marketMarginHome: mkt, modelMarginHome: p.margin, home: rh, away: ra,
+      leagueGoals: NHL_LEAGUE_GOALS },
+    dogName, favName,
+  );
 
   return (
     <div className="impgame">
@@ -173,6 +225,9 @@ export default function NhlGameCard({ g, p, mkt }: {
           Goaltending is who <i>has</i> started, not who is announced — the NHL publishes no
           projected starter, so no board can show one before warm-ups.
         </span>
+        {/* The meter reads the factors above it, so it sits under them — same placement as the
+            NFL card. */}
+        {upset && <UpsetMeter read={upset} tip={<NhlUpsetTip />} />}
       </section>
     </div>
   );

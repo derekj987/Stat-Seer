@@ -64,6 +64,7 @@ REGRESS_K = 6           # toward the league mean
 # that load: at six games a team's rating is half its own and half the league's.
 PRIOR_W = 0
 MARGIN_SD = 2.569       # measured, 1,312 games (see lib/nhlBoard.ts)
+CHAOS_WINDOW = 2        # completed seasons behind the current one, matching analysis/chaos_traits.py
 
 
 def load_games(conn):
@@ -347,11 +348,45 @@ def main(argv=None):
     # Ranks are 1 = best: most goals scored, fewest allowed.
     gf_rank = {t: i + 1 for i, t in enumerate(sorted(teams, key=lambda x: -att[x]))}
     ga_rank = {t: i + 1 for i, t in enumerate(sorted(teams, key=lambda x: dfn[x]))}
+
+    # --- Chaos traits, for the Upset Meter's non-predictive driver ------------------------------
+    # The same two measurements analysis/chaos_traits.py takes for the NFL, over the same window
+    # (the last CHAOS_WINDOW completed seasons plus this one): how VOLATILE a team's game margins
+    # are, and how high its single-game CEILING is. A boom-and-bust favourite is more crashable; a
+    # high-ceiling underdog has a bigger night in it.
+    #
+    # 🚨 NOT PREDICTIVE, BY CONSTRUCTION, and it is the smallest weight on the meter that uses it.
+    # A PERCENTILE HIDES HOW CLOSE THESE CLUBS ARE, so the size was measured rather than assumed:
+    # across 32 teams and three seasons, margin volatility runs 2.39 to 2.85 goals — a 0.46 spread,
+    # 18% of the league median. The NFL's is 11.1 to 16.4, 40% of ITS median. So hockey's teams are
+    # less than half as differentiated on this measure as football's, and a 90th-percentile NHL
+    # favourite is about a third of a goal more volatile than a 10th-percentile one. The driver is
+    # published with that stated; it is not stretched until it looks informative.
+    chaos_seasons = sorted({g[0] for g in games})[-(CHAOS_WINDOW + 1):]
+    margins = collections.defaultdict(list)
+    for s_, d, h, a, hg, ag in games:
+        if s_ not in chaos_seasons:
+            continue
+        margins[h].append(hg - ag)
+        margins[a].append(ag - hg)
+    raw = {t: {"vol": st.pstdev(ms), "ceiling": max(ms)}
+           for t, ms in margins.items() if len(ms) >= 10}
+
+    def pct_rank(vals):
+        order = sorted(vals)
+        n = len(order)
+        return {v: (0.0 if n < 2 else round(100.0 * order.index(v) / (n - 1))) for v in set(vals)}
+
+    volp = pct_rank([r["vol"] for r in raw.values()])
+    ceilp = pct_rank([r["ceiling"] for r in raw.values()])
+    chaos = {t: {"volPct": volp[r["vol"]], "ceilPct": ceilp[r["ceiling"]]} for t, r in raw.items()}
     out = []
     for t in teams:
         out.append({"team": t, "attack": round(att[t], 3), "defence": round(dfn[t], 3),
                     "gfRank": gf_rank[t], "gaRank": ga_rank[t],
-                    "lastGame": last_game.get(t), "goalies": goalies.get(t, [])})
+                    "lastGame": last_game.get(t), "goalies": goalies.get(t, []),
+                    "volPct": chaos.get(t, {}).get("volPct"),
+                    "ceilPct": chaos.get(t, {}).get("ceilPct")})
     if args.dry_run:
         for r in sorted(out, key=lambda r: -r["attack"])[:5]:
             print("   ", r)
@@ -372,6 +407,10 @@ def main(argv=None):
         "  gfRank: number; gaRank: number;",
         "  lastGame: string | null;   // this season's most recent game, for days of rest",
         "  goalies: NhlGoalieForm[];  // who has actually been starting (no projected starter exists)",
+        "  // Upset Meter chaos driver only — margin volatility and single-game ceiling as league",
+        "  // percentiles. Deliberately NON-predictive; null for a club without enough games.",
+        "  volPct: number | null;",
+        "  ceilPct: number | null;",
         "}",
         f"export const NHL_LEAGUE_GOALS = {lg:.3f};",
         f"export const NHL_HOME_ICE = {hfa:.3f};",

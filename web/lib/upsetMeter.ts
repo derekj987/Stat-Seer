@@ -53,7 +53,10 @@ export interface UpsetInput {
 }
 
 export interface UpsetDriver {
-  key: "model" | "scoring" | "weather" | "referee" | "chaos";
+  /** `goaltending` is NHL-only (lib/nhlUpset.ts) — the football meter never emits it, and the
+   *  hockey meter never emits `weather` or `referee`. One union so both sports share the
+   *  component, the CSS and the 0-100 scale. */
+  key: "model" | "scoring" | "weather" | "referee" | "chaos" | "goaltending";
   label: string;
   /** 0-100 — how much this factor argues for an upset. */
   score: number;
@@ -179,6 +182,7 @@ export function upsetMeter(g: UpsetInput, dogName: string | null, favName: strin
 
   const W: Record<UpsetDriver["key"], number> = {
     model: 40, scoring: 18, chaos: 16, weather: 14, referee: 12,
+    goaltending: 0,   // never emitted here; hockey's weights live in lib/nhlUpset.ts
   };
   const wsum = drivers.reduce((s, d) => s + W[d.key], 0);
   const score = wsum ? Math.round(drivers.reduce((s, d) => s + W[d.key] * d.score, 0) / wsum) : 0;

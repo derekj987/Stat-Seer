@@ -17,7 +17,11 @@ const TIER_WORD: Record<UpsetRead["tier"], string> = {
   high: "Upset in play", notable: "Some upset risk", low: "Favourite should hold",
 };
 
-export function UpsetMeter({ read }: { read: UpsetRead }) {
+/** `tip` replaces the explanation for a sport whose drivers differ — hockey has no weather and no
+ *  referee, and gains a goaltending driver, so the football scroll would describe a panel the
+ *  reader is not looking at. Everything else is shared, which is the point: one meter, one scale,
+ *  one set of tiers across the boards. */
+export function UpsetMeter({ read, tip }: { read: UpsetRead; tip?: React.ReactNode }) {
   if (!read.drivers.length) return null;
   return (
     <>
@@ -26,7 +30,7 @@ export function UpsetMeter({ read }: { read: UpsetRead }) {
           upset meter section and make that a header as well. Make all the headers uniform."
           The scroll rides on the header, where its bubble has the block's full width. */}
       <h4 className="impsec">Upset meter
-        <Tip label="Upset meter" text={<>
+        <Tip label="Upset meter" text={tip ?? (<>
           <span className="tip__lead">How upset-prone this game looks, 0-100 — and every number
           behind it. It is context, not a pick, and nothing here feeds The Model or the
           Value Finder.</span><br /><br />
@@ -54,7 +58,7 @@ export function UpsetMeter({ read }: { read: UpsetRead }) {
           one crew tendency measured to persist year to year, plus two HISTORICAL readings at half
           weight: how often the favourite covered in his games, and how often they went over.
           Those two are history, not a carried-over tendency, and are weighted accordingly.
-        </>} />
+        </>)} />
       </h4>
       <div className={`upmeter upmeter--${read.tier}`}>
       <div className="upmeter__head">
