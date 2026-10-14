@@ -40,10 +40,13 @@ const GOALS_LINE = 0.5;
 
 const fmt = (n: number, d: number) => n.toFixed(d);
 
-interface Row {
+export interface NhlModelRow {
   player: string; team: string | null; matchup: string;
+  /** Which game the row belongs to, and when it starts — the board groups by game and by day. */
+  eventId: string; commence: string; home: string; away: string;
   line: number; proj: number; games: number; pOver: number | null;
 }
+type Row = NhlModelRow;
 
 /** Every category's rows, so a page can show one tab or all of them. */
 export function nhlModelRows(games: PropGame[], cat: NhlMarket): Row[] {
@@ -62,6 +65,7 @@ export function nhlModelRows(games: PropGame[], cat: NhlMarket): Row[] {
         if (!p) continue;
         seen.add(q.player);
         rows.push({ player: q.player, team: p.team, matchup: g.matchup,
+                    eventId: g.eventId, commence: g.commence, home: g.home, away: g.away,
                     line, proj: p.proj, games: p.games,
                     pOver: pOver(cat, p.proj, line) });
       }

@@ -207,6 +207,35 @@ def main(argv=None):
     # published. Non-parametric: bucket player-seasons by their per-game mean and count how often a
     # game cleared each line. Every cell holds thousands of games and the table is monotone in the
     # mean for all three lines.
+    # 🚨 GOALIE SAVES NEEDS ITS OWN TABLE, AND NOT HAVING ONE WAS A SILENT HOLE. The Goalie saves
+    # tab published a projection and an em-dash in the column the whole page is built around,
+    # because `pOver` returns null for a market the table was never built for and saves was never
+    # in it. A blank is honest about one row; a blank on every row of a tab is a tab that does not
+    # work.
+    #
+    # It is built from `nhl_goalie_starts` rather than `nhl_skater_games` and keyed on STARTS, so
+    # the bands below are saves per start rather than per game. Two differences from the skater
+    # markets, both forced by the data:
+    #
+    #   * The lines are a LADDER, not three fixed numbers. Books post saves anywhere from the low
+    #     twenties to the mid thirties, so the table carries every half-integer across the range
+    #     the data actually covers; a line outside it still returns null, which is correct.
+    #   * The bands are narrower, because 12,299 starts spread over a 16-save range would make a
+    #     seven-band table where neighbouring bands are three saves apart.
+    #
+    # THE LADDER IS CUT WHERE THE TABLE STOPS BEING MONOTONE, which is the test the skater tables
+    # are already held to and the reason it is not simply 15.5 to 40.5. Measured across the seven
+    # bands: every line from 17.5 to 38.5 rises with the band mean, while 15.5 and 16.5 invert at
+    # the top (0.963 then 0.958) and 39.5 and up invert in the middle — both ends are places where
+    # the probability is near 0 or 1 and the ordering is sampling noise. A table that goes the
+    # wrong way at the edges is worse than one that returns nothing there.
+    GOALIE_SPEC = {
+        "col": "saves", "dp": 1,
+        "lines": [x / 2 for x in range(35, 78, 2)],          # 17.5 .. 38.5, the monotone range
+        "bands": [(0, 23.0), (23.0, 24.5), (24.5, 25.5), (25.5, 26.5),
+                  (26.5, 27.5), (27.5, 29.0), (29.0, 99)],
+    }
+
     def build_over_tables():
         """{market: [band, ...]} — P(stat > line) by the player's own per-game rate, counted off
         real outcomes rather than assumed from a distribution."""
@@ -228,6 +257,27 @@ def main(argv=None):
                             "p": {str(L): round(sum(1 for x in g if x > L) / len(g), 4)
                                   for L in spec["lines"]}})
             out[mk] = tbl
+
+        # Goalies, same recipe against the starts table. The history cut is 15 starts rather than
+        # the skaters' 20 games: a goalie-season IS about sixty starts at most, so 20 would throw
+        # away a third of the backups, who are exactly the band a reader needs when a back-to-back
+        # puts one in net.
+        ghist = collections.defaultdict(list)
+        for season, gid, v in conn.execute(
+                "select season, goalie_id, saves from nhl_goalie_starts"
+                " where is_starter = 1 and saves is not null and shots_against > 0"):
+            ghist[(season, gid)].append(v)
+        ghist = {k: v for k, v in ghist.items() if len(v) >= 15}
+        gtbl = []
+        for lo, hi in GOALIE_SPEC["bands"]:
+            members = [v for v in ghist.values() if lo <= st.mean(v) < hi]
+            g = [x for v in members for x in v]
+            if len(g) < 500:
+                continue
+            gtbl.append({"mean": round(st.mean([st.mean(v) for v in members]), 4), "n": len(g),
+                         "p": {str(L): round(sum(1 for x in g if x > L) / len(g), 4)
+                               for L in GOALIE_SPEC["lines"]}})
+        out["saves"] = gtbl
         return out
 
     over_tables = static["overTables"] if static else build_over_tables()

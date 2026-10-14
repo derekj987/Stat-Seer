@@ -1,7 +1,8 @@
 import { Brand, FlowSteps, ModelSubnav, DayBadge } from "../../../Nav";
 import PinButton from "../../../PinButton";
 import Tip from "../../../Tip";
-import NhlModelPanel, { NHL_MODEL_CATS, nhlCatByKey } from "../../NhlModelPanel";
+import { NHL_MODEL_CATS, nhlCatByKey } from "../../NhlModelPanel";
+import NhlPlayerBoard from "../../NhlPlayerBoard";
 import { nhlPropBoard } from "@/lib/nhlProps";
 
 // NHL · The Model. The section's home, and the first step of the flow every other sport has.
@@ -26,7 +27,7 @@ import { nhlPropBoard } from "@/lib/nhlProps";
 export const metadata = {
   title: "StatSeer — NHL Player Model",
   description:
-    "NHL line-blind player projections — shots on goal and goalie saves, published before puck drop and graded against the result.",
+    "NHL line-blind player projections — shots, points, assists, goals and goalie saves, broken down by game and published before puck drop.",
 };
 export const revalidate = 120;
 
@@ -84,11 +85,13 @@ export default async function Page({ searchParams }: PageProps<"/nhl/model/playe
       <div className="subnavrow"><ModelSubnav active="player" base="nhl" /></div>
 
       {games.length ? (
-        <section className="ncf-sec">
+        <section className="pmcat">
           <CatNav current={cat.key} />
-          {/* heading={false}: this page supplies its own masthead, so the panel's internal
-              "THE MODEL — LINE-BLIND" strip would be a second title for the same thing. */}
-          <NhlModelPanel games={games} cat={cat.key} limit={40} heading={false} />
+          {/* A card per GAME inside the category, the way the NFL and NCAAF player models read.
+              The flat league-wide list this replaced was a ranking by our own projection, and the
+              top of a ranking reads as the night's best plays — which is the one thing this panel
+              is not. */}
+          <NhlPlayerBoard games={games} cat={cat.key} />
         </section>
       ) : (
         <p className="foot">

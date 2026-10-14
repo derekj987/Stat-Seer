@@ -3459,6 +3459,20 @@ a.snav__dfeat{display:block}
 .pmtable--mlbk .pmrow--data{height:56px;align-items:center}
 .pmtable--mlbk .pmrow--head{align-items:end}
 .pmtable--mlbk .pmrow--data .pmcell--player{line-height:1.3;white-space:normal}
+/* NHL player model — five columns, inside a per-game card like the football boards. Hockey rows
+   are the simplest on the site (one market per player, no matchup pill, no slip chip), so the
+   player column needs far less than football's 205px: the longest line on the board, "Nathan
+   MacKinnon (COL)", is ~180px of ink. The four numeric columns are each sized to their HEADER
+   rather than their value — "3.5" is 24px and "Chance over" is 82px, so the label is what sets the
+   track, which is the opposite of the football tables and is why their numbers were reused for
+   neither. Budget: 190+68+62+86+46 = 452 + 4 gaps x 16 + 32 padding = 548. */
+.pmtable--nhlp{min-width:560px;max-width:1120px}
+.pmtable--nhlp .pmrow--data,
+.pmtable--nhlp .pmrow--head{--pmx:max(0px,calc((100% - 452px) / 5));
+  grid-template-columns:calc(190px + var(--pmx)) calc(68px + var(--pmx)) calc(62px + var(--pmx))
+    calc(86px + var(--pmx)) calc(46px + var(--pmx))}
+/* One line per row, so the fixed 62px of .pmtable--data is more than these rows need. */
+.pmtable--nhlp .pmrow--data:not(.pmrow--head){height:46px}
 /* Game model board — six columns. A chart rather than the football boards' cards because MLB
    plays fifteen games a NIGHT against football's sixteen a week, so cards become four screens of
    scrolling.
