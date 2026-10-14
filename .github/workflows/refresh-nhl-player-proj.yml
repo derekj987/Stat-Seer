@@ -64,6 +64,16 @@ jobs:
       - name: Extract skater game logs from the cached boxscores
         run: python nhl_skaters.py
 
+      # Keep the durable table current. The SQLite the steps above build lives only for this job,
+      # so without this push nhl_goalie_starts would be the one-off backfill forever. Upsert on
+      # (game_id, goalie_id), so re-sending a game already there is a no-op rather than a duplicate
+      # — this table records completed games and is deliberately NOT append-only.
+      - name: Push goalie starts to Supabase
+        env:
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python nhl_goalies.py --season 20262027 --supabase
+
       - name: Build line-blind player projections
         run: python nhl_player_proj.py --static ingest/nhl_static_inputs.json
 
