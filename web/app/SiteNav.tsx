@@ -203,17 +203,18 @@ export default function SiteNav() {
               </div>
             </details>
 
-            {/* NHL — the one live sport with NO model, so the group breaks the template on purpose:
-                its name links to Value Finder and there is no "The Model" row, because listing one
-                would promise a page that does not exist. Sweet Spots is absent for the same reason
-                it is absent from the NHL subnav — the puck line is ±1.5 on every game, so there is
-                no half-point to find. */}
+            {/* NHL — now the full template bar one row. The Model arrived 2026-10-14 (a PLAYER
+                model; hockey has no game model, because the starting goalie measured as already
+                priced into the close). Sweet Spots stays absent for its own reason: the puck line
+                is ±1.5 on every game, so there is no half-point to find. */}
             <details className="snav__pgroup snav__sportgroup">
               <summary className="snav__sportsum">
-                <a href="/nhl/lines" className="snav__sportname" onClick={(e) => e.stopPropagation()}>NHL</a>
+                <a href="/nhl/model" className="snav__sportname" onClick={(e) => e.stopPropagation()}>NHL</a>
                 <span className="snav__sportchev" aria-hidden="true">▾</span>
               </summary>
               <div className="snav__sportkids">
+                <a href="/nhl/model" className="snav__dfeat">The Model</a>
+
                 <details className="snav__pgroup snav__pgroup--feat" open>
                   <summary className="snav__dfeat snav__psum">Value Finder</summary>
                   <a href="/nhl/lines" className="snav__dsub">Game Lines</a>

@@ -53,10 +53,12 @@ export const SPORT_PATHS: Record<Sport, { analyze: string; context: string; valu
   // than a link to a 404 — the reader sees the same three-step flow every sport has, and sees
   // honestly which parts of it exist for this one.
   mlb:   { analyze: "/mlb/model",   context: "",                      value: "/mlb/lines" },
-  // NHL arrives Value-Finder-first, which is the architecture's own order: the Value Finder is
-  // arithmetic and needs no model, while a model needs a season of prop and line captures to
-  // validate against — and those only started on 2026-10-09. So analyze is honestly blank.
-  nhl:   { analyze: "",             context: "",                      value: "/nhl/lines" },
+  // NHL arrived Value-Finder-first, which is the architecture's own order — the Value Finder is
+  // arithmetic and needs no model. `analyze` was honestly blank until 2026-10-14, when the
+  // line-blind shots/saves model went live. It is a PLAYER model only: hockey has no game model
+  // here, and the starting goalie was measured as already priced into the close (§14d), so there
+  // is nothing to put on a game board that the market has not already said.
+  nhl:   { analyze: "/nhl/model",   context: "",                      value: "/nhl/lines" },
 };
 
 export function FlowSteps({ active, base = "nfl" }: {
@@ -105,10 +107,10 @@ export const SPORTS = [
   { key: "nfl", label: "NFL", live: true, home: "/model" },
   { key: "ncaaf", label: "NCAAF", live: true, home: "/ncaaf/model" },
   { key: "mlb", label: "MLB", live: true, home: "/mlb/model" },
-  // NHL's home is Value Finder, not The Model — it is the one live sport with no model, and
-  // pointing its tab at /nhl/model would land on a 404. A sport is "live" here when it has a
-  // section worth visiting, not when it has all three.
-  { key: "nhl", label: "NHL", live: true, home: "/nhl/lines" },
+  // NHL's tab pointed at Value Finder while it had no model. It has one as of 2026-10-14, so its
+  // home is The Model like every other live sport — the sameness of that journey across sports is
+  // the product.
+  { key: "nhl", label: "NHL", live: true, home: "/nhl/model" },
   { key: "nba", label: "NBA", live: false, home: "" },
   { key: "wnba", label: "WNBA", live: false, home: "" },
   { key: "soccer", label: "Soccer", live: false, home: "" },
@@ -341,17 +343,25 @@ export function MoreTable({ id, head, extra, noun, plr, cls, children }: {
 
 /** Sub-tabs inside The Model (Game Model · Player Model). Sits under the leftmost
  *  "The Model" flow step, so it left-aligns like the flow. */
-export function ModelSubnav({ active = "game", base = "nfl" }: {
+export function ModelSubnav({ active = "game", base = "nfl", only }: {
   active?: "game" | "player"; base?: Sport;
+  /** The halves this sport's model actually has. Same escape hatch as ShopSubnav and for the same
+   *  reason — a subnav is a promise the page exists. NHL has a PLAYER model and no game model:
+   *  the starting goalie, the one input a hockey game model would turn on, measured as already
+   *  priced into the closing line (EMPIRICAL_REFERENCE §14d), so there is nothing to put on a game
+   *  board that the market has not already said. Omit to show both, which every football sport does. */
+  only?: Array<"game" | "player">;
 }) {
   const game = SPORT_PATHS[base].analyze;
-  const player = `${SPORT_PATHS[base].analyze}/players`;
+  // NHL's model section IS the player model, so its tab is the section root rather than /players.
+  const player = only && !only.includes("game") ? game : `${SPORT_PATHS[base].analyze}/players`;
+  const show = (t: "game" | "player") => !only || only.includes(t);
   return (
     <nav className="subnav subnav--model" aria-label="The Model view">
-      <a href={game} className={active === "game" ? "subnav__t active" : "subnav__t"}
-        aria-current={active === "game" ? "page" : undefined}>Game Model (spreads, O/U&apos;s)</a>
-      <a href={player} className={active === "player" ? "subnav__t active" : "subnav__t"}
-        aria-current={active === "player" ? "page" : undefined}>Player Model (props)</a>
+      {show("game") && <a href={game} className={active === "game" ? "subnav__t active" : "subnav__t"}
+        aria-current={active === "game" ? "page" : undefined}>Game Model (spreads, O/U&apos;s)</a>}
+      {show("player") && <a href={player} className={active === "player" ? "subnav__t active" : "subnav__t"}
+        aria-current={active === "player" ? "page" : undefined}>Player Model (props)</a>}
     </nav>
   );
 }

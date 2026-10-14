@@ -5,7 +5,7 @@ import { etToday } from "@/lib/gameDays";
 import { nhlPropBoard, NHL_CATEGORIES, NHL_PROP_LABELS, nhlCategoryByKey, ONE_SIDED } from "@/lib/nhlProps";
 import { US_BOOKS, bookLegend } from "@/lib/bookLabel";
 import { nhlTeamFor } from "@/lib/nhlTeamTag";
-import NhlModelPanel from "./NhlModelPanel";
+import NhlModelPanel from "../NhlModelPanel";
 import Tip from "../../Tip";
 
 // NHL · Value Finder · Player Props. The same grid the baseball board uses (one row per player,

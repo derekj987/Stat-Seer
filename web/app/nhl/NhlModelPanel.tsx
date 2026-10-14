@@ -19,7 +19,13 @@ interface Row {
   line: number; proj: number; games: number; market: "shots" | "saves"; pOver: number | null;
 }
 
-export default function NhlModelPanel({ games }: { games: PropGame[] }) {
+export default function NhlModelPanel({ games, limit = 12, heading = true }: {
+  games: PropGame[];
+  /** Rows per table. The props tab shows a teaser; the Model section shows the board. */
+  limit?: number;
+  /** The Model section supplies its own masthead, so it suppresses this one. */
+  heading?: boolean;
+}) {
   const rows: Row[] = [];
   for (const g of games) {
     for (const mb of g.markets) {
@@ -61,7 +67,7 @@ export default function NhlModelPanel({ games }: { games: PropGame[] }) {
           </tr>
         </thead>
         <tbody>
-          {list.slice(0, 12).map((r) => (
+          {list.slice(0, limit).map((r) => (
             <tr key={`${r.market}-${r.player}`}>
               <td className="hb-l">
                 {r.player}
@@ -84,9 +90,11 @@ export default function NhlModelPanel({ games }: { games: PropGame[] }) {
 
   return (
     <section className="ncf-sec nhlmodel">
-      <div className="lpf__head lpf__head--snap">
-        <div className="lp-snaplabel">THE MODEL &mdash; LINE-BLIND</div>
-      </div>
+      {heading && (
+        <div className="lpf__head lpf__head--snap">
+          <div className="lp-snaplabel">THE MODEL &mdash; LINE-BLIND</div>
+        </div>
+      )}
       <p className="lpf__sub">
         Our own read on tonight&apos;s players, built from each player&apos;s own volume and set{" "}
         <b>without looking at the book&apos;s line</b>. The headline number is the{" "}
