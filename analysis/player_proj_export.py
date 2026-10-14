@@ -196,7 +196,7 @@ def norm(name):
 # a team defence is not a person; both arrive in `player_name` and would otherwise become rows now
 # that a priced name is no longer required to match a roster. "No Scorer" is priced in all 16
 # games, which is the tell — a player appears in one.
-NOT_A_PLAYER = re.compile(r"(d/?st|defense|no (scorer|touchdown)|test player)", re.I)
+NOT_A_PLAYER = re.compile(r"\b(d/?st|defense|no (scorer|touchdown)|test player)\b", re.I)
 
 
 # market -> (category, projection key)

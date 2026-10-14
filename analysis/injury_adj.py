@@ -290,7 +290,7 @@ def _news_out(season):
 
         def _n(x):
             y = _re.sub(r"[^a-z ]", "", str(x).lower())
-            y = _re.sub(r"(jr|sr|ii|iii|iv|v)", "", y)
+            y = _re.sub(r"\b(jr|sr|ii|iii|iv|v)\b", "", y)
             return _re.sub(r"\s+", " ", y).strip()
 
         ros = pd.read_csv(ROSTER_LOCAL % season, low_memory=False)             if os.path.exists(ROSTER_LOCAL % season) else None
