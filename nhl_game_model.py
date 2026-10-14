@@ -141,13 +141,54 @@ def norm_cdf(z):
     return 0.5 * (1 + math.erf(z / math.sqrt(2)))
 
 
-def win_prob(margin):
-    """P(home wins) from an expected margin, through the measured margin SD.
+# Expected-margin bands for the EMPIRICAL win curve. Hockey margins are tightly packed, so the
+# bands are narrow in the middle where almost every game sits and open up at the edges.
+WIN_BANDS = [-9, -0.60, -0.40, -0.25, -0.12, 0.0, 0.12, 0.25, 0.40, 0.60, 9]
 
-    Hockey has no ties, so this is P(margin > 0). The normal is a poor fit to a distribution with
-    43% of its mass on |1| — the ORDERING is reliable, the third decimal is not, which is why the
-    page prints a percentage and never a price."""
+
+def win_prob(margin):
+    """P(home wins) from an expected margin, through the measured MARGIN SD — the OLD way, kept
+    only so the backtest can score it against the empirical curve that replaced it."""
     return norm_cdf(margin / MARGIN_SD)
+
+
+def fit_win_table(pairs):
+    """[(lo, hi, mid_margin, n, p_home_win)] counted off real outcomes.
+
+    🚨 WHY NOT A NORMAL. An NHL margin distribution is nothing like one: there are no ties, 43.2%
+    of games finish inside a single goal, and ~25% are settled in overtime or a shootout where the
+    winning margin can ONLY be one. §14d measured the companion effect on totals — 68% of them land
+    odd, because a shootout adds exactly one goal, and a fitted Poisson misprices the push on a 6.0
+    total by five points. The same objection applies to putting a smooth curve over margins, so the
+    curve is counted rather than assumed."""
+    out = []
+    for lo, hi in zip(WIN_BANDS, WIN_BANDS[1:]):
+        v = [(m, w) for m, w in pairs if lo <= m < hi]
+        if len(v) < 150:
+            continue
+        out.append({"lo": round(lo, 3), "hi": round(hi, 3),
+                    "mid": round(sum(m for m, _ in v) / len(v), 4),
+                    "n": len(v), "p": round(sum(w for _, w in v) / len(v), 4)})
+    # Monotone by construction: a bigger expected margin cannot mean a smaller win chance, and a
+    # thin band must not be allowed to invert the curve.
+    for i in range(1, len(out)):
+        out[i]["p"] = max(out[i]["p"], out[i - 1]["p"])
+    return out
+
+
+def win_prob_table(margin, table):
+    """Interpolate the empirical curve on band midpoints; clamp outside the fitted range."""
+    if not table:
+        return win_prob(margin)
+    if margin <= table[0]["mid"]:
+        return table[0]["p"]
+    if margin >= table[-1]["mid"]:
+        return table[-1]["p"]
+    for a, b in zip(table, table[1:]):
+        if a["mid"] <= margin <= b["mid"]:
+            t = (margin - a["mid"]) / (b["mid"] - a["mid"]) if b["mid"] > a["mid"] else 0
+            return a["p"] + t * (b["p"] - a["p"])
+    return win_prob(margin)
 
 
 def fit_hfa(games, seasons):
@@ -155,16 +196,34 @@ def fit_hfa(games, seasons):
     return st.mean(diffs) if diffs else 0.13
 
 
+def collect_pairs(games, seasons, hfa):
+    """[(expected_margin, home_won)] walking forward, prior games only."""
+    pairs = []
+    for season in sorted({g[0] for g in games if g[0] in seasons}):
+        gs = [g for g in games if g[0] == season]
+        for i, (s, d, h, a, hg, ag) in enumerate(gs):
+            if i < 60:
+                continue
+            att, dfn, lg = ratings(games, upto_date=d, season=season)
+            if h not in att or a not in att:
+                continue
+            ph, pa = project(att[h], dfn[h], att[a], dfn[a], lg, hfa)
+            pairs.append((ph - pa, 1 if hg > ag else 0))
+    return pairs
+
+
 def backtest(games, train, hold):
     hfa = fit_hfa(games, train)
     print(f"  fitted home ice on train: {hfa:+.3f} goals")
+    # Fit the empirical win curve on TRAIN only, then score both it and the normal on HOLDOUT.
+    win_tbl = fit_win_table(collect_pairs(games, train, hfa))
     # Walk the held-out seasons game by game, rating only on what came before.
     rows = [g for g in games if g[0] in hold]
     by_season = collections.defaultdict(list)
     for g in rows:
         by_season[g[0]].append(g)
     tot = {"n": 0, "mae_margin": [], "mae_total": [], "base_margin": [], "base_total": [],
-           "correct": 0, "brier": []}
+           "correct": 0, "brier": [], "brier_tbl": [], "correct_tbl": 0}
     for season, gs in by_season.items():
         prior_att, prior_dfn, prior_lg = ratings(games, season=season - 10001)
         for i, (s, d, h, a, hg, ag) in enumerate(gs):
@@ -183,9 +242,13 @@ def backtest(games, train, hold):
             # Baseline: home ice and the league total, i.e. knowing nothing about the teams.
             tot["base_margin"].append(abs(hfa - (hg - ag)))
             tot["base_total"].append(abs(2 * lg - (hg + ag)))
+            won = 1 if hg > ag else 0
             p = win_prob(m)
-            tot["correct"] += (p > 0.5) == (hg > ag)
-            tot["brier"].append((p - (1 if hg > ag else 0)) ** 2)
+            tot["correct"] += (p > 0.5) == bool(won)
+            tot["brier"].append((p - won) ** 2)
+            pt = win_prob_table(m, win_tbl)
+            tot["correct_tbl"] += (pt > 0.5) == bool(won)
+            tot["brier_tbl"].append((pt - won) ** 2)
     n = tot["n"]
     if not n:
         print("  no held-out games")
@@ -195,8 +258,16 @@ def backtest(games, train, hold):
           f"   {(st.mean(tot['base_margin'])-st.mean(tot['mae_margin']))/st.mean(tot['base_margin'])*100:+.2f}%")
     print(f"    total  MAE  {st.mean(tot['mae_total']):.4f}  vs baseline {st.mean(tot['base_total']):.4f}"
           f"   {(st.mean(tot['base_total'])-st.mean(tot['mae_total']))/st.mean(tot['base_total'])*100:+.2f}%")
-    print(f"    winner called right {tot['correct']/n*100:.1f}%   Brier {st.mean(tot['brier']):.4f}"
-          f"  (always-home baseline Brier {st.mean([(0.5-(1 if g[4]>g[5] else 0))**2 for g in rows]):.4f})")
+    base_brier = st.mean([(0.5 - (1 if g[4] > g[5] else 0)) ** 2 for g in rows])
+    print(f"    coin-flip baseline Brier {base_brier:.4f}")
+    print(f"    NORMAL on the margin SD   winner {tot['correct']/n*100:.1f}%   Brier {st.mean(tot['brier']):.4f}")
+    print(f"    EMPIRICAL win curve       winner {tot['correct_tbl']/n*100:.1f}%   Brier {st.mean(tot['brier_tbl']):.4f}"
+          f"   {(st.mean(tot['brier'])-st.mean(tot['brier_tbl']))/st.mean(tot['brier'])*100:+.2f}% vs normal")
+    print()
+    print(f"  fitted curve ({len(win_tbl)} bands):")
+    for b in win_tbl:
+        print(f"    margin {b['lo']:+.2f}..{b['hi']:+.2f}  mid {b['mid']:+.3f}  n={b['n']:5}"
+              f"  P(home) {b['p']:.3f}   normal says {win_prob(b['mid']):.3f}")
 
 
 def main(argv=None):

@@ -1992,3 +1992,39 @@ A JOIN BUG WORTH REMEMBERING, because it is the third time this class has bitten
 odds feed's commence_time is UTC and the NHL's gameDate is local, so a 10pm ET game is *tomorrow*
 in UTC. Keying on the UTC date alone matched 1,261 of 3,987 events — it silently discarded most of
 the Western conference. With neighbouring dates tried it matches 3,945 of 3,964.
+
+---
+
+### §19. The margin→win% normal was tested and kept (2026-10-14)
+
+§14d established that NHL scoring does not take a smooth distribution — totals are 68% odd and a
+Poisson misprices the push on a 6.0 by five points. The obvious corollary was that the game board's
+**margin → win probability** conversion, a normal over the measured margin SD, had the same defect.
+Tested on the training seasons, scored on 2,504 held-out games:
+
+| conversion | held-out Brier | winner | vs shipped |
+|---|---|---|---|
+| **normal (shipped)** | **0.24400** | 56.6% | — |
+| empirical 9-band win curve | 0.24449 | 55.0% | **−0.35%** |
+| normal, width fitted on train (k=1.5) | 0.24396 | 56.6% | **+0.02%** |
+
+**Neither replacement beats it, so neither shipped.** The corollary does not transfer: a normal over
+*margins* survives where a Poisson over *totals* does not.
+
+**But the diagnosis was real, and it is a known limitation rather than a clean bill of health.** The
+empirical curve is measurably steeper than the normal at both edges:
+
+| expected margin | observed P(home) | normal says |
+|---|---|---|
+| −0.49 | 0.383 | 0.424 |
+| −0.06 | 0.464 | 0.491 |
+| +0.32 | 0.581 | 0.550 |
+| +0.85 | **0.687** | **0.630** |
+
+At +0.85 that is ~3 SE on n=734 — the normal genuinely understates confidence in the tails. It is
+not corrected because **a single width parameter that helps the tails hurts the middle**, where
+nearly every NHL game sits, and the honest fit (chosen on train) nets +0.02%. The right fix is a
+non-linear recalibration, which is the empirical table, which overfits at this sample size.
+
+Revisit with more seasons. `nhl_game_model.py --backtest` now scores both conversions side by side
+on every run, so the assumption is re-tested rather than inherited.

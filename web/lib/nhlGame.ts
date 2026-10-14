@@ -61,6 +61,21 @@ export function projectGame(homeName: string, awayName: string): NhlGameProj | n
     // league and 43.2% of games finish inside one goal, so comparing our margin to a 1.5 "spread"
     // is the mistake the MLB run line already taught this project. P(margin > 0) is the question
     // the number can actually answer.
+    //
+    // THE NORMAL STAYS, AND THAT IS NOW MEASURED RATHER THAN ASSUMED. §14d warns against putting a
+    // smooth distribution over NHL scoring, so two replacements were fitted on the training seasons
+    // and scored on 2,504 held-out games (EMPIRICAL_REFERENCE §19):
+    //
+    //     normal, as here                       Brier 0.24400   winner 56.6%
+    //     empirical 9-band win curve            Brier 0.24449   -0.35%
+    //     normal with a fitted width (k=1.5)    Brier 0.24396   +0.02%
+    //
+    // Neither beats it, so neither ships. KNOWN LIMITATION, worth stating because it is real: the
+    // normal COMPRESSES at the edges — at an expected margin of +0.85 it says 63.0% where the
+    // observed rate is 68.7% (n=734, about 3 SE). Correcting that globally does not pay, because a
+    // scale that helps the tails hurts the middle, where nearly every game sits. A proper fix is a
+    // non-linear recalibration, which is the empirical table, which overfits at this sample size.
+    // Revisit with more seasons; until then the page prints a whole percentage and never a price.
     homeWinPct: normCdf(margin / NHL_MARGIN_SD),
   };
 }
