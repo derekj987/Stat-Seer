@@ -5466,3 +5466,22 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
   .hb-form--nhlmodel th:nth-child(3),.hb-form--nhlmodel td:nth-child(3){width:22%}
   .hb-form--nhlmodel th:nth-child(4),.hb-form--nhlmodel td:nth-child(4){width:24%}
 }
+
+/* FIVE columns on the NHL game board. Same budget discipline as .hb-form--nhlmodel above: the base
+ * .hb-form declares 1-4 and sums to 100%, so a fifth column gets no width under table-layout:fixed.
+ * Game takes the most because it carries two full club names. */
+.hb-form--nhlgame th:nth-child(1),.hb-form--nhlgame td:nth-child(1){width:36%}
+.hb-form--nhlgame th:nth-child(2),.hb-form--nhlgame td:nth-child(2){width:16%}
+.hb-form--nhlgame th:nth-child(3),.hb-form--nhlgame td:nth-child(3){width:17%}
+.hb-form--nhlgame th:nth-child(4),.hb-form--nhlgame td:nth-child(4){width:15%}
+.hb-form--nhlgame th:nth-child(5),.hb-form--nhlgame td:nth-child(5){width:16%}
+.hb-form--nhlgame td:nth-child(1){white-space:normal}
+@media (max-width:560px){
+  /* Drop Our total on a phone and re-budget the rest to 100. It is the column the measurement says
+     carries least — level with the league average — so it is the one to lose first. */
+  .hb-form--nhlgame th:nth-child(4),.hb-form--nhlgame td:nth-child(4){display:none}
+  .hb-form--nhlgame th:nth-child(1),.hb-form--nhlgame td:nth-child(1){width:40%}
+  .hb-form--nhlgame th:nth-child(2),.hb-form--nhlgame td:nth-child(2){width:20%}
+  .hb-form--nhlgame th:nth-child(3),.hb-form--nhlgame td:nth-child(3){width:21%}
+  .hb-form--nhlgame th:nth-child(5),.hb-form--nhlgame td:nth-child(5){width:19%}
+}

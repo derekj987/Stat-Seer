@@ -91,37 +91,76 @@ def main(argv=None):
     if args.static:
         with open(args.static, encoding="utf-8") as fh:
             static = json.load(fh)
-        print(f"static inputs: {len(static['skaterPrior'])} skater / "
-              f"{len(static['goaliePrior'])} goalie baselines, {len(static['overTable'])} bands")
+        print(f"static inputs: {sum(len(v) for v in static['skaterPrior'].values())} skater / "
+              f"{len(static['goaliePrior'])} goalie baselines across "
+              f"{len(static['overTables'])} markets")
 
-    # ---- skaters: shots on goal ----
-    cur = collections.defaultdict(list)
-    prior = collections.defaultdict(list)
+    # ---- skaters: one projection per market the book actually posts ----
+    #
+    # 🚨 EVERY ONE OF THESE IS PUBLISHED AS A PROBABILITY, which is what makes four different
+    # markets comparable to four different prices. The lines below are the ones the feed posts:
+    # shots 1.5/2.5/3.5, assists and points at 0.5 (and points also 1.5), and GOALS as the
+    # anytime-scorer market, which is already a probability and so needs no line at all — P(>0.5)
+    # IS "does he score". That market being a probability on both sides is exactly why the football
+    # boards publish anytime TD as a percentage, and it is the shape the other three are converted
+    # into rather than the exception.
+    #
+    # Goals are the one market the project's own rule says NOT to project directly: a goal is a
+    # shot times a shooting percentage, shots persist at r = 0.949 and shooting% at only 0.563
+    # (§15a). But the P(over) table is built on the HISTORICAL DISTRIBUTION of goals at a given
+    # goal rate, not on a parametric model of them, so the decomposition is already baked into the
+    # empirical frequencies — a player projected at 0.35 goals a game scored at the rate players
+    # projected at 0.35 actually scored. Projecting the rate and reading the frequency off real
+    # outcomes is the same discipline by another route.
+    SKATER_MARKETS = {
+        "shots":   {"col": "sog",     "lines": [1.5, 2.5, 3.5], "dp": 2,
+                    "bands": [(0, 1.25), (1.25, 1.75), (1.75, 2.25), (2.25, 2.75),
+                              (2.75, 3.25), (3.25, 3.75), (3.75, 99)]},
+        "goals":   {"col": "goals",   "lines": [0.5], "dp": 3,
+                    "bands": [(0, 0.08), (0.08, 0.14), (0.14, 0.20), (0.20, 0.28),
+                              (0.28, 0.38), (0.38, 0.50), (0.50, 9)]},
+        "assists": {"col": "assists", "lines": [0.5, 1.5], "dp": 3,
+                    "bands": [(0, 0.15), (0.15, 0.25), (0.25, 0.35), (0.35, 0.50),
+                              (0.50, 0.70), (0.70, 0.95), (0.95, 9)]},
+        "points":  {"col": "points",  "lines": [0.5, 1.5], "dp": 3,
+                    "bands": [(0, 0.25), (0.25, 0.40), (0.40, 0.55), (0.55, 0.75),
+                              (0.75, 1.00), (1.00, 1.30), (1.30, 9)]},
+    }
+
     names, teams = {}, {}
-    for season, pid, nm, team, sog in conn.execute(
-            "select season, player_id, player_name, team, sog from nhl_skater_games"
-            " where sog is not null and toi_seconds > 0 order by game_date, game_id"):
-        if season == CURRENT_SEASON:
-            cur[pid].append(sog)
-            names[pid] = nm
-            teams[pid] = team
-        elif season == PRIOR_SEASON:
-            prior[pid].append(sog)
-            names.setdefault(pid, nm)
-    league_sog = st.mean([v for vs in cur.values() for v in vs]) if cur else 1.72
+    cur_by, prior_by = {}, {}
+    for mk, spec in SKATER_MARKETS.items():
+        cur_by[mk] = collections.defaultdict(list)
+        prior_by[mk] = collections.defaultdict(list)
+        for season, pid, nm, team, v in conn.execute(
+                f"select season, player_id, player_name, team, {spec['col']} from nhl_skater_games"
+                f" where {spec['col']} is not null and toi_seconds > 0 order by game_date, game_id"):
+            if season == CURRENT_SEASON:
+                cur_by[mk][pid].append(v)
+                names[pid] = nm
+                teams[pid] = team
+            elif season == PRIOR_SEASON:
+                prior_by[mk][pid].append(v)
+                names.setdefault(pid, nm)
+
     skaters = []
-    for pid, vals in cur.items():
-        if len(vals) < MIN_GAMES:
-            continue
-        # Rounded to the same precision the static file stores, or the two paths differ in the
-        # third decimal and the published projection moves by 0.01 depending on where it was built.
-        pr = (round(st.mean(prior[pid]), 3) if len(prior.get(pid, [])) >= MIN_PRIOR_SKATER
-              else (static["skaterPrior"].get(str(pid)) if static else None))
-        proj, n = blend(vals, pr, league_sog)
-        skaters.append({"id": pid, "player": names.get(pid), "team": teams.get(pid),
-                        "market": "shots", "proj": round(proj, 2), "games": n,
-                        "seasonMean": round(st.mean(vals), 2),
-                        "priorMean": round(pr, 2) if pr is not None else None})
+    league_rate = {}
+    for mk, spec in SKATER_MARKETS.items():
+        cur, prior = cur_by[mk], prior_by[mk]
+        league_rate[mk] = st.mean([v for vs in cur.values() for v in vs]) if cur else 0.0
+        for pid, vals in cur.items():
+            if len(vals) < MIN_GAMES:
+                continue
+            # Rounded to the precision the static file stores, or the two paths differ in the third
+            # decimal and the published projection moves depending on where it was built.
+            prior_vals = prior.get(pid, [])
+            pr = (round(st.mean(prior_vals), 3) if len(prior_vals) >= MIN_PRIOR_SKATER
+                  else (static["skaterPrior"].get(mk, {}).get(str(pid)) if static else None))
+            proj, n = blend(vals, pr, league_rate[mk])
+            skaters.append({"id": pid, "player": names.get(pid), "team": teams.get(pid),
+                            "market": mk, "proj": round(proj, spec["dp"]), "games": n,
+                            "seasonMean": round(st.mean(vals), spec["dp"]),
+                            "priorMean": round(pr, spec["dp"]) if pr is not None else None})
 
     # ---- goalies: saves = projected shots against x LEAGUE save% ----
     g_cur_sa, g_cur_sv, g_prior_sa = (collections.defaultdict(list) for _ in range(3))
@@ -168,46 +207,58 @@ def main(argv=None):
     # published. Non-parametric: bucket player-seasons by their per-game mean and count how often a
     # game cleared each line. Every cell holds thousands of games and the table is monotone in the
     # mean for all three lines.
-    def build_over_table():
-        hist = collections.defaultdict(list)
-        for season, pid, sog in conn.execute(
-                "select season, player_id, sog from nhl_skater_games"
-                " where sog is not null and toi_seconds > 0"):
-            hist[(season, pid)].append(sog)
-        hist = {k: v for k, v in hist.items() if len(v) >= 20}
-        BANDS = [(0, 1.25), (1.25, 1.75), (1.75, 2.25), (2.25, 2.75),
-                 (2.75, 3.25), (3.25, 3.75), (3.75, 99)]
-        LINES = [1.5, 2.5, 3.5]
-        tbl = []
-        for lo, hi in BANDS:
-            members = [v for k, v in hist.items() if lo <= st.mean(v) < hi]
-            g = [x for v in members for x in v]
-            if len(g) < 500:
-                continue
-            tbl.append({"mean": round(st.mean([st.mean(v) for v in members]), 3), "n": len(g),
-                        "p": {str(L): round(sum(1 for x in g if x > L) / len(g), 4) for L in LINES}})
-        return tbl
+    def build_over_tables():
+        """{market: [band, ...]} — P(stat > line) by the player's own per-game rate, counted off
+        real outcomes rather than assumed from a distribution."""
+        out = {}
+        for mk, spec in SKATER_MARKETS.items():
+            hist = collections.defaultdict(list)
+            for season, pid, v in conn.execute(
+                    f"select season, player_id, {spec['col']} from nhl_skater_games"
+                    f" where {spec['col']} is not null and toi_seconds > 0"):
+                hist[(season, pid)].append(v)
+            hist = {k: v for k, v in hist.items() if len(v) >= 20}
+            tbl = []
+            for lo, hi in spec["bands"]:
+                members = [v for k, v in hist.items() if lo <= st.mean(v) < hi]
+                g = [x for v in members for x in v]
+                if len(g) < 500:
+                    continue
+                tbl.append({"mean": round(st.mean([st.mean(v) for v in members]), 4), "n": len(g),
+                            "p": {str(L): round(sum(1 for x in g if x > L) / len(g), 4)
+                                  for L in spec["lines"]}})
+            out[mk] = tbl
+        return out
 
-    over_table = static["overTable"] if static else build_over_table()
+    over_tables = static["overTables"] if static else build_over_tables()
 
     # Freeze the year-constant inputs so a daily job never has to rebuild five seasons.
     if args.write_static:
-        prior_sk = {str(pid): round(st.mean(v), 3) for pid, v in prior.items() if len(v) >= MIN_PRIOR_SKATER}
+        prior_sk = {mk: {str(pid): round(st.mean(v), 3)
+                         for pid, v in prior_by[mk].items() if len(v) >= MIN_PRIOR_SKATER}
+                    for mk in SKATER_MARKETS}
         prior_gl = {str(gid): round(st.mean(v), 2) for gid, v in g_prior_sa.items() if len(v) >= MIN_PRIOR_GOALIE}
         with open(args.write_static, "w", encoding="utf-8", newline="\n") as fh:
             json.dump({"_note": "Frozen by nhl_player_proj.py --write-static from the full local "
                                 "history. Prior-season baselines and the P(over) table are constant "
                                 "for a season; the scheduled refresh reads this instead of "
                                 "rebuilding ~6,600 boxscores. Regenerate once per season.",
-                       "priorSeason": PRIOR_SEASON, "overTable": over_table,
+                       "priorSeason": PRIOR_SEASON, "overTables": over_tables,
                        "skaterPrior": prior_sk, "goaliePrior": prior_gl}, fh, indent=0)
         print(f"wrote {args.write_static} "
-              f"({len(prior_sk)} skater / {len(prior_gl)} goalie baselines)")
+              f"({sum(len(v) for v in prior_sk.values())} skater / {len(prior_gl)} goalie baselines)")
     conn.close()
 
-    rows = sorted(skaters, key=lambda r: -r["proj"]) + sorted(goalies, key=lambda r: -r["proj"])
-    print(f"{len(skaters)} skaters, {len(goalies)} goalies "
-          f"(league {league_sog:.2f} shots, {league_sa:.1f} shots against, save% {league_pct:.4f})")
+    # Market first, then our projection descending — the generated file is read by a page that
+    # tabs by market, so grouping it here saves the page a sort and makes the diff legible.
+    order = {mk: i for i, mk in enumerate(SKATER_MARKETS)}
+    rows = (sorted(skaters, key=lambda r: (order.get(r["market"], 99), -r["proj"]))
+            + sorted(goalies, key=lambda r: -r["proj"]))
+    by_mkt = collections.Counter(r["market"] for r in rows)
+    print(f"{len(skaters)} skater rows across {len(SKATER_MARKETS)} markets "
+          f"({dict(by_mkt)}), {len(goalies)} goalies")
+    print(f"  league rates: " + ", ".join(f"{k} {v:.3f}" for k, v in league_rate.items())
+          + f"; shots against {league_sa:.1f}, save% {league_pct:.4f}")
     if args.dry_run:
         for r in rows[:5]:
             print("   ", r)
@@ -231,28 +282,63 @@ def main(argv=None):
         "",
         "export interface NhlProj {",
         "  id: number; player: string | null; team: string | null;",
-        '  market: "shots" | "saves"; proj: number; games: number;',
-        "  seasonMean: number; priorMean: number | null; shotsAgainst?: number;",
+        "  // `market` is a plain string, NOT a union of the five keys. With ~2,500 elements TS",
+        "  // checks the union per element and gives up: 'Expression produces a union type that is",
+        "  // too complex to represent'. The union lives on NhlMarket in lib/nhlProjMatch.ts, which",
+        "  // is where callers touch it, so nothing is lost but the compile.",
+        "  market: string; proj: number; games: number;",
+        "  seasonMean: number; priorMean: number | null; shotsAgainst: number | null;",
         "}",
         "",
         f"export const NHL_LEAGUE_SAVE_PCT = {league_pct:.4f};",
         "",
-        "/** Empirical P(shots > line) by the player's projected per-game mean, from "
-        f"{sum(b['n'] for b in over_table):,} historical skater games.",
-        " *  Published as a probability because a small count against a half-point line cannot be",
-        " *  compared to a mean, and its median snaps to an integer (EMPIRICAL_REFERENCE §15d). */",
+        "/** Empirical P(stat > line) by the player's projected per-game rate, counted off real",
+        " *  outcomes. One table per market. Published as a probability because a small count",
+        " *  against a half-point line cannot be compared to a mean, and its median snaps to an",
+        " *  integer (EMPIRICAL_REFERENCE §15d). */",
         "export interface NhlOverBand { mean: number; n: number; p: Record<string, number> }",
-        "export const NHL_OVER_TABLE: NhlOverBand[] = [",
-        *[f"  {json.dumps(b)}," for b in over_table],
-        "];",
-        "",
-        "export const NHL_PROJ: NhlProj[] = [",
+        "export const NHL_OVER_TABLES: Record<string, NhlOverBand[]> = {",
     ]
-    body = [f"  {json.dumps(r, ensure_ascii=False)}," for r in rows]
+    for mk, tbl in over_tables.items():
+        head.append(f"  {json.dumps(mk)}: [")
+        head += [f"    {json.dumps(b)}," for b in tbl]
+        head.append("  ],")
+    head += [
+        "};",
+        "",
+    ]
+    # 🚨 EVERY ROW GETS THE SAME KEYS IN THE SAME ORDER. Skater rows had no `shotsAgainst` and
+    # goalie rows did, so TypeScript inferred a different object type per element and gave up on
+    # ~2,500 of them: "Expression produces a union type that is too complex to represent". One
+    # uniform shape is one inferred type. Annotating the array did not help — TS still computes the
+    # literal's own type to check assignability.
+    KEYS = ("id", "player", "team", "market", "proj", "games",
+            "seasonMean", "priorMean", "shotsAgainst")
+    # 🚨 ONE ARRAY PER MARKET, THEN CONCATENATED — NOT ONE ARRAY OF ~2,500.
+    #
+    # TypeScript gives up on a single literal that large: "Expression produces a union type that is
+    # too complex to represent" (TS2590). It is the COUNT, not the shape — the 676-row version of
+    # this file compiled fine, and neither making every row the same shape nor widening `market`
+    # from a union to a string fixed the 2,560-row one. Five arrays of ~630 each are each well
+    # inside the limit, and the spread below is a runtime concat of already-typed arrays, so
+    # nothing has to be re-inferred.
+    #
+    # Adding a sixth market? Give it its own const here rather than growing one of these.
+    body: list[str] = []
+    for mk in list(SKATER_MARKETS) + ["saves"]:
+        part = [r for r in rows if r["market"] == mk]
+        if not part:
+            continue
+        body.append(f"const P_{mk.upper()}: NhlProj[] = [")
+        body += [f"  {json.dumps({k: r.get(k) for k in KEYS}, ensure_ascii=False)}," for r in part]
+        body += ["];", ""]
+    present = [mk for mk in list(SKATER_MARKETS) + ["saves"] if any(r["market"] == mk for r in rows)]
+    body.append("export const NHL_PROJ: NhlProj[] = ["
+                + ", ".join(f"...P_{mk.upper()}" for mk in present) + "];")
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     with open(args.out, "w", encoding="utf-8", newline="\n") as fh:
-        fh.write("\n".join(head + body + ["];", ""]))
-    print(f"wrote {args.out} ({len(rows)} rows)")
+        fh.write("\n".join(head + body + [""]))
+    print(f"wrote {args.out} ({len(rows)} rows across {len(present)} arrays)")
     return 0
 
 

@@ -1607,3 +1607,53 @@ posted line. Monotone in the mean for every line, thousands of games per cell:
 and we read higher than the market on **46.2%** of rows — from a 58% one-way lean to balanced, with
 a 6.6-point mean absolute gap left as the actual disagreement. This is the same reason the football
 boards publish anytime TD as a percentage rather than as a number of touchdowns.
+
+### §16. NHL game model — published, and worth about 2% (2026-10-14)
+
+Derek asked for a game board covering spreads and over/unders "just like the other sections". Built,
+backtested, shipped at `/nhl/model`. Team goals-for and goals-against rates, shrunk toward the league
+mean, combined into an expected score with a fitted home ice of **+0.21 goals**.
+
+**Held out on 2,504 games across two seasons the model never saw:**
+
+| | model | no-information baseline | gain |
+|---|---|---|---|
+| margin MAE | 1.7405 | 1.7768 | **+2.04%** |
+| total MAE | 1.8622 | 1.8635 | **+0.07%** |
+| winner called right | 54.0% | — | |
+| Brier | 0.2465 | 0.2500 | |
+
+**The margin carries a little. THE TOTAL CARRIES NOTHING** — +0.07% over "always say the league
+average" is not a signal, and it does not become one at any shrink setting tested (the sweep ran
+−0.20% to +0.07%). It is published because a line-blind number graded in public is what the Model
+section is for, not because it finds a price error. Nothing here has been scored against the
+closing line, and the starting goalie — the input anyone would reach for first — is already
+priced (§14d).
+
+**§16a. Carrying last season forward HURTS, and a default-argument bug nearly hid it.** Fitted:
+
+| prior-season weight | margin vs base | total vs base |
+|---|---|---|
+| **0** | **+2.04%** | **+0.07%** |
+| 5 | +1.66% | −0.06% |
+| 20 | +1.51% | −0.16% |
+| 200 | +1.45% | −0.20% |
+
+Monotone: every game of last season blended in makes both numbers worse. In a league this
+high-variance last year's ratings are stale information.
+
+🚨 The first sweep returned **byte-identical results at every prior weight**, which is what exposed
+the bug: `def blend_prior(..., weight=PRIOR_W)` evaluates its default once, at definition time, so
+reassigning the module global never reached it. A parameter that cannot move is indistinguishable
+from a parameter that does not matter — if a sweep comes back flat, check that the knob is wired
+before concluding the knob is useless.
+
+**What the sweep does NOT test:** the backtest skips each season's first 60 games, so the
+early-season case, where a team has three games and a prior would matter most, is untested. The
+shrink toward the league mean (K=6) carries that load instead — at six games a rating is half its
+own and half the league's.
+
+**No puck-line call, ever.** It is ±1.5 on every game and 43.2% of games finish inside one goal, so
+a margin against that number is not a comparison — the same trap the MLB run line set (§12d). The
+margin converts to a win probability instead, and the market column shows the moneyline expressed
+in goals.

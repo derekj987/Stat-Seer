@@ -1,87 +1,143 @@
 import { Brand, FlowSteps, ModelSubnav, DayBadge } from "../../Nav";
 import PinButton from "../../PinButton";
 import Tip from "../../Tip";
-import NhlModelPanel from "../NhlModelPanel";
-import { nhlPropBoard } from "@/lib/nhlProps";
+import { DayHeader } from "../../DayHeader";
+import { etToday, groupByGameDay } from "@/lib/gameDays";
+import { nhlBoard } from "@/lib/nhlBoard";
+import { projectGame, type NhlGameProj } from "@/lib/nhlGame";
+import { marketMargin } from "@/lib/nhlBoard";
+import type { Game } from "@/lib/board";
 
-// NHL · The Model. The section's home, and the first step of the flow every other sport has.
+// NHL · Game Model — our line-blind expected score, margin and total for every game on the board,
+// beside what the market says. The spreads-and-totals half of the section, matching the shape the
+// NFL, NCAAF and MLB boards already use.
 //
-// 🚨 IT IS A PLAYER MODEL AND THERE IS NO GAME MODEL, WHICH IS A MEASURED DECISION RATHER THAN AN
-// UNFINISHED ONE. The input a hockey game model would be built on is the starting goalie, and that
-// was tested against four seasons of closing moneylines: 3,241 games, ROI +0.15% with a standard
-// error of 2.60, calibration slope t = +1.81 (EMPIRICAL_REFERENCE §14d). The market has it priced.
-// Publishing a game board anyway would be the "appearance of rigor" this project exists against, so
-// the Model section carries the one thing that measured up — the line-blind player read.
+// 🚨 WHAT IT IS WORTH, AND THE PAGE SAYS SO. Held out on 2,504 games across two seasons the model
+// never saw: margin MAE 1.7405 against a no-information baseline of 1.7768 (+2.04%), total MAE
+// 1.8622 against 1.8635 (+0.07%), winner called right 54.0% with a Brier of 0.2465 against 0.2500.
+// The margin carries a little and THE TOTAL CARRIES ESSENTIALLY NOTHING. Both are published
+// because a line-blind number graded in public is what this section is for; neither is an edge
+// claim, and nothing here has been scored against the closing line.
 //
-// WHY THE PLAYER READ IS WORTH PUBLISHING WHEN THE GAME READ IS NOT: shots on goal persist at
-// r = 0.949 across 239,197 games, more than any NFL volume metric here (§15a). That is a real,
-// stable quantity. It is published as a PROBABILITY of clearing the posted line rather than as a
-// projected number of shots, because a mean and a half-point line are not the same statistic —
-// printed as a mean it read 58% over, as a probability it sits at 47.3% against the market's 48.8%
-// (§15d).
-//
-// Still unproven, and the copy must not imply otherwise: none of this has been scored against the
-// closing line, because NHL shots props have only been captured since 2026-10-09. It is published
-// line-blind and graded, and the record will say.
+// 🚨 NO PUCK-LINE CALL, EVER. The puck line is ±1.5 on every game in the league and 43.2% of games
+// finish inside one goal, so "our margin beats their spread" is the mistake the MLB run line
+// already taught this project (§12d). Our margin converts to a WIN PROBABILITY instead, which is
+// the question the number can answer, and the market column shows the moneyline converted to goals
+// rather than a column of -1.5 repeated down the page.
 export const metadata = {
-  title: "StatSeer — NHL Player Model",
+  title: "StatSeer — NHL Game Model",
   description:
-    "NHL line-blind player projections — shots on goal and goalie saves, published before puck drop and graded against the result.",
+    "NHL line-blind game projections — expected score, margin and total for every game, published before puck drop and graded.",
 };
 export const revalidate = 120;
 
+const fmt1 = (n: number) => n.toFixed(1);
+const fmt2 = (n: number) => n.toFixed(2);
+
 export default async function Page() {
-  const games = await nhlPropBoard().catch(() => []);
+  let board: Game[] = [];
+  try {
+    ({ board } = await nhlBoard());
+  } catch { /* odds not up yet */ }
+
+  const rows = board
+    .map((g) => ({ g, p: projectGame(g.home, g.away), mkt: marketMargin(g) }))
+    .filter((r): r is { g: Game; p: NhlGameProj; mkt: number | null } => r.p !== null);
+  const { today, tomorrow } = etToday();
+  const days = groupByGameDay(rows, (r) => r.g.commence, today, tomorrow);
 
   return (
     <main className="wrap">
       <header className="masthead">
         <Brand
-          sub={<><span className="brand__sport">NHL</span> · The Model</>}
+          sub={<><span className="brand__sport">NHL</span> · Game Model</>}
           art={{ src: "/scroll1.png?v=1", alt: "The Model" }}
         />
       </header>
 
       <DayBadge tip={<Tip label="About this board" text={<>
-            <span className="tip__lead">Our own read on tonight&apos;s players, set{" "}
-              <b>without looking at the book&apos;s line</b>, published before puck drop and graded
-              against what actually happens.</span><br /><br />
-            <b>What the number is.</b> The headline figure is the <b>chance of clearing the posted
-            line</b> — a probability, which is what compares directly to a price. The projection
-            beside it is the expected count: shots on goal per game for a skater, saves per start for
-            a goalie.<br /><br />
-            <b>Why shots.</b> A player&apos;s shot volume is the most repeatable thing he does —
-            measured across 239,197 games it carries from one half of a season to the other better
-            than any comparable football number we track. Goals are shots multiplied by a shooting
-            percentage, and that second part barely repeats at all, which is why the read is built on
-            the volume and not on the finishing.<br /><br />
-            <b>Goalies.</b> Saves are shots faced multiplied by a save percentage. The shots a goalie
-            faces repeat; his save percentage does not, so the number leans on his workload and takes
-            the league rate for the rest.<br /><br />
-            <b>Hockey has no game board here on purpose.</b> The starting goalie is the input a
-            game model would turn on, and measured across 3,241 games the market already has it in
-            the closing price. We publish what measured up rather than filling the page.<br /><br />
-            For prices on these same players, see <a href="/nhl/props">Player Props</a>; for game
-            lines, <a href="/nhl/lines">Line Shopping</a>.
-          </>} />} pin={<PinButton size="sm" pin={{ id: "/nhl/model", kind: "model", label: "NHL · Player Model", detail: "line-blind", href: "/nhl/model" }} />} />
+            <span className="tip__lead">Our own expected score for every game, built from each
+              team&apos;s scoring and conceding rates and set <b>without looking at the
+              market</b>.</span><br /><br />
+            <b>What the columns are.</b> <b>Our score</b> is the expected goals for each side, and
+            the <b>win chance</b> is what that margin is worth once hockey&apos;s scoring
+            distribution is taken into account. <b>Our total</b> is the two added together. The
+            market column is the moneyline expressed in goals, so there is something to compare
+            against — a puck-line column would print ±1.5 down the page and say nothing.<br /><br />
+            <b>How it has done.</b> Scored on 2,504 games the model never saw: the margin beats a
+            no-information baseline by about 2%, the winner is called right 54% of the time, and
+            <b> the total is level with simply using the league average</b>. Those are the numbers;
+            they are published so the record can be read rather than described.<br /><br />
+            <b>Why there is no pick on the puck line.</b> It is ±1.5 on every game in the league and
+            43% of games finish inside one goal, so a margin against that number is not a
+            comparison. The win chance is the question our number can answer.<br /><br />
+            For prices on these games see <a href="/nhl/lines">Line Shopping</a>; for the player
+            read, <a href="/nhl/model/players">Player Model</a>.
+          </>} />} pin={<PinButton size="sm" pin={{ id: "/nhl/model", kind: "model", label: "NHL · Game Model", detail: "line-blind", href: "/nhl/model" }} />} />
       <FlowSteps active="analyze" base="nhl" />
-      <div className="subnavrow"><ModelSubnav active="player" base="nhl" only={["player"]} /></div>
+      <div className="subnavrow"><ModelSubnav active="game" base="nhl" /></div>
 
-      {games.length ? (
-        // heading={false}: this page supplies its own masthead, so the panel's internal
-        // "THE MODEL — LINE-BLIND" strip would be a second title for the same thing.
-        <NhlModelPanel games={games} limit={40} heading={false} />
+      {rows.length ? (
+        <section className="ncf-sec">
+          {days.map((grp) => (
+            <div className="propday" key={grp.key}>
+              <DayHeader label={grp.label} tone={grp.tone} count={grp.items.length} />
+              <div className="hb-formwrap">
+                <table className="hb-form hb-form--nhlgame">
+                  <thead>
+                    <tr>
+                      <th className="hb-l">Game</th>
+                      <th>Our score</th>
+                      <th>Win chance</th>
+                      <th>Our total</th>
+                      <th>Market</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {grp.items.map(({ g, p, mkt }) => (
+                      <tr key={g.eventId}>
+                        {/* Full club names on a wide screen, abbreviations on a phone. Measured at
+                            375px the long names wrapped to different line counts and split the row
+                            heights 67/50 — the same long/short swap the books column already uses. */}
+                        <td className="hb-l">
+                          <span className="hb-books__long">{g.away}<span className="at">@</span>{g.home}</span>
+                          <span className="hb-books__short">{p.awayAbbr}<span className="at">@</span>{p.homeAbbr}</span>
+                        </td>
+                        <td className="hb-num">
+                          <b className="hb-model">{fmt1(p.awayGoals)}&ndash;{fmt1(p.homeGoals)}</b>
+                        </td>
+                        <td className="hb-num">
+                          <b className="hb-model">{(p.homeWinPct * 100).toFixed(0)}%</b>
+                          <span className="propq__slot"> {p.homeAbbr}</span>
+                        </td>
+                        <td className="hb-num"><b className="hb-model">{fmt2(p.total)}</b></td>
+                        <td className="hb-num">
+                          {mkt === null ? <span className="bg__none">&mdash;</span>
+                            : <>{mkt > 0 ? p.homeAbbr : p.awayAbbr}{" "}
+                               {Math.abs(mkt).toFixed(1)}</>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <p className="lp-cardfoot">
+                  Win chance is for the home side. Market is the moneyline expressed in goals.
+                </p>
+              </div>
+            </div>
+          ))}
+        </section>
       ) : (
         <p className="foot">
-          No NHL players priced for the next slate yet — the board fills as books post their props.
+          No NHL games with posted lines in the next two days — the board fills as books price the
+          next slate.
         </p>
       )}
 
       <footer className="foot">
         <p>
-          <b>Line-blind and graded.</b> These numbers are set from each player&apos;s own history and
-          published before puck drop. To shop the prices beside them, see{" "}
-          <a href="/nhl/props">Player Props</a>.
+          <b>Line-blind and graded.</b> These numbers are set from each team&apos;s own results and
+          published before puck drop. For prices, see <a href="/nhl/lines">Line Shopping</a>.
         </p>
       </footer>
     </main>

@@ -1,7 +1,8 @@
-name: Refresh NHL player projections
+name: Refresh NHL model
 
-# Regenerates web/lib/nhlPlayerProjections.ts and commits it (which triggers a Vercel redeploy).
-# It is the line-blind Model panel on /nhl/props: shots on goal per skater, saves per goalie.
+# Regenerates the NHL model's two generated files — web/lib/nhlPlayerProjections.ts (the
+# line-blind player read: shots, goals, assists, points, saves) and web/lib/nhlGameModel.ts (team
+# attack/defence ratings behind the game board) — and commits them, triggering a Vercel redeploy.
 #
 # WHAT IT ACTUALLY RECOMPUTES, AND WHY THAT IS SMALL. Only the CURRENT season changes day to day.
 # The prior-season baselines and the P(over) table come from five seasons — 227,861 skater games,
@@ -63,24 +64,30 @@ jobs:
       - name: Extract skater game logs from the cached boxscores
         run: python nhl_skaters.py
 
-      - name: Build line-blind projections
+      - name: Build line-blind player projections
         run: python nhl_player_proj.py --static ingest/nhl_static_inputs.json
+
+      # The game board's team ratings come from the same database this job has just rebuilt, and
+      # they are current-season only (PRIOR_W = 0, measured), so they go stale exactly as fast as
+      # the player numbers do and refresh on the same cadence.
+      - name: Build line-blind team ratings
+        run: python nhl_game_model.py
 
       - name: Commit if changed
         run: |
-          FILE="web/lib/nhlPlayerProjections.ts"
+          FILES="web/lib/nhlPlayerProjections.ts web/lib/nhlGameModel.ts"
           # The generated header carries counts and a league save%, not a timestamp, so an unchanged
           # board produces an unchanged file and this is a plain diff — no timestamp-stripping
           # needed, unlike refresh-nhl-rosters.yml.
-          if git diff --quiet -- "$FILE"; then
+          if git diff --quiet -- $FILES; then
             echo "No projection changes — nothing to commit."
             exit 0
           fi
-          git diff --stat -- "$FILE"
+          git diff --stat -- $FILES
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "$FILE"
-          git commit -m "chore: refresh NHL player projections (auto)"
+          git add $FILES
+          git commit -m "chore: refresh NHL projections + team ratings (auto)"
           # Several bots push this branch; a push can lose the race even right after a rebase.
           for i in 1 2 3 4 5; do
             git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || git rebase --abort || true

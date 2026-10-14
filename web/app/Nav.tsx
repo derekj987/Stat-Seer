@@ -346,10 +346,8 @@ export function MoreTable({ id, head, extra, noun, plr, cls, children }: {
 export function ModelSubnav({ active = "game", base = "nfl", only }: {
   active?: "game" | "player"; base?: Sport;
   /** The halves this sport's model actually has. Same escape hatch as ShopSubnav and for the same
-   *  reason — a subnav is a promise the page exists. NHL has a PLAYER model and no game model:
-   *  the starting goalie, the one input a hockey game model would turn on, measured as already
-   *  priced into the closing line (EMPIRICAL_REFERENCE §14d), so there is nothing to put on a game
-   *  board that the market has not already said. Omit to show both, which every football sport does. */
+   *  reason — a subnav is a promise the page exists. Every sport now has both; the hatch stays for
+   *  the next one to arrive one half at a time. */
   only?: Array<"game" | "player">;
 }) {
   const game = SPORT_PATHS[base].analyze;

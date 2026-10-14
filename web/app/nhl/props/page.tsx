@@ -116,7 +116,7 @@ export default async function Page({ searchParams }: PageProps<"/nhl/props">) {
               better than an empty card claiming a projection we do not have. `all` is passed, not
               the filtered `games`, so the panel is driven by the whole board rather than by which
               tab happens to be open. */}
-          <NhlModelPanel games={all} />
+          <NhlModelPanel games={all} cat={cat.key === "shots" ? "shots" : cat.key === "points" ? "points" : cat.key === "assists" ? "assists" : "goals"} />
           {games.length ? (
             <PropsGrid games={games} markets={cat.markets} labels={NHL_PROP_LABELS} {...etToday()} />
           ) : (
