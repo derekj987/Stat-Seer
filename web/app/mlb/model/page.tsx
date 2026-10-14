@@ -7,6 +7,7 @@ import { MLB_GAMES, MLB_GAME_SCORES } from "@/lib/mlbGameModel";
 import { MLB_AVAIL, type MlbAvail } from "@/lib/mlbAvailability";
 import { mlbBoard } from "@/lib/mlbBoard";
 import type { Game } from "@/lib/board";
+import MlbUpsetPanel from "../MlbUpsetPanel";
 
 // MLB · Game Model — the spreads/totals half of the section, beside Player Props.
 //
@@ -456,6 +457,30 @@ export default async function Page() {
               );
             })
           )}
+        </div>
+      </details>
+
+      {/* The Upset Meter, directly under the board it reads. A panel rather than a column in the
+          chart above: the drivers ARE the meter, and that chart's cells are forbidden to wrap. */}
+      <details className="hb-panel hb-panel--card" data-embedchart="mlb-upset" open>
+        <summary className="hb-bar">
+          <span className="hb-bar__title hb-bar__title--gold">Upset meter</span>
+          <span className="hb-bar__count">{upcoming.length} game{upcoming.length === 1 ? "" : "s"}</span>
+          <Tip label="About the Upset Meter" text={<>
+            <span className="tip__lead">How upset-prone each game looks, 0-100, with every number
+              behind it. <b>Context, not a pick</b> — nothing here feeds The Model or the Value
+              Finder, and the same meter runs on the NFL, NCAAF and NHL boards.</span><br /><br />
+            <b>Baseball&apos;s drivers</b> are our model against the market (40), the two clubs&apos;
+            scoring (18), a non-predictive chaos reading (16) and tonight&apos;s starting pitchers
+            (14) once both probables are posted. The full explanation, including what is
+            deliberately left out and why, is on the scroll beside each game&apos;s meter.
+          </>} />
+          <PinButton size="sm" pin={{ id: "/mlb/model#upset", kind: "model", label: "MLB · Upset Meter", detail: "context, not a pick", href: "/mlb/model" }} />
+          <span className="hb-bar__chev" aria-hidden="true">▾</span>
+        </summary>
+        <div className="hb-body">
+          <MlbUpsetPanel games={upcoming} mktFor={mktFor} leagueRuns={S.meanTotal / 2}
+            today={todayEt} tomorrow={tomorrowEt} />
         </div>
       </details>
 

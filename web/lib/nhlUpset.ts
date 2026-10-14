@@ -80,8 +80,11 @@ export function nhlUpsetMeter(
     const picksDog = homeIsDog ? g.modelMarginHome > 0 : g.modelMarginHome < 0;
     drivers.push({
       key: "model", label: "Our model", score,
+      // The note carries the SIZE as well as the direction: hockey margins are small enough to
+      // cross zero on a third of a goal, so the bare "we project the dog to win outright" reads as
+      // a much louder claim than the bar beside it. Same fix as the baseball meter.
       note: picksDog
-        ? `we project ${dogName ?? "the underdog"} to win outright`
+        ? `we have ${dogName ?? "the underdog"} winning outright, ${towardDog.toFixed(1)} of a goal away from the market`
         : Math.abs(towardDog) < 0.1
           ? "our number and the market's agree"
           : towardDog > 0
