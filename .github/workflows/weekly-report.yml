@@ -53,15 +53,33 @@ jobs:
           python-version: "3.12"
       - run: pip install --quiet pandas numpy certifi -c requirements.txt
 
-      # The grader needs the season's player stats to know what each prop actually did, and
-      # data/ is gitignored. Current season only — it grades one week.
-      - name: Fetch nflverse player stats + schedule
+      # EVERY input the grader reads, enumerated from the source rather than discovered one failed
+      # run at a time — data/ is gitignored, so anything not fetched here is simply absent:
+      #   stats_2026    what each prop actually did
+      #   snaps_2026/25 snap share, used to VOID an injured starter's props. Without it the card
+      #                 would grade a player who left in the first quarter as a loss, so
+      #                 weekly_report.py refuses to run rather than publish that. The first manual
+      #                 test of this workflow failed on exactly that guard, which is the guard
+      #                 working — but it means both seasons have to be here.
+      #   games.csv     the grader fetches this itself (grade_predictions.fetch_fresh_games)
+      - name: Fetch nflverse player stats, snap counts + schedule
         run: |
           mkdir -p data
           curl -fsSL --retry 3 -o data/stats_2026.csv \
             "https://github.com/nflverse/nflverse-data/releases/download/stats_player/stats_player_week_2026.csv"
+          for Y in 2025 2026; do
+            curl -fsSL --retry 3 -o "data/snaps_$Y.csv.gz" \
+              "https://github.com/nflverse/nflverse-data/releases/download/snap_counts/snap_counts_$Y.csv.gz"
+            gunzip -f "data/snaps_$Y.csv.gz"
+          done
           curl -fsSL --retry 3 -o data/games.csv \
             "https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv"
+          # Assert rather than assume: a 0-byte or HTML error page downloads happily.
+          for f in data/stats_2026.csv data/snaps_2025.csv data/snaps_2026.csv data/games.csv; do
+            n=$(wc -l < "$f")
+            echo "  $f: $n lines"
+            [ "$n" -gt 100 ] || { echo "::error::$f has only $n lines — fetch failed"; exit 1; }
+          done
 
       - name: Resolve the week to grade
         id: wk
