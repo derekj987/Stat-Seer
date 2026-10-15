@@ -50,7 +50,7 @@ jobs:
       # change log. The default shallow checkout fetches one commit, so `git log -2 -- <path>`
       # returns a single sha, mlb_changes() finds nothing to diff against and returns empty. That
       # failure is completely silent: the digest just never mentions baseball.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v5
