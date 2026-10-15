@@ -190,6 +190,59 @@ and misleading. The margin model (point differential) has real signal and stands
 the totals half does not. Contrast the margin model: MAE 10.15 vs market 9.89 — a
 genuine if losing prediction; the totals model barely moves off a constant.
 
+#### 🚨 It shipped anyway, with a SIDE attached — and the record found it (2026-10-15)
+
+The paragraph above says "not shipped". It was: `gen_model_totals.py` has been
+feeding `/model` and the homepage, and the board's bottom line turned it into an
+over/under call whenever our number sat **one point** from the market's — against
+a model whose own error on a total is 10.4 points. Graded over 2026 weeks 1–5 it
+went **29-50, losing in all five weeks**, which is what prompted the rebuild.
+
+**The level was never the problem.** Over those 79 games:
+
+| | mean | bias vs actual | MAE | sd |
+|---|---|---|---|---|
+| ours | 46.06 | **−0.57** | 11.73 | 1.62 |
+| market | 44.92 | −1.72 | 10.69 | 4.05 |
+| actual | 46.63 | — | — | 14.60 |
+
+We are **three times closer than the market on the level**. What cannot carry a
+side is the SHAPE: a correctly-shrunk total varies 1.6 points between games
+against the market's 4.1, so "ours vs theirs" is mostly the market's own line
+read backwards — and the market's line is the better per-game signal (corr 0.48
+with the result against our 0.25). Hence corr(ours−market, actual−market) =
+**−0.222**: a contrarian machine built out of a constant.
+
+**Reading the current season helps the number and not the record**
+(`analysis/totals_inseason.py`). The margin model was given an in-season blend
+months ago; the totals model never was, so a team scoring 31 a game was still
+priced off last year. Walking the season forward, chosen on TRAIN 2018–22 and
+confirmed once on HELD-OUT 2023–25:
+
+| setting | train MAE | held-out MAE | train O/U | held-out O/U |
+|---|---|---|---|---|
+| CUR_W 0, K 0.50 (shipped) | 11.119 | 10.501 | 50.2% | 49.8% |
+| **CUR_W 1.5, K 0.75** | **10.980** | **10.402** | 49.0% | 51.0% |
+| CUR_W 3.0, K 0.75 | 11.016 | 10.493 | 47.3% | 50.2% |
+
+About **+1% against what games actually score**, in both splits, with the optimum
+in the interior of the grid rather than on an edge. Shipped on that basis.
+
+**🚨 NOTHING BEATS THE CLOSING TOTAL, AT ANY SETTING.** Across 2,111 games the
+over/under record runs **47.3%–51.4%** over the whole sweep, including the
+settings that let the column swing hardest. The 29-50 is that coin flip landing
+badly at n=79 (2.4 SE below chance), not a defect with a fix in it — and the
+rebuilt model, replayed on the same five weeks, still goes 31-48. **Do not tune
+this against the market again; the measurement above is the answer.**
+
+**The shrink is correct, not timidity.** K below 1 pulls each game toward the
+league rate, which is what a less-informed forecaster's estimate should do — it
+is why our MAE is near the market's at all. The cost is a column that varies less
+than the market's line, and that is an argument against printing a side from it,
+not an argument for unshrinking it. The board now shows both numbers and calls
+no side; the spread side stays, because the margin model does beat a
+no-information baseline.
+
 ### Model win-probability calibration — v1 overconfident, fixed in v2 (`grade_predictions.py --backtest`)
 
 Walk-forward 2021–2025, n=1,355, calibrating the model's favored-team win prob

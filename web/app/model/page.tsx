@@ -45,7 +45,26 @@ function favLabel(home: string, away: string, spread: number | null): string {
   return spread < 0 ? `${home} ${spread.toFixed(1)}` : `${away} -${spread.toFixed(1)}`;
 }
 
-/** Which side of the MARKET spread the model favors (cover, not just winner) + O/U lean. */
+/** Which side of the MARKET spread the model favors (cover, not just winner).
+ *
+ *  🚨 NO OVER/UNDER SIDE, AND THAT IS A MEASURED DECISION RATHER THAN A GAP. This used to add
+ *  "and the over" / "and the under" whenever our total sat ONE POINT from the market's. The
+ *  model's own error on a total is 10.4 points, so a one-point disagreement is not a disagreement
+ *  — it is a rounding difference being published as a call.
+ *
+ *  Graded, it did exactly what that implies: 29-50 across 2026 weeks 1-5, losing every week. The
+ *  decomposition (analysis/totals_inseason.py) says the number itself is fine — our totals average
+ *  46.1 against 46.6 actually scored, where the market averages 44.9, so our LEVEL is three times
+ *  closer than theirs. What cannot carry a side is the SHAPE: a correctly-shrunk total varies by
+ *  about 2.3 points between games against the market's 4.1, so "ours vs theirs" is mostly the
+ *  market's own line read backwards, and the market's line is the better per-game signal
+ *  (corr 0.48 with the result against our 0.25).
+ *
+ *  Nor is there a setting that fixes it: across 2,111 games the over/under record against the
+ *  close runs 47.3%-51.4% at every blend and shrink tested, including the ones that let the column
+ *  swing hardest. So the board shows both numbers side by side and says nothing about which side
+ *  to take. The spread side stays — the margin model has a measured, published edge over a
+ *  no-information baseline, which the totals model does not. */
 function bottomLine(e: Env): { spread: string; total: string | null } | null {
   if (e.spread === null || e.modelMarginHome === null) return null;
   const mag = Math.abs(e.spread);
@@ -55,12 +74,7 @@ function bottomLine(e: Env): { spread: string; total: string | null } | null {
   const spread = mag < 0.5
     ? "pick'em"
     : modelMarginForFav >= mag ? e.favLabel : `${dog} +${mag.toFixed(1)}`;
-  let total: string | null = null;
-  if (e.modelTotal !== null && e.total !== null) {
-    const d = e.modelTotal - e.total;
-    total = Math.abs(d) < 1 ? null : d < 0 ? "the under" : "the over";
-  }
-  return { spread, total };
+  return { spread, total: null };
 }
 
 function ImpTable({ rows, refs, spec, today, tomorrow, cap }: {

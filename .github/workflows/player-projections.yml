@@ -68,6 +68,13 @@ jobs:
       - name: Build team ratings (current-season off/def points per game)
         run: python analysis/team_ratings_export.py
 
+      # The model total used to be a pure function of LAST season, so nothing ever re-ran it. It
+      # now blends this season as it goes (CUR_W 1.5 / K 0.75), which means a stale file prices
+      # week 10 off week 1 — it has to be regenerated on the same cadence as everything else here.
+      # It fetches the schedule itself when data/ is absent and REFUSES to write a short one.
+      - name: Build model totals (prior season blended with this one)
+        run: python analysis/gen_model_totals.py
+
       # The weekly questions Derek was asking by hand -- who is out, who is BACK, whether the model
       # moved for them, where we disagree most with the market, and whether any feed is stale.
       # It runs HERE rather than on its own schedule so it always describes the board that was just
@@ -83,15 +90,15 @@ jobs:
 
       - name: Commit if changed
         run: |
-          FILES="web/lib/playerProjections.ts web/lib/depthChart.ts web/lib/incentiveWatch.ts web/lib/teamRatings.ts"
+          FILES="web/lib/playerProjections.ts web/lib/depthChart.ts web/lib/incentiveWatch.ts web/lib/teamRatings.ts web/lib/modelTotals.ts"
           if git diff --quiet -- $FILES; then
-            echo "No projection/depth/incentive/ratings changes — nothing to commit."
+            echo "No projection/depth/incentive/ratings/totals changes — nothing to commit."
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add $FILES
-          git commit -m "chore: refresh projections + depth + incentives + team ratings (auto)"
+          git commit -m "chore: refresh projections + depth + incentives + ratings + totals (auto)"
           # Several bots push this branch; a push can lose the race (non-fast-forward)
           # even right after a rebase. Retry rebase+push a few times before failing, so
           # a lost race doesn't email a FAILURE.
