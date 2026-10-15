@@ -1,0 +1,119 @@
+name: Weekly report card
+
+# Generates the graded report card for the week that just finished, for both sports, and commits
+# web/lib/reportCards.ts. That file is what /report renders and what weekly_flags now reads to
+# print our bias against ACTUAL RESULTS beside every market lean.
+#
+# 🚨 WHY THIS EXISTS: IT WAS A MANUAL TUESDAY RITUAL AND THE RITUAL WAS MISSED. Nothing in
+# .github/workflows ran weekly_report.py. On 2026-10-15 the NFL series had holes at weeks 3 AND 5 —
+# a third of the season ungraded — and nobody noticed, because an absent report card looks exactly
+# like a week that has not finished yet. The record is the product; a record that depends on
+# somebody remembering is not a record.
+#
+# The narrative stays human. reportNotes.ts is hand-written and keyed by sport-season-week, and
+# this job never touches it — regenerating a card must not overwrite what someone wrote about it.
+#
+# TUESDAY, because the week is not over until the Monday night game is. Running Monday would grade
+# a short week and lock a wrong denominator into the file.
+
+on:
+  schedule:
+    # 16:40 UTC Tuesday (~12:40pm ET), Sep-Jan. After the Monday-night final has settled and
+    # nflverse has published it. Minute is deliberately off :00 — scheduled runs at the top of the
+    # hour are the ones GitHub drops under load.
+    - cron: "40 16 * 9-12,1 2"
+  workflow_dispatch:
+    inputs:
+      week:
+        description: "NFL week to grade, or blank for the most recently completed"
+        required: false
+        default: ""
+
+concurrency:
+  group: weekly-report
+  cancel-in-progress: false
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      # fetch-depth: 0 is LOAD-BEARING, for the same reason as grade-predictions. weekly_report.py
+      # grades the files AS COMMITTED BEFORE EACH KICKOFF (`git rev-list --before`), because the
+      # nightly jobs regenerate the projections daily — by Tuesday the working copy describes NEXT
+      # week. A shallow checkout leaves one commit reachable and the grader silently falls back to
+      # today's file, which is grading hindsight and scores ~85%.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet pandas numpy certifi -c requirements.txt
+
+      # The grader needs the season's player stats to know what each prop actually did, and
+      # data/ is gitignored. Current season only — it grades one week.
+      - name: Fetch nflverse player stats + schedule
+        run: |
+          mkdir -p data
+          curl -fsSL --retry 3 -o data/stats_2026.csv \
+            "https://github.com/nflverse/nflverse-data/releases/download/stats_player/stats_player_week_2026.csv"
+          curl -fsSL --retry 3 -o data/games.csv \
+            "https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv"
+
+      - name: Resolve the week to grade
+        id: wk
+        env:
+          WEEK_IN: ${{ inputs.week }}
+        run: python .github/scripts/last_complete_week.py
+
+      - name: NFL report card
+        if: steps.wk.outputs.nfl != ''
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python weekly_report.py --sport nfl --season 2026 --week "${{ steps.wk.outputs.nfl }}"
+
+      - name: NCAAF report card
+        if: steps.wk.outputs.ncaaf != ''
+        continue-on-error: true   # college grading is flakier; a miss there must not lose the NFL card
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+        run: python weekly_report.py --sport ncaaf --season 2026 --week "${{ steps.wk.outputs.ncaaf }}"
+
+      # The lean-vs-outcomes line this card feeds. Printed into the run summary so the number
+      # Derek asks for — "is our pass_yds bias still near zero?" — is in the job that produced it,
+      # not something to go and compute afterwards.
+      - name: Board calibration, with the graded residual
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          python analysis/weekly_flags.py | tee flags.txt
+          {
+            echo '## Board calibration after grading'
+            echo '```'
+            sed -n '/Is the NFL board calibrated/,/^$/p' flags.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- web/lib/reportCards.ts; then
+            echo "No report-card changes — nothing to commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/lib/reportCards.ts
+          git commit -m "chore: weekly report card (auto)"
+          for i in 1 2 3; do
+            git pull --rebase --quiet && git push && exit 0
+            echo "push lost the race, retrying ($i/3)"; sleep 5
+          done
+          echo "could not push after 3 attempts"; exit 1

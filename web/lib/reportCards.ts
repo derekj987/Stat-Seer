@@ -35,7 +35,7 @@ export const REPORT_CARDS: ReportCard[] = [
   "season": 2026,
   "week": 5,
   "label": "NFL Week 5",
-  "generatedAt": "2026-10-14T23:28:50+00:00",
+  "generatedAt": "2026-10-15T14:54:38+00:00",
   "publishedRefs": [
    "0a5080ee3847b2511731df5013091fad59d41798",
    "3e640486c47f48109caa512f7a4dd47c8aabf55e",
@@ -1436,8 +1436,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 201.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 220.0,
+    "result": "win"
    },
    {
     "player": "Trevor Lawrence",
@@ -1450,7 +1450,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 198.6,
     "lean": null,
-    "actual": null,
+    "actual": 331.0,
     "result": null
    },
    {
@@ -1464,8 +1464,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.26,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "win"
    },
    {
     "player": "Trevor Lawrence",
@@ -1478,8 +1478,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.22,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "loss"
    },
    {
     "player": "Parker Washington",
@@ -1492,8 +1492,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 45.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 124.0,
+    "result": "loss"
    },
    {
     "player": "Brenton Strange",
@@ -1506,8 +1506,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 35.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 68.0,
+    "result": "loss"
    },
    {
     "player": "Dontayvion Wicks",
@@ -1520,8 +1520,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 31.9,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 63.0,
+    "result": "loss"
    },
    {
     "player": "Jakobi Meyers",
@@ -1534,8 +1534,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 31.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 37.0,
+    "result": "loss"
    },
    {
     "player": "Makai Lemon",
@@ -1548,7 +1548,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 28.3,
     "lean": null,
-    "actual": null,
+    "actual": 43.0,
     "result": null
    },
    {
@@ -1562,8 +1562,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 26.0,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Dallas Goedert",
@@ -1576,7 +1576,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 25.4,
     "lean": null,
-    "actual": null,
+    "actual": 38.0,
     "result": null
    },
    {
@@ -1590,8 +1590,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 18.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 71.0,
+    "result": "loss"
    },
    {
     "player": "Josh Cameron",
@@ -1604,7 +1604,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 8.5,
     "lean": null,
-    "actual": null,
+    "actual": 43.0,
     "result": null
    },
    {
@@ -1618,8 +1618,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 24.0,
+    "result": "loss"
    },
    {
     "player": "Will Shipley",
@@ -1632,8 +1632,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 7.0,
+    "result": "win"
    },
    {
     "player": "Brenton Strange",
@@ -1646,8 +1646,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 7.0,
+    "result": "loss"
    },
    {
     "player": "Parker Washington",
@@ -1660,8 +1660,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 6.0,
+    "result": "loss"
    },
    {
     "player": "Dontayvion Wicks",
@@ -1674,8 +1674,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 5.0,
+    "result": "loss"
    },
    {
     "player": "Jakobi Meyers",
@@ -1688,8 +1688,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.0,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "loss"
    },
    {
     "player": "Dallas Goedert",
@@ -1702,8 +1702,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.9,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 6.0,
+    "result": "loss"
    },
    {
     "player": "Makai Lemon",
@@ -1716,7 +1716,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.6,
     "lean": null,
-    "actual": null,
+    "actual": 5.0,
     "result": null
    },
    {
@@ -1730,8 +1730,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Darius Cooper",
@@ -1744,8 +1744,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "win"
    },
    {
     "player": "Bhayshul Tuten",
@@ -1758,8 +1758,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "loss"
    },
    {
     "player": "Will Shipley",
@@ -1772,8 +1772,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "win"
    },
    {
     "player": "Josh Cameron",
@@ -1786,7 +1786,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.0,
     "lean": null,
-    "actual": null,
+    "actual": 3.0,
     "result": null
    },
    {
@@ -1800,8 +1800,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 55.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 72.0,
+    "result": "loss"
    },
    {
     "player": "Chris Rodriguez Jr.",
@@ -1814,8 +1814,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 26.9,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 5.0,
+    "result": "loss"
    },
    {
     "player": "Will Shipley",
@@ -1828,8 +1828,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 25.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 6.0,
+    "result": "win"
    },
    {
     "player": "Dameon Pierce",
@@ -1842,7 +1842,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 21.0,
     "lean": null,
-    "actual": null,
+    "actual": 14.0,
     "result": null
    },
    {
@@ -1856,8 +1856,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 20.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "loss"
    },
    {
     "player": "Trevor Lawrence",
@@ -1870,7 +1870,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 9.4,
     "lean": null,
-    "actual": null,
+    "actual": 25.0,
     "result": null
    },
    {
@@ -1884,8 +1884,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 41.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Jalen Hurts",
@@ -1898,8 +1898,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 40.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Parker Washington",
@@ -1912,8 +1912,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 28.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Brian Thomas Jr.",
@@ -1926,8 +1926,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 27.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Dallas Goedert",
@@ -1940,8 +1940,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 27.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Zach Ertz",
@@ -1954,8 +1954,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 27.0,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Chris Rodriguez Jr.",
@@ -1968,8 +1968,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 26.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Jakobi Meyers",
@@ -1982,8 +1982,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 22.9,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Brenton Strange",
@@ -1996,8 +1996,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 20.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Dontayvion Wicks",
@@ -2010,8 +2010,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 20.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Dameon Pierce",
@@ -2024,8 +2024,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 18.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Trevor Lawrence",
@@ -2038,8 +2038,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 18.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Makai Lemon",
@@ -2052,8 +2052,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 17.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Darius Cooper",
@@ -2066,8 +2066,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 14.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "win"
    },
    {
     "player": "Will Shipley",
@@ -2080,8 +2080,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 13.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Elijah Moore",
@@ -2108,8 +2108,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 11.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Josh Cameron",
@@ -2122,8 +2122,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 11.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Travis Hunter",
@@ -2136,8 +2136,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Quintin Morris",
@@ -2150,8 +2150,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Nate Boerkircher",
@@ -2164,8 +2164,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Johnny Mundt",
@@ -2178,8 +2178,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "E.J. Jenkins",
@@ -2206,8 +2206,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Britain Covey",
@@ -2220,8 +2220,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 0.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "C.J. Williams",
@@ -2248,7 +2248,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": null,
     "lean": null,
-    "actual": null,
+    "actual": 0.0,
     "result": null
    },
    {
@@ -2276,7 +2276,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 267.2,
     "lean": null,
-    "actual": null,
+    "actual": 367.0,
     "result": null
    },
    {
@@ -2290,7 +2290,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 168.5,
     "lean": null,
-    "actual": null,
+    "actual": 87.0,
     "result": null
    },
    {
@@ -2304,8 +2304,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.63,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "win"
    },
    {
     "player": "Tyson Bagent",
@@ -2318,7 +2318,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.04,
     "lean": null,
-    "actual": null,
+    "actual": 0.0,
     "result": null
    },
    {
@@ -2332,8 +2332,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 58.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 143.0,
+    "result": "loss"
    },
    {
     "player": "Matthew Golden",
@@ -2346,8 +2346,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 58.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 123.0,
+    "result": "loss"
    },
    {
     "player": "Luther Burden III",
@@ -2360,7 +2360,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 55.0,
     "lean": null,
-    "actual": null,
+    "actual": 47.0,
     "result": null
    },
    {
@@ -2374,8 +2374,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 46.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 64.0,
+    "result": "loss"
    },
    {
     "player": "Rome Odunze",
@@ -2388,8 +2388,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 41.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 40.0,
+    "result": "win"
    },
    {
     "player": "Colston Loveland",
@@ -2402,7 +2402,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 35.9,
     "lean": null,
-    "actual": null,
+    "actual": 19.0,
     "result": null
    },
    {
@@ -2416,8 +2416,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 32.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 6.0,
+    "result": "win"
    },
    {
     "player": "Skyy Moore",
@@ -2430,8 +2430,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 18.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "MarShawn Lloyd",
@@ -2444,7 +2444,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 15.0,
     "lean": null,
-    "actual": null,
+    "actual": 6.0,
     "result": null
    },
    {
@@ -2458,8 +2458,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 11.0,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 30.0,
+    "result": "win"
    },
    {
     "player": "Jonnu Smith",
@@ -2486,8 +2486,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 9.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 8.0,
+    "result": "loss"
    },
    {
     "player": "Matthew Golden",
@@ -2500,8 +2500,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.9,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 6.0,
+    "result": "loss"
    },
    {
     "player": "Christian Watson",
@@ -2514,8 +2514,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 6.0,
+    "result": "loss"
    },
    {
     "player": "Tucker Kraft",
@@ -2528,8 +2528,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 5.0,
+    "result": "loss"
    },
    {
     "player": "Luther Burden III",
@@ -2542,8 +2542,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 4.0,
+    "result": "win"
    },
    {
     "player": "Colston Loveland",
@@ -2556,8 +2556,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "loss"
    },
    {
     "player": "Rome Odunze",
@@ -2570,8 +2570,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 3.0,
+    "result": "win"
    },
    {
     "player": "Kalif Raymond",
@@ -2584,8 +2584,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 3.0,
+    "result": "win"
    },
    {
     "player": "MarShawn Lloyd",
@@ -2598,7 +2598,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.5,
     "lean": null,
-    "actual": null,
+    "actual": 1.0,
     "result": null
    },
    {
@@ -2612,8 +2612,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 4.0,
+    "result": "win"
    },
    {
     "player": "Skyy Moore",
@@ -2626,8 +2626,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "win"
    },
    {
     "player": "Jonnu Smith",
@@ -2654,8 +2654,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "loss"
    },
    {
     "player": "D'Andre Swift",
@@ -2668,8 +2668,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 91.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 43.0,
+    "result": "win"
    },
    {
     "player": "MarShawn Lloyd",
@@ -2682,7 +2682,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 28.6,
     "lean": null,
-    "actual": null,
+    "actual": 31.0,
     "result": null
    },
    {
@@ -2696,8 +2696,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 20.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 26.0,
+    "result": "win"
    },
    {
     "player": "Jordan Love",
@@ -2710,7 +2710,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.9,
     "lean": null,
-    "actual": null,
+    "actual": 6.0,
     "result": null
    },
    {
@@ -2724,7 +2724,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.8,
     "lean": null,
-    "actual": null,
+    "actual": 17.0,
     "result": null
    },
    {
@@ -2738,8 +2738,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 47.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Christian Watson",
@@ -2752,8 +2752,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 32.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Tucker Kraft",
@@ -2766,8 +2766,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 30.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "MarShawn Lloyd",
@@ -2780,8 +2780,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 27.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Matthew Golden",
@@ -2794,8 +2794,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 27.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Luther Burden III",
@@ -2808,8 +2808,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 24.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Colston Loveland",
@@ -2822,8 +2822,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 23.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Rome Odunze",
@@ -2836,8 +2836,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 22.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Jonnu Smith",
@@ -2864,8 +2864,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 17.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Cole Kmet",
@@ -2878,8 +2878,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 15.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Kaleb Johnson",
@@ -2892,8 +2892,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 13.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Jahdae Walker",
@@ -2906,8 +2906,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 11.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Kalif Raymond",
@@ -2920,8 +2920,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 11.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Tyson Bagent",
@@ -2934,8 +2934,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 9.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Jordan Love",
@@ -2948,8 +2948,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 8.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Skyy Moore",
@@ -2962,8 +2962,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Josh Whyle",
@@ -2990,8 +2990,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Bo Melton",
@@ -3004,8 +3004,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Mark Redman",
@@ -3032,8 +3032,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Zavion Thomas",
@@ -3046,8 +3046,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Pierre Strong",
@@ -3060,7 +3060,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": null,
     "lean": null,
-    "actual": null,
+    "actual": 0.0,
     "result": null
    },
    {
@@ -3074,8 +3074,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 290.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 190.0,
+    "result": "loss"
    },
    {
     "player": "Malik Willis",
@@ -3088,8 +3088,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 177.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 137.0,
+    "result": "win"
    },
    {
     "player": "Joe Burrow",
@@ -3102,8 +3102,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 4.0,
+    "result": "win"
    },
    {
     "player": "Malik Willis",
@@ -3116,8 +3116,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.08,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "loss"
    },
    {
     "player": "Malik Washington",
@@ -3130,8 +3130,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 37.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 43.0,
+    "result": "win"
    },
    {
     "player": "Chase Brown",
@@ -3144,7 +3144,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 31.4,
     "lean": null,
-    "actual": null,
+    "actual": 21.0,
     "result": null
    },
    {
@@ -3158,7 +3158,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 29.4,
     "lean": null,
-    "actual": null,
+    "actual": 37.0,
     "result": null
    },
    {
@@ -3172,7 +3172,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 22.7,
     "lean": null,
-    "actual": null,
+    "actual": 0.0,
     "result": null
    },
    {
@@ -3186,7 +3186,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 22.6,
     "lean": null,
-    "actual": null,
+    "actual": 30.0,
     "result": null
    },
    {
@@ -3200,8 +3200,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.9,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Will Kacmarek",
@@ -3214,7 +3214,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.4,
     "lean": null,
-    "actual": null,
+    "actual": 5.0,
     "result": null
    },
    {
@@ -3228,8 +3228,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.9,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 3.0,
+    "result": "win"
    },
    {
     "player": "Malik Washington",
@@ -3242,8 +3242,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.9,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 6.0,
+    "result": "loss"
    },
    {
     "player": "Greg Dulcich",
@@ -3256,7 +3256,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.1,
     "lean": null,
-    "actual": null,
+    "actual": 4.0,
     "result": null
    },
    {
@@ -3270,7 +3270,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.2,
     "lean": null,
-    "actual": null,
+    "actual": 0.0,
     "result": null
    },
    {
@@ -3284,7 +3284,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.2,
     "lean": null,
-    "actual": null,
+    "actual": 3.0,
     "result": null
    },
    {
@@ -3298,8 +3298,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Will Kacmarek",
@@ -3312,7 +3312,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 0.8,
     "lean": null,
-    "actual": null,
+    "actual": 1.0,
     "result": null
    },
    {
@@ -3326,8 +3326,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 61.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 39.0,
+    "result": "win"
    },
    {
     "player": "Ollie Gordon II",
@@ -3340,8 +3340,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 42.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 88.0,
+    "result": "loss"
    },
    {
     "player": "Jaylen Wright",
@@ -3354,8 +3354,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 24.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 11.0,
+    "result": "win"
    },
    {
     "player": "Malik Willis",
@@ -3368,8 +3368,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 17.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 74.0,
+    "result": "loss"
    },
    {
     "player": "Samaje Perine",
@@ -3382,8 +3382,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 10.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 68.0,
+    "result": "loss"
    },
    {
     "player": "Joe Burrow",
@@ -3396,7 +3396,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.8,
     "lean": null,
-    "actual": null,
+    "actual": 10.0,
     "result": null
    },
    {
@@ -3410,8 +3410,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 43.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Tee Higgins",
@@ -3424,8 +3424,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 40.9,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Chase Brown",
@@ -3438,8 +3438,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 40.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Ollie Gordon II",
@@ -3452,8 +3452,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 31.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Malik Washington",
@@ -3466,8 +3466,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 22.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Dohnte Meyers",
@@ -3480,8 +3480,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 20.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Mitchell Tinsley",
@@ -3508,8 +3508,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 19.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Malik Willis",
@@ -3522,8 +3522,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 18.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Greg Dulcich",
@@ -3536,8 +3536,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 15.9,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Jalen Tolbert",
@@ -3550,8 +3550,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 15.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Kevin Coleman Jr.",
@@ -3564,8 +3564,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 14.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "win"
    },
    {
     "player": "Jaylen Wright",
@@ -3578,8 +3578,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 14.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Chris Bell",
@@ -3592,8 +3592,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 14.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Samaje Perine",
@@ -3606,8 +3606,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 14.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Joe Burrow",
@@ -3620,8 +3620,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 14.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "DJ Herman",
@@ -3662,8 +3662,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 8.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Tanner Hudson",
@@ -3676,8 +3676,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 8.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Erick All",
@@ -3690,8 +3690,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Will Kacmarek",
@@ -3704,8 +3704,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Tahj Brooks",
@@ -3718,8 +3718,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 0.9,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Carlos Washington",
@@ -3746,7 +3746,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": null,
     "lean": null,
-    "actual": null,
+    "actual": 0.0,
     "result": null
    },
    {
@@ -3760,8 +3760,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 261.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 243.0,
+    "result": "win"
    },
    {
     "player": "Drake Maye",
@@ -3774,8 +3774,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 231.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 374.0,
+    "result": "win"
    },
    {
     "player": "Kirk Cousins",
@@ -3788,8 +3788,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.65,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "loss"
    },
    {
     "player": "Drake Maye",
@@ -3802,7 +3802,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.33,
     "lean": null,
-    "actual": null,
+    "actual": 4.0,
     "result": null
    },
    {
@@ -3816,8 +3816,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 72.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 110.0,
+    "result": "loss"
    },
    {
     "player": "Tre Tucker",
@@ -3830,8 +3830,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 42.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 41.0,
+    "result": "loss"
    },
    {
     "player": "Romeo Doubs",
@@ -3844,8 +3844,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 41.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 16.0,
+    "result": "win"
    },
    {
     "player": "Michael Mayer",
@@ -3858,8 +3858,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 36.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "win"
    },
    {
     "player": "Hunter Henry",
@@ -3872,7 +3872,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 28.4,
     "lean": null,
-    "actual": null,
+    "actual": 44.0,
     "result": null
    },
    {
@@ -3886,8 +3886,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 27.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 65.0,
+    "result": "win"
    },
    {
     "player": "Rhamondre Stevenson",
@@ -3900,8 +3900,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 17.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 21.0,
+    "result": "loss"
    },
    {
     "player": "Cody White",
@@ -3914,8 +3914,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 16.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 44.0,
+    "result": "loss"
    },
    {
     "player": "Efton Chism III",
@@ -3928,8 +3928,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 11.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 57.0,
+    "result": "loss"
    },
    {
     "player": "Kyle Williams",
@@ -3942,8 +3942,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "median",
     "proj": 10.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 91.0,
+    "result": "loss"
    },
    {
     "player": "Eli Raridon",
@@ -3956,7 +3956,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.1,
     "lean": null,
-    "actual": null,
+    "actual": 57.0,
     "result": null
    },
    {
@@ -3970,8 +3970,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.9,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 16.0,
+    "result": "win"
    },
    {
     "player": "Brock Bowers",
@@ -3984,8 +3984,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 8.0,
+    "result": "loss"
    },
    {
     "player": "Michael Mayer",
@@ -3998,8 +3998,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "win"
    },
    {
     "player": "Tre Tucker",
@@ -4012,8 +4012,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 4.0,
+    "result": "loss"
    },
    {
     "player": "Romeo Doubs",
@@ -4026,7 +4026,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.5,
     "lean": null,
-    "actual": null,
+    "actual": 1.0,
     "result": null
    },
    {
@@ -4040,7 +4040,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.0,
     "lean": null,
-    "actual": null,
+    "actual": 3.0,
     "result": null
    },
    {
@@ -4054,7 +4054,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.9,
     "lean": null,
-    "actual": null,
+    "actual": 3.0,
     "result": null
    },
    {
@@ -4068,8 +4068,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 4.0,
+    "result": "win"
    },
    {
     "player": "Cody White",
@@ -4082,8 +4082,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "loss"
    },
    {
     "player": "Efton Chism III",
@@ -4096,8 +4096,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 5.0,
+    "result": "loss"
    },
    {
     "player": "Kyle Williams",
@@ -4110,8 +4110,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "median",
     "proj": 1.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 3.0,
+    "result": "loss"
    },
    {
     "player": "TreVeyon Henderson",
@@ -4124,7 +4124,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.2,
     "lean": null,
-    "actual": null,
+    "actual": 1.0,
     "result": null
    },
    {
@@ -4138,7 +4138,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.0,
     "lean": null,
-    "actual": null,
+    "actual": 5.0,
     "result": null
    },
    {
@@ -4152,8 +4152,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 51.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 22.0,
+    "result": "win"
    },
    {
     "player": "Rhamondre Stevenson",
@@ -4166,8 +4166,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 43.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 64.0,
+    "result": "win"
    },
    {
     "player": "Drake Maye",
@@ -4180,8 +4180,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 22.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 25.0,
+    "result": "win"
    },
    {
     "player": "Kirk Cousins",
@@ -4194,8 +4194,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Ashton Jeanty",
@@ -4208,8 +4208,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 48.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Brock Bowers",
@@ -4222,8 +4222,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 38.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Rhamondre Stevenson",
@@ -4236,8 +4236,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 33.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "TreVeyon Henderson",
@@ -4250,8 +4250,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 31.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Hunter Henry",
@@ -4264,8 +4264,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 28.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Romeo Doubs",
@@ -4278,8 +4278,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 26.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Tre Tucker",
@@ -4292,8 +4292,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 21.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Drake Maye",
@@ -4306,8 +4306,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 20.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Mike Washington Jr.",
@@ -4320,8 +4320,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 20.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Michael Mayer",
@@ -4334,8 +4334,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 17.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "DeMario Douglas",
@@ -4348,8 +4348,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 14.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Cody White",
@@ -4362,8 +4362,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 12.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Efton Chism III",
@@ -4376,8 +4376,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 11.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Kyle Williams",
@@ -4390,8 +4390,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 10.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Kirk Cousins",
@@ -4404,8 +4404,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 9.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Connor Heyward",
@@ -4418,8 +4418,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 9.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Eli Raridon",
@@ -4432,8 +4432,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 8.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Corey Kiner",
@@ -4446,8 +4446,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Ian Thomas",
@@ -4460,8 +4460,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Deven Thompkins",
@@ -4474,8 +4474,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Malik Benson",
@@ -4488,8 +4488,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Dareke Young",
@@ -4516,8 +4516,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 0.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Cameron Latu",
@@ -4530,8 +4530,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 0.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Tanner Arkin",
@@ -4544,7 +4544,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": null,
     "lean": null,
-    "actual": null,
+    "actual": 0.0,
     "result": null
    },
    {
@@ -4558,8 +4558,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 303.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 96.0,
+    "result": "loss"
    },
    {
     "player": "Kyler Murray",
@@ -4572,8 +4572,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 231.9,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 229.0,
+    "result": "win"
    },
    {
     "player": "Tyler Shough",
@@ -4586,8 +4586,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.89,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Kyler Murray",
@@ -4600,8 +4600,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.48,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "win"
    },
    {
     "player": "Chris Olave",
@@ -4614,8 +4614,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 90.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 46.0,
+    "result": "win"
    },
    {
     "player": "Devaughn Vele",
@@ -4628,8 +4628,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 50.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 26.0,
+    "result": "win"
    },
    {
     "player": "Juwan Johnson",
@@ -4642,8 +4642,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 49.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 16.0,
+    "result": "win"
    },
    {
     "player": "T.J. Hockenson",
@@ -4656,8 +4656,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 44.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 7.0,
+    "result": "loss"
    },
    {
     "player": "Justin Jefferson",
@@ -4670,8 +4670,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 38.9,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 79.0,
+    "result": "win"
    },
    {
     "player": "Alvin Kamara",
@@ -4684,8 +4684,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 21.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": -6.0,
+    "result": "loss"
    },
    {
     "player": "Aaron Jones",
@@ -4698,7 +4698,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 20.9,
     "lean": null,
-    "actual": null,
+    "actual": 4.0,
     "result": null
    },
    {
@@ -4712,8 +4712,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 20.9,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 7.0,
+    "result": "loss"
    },
    {
     "player": "Chris Olave",
@@ -4726,8 +4726,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 4.0,
+    "result": "win"
    },
    {
     "player": "Juwan Johnson",
@@ -4740,8 +4740,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.9,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 4.0,
+    "result": "win"
    },
    {
     "player": "T.J. Hockenson",
@@ -4754,7 +4754,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.9,
     "lean": null,
-    "actual": null,
+    "actual": 1.0,
     "result": null
    },
    {
@@ -4768,7 +4768,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.5,
     "lean": null,
-    "actual": null,
+    "actual": 4.0,
     "result": null
    },
    {
@@ -4782,8 +4782,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 6.0,
+    "result": "loss"
    },
    {
     "player": "Aaron Jones",
@@ -4796,8 +4796,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 3.0,
+    "result": "win"
    },
    {
     "player": "Alvin Kamara",
@@ -4810,8 +4810,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "loss"
    },
    {
     "player": "Noah Fant",
@@ -4824,8 +4824,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "loss"
    },
    {
     "player": "Aaron Jones",
@@ -4838,8 +4838,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 86.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 113.0,
+    "result": "loss"
    },
    {
     "player": "Alvin Kamara",
@@ -4852,8 +4852,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 49.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 12.0,
+    "result": "loss"
    },
    {
     "player": "Kendre Miller",
@@ -4866,7 +4866,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 36.9,
     "lean": null,
-    "actual": null,
+    "actual": 30.0,
     "result": null
    },
    {
@@ -4880,8 +4880,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 12.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 51.0,
+    "result": "win"
    },
    {
     "player": "Tyler Shough",
@@ -4894,7 +4894,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 10.5,
     "lean": null,
-    "actual": null,
+    "actual": 0.0,
     "result": null
    },
    {
@@ -4908,8 +4908,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 45.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Alvin Kamara",
@@ -4922,8 +4922,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 42.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Chris Olave",
@@ -4936,8 +4936,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 35.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Justin Jefferson",
@@ -4950,8 +4950,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 33.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Devaughn Vele",
@@ -4964,8 +4964,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 28.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Kyler Murray",
@@ -4978,8 +4978,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 26.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Juwan Johnson",
@@ -4992,8 +4992,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 25.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Kendre Miller",
@@ -5006,8 +5006,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 25.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "win"
    },
    {
     "player": "T.J. Hockenson",
@@ -5020,8 +5020,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 25.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Jauan Jennings",
@@ -5034,8 +5034,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 18.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Noah Fant",
@@ -5048,8 +5048,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 17.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Tyler Shough",
@@ -5062,8 +5062,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 16.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "CJ Donaldson",
@@ -5076,8 +5076,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 16.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Bryce Lance",
@@ -5090,8 +5090,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 14.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Demond Claiborne",
@@ -5104,8 +5104,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 12.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Cedric Tillman",
@@ -5146,8 +5146,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Gavin Bartholomew",
@@ -5160,8 +5160,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Max Bredeson",
@@ -5188,8 +5188,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Ben Yurosek",
@@ -5202,8 +5202,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Jeshaun Jones",
@@ -5216,8 +5216,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Myles Price",
@@ -5230,8 +5230,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.9,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Treyton Welch",
@@ -5258,8 +5258,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Barion Brown",
@@ -5272,8 +5272,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Deshaun Watson",
@@ -5286,7 +5286,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 215.4,
     "lean": null,
-    "actual": null,
+    "actual": 155.0,
     "result": null
    },
    {
@@ -5300,8 +5300,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 201.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 182.0,
+    "result": "loss"
    },
    {
     "player": "Deshaun Watson",
@@ -5314,7 +5314,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.33,
     "lean": null,
-    "actual": null,
+    "actual": 1.0,
     "result": null
    },
    {
@@ -5328,8 +5328,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.26,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "win"
    },
    {
     "player": "KC Concepcion",
@@ -5342,7 +5342,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 53.7,
     "lean": null,
-    "actual": null,
+    "actual": 5.0,
     "result": null
    },
    {
@@ -5356,8 +5356,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 53.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 104.0,
+    "result": "loss"
    },
    {
     "player": "Denzel Boston",
@@ -5370,7 +5370,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 41.5,
     "lean": null,
-    "actual": null,
+    "actual": 46.0,
     "result": null
    },
    {
@@ -5384,8 +5384,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 37.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 4.0,
+    "result": "loss"
    },
    {
     "player": "Kenyon Sadiq",
@@ -5398,7 +5398,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 30.0,
     "lean": null,
-    "actual": null,
+    "actual": 3.0,
     "result": null
    },
    {
@@ -5412,8 +5412,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 20.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 24.0,
+    "result": "win"
    },
    {
     "player": "Jerry Jeudy",
@@ -5426,8 +5426,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 19.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 19.0,
+    "result": "win"
    },
    {
     "player": "Quinshon Judkins",
@@ -5440,7 +5440,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 19.1,
     "lean": null,
-    "actual": null,
+    "actual": 6.0,
     "result": null
    },
    {
@@ -5454,8 +5454,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 17.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 16.0,
+    "result": "win"
    },
    {
     "player": "Raheim Sanders",
@@ -5468,8 +5468,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 9.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "win"
    },
    {
     "player": "Braelon Allen",
@@ -5482,8 +5482,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Garrett Wilson",
@@ -5496,8 +5496,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.9,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 7.0,
+    "result": "loss"
    },
    {
     "player": "KC Concepcion",
@@ -5510,7 +5510,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.7,
     "lean": null,
-    "actual": null,
+    "actual": 1.0,
     "result": null
    },
    {
@@ -5524,7 +5524,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.4,
     "lean": null,
-    "actual": null,
+    "actual": 1.0,
     "result": null
    },
    {
@@ -5538,7 +5538,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.6,
     "lean": null,
-    "actual": null,
+    "actual": 3.0,
     "result": null
    },
    {
@@ -5552,7 +5552,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.4,
     "lean": null,
-    "actual": null,
+    "actual": 2.0,
     "result": null
    },
    {
@@ -5566,7 +5566,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.2,
     "lean": null,
-    "actual": null,
+    "actual": 3.0,
     "result": null
    },
    {
@@ -5580,8 +5580,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 3.0,
+    "result": "win"
    },
    {
     "player": "Jerry Jeudy",
@@ -5594,8 +5594,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 3.0,
+    "result": "win"
    },
    {
     "player": "Raheim Sanders",
@@ -5608,7 +5608,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.9,
     "lean": null,
-    "actual": null,
+    "actual": 1.0,
     "result": null
    },
    {
@@ -5622,8 +5622,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "win"
    },
    {
     "player": "Braelon Allen",
@@ -5636,8 +5636,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "win"
    },
    {
     "player": "Quinshon Judkins",
@@ -5650,7 +5650,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 70.1,
     "lean": null,
-    "actual": null,
+    "actual": 44.0,
     "result": null
    },
    {
@@ -5664,8 +5664,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 43.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 116.0,
+    "result": "loss"
    },
    {
     "player": "Deshaun Watson",
@@ -5678,7 +5678,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 31.2,
     "lean": null,
-    "actual": null,
+    "actual": 40.0,
     "result": null
    },
    {
@@ -5692,8 +5692,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 12.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 8.0,
+    "result": "win"
    },
    {
     "player": "Geno Smith",
@@ -5706,7 +5706,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.7,
     "lean": null,
-    "actual": null,
+    "actual": 7.0,
     "result": null
    },
    {
@@ -5720,8 +5720,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 42.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Harold Fannin Jr.",
@@ -5734,8 +5734,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 31.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Garrett Wilson",
@@ -5748,8 +5748,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 29.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "KC Concepcion",
@@ -5762,8 +5762,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 29.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Deshaun Watson",
@@ -5776,8 +5776,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 27.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Denzel Boston",
@@ -5790,8 +5790,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 26.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Braelon Allen",
@@ -5804,8 +5804,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 26.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Kenyon Sadiq",
@@ -5818,8 +5818,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 24.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Andrew Beck",
@@ -5846,8 +5846,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 15.9,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Tim Patrick",
@@ -5860,8 +5860,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 15.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Mason Taylor",
@@ -5874,8 +5874,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 14.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Raheim Sanders",
@@ -5888,8 +5888,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 14.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Jaleel McLaughlin",
@@ -5902,8 +5902,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 13.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Isaiah Davis",
@@ -5916,8 +5916,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 11.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Isaiah Williams",
@@ -5930,8 +5930,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 9.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Jeremy Ruckert",
@@ -5958,8 +5958,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Geno Smith",
@@ -5972,8 +5972,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Blake Whiteheart",
@@ -6000,8 +6000,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Michael Burton",
@@ -6014,8 +6014,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.9,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Kene Nwangwu",
@@ -6028,8 +6028,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Isaiah Bond",
@@ -6042,8 +6042,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Jamaal Pritchett",
@@ -6070,8 +6070,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Aaron Rodgers",
@@ -6084,8 +6084,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 257.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 235.0,
+    "result": "win"
    },
    {
     "player": "Daniel Jones",
@@ -6098,7 +6098,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 241.9,
     "lean": null,
-    "actual": null,
+    "actual": 267.0,
     "result": null
    },
    {
@@ -6112,8 +6112,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.64,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 3.0,
+    "result": "win"
    },
    {
     "player": "Daniel Jones",
@@ -6126,8 +6126,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.47,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "DK Metcalf",
@@ -6140,8 +6140,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 59.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 12.0,
+    "result": "loss"
    },
    {
     "player": "Keenan Allen",
@@ -6154,8 +6154,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 46.0,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 45.0,
+    "result": "win"
    },
    {
     "player": "Tyler Warren",
@@ -6168,7 +6168,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 45.1,
     "lean": null,
-    "actual": null,
+    "actual": 83.0,
     "result": null
    },
    {
@@ -6182,8 +6182,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 44.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 47.0,
+    "result": "win"
    },
    {
     "player": "Roman Wilson",
@@ -6196,8 +6196,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 36.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Pat Freiermuth",
@@ -6210,8 +6210,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 30.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 44.0,
+    "result": "win"
    },
    {
     "player": "Darnell Washington",
@@ -6224,8 +6224,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 22.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 12.0,
+    "result": "win"
    },
    {
     "player": "Jaylen Warren",
@@ -6238,7 +6238,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 21.6,
     "lean": null,
-    "actual": null,
+    "actual": 87.0,
     "result": null
    },
    {
@@ -6252,7 +6252,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 20.3,
     "lean": null,
-    "actual": null,
+    "actual": 80.0,
     "result": null
    },
    {
@@ -6266,8 +6266,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 17.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 37.0,
+    "result": "loss"
    },
    {
     "player": "Laquon Treadwell",
@@ -6280,8 +6280,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 16.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 34.0,
+    "result": "loss"
    },
    {
     "player": "DK Metcalf",
@@ -6294,7 +6294,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.9,
     "lean": null,
-    "actual": null,
+    "actual": 3.0,
     "result": null
    },
    {
@@ -6308,8 +6308,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.9,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 7.0,
+    "result": "win"
    },
    {
     "player": "Keenan Allen",
@@ -6322,8 +6322,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 5.0,
+    "result": "win"
    },
    {
     "player": "Josh Downs",
@@ -6336,7 +6336,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.2,
     "lean": null,
-    "actual": null,
+    "actual": 3.0,
     "result": null
    },
    {
@@ -6350,8 +6350,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 6.0,
+    "result": "win"
    },
    {
     "player": "Roman Wilson",
@@ -6364,8 +6364,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Pat Freiermuth",
@@ -6378,7 +6378,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.2,
     "lean": null,
-    "actual": null,
+    "actual": 5.0,
     "result": null
    },
    {
@@ -6392,7 +6392,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.8,
     "lean": null,
-    "actual": null,
+    "actual": 3.0,
     "result": null
    },
    {
@@ -6406,8 +6406,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "win"
    },
    {
     "player": "Germie Bernard",
@@ -6420,7 +6420,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.0,
     "lean": null,
-    "actual": null,
+    "actual": 6.0,
     "result": null
    },
    {
@@ -6434,7 +6434,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.6,
     "lean": null,
-    "actual": null,
+    "actual": 2.0,
     "result": null
    },
    {
@@ -6448,7 +6448,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 98.8,
     "lean": null,
-    "actual": null,
+    "actual": 45.0,
     "result": null
    },
    {
@@ -6462,8 +6462,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 63.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 101.0,
+    "result": "loss"
    },
    {
     "player": "Daniel Jones",
@@ -6476,8 +6476,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 8.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 4.0,
+    "result": "loss"
    },
    {
     "player": "Aaron Rodgers",
@@ -6490,8 +6490,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 6.0,
+    "result": "win"
    },
    {
     "player": "Jonathan Taylor",
@@ -6504,8 +6504,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 59.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "DK Metcalf",
@@ -6518,8 +6518,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 39.0,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Keenan Allen",
@@ -6532,8 +6532,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 33.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Tyler Warren",
@@ -6546,8 +6546,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 31.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "win"
    },
    {
     "player": "Jaylen Warren",
@@ -6560,8 +6560,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 27.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Pat Freiermuth",
@@ -6574,8 +6574,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 25.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "win"
    },
    {
     "player": "Roman Wilson",
@@ -6588,8 +6588,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 24.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Josh Downs",
@@ -6602,8 +6602,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 24.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Daniel Jones",
@@ -6616,8 +6616,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 17.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Robert Tonyan",
@@ -6644,8 +6644,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 15.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Germie Bernard",
@@ -6658,8 +6658,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 13.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Darnell Washington",
@@ -6672,8 +6672,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 12.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Mo Alie-Cox",
@@ -6686,8 +6686,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 11.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Seth McGowan",
@@ -6700,8 +6700,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 11.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Aaron Rodgers",
@@ -6714,8 +6714,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 9.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Laquon Treadwell",
@@ -6728,8 +6728,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 8.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "DJ Giddens",
@@ -6756,8 +6756,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Ben Skowronek",
@@ -6798,8 +6798,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 0.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Anthony Gould",
@@ -6812,8 +6812,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 0.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Riley Nowakowski",
@@ -6826,8 +6826,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 0.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Kaden Wetjen",
@@ -6840,8 +6840,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 0.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "C.J. Stroud",
@@ -6854,8 +6854,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 255.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 261.0,
+    "result": "win"
    },
    {
     "player": "Cam Ward",
@@ -6868,7 +6868,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 207.5,
     "lean": null,
-    "actual": null,
+    "actual": 170.0,
     "result": null
    },
    {
@@ -6882,8 +6882,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.57,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "win"
    },
    {
     "player": "Cam Ward",
@@ -6896,8 +6896,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.38,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Nico Collins",
@@ -6910,8 +6910,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 69.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 56.0,
+    "result": "win"
    },
    {
     "player": "Carnell Tate",
@@ -6924,7 +6924,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 65.2,
     "lean": null,
-    "actual": null,
+    "actual": 6.0,
     "result": null
    },
    {
@@ -6938,8 +6938,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 45.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 53.0,
+    "result": "win"
    },
    {
     "player": "Xavier Hutchinson",
@@ -6952,7 +6952,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 38.8,
     "lean": null,
-    "actual": null,
+    "actual": 65.0,
     "result": null
    },
    {
@@ -6966,7 +6966,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 36.9,
     "lean": null,
-    "actual": null,
+    "actual": 30.0,
     "result": null
    },
    {
@@ -6980,8 +6980,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 26.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 38.0,
+    "result": "win"
    },
    {
     "player": "Jaylin Noel",
@@ -6994,8 +6994,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 18.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 41.0,
+    "result": "loss"
    },
    {
     "player": "Elic Ayomanor",
@@ -7008,8 +7008,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 16.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 17.0,
+    "result": "win"
    },
    {
     "player": "Calvin Ridley",
@@ -7022,8 +7022,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 16.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 33.0,
+    "result": "win"
    },
    {
     "player": "Gunnar Helm",
@@ -7036,7 +7036,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 16.1,
     "lean": null,
-    "actual": null,
+    "actual": 0.0,
     "result": null
    },
    {
@@ -7050,8 +7050,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 11.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Woody Marks",
@@ -7064,8 +7064,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 8.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 23.0,
+    "result": "loss"
    },
    {
     "player": "Tyjae Spears",
@@ -7078,8 +7078,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 28.0,
+    "result": "win"
    },
    {
     "player": "David Montgomery",
@@ -7092,8 +7092,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.9,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Carnell Tate",
@@ -7106,7 +7106,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.5,
     "lean": null,
-    "actual": null,
+    "actual": 1.0,
     "result": null
    },
    {
@@ -7120,8 +7120,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 5.0,
+    "result": "win"
    },
    {
     "player": "Dalton Schultz",
@@ -7134,8 +7134,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 3.0,
+    "result": "win"
    },
    {
     "player": "Wan'Dale Robinson",
@@ -7148,8 +7148,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 6.0,
+    "result": "win"
    },
    {
     "player": "Xavier Hutchinson",
@@ -7162,7 +7162,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.6,
     "lean": null,
-    "actual": null,
+    "actual": 4.0,
     "result": null
    },
    {
@@ -7176,8 +7176,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Kayshon Boutte",
@@ -7190,7 +7190,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.1,
     "lean": null,
-    "actual": null,
+    "actual": 3.0,
     "result": null
    },
    {
@@ -7204,7 +7204,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.0,
     "lean": null,
-    "actual": null,
+    "actual": 0.0,
     "result": null
    },
    {
@@ -7218,8 +7218,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "loss"
    },
    {
     "player": "Jaylin Noel",
@@ -7232,8 +7232,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 5.0,
+    "result": "loss"
    },
    {
     "player": "Calvin Ridley",
@@ -7246,8 +7246,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "win"
    },
    {
     "player": "Woody Marks",
@@ -7260,8 +7260,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 4.0,
+    "result": "loss"
    },
    {
     "player": "Tyjae Spears",
@@ -7274,8 +7274,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 9.0,
+    "result": "win"
    },
    {
     "player": "David Montgomery",
@@ -7288,8 +7288,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Tony Pollard",
@@ -7302,7 +7302,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 65.4,
     "lean": null,
-    "actual": null,
+    "actual": 52.0,
     "result": null
    },
    {
@@ -7316,8 +7316,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 45.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 11.0,
+    "result": "loss"
    },
    {
     "player": "Woody Marks",
@@ -7330,7 +7330,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 29.4,
     "lean": null,
-    "actual": null,
+    "actual": 62.0,
     "result": null
    },
    {
@@ -7344,8 +7344,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 10.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Cam Ward",
@@ -7358,8 +7358,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 8.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "win"
    },
    {
     "player": "C.J. Stroud",
@@ -7372,8 +7372,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 5.0,
+    "result": "loss"
    },
    {
     "player": "David Montgomery",
@@ -7386,8 +7386,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 44.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Nico Collins",
@@ -7400,8 +7400,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 35.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Carnell Tate",
@@ -7414,8 +7414,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 32.0,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Tony Pollard",
@@ -7428,8 +7428,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 31.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Woody Marks",
@@ -7442,8 +7442,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 28.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Calvin Ridley",
@@ -7456,8 +7456,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 27.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Wan'Dale Robinson",
@@ -7470,8 +7470,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 23.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Dalton Schultz",
@@ -7484,8 +7484,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 21.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Kayshon Boutte",
@@ -7498,8 +7498,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 18.9,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Foster Moreau",
@@ -7512,8 +7512,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 17.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Elic Ayomanor",
@@ -7526,8 +7526,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 17.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Tyjae Spears",
@@ -7540,8 +7540,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 15.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Jared Wayne",
@@ -7554,8 +7554,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 14.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Xavier Hutchinson",
@@ -7568,8 +7568,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 13.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Cam Ward",
@@ -7582,8 +7582,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 13.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Jaylin Noel",
@@ -7596,8 +7596,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 12.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Gunnar Helm",
@@ -7610,8 +7610,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 12.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Chimere Dike",
@@ -7624,8 +7624,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 11.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Brevin Jordan",
@@ -7638,8 +7638,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 11.0,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Kalel Mullings",
@@ -7652,8 +7652,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 9.9,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Daniel Bellinger",
@@ -7666,8 +7666,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 9.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "C.J. Stroud",
@@ -7680,8 +7680,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 8.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Cade Stover",
@@ -7694,8 +7694,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.0,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Dare Ogunbowale",
@@ -7736,8 +7736,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Julius Chestnut",
@@ -7764,8 +7764,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 200.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 326.0,
+    "result": "win"
    },
    {
     "player": "Jayden Daniels",
@@ -7778,8 +7778,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 177.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 199.0,
+    "result": "win"
    },
    {
     "player": "Jameis Winston",
@@ -7792,7 +7792,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.24,
     "lean": null,
-    "actual": null,
+    "actual": 3.0,
     "result": null
    },
    {
@@ -7806,7 +7806,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.12,
     "lean": null,
-    "actual": null,
+    "actual": 0.0,
     "result": null
    },
    {
@@ -7820,8 +7820,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 58.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 62.0,
+    "result": "win"
    },
    {
     "player": "Isaiah Likely",
@@ -7834,8 +7834,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 54.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 94.0,
+    "result": "loss"
    },
    {
     "player": "Malik Nabers",
@@ -7848,8 +7848,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 49.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 121.0,
+    "result": "win"
    },
    {
     "player": "Antonio Williams",
@@ -7862,7 +7862,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 36.1,
     "lean": null,
-    "actual": null,
+    "actual": 31.0,
     "result": null
    },
    {
@@ -7876,8 +7876,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 24.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 60.0,
+    "result": "win"
    },
    {
     "player": "Malachi Fields",
@@ -7890,7 +7890,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 22.6,
     "lean": null,
-    "actual": null,
+    "actual": 20.0,
     "result": null
    },
    {
@@ -7904,8 +7904,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 17.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 14.0,
+    "result": "loss"
    },
    {
     "player": "Rachaad White",
@@ -7918,8 +7918,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 11.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "loss"
    },
    {
     "player": "Cam Skattebo",
@@ -7932,8 +7932,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 10.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 12.0,
+    "result": "loss"
    },
    {
     "player": "Jacory Croskey-Merritt",
@@ -7946,8 +7946,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Isaiah Likely",
@@ -7960,8 +7960,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 11.0,
+    "result": "loss"
    },
    {
     "player": "Terry McLaurin",
@@ -7974,8 +7974,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 4.0,
+    "result": "win"
    },
    {
     "player": "Malik Nabers",
@@ -7988,8 +7988,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 11.0,
+    "result": "win"
    },
    {
     "player": "Antonio Williams",
@@ -8002,7 +8002,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.3,
     "lean": null,
-    "actual": null,
+    "actual": 3.0,
     "result": null
    },
    {
@@ -8016,8 +8016,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 4.0,
+    "result": "win"
    },
    {
     "player": "Malachi Fields",
@@ -8030,7 +8030,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.2,
     "lean": null,
-    "actual": null,
+    "actual": 2.0,
     "result": null
    },
    {
@@ -8044,8 +8044,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "loss"
    },
    {
     "player": "Cam Skattebo",
@@ -8058,8 +8058,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "win"
    },
    {
     "player": "Darnell Mooney",
@@ -8072,8 +8072,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.9,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "win"
    },
    {
     "player": "Jacory Croskey-Merritt",
@@ -8086,8 +8086,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Cam Skattebo",
@@ -8100,8 +8100,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 73.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 59.0,
+    "result": "loss"
    },
    {
     "player": "Jacory Croskey-Merritt",
@@ -8114,8 +8114,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 60.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 82.0,
+    "result": "loss"
    },
    {
     "player": "Rachaad White",
@@ -8128,8 +8128,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 30.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 18.0,
+    "result": "loss"
    },
    {
     "player": "Jayden Daniels",
@@ -8142,8 +8142,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 26.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 103.0,
+    "result": "win"
    },
    {
     "player": "Najee Harris",
@@ -8156,8 +8156,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 26.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 9.0,
+    "result": "loss"
    },
    {
     "player": "Jameis Winston",
@@ -8170,8 +8170,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 27.0,
+    "result": "win"
    },
    {
     "player": "Cam Skattebo",
@@ -8184,8 +8184,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 47.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Austin Ekeler",
@@ -8198,8 +8198,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 38.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Jacory Croskey-Merritt",
@@ -8212,8 +8212,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 37.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Najee Harris",
@@ -8226,8 +8226,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 33.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Terry McLaurin",
@@ -8240,8 +8240,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 33.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Rachaad White",
@@ -8254,8 +8254,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 30.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Malik Nabers",
@@ -8268,8 +8268,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 29.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Isaiah Likely",
@@ -8282,8 +8282,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 28.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Jayden Daniels",
@@ -8296,8 +8296,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 27.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Antonio Williams",
@@ -8310,8 +8310,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 23.0,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Tyrone Tracy Jr.",
@@ -8324,8 +8324,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 17.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Malachi Fields",
@@ -8338,8 +8338,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 16.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Darnell Mooney",
@@ -8352,8 +8352,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 16.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Theo Johnson",
@@ -8366,8 +8366,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 16.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Chig Okonkwo",
@@ -8380,8 +8380,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 14.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Treylon Burks",
@@ -8394,8 +8394,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 10.9,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Dyami Brown",
@@ -8408,8 +8408,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 10.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Jameis Winston",
@@ -8422,8 +8422,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 8.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Luke McCaffrey",
@@ -8436,8 +8436,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Ben Sinnott",
@@ -8450,8 +8450,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Patrick Ricard",
@@ -8478,8 +8478,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Dalen Cambre",
@@ -8492,8 +8492,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Thomas Fidone II",
@@ -8534,8 +8534,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Charlie Jones",
@@ -8548,8 +8548,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 0.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Bo Nix",
@@ -8562,8 +8562,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 243.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 123.0,
+    "result": "win"
    },
    {
     "player": "Justin Herbert",
@@ -8576,8 +8576,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 221.9,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 121.0,
+    "result": "loss"
    },
    {
     "player": "Bo Nix",
@@ -8590,7 +8590,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.58,
     "lean": null,
-    "actual": null,
+    "actual": 1.0,
     "result": null
    },
    {
@@ -8604,7 +8604,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.37,
     "lean": null,
-    "actual": null,
+    "actual": 1.0,
     "result": null
    },
    {
@@ -8618,7 +8618,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 50.9,
     "lean": null,
-    "actual": null,
+    "actual": 19.0,
     "result": null
    },
    {
@@ -8632,8 +8632,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 44.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 18.0,
+    "result": "loss"
    },
    {
     "player": "RJ Harvey",
@@ -8646,8 +8646,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 32.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Tre Harris",
@@ -8660,8 +8660,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 32.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 16.0,
+    "result": "win"
    },
    {
     "player": "Oronde Gadsden II",
@@ -8674,8 +8674,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 31.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Evan Engram",
@@ -8688,8 +8688,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 20.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 55.0,
+    "result": "win"
    },
    {
     "player": "Troy Franklin",
@@ -8702,8 +8702,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 15.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 16.0,
+    "result": "loss"
    },
    {
     "player": "Marvin Mims Jr.",
@@ -8716,8 +8716,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 11.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 6.0,
+    "result": "win"
    },
    {
     "player": "Keaton Mitchell",
@@ -8730,8 +8730,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 10.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 18.0,
+    "result": "loss"
    },
    {
     "player": "Omarion Hampton",
@@ -8744,8 +8744,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 6.0,
+    "result": "win"
    },
    {
     "player": "RJ Harvey",
@@ -8758,8 +8758,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Jaylen Waddle",
@@ -8772,7 +8772,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.1,
     "lean": null,
-    "actual": null,
+    "actual": 2.0,
     "result": null
    },
    {
@@ -8786,8 +8786,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "loss"
    },
    {
     "player": "Oronde Gadsden II",
@@ -8800,8 +8800,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Tre Harris",
@@ -8814,8 +8814,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "win"
    },
    {
     "player": "Evan Engram",
@@ -8828,8 +8828,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 4.0,
+    "result": "win"
    },
    {
     "player": "Troy Franklin",
@@ -8842,8 +8842,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "win"
    },
    {
     "player": "Omarion Hampton",
@@ -8856,8 +8856,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "loss"
    },
    {
     "player": "Marvin Mims Jr.",
@@ -8870,8 +8870,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "win"
    },
    {
     "player": "J.K. Dobbins",
@@ -8884,8 +8884,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 63.0,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 68.0,
+    "result": "win"
    },
    {
     "player": "Omarion Hampton",
@@ -8898,8 +8898,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 62.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 33.0,
+    "result": "loss"
    },
    {
     "player": "Keaton Mitchell",
@@ -8912,8 +8912,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 26.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 11.0,
+    "result": "win"
    },
    {
     "player": "RJ Harvey",
@@ -8926,7 +8926,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 23.7,
     "lean": null,
-    "actual": null,
+    "actual": 7.0,
     "result": null
    },
    {
@@ -8940,8 +8940,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 18.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 54.0,
+    "result": "loss"
    },
    {
     "player": "Bo Nix",
@@ -8954,8 +8954,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 10.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 10.0,
+    "result": "loss"
    },
    {
     "player": "Omarion Hampton",
@@ -8968,8 +8968,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 44.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "J.K. Dobbins",
@@ -8982,8 +8982,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 40.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "RJ Harvey",
@@ -8996,8 +8996,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 35.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Courtland Sutton",
@@ -9010,8 +9010,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 29.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Jaylen Waddle",
@@ -9024,8 +9024,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 29.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Ladd McConkey",
@@ -9052,8 +9052,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 21.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Keaton Mitchell",
@@ -9066,8 +9066,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 20.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Kimani Vidal",
@@ -9080,8 +9080,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 20.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "win"
    },
    {
     "player": "Bo Nix",
@@ -9094,8 +9094,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 20.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Evan Engram",
@@ -9108,8 +9108,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 19.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Troy Franklin",
@@ -9122,8 +9122,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 16.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Justin Herbert",
@@ -9136,8 +9136,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 16.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Marquez Valdes-Scantling",
@@ -9150,8 +9150,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 16.0,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Tre Harris",
@@ -9164,8 +9164,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 15.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Nate Adkins",
@@ -9192,8 +9192,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 14.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Marvin Mims Jr.",
@@ -9206,8 +9206,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 13.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Adam Trautman",
@@ -9234,8 +9234,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 9.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Tyler Badie",
@@ -9248,8 +9248,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 8.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Alec Ingold",
@@ -9276,8 +9276,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Scott Matlock",
@@ -9304,8 +9304,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Patrick Herbert",
@@ -9332,8 +9332,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Dallen Bentley",
@@ -9360,8 +9360,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 300.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 271.0,
+    "result": "win"
    },
    {
     "player": "Jacoby Brissett",
@@ -9374,8 +9374,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 271.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 292.0,
+    "result": "loss"
    },
    {
     "player": "Jared Goff",
@@ -9388,8 +9388,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.79,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 3.0,
+    "result": "loss"
    },
    {
     "player": "Jacoby Brissett",
@@ -9402,8 +9402,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.74,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 3.0,
+    "result": "loss"
    },
    {
     "player": "Amon-Ra St. Brown",
@@ -9416,8 +9416,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 89.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 69.0,
+    "result": "win"
    },
    {
     "player": "Michael Wilson",
@@ -9430,8 +9430,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 89.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 30.0,
+    "result": "win"
    },
    {
     "player": "Trey McBride",
@@ -9444,8 +9444,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 83.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 66.0,
+    "result": "win"
    },
    {
     "player": "Sam LaPorta",
@@ -9458,7 +9458,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 59.7,
     "lean": null,
-    "actual": null,
+    "actual": 88.0,
     "result": null
    },
    {
@@ -9472,8 +9472,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 52.9,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 47.0,
+    "result": "win"
    },
    {
     "player": "Jahmyr Gibbs",
@@ -9486,8 +9486,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 34.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 56.0,
+    "result": "loss"
    },
    {
     "player": "Kendrick Bourne",
@@ -9500,7 +9500,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 31.1,
     "lean": null,
-    "actual": null,
+    "actual": 70.0,
     "result": null
    },
    {
@@ -9514,8 +9514,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 30.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Jeremiyah Love",
@@ -9528,7 +9528,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 11.7,
     "lean": null,
-    "actual": null,
+    "actual": 0.0,
     "result": null
    },
    {
@@ -9542,8 +9542,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 9.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 57.0,
+    "result": "win"
    },
    {
     "player": "Tyler Allgeier",
@@ -9556,8 +9556,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 8.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 9.0,
+    "result": "win"
    },
    {
     "player": "Trey McBride",
@@ -9570,8 +9570,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 8.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 9.0,
+    "result": "loss"
    },
    {
     "player": "Michael Wilson",
@@ -9584,8 +9584,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.9,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 4.0,
+    "result": "win"
    },
    {
     "player": "Amon-Ra St. Brown",
@@ -9598,8 +9598,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 6.0,
+    "result": "loss"
    },
    {
     "player": "Sam LaPorta",
@@ -9612,8 +9612,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 5.0,
+    "result": "win"
    },
    {
     "player": "Jahmyr Gibbs",
@@ -9626,8 +9626,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 5.0,
+    "result": "loss"
    },
    {
     "player": "Jameson Williams",
@@ -9640,7 +9640,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.9,
     "lean": null,
-    "actual": null,
+    "actual": 2.0,
     "result": null
    },
    {
@@ -9654,8 +9654,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Kendrick Bourne",
@@ -9668,8 +9668,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 5.0,
+    "result": "loss"
    },
    {
     "player": "Jeremiyah Love",
@@ -9682,7 +9682,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.3,
     "lean": null,
-    "actual": null,
+    "actual": 0.0,
     "result": null
    },
    {
@@ -9696,8 +9696,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "win"
    },
    {
     "player": "Elijah Higgins",
@@ -9710,7 +9710,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.4,
     "lean": null,
-    "actual": null,
+    "actual": 3.0,
     "result": null
    },
    {
@@ -9724,8 +9724,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 88.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 151.0,
+    "result": "loss"
    },
    {
     "player": "Jeremiyah Love",
@@ -9738,7 +9738,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 72.4,
     "lean": null,
-    "actual": null,
+    "actual": 22.0,
     "result": null
    },
    {
@@ -9752,8 +9752,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 34.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 7.0,
+    "result": "loss"
    },
    {
     "player": "Jacoby Brissett",
@@ -9766,7 +9766,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 9.9,
     "lean": null,
-    "actual": null,
+    "actual": 19.0,
     "result": null
    },
    {
@@ -9780,8 +9780,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 8.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 11.0,
+    "result": "loss"
    },
    {
     "player": "Jared Goff",
@@ -9794,8 +9794,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "win"
    },
    {
     "player": "Jahmyr Gibbs",
@@ -9808,8 +9808,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 63.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Jeremiyah Love",
@@ -9822,8 +9822,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 47.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Amon-Ra St. Brown",
@@ -9836,8 +9836,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 44.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Sam LaPorta",
@@ -9850,8 +9850,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 36.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Trey McBride",
@@ -9864,8 +9864,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 33.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Michael Wilson",
@@ -9878,8 +9878,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 33.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Jameson Williams",
@@ -9892,8 +9892,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 31.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Tyler Allgeier",
@@ -9906,8 +9906,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 28.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Isaac TeSlaa",
@@ -9920,8 +9920,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 23.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Bam Knight",
@@ -9934,8 +9934,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 22.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Kendrick Bourne",
@@ -9948,8 +9948,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 16.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Jacoby Brissett",
@@ -9962,8 +9962,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 14.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Brock Wright",
@@ -9976,8 +9976,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 13.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Elijah Higgins",
@@ -9990,8 +9990,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 8.9,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Tyler Conklin",
@@ -10018,8 +10018,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Teagan Quitoriano",
@@ -10032,8 +10032,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "win"
    },
    {
     "player": "Sione Vaki",
@@ -10046,8 +10046,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Hunter Long",
@@ -10088,8 +10088,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Jalen Brooks",
@@ -10102,8 +10102,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Tay Martin",
@@ -10116,8 +10116,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Jacob Saylors",
@@ -10130,8 +10130,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Simi Fehoko",
@@ -10144,8 +10144,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Tom Kennedy",
@@ -10158,8 +10158,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 0.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Reggie Virgil",
@@ -10172,7 +10172,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": null,
     "lean": null,
-    "actual": null,
+    "actual": 0.0,
     "result": null
    },
    {
@@ -10186,8 +10186,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 239.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 195.0,
+    "result": "win"
    },
    {
     "player": "Brock Purdy",
@@ -10200,8 +10200,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 214.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 189.0,
+    "result": "loss"
    },
    {
     "player": "Sam Darnold",
@@ -10214,8 +10214,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.39,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "win"
    },
    {
     "player": "Brock Purdy",
@@ -10228,8 +10228,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.29,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "win"
    },
    {
     "player": "Jaxon Smith-Njigba",
@@ -10242,8 +10242,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 98.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 102.0,
+    "result": "loss"
    },
    {
     "player": "Mike Evans",
@@ -10256,8 +10256,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 43.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 113.0,
+    "result": "win"
    },
    {
     "player": "George Kittle",
@@ -10270,8 +10270,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 42.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 24.0,
+    "result": "loss"
    },
    {
     "player": "Deebo Samuel Sr.",
@@ -10284,8 +10284,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 30.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 21.0,
+    "result": "loss"
    },
    {
     "player": "Christian McCaffrey",
@@ -10298,8 +10298,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 28.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 15.0,
+    "result": "loss"
    },
    {
     "player": "Rashid Shaheed",
@@ -10312,8 +10312,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 26.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 23.0,
+    "result": "win"
    },
    {
     "player": "AJ Barner",
@@ -10326,7 +10326,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 26.2,
     "lean": null,
-    "actual": null,
+    "actual": 20.0,
     "result": null
    },
    {
@@ -10340,8 +10340,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 21.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 15.0,
+    "result": "loss"
    },
    {
     "player": "Tory Horton",
@@ -10368,8 +10368,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 24.0,
+    "result": "loss"
    },
    {
     "player": "Emanuel Wilson",
@@ -10382,8 +10382,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 11.0,
+    "result": "win"
    },
    {
     "player": "Jaxon Smith-Njigba",
@@ -10396,8 +10396,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 5.0,
+    "result": "win"
    },
    {
     "player": "Christian McCaffrey",
@@ -10410,8 +10410,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 3.0,
+    "result": "loss"
    },
    {
     "player": "George Kittle",
@@ -10424,7 +10424,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.2,
     "lean": null,
-    "actual": null,
+    "actual": 5.0,
     "result": null
    },
    {
@@ -10438,8 +10438,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 7.0,
+    "result": "win"
    },
    {
     "player": "AJ Barner",
@@ -10452,7 +10452,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.9,
     "lean": null,
-    "actual": null,
+    "actual": 3.0,
     "result": null
    },
    {
@@ -10466,8 +10466,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "loss"
    },
    {
     "player": "Rashid Shaheed",
@@ -10480,8 +10480,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "win"
    },
    {
     "player": "Cooper Kupp",
@@ -10494,8 +10494,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "loss"
    },
    {
     "player": "Tory Horton",
@@ -10522,8 +10522,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 4.0,
+    "result": "loss"
    },
    {
     "player": "Emanuel Wilson",
@@ -10536,8 +10536,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "loss"
    },
    {
     "player": "Emanuel Wilson",
@@ -10550,8 +10550,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 77.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 61.0,
+    "result": "win"
    },
    {
     "player": "Christian McCaffrey",
@@ -10564,8 +10564,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 63.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 68.0,
+    "result": "win"
    },
    {
     "player": "George Holani",
@@ -10578,8 +10578,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 34.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 7.0,
+    "result": "win"
    },
    {
     "player": "Kaelon Black",
@@ -10592,7 +10592,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 27.2,
     "lean": null,
-    "actual": null,
+    "actual": 16.0,
     "result": null
    },
    {
@@ -10606,8 +10606,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 19.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 6.0,
+    "result": "win"
    },
    {
     "player": "Deebo Samuel Sr.",
@@ -10620,7 +10620,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.0,
     "lean": null,
-    "actual": null,
+    "actual": 4.0,
     "result": null
    },
    {
@@ -10634,8 +10634,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 5.0,
+    "result": "win"
    },
    {
     "player": "Christian McCaffrey",
@@ -10648,8 +10648,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 57.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Mike Evans",
@@ -10662,8 +10662,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 44.0,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "win"
    },
    {
     "player": "Jaxon Smith-Njigba",
@@ -10676,8 +10676,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 38.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Deebo Samuel Sr.",
@@ -10690,8 +10690,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 37.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Cooper Kupp",
@@ -10704,8 +10704,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 36.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "George Kittle",
@@ -10718,8 +10718,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 32.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Emanuel Wilson",
@@ -10732,8 +10732,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 30.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "AJ Barner",
@@ -10746,8 +10746,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 25.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Brandin Cooks",
@@ -10760,8 +10760,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 24.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "win"
    },
    {
     "player": "Rashid Shaheed",
@@ -10774,8 +10774,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 22.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "George Holani",
@@ -10788,8 +10788,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 21.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Brock Purdy",
@@ -10802,8 +10802,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 19.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Kaelon Black",
@@ -10816,8 +10816,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 19.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Tory Horton",
@@ -10844,8 +10844,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 10.0,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Brady Russell",
@@ -10858,8 +10858,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 8.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Elijah Arroyo",
@@ -10872,8 +10872,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Jordan Watkins",
@@ -10900,8 +10900,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Eric Saubert",
@@ -10914,8 +10914,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Montorie Foster Jr",
@@ -10942,8 +10942,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Luke Farrell",
@@ -10956,8 +10956,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Nick Kallerup",
@@ -10984,8 +10984,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 0.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Robert Henry Jr.",
@@ -11012,8 +11012,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 183.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 240.0,
+    "result": "win"
    },
    {
     "player": "Tyler Huntley",
@@ -11026,8 +11026,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 107.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 201.0,
+    "result": "loss"
    },
    {
     "player": "Michael Penix Jr.",
@@ -11040,8 +11040,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.12,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "win"
    },
    {
     "player": "Tyler Huntley",
@@ -11054,8 +11054,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 0.67,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "loss"
    },
    {
     "player": "Zay Flowers",
@@ -11068,7 +11068,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 64.0,
     "lean": null,
-    "actual": null,
+    "actual": 53.0,
     "result": null
    },
    {
@@ -11082,8 +11082,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 52.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 118.0,
+    "result": "loss"
    },
    {
     "player": "Mark Andrews",
@@ -11096,8 +11096,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 33.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 28.0,
+    "result": "loss"
    },
    {
     "player": "Rashod Bateman",
@@ -11110,8 +11110,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 20.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 62.0,
+    "result": "win"
    },
    {
     "player": "Kyle Pitts",
@@ -11124,8 +11124,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 20.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 42.0,
+    "result": "win"
    },
    {
     "player": "Bijan Robinson",
@@ -11138,8 +11138,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 19.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 32.0,
+    "result": "win"
    },
    {
     "player": "Jahan Dotson",
@@ -11152,7 +11152,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 19.2,
     "lean": null,
-    "actual": null,
+    "actual": 54.0,
     "result": null
    },
    {
@@ -11180,8 +11180,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 10.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Devontez Walker",
@@ -11194,7 +11194,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 8.7,
     "lean": null,
-    "actual": null,
+    "actual": 9.0,
     "result": null
    },
    {
@@ -11208,8 +11208,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 5.0,
+    "result": "win"
    },
    {
     "player": "Derrick Henry",
@@ -11222,8 +11222,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 18.0,
+    "result": "win"
    },
    {
     "player": "Zay Flowers",
@@ -11236,8 +11236,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 8.0,
+    "result": "loss"
    },
    {
     "player": "Drake London",
@@ -11250,7 +11250,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.5,
     "lean": null,
-    "actual": null,
+    "actual": 7.0,
     "result": null
    },
    {
@@ -11264,8 +11264,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.0,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 4.0,
+    "result": "win"
    },
    {
     "player": "Bijan Robinson",
@@ -11278,8 +11278,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 4.0,
+    "result": "win"
    },
    {
     "player": "Kyle Pitts",
@@ -11292,8 +11292,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 5.0,
+    "result": "win"
    },
    {
     "player": "Rashod Bateman",
@@ -11306,8 +11306,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 5.0,
+    "result": "win"
    },
    {
     "player": "Jahan Dotson",
@@ -11320,8 +11320,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.9,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "win"
    },
    {
     "player": "Austin Hooper",
@@ -11348,7 +11348,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.5,
     "lean": null,
-    "actual": null,
+    "actual": 2.0,
     "result": null
    },
    {
@@ -11362,8 +11362,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Derrick Henry",
@@ -11376,8 +11376,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "win"
    },
    {
     "player": "Devontez Walker",
@@ -11390,8 +11390,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 0.9,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 2.0,
+    "result": "win"
    },
    {
     "player": "Derrick Henry",
@@ -11404,7 +11404,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 101.7,
     "lean": null,
-    "actual": null,
+    "actual": 102.0,
     "result": null
    },
    {
@@ -11418,8 +11418,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 98.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 86.0,
+    "result": "win"
    },
    {
     "player": "Brian Robinson",
@@ -11432,8 +11432,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 41.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 16.0,
+    "result": "loss"
    },
    {
     "player": "Tyler Huntley",
@@ -11446,7 +11446,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 12.3,
     "lean": null,
-    "actual": null,
+    "actual": 20.0,
     "result": null
    },
    {
@@ -11460,7 +11460,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.3,
     "lean": null,
-    "actual": null,
+    "actual": 73.0,
     "result": null
    },
    {
@@ -11474,8 +11474,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 8.0,
+    "result": "win"
    },
    {
     "player": "Derrick Henry",
@@ -11488,8 +11488,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 55.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Bijan Robinson",
@@ -11502,8 +11502,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 54.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Brian Robinson",
@@ -11516,8 +11516,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 32.5,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Mark Andrews",
@@ -11530,8 +11530,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 32.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Zay Flowers",
@@ -11544,8 +11544,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 30.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Drake London",
@@ -11558,8 +11558,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 29.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Rashod Bateman",
@@ -11572,8 +11572,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 21.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Jahan Dotson",
@@ -11586,8 +11586,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 17.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Austin Hooper",
@@ -11614,8 +11614,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 15.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Kyle Pitts",
@@ -11628,8 +11628,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 14.9,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Olamide Zaccheaus",
@@ -11642,8 +11642,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 13.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Justice Hill",
@@ -11656,8 +11656,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 12.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Devontez Walker",
@@ -11670,8 +11670,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 10.9,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "win"
    },
    {
     "player": "Matthew Hibner",
@@ -11712,8 +11712,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 9.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Zachariah Branch",
@@ -11726,8 +11726,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 7.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Elijah Sarratt",
@@ -11754,8 +11754,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Josh Cuevas",
@@ -11768,8 +11768,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Rasheen Ali",
@@ -11782,8 +11782,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Chris Blair",
@@ -11810,8 +11810,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.9,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Nick Muse",
@@ -11824,8 +11824,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 0.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Nick Vannett",
@@ -11852,8 +11852,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 315.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 383.0,
+    "result": "loss"
    },
    {
     "player": "Josh Allen",
@@ -11866,7 +11866,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 225.6,
     "lean": null,
-    "actual": null,
+    "actual": 210.0,
     "result": null
    },
    {
@@ -11880,8 +11880,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.88,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 3.0,
+    "result": "loss"
    },
    {
     "player": "Josh Allen",
@@ -11894,8 +11894,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.33,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "loss"
    },
    {
     "player": "Puka Nacua",
@@ -11908,8 +11908,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 101.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 138.0,
+    "result": "win"
    },
    {
     "player": "Davante Adams",
@@ -11922,8 +11922,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 66.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 51.0,
+    "result": "loss"
    },
    {
     "player": "Khalil Shakir",
@@ -11936,7 +11936,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 42.1,
     "lean": null,
-    "actual": null,
+    "actual": 80.0,
     "result": null
    },
    {
@@ -11950,8 +11950,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 37.9,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 83.0,
+    "result": "win"
    },
    {
     "player": "Kyren Williams",
@@ -11964,8 +11964,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 33.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 27.0,
+    "result": "loss"
    },
    {
     "player": "Dalton Kincaid",
@@ -11978,8 +11978,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 30.8,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 7.0,
+    "result": "win"
    },
    {
     "player": "Keon Coleman",
@@ -11992,8 +11992,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 30.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 7.0,
+    "result": "win"
    },
    {
     "player": "Konata Mumpfield",
@@ -12020,7 +12020,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 10.8,
     "lean": null,
-    "actual": null,
+    "actual": 3.0,
     "result": null
    },
    {
@@ -12034,8 +12034,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 10.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 72.0,
+    "result": "loss"
    },
    {
     "player": "Dawson Knox",
@@ -12048,8 +12048,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 9.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 6.0,
+    "result": "loss"
    },
    {
     "player": "James Cook",
@@ -12062,8 +12062,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 8.9,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 7.0,
+    "result": "loss"
    },
    {
     "player": "Jordan Whittington",
@@ -12076,8 +12076,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 8.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Puka Nacua",
@@ -12090,8 +12090,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.7,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 17.0,
+    "result": "win"
    },
    {
     "player": "Davante Adams",
@@ -12104,8 +12104,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.0,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 5.0,
+    "result": "win"
    },
    {
     "player": "Kyren Williams",
@@ -12118,8 +12118,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 5.2,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 6.0,
+    "result": "loss"
    },
    {
     "player": "Tyler Higbee",
@@ -12132,8 +12132,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 5.0,
+    "result": "win"
    },
    {
     "player": "Khalil Shakir",
@@ -12146,8 +12146,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 3.0,
+    "result": "win"
    },
    {
     "player": "Dalton Kincaid",
@@ -12160,8 +12160,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 3.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "win"
    },
    {
     "player": "Keon Coleman",
@@ -12174,7 +12174,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.9,
     "lean": null,
-    "actual": null,
+    "actual": 1.0,
     "result": null
    },
    {
@@ -12202,8 +12202,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 2.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 4.0,
+    "result": "loss"
    },
    {
     "player": "James Cook",
@@ -12216,8 +12216,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "loss"
    },
    {
     "player": "Colby Parkinson",
@@ -12230,8 +12230,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.6,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "loss"
    },
    {
     "player": "Dawson Knox",
@@ -12244,8 +12244,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.3,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 1.0,
+    "result": "loss"
    },
    {
     "player": "Jordan Whittington",
@@ -12258,8 +12258,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.0,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "James Cook",
@@ -12272,8 +12272,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 83.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 111.0,
+    "result": "loss"
    },
    {
     "player": "Kyren Williams",
@@ -12286,8 +12286,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 68.2,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 49.0,
+    "result": "loss"
    },
    {
     "player": "Blake Corum",
@@ -12300,8 +12300,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 32.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 19.0,
+    "result": "win"
    },
    {
     "player": "Josh Allen",
@@ -12314,7 +12314,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 29.8,
     "lean": null,
-    "actual": null,
+    "actual": 121.0,
     "result": null
    },
    {
@@ -12328,7 +12328,7 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 6.7,
     "lean": null,
-    "actual": null,
+    "actual": 0.0,
     "result": null
    },
    {
@@ -12342,8 +12342,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 56.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Davante Adams",
@@ -12356,8 +12356,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 51.0,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "win"
    },
    {
     "player": "Josh Allen",
@@ -12370,8 +12370,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 46.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "James Cook",
@@ -12384,8 +12384,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 45.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Puka Nacua",
@@ -12398,8 +12398,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 42.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "DJ Moore",
@@ -12426,8 +12426,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 24.4,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Dalton Kincaid",
@@ -12440,8 +12440,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 22.3,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Dawson Knox",
@@ -12454,8 +12454,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 22.0,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Khalil Shakir",
@@ -12468,8 +12468,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 21.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Blake Corum",
@@ -12482,8 +12482,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 19.9,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 100.0,
+    "result": "loss"
    },
    {
     "player": "Tyler Higbee",
@@ -12496,8 +12496,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 19.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Colby Parkinson",
@@ -12510,8 +12510,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 15.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Ty Johnson",
@@ -12524,8 +12524,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 14.8,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Konata Mumpfield",
@@ -12552,8 +12552,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 13.4,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Davis Allen",
@@ -12566,8 +12566,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 11.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Tutu Atwell",
@@ -12580,8 +12580,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 10.1,
     "lean": "over",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "loss"
    },
    {
     "player": "Greg Dortch",
@@ -12594,8 +12594,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 10.0,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Jackson Hawes",
@@ -12608,8 +12608,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 9.7,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Matthew Stafford",
@@ -12622,8 +12622,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Jordan Whittington",
@@ -12636,8 +12636,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 4.1,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Dean Connors",
@@ -12650,8 +12650,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.6,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Keleki Latu",
@@ -12664,8 +12664,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 1.5,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "Alex Bachman",
@@ -12678,8 +12678,8 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": 0.9,
     "lean": "under",
-    "actual": null,
-    "result": null
+    "actual": 0.0,
+    "result": "win"
    },
    {
     "player": "CJ Daniels",
@@ -12720,128 +12720,128 @@ export const REPORT_CARDS: ReportCard[] = [
     "lineSrc": "fanduel",
     "proj": null,
     "lean": null,
-    "actual": null,
+    "actual": 0.0,
     "result": null
    }
   ],
   "propSummary": {
    "passing": {
     "n": 60,
-    "graded": 4,
+    "graded": 60,
     "voided": 0,
     "lean": {
-     "w": 1,
-     "l": 0,
+     "w": 26,
+     "l": 17,
      "p": 0
     },
     "overLean": {
-     "w": 0,
-     "l": 0,
-     "p": 0
-    },
-    "underLean": {
-     "w": 1,
-     "l": 0,
-     "p": 0
-    },
-    "projMae": 9.1,
-    "lineMae": 14.0,
-    "projAboveLine": 75,
-    "actualOver": 75,
-    "projBias": -7.0
-   },
-   "receiving": {
-    "n": 165,
-    "graded": 11,
-    "voided": 0,
-    "lean": {
-     "w": 3,
-     "l": 3,
-     "p": 0
-    },
-    "overLean": {
-     "w": 2,
-     "l": 1,
-     "p": 0
-    },
-    "underLean": {
-     "w": 1,
-     "l": 2,
-     "p": 0
-    },
-    "projMae": 27.9,
-    "lineMae": 25.2,
-    "projAboveLine": 82,
-    "actualOver": 55,
-    "projBias": -3.7
-   },
-   "receptions": {
-    "n": 164,
-    "graded": 11,
-    "voided": 0,
-    "lean": {
-     "w": 4,
-     "l": 5,
-     "p": 0
-    },
-    "overLean": {
-     "w": 2,
-     "l": 5,
-     "p": 0
-    },
-    "underLean": {
-     "w": 2,
-     "l": 0,
-     "p": 0
-    },
-    "projMae": 1.5,
-    "lineMae": 1.6,
-    "projAboveLine": 45,
-    "actualOver": 27,
-    "projBias": 0.2
-   },
-   "rushing": {
-    "n": 83,
-    "graded": 5,
-    "voided": 0,
-    "lean": {
-     "w": 3,
-     "l": 1,
-     "p": 0
-    },
-    "overLean": {
-     "w": 2,
-     "l": 1,
-     "p": 0
-    },
-    "underLean": {
-     "w": 1,
-     "l": 0,
-     "p": 0
-    },
-    "projMae": 30.8,
-    "lineMae": 33.9,
-    "projAboveLine": 40,
-    "actualOver": 40,
-    "projBias": -13.7
-   },
-   "td": {
-    "n": 394,
-    "graded": 22,
-    "voided": 0,
-    "lean": {
-     "w": 13,
-     "l": 9,
-     "p": 0
-    },
-    "overLean": {
-     "w": 1,
-     "l": 6,
+     "w": 14,
+     "l": 8,
      "p": 0
     },
     "underLean": {
      "w": 12,
-     "l": 3,
+     "l": 9,
+     "p": 0
+    },
+    "projMae": 30.0,
+    "lineMae": 28.2,
+    "projAboveLine": 55,
+    "actualOver": 52,
+    "projBias": 1.4
+   },
+   "receiving": {
+    "n": 165,
+    "graded": 160,
+    "voided": 0,
+    "lean": {
+     "w": 63,
+     "l": 55,
+     "p": 0
+    },
+    "overLean": {
+     "w": 30,
+     "l": 26,
+     "p": 0
+    },
+    "underLean": {
+     "w": 33,
+     "l": 29,
+     "p": 0
+    },
+    "projMae": 22.4,
+    "lineMae": 21.6,
+    "projAboveLine": 52,
+    "actualOver": 49,
+    "projBias": -5.1
+   },
+   "receptions": {
+    "n": 164,
+    "graded": 159,
+    "voided": 0,
+    "lean": {
+     "w": 62,
+     "l": 54,
+     "p": 0
+    },
+    "overLean": {
+     "w": 34,
+     "l": 28,
+     "p": 0
+    },
+    "underLean": {
+     "w": 28,
+     "l": 26,
+     "p": 0
+    },
+    "projMae": 1.6,
+    "lineMae": 1.6,
+    "projAboveLine": 48,
+    "actualOver": 50,
+    "projBias": -0.1
+   },
+   "rushing": {
+    "n": 83,
+    "graded": 82,
+    "voided": 0,
+    "lean": {
+     "w": 28,
+     "l": 29,
+     "p": 0
+    },
+    "overLean": {
+     "w": 12,
+     "l": 17,
+     "p": 0
+    },
+    "underLean": {
+     "w": 16,
+     "l": 12,
+     "p": 0
+    },
+    "projMae": 21.7,
+    "lineMae": 19.9,
+    "projAboveLine": 48,
+    "actualOver": 45,
+    "projBias": -2.8
+   },
+   "td": {
+    "n": 394,
+    "graded": 336,
+    "voided": 0,
+    "lean": {
+     "w": 154,
+     "l": 176,
+     "p": 0
+    },
+    "overLean": {
+     "w": 12,
+     "l": 123,
+     "p": 0
+    },
+    "underLean": {
+     "w": 142,
+     "l": 53,
      "p": 0
     },
     "projMae": null,
@@ -12849,12 +12849,12 @@ export const REPORT_CARDS: ReportCard[] = [
     "projAboveLine": null,
     "actualOver": null,
     "projBias": null,
-    "tdRows": 22,
-    "meanOurs": 18.4,
-    "meanBook": 21.9,
-    "scoredPct": 18.2,
-    "brierOurs": 0.1023,
-    "brierBook": 0.0954
+    "tdRows": 330,
+    "meanOurs": 18.6,
+    "meanBook": 20.0,
+    "scoredPct": 19.7,
+    "brierOurs": 0.136,
+    "brierBook": 0.126
    }
   }
  },
