@@ -316,14 +316,28 @@ const pg = (path: string) => pgFrom("odds_snapshots", path);
 export async function currentWeek(season = 2026): Promise<number | null> {
   const now = new Date();
   const hi = new Date(now.getTime() + 14 * 86_400_000);
-  const rows = (await pg(
+  const lo = new Date(now.getTime() - 36 * 3_600_000);
+  const window =
     `?season=eq.${season}` +
-      `&commence_time=gt.${encodeURIComponent(now.toISOString())}` +
-      `&commence_time=lt.${encodeURIComponent(hi.toISOString())}` +
-      `&select=week`
-  )) as { week: number }[];
-  const weeks = rows.map((r) => r.week).filter((w) => w != null);
-  return weeks.length ? Math.min(...weeks) : null;
+    `&commence_time=gt.${encodeURIComponent(now.toISOString())}` +
+    `&commence_time=lt.${encodeURIComponent(hi.toISOString())}`;
+  // 🚨 ONE ROW PER EVENT, NOT EVERY ROW IN THE WINDOW. Dropping the sort was only half the fix:
+  // `pg()` pages until a SHORT page comes back, so a bare `select=week` over a fortnight pulls
+  // every book x market x outcome x sweep — ~30 pages, and /model took 34 SECONDS to render.
+  // Narrowing to one book/market/outcome collapses it to one row per event per sweep, and the
+  // capture bound keeps it to recent sweeps: 90 rows in one page, 0.98s measured.
+  const narrow = `&collected_at=gt.${encodeURIComponent(lo.toISOString())}` +
+    `&book=eq.fanduel&market=eq.totals&outcome_name=eq.Over&select=week`;
+  const pick = (rows: { week: number }[]) => {
+    const weeks = rows.map((r) => r.week).filter((w) => w != null);
+    return weeks.length ? Math.min(...weeks) : null;
+  };
+  const fast = pick((await pg(window + narrow)) as { week: number }[]);
+  if (fast !== null) return fast;
+  // Nothing captured in the last 36h (a paused sweep, or FanDuel absent from it). Widen rather
+  // than return null — null sends every caller to weekRange().min, which is week 1 all season,
+  // and that is the failure this whole function is about. Slower (~3.4s) and still one page.
+  return pick((await pg(window + "&market=eq.totals&outcome_name=eq.Over&select=week")) as { week: number }[]);
 }
 
 /** The min/max NFL week that currently has any odds captured, for the week nav. */

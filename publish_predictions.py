@@ -162,16 +162,31 @@ def current_week(env, season):
     nothing. Measured: 2.2s -> 0.2s. Same answer, week 6 either way.
 
     This is the third shape of the same lesson already in this file: never ask PostgREST to order a
-    snapshot table. Pin or bound it, then resolve in code."""
+    snapshot table. Pin or bound it, then resolve in code.
+
+    🚨 AND ONE ROW PER EVENT, because dropping the sort was only half of it. `_get` pages until a
+    SHORT page comes back, so a bare `select=week` over a fortnight pulls every book x market x
+    outcome x sweep — about thirty pages. The same mistake in the web app's copy of this function
+    took /model from ~1s to 34 SECONDS to render. Narrowing to one book/market/outcome gives one
+    row per event per sweep: 90 rows in a single page, 0.98s measured."""
     now = datetime.datetime.now(datetime.timezone.utc)
     hi = now + datetime.timedelta(days=14)
-    rows = _get(env, "odds_snapshots",
-                f"?season=eq.{season}"
-                f"&commence_time=gt.{urllib.parse.quote(now.isoformat())}"
-                f"&commence_time=lt.{urllib.parse.quote(hi.isoformat())}"
-                "&select=week")
-    weeks = [r["week"] for r in rows if r.get("week") is not None]
-    return min(weeks) if weeks else None
+    lo = now - datetime.timedelta(hours=36)
+    window = (f"?season=eq.{season}"
+              f"&commence_time=gt.{urllib.parse.quote(now.isoformat())}"
+              f"&commence_time=lt.{urllib.parse.quote(hi.isoformat())}")
+
+    def earliest(q):
+        weeks = [r["week"] for r in _get(env, "odds_snapshots", q) if r.get("week") is not None]
+        return min(weeks) if weeks else None
+
+    wk = earliest(window + f"&collected_at=gt.{urllib.parse.quote(lo.isoformat())}"
+                  "&book=eq.fanduel&market=eq.totals&outcome_name=eq.Over&select=week")
+    if wk is not None:
+        return wk
+    # Nothing captured in the last 36h. Widen rather than report "nothing to publish" — a paused
+    # sweep should not look identical to an empty schedule.
+    return earliest(window + "&market=eq.totals&outcome_name=eq.Over&select=week")
 
 
 def main(argv=None):
