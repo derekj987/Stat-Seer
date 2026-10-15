@@ -58,6 +58,41 @@ reserve share is ~70% proportional error — close to noise.
 
 Lag-1 within-player, within-season correlation.
 
+### CUR_K re-swept with real in-season data — unchanged (2026-10-15)
+
+`CUR_K` (how hard this season's games-so-far pull against the prior season) and
+the 2.5-game recency half-life were originally chosen when 2026 was empty. Re-run
+with weeks 1–5 complete, train 2021–24 / held-out 2025–26:
+
+| | train MAE | pick |
+|---|---|---|
+| half-life 2.5, **CUR_K 1.0** | **2.9085** | best on train — what already ships |
+| half-life 2.0, CUR_K 1.0 | 2.9109 | |
+| half-life 2.5, CUR_K 1.5 | 2.9147 | |
+
+Held-out 21,269 / 6,776 player-games: the shipped pair beats the old simple-mean
+baseline by **+1.56%**, RB +2.07%, QB +2.05%, WR +1.01%, TE +0.04%, and on roles
+that stepped up **+3.79% with bias −1.78 → −0.90**.
+
+**Per-n re-confirmed too** (`curk_by_n.py`). At 4–5 games played — where week 6
+sits — K=1.0 is the best cell. A per-n schedule chosen on train is still WORSE
+held-out: −0.11% overall, **−1.76% on WR/TE early**. Same verdict as the first
+sweep, now with a real current season behind it. **Do not re-run this.**
+
+**What prompted it, and the answer.** The week-6 board sat +7.8 yards above the
+market on `pass_yds` (67% over). Decomposed, the whole offset is VOLUME, not
+efficiency — implied YPA across the 27 rows is a tight 6.63–7.24, and
++1.3 attempts × ~7.0 YPA ≈ +9 yards. The inputs check out against the raw stat
+files (Stafford 35.1 → 43.2 attempts/game, Bryce Young 29.9 → 40.5, Winston
+22.0 → 33.0), so the blend is reading real increases at the correct weight.
+
+Note the gap that looks alarming and is not: league-wide passing is up only
+**+0.38 attempts/team-game (+1.2%)** in weeks 1–5 2026 vs 2025, against +1.3 on
+our board. That is SELECTION — the board is this week's posted starters, several
+of whom (Winston, Young, Brissett) carried depressed prior-season averages as
+backups. Comparing a board of starters to a league average including everyone is
+not a like-for-like comparison, and the discrepancy is not evidence of a bug.
+
 ### Volume / role — highly persistent
 
 | Attribute | Persistence |
