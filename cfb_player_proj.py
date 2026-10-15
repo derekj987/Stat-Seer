@@ -1026,10 +1026,32 @@ PUBLISH_RATIO = {
     "rush_yds":   [0.722, 0.722, 0.722, 0.961, 1.002, 1.002],
     "pass_yds":   [1.006, 1.006, 1.006, 1.006, 1.006, 1.006],
 }
-# 🚨 RECEPTIONS IS ON — the backtest its gate was waiting for has been run
-# (analysis/cfb_receptions_fit.py, 2026-10-15). This curve sat behind CFB_RECEPTIONS="off" marked
-# "gated until backtested" and was never backtested, so the board shipped unconverted the whole
-# time.
+# 🚨 RECEPTIONS STAYS OFF. I turned this on for about an hour on 2026-10-15 and reverted it; the
+# reasoning is kept because the mistake is easy to repeat.
+#
+# The gate says "gated until backtested", so I backtested it — against the AGGREGATE over-rate,
+# which said 39.6% -> 48.2% held out with MAE improving, and shipped. §13i had ALREADY backtested
+# this exact curve on 2026-10-09 against a pre-registered bar, split by level, and rejected it. Its
+# finding survives mine because it measured the thing that matters and mine averaged over it:
+#
+#     actual clears our number      low half of lines   high half
+#     unconverted (ships)                 37.2%           48.6%
+#     with this curve                     44.7%           58.1%
+#
+# THE HIGH HALF WAS ALREADY RIGHT — 48.6% against a fair 50, well inside its 3.7pt standard error
+# — and the curve pushed it to 58.1%. My aggregate of 48.4% was a fixed low end averaged against a
+# broken high end, which is exactly the shape §13i's level split exists to catch. Same conclusion
+# by §13i's own metric: the board lean against the book's graded benchmark goes +22.5 -> +1.9 on
+# the low half and -8.4 -> -29.1 on the high.
+#
+# THE REAL LESSON IS WHERE THE ERROR LIVES, and §13i already wrote it down: med/mean does not vary
+# with receptions level, so this is not a mean->median problem at all. The error is in `mu` — our
+# projected mean is too high for LOW-USAGE receivers specifically. A near-uniform shrink (0.852 to
+# 0.905 is a 5.3% spread against an error running from +22.5 to -8.4) cannot fix one end without
+# dragging the other down with it, and that is precisely what it did.
+#
+# So: do not re-enable this by measuring the aggregate. Any future attempt has to fix the low-usage
+# projection itself, and has to be scored SPLIT BY LEVEL in both directions.
 #
 # WHAT IT FIXES. Graded against what actually happened, our unconverted receptions number was
 # cleared by the real result only 39.6% of the time on held-out weeks — a published "expected"
@@ -1056,7 +1078,8 @@ PUBLISH_RATIO = {
 # so the lookup lands a band too high exactly where the projection is most inflated. This curve is
 # fitted on bands of OUR OWN projection and looked up the same way — self-consistent, and
 # line-blind by construction.
-PUBLISH_RATIO["receptions"] = [0.852, 0.852, 0.876, 0.876, 0.905, 0.905]
+if os.environ.get("CFB_RECEPTIONS", "off") == "on":
+    PUBLISH_RATIO["receptions"] = [0.852, 0.852, 0.876, 0.876, 0.905, 0.905]
 
 
 def to_fifty_fifty(market, mu):

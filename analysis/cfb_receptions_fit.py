@@ -109,7 +109,19 @@ def fit(rows):
 
 
 def score(rows, ratios, label):
-    """Over-rate against OUR number per band, plus MAE. Fair is 50%."""
+    """Over-rate against OUR number per band, plus MAE. Fair is 50%.
+
+    🚨 READ THE LEVEL SPLIT, NEVER THE HEADLINE. The first version of this script printed the
+    aggregate first and I shipped on it: 39.6% -> 48.2% held out, MAE improving, looked decisive.
+    It was a FIXED LOW END AVERAGED AGAINST A BROKEN HIGH END. By half of the line range the same
+    curve reads 37.2 -> 44.7 (good) and 48.6 -> 58.1 (a correctly-calibrated half pushed past
+    fair). §13i had already caught this on 2026-10-09 with a pre-registered level split; an hour of
+    shipping it was the cost of my not reading that entry first.
+
+    So the per-band and per-half breakdowns are printed under every aggregate, and a candidate is
+    only acceptable if NO level moves away from 50. An average that improves while a half degrades
+    is the signature this market produces.
+    """
     conv = (lambda p: round(p * ratios[band_of(p)], 1)) if ratios else (lambda p: p)
     n = len(rows)
     over = sum(1 for r in rows if r["actual"] > conv(r["proj"]))
@@ -124,6 +136,20 @@ def score(rows, ratios, label):
         print(f"       proj {BANDS[i]:.0f}-{hi:.0f}: n={len(g):3d}  over {o:5.1f}%"
               f"  mean ours {st.mean(conv(r['proj']) for r in g):4.2f}"
               f"  actual {st.mean(r['actual'] for r in g):4.2f}")
+    # By half of the LINE range — the split §13i used and the one that rejects this curve. Printed
+    # after the bands because it is the verdict, not a detail: a half moving AWAY from 50 fails the
+    # candidate however good the aggregate looks.
+    med = st.median([r["line"] for r in rows])
+    worst = 0.0
+    for half, keep in (("low ", lambda r: r["line"] <= med), ("high", lambda r: r["line"] > med)):
+        g = [r for r in rows if keep(r)]
+        if len(g) < 15:
+            continue
+        o = 100.0 * sum(1 for r in g if r["actual"] > conv(r["proj"])) / len(g)
+        worst = max(worst, abs(o - 50))
+        print(f"       {half} half of lines (<= {med:g}): n={len(g):3d}  over {o:5.1f}%"
+              f"{'   <- away from fair' if abs(o - 50) > 6 else ''}")
+    print(f"       worst half is {worst:.1f} points from fair")
     return 100.0 * over / n, mae
 
 
