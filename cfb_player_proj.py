@@ -1026,15 +1026,37 @@ PUBLISH_RATIO = {
     "rush_yds":   [0.722, 0.722, 0.722, 0.961, 1.002, 1.002],
     "pass_yds":   [1.006, 1.006, 1.006, 1.006, 1.006, 1.006],
 }
-# Gated until backtested. "on" adds the fitted receptions curve; default stays off so the shipped
-# board is unchanged while the measurement runs.
-if os.environ.get("CFB_RECEPTIONS", "off") == "on":
-    PUBLISH_RATIO["receptions"] = [0.852, 0.852, 0.876, 0.876, 0.905, 0.905]
-# RECEPTIONS is deliberately absent, the same call the NFL side made. Its whole range fits inside
-# one band, so the fit produces a single flat 0.79 -- and a flat ratio is a uniform shrink, which
-# does not correct a tilt, it just moves the level. Applied, it drove the board from 62% over to
-# 35%: overshot, in the other direction. A small-integer market needs its own band structure before
-# it can be converted at all.
+# 🚨 RECEPTIONS IS ON — the backtest its gate was waiting for has been run
+# (analysis/cfb_receptions_fit.py, 2026-10-15). This curve sat behind CFB_RECEPTIONS="off" marked
+# "gated until backtested" and was never backtested, so the board shipped unconverted the whole
+# time.
+#
+# WHAT IT FIXES. Graded against what actually happened, our unconverted receptions number was
+# cleared by the real result only 39.6% of the time on held-out weeks — a published "expected"
+# figure that the player failed to reach three times in five. Not a level error either: the
+# board-wide mean error is -0.10 because the bands cancel. It is a TILT, which is why the earlier
+# FLAT 0.79 ratio failed and drove the board from 62% over to 35% (§13a) — a uniform shrink moves
+# an average and cannot touch a gradient. The gradient is the small-count mean/median gap: at an
+# expected 2.5 catches the median is 2, at 5.0 it is 5.
+#
+# Train weeks 1-3, held out on 5-6, 655 graded rows:
+#
+#     held-out               actual clears ours   MAE
+#     no conversion (shipped)      39.6%         1.676
+#     this curve                   48.2%         1.642
+#     a fresh refit                48.5%         1.640
+#
+# MAE IMPROVES as well as the calibration, which is the shape of a real correction rather than one
+# that only moves the 50/50 point. The refit is inside noise of this curve and is NOT taken: this
+# one is best-or-tied across both splits, and re-fitting on a sample I had just inspected would be
+# choosing on the test set.
+#
+# AND NOTE WHY THE LOOKUP IS SOUND HERE while to_fifty_fifty's docstring warns about it for the
+# other markets: those are fitted on bands of the BOOK'S LINE and then looked up with our own mean,
+# so the lookup lands a band too high exactly where the projection is most inflated. This curve is
+# fitted on bands of OUR OWN projection and looked up the same way — self-consistent, and
+# line-blind by construction.
+PUBLISH_RATIO["receptions"] = [0.852, 0.852, 0.876, 0.876, 0.905, 0.905]
 
 
 def to_fifty_fifty(market, mu):
