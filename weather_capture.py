@@ -24,7 +24,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 try:
     import certifi
@@ -211,10 +211,22 @@ def main():
     # games that had already been played and the model board showed no weather at all. Same
     # defect, same week, as the eight NFL pages that defaulted to weekRange().min; the fix is the
     # same as currentWeek() in web/lib/board.ts.
-    now_iso = datetime.now(timezone.utc).isoformat()
-    wk = sb(f"odds_snapshots?season=eq.{args.season}&commence_time=gt.{urllib.parse.quote(now_iso)}"
-            f"&select=week&order=week.asc&limit=1")
-    week = wk[0]["week"] if wk else 1
+    #
+    # 🚨 AND THE SORT ITSELF IS NOW GONE, which is the second half of the same story. Asking
+    # PostgREST to ORDER a snapshot table is an unindexed scan over a table that only grows: by
+    # 2026-10-11 the identical query in publish_predictions.py was answering HTTP 500 and had
+    # killed four consecutive daily publishes. A bounded fortnight is an indexed range, costs ~0.2s
+    # against 2.2s, and min() over a few hundred rows is free. Note the fallback below is WEEK 1 --
+    # exactly the stale completed week this comment is about -- so a failed read here does not
+    # merely do nothing, it refreshes September. Bounding the query is what keeps it from firing.
+    now_dt = datetime.now(timezone.utc)
+    hi_iso = (now_dt + timedelta(days=14)).isoformat()
+    wk = sb(f"odds_snapshots?season=eq.{args.season}"
+            f"&commence_time=gt.{urllib.parse.quote(now_dt.isoformat())}"
+            f"&commence_time=lt.{urllib.parse.quote(hi_iso)}"
+            f"&select=week")
+    weeks = [r["week"] for r in wk if r.get("week") is not None]
+    week = min(weeks) if weeks else 1
     games = current_week_games(args.season, week)
     now = datetime.now(timezone.utc)
     print(f"season={args.season} week={week}: {len(games)} games")

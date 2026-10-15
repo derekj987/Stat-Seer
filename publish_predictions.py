@@ -18,6 +18,7 @@ import datetime
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -42,8 +43,21 @@ def _get(env, table, query):
         req = urllib.request.Request(base, headers={"apikey": key, "Authorization": f"Bearer {key}",
                                                     "Range-Unit": "items",
                                                     "Range": f"{off}-{off + PAGE - 1}"})
-        with urllib.request.urlopen(req, timeout=30) as r:
-            page = json.loads(r.read())
+        # Retry a 5xx a couple of times before giving up. Supabase answers a heavy read with a 500
+        # rather than a timeout, and one of those killed the whole run on four consecutive days.
+        # The scan that caused those is fixed in current_week(), but a transient 500 under load is
+        # normal on this instance and should cost a few seconds, not a day's publish.
+        page = None
+        for attempt in range(3):
+            try:
+                with urllib.request.urlopen(req, timeout=30) as r:
+                    page = json.loads(r.read())
+                break
+            except urllib.error.HTTPError as e:
+                if e.code < 500 or attempt == 2:
+                    raise
+                print(f"  {table}: HTTP {e.code}, retrying ({attempt + 1}/2)")
+                time.sleep(3 * (attempt + 1))
         out += page
         if len(page) < PAGE:
             return out
@@ -133,12 +147,31 @@ def current_week(env, season):
     which the ledger requires (published_at < commence_time is enforced at the database).
 
     Returns None when no future game has odds yet; the caller treats that as "nothing to do today"
-    rather than an error, so the run is a clean no-op and retries tomorrow."""
-    now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    rather than an error, so the run is a clean no-op and retries tomorrow.
+
+    🚨 BOUNDED WINDOW, AND THE MINIMUM TAKEN IN CODE. This asked the server for
+    `commence_time > now ... order=week.asc&limit=1`, which is a filter plus a SORT over every row
+    odds_snapshots holds for the season. That is fine in September and fatal by October: the table
+    only grows, and on 2026-10-11 the query started returning HTTP 500 and did so on four
+    consecutive daily runs, so no week-6 prediction was ever published. Measured afterwards, the
+    same query still took 2.2 SECONDS to return ONE ROW — a scan that had simply crossed the
+    statement timeout under load.
+
+    A fortnight is more than enough to find the next kickoff (the NFL never has a 14-day gap
+    in-season), it is an indexed range rather than a sort, and min() over a few hundred rows costs
+    nothing. Measured: 2.2s -> 0.2s. Same answer, week 6 either way.
+
+    This is the third shape of the same lesson already in this file: never ask PostgREST to order a
+    snapshot table. Pin or bound it, then resolve in code."""
+    now = datetime.datetime.now(datetime.timezone.utc)
+    hi = now + datetime.timedelta(days=14)
     rows = _get(env, "odds_snapshots",
-                f"?season=eq.{season}&commence_time=gt.{urllib.parse.quote(now)}"
-                "&select=week&order=week.asc&limit=1")
-    return rows[0]["week"] if rows else None
+                f"?season=eq.{season}"
+                f"&commence_time=gt.{urllib.parse.quote(now.isoformat())}"
+                f"&commence_time=lt.{urllib.parse.quote(hi.isoformat())}"
+                "&select=week")
+    weeks = [r["week"] for r in rows if r.get("week") is not None]
+    return min(weeks) if weeks else None
 
 
 def main(argv=None):
@@ -221,7 +254,10 @@ def main(argv=None):
         print(f"    ~ REVISED {r}")
     for s in skipped:
         print(f"    - {s}")
-    for r in rows[:3]:
+    # Every row, not the first three. This write is PERMANENT — the ledger is append-only and each
+    # game locks the first time it is published — so the one chance to read what is about to be
+    # locked is right here, and a preview that elides eleven of fourteen is not a preview.
+    for r in rows:
         print(f"    + {r['subject']} home win {100*r['model_prob']:.1f}%  ({r['event_id']})")
 
     if not args.write:

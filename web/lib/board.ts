@@ -264,7 +264,29 @@ async function pgFrom(table: string, path: string): Promise<unknown[]> {
       },
       next: { revalidate: 120 }, // refresh at most every 2 min
     });
-    if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
+    if (!res.ok) {
+      // Retry a 5xx once before giving up. Supabase answers a heavy read with a 500 rather than a
+      // timeout, and every caller of this helper swallows the throw into a fallback — so a single
+      // transient 500 does not show an error, it shows the WRONG DATA. That is how /model spent
+      // part of 2026-10-15 serving week 1's completed September games.
+      if (res.status >= 500) {
+        await new Promise((r) => setTimeout(r, 400));
+        const retry = await fetch(base, {
+          headers: {
+            apikey: key, Authorization: `Bearer ${key}`,
+            "Range-Unit": "items", Range: `${off}-${off + PAGE - 1}`,
+          },
+          cache: "no-store",
+        });
+        if (retry.ok) {
+          const rows = (await retry.json()) as unknown[];
+          out.push(...rows);
+          if (rows.length < PAGE) break;
+          continue;
+        }
+      }
+      throw new Error(`Supabase ${res.status}: ${await res.text()}`);
+    }
     const rows = (await res.json()) as unknown[];
     out.push(...rows);
     if (rows.length < PAGE) break;
@@ -275,13 +297,33 @@ const pg = (path: string) => pgFrom("odds_snapshots", path);
 
 /** The current NFL week: the earliest week that still has an un-kicked-off game.
  * Rotates automatically — once a week's games are all in the past it advances. */
+/** The earliest week with a game still to play — what every NFL page opens on.
+ *
+ *  🚨 BOUNDED WINDOW, MINIMUM TAKEN IN CODE, AND THE REASON IS A LIVE BUG. This asked PostgREST to
+ *  filter `commence_time > now` and then SORT BY WEEK across everything odds_snapshots holds for
+ *  the season. That is an unindexed scan over a table that only grows: measured, it took 2.2
+ *  SECONDS to return one row, and under load it answers HTTP 500 instead. Every caller wraps this
+ *  in `catch { cur = null }` and then falls back to `weekRange().min` — which is WEEK 1 all season.
+ *
+ *  So on a failed read /model, /props, /lines, /best and /audit all quietly served week 1's
+ *  COMPLETED September games under a "Week 1" badge, with no error anywhere. Caught on 2026-10-15
+ *  by reloading the board five times: one load showed week 6, four showed week 1.
+ *
+ *  A fortnight is more than enough to find the next kickoff — the NFL never has a 14-day in-season
+ *  gap — it is an indexed range rather than a sort, and min() over a few hundred rows is free.
+ *  The publisher had the identical query and the identical failure; both are fixed the same way.
+ *  The rule this keeps re-teaching: never ask PostgREST to ORDER a snapshot table. */
 export async function currentWeek(season = 2026): Promise<number | null> {
-  const now = new Date().toISOString();
+  const now = new Date();
+  const hi = new Date(now.getTime() + 14 * 86_400_000);
   const rows = (await pg(
-    `?season=eq.${season}&commence_time=gt.${encodeURIComponent(now)}` +
-      `&select=week&order=week.asc&limit=1`
+    `?season=eq.${season}` +
+      `&commence_time=gt.${encodeURIComponent(now.toISOString())}` +
+      `&commence_time=lt.${encodeURIComponent(hi.toISOString())}` +
+      `&select=week`
   )) as { week: number }[];
-  return rows.length ? rows[0].week : null;
+  const weeks = rows.map((r) => r.week).filter((w) => w != null);
+  return weeks.length ? Math.min(...weeks) : null;
 }
 
 /** The min/max NFL week that currently has any odds captured, for the week nav. */
