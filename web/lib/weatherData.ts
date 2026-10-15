@@ -7,7 +7,7 @@ export interface GameWeather { eventId: string; game: string; home: string; away
   gustMph: number|null; precipPct: number|null; conditions: string|null; windFlag: boolean }
 export const WEATHER_SEASON = 2026;
 export const WEATHER_WEEK = 6;
-export const WEATHER_UPDATED = "2026-10-15T13:41Z";
+export const WEATHER_UPDATED = "2026-10-15T13:42Z";
 export const GAME_WEATHER: GameWeather[] = [
   {"eventId": "855f58fad5f0f14b239f4f63df27998b", "game": "SEA @ DEN", "home": "DEN", "away": "SEA", "commence": "2026-10-16T00:15:00+00:00", "neutral": false, "venue": "Empower Field at Mile High", "city": "Denver", "state": "CO", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 48, "windMph": 0, "gustMph": 6, "precipPct": 0, "conditions": "Clear", "windFlag": false},
   {"eventId": "57418b2cf5aca558b3c98eafac1e264a", "game": "HOU @ JAX", "home": "JAX", "away": "HOU", "commence": "2026-10-18T13:30:00+00:00", "neutral": true, "venue": "Wembley Stadium", "city": "London", "state": "England", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 54, "windMph": 11, "gustMph": 23, "precipPct": 27, "conditions": "Drizzle", "windFlag": true},
