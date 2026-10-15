@@ -259,6 +259,38 @@ def section_disagreements(rows, depth, n=12):
     say()
 
 
+def graded_bias(sport_label):
+    """{market: {n, ours, market}} — mean(projection - actual) and mean(line - actual) over every
+    row the report cards have already graded, so a lean against the MARKET can be read next to the
+    only thing that settles it: what the games actually produced.
+
+    Reads web/lib/reportCards.ts, which is graded from the files as COMMITTED BEFORE EACH KICKOFF
+    against the closing line — so this is what we published, not what today's export would say.
+    Returns {} on any failure; a missing residual must degrade to "no comparison available" rather
+    than to a number, because a confident wrong baseline here is worse than none."""
+    path = os.path.join(ROOT, "web", "lib", "reportCards.ts")
+    try:
+        src = open(path, encoding="utf-8").read().splitlines()
+        start = next(i for i, l in enumerate(src) if "REPORT_CARDS" in l)
+        cards = json.loads("\n".join(src[start:]).split("= ", 1)[1].rstrip().rstrip(";"))
+    except Exception:  # noqa: BLE001 — never let the comparison break the flags
+        return {}
+    want = sport_label.lower()
+    out = {}
+    for c in cards:
+        if c.get("sport") != want:
+            continue
+        for p in c.get("props", []):
+            if p.get("actual") is None or p.get("proj") is None or not p.get("line"):
+                continue
+            d = out.setdefault(p["market"], {"n": 0, "o": 0.0, "m": 0.0})
+            d["n"] += 1
+            d["o"] += p["proj"] - p["actual"]
+            d["m"] += p["line"] - p["actual"]
+    return {k: {"n": v["n"], "ours": v["o"] / v["n"], "market": v["m"] / v["n"]}
+            for k, v in out.items() if v["n"] >= 25}
+
+
 def section_calibration(rows, depth, label="NFL"):
     """The board-level checks that came out of the "everything is an under" hunt.
 
@@ -277,12 +309,32 @@ def section_calibration(rows, depth, label="NFL"):
 
     # 1. LEAN PER MARKET. Must be near 50% on each market SEPARATELY. Pooling hides it, because
     # anytime-TD is a probability market and sits near 37% by construction, which drags the average.
+    #
+    # 🚨 AND THE GRADED RESIDUAL BESIDE IT, because the lean alone CANNOT tell you which of two
+    # opposite things is happening, and this check has now sent someone down that road twice.
+    # A board leaning over means either:
+    #     our level is wrong   -> a bug, fix it before publishing
+    #     the market is low    -> not a bug, and pulling toward the market makes us WORSE
+    # The market column cannot distinguish them. Only the residual against what actually happened
+    # can, so it is printed on the same line.
+    #
+    # Worked example, 2026 week 6: pass_yds flagged at 67% over. Against the market that looks like
+    # a broken board. Against outcomes, over 128 graded rows we were LOW by 4.25 and the market LOW
+    # by 4.70 — we track it closely, and in weeks 3-5 both were low by ~13. The lean was the
+    # in-season volume blend catching up to a season scoring more than last year; "fixing" it would
+    # have moved us away from reality to agree with a price. Nothing was changed.
+    graded = graded_bias(label)
     for mkt in ("rec_yds", "rush_yds", "pass_yds", "receptions"):
         g = [r for r in priced if r["market"] == mkt]
         if len(g) < 20:
             continue
         pct = 100.0 * sum(1 for r in g if r["proj"] > r["book"]) / len(g)
-        check(f"{mkt} lean", 38 <= pct <= 62, f"{pct:.0f}% over (n={len(g)}); want ~50")
+        gb = graded.get(mkt)
+        tail = ""
+        if gb:
+            tail = (f"; graded n={gb['n']}: ours {gb['ours']:+.1f} vs actual, "
+                    f"market {gb['market']:+.1f}")
+        check(f"{mkt} lean", 38 <= pct <= 62, f"{pct:.0f}% over (n={len(g)}); want ~50{tail}")
 
     # 1b. TILT. The check that was missing, and the reason Derek could still see a broken board
     # while section 4 reported ALL CLEAR. A lean averaged over a whole market hides a slope: top-half
