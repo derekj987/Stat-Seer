@@ -260,9 +260,29 @@ def section_disagreements(rows, depth, n=12):
 
 
 def graded_bias(sport_label):
-    """{market: {n, ours, market}} — mean(projection - actual) and mean(line - actual) over every
-    row the report cards have already graded, so a lean against the MARKET can be read next to the
-    only thing that settles it: what the games actually produced.
+    """{market: {n, ours, market, ourOver, mktOver}} over every row the report cards have graded,
+    so a lean against the MARKET can be read next to the only thing that settles it: what the games
+    actually produced.
+
+    🚨 THE OVER RATE IS THE HEADLINE AND THE MEAN RESIDUAL IS THE TRAP. The first version of this
+    reported only mean(line - actual), and on a right-skewed market that number is LARGE AND
+    NEGATIVE FOR A PERFECTLY FAIR LINE — a book prices the median, the mean sits well above it, so
+    the residual measures the skew rather than any error. Measured across every market the cards
+    have graded:
+
+        market                mean(actual-line)   actual over the line   mean/median of actual
+        NCAAF rec_yds               +7.75                53.5%                   1.32
+        NFL   rec_yds               +5.31                50.3%                   1.34
+        NFL   receptions            +0.22                49.2%                   1.08
+        NCAAF pass_yds              -0.74                50.8%                   0.98
+
+    The two markets with a big "bias" are exactly the two with a skew of 1.3, and both sit within
+    a few points of a fair 50% over rate. Reading the mean alone would have had someone chasing a
+    7.75-yard college market inefficiency that is mostly arithmetic.
+
+    So the over rate leads: it is the same statistic as the board lean printed beside it, directly
+    comparable between markets and sports, and a fair line sits at 50 whatever the distribution
+    does. The mean is kept at the end for level, labelled, and never read on its own.
 
     Reads web/lib/reportCards.ts, which is graded from the files as COMMITTED BEFORE EACH KICKOFF
     against the closing line — so this is what we published, not what today's export would say.
@@ -283,11 +303,14 @@ def graded_bias(sport_label):
         for p in c.get("props", []):
             if p.get("actual") is None or p.get("proj") is None or not p.get("line"):
                 continue
-            d = out.setdefault(p["market"], {"n": 0, "o": 0.0, "m": 0.0})
+            d = out.setdefault(p["market"], {"n": 0, "o": 0.0, "m": 0.0, "oo": 0, "mo": 0})
             d["n"] += 1
             d["o"] += p["proj"] - p["actual"]
             d["m"] += p["line"] - p["actual"]
-    return {k: {"n": v["n"], "ours": v["o"] / v["n"], "market": v["m"] / v["n"]}
+            d["oo"] += 1 if p["actual"] > p["proj"] else 0
+            d["mo"] += 1 if p["actual"] > p["line"] else 0
+    return {k: {"n": v["n"], "ours": v["o"] / v["n"], "market": v["m"] / v["n"],
+                "ourOver": 100.0 * v["oo"] / v["n"], "mktOver": 100.0 * v["mo"] / v["n"]}
             for k, v in out.items() if v["n"] >= 25}
 
 
@@ -332,8 +355,12 @@ def section_calibration(rows, depth, label="NFL"):
         gb = graded.get(mkt)
         tail = ""
         if gb:
-            tail = (f"; graded n={gb['n']}: ours {gb['ours']:+.1f} vs actual, "
-                    f"market {gb['market']:+.1f}")
+            # Over rate first — same statistic as the lean to its left, fair sits at 50 whatever
+            # the distribution's shape. The mean follows, flagged as skew-inflated, because on a
+            # right-skewed market it is large and negative for a correctly-priced line.
+            tail = (f"; graded n={gb['n']}: actual clears OURS {gb['ourOver']:.0f}% / "
+                    f"MARKET {gb['mktOver']:.0f}% (fair 50)"
+                    f"; mean err ours {gb['ours']:+.1f} mkt {gb['market']:+.1f} (skew-inflated)")
         check(f"{mkt} lean", 38 <= pct <= 62, f"{pct:.0f}% over (n={len(g)}); want ~50{tail}")
 
     # 1b. TILT. The check that was missing, and the reason Derek could still see a broken board
