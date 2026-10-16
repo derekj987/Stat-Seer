@@ -605,6 +605,45 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
             _resid.append(abs(anchored_margin(home, away, neu, _hsp)) - abs(float(_hsp)))
     debias = statistics.median(_resid) if _resid else 0.0
 
+    # 🚨 AND THE SAME CORRECTION ON THE CLOSE/MID GAMES, which is 84% of a slate (92 of 109 on the
+    # week-7 2026 card) and was left to whatever level its prior happened to carry.
+    #
+    # The block above fixed the big-spread zone and was measured only there — cfb_card_backtest's
+    # report scored the anchored slice and nothing else — so the identical failure went unwatched on
+    # the rest of the board. Measured on the published week-7 card: the anchored zone sat at a
+    # median |ours|−|line| of +0.00 and said the favourite covers 47.1%, exactly as designed, while
+    # the close/mid zone sat at +1.50 and said the favourite covers 70.1% of the games where we
+    # agree with the market on who is favoured. Derek, on four games on one night: "looks like we
+    # have every favorite covering."
+    #
+    # WHY IT IS A LEVEL CORRECTION AND NOT A SCALE CHANGE. The obvious suspect was CARD_SCALE, and
+    # it is the wrong one: swept walk-forward 2021-25, LOWERING the scale makes history worse (at
+    # 1.00 the close/mid zone reads "favourite covers" on 24-30% against ~48-50% actual), because
+    # historically that zone leans slightly to the DOG. The live lean does not come from the scale,
+    # it comes from the preseason prior — the card seeds its rating with SP+ at SP_BLEND=0.80 and
+    # the seed has not washed out by week 7 the way the comment on it claims. That cannot be
+    # backtested: CFBD's /ratings/sp returns a past season's FINAL ratings, so replaying production's
+    # preseason seed historically would be hindsight. A median centring needs no such replay — it
+    # removes whatever one-directional level the prior is carrying, whatever its cause.
+    #
+    # Walk-forward 2021-2025 (analysis/cfb_card_backtest.py --debias, mode `midfav`), close/mid:
+    #
+    #     era                 we say fav covers    median |ours|-|line|    MAE
+    #     choose <=2023   40.7% -> 42.6%  (47.6% actual)   -0.36 -> +0.00   12.79 -> 12.83
+    #     confirm  >2023   41.0% -> 43.4%  (50.5% actual)   -0.25 -> +0.00   12.45 -> 12.48
+    #
+    # Closer to reality in both eras for 0.03-0.04 of MAE, and nearly a no-op on a slate that is
+    # already centred — which is the point. It is a GUARDRAIL: it costs almost nothing when the
+    # board is healthy and removes the full offset when it is not. It is an improvement and not a
+    # cure; a zero median does not put "favourite covers" at 50% because the gap distribution is
+    # skewed, so 43% against ~48-50% actual is what this buys.
+    _mresid = []
+    for away, home, neu, date, gid, _hc, _ac in rows:
+        _hsp, _ = market_for(away, home, gid)
+        if _hsp is not None and abs(float(_hsp)) <= ANCHOR_LO:
+            _mresid.append(abs(anchored_margin(home, away, neu, _hsp)) - abs(float(_hsp)))
+    mid_debias = statistics.median(_mresid) if _mresid else 0.0
+
     # Totals de-bias (same idea as the spread anchor). Our projected total sits a HAIR below the
     # market on average, so the board leans UNDER on ~61% of games — vs the ~50/50 over/under the
     # closing total actually hits (CFB 2023-25: 48-52% over by season). Center the projection on the
@@ -645,6 +684,13 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
             # so this buys the calibration for nothing. max(0, …) guards a correction larger than
             # the margin; in practice the smallest anchored margin stays around 8 points.
             _mag = max(0.0, abs(margin) - debias)
+            margin = _mag if margin >= 0 else -_mag
+            margin = max(-DISPLAY_CAP, min(DISPLAY_CAP, margin))
+        elif hsp is not None and mid_debias:
+            # Close/mid: same favourite-space centring, same reason — see mid_debias above. Games
+            # with no market line are untouched, exactly as in the anchored branch: there is nothing
+            # to centre on, and the pure model number is the honest answer.
+            _mag = max(0.0, abs(margin) - mid_debias)
             margin = _mag if margin >= 0 else -_mag
             margin = max(-DISPLAY_CAP, min(DISPLAY_CAP, margin))
 
