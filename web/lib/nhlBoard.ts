@@ -22,7 +22,7 @@
 // and 7, totals 37-51), so `key` comes back null on every NHL game. That is correct — and unlike
 // baseball, hockey's key number HAS now been measured (see KEY_ONE_GOAL below), so if a real table
 // is ever wanted the number exists.
-import { buildBoard, LINE_BOOK, type Game, type OddsRow } from "@/lib/board";
+import { bestPrice, buildBoard, LINE_BOOK, pairFair, type Game, type Line, type OddsRow } from "@/lib/board";
 import { deVig } from "@/lib/fairValue";
 import { usBooks } from "@/lib/bookLabel";
 
@@ -99,67 +99,154 @@ const fmtPrice = (p: number) => (p > 0 ? `+${p}` : `−${Math.abs(p)}`);
  *  "spread". */
 export type PuckLine = { text: string; fair: number | null; homeFav: boolean; point: number };
 
-/** 🚨 READ FROM THE RAW ROWS, NOT FROM `game.spread`. The generic board's spread sides are built by
- *  `lineSide(rows, "max")` — the LARGEST point posted for each side — and that is correct for
- *  football, where a book posts one number per side and the most points is the best version of a
- *  dog's line. Hockey breaks it, because the two sides of a ±1.5 are the same magnitude and books
- *  do not always agree on which club is laying it. Measured over 4 snapshots and 21 events:
- *
- *      distinct points one book posts for one side   1 on 21 of 21 events (no alternate lines)
- *      events where books disagree on the favourite  4 of 21  (19%)
- *      events with no FanDuel spread                 0 of 21
- *
- *  On those 4, `max` returns +1.5 for BOTH clubs — one side's +1.5 from the majority, the other's
- *  from whichever book had the game the other way round — so neither side has a negative point and
- *  the favourite cannot be identified at all. ANA/BOS came back exactly that way: FanDuel had
- *  BOS -1.5 / ANA +1.5, and the built sides were ANA +1.5 (eight books) and BOS +1.5 (betmgm
- *  alone), with FanDuel's actual Boston price discarded.
- *
- *  Since every event carries a FanDuel spread and no book posts an alternate, FanDuel's OWN PAIR is
- *  the whole answer and needs no consensus logic: the row with the negative point is the favourite,
- *  the other row is the price of the other side, and de-vigging the two gives that book's own fair
- *  cover chance. That is also literally what was asked for — "make the spreads match fanduel".
- *
- *  The fallback for an event FanDuel has not priced is the majority favourite across books at its
- *  best available price. It fires on none of the 21 and exists so a missing book is a worse number
- *  rather than an empty column. */
+/** 🚨 READ FROM THE RAW ROWS, NOT FROM `game.spread` — which club is laying the line cannot be
+ *  recovered from the built board's points, for the reason set out on `puckFavourite` below. The
+ *  favourite comes from there; the price shown beside it is FanDuel's own, and `fair` de-vigs
+ *  FanDuel's two prices against each other to that book's own cover chance. */
 export function nhlPuckLines(rows: OddsRow[]): Map<string, PuckLine> {
+  const out = new Map<string, PuckLine>();
+  for (const [eventId, rs] of spreadsByEvent(rows)) {
+    const anchor = puckFavourite(rs);
+    if (!anchor) continue;
+    const home = rs[0].home_team;
+    // FanDuel's own two prices where FanDuel priced it — "make the spreads match fanduel". Where it
+    // did not, the best price on offer for each side of the anchored number, which is the board's
+    // shopping convention and the only other defensible answer.
+    const pool = anchor.fromLineBook ? rs.filter((r) => r.book === LINE_BOOK) : rs;
+    const fav = shortlist(pool, anchor.fav, anchor.point)
+      .reduce<OddsRow | null>((b, r) => (b && b.price_american >= r.price_american ? b : r), null);
+    if (!fav) continue;
+    const against = shortlist(pool, otherSide(rs, anchor.fav), -anchor.point)
+      .reduce<OddsRow | null>((b, r) => (b && b.price_american >= r.price_american ? b : r), null);
+    const fair = against ? deVig(fav.price_american, against.price_american) : null;
+    out.set(eventId, {
+      text: `−${Math.abs(anchor.point).toFixed(1)} ${fmtPrice(fav.price_american)}`,
+      fair: fair !== null && isFinite(fair) ? fair : null,
+      homeFav: anchor.fav === home,
+      point: anchor.point,
+    });
+  }
+  return out;
+}
+
+/** 🚨 THE PUCK LINE'S TWO SIDES, REBUILT — because `lineSide(rows, "max")` in lib/board.ts CANNOT
+ *  build them, and the generic board must not be changed to try.
+ *
+ *  In football "max" is the shopping convention and it is right: a book posts one number per side,
+ *  books genuinely differ (-2.5 at one, -3 at another), and the most points IS the best version of
+ *  a dog's line. Hockey breaks the assumption underneath it — that the point identifies the side.
+ *  Both sides of a puck line are magnitude 1.5, and on 4 of 21 measured events the books do not
+ *  agree on WHICH club is laying it, so "max" returns +1.5 for BOTH clubs: the majority's dog, and
+ *  the minority book's dog, which is the other club. The card then offers two dog sides that cannot
+ *  both exist, and the favourite's price — the +210 a reader came for — never appears at all.
+ *
+ *  Observed live on the 2026-10-16T11:21:35Z sweep, BOS @ ANA:
+ *
+ *      rendered   ANA +1.5 −250 Hard Rock  |  BOS +1.5 −275 BetMGM     (two dogs, no favourite)
+ *      posted     BOS −1.5 +210 FanDuel    |  ANA +1.5 −280 FanDuel
+ *      shopped    BOS −1.5 +225 (3 books)  |  ANA +1.5 −250 Hard Rock
+ *
+ *  So fix the SIDE ASSIGNMENT first (puckFavourite, which is FanDuel's own pair), then shop within
+ *  it: the best price among rows that have the favourite at its negative number, and the best among
+ *  rows that have the dog at the mirror. A book holding the game the other way round contributes to
+ *  NEITHER side — it is not a better price on this bet, it is a different bet — which also keeps it
+ *  out of the de-vig, where pairing a favourite's price against another book's favourite price
+ *  would read as a 25% hold.
+ *
+ *  `consensus` is re-signed from the same anchor. buildBoard sets it from FanDuel's home row, which
+ *  agrees with this whenever FanDuel priced the game; on the fallback path its median across books
+ *  can land on 0.0 (the median of −1.5 and +1.5), which is not a line any book posts. */
+export function nhlSpreadSides(board: Game[], rows: OddsRow[]): void {
+  const byEvent = spreadsByEvent(rows);
+  for (const g of board) {
+    const rs = byEvent.get(g.eventId);
+    const anchor = rs ? puckFavourite(rs) : null;
+    // No spread rows, no favourite, or an outcome name that matches neither club: show nothing.
+    // Every failure here is a side assignment, and a missing market is a better answer than a
+    // confident wrong one.
+    if (!rs || !anchor || (anchor.fav !== g.home && anchor.fav !== g.away)) {
+      g.spread.home = null; g.spread.away = null; continue;
+    }
+    const homeFav = anchor.fav === g.home;
+    const fav = lineAt(rs, anchor.fav, anchor.point);
+    const dog = lineAt(rs, homeFav ? g.away : g.home, -anchor.point);
+    g.spread.home = homeFav ? fav : dog;
+    g.spread.away = homeFav ? dog : fav;
+    g.spread.consensus = homeFav ? anchor.point : -anchor.point;
+    pairFair(g.spread.home, g.spread.away);
+  }
+}
+
+/** The spread rows of a snapshot grouped by event. A row with no point is not a puck line. */
+function spreadsByEvent(rows: OddsRow[]): Map<string, OddsRow[]> {
   const byEvent = new Map<string, OddsRow[]>();
   for (const r of rows) {
     if (r.market !== "spreads" || r.outcome_point == null) continue;
     const list = byEvent.get(r.event_id);
     if (list) list.push(r); else byEvent.set(r.event_id, [r]);
   }
-  const out = new Map<string, PuckLine>();
-  for (const [eventId, rs] of byEvent) {
-    const home = rs[0].home_team;
-    const fd = rs.filter((r) => r.book === LINE_BOOK);
-    let fav = fd.find((r) => r.outcome_point! < 0);
-    let against = fav ? fd.find((r) => r.outcome_name !== fav!.outcome_name) : undefined;
-    if (!fav) {
-      // No FanDuel price. Whichever club the most books have laying the line, at the best price
-      // on offer for it — the board's own shopping convention.
-      const votes = new Map<string, number>();
-      for (const r of rs) if (r.outcome_point! < 0)
-        votes.set(r.outcome_name, (votes.get(r.outcome_name) ?? 0) + 1);
-      const top = [...votes.entries()].sort((a, b) => b[1] - a[1])[0];
-      if (!top) continue;
-      const lay = rs.filter((r) => r.outcome_name === top[0] && r.outcome_point! < 0);
-      fav = lay.reduce((best, r) => (r.price_american > best.price_american ? r : best));
-      const other = rs.filter((r) => r.outcome_name !== top[0] && r.outcome_point! > 0);
-      against = other.length
-        ? other.reduce((best, r) => (r.price_american > best.price_american ? r : best))
-        : undefined;
-    }
-    const fair = against ? deVig(fav.price_american, against.price_american) : null;
-    out.set(eventId, {
-      text: `−${Math.abs(fav.outcome_point!).toFixed(1)} ${fmtPrice(fav.price_american)}`,
-      fair: fair !== null && isFinite(fair) ? fair : null,
-      homeFav: fav.outcome_name === home,
-      point: fav.outcome_point!,
-    });
+  return byEvent;
+}
+
+const shortlist = (rs: OddsRow[], name: string | null, point: number) =>
+  name === null ? [] : rs.filter((r) => r.outcome_name === name && r.outcome_point === point);
+
+/** The club that is not `fav`, named as the feed names it. */
+const otherSide = (rs: OddsRow[], fav: string): string | null =>
+  rs.find((r) => r.outcome_name !== fav)?.outcome_name ?? null;
+
+/** One side of one number, shopped across books — board.ts's own best-price logic, pointed at rows
+ *  this file has picked rather than at a max over points. */
+function lineAt(rs: OddsRow[], name: string, point: number): Line | null {
+  const at = shortlist(rs, name, point);
+  if (!at.length) return null;
+  return { point, ...bestPrice(at) };
+}
+
+/** WHICH CLUB IS LAYING THE LINE, AND ON WHAT NUMBER. Every NHL handicap number on the site comes
+ *  from this one decision — the market column, both shopping sides, the slip legs the assistant
+ *  offers — which is why it is one function and not a rule repeated per page. Measured over 4
+ *  snapshots and 21 events in nhl_odds_snapshots:
+ *
+ *      distinct points one book posts for one side   1 on 21 of 21 events (no alternate lines)
+ *      events where books disagree on the favourite  4 of 21  (19%)
+ *      events with no FanDuel spread                 0 of 21
+ *
+ *  Those three numbers are the whole design. Because no book posts an alternate, there is exactly
+ *  one number per side per book and nothing to shop for on the NUMBER. Because every event carries
+ *  a FanDuel spread, FanDuel's own pair answers it outright and no consensus logic is needed: the
+ *  row with the negative point is the favourite, on the number FanDuel posts — which is also
+ *  literally what was asked for, "make the spreads match fanduel". And because a fifth of events
+ *  have books on opposite sides, the question has to be ASKED rather than inferred from the points.
+ *
+ *  The fallback for an event FanDuel has not priced is the club the most books have laying it, on
+ *  the number most of those books post. It fires on none of the 21 and exists so that a missing
+ *  book degrades to a worse price rather than to an empty column — or, worse, to a minority book's
+ *  dog being published as the favourite. */
+type PuckFav = { fav: string; point: number; fromLineBook: boolean };
+function puckFavourite(rs: OddsRow[]): PuckFav | null {
+  const fd = rs.find((r) => r.book === LINE_BOOK && r.outcome_point! < 0);
+  if (fd) return { fav: fd.outcome_name, point: fd.outcome_point!, fromLineBook: true };
+  // votes: club → number → how many books post that club laying that number.
+  const votes = new Map<string, Map<number, number>>();
+  for (const r of rs) {
+    if (r.outcome_point! >= 0) continue;
+    const pts = votes.get(r.outcome_name) ?? new Map<number, number>();
+    pts.set(r.outcome_point!, (pts.get(r.outcome_point!) ?? 0) + 1);
+    votes.set(r.outcome_name, pts);
   }
-  return out;
+  let best: PuckFav | null = null;
+  let bestN = 0;
+  for (const [fav, pts] of votes) {
+    const n = [...pts.values()].reduce((a, b) => a + b, 0);
+    if (n <= bestN) continue;
+    bestN = n;
+    // Most-posted number for that club; a tie goes to the smaller handicap, the one a favourite
+    // would rather lay.
+    const [point] = [...pts.entries()].sort((a, b) => b[1] - a[1] || b[0] - a[0])[0];
+    best = { fav, point, fromLineBook: false };
+  }
+  return best;
 }
 
 /** The market's expected margin, in GOALS, positive = home favoured. INTERNAL — see the warning on
@@ -237,10 +324,17 @@ export async function nhlOddsRows(): Promise<{ rows: OddsRow[]; snapshot: string
 
 /** Tonight's board: one Game per matchup, best price per side across books, plus the posted puck
  *  line per event keyed by event id. `lines` is returned from here rather than derived from the
- *  board because it has to be read off the RAW rows — see nhlPuckLines. */
+ *  board because it has to be read off the RAW rows — see nhlPuckLines.
+ *
+ *  🚨 EVERY NHL READER GOES THROUGH HERE, which is why the puck line's sides are repaired here
+ *  rather than in each page. `buildBoard` is generic and its football side-assignment is wrong for
+ *  hockey (nhlSpreadSides says why); fixing it at this one seam means /nhl/lines and the assistant's
+ *  NHL menu — the two surfaces that read `game.spread` — cannot drift apart or be forgotten. */
 export async function nhlBoard(): Promise<{
   board: Game[]; snapshot: string | null; lines: Map<string, PuckLine>;
 }> {
   const { rows, snapshot } = await nhlOddsRows();
-  return { board: buildBoard(rows), snapshot, lines: nhlPuckLines(rows) };
+  const board = buildBoard(rows);
+  nhlSpreadSides(board, rows);
+  return { board, snapshot, lines: nhlPuckLines(rows) };
 }
