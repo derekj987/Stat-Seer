@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import { NHL_RATINGS, NHL_LEAGUE_GOALS, type NhlTeamRating } from "@/lib/nhlGameModel";
 import type { NhlGameProj } from "@/lib/nhlGame";
+import type { PuckLine } from "@/lib/nhlBoard";
 import { etDayKey } from "@/lib/gameDays";
 import { nhlUpsetMeter } from "@/lib/nhlUpset";
 import { UpsetMeter } from "../UpsetMeter";
@@ -92,12 +93,15 @@ function NhlUpsetTip() {
       0-100.<br /><br />
       <b>Each driver is 0-100 too, where 50 is a neutral game.</b> Higher means that factor argues
       MORE for an upset.<br /><br />
-      <b>Our model (weight 40)</b> — our line-blind projected margin against the market&apos;s
-      number. 40 means we agree with the market; it climbs as our number leans toward the underdog
-      and tops out when we project the dog to win outright. This is the only driver with a graded,
-      published track record, which is why it carries the most. A goal is a big number in hockey, so
-      the dial is scaled to goals: a full goal of disagreement sits where a touchdown sits on the
-      football board.<br /><br />
+      <b>Our model (weight 40)</b> — our line-blind projected margin against how big a favourite
+      the market has made. Because the puck line is &plusmn;1.5 on every game, that size is read
+      from the two moneyline prices rather than from the line, so this driver is the one place a
+      derived number is used — it needs the direction and the rough magnitude, which the prices give
+      reliably, and never the decimal. 40 means we agree with the market; it climbs as our number
+      leans toward the underdog and tops out when we project the dog to win outright. This is the
+      only driver with a graded, published track record, which is why it carries the most. A goal is
+      a big number in hockey, so the dial is scaled to goals: a full goal of disagreement sits where
+      a touchdown sits on the football board.<br /><br />
       <b>Scoring (18)</b> — the underdog&apos;s goals scored and the favourite&apos;s goals allowed,
       each against the league rate of {NHL_LEAGUE_GOALS.toFixed(2)} a game.<br /><br />
       <b>Chaos (16)</b> — how streaky the favourite has been and how big the underdog&apos;s best
@@ -117,25 +121,38 @@ function NhlUpsetTip() {
   );
 }
 
-export default function NhlGameCard({ g, p, mkt }: {
+export default function NhlGameCard({ g, p, mkt, line }: {
   g: { eventId: string; home: string; away: string; commence: string; total: number | null };
   p: NhlGameProj;
   mkt: number | null;
+  line: PuckLine | null;
 }) {
   const rh = RATING.get(p.homeAbbr), ra = RATING.get(p.awayAbbr);
-  // Favourite-and-number, the way every other board on this site writes a spread.
-  const spread = (m: number) => `${m > 0 ? p.homeAbbr : p.awayAbbr} -${Math.abs(m).toFixed(1)}`;
+  // 🚨 WRITTEN AS A MARGIN, NOT AS A LINE: "COL by 0.4", never "COL -0.4".
+  //
+  // The market column beside it now shows a real posted −1.5, so a model number dressed in the
+  // same `TEAM -x.x` costume as a sportsbook price invites exactly the reading Derek objected to —
+  // and a fractional one, which no book posts, makes it look broken rather than different. "by" is
+  // one word and it says what the number is: how many goals we expect the gap to be.
+  //
+  // It also retires "-0.0". `toFixed(1)` on a margin of -0.04 prints a signed zero, which read as
+  // a favourite laying nothing (Derek saw "OTT -0.0" on this board); under a twentieth of a goal
+  // there is no favourite to name, so it says "pick".
+  const margin = (m: number) =>
+    Math.abs(m) < 0.05 ? "pick" : `${m > 0 ? p.homeAbbr : p.awayAbbr} by ${Math.abs(m).toFixed(1)}`;
   const restH = restDays(rh?.lastGame, g.commence);
   const restA = restDays(ra?.lastGame, g.commence);
   const b2b = restA === 0 || restH === 0;
 
-  // The Upset Meter needs a dog to be about, and only the market names one.
-  const homeIsDog = mkt === null ? null : mkt < 0;
+  // The Upset Meter needs a dog to be about, and only the market names one. The POSTED line names
+  // it where there is one, so the meter and the puck-line column above it can never disagree about
+  // which club is the favourite; the moneyline-derived margin is the fallback and the magnitude.
+  const homeIsDog = line !== null ? !line.homeFav : mkt === null ? null : mkt < 0;
   const dogName = homeIsDog === null ? null : homeIsDog ? p.homeAbbr : p.awayAbbr;
   const favName = homeIsDog === null ? null : homeIsDog ? p.awayAbbr : p.homeAbbr;
   const upset = nhlUpsetMeter(
     { marketMarginHome: mkt, modelMarginHome: p.margin, home: rh, away: ra,
-      leagueGoals: NHL_LEAGUE_GOALS },
+      leagueGoals: NHL_LEAGUE_GOALS, homeIsDog },
     dogName, favName,
   );
 
@@ -144,29 +161,54 @@ export default function NhlGameCard({ g, p, mkt }: {
       {/* Each game carries its own column header, same as the NFL card: the considerations block
           below is tall enough that a single header per day is off screen by the second game. */}
       <h4 className="impsec impsec--first">Market vs model breakdown</h4>
-      <div className="improw improw--head" role="row">
-        <span>game</span><span>spread</span><span>total</span>
-        <span className="improw__modh improw__modstart">model spread</span>
+      <div className="improw improw--nhl improw--head" role="row">
+        <span>game</span><span>puck line</span><span>total</span>
+        <span className="improw__modh improw__modstart">model margin</span>
         <span className="improw__modh">model total</span>
         <span className="improw__blh">bottom line</span>
       </div>
-      <div className="improw" role="row">
+      <div className="improw improw--nhl" role="row">
         <span className="improw__g">{g.away}<span className="at">@</span>{g.home}</span>
-        {/* 🚨 THE MARKET SPREAD IS THE MONEYLINE IN GOALS, NOT THE PUCK LINE. The puck line is
-            ±1.5 on every game in the league, so a column of it would print one number down the
-            page — the same thing the MLB board found with the run line. */}
-        <span className="improw__sp">{mkt === null ? "—" : spread(mkt)}</span>
+        {/* 🚨 THE POSTED PUCK LINE, WITH ITS PRICE — never a number derived from the moneyline.
+            This column used to print `marketMargin`, a de-vigged win probability converted to
+            goals, and so published rows like "NJD -0.4" under a header reading "spread". No book
+            posts that. The size of the favourite is in the PRICE: laying 1.5 at +198 is a
+            coin-flip favourite, laying it at -122 is a heavy one. See lib/nhlBoard.ts. */}
+        <span className="improw__sp pmcover">
+          {line === null ? "—" : <>
+            {line.homeFav ? p.homeAbbr : p.awayAbbr} {line.text}
+            {line.fair !== null && (
+              <span className="pmcover__sub">fair {Math.round(line.fair * 100)}% to cover</span>
+            )}
+          </>}
+        </span>
         <span className="improw__tot">{g.total === null ? "—" : g.total.toFixed(1)}</span>
         <span className="improw__mod improw__modstart">
-          {spread(p.margin)}
-          {mkt !== null && Math.sign(mkt) !== Math.sign(p.margin) && (
+          {margin(p.margin)}
+          {/* Flagged against the side THE BOOK made favourite, which is the side now printed
+              beside it. Falls back to the moneyline-derived sign when no line is posted — and
+              never fires on a margin that rounds to "pick", which has no side to be off. */}
+          {Math.abs(p.margin) >= 0.05 && (line !== null
+              ? line.homeFav !== (p.margin > 0)
+              : mkt !== null && Math.sign(mkt) !== Math.sign(p.margin)) && (
             <span className="offcmark" title="Off consensus — our number favours the other side">⚑</span>
           )}
         </span>
         <span className="improw__mod">{p.total.toFixed(1)}</span>
         {/* 🚨 THE BOTTOM LINE IS A WIN CHANCE, AND NOTHING ELSE. The NFL card names a side against
-            the spread and a side on the total. Neither is available here and both were tried:
-            hockey has no spread to name a side against (±1.5 on every game), and our total is
+            the spread and a side on the total. Neither is available here and both were tried.
+
+            NO PUCK-LINE CALL, even now that the posted line is in the column to the left with the
+            market's own cover chance under it. Naming a side would need OUR probability for the
+            same bet, and the only way to get one from a projected margin is to put a distribution
+            over it — directly on top of the 43.2% spike at a one-goal margin, which is where a
+            smooth curve is at its worst (§14d, and the normal in nhlGame.ts is already measured as
+            compressing at the edges). MLB can do it because it has a logistic FITTED on held-out
+            games; hockey has no such fit, and deriving one from the normal would be exactly the
+            appearance-of-rigor move this project exists against. The market's fair % stands alone
+            as arithmetic; ours is absent rather than invented.
+
+            And on the total: our number is
             measured at +0.07% over "always say the league average" with an MAE of 1.86 goals — so
             a card reading "and the over" because our 6.2 sits 0.7 above a 5.5 would be calling a
             side off a gap three times smaller than the number's own error. Both totals are printed

@@ -46,6 +46,13 @@ export interface NhlUpsetInput {
   away: NhlTeamRating | undefined;
   /** League goals per game, to read each club's scoring against. */
   leagueGoals: number;
+  /** Which side the market makes the underdog, when the caller already knows from the POSTED puck
+   *  line. Supplied so the meter and the card above it can never name opposite favourites: the
+   *  card reads the posted line, this read used to re-derive the dog from `marketMarginHome`, and
+   *  the two can differ in a true pick'em — the moneyline-derived margin crossing zero at a
+   *  hundredth of a goal while the book has the line unambiguously on one side. Falls back to the
+   *  derived sign when no line is posted. */
+  homeIsDog?: boolean | null;
 }
 
 /**
@@ -61,7 +68,7 @@ export function nhlUpsetMeter(
   const drivers: UpsetDriver[] = [];
   // Which side the market makes the underdog. With no market we cannot name a dog at all, and the
   // meter is about an upset, so everything downstream needs it.
-  const homeIsDog = g.marketMarginHome !== null ? g.marketMarginHome < 0 : null;
+  const homeIsDog = g.homeIsDog ?? (g.marketMarginHome !== null ? g.marketMarginHome < 0 : null);
   const dogR = homeIsDog === null ? undefined : homeIsDog ? g.home : g.away;
   const favR = homeIsDog === null ? undefined : homeIsDog ? g.away : g.home;
 

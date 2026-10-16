@@ -22,7 +22,7 @@
 // and 7, totals 37-51), so `key` comes back null on every NHL game. That is correct — and unlike
 // baseball, hockey's key number HAS now been measured (see KEY_ONE_GOAL below), so if a real table
 // is ever wanted the number exists.
-import { buildBoard, type Game, type OddsRow } from "@/lib/board";
+import { buildBoard, LINE_BOOK, type Game, type OddsRow } from "@/lib/board";
 import { deVig } from "@/lib/fairValue";
 import { usBooks } from "@/lib/bookLabel";
 
@@ -73,20 +73,107 @@ function probit(p: number): number {
          (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
 }
 
-/** The market's expected margin, in GOALS, positive = home favoured.
+const fmtPrice = (p: number) => (p > 0 ? `+${p}` : `−${Math.abs(p)}`);
+
+/** The posted puck line, exactly as a sportsbook shows it: the favourite laying 1.5, with the
+ *  price. FanDuel's price where FanDuel posts one — the book Derek reads beside this board — else
+ *  the best available, which the board's shopping logic has already picked. `fair` is the market's
+ *  own de-vigged chance that THAT side covers (Pick Auditor arithmetic, averaged across books).
  *
- *  Same reasoning as baseball's, and for the same reason: the puck line is a fixed ±1.5 on every
- *  game, so a "market spread" column could only ever print -1.5, +1.5, or a meaningless median of
- *  0 where books disagree on the favourite. In hockey the size of a favourite lives in the
- *  MONEYLINE, so that is what we read — de-vig the two prices to a fair home win probability, then
- *  convert through the measured margin distribution: P(home wins) = P(margin > 0), so
- *  margin ≈ SD * probit(p).
+ *  🚨 THIS IS THE THIRD TIME THIS PROJECT HAS LEARNED THE SAME THING, so it is written down here
+ *  rather than in a page comment. A column headed "spread" must show WHAT THE BOOK POSTS. Derek,
+ *  on the NHL cards: "I'm looking at the market hockey spreads and none should be -.4. Make the
+ *  spreads match fanduel." He said the same thing about the MLB run line ("they would never be
+ *  listed as -.9 or -.6 in a sports book"), and both times the number on the page was
+ *  `marketMargin` below — a moneyline converted to goals.
  *
- *  THE APPROXIMATION IS WEAKER HERE THAN IN BASEBALL, and it is worth stating rather than burying.
- *  A normal is a poor fit to a distribution with 43% of its mass on |1| and a hole at 0. The
- *  DIRECTION and the ORDERING of favourites are reliable; the decimal should be read as "about a
- *  goal and a half", never as a projection. It exists so the board can say who the market likes
- *  and by roughly how much, which -1.5 on every row could not. */
+ *  THE OBJECTION THAT PUT IT THERE WAS REAL BUT ANSWERED WRONG. A bare ±1.5 column does print one
+ *  number down the page: a live sweep is 497 rows at -1.5, 497 at +1.5 and 6 at ±2.5. But the
+ *  information was never missing — it is in THE PRICE beside the line. A club laying 1.5 at +198
+ *  is a coin-flip favourite; one laying it at -122 is a heavy one. Deriving a margin from the
+ *  moneyline threw away the number the book actually posts in order to recover, approximately,
+ *  something the price already said exactly.
+ *
+ *  So this is the market column, and `marketMargin` is demoted to what it is honestly good for:
+ *  an internal signed magnitude for the Upset Meter's model-vs-market driver, never a displayed
+ *  "spread". */
+export type PuckLine = { text: string; fair: number | null; homeFav: boolean; point: number };
+
+/** 🚨 READ FROM THE RAW ROWS, NOT FROM `game.spread`. The generic board's spread sides are built by
+ *  `lineSide(rows, "max")` — the LARGEST point posted for each side — and that is correct for
+ *  football, where a book posts one number per side and the most points is the best version of a
+ *  dog's line. Hockey breaks it, because the two sides of a ±1.5 are the same magnitude and books
+ *  do not always agree on which club is laying it. Measured over 4 snapshots and 21 events:
+ *
+ *      distinct points one book posts for one side   1 on 21 of 21 events (no alternate lines)
+ *      events where books disagree on the favourite  4 of 21  (19%)
+ *      events with no FanDuel spread                 0 of 21
+ *
+ *  On those 4, `max` returns +1.5 for BOTH clubs — one side's +1.5 from the majority, the other's
+ *  from whichever book had the game the other way round — so neither side has a negative point and
+ *  the favourite cannot be identified at all. ANA/BOS came back exactly that way: FanDuel had
+ *  BOS -1.5 / ANA +1.5, and the built sides were ANA +1.5 (eight books) and BOS +1.5 (betmgm
+ *  alone), with FanDuel's actual Boston price discarded.
+ *
+ *  Since every event carries a FanDuel spread and no book posts an alternate, FanDuel's OWN PAIR is
+ *  the whole answer and needs no consensus logic: the row with the negative point is the favourite,
+ *  the other row is the price of the other side, and de-vigging the two gives that book's own fair
+ *  cover chance. That is also literally what was asked for — "make the spreads match fanduel".
+ *
+ *  The fallback for an event FanDuel has not priced is the majority favourite across books at its
+ *  best available price. It fires on none of the 21 and exists so a missing book is a worse number
+ *  rather than an empty column. */
+export function nhlPuckLines(rows: OddsRow[]): Map<string, PuckLine> {
+  const byEvent = new Map<string, OddsRow[]>();
+  for (const r of rows) {
+    if (r.market !== "spreads" || r.outcome_point == null) continue;
+    const list = byEvent.get(r.event_id);
+    if (list) list.push(r); else byEvent.set(r.event_id, [r]);
+  }
+  const out = new Map<string, PuckLine>();
+  for (const [eventId, rs] of byEvent) {
+    const home = rs[0].home_team;
+    const fd = rs.filter((r) => r.book === LINE_BOOK);
+    let fav = fd.find((r) => r.outcome_point! < 0);
+    let against = fav ? fd.find((r) => r.outcome_name !== fav!.outcome_name) : undefined;
+    if (!fav) {
+      // No FanDuel price. Whichever club the most books have laying the line, at the best price
+      // on offer for it — the board's own shopping convention.
+      const votes = new Map<string, number>();
+      for (const r of rs) if (r.outcome_point! < 0)
+        votes.set(r.outcome_name, (votes.get(r.outcome_name) ?? 0) + 1);
+      const top = [...votes.entries()].sort((a, b) => b[1] - a[1])[0];
+      if (!top) continue;
+      const lay = rs.filter((r) => r.outcome_name === top[0] && r.outcome_point! < 0);
+      fav = lay.reduce((best, r) => (r.price_american > best.price_american ? r : best));
+      const other = rs.filter((r) => r.outcome_name !== top[0] && r.outcome_point! > 0);
+      against = other.length
+        ? other.reduce((best, r) => (r.price_american > best.price_american ? r : best))
+        : undefined;
+    }
+    const fair = against ? deVig(fav.price_american, against.price_american) : null;
+    out.set(eventId, {
+      text: `−${Math.abs(fav.outcome_point!).toFixed(1)} ${fmtPrice(fav.price_american)}`,
+      fair: fair !== null && isFinite(fair) ? fair : null,
+      homeFav: fav.outcome_name === home,
+      point: fav.outcome_point!,
+    });
+  }
+  return out;
+}
+
+/** The market's expected margin, in GOALS, positive = home favoured. INTERNAL — see the warning on
+ *  `puckLine` above: this is not a column, because it is not a number any book posts.
+ *
+ *  It is still the right input for the Upset Meter, which needs a signed magnitude of how big a
+ *  favourite the market has made and cannot read that off a line that is ±1.5 either way. De-vig
+ *  the two moneyline prices to a fair home win probability, then convert through the measured
+ *  margin distribution: P(home wins) = P(margin > 0), so margin ≈ SD * probit(p).
+ *
+ *  THE APPROXIMATION IS WEAK, and that is survivable for a meter driver and was not survivable for
+ *  a market column. A normal is a poor fit to a distribution with 43% of its mass on |1| and a
+ *  hole at 0. The DIRECTION and the ORDERING of favourites are reliable; the decimal is "about a
+ *  goal and a half" and was never a projection. */
 export function marketMargin(g: Game): number | null {
   const home = g.ml?.[g.home], away = g.ml?.[g.away];
   const p = home?.fairProb ?? (home && away ? deVig(home.price, away.price) : null);
@@ -148,8 +235,12 @@ export async function nhlOddsRows(): Promise<{ rows: OddsRow[]; snapshot: string
   return { rows: rows.filter((r) => r.commence_time > now), snapshot };
 }
 
-/** Tonight's board: one Game per matchup, best price per side across books. */
-export async function nhlBoard(): Promise<{ board: Game[]; snapshot: string | null }> {
+/** Tonight's board: one Game per matchup, best price per side across books, plus the posted puck
+ *  line per event keyed by event id. `lines` is returned from here rather than derived from the
+ *  board because it has to be read off the RAW rows — see nhlPuckLines. */
+export async function nhlBoard(): Promise<{
+  board: Game[]; snapshot: string | null; lines: Map<string, PuckLine>;
+}> {
   const { rows, snapshot } = await nhlOddsRows();
-  return { board: buildBoard(rows), snapshot };
+  return { board: buildBoard(rows), snapshot, lines: nhlPuckLines(rows) };
 }

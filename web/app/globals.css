@@ -1116,6 +1116,19 @@ a.sportstrip__i:hover{color:var(--ink)}
   grid-template-columns:minmax(140px,1.5fr) minmax(84px,1fr) minmax(60px,.8fr) minmax(84px,1fr) minmax(60px,.8fr) minmax(130px,1.6fr);
   gap:18px;align-items:center;padding:7px 12px;background:var(--surface);border:1px solid var(--line);
   border-radius:8px;font-size:13px}
+/* NHL: the market cell is a POSTED PUCK LINE WITH ITS PRICE ("NJD −1.5 +198") over the de-vigged
+   cover chance, because hockey's line is ±1.5 on every game and the size of the favourite lives in
+   the price (lib/nhlBoard.ts). That is ~115px of mono ink against football's "NJD -1.5" at ~72px,
+   so only that one track widens — the other five are the NFL card's, which is the point of reusing
+   these classes. The 124px floor is a floor: under it the price wrapped onto the abbreviation and
+   the row grew taller than its neighbours (audit, chart-rows-uneven).
+
+   The model column widens a little too: ours is written "COL by 0.4" rather than football's
+   "COL -0.4", because a fractional number in a sportsbook's `TEAM -x.x` costume is what made
+   Derek read our margin as a posted line. Two extra characters plus the off-consensus flag need
+   96px, not 84. */
+.improw--nhl{grid-template-columns:minmax(140px,1.5fr) minmax(124px,1.2fr) minmax(60px,.8fr)
+  minmax(96px,1fr) minmax(60px,.8fr) minmax(130px,1.6fr)}
 /* A subtle divider before the model pair keeps the market/model grouping legible. */
 .improw__modstart{border-left:1px solid var(--line);padding-left:14px;margin-left:-6px}
 /* +1px inline padding vs .improw so the header tracks line up with the bordered
