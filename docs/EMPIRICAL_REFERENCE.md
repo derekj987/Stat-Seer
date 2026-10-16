@@ -2116,3 +2116,48 @@ non-linear recalibration, which is the empirical table, which overfits at this s
 
 Revisit with more seasons. `nhl_game_model.py --backtest` now scores both conversions side by side
 on every run, so the assumption is re-tested rather than inherited.
+
+---
+
+### §20. NHL puck line — books disagree on the favourite on 1 game in 5 (2026-10-16)
+
+Measured on `nhl_odds_snapshots`, 4 snapshots / 21 events, all US books:
+
+| | |
+|---|---|
+| distinct points one book posts for one side | **1 on 21 of 21 events** — no alternate puck lines in this feed |
+| events where books disagree on **who is laying** the 1.5 | **4 of 21 (19%)** |
+| events with no FanDuel spread | **0 of 21** |
+
+Two consequences, and the second is why this is written down.
+
+**1. The puck line is not a margin, it is a price.** It is ±1.5 on essentially every game (497 rows
+at −1.5, 497 at +1.5 and 6 at ±2.5 on a 1,000-row sweep), so the line carries no information and
+all of it is in the price beside it: on one night BOS laid 1.5 at **+210** and COL laid it at
+**+116** — the same posted number describing very different favourites.
+
+**2. `lineSide(rows,"max")` in `lib/board.ts` cannot build a hockey puck line.** It takes the
+LARGEST point posted for each side independently. That is correct for football — books genuinely
+post −2.5 and −3 on one game, and taking the most points IS the shopping convention — but hockey's
+two sides share magnitude 1.5, so on the 19% where books disagree it returns **+1.5 for both
+clubs**: one side's +1.5 from the majority, the other's from whichever book had the game the other
+way round. Neither side then has a negative point and the favourite cannot be identified at all.
+
+Observed: ANA/BOS came back as ANA +1.5 (eight books) and BOS +1.5 (betmgm alone), with FanDuel's
+actual **BOS −1.5 +210** discarded entirely.
+
+**The reader therefore goes to the raw rows, not to `game.spread`** (`nhlPuckLines()` in
+`lib/nhlBoard.ts`). Because every event carries a FanDuel spread and nobody posts an alternate,
+FanDuel's own pair is the whole answer: the negative-point row is the favourite, the other row is
+the opposing price, and de-vigging the two gives that book's own fair cover chance. The fallback
+for an unpriced event is the majority favourite at its best price; it fired on none of the 21.
+
+**Do not "fix" this in `board.ts`.** The football behaviour is deliberate and shared by NFL, NCAAF
+and MLB. The defect is hockey-shaped and belongs in the hockey reader.
+
+**The rule this is the third instance of: A MARKET COLUMN SHOWS WHAT THE BOOK POSTS.** §12d caught
+it on the MLB run line; it recurred on the NHL model cards, where the column printed the de-vigged
+moneyline converted to goals and published rows like "NJD −0.4" that no sportsbook has offered; and
+it is still live on `/nhl/lines`, which quotes two dog sides against each other on those same 19%.
+The objection that keeps producing it — "a column of ±1.5 says nothing" — is true about the LINE and
+false about the MARKET, because the price is the number that varies.
