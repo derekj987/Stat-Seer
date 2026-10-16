@@ -36,15 +36,110 @@ OUT = "web/app/ncaaf/model-data.ts"
 # stays partly ours, and it WASHES OUT: once real 2026 games arrive the ridge refit (LAM=5)
 # moves off this prior, ~parity by week 5-6. This seed touches ONLY the forward card -- the
 # published walk-forward track record (SU/RMSE/ATS) never sees SP+ and is unchanged.
-# NOTE: the /ratings/sp endpoint archives only each PAST season's FINAL SP+, so this can't
-# be cleanly back-tested as a preseason prior; the justification is SP+'s published
-# preseason record plus the ordering/compression fixes visible on the live board.
+# 🚨 "PULLED THE DAY THE CARD IS BUILT SO THERE'S NO HINDSIGHT" WAS WRONG, and so was
+# "it WASHES OUT ... ~parity by week 5-6". Both sentences above describe what this seed was
+# meant to be; neither described what it was. CFBD's /ratings/sp?year=Y UPDATES IN-SEASON the
+# moment games are played (cfb_preseason_snapshot.py says so in its own docstring), and this
+# module re-fetched it on every refresh — every 6 hours. So the "preseason" seed was a
+# CURRENT SP+ that already contained the season, and it could never wash out, because it was
+# being replaced with a fresher copy faster than the ridge could move off it.
+#
+# Measured against the frozen daily snapshots (2026-08-27 .. today, 50 of them):
+#
+#     mean |change| per team, preseason -> week 7     4.92 pts   (max 24.5, Georgia State)
+#     corr(live SP+, 2026 points-per-game diff)        0.882     — it knows this season
+#     close/mid median |ours|-|line|, live seed        +1.63
+#     close/mid median |ours|-|line|, frozen seed      +0.42
+#     ...SP+'s OWN margin vs the market, preseason     -0.35     — essentially unbiased
+#     ...SP+'s OWN margin vs the market, live          +1.20
+#
+# That is the whole of the close/mid lean, and it is not a washing-out problem. It is
+# DOUBLE-COUNTING: the prior already contained the 2026 results, and then fit_ratings fitted
+# the SAME 2026 results on top of it, so the season was used twice and the ratings spread.
+#
+# So the seed is now the FROZEN preseason snapshot — the value this code always meant, which
+# cfb_preseason_snapshot.py has been capturing daily since 2026-08-27 precisely because it
+# cannot be recovered later. Validated out of sample WITHIN 2026, both arms training only on
+# games before the test week and the live arm using the snapshot dated just before it (what a
+# refresh that morning would really have fetched), scored against ACTUAL margins:
+#
+#     weeks 3-5, 171 games       MAE      bias
+#     frozen preseason          11.406   — best in 1 of 3 weeks, pooled winner
+#     current SP+ (shipped)     11.530
+#     no seed at all            12.584   — both seeds are worth ~9%, so do NOT drop the seed
+#
+# BE HONEST ABOUT WHAT THAT BUYS: on accuracy the two seeds are a TIE (1.1% on 171 games is
+# inside the noise). The case for the change is the calibration — the one-directional +1.2
+# against the market disappears — plus the fact that double-counting a season is wrong however
+# it scores. Same footing as the anchored de-bias: it buys the calibration for nothing.
 # Raised 0.65 -> 0.80: at 0.65 the preseason card still under-projected big favorites vs the
 # market by ~2.3 pts on average (our compressed carryover dragged the well-ordered SP+ number
 # down). 0.80 leans harder on SP+ (still line-blind — it's Connelly's efficiency projection, not
 # the betting line) and closes that average gap to ~0.8, while 20% carryover keeps the number
 # partly ours so genuine divergences persist (SP+ itself has Alabama well under the market).
 SP_BLEND = 0.80
+
+
+def frozen_preseason_sp(season, db=DB):
+    """The season's TRUE preseason SP+, from the frozen cfb_preseason_snapshots capture.
+
+    Returns ({team: rating}, snapshot_date) or ({}, None) when nothing usable is stored.
+
+    Picks the NEWEST snapshot strictly before the season's first completed FBS game — the most
+    informed value that still saw no results. Reading "the earliest row" instead would work
+    today and silently break the first time the capture is started mid-August of a season that
+    opens in week 0.
+
+    🚨 FBS, not "any game". The first completed 2026 row is an FCS-vs-FCS game at 22:00 UTC on
+    2026-08-27 — the same day as the only preseason snapshot — so taking the first game of ANY
+    class excluded every snapshot and the function returned nothing at all. SP+ rates FBS teams
+    only, so an FCS result cannot move it; the boundary that matters is the first FBS kickoff
+    (2026-08-29), which leaves 08-27 and 08-28, both still at the untouched preseason values.
+
+    Pages with Range headers. PostgREST caps a response at 1000 rows whatever `limit` says,
+    and 138 teams x 50 daily snapshots is already past that — a read that stops at the cap
+    looks exactly like a complete one, and here it would silently drop the oldest dates,
+    which are the only ones this function wants.
+    """
+    url = (oc.load_env().get("SUPABASE_URL") or "").rstrip("/")
+    key = oc.load_env().get("SUPABASE_SERVICE_KEY") or ""
+    if not url or not key:
+        print("  frozen SP+: SUPABASE_URL / SUPABASE_SERVICE_KEY not set", file=sys.stderr)
+        return {}, None
+    conn = sqlite3.connect(db)
+    row = conn.execute(
+        "SELECT MIN(start_date) FROM games WHERE season=? AND home_points IS NOT NULL "
+        "AND (home_class='fbs' OR away_class='fbs')", (season,)).fetchone()
+    conn.close()
+    first_game = (row[0] or "")[:10] if row else ""
+
+    out, off = {}, 0
+    while True:
+        req = urllib.request.Request(
+            f"{url}/rest/v1/cfb_preseason_snapshots"
+            f"?select=snapshot_date,team,sp_rating&season=eq.{season}",
+            headers={"apikey": key, "Authorization": f"Bearer {key}",
+                     "Range-Unit": "items", "Range": f"{off}-{off + 999}"})
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                rows = json.loads(r.read())
+        except Exception as e:  # noqa: BLE001
+            print("  frozen SP+ read failed: %s" % e, file=sys.stderr)
+            return {}, None
+        for x in rows:
+            if x.get("sp_rating") is None:
+                continue
+            d = x["snapshot_date"][:10]
+            if first_game and d >= first_game:
+                continue                      # a snapshot taken after kickoff is not preseason
+            out.setdefault(d, {})[x["team"]] = float(x["sp_rating"])
+        if len(rows) < 1000:
+            break
+        off += 1000
+    if not out:
+        return {}, None
+    pick = max(out)
+    return out[pick], pick
 
 
 def team_conferences(db, season):
@@ -833,9 +928,28 @@ def main():
     # de-compresses it. As the season runs, games already played refit toward that seeded
     # prior and the SP+ portion washes out, so a scheduled refresh stays correct. Week
     # auto-advances.
-    sp = fetch_preseason_sp(CARD_SEASON)
-    prior_pre = seed_preseason_prior(final, sp, SP_BLEND)
+    # 🚨 THE FROZEN PRESEASON VALUE, NOT TODAY'S — see the SP_BLEND block for the measurement.
+    # The live endpoint updates in-season, so re-fetching it mid-season seeds the prior with the
+    # very results the fit below is about to use again.
+    #
+    # The fallback is deliberately the OLD behaviour and not "no seed": dropping the seed costs
+    # ~9% of MAE (11.5 -> 12.6 on held-out 2026 weeks), which is far worse than the calibration
+    # it would fix. Degrade to today's number, say so loudly, and keep the accuracy.
+    sp, sp_date = frozen_preseason_sp(CARD_SEASON)
     completed = load_completed(DB, CARD_SEASON)
+    if sp:
+        print("  preseason SP+: %d teams, frozen %s" % (len(sp), sp_date))
+    else:
+        sp = fetch_preseason_sp(CARD_SEASON)
+        if completed and sp:
+            print("  WARNING: no frozen preseason SP+ for %d — falling back to the LIVE endpoint, "
+                  "which has updated with %d games already played. The card will lean to "
+                  "favourites. Check capture-cfb-preseason.yml ran before week 1."
+                  % (CARD_SEASON, len(completed)), file=sys.stderr)
+        else:
+            # No games played yet, so the live endpoint IS the preseason value.
+            print("  preseason SP+: %d teams, live (no games played yet)" % len(sp))
+    prior_pre = seed_preseason_prior(final, sp, SP_BLEND)
     # Merge the fit OVER the seeded prior: fit_ratings only returns teams that appear in the
     # completed games, so early in the season most FBS teams are missing from the fit. Without the
     # {**prior_pre, ...} merge they silently fell back to NEWCOMER_R (-9.0), throwing away their
