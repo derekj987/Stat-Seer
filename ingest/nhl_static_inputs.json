@@ -433,6 +433,12 @@
 }
 ]
 },
+"noPriorRatio": {
+"shots": 0.7676,
+"goals": 0.6922,
+"assists": 0.6515,
+"points": 0.6667
+},
 "skaterPrior": {
 "shots": {
 "8477935": 2.645,
