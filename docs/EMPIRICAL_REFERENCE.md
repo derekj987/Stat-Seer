@@ -1856,6 +1856,66 @@ and we read higher than the market on **46.2%** of rows — from a 58% one-way l
 a 6.6-point mean absolute gap left as the actual disagreement. This is the same reason the football
 boards publish anytime TD as a percentage rather than as a number of touchdowns.
 
+### §15e. The no-prior fallback overstated every rookie's P(over) by 8 points (2026-10-16)
+
+Derek, on the PIT @ COL shots board: *"we have all shots going over for one team and all shots
+going under for the other. Is this accurate?"* The team split turned out not to be a defect — but
+chasing it found one.
+
+**The split itself is the board working as designed.** The projection is line-blind with no
+opponent, pace or home/away term (§15), so it cannot produce a team-level lean on its own. Measured
+on that game, the book's lines sat **0.19 below** COL players' own season averages and **0.25
+above** PIT's, while our projections sat +0.07 and +0.26 against the same averages. The lean is the
+book pricing tonight's game and us deliberately not. Walk-forward over 45,393 player-games, our
+mean residual against ACTUAL shots is **+0.034** — the level is right, which is the test that
+separates "our bug" from "the market disagrees" and this is the second case.
+
+**And it looks worse than it is, because of which column gets read.** By projection-vs-line the
+board read 8 over / 1 under for COL and 2/4 for PIT; by the published CHANCE OVER it reads 6/3 and
+1/5, mean 50.9% against 44.8%. Three rows point opposite ways between the two columns. The median
+walk-forward residual is **+0.206** against a mean of +0.034 — the usual right-skew signature, and
+exactly why the panel publishes a probability.
+
+**THE REAL DEFECT, found while confirming the above.** Leave-one-season-out over **226,854
+player-games**, with `pOver` reconstructed the way the board builds it:
+
+| group | n | mean proj | mean actual | P(over 1.5) error |
+|---|---|---|---|---|
+| has prior / 2-9 games | 21,261 | 1.64 | 1.61 | −2.0pp |
+| has prior / 10+ games | 141,864 | 1.72 | 1.69 | −1.6pp |
+| **no prior / 2-9 games** | **11,517** | **1.60** | **1.39** | **−8.2pp** |
+| no prior / 10+ games | 51,830 | 1.70 | 1.68 | −1.6pp |
+
+A skater with no qualifying prior season was shrunk toward `league_rate`, the mean over EVERY
+skater game. But a player with no prior season and a handful of games is, by selection, a rookie or
+a call-up, and that population shoots **76-78%** of the league rate for shots and **62-70%** for
+goals/assists/points in both recent seasons. The fallback was describing a different population
+from the one it served — the same shape as the `member_f315ce11` username default and the
+season-leading-passer definition: *a default that cannot fit the case it exists for.*
+
+Fixed with a **frozen RATIO applied to the live league rate**. All three candidates were tried and
+the first two fail: a live sample of this season's no-prior games is empty exactly when it matters
+(in October it fell back to league on 4 of 4 markets), and a frozen RATE goes stale because the
+league drifts (shots 1.74 → 1.55 over four seasons). The ratio is stable where the level is not.
+Board-wide overstatement **2.0 → 1.0** points at the 1.5 line, 1.4 → 0.6 at 2.5, 0.7 → 0.2 at 3.5.
+Clean A/B on identical data: 204 of 2,560 rows move, all downward, and zero of them have a prior
+baseline.
+
+**🚨 TWO WRONG DIAGNOSES FIRST, BOTH FROM NOT RECONSTRUCTING THE BOARD'S OWN ARITHMETIC.** This is
+the validator rule in CLAUDE.md's skill file, earned twice more:
+
+1. The open-ended top band (3.75+) measured **7.3 points** overstated and a fix was approved on
+   that basis. It was my method: I compared a flat band rate to a flat realized rate, while
+   `pOver` **interpolates between band means and clamps at the ends**. Splitting the band would
+   have fixed nothing.
+2. The table assigns a player to a band by his season mean and then counts overs on **those same
+   games** — selection on the outcome. Real, but leave-one-game-out recovers only **0.2-0.3** of
+   the 2.0 points, so it is not the cause either.
+
+Only localising the error — monotone in SAMPLE DEPTH (−5.4pp at 2-5 games falling to −1.1pp at
+40+), not in band — pointed at the fallback. **Localise before fixing; a plausible mechanism that
+explains the right-shaped number can still be the wrong one.**
+
 ### §16. NHL game model — published, and worth about 2% (2026-10-14)
 
 Derek asked for a game board covering spreads and over/unders "just like the other sections". Built,

@@ -23,8 +23,10 @@ project's oldest rule (project volume, multiply by a regressed efficiency baseli
 where the persistence numbers said it would.
 
 EARLY SEASON: a player with four games has a mean that is mostly noise, so each projection is
-shrunk toward his PRIOR-SEASON rate by PRIOR_K games, and toward the league rate when there is no
-prior season either. The shrink is what makes an October board usable at all.
+shrunk toward his PRIOR-SEASON rate by PRIOR_K games. The shrink is what makes an October board
+usable at all. A player with no prior season is shrunk toward the NO-PRIOR population's rate, not
+the league's -- a rookie or call-up shoots at ~77% of the league rate, and using the league number
+overstated his published P(over) by 8.2 points. See the note on `noprior_rate` below.
 
 🚨 THIS IS NOT AN EDGE CLAIM AND THE PAGE MUST NOT MAKE ONE. Everything above is accuracy against
 the ACTUAL result. Nothing here has been tested against the closing line, because NHL shots props
@@ -143,20 +145,94 @@ def main(argv=None):
                 prior_by[mk][pid].append(v)
                 names.setdefault(pid, nm)
 
+    def no_prior_ratios():
+        """{market: (no-prior rate / league rate)} measured over every COMPLETED season in the DB.
+
+        A skater counts as no-prior in season S when he has fewer than MIN_PRIOR_SKATER games in
+        S-1 — the same test the projection applies, so the ratio describes the population the
+        fallback actually serves. The current season is excluded: it is a few games deep and
+        would drag the ratio toward noise. Returns {} when the DB has no usable history, and the
+        caller then leaves the league rate in place rather than inventing a number."""
+        games = collections.defaultdict(lambda: collections.defaultdict(list))   # season -> mk -> rows
+        seen = collections.defaultdict(lambda: collections.defaultdict(int))     # season -> pid -> n
+        cols = ", ".join(spec["col"] for spec in SKATER_MARKETS.values())
+        for row in conn.execute(
+                f"select season, player_id, {cols} from nhl_skater_games where toi_seconds > 0"):
+            season, pid = row[0], row[1]
+            seen[season][pid] += 1
+            for i, mk in enumerate(SKATER_MARKETS):
+                if row[2 + i] is not None:
+                    games[season][mk].append((pid, row[2 + i]))
+        out = {}
+        for mk in SKATER_MARKETS:
+            nums, dens = [], []
+            for season in sorted(games):
+                if season == CURRENT_SEASON:
+                    continue
+                prev = seen.get(season - 10001)      # 20242025 -> 20232024
+                if not prev:
+                    continue                          # no season before it in the DB
+                rows = games[season][mk]
+                npv = [v for pid, v in rows if prev.get(pid, 0) < MIN_PRIOR_SKATER]
+                if len(npv) < 500 or not rows:
+                    continue
+                nums.append(st.mean(npv))
+                dens.append(st.mean([v for _, v in rows]))
+            if nums:
+                out[mk] = round(st.mean(nums) / st.mean(dens), 4)
+        return out
+
+    hist_ratio = no_prior_ratios() if not static else {}
     skaters = []
-    league_rate = {}
+    league_rate, noprior_rate = {}, {}
     for mk, spec in SKATER_MARKETS.items():
         cur, prior = cur_by[mk], prior_by[mk]
         league_rate[mk] = st.mean([v for vs in cur.values() for v in vs]) if cur else 0.0
+
+        def prior_for(pid, mk=mk, prior=prior):
+            """His prior-season rate, or None. Rounded to the precision the static file stores,
+            or the two paths differ in the third decimal and the published projection moves
+            depending on where it was built."""
+            pv = prior.get(pid, [])
+            if len(pv) >= MIN_PRIOR_SKATER:
+                return round(st.mean(pv), 3)
+            return static["skaterPrior"].get(mk, {}).get(str(pid)) if static else None
+
+        # 🚨 A PLAYER WITH NO PRIOR SEASON IS NOT AN AVERAGE SKATER, AND SHRINKING HIM TOWARD THE
+        # LEAGUE SAID HE WAS. The fallback used to be league_rate, which is the mean over EVERY
+        # skater game. But a player who has no qualifying prior season and only a handful of games
+        # is, by selection, a rookie or a call-up — and that population shoots well below league.
+        # Measured across both recent seasons, no-prior skaters run at 76-78% of the league rate
+        # for shots and 62-70% for goals/assists/points, so the gap is about WHO these players are
+        # rather than about any one market.
+        #
+        # What it cost: the published P(over) for a no-prior skater with 2-9 games was overstated
+        # by 8.2 points at the 1.5 line (projected 1.60 shots, actually produced 1.39, n=11,517
+        # player-games). Everyone else sat at 1.4-2.0 points. Leave-one-season-out over 226,854
+        # player-games, pOver built the way the board builds it: the board-wide overstatement goes
+        # 2.0 -> 1.0 points at 1.5, 1.4 -> 0.6 at 2.5 and 0.7 -> 0.2 at 3.5.
+        #
+        # 🚨 A FROZEN RATIO, NOT A FROZEN RATE, AND NOT A LIVE SAMPLE. All three were tried:
+        #   * A live sample of this season's no-prior games is the obvious choice and is EMPTY
+        #     when it matters. In October there are only a few hundred such games league-wide, so
+        #     it fell back to the league rate on all four markets — in exactly the weeks the
+        #     thin-sample bias is largest. Measured on the live board: 0 of 4 markets qualified.
+        #   * A frozen RATE goes stale, because the league itself drifts (shots 1.74 -> 1.55 over
+        #     four seasons).
+        # The RATIO is stable where the level is not (shots 0.76 / 0.78 in the last two seasons,
+        # goals 0.70 / 0.69, assists 0.62 / 0.67, points 0.65 / 0.68), so it is frozen in the
+        # static file and multiplied by THIS season's live league rate. That works from game one
+        # and still tracks the league.
+        ratio = (static or {}).get("noPriorRatio", {}).get(mk)
+        if ratio is None and hist_ratio:
+            ratio = hist_ratio.get(mk)
+        noprior_rate[mk] = league_rate[mk] * ratio if ratio else league_rate[mk]
+
         for pid, vals in cur.items():
             if len(vals) < MIN_GAMES:
                 continue
-            # Rounded to the precision the static file stores, or the two paths differ in the third
-            # decimal and the published projection moves depending on where it was built.
-            prior_vals = prior.get(pid, [])
-            pr = (round(st.mean(prior_vals), 3) if len(prior_vals) >= MIN_PRIOR_SKATER
-                  else (static["skaterPrior"].get(mk, {}).get(str(pid)) if static else None))
-            proj, n = blend(vals, pr, league_rate[mk])
+            pr = prior_for(pid)
+            proj, n = blend(vals, pr, noprior_rate[mk])
             skaters.append({"id": pid, "player": names.get(pid), "team": teams.get(pid),
                             "market": mk, "proj": round(proj, spec["dp"]), "games": n,
                             "seasonMean": round(st.mean(vals), spec["dp"]),
@@ -294,6 +370,7 @@ def main(argv=None):
                                 "for a season; the scheduled refresh reads this instead of "
                                 "rebuilding ~6,600 boxscores. Regenerate once per season.",
                        "priorSeason": PRIOR_SEASON, "overTables": over_tables,
+                       "noPriorRatio": hist_ratio or {},
                        "skaterPrior": prior_sk, "goaliePrior": prior_gl}, fh, indent=0)
         print(f"wrote {args.write_static} "
               f"({sum(len(v) for v in prior_sk.values())} skater / {len(prior_gl)} goalie baselines)")
@@ -309,6 +386,11 @@ def main(argv=None):
           f"({dict(by_mkt)}), {len(goalies)} goalies")
     print(f"  league rates: " + ", ".join(f"{k} {v:.3f}" for k, v in league_rate.items())
           + f"; shots against {league_sa:.1f}, save% {league_pct:.4f}")
+    # Printed beside the league rate so a run that silently fell back (too few no-prior games, or
+    # a season where everyone qualifies) is visible rather than inferred — the two read equal.
+    print(f"  no-prior baselines: " + ", ".join(
+        f"{k} {v:.3f}" + ("" if v != league_rate[k] else " [fell back to league]")
+        for k, v in noprior_rate.items()))
     if args.dry_run:
         for r in rows[:5]:
             print("   ", r)
