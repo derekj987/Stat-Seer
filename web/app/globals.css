@@ -4057,12 +4057,78 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
  * Doubled up (0,3,1) so it beats the five-column rules regardless of source order, and scoped to
  * --cards so the four LandingHub tables and the NFL model card, which are all still five columns,
  * are untouched. */
-.hb-form--mkt.hb-form--cards th:nth-child(1),.hb-form--mkt.hb-form--cards td:nth-child(1){width:25%}
-.hb-form--mkt.hb-form--cards th:nth-child(2),.hb-form--mkt.hb-form--cards td:nth-child(2){width:15%}
-.hb-form--mkt.hb-form--cards th:nth-child(3),.hb-form--mkt.hb-form--cards td:nth-child(3){width:7%}
-.hb-form--mkt.hb-form--cards th:nth-child(4),.hb-form--mkt.hb-form--cards td:nth-child(4){width:18%}
-.hb-form--mkt.hb-form--cards th:nth-child(5),.hb-form--mkt.hb-form--cards td:nth-child(5){width:6%}
-.hb-form--mkt.hb-form--cards th:nth-child(6),.hb-form--mkt.hb-form--cards td:nth-child(6){width:29%}
+/* 🚨 RE-MEASURED, because the budget below it was set from the widest DATA string and never from
+ * the HEADER, and two headers did not fit. Measured in the browser across every card table on the
+ * board at a 893px table (the widest single line each cell must hold, plus that cell's own
+ * padding; for a header the longest WORD, since that is what cannot wrap):
+ *
+ *     column          needs   had    verdict
+ *     Game               215   223   "Charleston Southern at Clemson" — see the no-space note
+ *     Market Spread      170   134   "James Madison -10.5" wrapped to two lines
+ *     Market O/U          81    63   the word "MARKET" overflowed by 3px
+ *     Model Spread       180   161   "James Madison -16.9" wrapped
+ *     Model O/U           73    54   the word "MODEL" overflowed by 4px
+ *     Bottom Line     150 (2ln) 259  fine
+ *
+ * Both halves of what Derek saw are in that table. The two O/U HEADERS spilled past their own
+ * column into the next one, which is the "columns look misaligned" — a header sitting over the
+ * wrong cells. And the spread cells WRAPPED, which is the "rows look misaligned": the board came
+ * back with row heights of 38, 44, 52, 58 and 66px, because a row is tall exactly when one of its
+ * team names is long enough to take a second line.
+ *
+ * 🚨 THE DATA CELLS ARE nowrap, THE HEADERS ARE NOT, and the asymmetry is the whole trick. The
+ * first attempt at this put nowrap on both: "MARKET O/U" then had to hold on ONE line, so the
+ * header that was overflowing by 3px began overflowing by 12. A header is two short words and is
+ * happy on two lines; a data cell is "James Madison -10.5" and must not break. So the number
+ * columns are sized for the longest DATA string, and the headers wrap inside that width — which
+ * they fit, because the binding constraint on a header is its longest WORD, not its whole phrase.
+ *
+ * ROW HEIGHT IS NOW UNIFORM BY CONSTRUCTION rather than by luck. Every cell in a row is a fixed
+ * number of lines: the number columns are one line each (nowrap, and wide enough), the Game cell
+ * is matchup + kickoff (.hb-gkick is display:block), and the Bottom Line is pick + O/U lean
+ * (.hb-bl__t is display:block below, for the same reason). Nothing in a row depends on how long a
+ * team's name happens to be.
+ *
+ * THE GAME CELL CANNOT WRAP, so it has to be sized for its longest matchup outright. NcaafGameCell
+ * renders the names and the "at" as adjacent spans with NO whitespace between them, so the browser
+ * sees "Charleston Southernat Clemson" as one unbreakable word and spills it into Market Spread
+ * rather than taking a second line. 16 of 140 rows did that, all of them FCS names. Widening to
+ * 24.5% (219px against the 215px worst case) clears every one and keeps the matchup on one line,
+ * which is also what keeps the row heights uniform — a wrapped matchup would make those rows tall.
+ * The 2.5% comes from Bottom Line, which only needs to hold "Presbyterian -11.5" on its first line.
+ *
+ * If a column is ever re-sized, re-measure the HEADER as well — that is the step this budget
+ * skipped the first time, and it is why two of them did not fit. */
+.hb-form--mkt.hb-form--cards th:nth-child(1),.hb-form--mkt.hb-form--cards td:nth-child(1){width:24.5%}
+.hb-form--mkt.hb-form--cards th:nth-child(2),.hb-form--mkt.hb-form--cards td:nth-child(2){width:19%}
+.hb-form--mkt.hb-form--cards th:nth-child(3),.hb-form--mkt.hb-form--cards td:nth-child(3){width:9.1%}
+.hb-form--mkt.hb-form--cards th:nth-child(4),.hb-form--mkt.hb-form--cards td:nth-child(4){width:20.2%}
+.hb-form--mkt.hb-form--cards th:nth-child(5),.hb-form--mkt.hb-form--cards td:nth-child(5){width:8.2%}
+.hb-form--mkt.hb-form--cards th:nth-child(6),.hb-form--mkt.hb-form--cards td:nth-child(6){width:19%}
+/* 🚨 THE WHITE-SPACE RULES ARE MEDIA-GUARDED, and they have to be. Below 640px this table stops
+ * being a table and becomes one card per game, and that layout sets `white-space:normal` through
+ * `.hb-form.hb-form--cards td` — specificity (0,2,1). Every rule in this block is (0,4,1) or more,
+ * so WITHOUT the guard they beat the card layout from outside its own media query and silently
+ * re-applied nowrap to the number cells on a phone. Specificity does not care which rule is inside
+ * a media query; only the query itself keeps this off the card layout. */
+@media (min-width:641px){
+  /* Data cells only — see the asymmetry note above. */
+  .hb-form--mkt.hb-form--cards td:nth-child(n+2):nth-child(-n+5){white-space:nowrap}
+  /* ...and the two PROSE columns are explicitly allowed to wrap, which they were not: the cells
+   * inherit `white-space:nowrap` at this width, so Game and Bottom Line could only ever spill.
+   * That is what made a long FCS matchup run 59px into Market Spread instead of taking a line. */
+  .hb-form--mkt.hb-form--cards td:nth-child(1),
+  .hb-form--mkt.hb-form--cards td:nth-child(6),
+  .hb-form--mkt.hb-form--cards td:nth-child(1) .hb-game{white-space:normal}
+  /* The O/U lean takes its own line, so every Bottom Line cell is exactly two. */
+  .hb-form--mkt.hb-form--cards .hb-bl__t{display:block}
+  /* A BREAK OPPORTUNITY AROUND THE "at", because the markup has none. NcaafGameCell writes the two
+   * names and the "at" as adjacent spans with no whitespace between them, so to the line breaker
+   * "Bethune-CookmanatMississippi Valley St" is a single word. With wrapping allowed above, these
+   * two zero-width spaces are what let it break after a team name rather than mid-name. */
+  .hb-form--mkt.hb-form--cards .hb-at::before,
+  .hb-form--mkt.hb-form--cards .hb-at::after{content:"\200B"}
+}
 /* single Model values sit centered against the two-chip Market cells (even vertical rhythm) */
 .hb-form--mkt td{vertical-align:middle}
 /* player-snapshot 4-col: Player · Team · Prop(book) · Our proj */

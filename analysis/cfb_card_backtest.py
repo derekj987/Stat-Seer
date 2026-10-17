@@ -88,10 +88,14 @@ def run(games, lam, cap, from_week, decay, hfa_outside, debias_mode="market"):
             # and GROWS an away one — so a single constant pushes the two groups in opposite
             # directions on "does the favourite cover", and no value of it can centre both.
             fav_d = {}
-            if debias_mode in ("fav", "favside"):
+            # "midfav" is "fav" on the anchored zone (that is production) PLUS the close/mid
+            # correction below, so it must take the same anchored branch — otherwise the two
+            # candidates would differ on the big-spread games as well and the comparison would
+            # not isolate the change being tested.
+            if debias_mode in ("fav", "favside", "midfav"):
                 def fr(g):
                     return abs(raw[id(g)]) - abs(float(g["spread"]))
-                if debias_mode == "fav":
+                if debias_mode in ("fav", "midfav"):
                     v = statistics.median([fr(g) for g in anch]) if anch else 0.0
                     fav_d = {"h": v, "a": v}
                 else:
@@ -107,6 +111,18 @@ def run(games, lam, cap, from_week, decay, hfa_outside, debias_mode="market"):
             else:
                 debias = statistics.median([raw[id(g)] - (-float(g["spread"])) for g in anch]) \
                     if anch else 0.0
+            # The same favourite-space centring, computed over the CLOSE/MID games and applied to
+            # them. "midfav" is the candidate fix for the lean this report only started measuring:
+            # production centres the big-spread zone and leaves the other 84% of the slate to
+            # whatever level its prior happens to carry. A median is a level correction — it keeps
+            # every relative read (which teams we rate above or below Vegas) and only moves where
+            # the slate as a whole sits against the line.
+            mid_d = 0.0
+            if debias_mode == "midfav":
+                _mid = [g for g in slate if abs(float(g["spread"])) <= ce.ANCHOR_LO]
+                if _mid:
+                    mid_d = statistics.median(
+                        [abs(raw[id(g)]) - abs(float(g["spread"])) for g in _mid])
             for g in slate:
                 m = raw[id(g)]
                 if abs(float(g["spread"])) > ce.ANCHOR_LO:
@@ -116,6 +132,10 @@ def run(games, lam, cap, from_week, decay, hfa_outside, debias_mode="market"):
                         m = mag if m >= 0 else -mag          # ...keeping the side we picked
                     else:
                         m = m - debias
+                    m = max(-ce.DISPLAY_CAP, min(ce.DISPLAY_CAP, m))
+                elif mid_d:
+                    mag = max(0.0, abs(m) - mid_d)
+                    m = mag if m >= 0 else -mag
                     m = max(-ce.DISPLAY_CAP, min(ce.DISPLAY_CAP, m))
                 rows.append({"pred": m, "actual": float(g["margin"]),
                              "spread": float(g["spread"]), "neutral": g["neutral"],
@@ -145,15 +165,35 @@ def report(rows, label):
     ats = 100.0 * w / max(w + l, 1)
     # The thing the de-bias exists for: on ANCHORED (big-spread) games it should not read
     # "dog covers" far more often than dogs actually cover. Both numbers on the same games.
-    anch = [r for r in rows if r.get("anchored")]
+    #
+    # 🚨 AND THE SAME QUESTION ON THE CLOSE/MID GAMES, which is where the board actually lives.
+    # This report scored ONLY the anchored slice for three revisions, and anchored games are 16%
+    # of a slate (17 of 109 on the week-7 card). The other 84% take CARD_SCALE with no anchor and
+    # no de-bias and were never checked for the identical failure — so the fix that calibrated big
+    # favourites to ~46% left close/mid games reading "favourite covers" on 70% of the games where
+    # we agree with the market on who is favoured. A validator that looks at a sixth of the board
+    # is how a one-directional lean ships twice.
     def fav_cover(v, r):
         return (v + r["spread"] > 0) if r["spread"] < 0 else (v + r["spread"] < 0)
-    proj_fc = 100.0 * sum(fav_cover(r["pred"], r) for r in anch) / max(len(anch), 1)
-    real_fc = 100.0 * sum(fav_cover(r["actual"], r) for r in anch) / max(len(anch), 1)
+
+    def zone(rs, name):
+        if not rs:
+            return f"   {name}: (none)"
+        pf = 100.0 * sum(fav_cover(r["pred"], r) for r in rs) / len(rs)
+        af_ = 100.0 * sum(fav_cover(r["actual"], r) for r in rs) / len(rs)
+        # How much bigger our margin is than the market's, in POINTS. The ratio |ours|/|line|
+        # is unusable here: a 1.5-point line missed by 0.5 is a ratio of 1.33 and nothing at all.
+        infl = statistics.median([abs(r["pred"]) - abs(r["spread"]) for r in rs])
+        return (f"   {name}: we say fav covers {pf:4.1f}% vs {af_:4.1f}% actual, "
+                f"median |ours|-|line| {infl:+5.2f} (n={len(rs)})")
+
+    anch = [r for r in rows if r.get("anchored")]
+    mid = [r for r in rows if not r.get("anchored")]
     print(f"  {label:16} n={len(rows):5}  MAE {mae:6.2f} (book {book_mae:5.2f})  bias {bias:+6.2f}  "
           f"ATS {ats:5.1f}%   home-fav infl {statistics.median(hf):+5.2f}  "
-          f"away-fav {statistics.median(af):+5.2f}   big-spread: we say fav covers "
-          f"{proj_fc:4.1f}% vs {real_fc:4.1f}% actual (n={len(anch)})")
+          f"away-fav {statistics.median(af):+5.2f}")
+    print(f"  {'':16}{zone(anch, 'big-spread ')}")
+    print(f"  {'':16}{zone(mid, 'close/mid  ')}")
     return mae
 
 
@@ -171,6 +211,8 @@ def main(argv=None):
                     help="sweep what the big-spread de-bias is centred on (market/none/results)")
     ap.add_argument("--split", type=int, default=None,
                     help="choose on seasons <= this, confirm after it")
+    ap.add_argument("--scale", type=float, nargs="*", default=None,
+                    help="sweep CARD_SCALE over these values (default: the shipped one)")
     args = ap.parse_args(argv)
 
     games = load(args.db, args.start, args.end)
@@ -181,8 +223,21 @@ def main(argv=None):
         if not sel:
             continue
         print(f"{era}   ({len({g['season'] for g in sel})} seasons)")
-        if args.debias:
-            for mode in ("market", "none", "results", "fav", "favside"):
+        if args.scale is not None:
+            # CARD_SCALE de-compresses the ridge-compressed rating gap. Too small and every big
+            # favourite reads "dog covers"; too large and every close/mid favourite reads "fav
+            # covers" — the same one-directional lean, pointed the other way. Production's
+            # de-bias is fav-space, so sweep with that mode rather than the legacy default.
+            shipped = ce.CARD_SCALE
+            try:
+                for s in args.scale:
+                    ce.CARD_SCALE = s
+                    report(run(sel, args.lam, args.cap, args.from_week, args.decay, True, "fav"),
+                           f"scale={s:g}")
+            finally:
+                ce.CARD_SCALE = shipped
+        elif args.debias:
+            for mode in ("market", "none", "results", "fav", "favside", "midfav"):
                 report(run(sel, args.lam, args.cap, args.from_week, args.decay, True, mode),
                        "debias=" + mode)
         else:

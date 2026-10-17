@@ -82,7 +82,12 @@ export function median(xs: number[]): number {
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 
-function bestPrice(rows: OddsRow[]): { price: number; books: string[]; byBook: Record<string, number> } {
+/** Best price for a set of rows that are all the SAME side of the SAME number, plus every book's
+ *  own best at it. Exported because lib/nhlBoard.ts has to pick the rows itself — a puck line's two
+ *  sides share magnitude 1.5, so which rows belong to which side cannot be read off the point
+ *  alone (see nhlPuckLines) — and reimplementing "best across books" there is how two boards start
+ *  disagreeing about what the best price is. */
+export function bestPrice(rows: OddsRow[]): { price: number; books: string[]; byBook: Record<string, number> } {
   const byBook: Record<string, number> = {};
   for (const r of rows) {
     if (byBook[r.book] === undefined || r.price_american > byBook[r.book]) byBook[r.book] = r.price_american;
@@ -193,7 +198,9 @@ function coherence(h2h: OddsRow[], consensus: number | null, home: string, away:
 }
 
 // Pick Auditor: de-vig a two-sided market (per book, then average) → fair probability of each side.
-function pairFair(a: { byBook: Record<string, number>; fairProb?: number | null } | null | undefined,
+// Exported for lib/nhlBoard.ts, which rebuilds the puck line's two sides after buildBoard and has
+// to re-run the de-vig over the sides it ended up with.
+export function pairFair(a: { byBook: Record<string, number>; fairProb?: number | null } | null | undefined,
                   b: { byBook: Record<string, number>; fairProb?: number | null } | null | undefined) {
   if (!a || !b) return;
   const probs: number[] = [];
