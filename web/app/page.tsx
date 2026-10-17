@@ -205,17 +205,21 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
             buttons the original wording summed to 861px inside a 760px column and left MLB
             orphaned on its own line; "Explore the ..." was dropped to fix it. Adding hockey broke
             it again the same way (744px, NHL alone on line two), so the labels lost the verb
-            entirely: "The NFL Model" and friends measure 607px and sit on one line with room for
-            a fifth sport.
-            HOCKEY NAMES A DIFFERENT DESTINATION BECAUSE IT HAS ONE. There is no NHL model, so a
-            fourth "...Model" button would land on a 404 — it points at Value Finder instead. It
-            still belongs in this row: a visitor scanning the hero counts the sports here, and
-            leaving hockey out reads as "no NHL" rather than "NHL starts at the third step". */}
+            entirely. Re-measured on the rendered page after hockey took a Model label: 141 + 162 +
+            145 + 144 = 593px of buttons in a 760px row, one line, which leaves room for a fifth
+            sport. At 375px they stack 2x2 with no clipping and no page overflow.
+            Hockey used to name a different destination and no longer does. It pointed at Value
+            Finder because a "...Model" button would have 404ed — true until 2026-10-14, when the
+            line-blind game model shipped at /nhl/model (EMPIRICAL_REFERENCE §16, held out on 2,504
+            games). All four now name the same step, which is the point of the row: a visitor
+            scanning the hero should see one shape repeated per sport, not three of one kind and an
+            odd one out. The new label is SHORTER than the one it replaces ("The NHL Model" vs "NHL
+            Value Finder"), so the width budget above gets easier, not tighter. */}
         <div className="lp-lead__cta">
           <a href="/model" className="btn btn--primary lp-lead__go">The NFL Model</a>
           <a href="/ncaaf/model" className="btn btn--primary lp-lead__go">The NCAAF Model</a>
           <a href="/mlb/model" className="btn btn--primary lp-lead__go">The MLB Model</a>
-          <a href="/nhl/lines" className="btn btn--primary lp-lead__go">NHL Value Finder</a>
+          <a href="/nhl/model" className="btn btn--primary lp-lead__go">The NHL Model</a>
         </div>
         <div className="lp-lead__cta lp-lead__cta--alt">
           <a href="/considerations" className="lp-lead__alt">See the Context that shapes a game →</a>
