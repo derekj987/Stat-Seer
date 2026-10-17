@@ -201,12 +201,40 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
     // name, so a live row lands in the same card as the exported ones. The NFL needs none of this:
     // both sides already use the nflverse abbreviation, so the feed's matchup IS the export's game
     // string — verified row for row ("SEA @ DEN").
+    // 🚨 ...AND THE EXPORT'S NAME IS SOMETIMES ITSELF AN ABBREVIATION, which a prefix test can
+    // never bridge. CFBD calls the school "App State"; the feed calls it "Appalachian State
+    // Mountaineers", and "appalachian state mountaineers" does not start with "app state ". So
+    // the live row fell through to the mascot strip, kept the spelling "Appalachian State", and
+    // — because rows are grouped by the raw `game` string — rendered a SECOND card for a game
+    // that already had one: "App St @ Coastal Car." and "App State @ Coastal Car." on the
+    // receiving tab. Same school, same kickoff, two cards.
+    //
+    // So a second pass matches TOKEN BY TOKEN, each export token against the feed's token in the
+    // same position, accepting a prefix ("app" for "appalachian", "jax" for "jacksonville").
+    // Two guards keep it from over-matching, and both are load-bearing:
+    //   - at least TWO tokens, or a one-word export like "Miami" would swallow "Miami (OH)" and
+    //     "Ohio" would swallow "Ohio State";
+    //   - at least one token STRICTLY shorter than the feed's, so this only ever fires where the
+    //     exact/prefix pass above could not, and never re-decides a match it already made.
+    // The longest match wins, so "Miami (OH)" beats "Miami" on "Miami (OH) RedHawks".
+    const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]+/g, "").replace(/\s+/g, " ").trim();
     const schoolOf = (feed: string): string => {
       const f = feed.toLowerCase();
-      const hit = [...new Set(projections.flatMap((r) => r.game.split(" @ ")))]
+      const schools = [...new Set(projections.flatMap((r) => r.game.split(" @ ")))];
+      const exact = schools
         .filter((sch) => f === sch.toLowerCase() || f.startsWith(sch.toLowerCase() + " "))
         .sort((a, b) => b.length - a.length)[0];
-      return hit ?? feed.replace(/\s+\S+$/, "");        // no export game: drop the mascot
+      if (exact) return exact;
+      const ft = norm(feed).split(" ");
+      const loose = schools
+        .filter((sch) => {
+          const st = norm(sch).split(" ");
+          if (st.length < 2 || st.length > ft.length) return false;
+          if (!st.every((w, i) => ft[i] === w || ft[i].startsWith(w))) return false;
+          return st.some((w, i) => w.length < ft[i].length);
+        })
+        .sort((a, b) => norm(b).length - norm(a).length)[0];
+      return loose ?? feed.replace(/\s+\S+$/, "");      // no export game: drop the mascot
     };
     // 🚨 THE FEED'S MARKET NAME IS NOT OUR MARKET NAME, and stripping the prefix is not a
     // translation. The books call receiving yards `player_reception_yds`; every internal name in

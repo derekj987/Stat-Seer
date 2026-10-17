@@ -37,9 +37,27 @@ const STATE_WORD: Record<string, string> = {
   Nebraska: "Neb", Oregon: "Ore", Kansas: "Kan", California: "Cal",
 };
 
+/** 🚨 ABBREVIATING AN ALREADY-ABBREVIATED NAME MUST BE A NO-OP, and it was not.
+ *
+ *  Two curated entries produce a name the generic rules then shorten AGAIN:
+ *
+ *      "Appalachian State" -> "App State" -> re-applied -> "App St"
+ *      "Jacksonville State" -> "Jax State" -> re-applied -> "Jax St"
+ *
+ *  That matters because the two names reaching this function are not always the same spelling
+ *  of a school. CFBD — and so the generated projections file — calls the school "App State",
+ *  while the odds feed calls it "Appalachian State Mountaineers". Run both through here and
+ *  one came out "App St" and the other "App State", so one game rendered as TWO cards on
+ *  /ncaaf/model/players: "App St @ Coastal Car." and "App State @ Coastal Car.".
+ *
+ *  Treating every curated OUTPUT as a fixed point makes the function idempotent, so a name
+ *  that has already been through it is returned unchanged however many times it is applied. */
+const SHORT = new Set(Object.values(ABBR));
+
 export function abbrevTeam(name: string): string {
   if (!name) return name;
   if (ABBR[name]) return ABBR[name];
+  if (SHORT.has(name)) return name;
   let s = name.replace(/^(\w+) State$/, (m, w: string) => `${STATE_WORD[w] ?? w} State`);
   s = s.replace(/\bState\b/g, "St");
   s = s
