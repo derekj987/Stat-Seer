@@ -60,9 +60,10 @@ const OPTS_BY_SPORT: Record<SportId, Opt[]> = {
   ],
 };
 // Selecting ONLY the anytime-scorer market means "give me the likeliest scorers", so the builder
-// ranks instead of chasing a target price. Football ranks by the model's TD%; hockey has no model,
-// and buildMenuSlip falls back to shortest-price — which in a market quoted this long IS the
-// ranking a member means by "likeliest".
+// ranks instead of chasing a target price. Every sport now ranks by its own model percentage —
+// football's TD model, hockey's goals projection read at the 0.5 line. A player the projection
+// cannot place carries none, and buildMenuSlip falls back to shortest-price for him, which in a
+// market quoted this long IS the ranking a member means by "likeliest".
 const SCORER_MKT: Record<SportId, string> = {
   nfl: "player_anytime_td", ncaaf: "player_anytime_td", nhl: "player_goal_scorer_anytime",
 };
@@ -77,11 +78,14 @@ const EXAMPLES_BY_SPORT: Record<SportId, string[]> = {
     "Make me a 4-leg anytime-TD parlay of this weekend's likeliest scorers.",
     "Build a 4-leg parlay around +2500 using props and game lines.",
   ],
-  // 🚨 NO "off-consensus" EXAMPLE HERE. There is no NHL model, so nothing is ever flagged and that
-  // prompt would send a member straight into the one question hockey cannot answer.
+  // 🚨 STILL NO "off-consensus" EXAMPLE, and now for a sharper reason than before. Hockey legs
+  // DO carry modelPct since 2026-10-16, but they carry no offConsensus flag: a hockey margin is
+  // too fine to name a side from (see buildCandidatesNhl). An example that returns nothing
+  // teaches a member the feature is broken. The first example asks for the thing hockey can
+  // actually answer — our own percentage, which football asks for too.
   nhl: [
-    "Build me a 3-leg parlay from tonight's best moneyline prices.",
-    "Make a 4-leg anytime-goal parlay of tonight's likeliest scorers.",
+    "Make a 4-leg parlay of tonight's highest-% goal scorers by your model.",
+    "Build me a 3-leg shots-on-goal slip where your number is above the line.",
     "Build a 4-leg parlay around +2500 using goal scorers and totals.",
   ],
 };
