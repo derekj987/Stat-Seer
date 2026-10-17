@@ -82,11 +82,9 @@ export default async function Page({ searchParams }: PageProps<"/nhl/model/playe
             <b>Goalies.</b> Saves are shots faced multiplied by a save percentage. The shots a goalie
             faces repeat; his save percentage does not, so the number leans on his workload and takes
             the league rate for the rest.<br /><br />
-            <b>Hockey has no game board here on purpose.</b> The starting goalie is the input a
-            game model would turn on, and measured across 3,241 games the market already has it in
-            the closing price. We publish what measured up rather than filling the page.<br /><br />
-            For prices on these same players, see <a href="/nhl/props">Player Props</a>; for game
-            lines, <a href="/nhl/lines">Line Shopping</a>.
+            For the game itself, see the <a href="/nhl/model">Game Model</a>; for prices on these
+            same players, <a href="/nhl/props">Player Props</a>; for game lines,{" "}
+            <a href="/nhl/lines">Line Shopping</a>.
           </>} />} pin={<PinButton size="sm" pin={{ id: `/nhl/model/players?cat=${cat.key}`, kind: "model", label: `NHL · Player Model · ${cat.label}`, detail: "line-blind", href: `/nhl/model/players?cat=${cat.key}` }} />} />
       <FlowSteps active="analyze" base="nhl" />
       <div className="subnavrow"><ModelSubnav active="player" base="nhl" /></div>
