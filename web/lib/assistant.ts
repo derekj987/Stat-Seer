@@ -10,6 +10,8 @@ import { toDecimal, decToAmerican } from "./slipPricing";
 import { NCAAF_MODEL } from "@/app/ncaaf/model-data";
 import { nhlBoard } from "./nhlBoard";
 import { nhlPropBoard } from "./nhlProps";
+import { projectGame } from "./nhlGame";
+import { projFor, pOver, type NhlMarket } from "./nhlProjMatch";
 
 export type Sport = "nfl" | "ncaaf" | "nhl";
 
@@ -237,18 +239,38 @@ const NHL_PROP_CAT: Record<string, CandGroup> = {
 const NHL_PROP_LABEL: Record<string, string> = {
   player_shots_on_goal: "Shots", player_points: "Points", player_assists: "Assists",
 };
+// The prop feed's market key -> the player model's market. Saves is deliberately absent: the
+// menu carries no goalie-saves leg, so there is nothing to attach a projection to.
+const NHL_PROJ_MARKET: Record<string, NhlMarket> = {
+  player_goal_scorer_anytime: "goals",
+  player_shots_on_goal: "shots",
+  player_points: "points",
+  player_assists: "assists",
+};
 
 /** The NHL menu: game lines from nhl_odds_snapshots and props from nhl_prop_snapshots, every leg
  *  a real market at the best price across US books.
  *
  *  🚨 TWO THINGS HERE ARE NOT TRUE OF THE FOOTBALL MENUS, and both have to reach the prompt.
  *
- *  NO LEG CARRIES `model` OR `off`. There is no NHL model, so there is no model percentage to rank
- *  by and no off-consensus flag to ask for. buildMenuSlip already degrades correctly — with no
- *  candidate carrying a model %, rankByModel falls back to shortest-price, which for a goal-scorer
- *  selection means "the likeliest scorers" and is the right answer anyway. What must NOT happen is
- *  the assistant being told to look for off-consensus games in this sport, so the system prompt and
- *  the worked examples are both sport-specific.
+ *  LEGS CARRY `model` SINCE 2026-10-16, and that is a reversal worth stating. This block
+ *  used to read "there is no NHL model, so there is no model percentage to rank by" — true when
+ *  written and false from 2026-10-14, when the game model (EMPIRICAL_REFERENCE §16) and the player
+ *  model (§15) both shipped. While it stayed false the assistant was told to answer a hockey
+ *  model question by saying StatSeer "prices the board rather than projecting it", denying two
+ *  published, graded boards the nav links to.
+ *
+ *  What each leg carries now:
+ *    * moneyline — `model` is our line-blind win % for THAT side. There is NO `off` flag: see
+ *      the note at the moneyline loop for why hockey cannot honestly carry one.
+ *    * props — `model` is our P(over) at the line the book posted, read from the empirical band
+ *      table; for anytime goal the line is 0.5, so it IS "does he score".
+ *  A leg the projection cannot place carries no `model` at all, and buildMenuSlip still degrades
+ *  to shortest-price, which stays the right answer for a goal-scorer ask.
+ *
+ *  🚨 NONE OF THIS IS AN EDGE CLAIM. The player model has never been tested against a closing NHL
+ *  prop line (§15) and the game model is worth about 2% (§16). It is our own published read, and
+ *  it ranks what the member asked to rank — nothing here says it beats the price beside it.
  *
  *  ANYTIME GOAL SCORER IS THE LONG-ODDS ENGINE, not the moneyline. Hockey moneylines are short
  *  (roughly -250 to +200 — there are no 14-point favourites), so a parlay of game lines tops out
@@ -264,6 +286,20 @@ export async function buildCandidatesNhl(): Promise<Candidate[]> {
     const { board } = await nhlBoard();
     for (const g of board) {
       const mk = `${g.away} @ ${g.home}`;
+      // 🚨 NO OFF-CONSENSUS FLAG IN HOCKEY, and it is not an oversight — it was built, measured
+      // and removed. Football's definition (lib/model.ts) is "our favourite differs from the
+      // de-vigged market's", which works there because a football margin carries real spread.
+      // A hockey margin does not: home ice is +0.21 goals, so `margin > 0` flips on a hair.
+      // Measured on a live board, 5 of 16 games flagged and TWO of them read 50%/50% on our own
+      // side against a -130 and a -135 market favourite — a disagreement about nothing, dressed
+      // as a finding.
+      //
+      // NhlGameCard already refuses to name a side for exactly this reason: calling one off a
+      // projected margin would be "calling a side off a gap three times smaller than the number's
+      // own error", and the honest fix needs a fitted distribution hockey does not have (§14d —
+      // the 43.2% one-goal spike is where a smooth curve is worst). So the win % ships and the
+      // flag does not. `hasOff` is false for NHL in the assistant route for the same reason.
+      const proj = projectGame(g.home, g.away);
       const push = (id: string, group: CandGroup, market: string, title: string,
                     l: { point: number | null; price: number; books: string[]; byBook: Record<string, number> } | null) => {
         if (l && l.point !== null && Number.isFinite(l.price)) {
@@ -276,9 +312,16 @@ export async function buildCandidatesNhl(): Promise<Candidate[]> {
       push(`nhsp-${g.eventId}-a`, "spread", "spread", `${g.away} {pt}`, g.spread.away);
       push(`nhtot-${g.eventId}-o`, "total", "total", `${mk}: Over {pt}`, g.total.over);
       push(`nhtot-${g.eventId}-u`, "total", "total", `${mk}: Under {pt}`, g.total.under);
+      // THE MONEYLINE CARRIES THE MODEL, NOT THE PUCK LINE. Football hangs `off` on the spread
+      // because the spread IS football's side bet; hockey's side bet is the moneyline, and the
+      // puck line is ±1.5 on every game — a probability wearing a number (nhl_capture.py). So the
+      // win percentage and the disagreement flag go where "who wins" is actually priced.
       for (const [team, ml] of Object.entries(g.ml)) {
         if (ml && Number.isFinite(ml.price)) {
-          out.push({ id: `nhml-${g.eventId}-${slug(team)}`, kind: "line", group: "moneyline", market: "moneyline", title: `${team} ML`, detail: mk, price: ml.price, books: ml.books, byBook: ml.byBook });
+          const isHome = team === g.home;
+          const win = proj === null ? null : (isHome ? proj.homeWinPct : 1 - proj.homeWinPct);
+          out.push({ id: `nhml-${g.eventId}-${slug(team)}`, kind: "line", group: "moneyline", market: "moneyline", title: `${team} ML`, detail: mk, price: ml.price, books: ml.books, byBook: ml.byBook,
+            ...(win !== null ? { model: win * 100 } : {}) });
         }
       }
     }
@@ -302,10 +345,24 @@ export async function buildCandidatesNhl(): Promise<Candidate[]> {
           const title = isGoal
             ? `${q.player} Anytime Goal`
             : `${q.player} o${q.line} ${NHL_PROP_LABEL[mb.market] ?? mb.market}`;
+          // OUR PROBABILITY FOR THIS EXACT LEG, not a mean beside a half-point line. pOver reads
+          // the empirical band table at the line the book actually posted; for anytime goal that
+          // line is 0.5, so P(>0.5) IS "does he score" and needs no conversion. A player the
+          // projection cannot place (rookie under two games, call-up, unresolvable club) simply
+          // carries no model field, exactly as an unmatched football player does.
+          const pm = NHL_PROJ_MARKET[mb.market];
+          const pr = pm ? projFor(q.player, pg.home, pg.away, pm) : null;
+          // The LINE is part of the question, so a prop quoted without one gets no percentage
+          // rather than a percentage for a line we guessed. Anytime goal has no posted line and
+          // does not need one: the market IS P(> 0.5).
+          const atLine = isGoal ? 0.5 : (Number.isFinite(q.line) ? (q.line as number) : null);
+          const p = pr && pr.proj !== null && atLine !== null
+            ? pOver(pm, pr.proj, atLine) : null;
           out.push({
             id: `nhpr-${slug(q.player)}-${mb.market}`,
             kind: "prop", group, market: mb.market, title, detail: mk,
             price: q.price, books: q.books, byBook: q.byBook,
+            ...(p !== null && p !== undefined ? { model: p * 100 } : {}),
           });
         }
       }
