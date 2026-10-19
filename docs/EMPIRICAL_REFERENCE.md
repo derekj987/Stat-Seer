@@ -2221,3 +2221,62 @@ moneyline converted to goals and published rows like "NJD −0.4" that no sports
 it is still live on `/nhl/lines`, which quotes two dog sides against each other on those same 19%.
 The objection that keeps producing it — "a column of ±1.5 says nothing" — is true about the LINE and
 false about the MARKET, because the price is the number that varies.
+
+### §21. The NFL model's in-season weighting is already right — no knob is mis-set (2026-10-19)
+
+Derek, six weeks in: *"We need to be better at the spreads, ML, and over/unders… Have we been using
+in-season data? We need to adjust our model and get our numbers more accurate."* The honest answer
+to the first question is **yes**, and to the second, **there is no adjustment available in the
+parameters we have** — swept and reported here so nobody re-runs it.
+
+**Yes, in-season data is used, and it refreshes.** The rating is
+`(n·this_season + PRIOR_K·last_season)/(n + PRIOR_K)` with `PRIOR_K = 5`, so by week 6 it is **55%
+this season**. Totals blend separately (`CUR_W 1.5`, `K 0.75`). `player-projections.yml` runs twice
+daily and the generated files were last written the morning this was checked — the mechanism is
+live, not a stale file.
+
+**What the blend does to each club.** Mean pull away from a team's own 2026 margin: **2.40 points**,
+with the extremes at LAC (+5.4 up from −10.2/g), LV (−5.1 down from 0.0/g), LA (+4.8), KC (−4.7).
+Those look like the model refusing to believe what it has seen, which is what prompted the question.
+
+**🚨 BELIEVING IT MORE MAKES IT WORSE, AND BY A LOT.** Walk-forward over 2026's 92 games, strictly
+no look-ahead:
+
+| PRIOR_K | 2026 MAE | vs shipped |
+|---|---|---|
+| **0** (this season only) | **11.393** | **+1.700** |
+| 1 | 10.337 | +0.644 |
+| 3 | 9.822 | +0.129 |
+| **5 (shipped)** | **9.693** | — |
+| 8 | 9.666 | −0.027 |
+| 16 | 9.687 | −0.006 |
+
+Discarding last season costs **1.7 points of margin per game**. 2026's own optimum is K≈8 — *more*
+prior weight, not less — and the curve from 5 to 16 is flat inside 0.03.
+
+**The optimum wanders between seasons, which is the tell.** Best K is 2 on 2024, 3 on 2025, 8 on
+2026, and K=5 is within 0.08 of the best in every one. A parameter whose optimum moves that much on
+a curve that flat is not a lever; picking any season's winner is fitting that season's noise.
+
+**REGRESS and HFA are the same story.** Swept across 2023-2026:
+
+| | best per season | shipped | four-season mean gap |
+|---|---|---|---|
+| REGRESS | 0.65 / 0.80 / 0.55 / 0.45 | 0.65 | 0.025 |
+| HFA | 2.0 / 1.0 / 2.0 / 0.5-1.0 | 2.0 | 0.009 |
+
+2026 prefers REGRESS 0.45 and HFA ~0.5 strongly *on 2026 alone* — because this season's home margin
+is **+0.63** against +2.71 / +1.72 / +2.18 in the three before it. With n=87 and a margin SD near
+13.5, the standard error on that mean is **±1.45**, so +0.63 is within one SE of +2.0. It is a
+small sample, not a league shift, and tuning HFA down to chase it is the §4 mistake with a new
+number on it.
+
+**So where does the gap to the market actually live?** Our walk-forward margin MAE is **9.69**
+against the market's ~**9.3** on the same games — about **0.4 points**, and it is not in K, REGRESS
+or HFA. Closing it needs information the model does not have, not a better setting of the
+information it does. The 2026 board's records (ATS 45-45 = 50.0%, below the 52.4% break-even;
+totals 37-55) are that 0.4-point deficit expressed as win-loss, plus noise at n≈90.
+
+**Carry forward:** when a model looks too slow to update, sweep the weight before trusting the
+impression. Here the impression was right about the mechanism (the blend really does hold teams
+back by 2.4 points on average) and exactly backwards about the remedy.
