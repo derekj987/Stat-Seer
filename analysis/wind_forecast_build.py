@@ -59,6 +59,9 @@ CACHE = os.path.join(ROOT, "data", "wind_cache")
 OUT = os.path.join(ROOT, "data", "wind_forecast.csv")
 FORECAST_API = "https://historical-forecast-api.open-meteo.com/v1/forecast"
 ARCHIVE_API = "https://archive-api.open-meteo.com/v1/archive"
+# The near-kickoff forecast plus the SAME hour as forecast 1, 2 and 3 days earlier.
+FC_VARS = ("wind_speed_10m,wind_speed_10m_previous_day1,"
+           "wind_speed_10m_previous_day2,wind_speed_10m_previous_day3")
 
 
 def _get(url, tries=4):
@@ -79,8 +82,13 @@ def _get(url, tries=4):
     return None
 
 
-def hourly(api, lat, lon, start, end, tag):
-    """{iso_hour: wind_mph} for one venue-season, cached on disk."""
+def hourly(api, lat, lon, start, end, tag, variables="wind_speed_10m"):
+    """{var: {iso_hour: wind_mph}} for one venue-season, cached on disk.
+
+    `variables` may name several: the forecast endpoint also serves `wind_speed_10m_previous_dayN`,
+    which is the forecast for the SAME hour as it stood N days earlier. That is what turns a
+    near-kickoff number into a genuine bet-time one -- previous_day3 on a Sunday game is the
+    Thursday forecast."""
     os.makedirs(CACHE, exist_ok=True)
     key = f"{tag}_{lat:.4f}_{lon:.4f}_{start}_{end}.json"
     path = os.path.join(CACHE, key)
@@ -89,10 +97,12 @@ def hourly(api, lat, lon, start, end, tag):
             return json.load(fh)
     q = urllib.parse.urlencode({
         "latitude": lat, "longitude": lon, "start_date": start, "end_date": end,
-        "hourly": "wind_speed_10m", "wind_speed_unit": "mph", "timezone": "America/New_York"})
+        "hourly": variables, "wind_speed_unit": "mph", "timezone": "America/New_York"})
     d = _get(f"{api}?{q}")
     h = (d or {}).get("hourly", {})
-    out = {t: v for t, v in zip(h.get("time", []), h.get("wind_speed_10m", [])) if v is not None}
+    times = h.get("time", [])
+    out = {var: {t: v for t, v in zip(times, h.get(var, [])) if v is not None}
+           for var in variables.split(",")}
     with open(path, "w", encoding="utf-8") as fh:
         json.dump(out, fh)
     return out
@@ -152,8 +162,8 @@ def main(argv=None):
         _v, _c, _s, lat, lon, _roof = STADIUMS[home]
         start, end = f"{season}-09-01", f"{season + 1}-02-20"
         try:
-            fc = hourly(FORECAST_API, lat, lon, start, end, "fc")
-            ar = hourly(ARCHIVE_API, lat, lon, start, end, "ar")
+            fc = hourly(FORECAST_API, lat, lon, start, end, "fc2", FC_VARS)
+            ar = hourly(ARCHIVE_API, lat, lon, start, end, "ar2")
         except Exception as e:  # noqa: BLE001
             print(f"  {home} {season}: fetch failed ({type(e).__name__}) — skipped", file=sys.stderr)
             continue
@@ -168,7 +178,10 @@ def main(argv=None):
                                             "%Y-%m-%d %H:%M")
             except ValueError:
                 continue
-            f, a = nearest(fc, kick), nearest(ar, kick)
+            f = nearest(fc["wind_speed_10m"], kick)
+            a = nearest(ar["wind_speed_10m"], kick)
+            leads = {f"fc_d{n}": nearest(fc.get(f"wind_speed_10m_previous_day{n}", {}), kick)
+                     for n in (1, 2, 3)}
             if f is None or a is None:
                 no_cover += 1
                 continue
@@ -176,6 +189,7 @@ def main(argv=None):
                 "season": g["season"], "week": g["week"], "gameday": g["gameday"],
                 "away": g["away_team"], "home": home,
                 "fc_wind": round(f, 1), "ar_wind": round(a, 1),
+                **{k: (round(v, 1) if v is not None else "") for k, v in leads.items()},
                 "nflverse_wind": g.get("wind") or "",
                 "total_line": g["total_line"], "total": g.get("total") or "",
                 "temp": g.get("temp") or "",

@@ -2345,6 +2345,47 @@ mean total 2.26 points under the closing line. Break-even is 52.4%.
    much stronger position — but it is one mechanism, measured once more.
 
 **Status change: from "worth pursuing, not worth betting on" to "the mechanism is confirmed at bet
-time; the open question is lead time and sample."** The next measurement is a forecast issued 2-3
-days out rather than near kickoff — if the edge survives that, it is real and sized; if it collapses,
-the market is simply pricing late information well.
+time; the open question is lead time and sample."**
+
+### §22b. Lead time is NOT the obstacle — sample size is (2026-10-19)
+
+The follow-up §22 asked for: a forecast issued days out rather than near kickoff. Open-Meteo's
+`wind_speed_10m_previous_dayN` gives the forecast for the SAME kickoff hour as it stood N days
+earlier — verified to be a genuinely different forecast rather than a 24-hour lag of the series
+(mean |difference| 2.56 mph, almost never identical).
+
+**The archive only covers 2024-2025** — 348 of the 1,442 games. So every lead-time number below is
+on that subset, and the honest comparison is against near-kickoff **on the same games**, not
+against the full sample.
+
+| forecast issued | slope (pts/mph) | t | windy group |
+|---|---|---|---|
+| near kickoff | −0.2520 | −1.54 | 49.1% |
+| ~1 day earlier | −0.2686 | −1.65 | 54.5% |
+| ~2 days earlier | −0.2939 | −1.80 | 43.4% |
+| ~3 days earlier | −0.2203 | −1.39 | 46.2% |
+| *(full sample, near kickoff)* | *−0.2764* | *−3.38* | *58.2%* |
+
+**The slope does not degrade with lead** — −0.25 to −0.29 with no trend, and forecast skill barely
+decays either (r 0.835 → 0.761, MAE 2.05 → 2.40 mph at three days). Synoptic wind is genuinely
+predictable that far out.
+
+**And the subset shows no edge at ANY lead, including near kickoff (49.1%).** That rules out the
+tempting misreading: the weak lead-time numbers are not evidence that older forecasts fail, because
+the *same games* fail with the newest forecast too. 2024-2025 is simply a weak window.
+
+**It is a weak window, not a dying edge.** The windy group by season runs 61 / 65 / 46 / 66 / 65 /
+68 / **41** / 56 percent — n≈25-35 a season, SE ≈ 9 points. Split in halves: **2018-2021 58.9%**
+(n=112) against **2022-2025 57.4%** (n=108). Stable.
+
+**So: the information is available when a bettor would need it, and the market still does not price
+it.** What is NOT established is the size, and that has not moved — 220 windy games, an interval
+whose lower bound sits below break-even, and a per-season bounce of 27 points. The remaining work
+is sample, not mechanism and not timing.
+
+**⚠️ A bug caught mid-analysis, recorded because it nearly shipped.** The lead-time loop was written
+`for n in (1, 2, 3)`, shadowing the `n = len(rows)` used by the percentile cutoffs further down. The
+top-15% threshold silently became the third-smallest value — 0.2 mph instead of 11.5 — which put
+every game in the "windy" group and reported it at 52.2%. The tell was a cutoff printed in the
+output that was obviously wrong; printing the threshold rather than just using it is what made it
+visible.

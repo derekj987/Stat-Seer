@@ -94,6 +94,41 @@ def main(argv=None):
     print(f"   forecast MAE vs realized: {st.fmean(abs(r['fc'] - r['ar']) for r in rows):.2f} mph")
     print()
 
+    # --- lead time: the question that decides whether any of this is tradeable ---
+    # previous_dayN is the forecast for the SAME kickoff hour as it stood N days earlier
+    # (verified: it is not a 24h lag of the series -- mean |difference| 2.56 mph, almost never
+    # identical). A bettor pricing midweek holds roughly the d2/d3 column, not fc.
+    # NB: `lead`, not `n` -- `n` is the row count used by the percentile cutoffs further down, and
+    # shadowing it here silently turned the top-15% cutoff into the third-smallest value (0.2 mph
+    # instead of 11.5), which quietly put every game in the "windy" group.
+    leads = [("near kickoff", "fc")]
+    for lead in (1, 2, 3):
+        k = f"d{lead}"
+        if any(r.get(f"fc_d{lead}") not in (None, "", "NA") for r in rows):
+            for r in rows:
+                v = r.get(f"fc_d{lead}")
+                r[k] = float(v) if v not in (None, "", "NA") else None
+            leads.append((f"~{lead} day(s) earlier", k))
+    print("LEAD TIME — does the edge survive a forecast a bettor would actually have had?")
+    print(f"   {'forecast issued':<22}{'n':>6}{'skill r':>10}{'MAE mph':>10}"
+          f"{'slope':>10}{'t':>8}{'windy-group under':>20}")
+    for label, key in leads:
+        sel = [r for r in rows if r.get(key) is not None]
+        if len(sel) < 100:
+            continue
+        xs = [r[key] for r in sel]
+        skill, _a, _t, rr = ols(xs, [r["ar"] for r in sel])
+        mae = st.fmean(abs(r[key] - r["ar"]) for r in sel)
+        b, _a2, t2, _r2 = ols(xs, [r["resid"] for r in sel])
+        cut = sorted(xs)[int(0.85 * len(sel))]
+        g = [r for r in sel if r[key] >= cut and abs(r["resid"]) > 1e-9]
+        u = sum(1 for r in g if r["resid"] < 0)
+        print(f"   {label:<22}{len(sel):>6}{rr:>10.3f}{mae:>10.2f}{b:>10.4f}{t2:>8.2f}"
+              f"{f'{u}-{len(g)-u} = {u/len(g):.1%}' if g else '--':>20}")
+    print("   skill r / MAE are the forecast against what actually blew; slope and the windy group")
+    print("   are against the market. Break-even on the under is 52.4%.")
+    print()
+
     print("Q1. DOES THE MARKET PRICE THE FORECAST?  (actual total - closing total) ~ wind")
     print(f"   {'predictor':<22}{'slope (pts/mph)':>18}{'t':>8}{'r':>8}")
     for label, key in (("FORECAST wind", "fc"), ("realized wind", "ar")):
