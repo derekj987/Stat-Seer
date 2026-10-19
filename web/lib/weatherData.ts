@@ -7,11 +7,7 @@ export interface GameWeather { eventId: string; game: string; home: string; away
   gustMph: number|null; precipPct: number|null; conditions: string|null; windFlag: boolean }
 export const WEATHER_SEASON = 2026;
 export const WEATHER_WEEK = 6;
-export const WEATHER_UPDATED = "2026-10-18T18:56Z";
+export const WEATHER_UPDATED = "2026-10-19T05:19Z";
 export const GAME_WEATHER: GameWeather[] = [
-  {"eventId": "3729ac6d2a66b642850caf2044cdc658", "game": "ARI @ LA", "home": "LA", "away": "ARI", "commence": "2026-10-18T20:05:00+00:00", "neutral": false, "venue": "SoFi Stadium", "city": "Inglewood", "state": "CA", "roof": "dome", "indoor": true, "status": "indoor", "tempF": null, "windMph": null, "gustMph": null, "precipPct": null, "conditions": null, "windFlag": false},
-  {"eventId": "45b2690b350ed45145c7a716b18e8e66", "game": "BUF @ LV", "home": "LV", "away": "BUF", "commence": "2026-10-18T20:25:00+00:00", "neutral": false, "venue": "Allegiant Stadium", "city": "Las Vegas", "state": "NV", "roof": "dome", "indoor": true, "status": "indoor", "tempF": null, "windMph": null, "gustMph": null, "precipPct": null, "conditions": null, "windFlag": false},
-  {"eventId": "20fefae8c296247460ba5773caa42218", "game": "LAC @ KC", "home": "KC", "away": "LAC", "commence": "2026-10-18T20:25:00+00:00", "neutral": false, "venue": "Arrowhead Stadium", "city": "Kansas City", "state": "MO", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 66, "windMph": 12, "gustMph": 18, "precipPct": 0, "conditions": "Clear", "windFlag": false},
-  {"eventId": "82fd5a159fa130e67abab93a9537f70b", "game": "DAL @ GB", "home": "GB", "away": "DAL", "commence": "2026-10-19T00:20:00+00:00", "neutral": false, "venue": "Lambeau Field", "city": "Green Bay", "state": "WI", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 54, "windMph": 11, "gustMph": 20, "precipPct": 0, "conditions": "Clear", "windFlag": true},
-  {"eventId": "f122527f003276d3bca19efa48c902c1", "game": "WAS @ SF", "home": "SF", "away": "WAS", "commence": "2026-10-20T00:15:00+00:00", "neutral": false, "venue": "Levi's Stadium", "city": "Santa Clara", "state": "CA", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 61, "windMph": 12, "gustMph": 16, "precipPct": 0, "conditions": "Overcast", "windFlag": false},
+  {"eventId": "f122527f003276d3bca19efa48c902c1", "game": "WAS @ SF", "home": "SF", "away": "WAS", "commence": "2026-10-20T00:15:00+00:00", "neutral": false, "venue": "Levi's Stadium", "city": "Santa Clara", "state": "CA", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 60, "windMph": 12, "gustMph": 16, "precipPct": 0, "conditions": "Overcast", "windFlag": false},
 ];
