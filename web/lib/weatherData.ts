@@ -7,7 +7,7 @@ export interface GameWeather { eventId: string; game: string; home: string; away
   gustMph: number|null; precipPct: number|null; conditions: string|null; windFlag: boolean }
 export const WEATHER_SEASON = 2026;
 export const WEATHER_WEEK = 6;
-export const WEATHER_UPDATED = "2026-10-19T05:19Z";
+export const WEATHER_UPDATED = "2026-10-19T15:52Z";
 export const GAME_WEATHER: GameWeather[] = [
-  {"eventId": "f122527f003276d3bca19efa48c902c1", "game": "WAS @ SF", "home": "SF", "away": "WAS", "commence": "2026-10-20T00:15:00+00:00", "neutral": false, "venue": "Levi's Stadium", "city": "Santa Clara", "state": "CA", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 60, "windMph": 12, "gustMph": 16, "precipPct": 0, "conditions": "Overcast", "windFlag": false},
+  {"eventId": "f122527f003276d3bca19efa48c902c1", "game": "WAS @ SF", "home": "SF", "away": "WAS", "commence": "2026-10-20T00:15:00+00:00", "neutral": false, "venue": "Levi's Stadium", "city": "Santa Clara", "state": "CA", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 62, "windMph": 13, "gustMph": 17, "precipPct": 0, "conditions": "Overcast", "windFlag": false},
 ];
