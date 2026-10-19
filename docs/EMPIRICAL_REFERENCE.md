@@ -2221,3 +2221,171 @@ moneyline converted to goals and published rows like "NJD −0.4" that no sports
 it is still live on `/nhl/lines`, which quotes two dog sides against each other on those same 19%.
 The objection that keeps producing it — "a column of ±1.5 says nothing" — is true about the LINE and
 false about the MARKET, because the price is the number that varies.
+
+### §21. The NFL model's in-season weighting is already right — no knob is mis-set (2026-10-19)
+
+Derek, six weeks in: *"We need to be better at the spreads, ML, and over/unders… Have we been using
+in-season data? We need to adjust our model and get our numbers more accurate."* The honest answer
+to the first question is **yes**, and to the second, **there is no adjustment available in the
+parameters we have** — swept and reported here so nobody re-runs it.
+
+**Yes, in-season data is used, and it refreshes.** The rating is
+`(n·this_season + PRIOR_K·last_season)/(n + PRIOR_K)` with `PRIOR_K = 5`, so by week 6 it is **55%
+this season**. Totals blend separately (`CUR_W 1.5`, `K 0.75`). `player-projections.yml` runs twice
+daily and the generated files were last written the morning this was checked — the mechanism is
+live, not a stale file.
+
+**What the blend does to each club.** Mean pull away from a team's own 2026 margin: **2.40 points**,
+with the extremes at LAC (+5.4 up from −10.2/g), LV (−5.1 down from 0.0/g), LA (+4.8), KC (−4.7).
+Those look like the model refusing to believe what it has seen, which is what prompted the question.
+
+**🚨 BELIEVING IT MORE MAKES IT WORSE, AND BY A LOT.** Walk-forward over 2026's 92 games, strictly
+no look-ahead:
+
+| PRIOR_K | 2026 MAE | vs shipped |
+|---|---|---|
+| **0** (this season only) | **11.393** | **+1.700** |
+| 1 | 10.337 | +0.644 |
+| 3 | 9.822 | +0.129 |
+| **5 (shipped)** | **9.693** | — |
+| 8 | 9.666 | −0.027 |
+| 16 | 9.687 | −0.006 |
+
+Discarding last season costs **1.7 points of margin per game**. 2026's own optimum is K≈8 — *more*
+prior weight, not less — and the curve from 5 to 16 is flat inside 0.03.
+
+**The optimum wanders between seasons, which is the tell.** Best K is 2 on 2024, 3 on 2025, 8 on
+2026, and K=5 is within 0.08 of the best in every one. A parameter whose optimum moves that much on
+a curve that flat is not a lever; picking any season's winner is fitting that season's noise.
+
+**REGRESS and HFA are the same story.** Swept across 2023-2026:
+
+| | best per season | shipped | four-season mean gap |
+|---|---|---|---|
+| REGRESS | 0.65 / 0.80 / 0.55 / 0.45 | 0.65 | 0.025 |
+| HFA | 2.0 / 1.0 / 2.0 / 0.5-1.0 | 2.0 | 0.009 |
+
+2026 prefers REGRESS 0.45 and HFA ~0.5 strongly *on 2026 alone* — because this season's home margin
+is **+0.63** against +2.71 / +1.72 / +2.18 in the three before it. With n=87 and a margin SD near
+13.5, the standard error on that mean is **±1.45**, so +0.63 is within one SE of +2.0. It is a
+small sample, not a league shift, and tuning HFA down to chase it is the §4 mistake with a new
+number on it.
+
+**So where does the gap to the market actually live?** Our walk-forward margin MAE is **9.69**
+against the market's ~**9.3** on the same games — about **0.4 points**, and it is not in K, REGRESS
+or HFA. Closing it needs information the model does not have, not a better setting of the
+information it does. The 2026 board's records (ATS 45-45 = 50.0%, below the 52.4% break-even;
+totals 37-55) are that 0.4-point deficit expressed as win-loss, plus noise at n≈90.
+
+**Carry forward:** when a model looks too slow to update, sweep the weight before trusting the
+impression. Here the impression was right about the mechanism (the blend really does hold teams
+back by 2.4 points on average) and exactly backwards about the remedy.
+
+### §22. Wind at BET TIME — the one live lead survives its first real test (2026-10-19)
+
+ATTRIBUTE_CATALOG's wind finding (market under-sets totals ~1.3 pts at 15+ mph, 56.1% unders,
+n=647) carried its own disqualifier: it used the wind **recorded at game time**, which nobody can
+bet. The catalog named the honest version — *"being better than the market at predicting where the
+forecast lands"* — and left it there. This is that test.
+
+**Data.** `analysis/wind_forecast_build.py`: **1,442 outdoor games, 2018-2025**, each with the
+closing total, the actual total, and the wind that was **FORECAST** for kickoff. Forecast comes from
+Open-Meteo's historical-forecast archive (what was predicted), realized from its ERA5 archive (what
+happened) — free, no key. Join validated two ways: forecast↔realized r=+0.71 with a 2.05 mph MAE
+(a real forecast, not a relabelled analysis), and nflverse's own recorded wind↔ERA5 r=+0.70 with
+matching means, which independently confirms each game is matched to the right venue-hour.
+
+**Q1 — does the market price the forecast? No.** Regressing (actual total − closing total) on wind,
+threshold-free over every game:
+
+| predictor | slope (pts/mph) | t |
+|---|---|---|
+| **FORECAST wind** | **−0.2764** | **−3.38** |
+| realized wind | −0.2152 | −2.90 |
+
+**The forecast slope is STRONGER than the realized one.** That is the opposite of a hindsight
+artifact: if the edge lived in wind the market could not see, realized would dominate.
+
+**Q2 — is it only the surprises? No, and this is the decisive split.**
+
+| group | n | under % |
+|---|---|---|
+| forecast windy, and it was | 154 | 57.5% |
+| **forecast windy, it was NOT** | **67** | **59.7%** |
+| surprise wind (not forecast) | 63 | 57.1% |
+| calm by both | 1,158 | 50.7% |
+
+The games that were *forecast* windy go under whether or not the wind arrives. The edge is attached
+to the forecast — the thing a bettor holds — not to the weather.
+
+**It replicates out of sample.** Cutoff fitted on 2018-2021, tested on 2022-2025: slope −0.2674
+(t=−2.35) on train, **−0.2895 (t=−2.46) held out**. Essentially the same number on seasons the
+cutoff never saw.
+
+**It is not a proxy for December.** Controlling for temperature and week leaves wind at −0.2836
+(t=−3.31) while temp (t=+1.08) and week (t=+1.01) do nothing; corr(wind, temp) is only −0.106. The
+cleanest cut is the 2×2 — the wind gap is the same size in cold and mild games:
+
+| | forecast windy | calm |
+|---|---|---|
+| cold (<45°F) | **58.7%** under | 50.4% |
+| mild | **57.0%** under | 50.2% |
+
+**The bettable group:** forecast ≥ 11.5 mph went **128-92 to the under = 58.2%** (n=220, p=0.018),
+mean total 2.26 points under the closing line. Break-even is 52.4%.
+
+**🚨 NOT YET TRADEABLE, AND THE REASONS ARE SPECIFIC.**
+1. **n=220.** The 95% interval on 58.2% runs roughly [51.6%, 64.4%] — the lower bound is *below*
+   break-even. Significant is not the same as established.
+2. **Lead time.** The archived forecast is a SHORT lead. The closing total is also set near kickoff,
+   so the comparison is fair for a late bettor — but anyone pricing days out holds a worse forecast
+   than this, and that version has not been measured.
+3. **Provenance.** This began as the best of 31 tests (§4), which is exactly where false positives
+   live. It is now a pre-specified test of a named mechanism that replicated held out, which is a
+   much stronger position — but it is one mechanism, measured once more.
+
+**Status change: from "worth pursuing, not worth betting on" to "the mechanism is confirmed at bet
+time; the open question is lead time and sample."**
+
+### §22b. Lead time is NOT the obstacle — sample size is (2026-10-19)
+
+The follow-up §22 asked for: a forecast issued days out rather than near kickoff. Open-Meteo's
+`wind_speed_10m_previous_dayN` gives the forecast for the SAME kickoff hour as it stood N days
+earlier — verified to be a genuinely different forecast rather than a 24-hour lag of the series
+(mean |difference| 2.56 mph, almost never identical).
+
+**The archive only covers 2024-2025** — 348 of the 1,442 games. So every lead-time number below is
+on that subset, and the honest comparison is against near-kickoff **on the same games**, not
+against the full sample.
+
+| forecast issued | slope (pts/mph) | t | windy group |
+|---|---|---|---|
+| near kickoff | −0.2520 | −1.54 | 49.1% |
+| ~1 day earlier | −0.2686 | −1.65 | 54.5% |
+| ~2 days earlier | −0.2939 | −1.80 | 43.4% |
+| ~3 days earlier | −0.2203 | −1.39 | 46.2% |
+| *(full sample, near kickoff)* | *−0.2764* | *−3.38* | *58.2%* |
+
+**The slope does not degrade with lead** — −0.25 to −0.29 with no trend, and forecast skill barely
+decays either (r 0.835 → 0.761, MAE 2.05 → 2.40 mph at three days). Synoptic wind is genuinely
+predictable that far out.
+
+**And the subset shows no edge at ANY lead, including near kickoff (49.1%).** That rules out the
+tempting misreading: the weak lead-time numbers are not evidence that older forecasts fail, because
+the *same games* fail with the newest forecast too. 2024-2025 is simply a weak window.
+
+**It is a weak window, not a dying edge.** The windy group by season runs 61 / 65 / 46 / 66 / 65 /
+68 / **41** / 56 percent — n≈25-35 a season, SE ≈ 9 points. Split in halves: **2018-2021 58.9%**
+(n=112) against **2022-2025 57.4%** (n=108). Stable.
+
+**So: the information is available when a bettor would need it, and the market still does not price
+it.** What is NOT established is the size, and that has not moved — 220 windy games, an interval
+whose lower bound sits below break-even, and a per-season bounce of 27 points. The remaining work
+is sample, not mechanism and not timing.
+
+**⚠️ A bug caught mid-analysis, recorded because it nearly shipped.** The lead-time loop was written
+`for n in (1, 2, 3)`, shadowing the `n = len(rows)` used by the percentile cutoffs further down. The
+top-15% threshold silently became the third-smallest value — 0.2 mph instead of 11.5 — which put
+every game in the "windy" group and reported it at 52.2%. The tell was a cutoff printed in the
+output that was obviously wrong; printing the threshold rather than just using it is what made it
+visible.
