@@ -2280,3 +2280,71 @@ totals 37-55) are that 0.4-point deficit expressed as win-loss, plus noise at n�
 **Carry forward:** when a model looks too slow to update, sweep the weight before trusting the
 impression. Here the impression was right about the mechanism (the blend really does hold teams
 back by 2.4 points on average) and exactly backwards about the remedy.
+
+### §22. Wind at BET TIME — the one live lead survives its first real test (2026-10-19)
+
+ATTRIBUTE_CATALOG's wind finding (market under-sets totals ~1.3 pts at 15+ mph, 56.1% unders,
+n=647) carried its own disqualifier: it used the wind **recorded at game time**, which nobody can
+bet. The catalog named the honest version — *"being better than the market at predicting where the
+forecast lands"* — and left it there. This is that test.
+
+**Data.** `analysis/wind_forecast_build.py`: **1,442 outdoor games, 2018-2025**, each with the
+closing total, the actual total, and the wind that was **FORECAST** for kickoff. Forecast comes from
+Open-Meteo's historical-forecast archive (what was predicted), realized from its ERA5 archive (what
+happened) — free, no key. Join validated two ways: forecast↔realized r=+0.71 with a 2.05 mph MAE
+(a real forecast, not a relabelled analysis), and nflverse's own recorded wind↔ERA5 r=+0.70 with
+matching means, which independently confirms each game is matched to the right venue-hour.
+
+**Q1 — does the market price the forecast? No.** Regressing (actual total − closing total) on wind,
+threshold-free over every game:
+
+| predictor | slope (pts/mph) | t |
+|---|---|---|
+| **FORECAST wind** | **−0.2764** | **−3.38** |
+| realized wind | −0.2152 | −2.90 |
+
+**The forecast slope is STRONGER than the realized one.** That is the opposite of a hindsight
+artifact: if the edge lived in wind the market could not see, realized would dominate.
+
+**Q2 — is it only the surprises? No, and this is the decisive split.**
+
+| group | n | under % |
+|---|---|---|
+| forecast windy, and it was | 154 | 57.5% |
+| **forecast windy, it was NOT** | **67** | **59.7%** |
+| surprise wind (not forecast) | 63 | 57.1% |
+| calm by both | 1,158 | 50.7% |
+
+The games that were *forecast* windy go under whether or not the wind arrives. The edge is attached
+to the forecast — the thing a bettor holds — not to the weather.
+
+**It replicates out of sample.** Cutoff fitted on 2018-2021, tested on 2022-2025: slope −0.2674
+(t=−2.35) on train, **−0.2895 (t=−2.46) held out**. Essentially the same number on seasons the
+cutoff never saw.
+
+**It is not a proxy for December.** Controlling for temperature and week leaves wind at −0.2836
+(t=−3.31) while temp (t=+1.08) and week (t=+1.01) do nothing; corr(wind, temp) is only −0.106. The
+cleanest cut is the 2×2 — the wind gap is the same size in cold and mild games:
+
+| | forecast windy | calm |
+|---|---|---|
+| cold (<45°F) | **58.7%** under | 50.4% |
+| mild | **57.0%** under | 50.2% |
+
+**The bettable group:** forecast ≥ 11.5 mph went **128-92 to the under = 58.2%** (n=220, p=0.018),
+mean total 2.26 points under the closing line. Break-even is 52.4%.
+
+**🚨 NOT YET TRADEABLE, AND THE REASONS ARE SPECIFIC.**
+1. **n=220.** The 95% interval on 58.2% runs roughly [51.6%, 64.4%] — the lower bound is *below*
+   break-even. Significant is not the same as established.
+2. **Lead time.** The archived forecast is a SHORT lead. The closing total is also set near kickoff,
+   so the comparison is fair for a late bettor — but anyone pricing days out holds a worse forecast
+   than this, and that version has not been measured.
+3. **Provenance.** This began as the best of 31 tests (§4), which is exactly where false positives
+   live. It is now a pre-specified test of a named mechanism that replicated held out, which is a
+   much stronger position — but it is one mechanism, measured once more.
+
+**Status change: from "worth pursuing, not worth betting on" to "the mechanism is confirmed at bet
+time; the open question is lead time and sample."** The next measurement is a forecast issued 2-3
+days out rather than near kickoff — if the edge survives that, it is real and sized; if it collapses,
+the market is simply pricing late information well.
