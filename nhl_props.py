@@ -62,6 +62,16 @@ MARKETS = ["player_goal_scorer_anytime", "player_shots_on_goal",
 REGIONS = "us"
 DB = os.path.join(ROOT, "data", "nhl.db")
 
+# What makes two captured rows THE SAME OFFER, and therefore the only thing either store may
+# collapse. It must match the unique index in ingest/nhl_prop_snapshots.sql exactly -- PostgREST
+# resolves ?on_conflict= against that index and rejects any list it cannot find.
+#
+# `player` is a name, and a name is not an identity: Vancouver rosters two Elias Petterssons (the
+# forward #40 and the defenceman #25) and the odds feed sends no id. Without line and price their
+# two anytime-scorer offers, +275 and +1700, hash to one key and the sweep dies on a unique
+# violation. See the SQL file for the dates that cost us.
+CONFLICT = "snapshot_at,event_id,book,market,player,side,line,price"
+
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS nhl_prop_snapshots (
   snapshot_at TEXT NOT NULL,
@@ -75,7 +85,13 @@ CREATE TABLE IF NOT EXISTS nhl_prop_snapshots (
   side        TEXT,
   line        REAL,
   price       INTEGER,
-  PRIMARY KEY (snapshot_at, event_id, book, market, player, side)
+  -- Same key as CONFLICT / the Supabase index, and for the same reason: on this path the narrow
+  -- version was arguably worse, because INSERT OR IGNORE drops the colliding row SILENTLY instead
+  -- of raising, so one of the two Petterssons simply vanished with no error anywhere.
+  -- NB this only applies to a freshly created data/nhl.db; CREATE TABLE IF NOT EXISTS will not
+  -- re-key an existing local file, so delete it to pick the new key up. Supabase is the
+  -- production store and is fixed by the DDL, so no migration is written for the dev copy.
+  PRIMARY KEY (snapshot_at, event_id, book, market, player, side, line, price)
 );
 CREATE INDEX IF NOT EXISTS ix_nhlprops_event ON nhl_prop_snapshots(event_id);
 CREATE INDEX IF NOT EXISTS ix_nhlprops_commence ON nhl_prop_snapshots(commence);
@@ -173,19 +189,57 @@ def write_supabase(rows):
         raise SystemExit("--supabase needs SUPABASE_URL and SUPABASE_SERVICE_KEY in .env")
     payload = [dict(zip(("snapshot_at", "event_id", "commence", "home_team", "away_team",
                          "book", "market", "player", "side", "line", "price"), r)) for r in rows]
-    endpoint = url.rstrip("/") + "/rest/v1/nhl_prop_snapshots"
+    # 🚨 resolution=ignore-duplicates IS A NO-OP WITHOUT ?on_conflict=. This function sent the
+    # Prefer header for weeks while omitting the query parameter, so PostgREST had no arbiter to
+    # apply it to and a unique violation came back as a bare 409 that killed the whole sweep.
+    # nhl_capture.py has always appended its CONFLICT list; this one did not.
+    endpoint = f"{url.rstrip('/')}/rest/v1/nhl_prop_snapshots?on_conflict={CONFLICT}"
+    # Collapse exact repeats in-process first. A sweep can list the same offer twice (two books'
+    # feeds echoing one line), and dropping it here is free, shrinks the POST, and means the
+    # on_conflict path is only needed for genuine overlap with what is already stored.
+    seen, deduped = set(), []
+    for p in payload:
+        sig = tuple(p[c] for c in CONFLICT.split(","))
+        if sig in seen:
+            continue
+        seen.add(sig)
+        deduped.append(p)
+    if len(deduped) < len(payload):
+        print(f"  {len(payload) - len(deduped)} exact-duplicate offer(s) collapsed before sending")
     sent = 0
-    for i in range(0, len(payload), 500):     # chunked: one oversized POST is a 413
-        chunk = payload[i:i + 500]
-        req = urllib.request.Request(
-            endpoint, data=json.dumps(chunk).encode("utf-8"),
-            headers={"apikey": key, "Authorization": f"Bearer {key}",
-                     "Content-Type": "application/json",
-                     "Prefer": "return=minimal,resolution=ignore-duplicates"},
-            method="POST")
-        with urllib.request.urlopen(req, timeout=90) as r:
-            if r.getcode() not in (200, 201, 204):
-                raise SystemExit(f"Supabase write failed: {r.getcode()}")
+    for i in range(0, len(deduped), 500):     # chunked: one oversized POST is a 413
+        chunk = deduped[i:i + 500]
+        body = json.dumps(chunk).encode("utf-8")
+
+        def post(target):
+            req = urllib.request.Request(
+                target, data=body,
+                headers={"apikey": key, "Authorization": f"Bearer {key}",
+                         "Content-Type": "application/json",
+                         "Prefer": "return=minimal,resolution=ignore-duplicates"},
+                method="POST")
+            with urllib.request.urlopen(req, timeout=90) as r:
+                if r.getcode() not in (200, 201, 204):
+                    raise SystemExit(f"Supabase write failed: {r.getcode()}")
+
+        try:
+            post(endpoint)
+        except urllib.error.HTTPError as e:
+            # The on_conflict list must match a real unique index. ingest/nhl_prop_snapshots.sql
+            # widens that index to include line and price, and DDL is run by hand — so if this
+            # lands before that SQL does, PostgREST answers 400/42P10 ("no unique or exclusion
+            # constraint matching the ON CONFLICT specification"). Falling back to the plain
+            # endpoint keeps the capture no worse than it was instead of taking it fully offline,
+            # and the warning says exactly what to run.
+            detail = (e.read() or b"").decode("utf-8", "replace")[:300] if e.code == 400 else ""
+            if e.code == 400 and ("42P10" in detail or "ON CONFLICT" in detail):
+                print("  WARNING: the widened dedupe index is not in place yet — run "
+                      "ingest/nhl_prop_snapshots.sql in the Supabase SQL editor.\n"
+                      "  Posting without on_conflict; a repeated player NAME will still 409.",
+                      file=sys.stderr)
+                post(f"{url.rstrip('/')}/rest/v1/nhl_prop_snapshots")
+            else:
+                raise
         sent += len(chunk)
     return sent
 
