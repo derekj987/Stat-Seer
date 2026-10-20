@@ -1581,6 +1581,70 @@ def build_slate(slate, depth, prop_index, key):
     return out
 
 
+def collapse_verdict(prev, n_rows, n_props, n_priced, n_missing, n_slate, n_priced_games):
+    """May this run overwrite the published board? -> (ok, note). Pure, so it is testable.
+
+    🚨 NEVER REPLACE A POPULATED BOARD WITH AN EMPTY ONE. data/cfb.db holds the upcoming slate and
+    is gitignored, so a local copy that has not been rebuilt reports no upcoming games: the props
+    fetch still succeeds, nothing joins, and a 0-row board lands on top of the live one with an exit
+    code of 0. It has happened twice -- the workflow rebuilds cfb.db first (cfb_backfill) and a hand
+    run usually does not.
+
+    🚨 BUT A SMALLER BOARD IS NOT BY ITSELF A FAULT, and the original row-count ratio made this
+    workflow cry wolf every single week. Books post CFB player props a few days out, so the board
+    peaks on Saturday and the Sunday run legitimately finds a fraction of it. Over 50 runs,
+    Wed-Sat passed 26/27 while Sun-Tue passed 13/23, and every one of those failures was this guard
+    -- week 8 refused at 379 rows against 1741 while reporting a healthy 56-game slate. Worse,
+    refusing to write KEPT THE FINISHED WEEK'S BOARD LIVE, which then tripped the freshness check in
+    analysis/ncaaf_guardrail.py: one false alarm manufacturing a second, and a board describing games
+    already played. The thin board is the honest one -- the coverage filter in main() says so in as
+    many words ("a slate captured before the books post will be thin ... that is the intended
+    reading").
+
+    So the question is not "did the board shrink" but "did posted props go MISSING on the way to
+    it". The stale-db failure has that signature and a thin market does not: when cfb.db holds the
+    wrong week the feed's games find no slate row to join and the reconciliation fills up. A quiet
+    reconciliation means every prop the market posted is on the board and nothing is destroyed.
+
+    The four cases that matter, as `python -m doctest cfb_player_proj.py` checks them:
+
+    >>> # the real 2026 week-8 Sunday run: 12 of 56 games priced, reconciliation clean
+    >>> collapse_verdict(1741, 379, 379, 379, 0, 56, 12)[0]
+    True
+    >>> # stale cfb.db: the feed posted props and NONE of them found a row
+    >>> collapse_verdict(1741, 0, 379, 379, 379, 56, 0)[0]
+    False
+    >>> # props feed down while a slate exists -- an outage, not an unpriced slate
+    >>> collapse_verdict(1741, 0, 0, 0, 0, 56, 0)[0]
+    False
+    >>> # one book spelling the resolver has not learned is no reason to withhold the board
+    >>> collapse_verdict(1741, 378, 379, 379, 1, 56, 12)[0]
+    True
+    """
+    if not prev or n_rows >= prev * 0.5:
+        return True, ""
+    # A few unmatched names are routine (book spellings the resolver has not learned) and the
+    # reconciliation WARNING already surfaces them without failing the run, so the bar is a SHARE,
+    # not any miss at all. The real incident -- three unmapped games -- lost about a third of the
+    # posted props, and a stale db loses all of them; one stray spelling is under a percent.
+    if n_priced and n_missing > 0.10 * n_priced:
+        return False, (
+            f"{prev} rows published, this run produced {n_rows}, and {n_missing} of {n_priced} "
+            f"posted props found no row — props are being LOST, not merely unposted.\n"
+            f"The usual cause is a stale data/cfb.db — rebuild the slate first:\n"
+            f"  python cfb_backfill.py --start {CUR_SEASON} --end {CUR_SEASON}\n"
+            f"Pass --force if the collapse is real (end of season).")
+    if not n_props:
+        return False, (
+            f"{prev} rows published and the props feed returned nothing at all while {n_slate} "
+            f"games are scheduled. That is an upstream outage, not an unpriced slate.\n"
+            f"Pass --force to publish anyway.")
+    return True, (
+        f"board is thinner than the live one ({n_rows} vs {prev} rows) but every one of the "
+        f"{n_priced} posted props is on it — the market has priced {n_priced_games} of {n_slate} "
+        f"games so far. Writing.")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--probe", action="store_true", help="list props + match status, write nothing")
@@ -1589,7 +1653,7 @@ def main(argv=None):
                     help="BACKTEST: project this (played) week from what was knowable before it")
     ap.add_argument("--all-rows", action="store_true", help="keep unpriced rows (backtests)")
     ap.add_argument("--force", action="store_true",
-                    help="write the published board even if the row count collapses")
+                    help="write the published board even if the guard refuses")
     args = ap.parse_args(argv)
 
     # 🚨 AN EXPERIMENT MUST NOT OVERWRITE THE PUBLISHED BOARD. Every knob here is read from the
@@ -1756,24 +1820,16 @@ def main(argv=None):
         + ", ".join(f"...P{i}" for i in range(len(range(0, len(rows), CHUNK))))
         + "];\n"
     )
-    # 🚨 NEVER REPLACE A POPULATED BOARD WITH AN EMPTY ONE. data/cfb.db holds the upcoming slate and
-    # is gitignored, so a local copy that has not been rebuilt reports no upcoming games: the props
-    # fetch still succeeds, nothing joins, and this writes a 0-row board over the live one with an
-    # exit code of 0. It has happened twice — the workflow rebuilds cfb.db first (cfb_backfill) and
-    # a hand run usually does not.
-    #
-    # An empty slate IS legitimate out of season, so this refuses only when it would DESTROY rows
-    # that are already published. --force is the deliberate escape hatch.
     if os.path.abspath(args.out) == os.path.abspath(DEFAULT_OUT) and not args.force:
         prev = 0
         if os.path.exists(args.out):
             prev = open(args.out, encoding="utf-8").read().count('{"game":')
-        if prev and len(rows) < prev * 0.5:
-            raise SystemExit(
-                f"refusing to overwrite {args.out}: {prev} rows published, this run produced "
-                f"{len(rows)}.\nThe usual cause is a stale data/cfb.db — rebuild the slate first:\n"
-                f"  python cfb_backfill.py --start {CUR_SEASON} --end {CUR_SEASON}\n"
-                f"Pass --force if the collapse is real (end of season).")
+        ok, note = collapse_verdict(prev, len(rows), len(props), len(prop_index),
+                                    len(missing), len(slate), len({r["game"] for r in rows}))
+        if not ok:
+            raise SystemExit(f"refusing to overwrite {args.out}: {note}")
+        if note:
+            print(f"  {note}")
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
     with open(args.out, "w", encoding="utf-8") as f:
         f.write(body)

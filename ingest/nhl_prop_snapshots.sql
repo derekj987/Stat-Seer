@@ -50,8 +50,24 @@ create index if not exists nhl_props_commence_idx on nhl_prop_snapshots (commenc
 
 -- `nulls not distinct` matters here: the goal-scorer market has a NULL line on every row, and
 -- without it Postgres would treat each NULL as distinct and the dedupe index would never fire.
+--
+-- 🚨 THE KEY MUST INCLUDE line AND price, and leaving them out cost four consecutive sweeps.
+-- `player` is a NAME, and a name is not an identity. Vancouver currently rosters two different
+-- Elias Petterssons -- the forward (#40, nhl id 8480012) and the defenceman (#25, id 8483678) --
+-- and the odds feed supplies no id, only the string. Both are priced in the anytime-scorer market,
+-- at +275 and +1700, so under the old narrow key they produced the SAME index entry while being
+-- genuinely different offers. Postgres rejected the insert, and because the whole sweep is one
+-- POST, EVERY row in it was lost: captures failed 2026-10-19 20:38 through 2026-10-20 14:23. Prop
+-- history cannot be backfilled (see the header), so those sweeps are gone for good.
+--
+-- Including line and price makes the key mean "this exact offer, recorded twice", which is the only
+-- thing a snapshot table should ever collapse. Two prices for one name are two offers and both are
+-- kept. The remaining ambiguity is real and is NOT fixed here: a graded Pettersson prop cannot be
+-- attributed to the right player from this table alone, so grading must either skip duplicate names
+-- or resolve them against the roster by position/market. Flagged rather than papered over.
+drop index if exists nhl_prop_snapshots_dedupe;
 create unique index if not exists nhl_prop_snapshots_dedupe on nhl_prop_snapshots
-    (snapshot_at, event_id, book, market, player, side) nulls not distinct;
+    (snapshot_at, event_id, book, market, player, side, line, price) nulls not distinct;
 
 -- Append-only: the same block_mutation() trigger every capture table carries. A captured line is a
 -- historical fact; nothing should be able to edit it after the fact, including us.
