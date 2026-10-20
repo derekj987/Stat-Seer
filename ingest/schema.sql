@@ -678,8 +678,55 @@ create index if not exists cfb_prop_time_idx   on cfb_prop_snapshots (snapshot_a
 create index if not exists cfb_prop_player_idx on cfb_prop_snapshots (player);
 -- Dedupe target for the writer's ON CONFLICT (ignore-duplicates). nulls not distinct
 -- so a null player/side still dedupes (Postgres 15+, same as prop_snapshots).
+--
+-- 🚨 line AND price ARE PART OF THE KEY, and omitting them lost rows SILENTLY.
+-- `player` is a NAME taken from the book's outcome.description, and the odds feed
+-- sends no player id, so two different players sharing a name on one roster map to
+-- a single index entry while being two genuinely different offers. Because this
+-- table's writer DOES send resolution=ignore-duplicates, Postgres discarded the
+-- second one and answered 204 — no error, no log line, and prop history cannot be
+-- backfilled. The NHL table carried the identical key and failed loudly instead,
+-- only because its writer had omitted on_conflict: Vancouver rosters two Elias
+-- Petterssons (forward #40, defenceman #25) priced at +275 and +1700, the clash
+-- 409'd, and four entire sweeps were lost (see ingest/nhl_prop_snapshots.sql).
+--
+-- 🚨 MEASURED ACROSS ALL 974,020 ROWS BEFORE CHANGING ANYTHING, because the two
+-- halves of this defect turned out to have very different sizes:
+--
+--   NAME COLLISION — no measurable exposure. Zero of the 123 (team, name) pairs
+--   that map to several CFBD athlete ids in 2024-2026 has ever been priced, and
+--   zero (isoweek, market, name) keys span more than one event. Books post
+--   starters and skill players; the duplicated names are deep-bench walk-ons the
+--   market never prices. Nothing is known to have been lost this way.
+--   (cfb_player_proj.py's "~291 name collisions across athlete ids" is about CFBD
+--   game-log joins, NOT priced props — do not read it as prop exposure.)
+--
+--   ALTERNATE LINES — real, confirmed, rare. 1 of 231,252 two-sided groups holds
+--   two different lines under one key: Raleek Brown, player_rush_yds, betonlineag,
+--   stored as Over 49.5 (-114) beside Under 52.5 (-109). That pair is incoherent —
+--   the book posted two lines and the narrow key kept one side from each, so the
+--   row set describes a market that never existed.
+--
+--   🚨 THAT 1 IS A LOWER BOUND, not a count. A mismatch is only detectable when the
+--   surviving Over and Under came from DIFFERENT line offerings; when both came
+--   from the same one, the other offering vanished completely and left no trace.
+--   Roughly half of such cases are therefore invisible.
+--
+-- So: closing this is cheap prevention plus one known-bad row set, not repair of a
+-- measured loss. Do not restate it as a large data loss.
+--
+-- Widening a unique key is always safe on existing data: a longer column list is
+-- strictly more permissive, so it cannot fail on rows already stored (narrowing
+-- one can). Rows the old key already dropped are gone and cannot be recovered.
+--
+-- Rebuild cost: ~974k rows as of 2026-10-20, so expect this to take seconds, not
+-- minutes. It is a plain blocking CREATE INDEX — writes to this table wait for it,
+-- which for a capture that runs every few hours is not worth CONCURRENTLY (which
+-- in any case cannot run inside a transaction block, so it could not simply be
+-- dropped into a script like this one).
+drop index if exists cfb_prop_snapshots_dedupe;
 create unique index if not exists cfb_prop_snapshots_dedupe on cfb_prop_snapshots
-    (snapshot_at, event_id, book, market, player, side) nulls not distinct;
+    (snapshot_at, event_id, book, market, player, side, line, price) nulls not distinct;
 
 revoke update, delete on cfb_prop_snapshots from public, anon, authenticated;
 drop trigger if exists no_update_cfb_props on cfb_prop_snapshots;

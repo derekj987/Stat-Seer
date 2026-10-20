@@ -267,7 +267,17 @@ def implied_pct(american):
 def fetch_props():
     """Current NCAAF props from the latest cfb_prop_snapshots snapshot -> one consensus line
     per (event, market, player). Consensus = median line (yardage/receptions) or median
-    implied % from the Yes price (anytime TD)."""
+    implied % from the Yes price (anytime TD).
+
+    NB the median pool is per (event, market, player) and NOT per book, so a book that posts
+    ALTERNATE LINES contributes more than one entry and is over-weighted by that much. This became
+    possible on 2026-10-20, when ingest/schema.sql's dedupe index was widened to include line and
+    price — before that the narrow key could only store one line per book per side, so the pool was
+    one-per-book by accident rather than by design. Measured frequency at the time: 1 of 231,252
+    two-sided groups across 974,020 rows, so the effect on a median over ~8 books is negligible and
+    the aggregation was deliberately left alone. If alternate lines ever become common, collapse to
+    one line per book FIRST (prefer the price nearest even money, which is the main line) and take
+    the median of those."""
     latest = sb_get("cfb_prop_snapshots?select=snapshot_at&order=snapshot_at.desc&limit=1")
     if not latest:
         return []

@@ -96,7 +96,31 @@ def week_maps():
 
 
 def priced_rows(date_week):
-    """{(week, market, name): closing line} — newest PREGAME capture per player-market-week."""
+    """{(week, market, name): closing line} — newest PREGAME capture per player-market-week.
+
+    🚨 TWO KNOWN LIMITS OF THIS KEY, both left in place deliberately rather than changed here,
+    because altering what this returns would move the published conversions.
+
+    1. IT KEYS ON A NAME, with no event and no team, so two different players sharing a name in one
+       week would be graded as one. Measured 2026-10-20 over all 974,020 rows of
+       cfb_prop_snapshots: ZERO (isoweek, market, name) keys span more than one event, and none of
+       the 123 names that map to several CFBD athlete ids in 2024-2026 has ever been priced. So the
+       conflation is structural, not currently active. If it ever is, the fix is to carry event_id
+       (or team) into the key — the odds feed sends no player id, so the name alone can never
+       identify a player.
+
+    2. ALTERNATE LINES ARE NOW REPRESENTABLE, which they were not before. ingest/schema.sql's
+       dedupe index used to omit line and price, so at most one row per
+       (sweep, event, book, market, player, side) could exist and this selection was accidentally
+       deterministic. The index now includes them — correctly, since a book posting 49.5 and 52.5
+       for the same player is posting two real offers — so several lines can share a sweep. The
+       `(snap or "") > best[k][0]` test below only breaks ties on the SNAPSHOT, so among rows from
+       the same sweep it silently keeps whichever arrived first by id. That is arbitrary and may
+       pick an alternate line over the main one.
+       The rule this should use is the MAIN line: the offering whose price sits nearest even money
+       (an alternate line is priced away from -110 by construction). Not implemented here on
+       purpose — it changes the fitted ratios, so it is Derek's call, not a drive-by edit.
+    """
     import injuries_nflverse as I
     env = I.load_env(); I.ensure_ssl()
     url, key = env["SUPABASE_URL"].rstrip("/"), env["SUPABASE_SERVICE_KEY"]
