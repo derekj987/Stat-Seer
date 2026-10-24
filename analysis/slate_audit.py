@@ -270,8 +270,15 @@ def compare(sport, sched, market, board, days):
     say(f"\n## {sport} — next {days} days")
     say()
     if sched is None or market is None or board is None:
-        warn(f"{sport}: a source is unavailable (schedule={sched is not None}, "
-             f"market={market is not None}, board={board is not None}) — cannot audit")
+        # 🚨 A MISSING SOURCE IS A FAILURE, NOT A WARNING. This used to warn and return, and the
+        # run then ended "**All clear.** 2 warning(s)" having compared nothing against nothing —
+        # a false all-clear in the tool whose entire job is catching missing games. It happens
+        # the moment this is run from a git worktree, because `data/` is gitignored and neither
+        # data/games.csv nor data/cfb.db exists there.
+        fail(f"{sport}: a source is unavailable (schedule={sched is not None}, "
+             f"market={market is not None}, board={board is not None}) — NOTHING WAS AUDITED. "
+             f"If this is a worktree, link the data in: "
+             f"mklink /J <worktree>\\data <repo>\\data")
         return
     say(f"  schedule {len(sched)}   priced by a book {len(market)}   on our board {len(board)}")
 
