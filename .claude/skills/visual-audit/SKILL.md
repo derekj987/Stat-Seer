@@ -4262,6 +4262,105 @@ disagreement reads as a finding.
 A priced game absent from our schedule source cannot be boarded at all; one that IS in our schedule
 and missing from the board is ours. The report says which, so the next reader opens the right file.
 
+#### ⚠️ It prints "All clear" when it has NO SOURCE TO AUDIT
+Run from a git worktree it reported `schedule=False, market=True, board=True` for both sports, one
+`[warn]`, and then **"All clear."** `data/` is gitignored, so a worktree has no `data/games.csv` and
+no `data/cfb.db` — the audit compared nothing against nothing and passed. Same family as every other
+false all-clear in this file, in the tool whose whole job is catching missing games.
+
+Two things follow. **Link the data in before auditing from a worktree** (a junction costs nothing and
+`data/` is gitignored, so it never shows up in `git status`):
+```bash
+cmd /c mklink /J "<worktree>\data" "C:\Users\joann\nfl-advice-app\data"
+```
+And **read the source line before believing the verdict** — a run whose `schedule` is False has
+audited nothing, whatever the last line says. With the junction in place the same command found 13
+NCAAF flags.
+
+#### A kickoff "disagreement" is usually CFBD's unannounced placeholder, not our board
+Of those 13, ten read `kickoff disagrees — ours Sat 07:30 PM vs Sat 12:00 AM ET`. **Our board had the
+real time and the SCHEDULE had the placeholder.** CFBD writes `T04:00:00.000Z` when a kickoff has not
+been announced, and the rate climbs as the week approaches: measured on 2026 `cfb.db`, weeks 1-6 are
+0%, week 7 is 2.7%, **week 8 is 12.3% and week 9 is 13.1%**.
+
+The audit already knows about the placeholder — but it only checks for it on OUR side
+(`str(when).endswith("T04:00:00.000Z")`), never on the reference, and `ref = market.get(k) or
+sched.get(k)` falls back to the schedule whenever the market key does not match. So a placeholder on
+the reference side is reported as our board being wrong. **Check which side holds the midnight before
+filing a kickoff bug**, and fix the probe rather than the board:
+```sql
+select start_date from games where season=2026 and away_team like '%Army%' and home_team like '%Memphis%';
+-- 2026-10-31T04:00:00.000Z  -> the SCHEDULE is the placeholder; our real time came from the feed
+```
+
+### 🚨 THE FAVOURITES-LEAN CHECK — count and MAGNITUDE are different questions
+Derek has reported this three times in two sports ("every RB is going over", "we have every favorite
+covering all 4 games", "all favorites winning by 5-10 more points than the spread"). It is the
+highest-yield numbers check in this file, and the trap is that the obvious statistic answers only
+half of it.
+
+**Measure the PUBLISHED pick, not your own derived diff.** The board's Bottom Line is `pick.side`;
+a reader reads that. Compare it to the market's favourite:
+```python
+fav = sum(1 for x in games if x["pick"]["side"] == x["marketSpread"]["fav"])
+```
+
+**Split by POPULATION, because they are not the same board** — and because a correction computed over
+a pooled population lets the noisy half set the level for the half members read. On the week-8 2026
+NCAAF card, FBS-vs-FBS and cross-division (FBS-vs-FCS) behaved completely differently:
+
+| population | n | median \|ours\|−\|line\| | mean \|error\| |
+|---|---|---|---|
+| FBS vs FBS | 54 | +1.90 | 4.00 |
+| cross-division | 41 | −0.80 | **7.20** |
+
+**Benchmark against what favourites ACTUALLY do, never against 50%.** This repo has measured it:
+close/mid favourites cover **47.6% (2021-23) and 50.5% (2024-25)** (`cfb_card_backtest`), and 20+
+favourites cover **49% ATS 2020-25**. A board picking the favourite on ~48% of close/mid games is
+therefore CORRECT, not lean-free-by-luck, and should be left alone.
+
+**🚨 THEN CHECK THE MAGNITUDES SEPARATELY, because equal counts can still read as a lean.** After the
+fix the FBS board was 26 favourite-side rows against 28 dog-side — 48.1%, bang on the benchmark — and
+Derek still saw a favourite lean. He was right about what he was looking at:
+
+```
+favourite-side rows: 26   mean size +3.9   max +11.1
+dog-side rows:       28   mean size -2.9   min -12.6
+median -0.20   MEAN +0.39      <- the mean/median gap IS the asymmetry
+```
+
+Equal counts, unequal sizes: when we disagree in the favourite's direction we disagree by a third
+more. A median centring fixes the LEVEL and cannot fix the SKEW, so a scan of the page still shows
+bigger numbers on the favourite side. Report both, and do not "fix" the second by shrinking the
+first — that would push the count off a benchmark it currently matches.
+```python
+pos = [d for d in diffs if d > 0]; neg = [d for d in diffs if d <= 0]
+statistics.mean(pos), statistics.mean(neg)     # sizes, not counts
+statistics.mean(diffs) - statistics.median(diffs)   # non-zero => skew, not level
+```
+
+### Aligning a board with FanDuel — what can and cannot be checked
+Standing request: *"scan all sports and ensure they align with fanduel — games, dates, player names,
+props."* **FanDuel is never scraped** (their terms); the licensed Odds API feed carries FanDuel's own
+prices and `LINE_BOOK = "fanduel"` in `lib/board.ts` is what every market column reads. So "aligns
+with FanDuel" means "agrees with the feed's FanDuel entries", and the four dimensions have four
+different tools:
+
+| dimension | tool | covers |
+|---|---|---|
+| games + dates | `analysis/slate_audit.py` | NFL, NCAAF only — **MLB and NHL are not covered** |
+| who is on a prop board | `analysis/board_coverage.py` | priced players with no row, ranked by shortest price |
+| player name spelling | the board shows the BOOK's spelling (`PROP_DISPLAY`) | see the duplicate-card entry below |
+| the posted line itself | `LINE_BOOK` / `mainLine()` | a market column must be a number the book POSTS |
+
+Two failure shapes worth checking directly, both of which have shipped:
+- **Two spellings of one team become two cards.** `abbrevTeam` was not idempotent and `schoolOf`
+  could not bridge an abbreviated export name, so "App State" (CFBD) and "Appalachian State" (the
+  feed) opened separate cards for one game. Sweep **day-aware** — the same matchup on two days is a
+  series or a doubleheader, not a duplicate.
+- **A sport with no coverage reports nothing wrong.** `slate_audit` silently has no MLB/NHL path; its
+  clean output for those sports is absence of a check, not absence of a defect. Say which.
+
 ## Prerequisites (already in the repo)
 - **QA preview mode** is automatic on the local dev server: `web/proxy.ts` opens the gate when
   `NODE_ENV==="development"`, and `web/lib/supabase/client.ts` mocks `auth.getUser/getSession` so
