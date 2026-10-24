@@ -117,6 +117,14 @@ def run(games, lam, cap, from_week, decay, hfa_outside, debias_mode="market"):
             # whatever level its prior happens to carry. A median is a level correction — it keeps
             # every relative read (which teams we rate above or below Vegas) and only moves where
             # the slate as a whole sits against the line.
+            #
+            # 🚨 THIS SLATE IS FBS-vs-FBS ONLY, and that is load-bearing. `cfb_ats.load` selects
+            # `home_class='fbs' AND away_class='fbs'`, so every number this report prints describes
+            # the FBS population. Production's `mid_debias` is therefore keyed on cross-division in
+            # `cfb_export.build_card`: pooling the two let the cross-division games — 43% of the
+            # week-8 card, with roughly double the error spread — set the correction for the games
+            # this backtest actually validated. If `build_card` ever goes back to one pooled median,
+            # this report silently stops describing it.
             mid_d = 0.0
             if debias_mode == "midfav":
                 _mid = [g for g in slate if abs(float(g["spread"])) <= ce.ANCHOR_LO]

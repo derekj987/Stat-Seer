@@ -732,12 +732,40 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
     # board is healthy and removes the full offset when it is not. It is an improvement and not a
     # cure; a zero median does not put "favourite covers" at 50% because the gap distribution is
     # skewed, so 43% against ~48-50% actual is what this buys.
-    _mresid = []
+    # 🚨 ONE MEDIAN PER POPULATION, because FBS-vs-FBS and cross-division are not the same board.
+    # The first version of this pooled every close/mid game into one median, and that is a
+    # validator/production divergence of exactly the kind this file keeps re-learning:
+    # `cfb_ats.load` — which `cfb_card_backtest` imports — selects `home_class='fbs' AND
+    # away_class='fbs'`, so `midfav` was validated on FBS games ONLY, while production computed
+    # its correction over a pool that is 43% cross-division.
+    #
+    # Those two populations have very different error distributions, so pooling lets the noisy one
+    # set the correction for the one members mostly read. Measured on the published week-8 card:
+    #
+    #     population      n    fav covers   median |ours|-|line|   mean |error|
+    #     FBS vs FBS     54      66.7%            +1.90                4.00
+    #     cross-division 41      46.3%            -0.80                7.20
+    #     pooled         95      57.9%            +3.40
+    #
+    # The pooled +3.40 applied to the FBS games overshoots them to ~43% cover; the FBS-only +2.15
+    # lands them at 48.1%, agree-on-favourite 51%, median -0.25. Cross-division games are already
+    # near-centred and get their own (much smaller) correction rather than one borrowed from a
+    # population whose errors are half the size.
+    _mres = {True: [], False: []}
     for away, home, neu, date, gid, _hc, _ac in rows:
         _hsp, _ = market_for(away, home, gid)
         if _hsp is not None and abs(float(_hsp)) <= ANCHOR_LO:
-            _mresid.append(abs(anchored_margin(home, away, neu, _hsp)) - abs(float(_hsp)))
-    mid_debias = statistics.median(_mresid) if _mresid else 0.0
+            _cd = not (_hc == "fbs" and _ac == "fbs")
+            _mres[_cd].append(abs(anchored_margin(home, away, neu, _hsp)) - abs(float(_hsp)))
+    # A thin population cannot set its own level — below this many games the median is noise, so
+    # fall back to the other population's rather than to an arbitrary zero.
+    MID_MIN_N = 8
+    _med = {k: (statistics.median(v) if len(v) >= MID_MIN_N else None) for k, v in _mres.items()}
+    _both = [x for v in _mres.values() for x in v]
+    _fallback = statistics.median(_both) if _both else 0.0
+    mid_debias = {k: (_med[k] if _med[k] is not None else _fallback) for k in (True, False)}
+    print("  close/mid de-bias: FBS %+.2f (n=%d), cross-division %+.2f (n=%d)"
+          % (mid_debias[False], len(_mres[False]), mid_debias[True], len(_mres[True])))
 
     # Totals de-bias (same idea as the spread anchor). Our projected total sits a HAIR below the
     # market on average, so the board leans UNDER on ~61% of games — vs the ~50/50 over/under the
@@ -781,11 +809,12 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
             _mag = max(0.0, abs(margin) - debias)
             margin = _mag if margin >= 0 else -_mag
             margin = max(-DISPLAY_CAP, min(DISPLAY_CAP, margin))
-        elif hsp is not None and mid_debias:
-            # Close/mid: same favourite-space centring, same reason — see mid_debias above. Games
-            # with no market line are untouched, exactly as in the anchored branch: there is nothing
-            # to centre on, and the pure model number is the honest answer.
-            _mag = max(0.0, abs(margin) - mid_debias)
+        elif hsp is not None and mid_debias[cross_div]:
+            # Close/mid: same favourite-space centring, same reason — see mid_debias above, and note
+            # it is keyed on THIS game's population. Games with no market line are untouched, exactly
+            # as in the anchored branch: there is nothing to centre on, and the pure model number is
+            # the honest answer.
+            _mag = max(0.0, abs(margin) - mid_debias[cross_div])
             margin = _mag if margin >= 0 else -_mag
             margin = max(-DISPLAY_CAP, min(DISPLAY_CAP, margin))
 
