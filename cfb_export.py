@@ -814,7 +814,20 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
             # it is keyed on THIS game's population. Games with no market line are untouched, exactly
             # as in the anchored branch: there is nothing to centre on, and the pure model number is
             # the honest answer.
-            _mag = max(0.0, abs(margin) - mid_debias[cross_div])
+            #
+            # 🚨 NO max(0, …) FLOOR HERE — the margin is allowed to CROSS ZERO and flip the side.
+            # The anchored branch floors at zero and is right to: its comment notes the smallest
+            # anchored margin stays around 8 points, so the guard never fires. Close/mid margins are
+            # small and the correction is 2-3.5 points, so the floor fired on 18 of 103 games on the
+            # first regenerated card and published "Marshall −0.0" against a market that had South
+            # Alabama −1.5 — a meaningless number, and a favourite named by whichever sign survived.
+            #
+            # Crossing is what the correction MEANS. If we had the home side by 2 and this population
+            # runs 3.5 points long, then our honest read is the away side by 1.5, and that is what
+            # gets published. Measured on the same card: 17 "−0.0" rows → 0, 17 favourites flip, and
+            # every calibration number is unchanged (ALL 43.7%, FBS 48.1%) because flipping the side
+            # and flipping the sign cancel in "does the favourite cover".
+            _mag = abs(margin) - mid_debias[cross_div]
             margin = _mag if margin >= 0 else -_mag
             margin = max(-DISPLAY_CAP, min(DISPLAY_CAP, margin))
 
