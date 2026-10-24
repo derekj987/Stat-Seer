@@ -236,6 +236,20 @@ Unders in 15+ mph wind: **56.1%**, p=0.002, CI [52.2, 59.9]. The market appears 
 
 Worth pursuing. Not worth betting on yet.
 
+> **UPDATE 2026-10-19 — tested at bet time, and it held.** EMPIRICAL_REFERENCE §22 rebuilt this on
+> **FORECAST** wind (Open-Meteo's forecast archive, 1,442 outdoor games 2018-2025) rather than
+> recorded wind. The market does **not** price the forecast: slope −0.276 points of total per mph,
+> t=−3.38, and **stronger on the forecast than on realized wind** (−0.215) — the opposite of a
+> hindsight artifact. Games that were *forecast* windy go under **whether or not the wind arrives**
+> (59.7% under when it did not), so the edge attaches to the thing a bettor holds. It replicates on
+> held-out seasons (−0.290, t=−2.46) and is not a proxy for cold or late season (wind survives
+> controls; the gap is the same size in cold and mild games).
+>
+> The bettable group — forecast ≥ 11.5 mph — ran **58.2% unders (n=220, p=0.018)**, 2.26 points
+> under the close. **Still not tradeable:** n=220 puts the interval's lower bound below the 52.4%
+> break-even, and the archived forecast is a SHORT lead. The open question is now lead time, not
+> whether the mechanism is real.
+
 ## The "surprise team" question — tested
 
 The idea: Week 1 produces upsets; a team projected poorly starts 4-1 or 3-2, then

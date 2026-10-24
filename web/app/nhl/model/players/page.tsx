@@ -67,6 +67,13 @@ export default async function Page({ searchParams }: PageProps<"/nhl/model/playe
             line</b> — a probability, which is what compares directly to a price. The projection
             beside it is the expected count: shots on goal per game for a skater, saves per start for
             a goalie.<br /><br />
+            <b>Why a whole team can lean one way.</b> The projection is built from a player&apos;s own
+            rate and carries no opponent, pace or home-ice term; the book&apos;s line is priced for
+            tonight&apos;s matchup. So on any given night one team&apos;s skaters can sit above their
+            lines and the other&apos;s below — that is the two numbers answering different questions,
+            not a disagreement about the players. Measured against what actually happened across
+            45,393 player-games, our projection lands <b>0.03 shots</b> from the real figure, so the
+            level is right; what it does not carry is tonight&apos;s game.<br /><br />
             <b>Why shots.</b> A player&apos;s shot volume is the most repeatable thing he does —
             measured across 239,197 games it carries from one half of a season to the other better
             than any comparable football number we track. Goals are shots multiplied by a shooting
@@ -75,11 +82,9 @@ export default async function Page({ searchParams }: PageProps<"/nhl/model/playe
             <b>Goalies.</b> Saves are shots faced multiplied by a save percentage. The shots a goalie
             faces repeat; his save percentage does not, so the number leans on his workload and takes
             the league rate for the rest.<br /><br />
-            <b>Hockey has no game board here on purpose.</b> The starting goalie is the input a
-            game model would turn on, and measured across 3,241 games the market already has it in
-            the closing price. We publish what measured up rather than filling the page.<br /><br />
-            For prices on these same players, see <a href="/nhl/props">Player Props</a>; for game
-            lines, <a href="/nhl/lines">Line Shopping</a>.
+            For the game itself, see the <a href="/nhl/model">Game Model</a>; for prices on these
+            same players, <a href="/nhl/props">Player Props</a>; for game lines,{" "}
+            <a href="/nhl/lines">Line Shopping</a>.
           </>} />} pin={<PinButton size="sm" pin={{ id: `/nhl/model/players?cat=${cat.key}`, kind: "model", label: `NHL · Player Model · ${cat.label}`, detail: "line-blind", href: `/nhl/model/players?cat=${cat.key}` }} />} />
       <FlowSteps active="analyze" base="nhl" />
       <div className="subnavrow"><ModelSubnav active="player" base="nhl" /></div>

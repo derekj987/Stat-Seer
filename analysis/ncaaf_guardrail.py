@@ -48,6 +48,8 @@ import re
 import subprocess
 import sys
 import unicodedata
+import urllib.error
+import urllib.request
 from urllib.parse import quote
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -237,17 +239,53 @@ def check_lines(card):
     say()
 
 
+def sb(env, path):
+    """One Supabase REST read. Copied from weekly_flags rather than imported — see the note in
+    check_priced_players and in _ncaaf_rows: this file stays stdlib-only on purpose."""
+    url, key = env.get("SUPABASE_URL"), env.get("SUPABASE_SERVICE_KEY")
+    if not url or not key:
+        return []
+    req = urllib.request.Request(
+        url.rstrip("/") + "/rest/v1/" + path,
+        headers={"apikey": key, "Authorization": f"Bearer {key}",
+                 "Range": "0-9999", "Range-Unit": "items"})
+    try:
+        with urllib.request.urlopen(req, timeout=90) as r:
+            return json.loads(r.read().decode("utf-8", "replace"))
+    except urllib.error.HTTPError as e:
+        print(f"  (supabase {e.code} on {path.split('?')[0]})", file=sys.stderr)
+        return []
+    except Exception:  # noqa: BLE001
+        return []
+
+
 def check_priced_players():
     """D. The market names a player; does our board have a row for him?"""
     say("## D. Is every priced player on the projection board?")
     say()
+    # 🚨 DO NOT import weekly_flags here. It imports pandas at module level, which neither CFB
+    # workflow installs, so this check has been answering "could not reach the projection board or
+    # Supabase (No module named 'pandas')" and returning early on EVERY CI run since it was
+    # written — the one section that independently confirms the board matches the market, quietly
+    # not running. It is a warn rather than a fail, so nothing ever surfaced it.
+    # The two helpers it was borrowing are pure stdlib: `sb` is inlined just below and
+    # ncaaf_projections is byte-identical to _ncaaf_rows() in this file. See _ncaaf_rows' docstring,
+    # which already drew this exact conclusion for its own sake and is now honoured here too.
     try:
         import injuries_nflverse as ie
-        from weekly_flags import sb, ncaaf_projections
         env = ie.load_env()
         ie.ensure_ssl()
     except Exception as e:  # noqa: BLE001
         warn(f"could not reach the projection board or Supabase ({e})")
+        say()
+        return
+    # `sb` returns [] both when the query is empty and when it cannot authenticate, and those mean
+    # opposite things — an empty capture table is an alarm, a missing key on a laptop is not. Say
+    # which, rather than reporting a frightening "no rows at all" to anyone running this without
+    # credentials. The same conflation is what let the pandas failure above hide for so long.
+    if not (env.get("SUPABASE_URL") and env.get("SUPABASE_SERVICE_KEY")):
+        warn("no SUPABASE_URL/SUPABASE_SERVICE_KEY, so the capture table cannot be checked "
+             "(this check is meaningful only where the credentials are, i.e. in CI)")
         say()
         return
     newest = sb(env, "cfb_prop_snapshots?select=snapshot_at&order=snapshot_at.desc&limit=1")
@@ -276,7 +314,7 @@ def check_priced_players():
         warn(f"the newest snapshot ({age:.1f}h old) prices no individual players")
         say()
         return
-    have = {nkey(p.get("player")) for p in ncaaf_projections()}
+    have = {nkey(p.get("player")) for p in _ncaaf_rows()}
     missing = sorted(p for p in players if nkey(p) not in have)
     frac = len(missing) / len(players)
     msg = (f"{len(missing)} of {len(players)} priced players have no projection row "

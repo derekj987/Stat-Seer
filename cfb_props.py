@@ -64,7 +64,13 @@ CREATE TABLE IF NOT EXISTS cfb_prop_snapshots (
   side        TEXT,
   line        REAL,
   price       INTEGER,
-  PRIMARY KEY (snapshot_at, event_id, book, market, player, side)
+  -- Same key as CONFLICT below, for the same reason. On this path the narrow version was worse
+  -- still: the insert is INSERT OR IGNORE, so a name collision or an alternate line was dropped
+  -- with no error and no count difference to notice.
+  -- NB CREATE TABLE IF NOT EXISTS will not re-key an existing data/cfb.db — delete that file to
+  -- pick the new key up. Supabase is the production store (CI runners are ephemeral, so
+  -- --supabase is what the scheduled capture uses) and is fixed by the DDL in ingest/schema.sql.
+  PRIMARY KEY (snapshot_at, event_id, book, market, player, side, line, price)
 );
 CREATE INDEX IF NOT EXISTS ix_cfbprops_event ON cfb_prop_snapshots(event_id);
 """
@@ -109,6 +115,33 @@ def event_props(key, eid, markets, regions):
 COLS = ["snapshot_at", "event_id", "commence", "home_team", "away_team",
         "book", "market", "player", "side", "line", "price"]
 
+# What makes two captured rows THE SAME OFFER. Must match the unique index in ingest/schema.sql
+# exactly — PostgREST resolves ?on_conflict= against that index and rejects a list it cannot find.
+#
+# 🚨 line AND price BELONG IN THIS KEY, and leaving them out is quiet data loss rather than a
+# crash. `player` is a NAME from the book's `outcome.description` and the feed carries no player
+# id, so two different players sharing a name on one roster produce one key for two real offers —
+# and because this writer DOES send `resolution=ignore-duplicates`, PostgREST discards the second
+# with a 204 and no log line. Nothing fails; the row is simply gone, and prop history cannot be
+# backfilled. The NHL table had the identical key and found out the loud way (its writer omitted
+# on_conflict, so the same clash 409'd and cost four whole sweeps when Vancouver rostered two
+# Elias Petterssons); see ingest/nhl_prop_snapshots.sql.
+#
+# 🚨 BUT MEASURE BEFORE REPEATING THE SCARY VERSION. All 974,020 captured rows were scanned: the
+# NAME-collision half has no measurable exposure here (no ambiguous name has ever been priced, no
+# (isoweek, market, name) key spans two events — books post starters, the duplicate names are
+# walk-ons), while the ALTERNATE-LINE half is real but rare: 1 of 231,252 two-sided groups holds
+# two lines under one key (Raleek Brown rush yds at betonlineag, Over 49.5 beside Under 52.5 — an
+# incoherent pair describing a market that never existed). That 1 is a LOWER BOUND, since a
+# mismatch is only visible when the surviving Over and Under came from different line offerings.
+# So this is prevention plus one known-bad row set, not repair of a large loss.
+# Full numbers in ingest/schema.sql above the index.
+#
+# Including line and price makes the key mean "this exact offer, recorded twice", which is the only
+# thing a snapshot table should ever collapse. It also stops alternate lines for one player from
+# overwriting each other, which the narrow key cannot represent at all.
+CONFLICT = "snapshot_at,event_id,book,market,player,side,line,price"
+
 
 def rows_from(ev, snapshot_at):
     out = []
@@ -134,23 +167,64 @@ def write_supabase(rows, env, batch=500):
     url, key = env.get("SUPABASE_URL"), env.get("SUPABASE_SERVICE_KEY")
     if not (url and key):
         raise RuntimeError("SUPABASE_URL / SUPABASE_SERVICE_KEY missing (needed for --supabase)")
-    endpoint = (url.rstrip("/") + "/rest/v1/cfb_prop_snapshots"
-                "?on_conflict=snapshot_at,event_id,book,market,player,side")
+    base = url.rstrip("/") + "/rest/v1/cfb_prop_snapshots"
+    endpoint = f"{base}?on_conflict={CONFLICT}"
     headers = {"apikey": key, "Authorization": f"Bearer {key}",
                "Content-Type": "application/json",
                "Prefer": "return=minimal,resolution=ignore-duplicates"}
     dict_rows = [dict(zip(COLS, r)) for r in rows]
+    # Collapse exact repeats in-process. Free, shrinks the POST, and leaves the server-side
+    # arbiter to handle only genuine overlap with what is already stored.
+    seen, deduped = set(), []
+    for d in dict_rows:
+        sig = tuple(d[c] for c in CONFLICT.split(","))
+        if sig in seen:
+            continue
+        seen.add(sig)
+        deduped.append(d)
+    if len(deduped) < len(dict_rows):
+        print(f"  {len(dict_rows) - len(deduped)} exact-duplicate offer(s) collapsed before "
+              f"sending", file=sys.stderr)
     written = 0
-    for i in range(0, len(dict_rows), batch):
-        chunk = dict_rows[i:i + batch]
-        req = urllib.request.Request(endpoint, data=json.dumps(chunk).encode("utf-8"),
-                                     headers=headers, method="POST")
-        try:
+    for i in range(0, len(deduped), batch):
+        chunk = deduped[i:i + batch]
+        body = json.dumps(chunk).encode("utf-8")
+
+        def post(target):
+            req = urllib.request.Request(target, data=body, headers=headers, method="POST")
             with urllib.request.urlopen(req, timeout=60) as r:
-                if r.getcode() in (200, 201, 204):
-                    written += len(chunk)
+                return r.getcode() in (200, 201, 204)
+
+        try:
+            if post(endpoint):
+                written += len(chunk)
         except urllib.error.HTTPError as e:
             detail = e.read().decode("utf-8", "replace")[:300]
+            # The on_conflict list must name a real unique index. ingest/schema.sql widens that
+            # index to include line and price, and DDL is applied by hand — so if this lands
+            # first, PostgREST answers 400/42P10 ("no unique or exclusion constraint matching the
+            # ON CONFLICT specification"). Fall back to the narrow key so capture keeps running
+            # exactly as it did before, and say what to run. Deliberately NOT silent: the whole
+            # defect being fixed here is one that produced no log line.
+            if e.code == 400 and ("42P10" in detail or "ON CONFLICT" in detail):
+                print("  ! WARNING: the widened cfb_prop_snapshots dedupe index is not in place "
+                      "yet — run ingest/schema.sql's cfb_prop_snapshots_dedupe block in the "
+                      "Supabase SQL editor.\n"
+                      "    Falling back to the narrow key; a repeated player NAME or an alternate "
+                      "line will still be DROPPED SILENTLY until it lands.", file=sys.stderr)
+                try:
+                    if post(f"{base}?on_conflict=snapshot_at,event_id,book,market,player,side"):
+                        written += len(chunk)
+                    continue
+                except urllib.error.HTTPError as e2:
+                    detail = e2.read().decode("utf-8", "replace")[:300]
+                    e = e2
+                except urllib.error.URLError as e2:
+                    # HTTPError subclasses URLError, so this only catches a genuine network
+                    # failure. Raise the same TransientError the outer handler would have, or the
+                    # caller sees a bare URLError and crashes the run instead of skipping it.
+                    raise TransientError(
+                        f"Supabase write network error on fallback ({e2.reason})") from e2
             print(f"  ! cfb props batch {i // batch}: HTTP {e.code} {detail}", file=sys.stderr)
             if e.code < 500:
                 raise   # 4xx = genuine schema/permission problem
