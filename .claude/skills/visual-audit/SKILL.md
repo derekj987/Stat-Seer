@@ -290,9 +290,94 @@ shrunk toward 50% so a short sample shows no arrow at all.
 sports) because there `proj` and `book` are both probabilities — like-for-like. When you find a
 one-sided board, look for the market that ISN'T biased; it usually names the mechanism.
 
-The NCAAF game model does NOT have this bug — it already centres on the median of the residual vs
-market (`debias = statistics.median(_resid)`, `total_debias` likewise in `cfb_export.py`), added for
-exactly this reason. Game margins and totals are near-symmetric anyway, so mean ≈ median there.
+⚠️ **"The NCAAF game model does NOT have this bug" — RETRACTED, it had it on 84% of the board.**
+The sentence that used to sit here was true of the code it described and false of the board. The
+centring (`debias = statistics.median(_resid)`, `total_debias` likewise in `cfb_export.py`) is real,
+and it is applied **only to games whose line is bigger than `ANCHOR_LO` (18)** — 17 of 109 games on
+the week-7 2026 card. The other 92 were never centred at all. See *"A de-bias applied to ONE ZONE"*
+below. Game margins and totals are near-symmetric, so mean ≈ median there; that was never the issue.
+
+**The general shape, because this is the second retraction in this file of the same kind:** an entry
+that says "X does not have this bug" because X contains the fix is asserting a property of the CODE
+and being read as a property of the OUTPUT. Re-read such a claim as "X contains a correction" and
+then go and measure the output — including the rows the correction's `if` does not reach.
+
+### 🚨 A de-bias applied to ONE ZONE, and a validator that reports only that zone
+Derek, on four NCAAF games on one night: *"Looks like we have every favorite covering all 4 games
+tonight."* Four games is not a board, and the premise did not survive measurement — it was 3 of 4,
+and 56.9% board-wide. **The defect was real anyway, bigger than the complaint, and in a place the
+complaint did not point at.** Split by the zone the correction actually covers:
+
+| zone | share of board | we say fav covers | median \|ours\|−\|line\| |
+|---|---|---|---|
+| big-spread (>18) | 17 of 109 | 47.1% | **+0.00** — exactly as designed |
+| close/mid (≤18) | **92 of 109** | 58.7% (70.1% where we agree on the favourite) | **+1.50** |
+
+The big-spread de-bias works perfectly. It is also the only thing anyone had ever measured:
+`cfb_card_backtest.report()` printed `big-spread: we say fav covers X% vs Y% actual` **and nothing
+about the other 84% of the slate**. A fix that calibrated a sixth of the board was signed off by a
+validator that could only see that sixth.
+
+**The rule: when a correction is gated by an `if`, the report must score BOTH branches.** Any
+`if (abs(line) > THRESHOLD)` in a projection path has a silent complement, and the complement is
+usually the bigger population. Grep your own graders for the condition and ask what the `else` does.
+
+**Three wrong diagnoses, in the order they were tried — each measured, each killed:**
+
+1. **`CARD_SCALE` is too big.** It de-compresses a ridge-compressed rating gap, and 1.33 inflating
+   margins is the obvious culprit. Swept walk-forward 2021-25: **lowering it makes history worse**
+   (at 1.00 the close/mid zone reads "favourite covers" on 24-30% against ~48-50% actual), because
+   historically that zone leans slightly to the DOG. A knob that is wrong in the opposite direction
+   from the symptom is not the cause.
+2. **The prior is undecayed.** Production seeds from last season's final rating without the `DECAY`
+   the chained fit uses. True, and worth ~0.5 points — not 1.5.
+3. **The SP+ preseason seed has not washed out.** This one is right: removing it moves the same
+   games from +1.63 to +0.63, and the comment claiming it "washes out by about week 5" is falsified
+   at week 7. **And it cannot be backtested** — CFBD's `/ratings/sp` returns a past season's FINAL
+   ratings, so replaying production's preseason seed historically is hindsight.
+
+**That last fact is what chooses the fix.** When the cause cannot be replayed, do not tune the
+cause — remove the SYMPTOM with a correction that needs no replay. A median centring in favourite
+space, the same mechanism already shipped for big spreads, takes out whatever one-directional level
+the prior is carrying, whatever its cause:
+
+```python
+_mresid = [abs(anchored_margin(...)) - abs(float(hsp))        # close/mid games only
+           for ... if hsp is not None and abs(float(hsp)) <= ANCHOR_LO]
+mid_debias = statistics.median(_mresid) if _mresid else 0.0
+```
+
+Walk-forward 2021-2025, close/mid zone: fav-cover 40.7% → 42.6% (choose) and 41.0% → 43.4%
+(confirm), against ~48-50% actual, median offset → +0.00, **MAE cost 0.03-0.04**. On the live week-7
+card it moves 58.7% → 46.7% and the agree-on-favourite slice 70.1% → 55.8%.
+
+**It is a guardrail, and that is the argument for it.** It is nearly a no-op on a slate that is
+already centred — which is why it costs almost nothing historically — and removes the full offset
+when a slate is not. It is an improvement, not a cure: a zero median does not put "favourite covers"
+at 50%, because the gap distribution is skewed. Say so rather than claiming the board is fixed.
+
+### 🚨 Reproduce the published number BEFORE running a one-variable experiment
+The experiment that found the above was run twice. The first run was worthless and looked fine.
+
+Step 1 of any "vary one ingredient" test is to rebuild production's output from production's own
+code and check it against what is actually published. Mine came back **median error 3.18 points**,
+and the whole variance table underneath it was describing a model nobody ships. The cause was
+mundane: **the git worktree had no `.env`**, so `fetch_preseason_sp()` returned `{}` and every arm
+of the experiment ran on a prior the live job never uses. With the key present the error dropped to
+1.16 and the arms separated properly.
+
+```python
+err = statistics.median([abs(abs(mine) - published) for ...])
+print(f"  median |mine - published| = {err:.3f}  (above ~0.05 means I am not running production)")
+```
+
+Two things worth carrying:
+- **A silent-empty credential is the same failure this file documents for parsers.** `{}` from a
+  missing key is indistinguishable from `{}` from a provider with no data, and `SP_BLEND = 0.80`
+  means that empty dict silently replaced 80% of the prior. Print the count (`SP+ teams 138`).
+- **A worktree is not the checkout.** `.env`, `.env.local`, `node_modules` and `data/` are all
+  gitignored, so a fresh worktree has none of them and scripts quietly take their fallback paths.
+  Copy them in before measuring anything, and check the counts the script prints.
 
 **A one-sided board is a SYMPTOM, and it has two possible causes. Measure which before you fix it.**
 The MLB game model board came up **13 of 15 over the market, median +0.7 runs** — the exact
@@ -3059,6 +3144,56 @@ sum to 100%**. `.hb-form--psnap` declared four widths for a five-column table, s
 outside the budget: the table overflowed its wrapper, a scrollbar appeared, and the Player column
 scrolled out of view. After adding or removing a column, always re-check the width rules — count the
 `<th>`s and count the `nth-child` rules, and make sure they match.
+
+### 🚨 Budget for the HEADER too — and give data `nowrap` while headers WRAP
+Derek: *"The rows and columns look misaligned as well."* Both halves of that were one cause on the
+NCAAF model board, and the budget above it had been computed from the data alone:
+
+| column | needed | had | what it did |
+|---|---|---|---|
+| Market Spread | 170 | 134 | "James Madison -10.5" wrapped → that row got taller |
+| Market O/U | **81** | 63 | the word "MARKET" **overflowed into the next column** |
+| Model O/U | **73** | 54 | the word "MODEL" overflowed |
+
+The spilling headers are the "columns look misaligned" — a label sitting over the wrong cells. The
+wrapping data cells are the "rows look misaligned": 26 overflowing cells and row heights of 38, 44,
+52, 58 and 66px, tall exactly when a team's name was long.
+
+**A header's binding constraint is its longest WORD; a data cell's is the whole string.** So:
+
+```css
+.tbl td:nth-child(n+2):nth-child(-n+5){white-space:nowrap}   /* data: must not break */
+/* headers are NOT in that selector — two short words are happy on two lines */
+```
+
+The first attempt put `nowrap` on `th` as well, and the header that was overflowing by 3px began
+overflowing by **12** — "MARKET O/U" now had to hold on one line. **Widening a column to fit a
+header you just told not to wrap is chasing your own change.**
+
+**Check `white-space` is not already inherited as `nowrap`.** The two PROSE columns (the matchup and
+the bottom line) could only ever spill, because a desktop rule set `nowrap` on every cell in the
+table — so a long FCS matchup ran **59px into the next column** instead of taking a second line. A
+break opportunity does not help while `nowrap` is on; `white-space:normal` has to come first.
+```js
+getComputedStyle(cell).whiteSpace   // read it; do not infer it from the rule you remember writing
+```
+
+**And the markup may contain no break opportunity at all.** `NcaafGameCell` renders the names and
+the "at" as adjacent spans with no whitespace between them, so `Bethune-CookmanatMississippi Valley
+St` is one word to the line breaker. `.hb-at::before/::after{content:"\200B"}` gives it two
+zero-width spaces to break on.
+
+**🚨 Media-guard every white-space rule, or specificity carries it past the breakpoint.** Below
+640px this table becomes one card per game, and that layout sets `white-space:normal` through
+`.hb-form.hb-form--cards td` — specificity (0,2,1). A fix written as
+`.hb-form--mkt.hb-form--cards td:nth-child(n+2):nth-child(-n+5)` is (0,4,1) and **beats the card
+layout from outside its own media query**, silently re-applying `nowrap` on a phone. Specificity
+does not care that the other rule is inside a `@media`; only wrapping yours in one keeps it out.
+
+Measured end to end: **26 overflowing cells → 0**, row heights 38-66px → 119 of 137 rows at one
+height, header and data left edges identical, no page overflow, at 1440 / 1024 / 375 and in both
+themes. The residual 18 rows are very long FCS matchups now taking two lines — **a tall row is a
+better answer than ink in the next column**, which is the trade to make deliberately.
 
 ### 🚨 Even rows: budget for the widest DATA value, then fix the height
 `chart-rows-uneven` + `card-property-as-column`. Derek asked twice for "evenly space the rows and
