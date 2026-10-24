@@ -834,7 +834,12 @@ def build_card(db, ratings, hfa, season, week, top_set, scoring, odds, confs=Non
         # Our read beside the market: our projected favorite + margin, an ATS pick (which
         # side of the MARKET spread our projection covers), and an over/under lean.
         our_fav = home if margin >= 0 else away
-        proj_spread = {"fav": our_fav, "num": round(-abs(float(margin)), 1)}
+        # `+ 0.0` normalises NEGATIVE ZERO. round(-0.04, 1) is -0.0 in Python and serialises to
+        # JSON as -0.0, so a genuine pick'em published as "North Dakota -0.0" — a minus sign on a
+        # zero, which reads as a typo. Adding 0.0 maps -0.0 to 0.0 and leaves every other value
+        # untouched. (The 18 other "-0.0" rows on the 2026-10-24 card were a different bug: the
+        # close/mid de-bias flooring at zero, fixed in #23 by letting the margin cross.)
+        proj_spread = {"fav": our_fav, "num": round(-abs(float(margin)), 1) + 0.0}
         market_spread = total_lean = pick = None
         off_flag = False
         if hsp is not None:
