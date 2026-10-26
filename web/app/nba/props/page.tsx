@@ -4,6 +4,7 @@ import PropsGrid from "../../PropsGrid";
 import { etToday } from "@/lib/gameDays";
 import { nbaPropBoard, NBA_CATEGORIES, NBA_PROP_LABELS, nbaCategoryByKey, THIN } from "@/lib/nbaProps";
 import { US_BOOKS, bookLegend } from "@/lib/bookLabel";
+import { nbaTeamFor } from "@/lib/nbaTeamTag";
 import Tip from "../../Tip";
 
 // NBA · Value Finder · Player Props. The same grid the baseball and hockey boards use (one row per
@@ -44,8 +45,19 @@ export default async function Page({ searchParams }: PageProps<"/nba/props">) {
   const cat = nbaCategoryByKey(typeof sp.cat === "string" ? sp.cat : "points");
   const catSet = new Set<string>(cat.markets);
   const all = await nbaPropBoard().catch(() => []);
+  // Only this category's markets, and only games that still have something in it — plus the team
+  // beside each name. The prop feed carries the two teams per GAME and none per PLAYER, so the tag
+  // is resolved against those two rosters (lib/nbaTeamTag.ts). It returns null rather than guess,
+  // and the grid simply omits the tag then, which is why a player books price while he is off the
+  // roster feed shows up untagged instead of wrongly tagged.
   const games = all
-    .map((g) => ({ ...g, markets: g.markets.filter((m) => catSet.has(m.market)) }))
+    .map((g) => ({
+      ...g,
+      markets: g.markets.filter((m) => catSet.has(m.market)).map((m) => ({
+        ...m,
+        quotes: m.quotes.map((q) => ({ ...q, team: nbaTeamFor(q.player, g.home, g.away) ?? undefined })),
+      })),
+    }))
     .filter((g) => g.markets.length > 0);
   const thin = THIN.has(cat.key);
 
