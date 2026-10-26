@@ -7,7 +7,7 @@
 # Workflows install with:  pip install -r requirements.txt
 # To upgrade: bump a pin here, run the pipeline locally, then commit.
 
-certifi==2026.7.22          # TLS cert bundle — see SSL_CERT_FILE handling in odds_client.py
-numpy==2.5.2                # cfb_power / cfb_ats rating fits
-pandas==3.0.5               # analysis scripts
+certifi==2026.10.19          # TLS cert bundle — see SSL_CERT_FILE handling in odds_client.py
+numpy==2.5.4                # cfb_power / cfb_ats rating fits
+pandas==3.1.0               # analysis scripts
 anthropic==1.0.0            # presser extraction (ingest/presser_collector.py)
