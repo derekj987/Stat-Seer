@@ -1,0 +1,48 @@
+name: Capture NBA odds
+
+# NBA game lines -> Supabase nba_odds_snapshots (moneyline, spread, total, every US book).
+#
+# COST. Measured, not guessed: one bulk call is regions x markets = 2 x 3 = 6 credits WHATEVER the
+# slate size, because the bulk odds endpoint is priced per call and never per game. A 2026-10-26 dry
+# run returned 1,026 rows from 9 games across 19 books for those 6 credits. At 8 sweeps a day that
+# is 48 credits/day against 4.81M remaining.
+#
+# CADENCE. Every 3 hours through the season. The NBA slate is same-day: lines appear the morning of
+# and move until tip-off, so a twice-daily sweep would publish numbers hours stale against the app.
+# That was exactly Derek's complaint on the CFB board (a receiver at +550 on ours against +900 on
+# FanDuel).
+#
+# --within-days 2 keeps it to the near-term slate. All times UTC.
+
+# 🚨 THE ODD MINUTE IS DELIBERATE — DO NOT "TIDY" IT BACK TO :00. GitHub runs scheduled workflows
+# on a best-effort queue and the top of the hour is its busiest moment, so a cron at minute 0 is
+# both delayed the most and dropped the most. Measured across this repo over several days: jobs
+# scheduled on the hour arrived a median 58-84 minutes late and delivered 34-75% of their declared
+# runs, and */30 delivered 10%. Every schedule here sits on a distinct off-peak minute, which also
+# stops our own jobs colliding with each other — three used to fire at 14:00. Minute 19 was free;
+# check the whole repo before changing it. See EMPIRICAL_REFERENCE §17.
+on:
+  schedule:
+    - cron: "19 */3 * 10-12,1-6 *"   # every 3 hours, October - June (regular season + playoffs)
+  workflow_dispatch: {}              # manual "Run workflow" for testing
+
+concurrency:
+  group: capture-nba-odds
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi -c requirements.txt
+      - name: Capture NBA odds -> Supabase
+        env:
+          ODDS_API_KEY:         ${{ secrets.ODDS_API_KEY }}
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python nba_capture.py --supabase --within-days 2

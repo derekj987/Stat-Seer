@@ -99,7 +99,7 @@ const GAME_CAP = 4;
  *  the label on the handicap market (a football spread is a baseball run line), the copy, the pin,
  *  and whether the week wheel exists (baseball has days, not weeks) — so the card, the chips, the
  *  slip wiring and the day grouping stay identical, which is the point of sharing it. */
-export type BoardSport = "nfl" | "mlb" | "ncaaf" | "nhl";
+export type BoardSport = "nfl" | "mlb" | "ncaaf" | "nhl" | "nba";
 const SPORT = {
   nfl: { label: "NFL", spread: "Spread", weeks: true, pin: "/lines", propsHref: "/props",
          foot: <>Line shopping — the <b>best available number across books</b> on every game, plus where a
@@ -120,6 +120,17 @@ const SPORT = {
          foot: <>Line shopping — the <b>best available price across books</b> on every game&apos;s moneyline,
            puck line and total. The puck line is ±1.5 everywhere, so the shopping is all in the price —
            and with <b>43% of games finishing within one goal</b>, that price moves a long way.</> },
+  // NBA: unlike the run line and the puck line, the basketball spread IS a real handicap — it runs
+  // ±1 to ±20 and genuinely estimates the margin — so the shopping is in the NUMBER as well as the
+  // price. What does NOT carry over is the sweet-spot language the football rows use: NFL margins
+  // land on 3 in 15.0% of games and 7 in 9.1%, while basketball margins are near-continuous, so
+  // there is no half-point cliff and this foot never mentions one. No week wheel; the NBA runs on
+  // days.
+  nba: { label: "NBA", spread: "Spread", weeks: false, pin: "/nba/lines", propsHref: "/nba/props",
+         foot: <>Line shopping — the <b>best available number across books</b> on every game&apos;s
+           moneyline, spread and total. Basketball margins spread out smoothly rather than clustering on
+           a few numbers, so there is no <b>sweet spot</b> to hunt here — the edge is simply getting the
+           best number and the best price.</> },
 } as const;
 
 function GameCard({
