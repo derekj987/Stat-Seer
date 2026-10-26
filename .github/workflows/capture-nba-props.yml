@@ -19,9 +19,15 @@ name: Capture NBA props
 # but worth knowing before alternate ladders are added (they would roughly quadruple it; see
 # ingest/nba_prop_snapshots.sql for why they are deliberately excluded for now).
 #
-# CADENCE. Every 3 hours. --within-days 2 keeps it to the near-term slate, and --max-events 24
-# covers two full NBA nights (10-14 games each) rather than the NHL's 20, which would silently drop
-# the back of tomorrow's slate. All times UTC.
+# CADENCE. Every 3 hours. --max-events 24 covers two full NBA nights (10-14 games each) rather
+# than the NHL's 20, which would silently drop the back of tomorrow's slate.
+#
+# 🚨 --within-days 3 MATCHES THE GAME-LINE CAPTURE, and costs nothing to do so. An event with no
+# props posted yet answers 404 and is FREE — measured: widening to 3 picked up Philadelphia @
+# Indiana two days out, which returned 0 rows, and the sweep still cost exactly 73 credits. Since
+# prop history cannot be backfilled, a window that reaches the game before the book posts its
+# props means we capture the FIRST number rather than whatever it has drifted to a day later.
+# All times UTC.
 
 # 🚨 THE ODD MINUTE IS DELIBERATE — DO NOT "TIDY" IT BACK TO :00. GitHub runs scheduled workflows
 # on a best-effort queue and the top of the hour is its busiest moment, so a cron at minute 0 is
@@ -53,4 +59,4 @@ jobs:
           ODDS_API_KEY:         ${{ secrets.ODDS_API_KEY }}
           SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: python nba_props.py --supabase --within-days 2 --max-events 24
+        run: python nba_props.py --supabase --within-days 3 --max-events 24
