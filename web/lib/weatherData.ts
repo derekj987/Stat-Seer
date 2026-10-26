@@ -7,11 +7,7 @@ export interface GameWeather { eventId: string; game: string; home: string; away
   gustMph: number|null; precipPct: number|null; conditions: string|null; windFlag: boolean }
 export const WEATHER_SEASON = 2026;
 export const WEATHER_WEEK = 7;
-export const WEATHER_UPDATED = "2026-10-25T19:15Z";
+export const WEATHER_UPDATED = "2026-10-26T05:17Z";
 export const GAME_WEATHER: GameWeather[] = [
-  {"eventId": "436119bb3ccdaa6ed7808aa3ebd82b76", "game": "DEN @ ARI", "home": "ARI", "away": "DEN", "commence": "2026-10-25T20:05:00+00:00", "neutral": false, "venue": "State Farm Stadium", "city": "Glendale", "state": "AZ", "roof": "retractable", "indoor": true, "status": "indoor", "tempF": null, "windMph": null, "gustMph": null, "precipPct": null, "conditions": null, "windFlag": false},
-  {"eventId": "e8e5715eefb6a9ce64765e9ddf49c0cc", "game": "GB @ DET", "home": "DET", "away": "GB", "commence": "2026-10-25T20:25:00+00:00", "neutral": false, "venue": "Ford Field", "city": "Detroit", "state": "MI", "roof": "dome", "indoor": true, "status": "indoor", "tempF": null, "windMph": null, "gustMph": null, "precipPct": null, "conditions": null, "windFlag": false},
-  {"eventId": "f7679cf18454e4d88a8f2b990c3f08ac", "game": "LA @ LV", "home": "LV", "away": "LA", "commence": "2026-10-25T20:25:00+00:00", "neutral": false, "venue": "Allegiant Stadium", "city": "Las Vegas", "state": "NV", "roof": "dome", "indoor": true, "status": "indoor", "tempF": null, "windMph": null, "gustMph": null, "precipPct": null, "conditions": null, "windFlag": false},
-  {"eventId": "176d474ed8b2bbf1eb4d7e9c56b4bf22", "game": "KC @ SEA", "home": "SEA", "away": "KC", "commence": "2026-10-26T00:20:00+00:00", "neutral": false, "venue": "Lumen Field", "city": "Seattle", "state": "WA", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 53, "windMph": 6, "gustMph": 15, "precipPct": 21, "conditions": "Mostly clear", "windFlag": false},
-  {"eventId": "4853610e63c246f2027a6a248e642c9a", "game": "DAL @ PHI", "home": "PHI", "away": "DAL", "commence": "2026-10-27T00:15:00+00:00", "neutral": false, "venue": "Lincoln Financial Field", "city": "Philadelphia", "state": "PA", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 57, "windMph": 5, "gustMph": 11, "precipPct": 1, "conditions": "Clear", "windFlag": false},
+  {"eventId": "4853610e63c246f2027a6a248e642c9a", "game": "DAL @ PHI", "home": "PHI", "away": "DAL", "commence": "2026-10-27T00:15:00+00:00", "neutral": false, "venue": "Lincoln Financial Field", "city": "Philadelphia", "state": "PA", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 58, "windMph": 5, "gustMph": 11, "precipPct": 1, "conditions": "Clear", "windFlag": false},
 ];
