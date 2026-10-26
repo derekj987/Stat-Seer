@@ -378,7 +378,10 @@ export function ShopSubnav({ active, base = "nfl", only }: {
   /** Tabs this sport actually has. A subnav is a promise that the page exists; a new sport
    *  arrives one surface at a time, and a tab pointing at a 404 is worse than a missing tab.
    *  Omit to show all of them, which is what every established sport does. */
-  only?: Array<"lines" | "props" | "best">;
+  /** readonly, so a caller can hand this straight out of an `as const` table — which is where
+   *  BoardView now keeps it, one row per sport, instead of a hardcoded sport check at the
+   *  render site. */
+  only?: readonly ("lines" | "props" | "best")[];
 }) {
   const h = base === "nfl"
     ? { lines: "/lines", props: "/props", best: "/best" }

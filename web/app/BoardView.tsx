@@ -95,28 +95,37 @@ function SavableChip({
 // third alone on the left with a blank slot beside it. Four fills two rows.
 const GAME_CAP = 4;
 
-/** The board serves two sports with one component. Everything a sport changes is in this table —
+/** The board serves every sport with one component. Everything a sport changes is in this table —
  *  the label on the handicap market (a football spread is a baseball run line), the copy, the pin,
- *  and whether the week wheel exists (baseball has days, not weeks) — so the card, the chips, the
- *  slip wiring and the day grouping stay identical, which is the point of sharing it. */
+ *  which Value Finder tabs it has, and whether the week wheel exists (baseball has days, not
+ *  weeks) — so the card, the chips, the slip wiring and the day grouping stay identical, which is
+ *  the point of sharing it.
+ *
+ *  🚨 `tabs` IS IN THE TABLE BECAUSE THE RENDER SITE HAD A HARDCODED `sport === "nhl"` IN IT, AND
+ *  NBA WALKED STRAIGHT INTO IT. Each page passes its own `only` to ShopSubnav, but BoardView
+ *  renders a second subnav of its own, so /nba/lines shipped a Sweet Spots tab pointing at
+ *  /nba/best — a 404 — while the page's own restriction applied only to its error branch. undefined
+ *  means every tab, which is what the three football/baseball sports want. ShopSubnav's doc says it
+ *  plainly: a subnav is a promise that the page exists, and a tab pointing at a 404 is worse than
+ *  a missing tab. A new sport is a row here, never another branch at a render site. */
 export type BoardSport = "nfl" | "mlb" | "ncaaf" | "nhl" | "nba";
 const SPORT = {
-  nfl: { label: "NFL", spread: "Spread", weeks: true, pin: "/lines", propsHref: "/props",
+  nfl: { label: "NFL", spread: "Spread", weeks: true, tabs: undefined, pin: "/lines", propsHref: "/props",
          foot: <>Line shopping — the <b>best available number across books</b> on every game, plus where a
            half-point sits on a <b>sweet spot</b> (a 3 or 7).</> },
-  mlb: { label: "MLB", spread: "Run line", weeks: false, pin: "/mlb/lines", propsHref: "/mlb/props",
+  mlb: { label: "MLB", spread: "Run line", weeks: false, tabs: undefined, pin: "/mlb/lines", propsHref: "/mlb/props",
          foot: <>Line shopping — the <b>best available price across books</b> on every game&apos;s moneyline,
            run line and total. The run line is ±1.5 everywhere, so the shopping is all in the price.</> },
   // NCAAF brings its own week badge and week wheel (the card's schedule, not the odds table's
   // week column, which this table does not have) through the `badge` / `nav` slots below.
-  ncaaf: { label: "NCAAF", spread: "Spread", weeks: false, pin: "/ncaaf/lines", propsHref: "/ncaaf/props",
+  ncaaf: { label: "NCAAF", spread: "Spread", weeks: false, tabs: undefined, pin: "/ncaaf/lines", propsHref: "/ncaaf/props",
          foot: <>Line shopping — the <b>best available number across books</b> on every game, plus where a
            half-point sits on a <b>sweet spot</b> (a 3 or 7 — college margins land there a little less often
            than the NFL&apos;s; the card says how much the half-point is worth).</> },
   // NHL: the puck line is ±1.5 on every game (284 of 284 rows on a live sweep), so like baseball's
   // run line the shopping is entirely in the PRICE, never in the number. No week wheel — hockey
   // runs on days.
-  nhl: { label: "NHL", spread: "Puck line", weeks: false, pin: "/nhl/lines", propsHref: "/nhl/props",
+  nhl: { label: "NHL", spread: "Puck line", weeks: false, tabs: ["lines", "props"] as const, pin: "/nhl/lines", propsHref: "/nhl/props",
          foot: <>Line shopping — the <b>best available price across books</b> on every game&apos;s moneyline,
            puck line and total. The puck line is ±1.5 everywhere, so the shopping is all in the price —
            and with <b>43% of games finishing within one goal</b>, that price moves a long way.</> },
@@ -126,7 +135,7 @@ const SPORT = {
   // land on 3 in 15.0% of games and 7 in 9.1%, while basketball margins are near-continuous, so
   // there is no half-point cliff and this foot never mentions one. No week wheel; the NBA runs on
   // days.
-  nba: { label: "NBA", spread: "Spread", weeks: false, pin: "/nba/lines", propsHref: "/nba/props",
+  nba: { label: "NBA", spread: "Spread", weeks: false, tabs: ["lines", "props"] as const, pin: "/nba/lines", propsHref: "/nba/props",
          foot: <>Line shopping — the <b>best available number across books</b> on every game&apos;s
            moneyline, spread and total. Basketball margins spread out smoothly rather than clustering on
            a few numbers, so there is no <b>sweet spot</b> to hunt here — the edge is simply getting the
@@ -247,7 +256,7 @@ export default function BoardView({
         <div className="subnavrow">
           {/* A new sport arrives one surface at a time; hide the tabs whose pages do not exist
               yet rather than linking to a 404. */}
-          <ShopSubnav active="lines" base={sport} only={sport === "nhl" ? ["lines", "props"] : undefined} />
+          <ShopSubnav active="lines" base={sport} only={S.tabs} />
         </div>
 
         {nav ?? (S.weeks && <WeekNav min={min} max={max} current={week} base="/lines" />)}
