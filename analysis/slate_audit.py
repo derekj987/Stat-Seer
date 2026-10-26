@@ -10,9 +10,18 @@ WHAT IT COMPARES, AND WHY NOT FANDUEL DIRECTLY
   FanDuel's site is not scraped -- their terms. The licensed Odds API feed carries FanDuel's own
   prices, so "what FanDuel lists" is read from the feed instead. Three sets per sport:
 
-    SCHEDULE  what is actually being played   (cfb.db for NCAAF, data/games.csv for NFL)
+    SCHEDULE  what is actually being played   (cfb.db for NCAAF, data/games.csv for NFL,
+                                               nhl_results for NHL, statsapi for MLB,
+                                               ESPN's scoreboard for NBA)
     MARKET    what a book has priced          (the Odds API; NCAAF needs BOTH sport keys)
     BOARD     what we publish
+
+  🚨 THE SCHEDULE MUST NOT COME FROM OUR OWN CAPTURE. Each source above is independent of the
+  table the board is built from, and that is the whole design: a guardrail that shares a dependency
+  with its subject is an echo, not a check. NBA shipped without an audit for exactly this reason —
+  the only NBA schedule in the project was nba_odds_snapshots, so the audit would have agreed with
+  itself by construction and printed "every priced game is on the board" even if the capture had
+  dropped half the slate. ESPN broke the dependency; see nba_schedule().
 
   A game priced but not on the board is the Montana State class and the one that matters: the
   market says members can bet it and we are silent. A game whose kickoff disagrees with the
@@ -339,7 +348,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--days", type=int, default=8)
-    ap.add_argument("--sport", choices=["nfl", "ncaaf", "mlb", "nhl", "both", "all"],
+    ap.add_argument("--sport", choices=["nfl", "ncaaf", "mlb", "nhl", "nba", "both", "all"],
                     default="all", help='"both" is football only, kept for existing callers')
     args = ap.parse_args(argv)
 
@@ -363,6 +372,10 @@ def main(argv=None):
         compare("MLB", mlb_schedule(args.days),
                 _odds_events("baseball_mlb", args.days, "MLB"),
                 _snapshot_board("mlb_odds_snapshots", args.days, "MLB"), args.days)
+    if args.sport in ("nba", "all"):
+        compare("NBA", nba_schedule(args.days),
+                _odds_events("basketball_nba", args.days, "NBA"),
+                _snapshot_board("nba_odds_snapshots", args.days, "NBA"), args.days)
 
     say("\n---")
     if FAILS:
@@ -517,6 +530,63 @@ def mlb_schedule(days):
     if dh:
         warn(f"MLB: {dh} doubleheader game(s) in the window cannot be told apart from their "
              f"first game — the odds feed carries no gamePk, so they are a known blind spot")
+    return out
+
+
+def nba_schedule(days):
+    """ESPN's scoreboard — public, no key, and the same host nba_rosters.py already reads.
+
+    🚨 THE WHOLE POINT OF THIS FUNCTION IS THAT IT IS NOT OUR OWN CAPTURE. When the NBA module
+    shipped, this audit deliberately skipped the sport rather than check it, because the only NBA
+    schedule in the project was nba_odds_snapshots — the very table the board is built from.
+    Comparing a capture against a board built from that capture is an ECHO, not a check: it agrees
+    by construction and would have printed "every priced game is on the board" even if the capture
+    had silently dropped half the slate. That is the guardrail-shares-a-dependency-with-its-subject
+    failure the visual-audit skill already has a section about. ESPN breaks the dependency.
+
+    ONE REQUEST PER ET DAY, which is not a style choice: this endpoint rejects a date RANGE with a
+    400 (`?dates=20261026-20261030` fails, `?dates=20261026` works). `dates=` means the ET GAME
+    date, and the games it returns straddle two UTC dates — a 7:10 PM ET tip is 23:10Z the same day
+    while a 10:10 PM ET tip is 02:10Z the next. That is exactly what _daykey keys on, so the two
+    agree without any special handling.
+
+    Team names need no aliasing: ESPN and the odds feed both write "Washington Wizards".
+    """
+    out = {}
+    failed = []
+    today = dt.datetime.now(ET).date()
+    for i in range(days + 1):
+        d = today + dt.timedelta(days=i)
+        url = ("https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"
+               f"?dates={d:%Y%m%d}")
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "statseer/1.0"})
+            with urllib.request.urlopen(req, timeout=60) as r:
+                data = json.loads(r.read())
+        except Exception as e:  # noqa: BLE001
+            failed.append(f"{d:%Y-%m-%d} ({e})")
+            continue
+        for ev in data.get("events", []):
+            iso = ev.get("date")
+            comp = ((ev.get("competitions") or [{}])[0].get("competitors")) or []
+            h = next((((c.get("team") or {}).get("displayName"))
+                      for c in comp if c.get("homeAway") == "home"), None)
+            a = next((((c.get("team") or {}).get("displayName"))
+                      for c in comp if c.get("homeAway") == "away"), None)
+            if not (iso and h and a) or not within(iso, days):
+                continue
+            out[_daykey(a, h, iso)] = iso
+    # A PARTIAL SCHEDULE IS NOT A SILENT DEGRADATION. It cannot invent a missing-game failure —
+    # check 1 compares the market against the board and uses the schedule only to attribute the
+    # gap — but it does make that attribution wrong, and it can hide check 3. Say so, and treat a
+    # total failure as no source at all so compare() fails loudly rather than auditing nothing.
+    if failed and len(failed) == days + 1:
+        warn(f"NBA schedule fetch failed for every day in the window: {failed[0]}")
+        return None
+    if failed:
+        warn(f"NBA: {len(failed)} of {days + 1} schedule day(s) could not be fetched "
+             f"({failed[0]}) — a priced game missing from the board will still be caught, but "
+             f"the reason it gives may be wrong")
     return out
 
 

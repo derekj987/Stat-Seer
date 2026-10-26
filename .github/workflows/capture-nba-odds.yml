@@ -12,7 +12,16 @@ name: Capture NBA odds
 # That was exactly Derek's complaint on the CFB board (a receiver at +550 on ours against +900 on
 # FanDuel).
 #
-# --within-days 2 keeps it to the near-term slate. All times UTC.
+# 🚨 --within-days 3, NOT 2, AND THE AUDIT IS WHY. analysis/slate_audit.py --sport nba failed on
+# its first run: Philadelphia @ Indiana was priced by the books and absent from our board. It was
+# not a capture bug — the game tipped off 2.3 days out and the window was 2, so it was never
+# fetched. Books post NBA game lines about three days ahead, so a 2-day window guarantees the
+# board is short of what a reader can actually shop.
+#
+# Widening is FREE here, which is the whole argument: the bulk odds endpoint is priced per CALL,
+# so 9 games and 10 games both cost 6 credits (measured, both). 4 days returns the same 10 games
+# as 3 — the books are not posting further out — so 3 is where the slate actually ends rather than
+# an arbitrary cushion. All times UTC.
 
 # 🚨 THE ODD MINUTE IS DELIBERATE — DO NOT "TIDY" IT BACK TO :00. GitHub runs scheduled workflows
 # on a best-effort queue and the top of the hour is its busiest moment, so a cron at minute 0 is
@@ -45,4 +54,4 @@ jobs:
           ODDS_API_KEY:         ${{ secrets.ODDS_API_KEY }}
           SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: python nba_capture.py --supabase --within-days 2
+        run: python nba_capture.py --supabase --within-days 3
