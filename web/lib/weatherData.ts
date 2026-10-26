@@ -7,7 +7,7 @@ export interface GameWeather { eventId: string; game: string; home: string; away
   gustMph: number|null; precipPct: number|null; conditions: string|null; windFlag: boolean }
 export const WEATHER_SEASON = 2026;
 export const WEATHER_WEEK = 7;
-export const WEATHER_UPDATED = "2026-10-26T05:17Z";
+export const WEATHER_UPDATED = "2026-10-26T15:28Z";
 export const GAME_WEATHER: GameWeather[] = [
-  {"eventId": "4853610e63c246f2027a6a248e642c9a", "game": "DAL @ PHI", "home": "PHI", "away": "DAL", "commence": "2026-10-27T00:15:00+00:00", "neutral": false, "venue": "Lincoln Financial Field", "city": "Philadelphia", "state": "PA", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 58, "windMph": 5, "gustMph": 11, "precipPct": 1, "conditions": "Clear", "windFlag": false},
+  {"eventId": "4853610e63c246f2027a6a248e642c9a", "game": "DAL @ PHI", "home": "PHI", "away": "DAL", "commence": "2026-10-27T00:15:00+00:00", "neutral": false, "venue": "Lincoln Financial Field", "city": "Philadelphia", "state": "PA", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 58, "windMph": 5, "gustMph": 11, "precipPct": 0, "conditions": "Clear", "windFlag": false},
 ];
