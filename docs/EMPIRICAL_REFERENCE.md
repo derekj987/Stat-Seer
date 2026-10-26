@@ -2031,6 +2031,67 @@ tuning.
 The one-line rule for anyone adding a workflow: **never schedule on minute :00**, and pick a minute
 no other workflow in the repo is using.
 
+### 17a. The re-measurement, 12 days on: the minute fix did not work, and the reason is a REPO-WIDE CAP
+
+Measured 2026-10-26, same method, every scheduled workflow in the repo. §17 asked for exactly this
+before believing the off-peak-minute change had worked. **It had not.**
+
+| declared/day | workflows | delivered |
+|---|---|---|
+| 48 | capture-nhl-odds `14,44`, capture-cfb-odds `11,41` | **11–12%** |
+| 12–17 | capture-props, capture-cfb-props, capture-odds | 36–40% |
+| 6–8 | capture-nhl-props, capture-sleeper | 51–60% |
+| 3–4 | weather, capture-mlb, refresh-cfb-ratings | 87–97% |
+| 1–2 | the daily jobs | ~100% |
+
+`capture-nhl-odds` went from 10% to 12% — inside the noise. Moving off minute :00 did not buy back
+the dropped runs, so **peak-minute contention was not the binding constraint.**
+
+**WHAT THE BINDING CONSTRAINT ACTUALLY IS.** Count every scheduled run the repo delivers per day:
+
+    2026-10-15 … 2026-10-25:  65, 67, 74, 70, 59, 66, 64, 63, 66, 68, 68
+    mean 66.4/day, min 59, max 74, across a steady 24 distinct workflows
+
+The repo *declares* roughly 180 scheduled runs a day and *receives* about 66, and that ceiling holds
+to within ±11% across eleven consecutive days while the declared total was unchanged. **Scheduled
+runs are a fixed, scarce, shared budget — not a per-workflow setting.** The delivery column above is
+not a throttle applied to each workflow independently; it is each workflow's share of one pool.
+
+🚨 **THE PRACTICAL CONSEQUENCE: DECLARING MORE OFTEN DOES NOT GET YOU MORE RUNS.** `capture-odds`
+declares 17/day and receives 6.9/day; `capture-nhl-odds` declares 48/day — nearly three times as
+many — and receives 5.7/day. Above roughly 8 declared runs a day the return flattens, so a `*/30`
+cron is not a cadence, it is a claim on a pool that cannot honour it. Anyone tempted to fix a stale
+board by tightening a cron is spending the repo's budget for nothing.
+
+**What this costs the product.** 5.7 delivered runs a day is an effective cadence of about 4.2 h, with
+observed gaps of 5–6 h. A board built from the newest sweep can therefore sit up to ~6 h behind the
+book on both prices and *which games exist at all*. Measured the same day: the NHL board held 3 games
+at the 11:32Z sweep while the books had posted 14; the 17:39Z sweep picked up all 14. Nothing was
+broken — 94 of 94 scheduled runs in the workflow's lifetime succeeded, with zero failures — the board
+was simply between sweeps. §17b records how that nearly got misreported.
+
+**So the next step is the one §17 already named, and cron tuning is now formally ruled out**: an
+external scheduler calling the `workflow_dispatch` API, which is not drawn from this pool. The other
+lever is consolidation — five per-sport odds captures each take a share of 66/day to do work one job
+could do in one run.
+
+### 17b. A board that is between sweeps looks exactly like a board that dropped games
+
+`slate_audit.py --sport all` reported 11 NHL FAILURES at 15:53Z: every Tuesday-night game priced by
+the books and absent from our board. The obvious readings were both wrong — it was not the capture
+window (those games tip 1.52 days after the sweep, inside `--within-days 2`) and not a failing job
+(every run was green). The books had posted Tuesday's lines after our last delivered sweep, and the
+next sweep took the board to 14 of 14 with no change to anything.
+
+The audit is not wrong to fail here: the board really was missing games a member could bet. But the
+finding is **"the board is N hours behind the market"**, not "the capture dropped games", and only the
+sweep-age line distinguishes them. That `[info]` line in `_snapshot_board` exists for precisely this,
+and it is the first thing to read before acting on one of these failures.
+
+**The check that settles it in one query**: list every sweep in the window with the games it held. A
+capture that is losing games shows a count that falls and stays down; a board between sweeps shows a
+count that rises again on the next sweep as the books post.
+
 ---
 
 *Numbering note: §18 continues the NHL goalie work that was drafted as §14a-d in a
