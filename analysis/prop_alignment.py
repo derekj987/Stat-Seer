@@ -98,7 +98,7 @@ def norm(s: str) -> str:
 # A team defence is priced as a "player" by the books and is not one. Matched AFTER norm(), which
 # strips the slash -- written as "d/st" first, it silently matched nothing and left twenty defences
 # in the results looking like real misses.
-NOT_A_PLAYER = ("dst", "defense", "no touchdown", "test player")
+NOT_A_PLAYER = ("dst", "defense", "no touchdown", "no scorer", "test player")
 
 # Per sport: the capture table, what it calls the player column, the generated board, and whether
 # the board carries a posted line we can compare.
@@ -110,14 +110,41 @@ NOT_A_PLAYER = ("dst", "defense", "no touchdown", "test player")
 #     GET /rest/v1/<table>?select=*&limit=1
 SPORTS = {
     "nfl":   dict(table="prop_snapshots",     player="player_name", price="price_american",
+                  commence="commence_time",
                   board="web/lib/playerProjections.ts",      has_line=True),
     "ncaaf": dict(table="cfb_prop_snapshots", player="player",      price="price",
+                  commence="commence",
                   board="web/lib/ncaafPlayerProjections.ts", has_line=True),
     "mlb":   dict(table="mlb_prop_snapshots", player="player",      price="price_american",
+                  commence="commence_time",
                   board="web/lib/mlbPlayerProps.ts",         has_line=False),
     "nhl":   dict(table="nhl_prop_snapshots", player="player",      price="price",
-                  board="web/lib/nhlPlayerProjections.ts",   has_line=False),
+                  commence="commence",
+                  board="web/lib/nhlPlayerProjections.ts",   has_line=False, slate=False),
 }
+
+# Three of the four boards are SLATE boards — a row per player per game, carrying the kickoff.
+# `nhlPlayerProjections.ts` is not: it is a league-wide player table (season shot rate shrunk to
+# the prior season), one row per player per market with no game on it, and /nhl/props joins it to
+# the night's games at render time. So its coverage is legitimately unscoped, and warning that it
+# "may be comparing two different slates" would be a manufactured finding about a deliberate
+# design. Absence of a kickoff is only a defect on a board that is supposed to have one.
+
+
+ABBREV_RE = re.compile(r"^[A-Z]\.\s")
+
+
+def is_abbrev(name: str) -> bool:
+    """"A. Copp" yes, "Chase Brown" no.
+
+    🚨 THE INITIAL-KEY MATCH IS ONLY SAFE ON A NAME THAT IS ACTUALLY ABBREVIATED. Applied to full
+    names it matches any two players sharing a surname and a first initial, and it duly reported
+    "Chase Brown" vs "Camden Brown", "Jameson Williams" vs "Javonte Williams" and "Darius Taylor"
+    vs "DJ Taylor" as spelling defects. They are different people. A check that manufactures
+    findings on common surnames is worse than no check, so the loose key is gated on the board
+    name looking like an abbreviation in the first place.
+    """
+    return bool(ABBREV_RE.match(name or ""))
 
 
 def initial_key(name: str):
@@ -176,8 +203,14 @@ def board_rows(path):
         blob, name = m.group(0), m.group(1)
         mk = re.search(r'"market": *"([^"]+)"', blob)
         bk = re.search(r'"book": *(-?[0-9.]+)', blob)
+        # The kickoff the row belongs to, as a UTC date. This is what scopes the coverage check to
+        # one slate; see the comment at its call site. Matching on TEAM NAME was tried first and is
+        # a dead end -- the file says "Indiana" where the feed says "Indiana Hoosiers", so the
+        # intersection is empty and the scoping silently does nothing at all.
+        cm = re.search(r'"commence": *"(\d{4}-\d{2}-\d{2})', blob)
         rows.append({"player": name, "market": mk.group(1) if mk else None,
-                     "book": float(bk.group(1)) if bk else None})
+                     "book": float(bk.group(1)) if bk else None,
+                     "day": cm.group(1) if cm else None})
     return rows
 
 
@@ -194,8 +227,9 @@ def audit(sport, cfg, env):
     if not latest:
         return fail(f"{sport}: {cfg['table']} is empty — NOTHING WAS AUDITED")
     snap = latest[0]["snapshot_at"]
+    ccol = cfg["commence"]
     rows = page(url, key, cfg["table"],
-                {"select": f"{pcol},market,line,{cfg['price']},book",
+                {"select": f"{pcol},market,line,{cfg['price']},book,{ccol}",
                  "snapshot_at": f"eq.{snap}"})
     if not rows:
         return fail(f"{sport}: newest capture {snap[:16]} has no rows — NOTHING WAS AUDITED")
@@ -206,11 +240,31 @@ def audit(sport, cfg, env):
                     f"NOTHING WAS AUDITED")
     print(f"  capture {snap[:16]}Z · {len(rows)} priced rows · board {len(board)} rows")
 
+    # 🚨 SCOPE COVERAGE TO THE SLATE THE BOARD WAS BUILT FOR. The capture is whatever the book
+    # prices right now; the generated file is the slate it was last built for. On a midweek run
+    # those barely overlap — NCAAF reported "82 of 94 priced players (87%) have no row" while
+    # comparing a Monday capture against a file built for Saturday. Two different slates is not a
+    # coverage gap, it is the calendar. Kickoff DATE is the join: it needs no name matching, which
+    # team names cannot survive ("Indiana" here, "Indiana Hoosiers" in the feed).
+    board_days = {b["day"] for b in board if b["day"]}
+    if not cfg.get("slate", True):
+        board_days = set()  # league-wide player table by design; see the note under SPORTS
+        print("  [info] board is a league-wide player table, not a slate board — coverage is "
+              "scoped to the whole league, which is correct here")
+    elif not board_days:
+        warn(f"{sport}: no kickoff date parsed from {cfg['board']}, so coverage is UNSCOPED and "
+             f"may be comparing two different slates")
+
     # ---- COVERAGE ----
     priced, best = {}, {}
+    off_slate = 0
     for r in rows:
         raw = r.get(pcol)
         if not raw:
+            continue
+        day = (r.get(ccol) or "")[:10]
+        if board_days and day not in board_days:
+            off_slate += 1
             continue
         k = norm(raw)
         if not k or any(w in k for w in NOT_A_PLAYER):
@@ -219,9 +273,21 @@ def audit(sport, cfg, env):
         p = r.get(cfg["price"])
         if p is not None and (k not in best or abs(int(p)) < abs(best[k])):
             best[k] = int(p)
+    if off_slate:
+        on = sorted({(r.get(ccol) or "")[:10] for r in rows if (r.get(ccol) or "")[:10]
+                     in board_days})
+        print(f"  [info] {off_slate} of {len(rows)} priced rows are for kickoffs outside the "
+              f"board's slate and are not counted against coverage — the overlap the check "
+              f"actually ran on is {', '.join(on) or 'nothing'}")
+    if not priced:
+        cap = sorted({(r.get(ccol) or "")[:10] for r in rows} - {""})
+        return fail(
+            f"{sport}: the generated board is built for {', '.join(sorted(board_days))}, and the "
+            f"book is pricing {', '.join(cap)} — ZERO overlap, so no player could be checked. "
+            f"The board is a slate behind: regenerate it for the games now priced.")
     # Covered if the board carries the name OR an abbreviated form of it — see initial_key.
     shown = {norm(b["player"]) for b in board}
-    shown_ini = {initial_key(b["player"]) for b in board}
+    shown_ini = {initial_key(b["player"]) for b in board if is_abbrev(b["player"])}
     missing = sorted((k for k in priced
                       if k not in shown and initial_key(priced[k]) not in shown_ini),
                      key=lambda k: best.get(k, 99999))
@@ -244,7 +310,11 @@ def audit(sport, cfg, env):
             continue
         # Only a name the book actually prices can be compared — anything else is simply a player
         # the market has not priced, not a spelling defect.
-        book_name = priced.get(norm(b["player"])) or by_ini.get(initial_key(b["player"]))
+        # The loose initial key is ONLY consulted for a board name that is actually abbreviated —
+        # see is_abbrev. Applied to full names it reports every shared surname as a defect.
+        book_name = priced.get(norm(b["player"]))
+        if not book_name and is_abbrev(b["player"]):
+            book_name = by_ini.get(initial_key(b["player"]))
         if book_name:
             odd.append((b["player"], book_name))
     odd = sorted(set(odd))
@@ -264,6 +334,8 @@ def audit(sport, cfg, env):
     for r in rows:
         if (r.get("book") or "") != "fanduel" or r.get("line") is None:
             continue
+        if board_days and (r.get(ccol) or "")[:10] not in board_days:
+            continue  # same player, a different week's line — not a drift in this slate's number
         fd[(norm(r.get(pcol) or ""), r.get("market"))] = float(r["line"])
     checked = bad = 0
     examples = []

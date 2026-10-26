@@ -48,12 +48,34 @@ def actuals_from_cards():
     return out
 
 
-def run(week, mode, k, qk=3, tr="off"):
+# (CFB_USAGE_MIN_GAMES, CFB_USAGE_SHRINK_K). (1, 0) is what shipped: a bare per-game mean behind
+# a one-game gate. The rest raise the gate and/or shrink the mean toward the volume the player's
+# CHART rank implies, so one big game moves him a little and six move him a lot.
+# (CFB_USAGE_MIN_GAMES, CFB_USAGE_SHRINK_K, CFB_USAGE_DECAY). decay 1.0 is the flat season mean
+# that shipped; lower is a shorter memory. 0.86 is what the PROJECTION already uses for carries,
+# and the Indiana case shows even that is too slow to see a two-game handover — but the sweep,
+# not that one case, decides.
+USAGE_VARIANTS = [(1, 0, 1.0), (2, 0, 1.0), (2, 2, 1.0),
+                  (2, 2, 0.86), (2, 2, 0.70), (2, 2, 0.55), (2, 0, 0.55), (2, 2, 0.40)]
+
+
+def run(week, mode, k, qk=3, tr="off", umin=None, ushrink=None, udecay=None):
     os.makedirs(SCRATCH, exist_ok=True)
-    out = os.path.join(SCRATCH, f"w{week}_{mode}{k or ''}_q{qk}_t{tr}.ts")
+    tag = "" if umin is None and ushrink is None else f"_u{umin}s{ushrink}d{udecay}"
+    out = os.path.join(SCRATCH, f"w{week}_{mode}{k or ''}_q{qk}_t{tr}{tag}.ts")
     if not os.path.exists(out):
         env = dict(os.environ, CFB_ROLE_MODE=mode, CFB_ROLE_K=str(k or 6), CFB_QB_K=str(qk),
                    CFB_TRANSFER=tr)
+        # The usage re-rank decides WHICH player holds each slot, and the slot is a projection
+        # input — so a wrong ordering is a wrong workload, not just a wrong tag. Swept here
+        # because the alternative is picking the setting whose ordering happens to match the
+        # book, which would stop the rating being line-blind.
+        if umin is not None:
+            env["CFB_USAGE_MIN_GAMES"] = str(umin)
+        if ushrink is not None:
+            env["CFB_USAGE_SHRINK_K"] = str(ushrink)
+        if udecay is not None:
+            env["CFB_USAGE_DECAY"] = str(udecay)
         # errors="replace": a team name carrying a cp1252 byte (0x97 in "San José State") made the
         # reader thread raise UnicodeDecodeError. The child still ran, so the backtest looked fine —
         # but the exception happens in the pipe reader, which means a REAL projector failure could
@@ -91,25 +113,30 @@ def score(rows, actual, week):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--weeks", type=int, nargs="+", default=[1, 2])
+    ap.add_argument("--usage", action="store_true",
+                    help="sweep the usage re-rank (CFB_USAGE_MIN_GAMES / CFB_USAGE_SHRINK_K) "
+                         "instead of the role-blend variants")
     args = ap.parse_args(argv)
     actual = actuals_from_cards()
     print(f"{len(actual)} graded (week, player, market) actuals from the report cards")
     for week in args.weeks:
         print(f"\n=== week {week}")
         print(f"  {'variant':10} {'cat':11} {'n':>4} {'MAE':>6} {'book':>6} {'bias':>6} {'proj>line':>9}")
-        for mode, k, qk, tr in VARIANTS:
-            rows = run(week, mode, k, qk, tr)
+        variants = ([(("blend2", 3, 3, "off"), u, sh, d) for u, sh, d in USAGE_VARIANTS]
+                    if args.usage else [(v, None, None, None) for v in VARIANTS])
+        for (mode, k, qk, tr), umin, ushrink, udecay in variants:
+            rows = run(week, mode, k, qk, tr, umin, ushrink, udecay)
             sc = score(rows, actual, week)
             tot_n = sum(v["n"] for v in sc.values())
             tot_mae = sum(v["mae"] * v["n"] for v in sc.values()) / max(tot_n, 1)
             tot_bias = sum(v["bias"] * v["n"] for v in sc.values()) / max(tot_n, 1)
-            label = f"transfer={tr}"
+            label = f"u{umin}s{ushrink}d{udecay}" if args.usage else f"transfer={tr}"
             for cat in CATS:
                 v = sc.get(cat)
                 if v:
-                    print(f"  {label:10} {cat:11} {v['n']:4} {v['mae']:6.1f} {v['book_mae']:6.1f} "
+                    print(f"  {label:14} {cat:11} {v['n']:4} {v['mae']:6.1f} {v['book_mae']:6.1f} "
                           f"{v['bias']:+6.1f} {100 * v['over']:8.0f}%")
-            print(f"  {label:10} {'ALL':11} {tot_n:4} {tot_mae:6.1f} {'':6} {tot_bias:+6.1f}")
+            print(f"  {label:14} {'ALL':11} {tot_n:4} {tot_mae:6.1f} {'':6} {tot_bias:+6.1f}")
     return 0
 
 
