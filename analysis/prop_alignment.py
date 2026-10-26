@@ -214,12 +214,41 @@ def board_rows(path):
     return rows
 
 
+def stale_vs_main(path):
+    """Is our copy of this AUTO-GENERATED board different from origin/main's?
+
+    🚨 THE WORKTREE IS NOT WHAT SHIPS. This cost the audit its two loudest findings: run from a
+    branch 24 commits behind main, the script reported NCAAF and MLB as "a slate behind — the
+    board is built for 2026-10-24 and the book is pricing 2026-10-27", complete with a confident
+    instruction to regenerate. Both boards were already correct on main (card week 9, not 8); the
+    refresh crons had run green all along and the stale file was mine. A branch does not normally
+    touch these files -- they are written by the refresh workflows -- so any difference from
+    origin/main means the audit is measuring an artifact nobody is served.
+    """
+    import subprocess
+    try:
+        mine = subprocess.run(["git", "hash-object", path], cwd=ROOT, capture_output=True,
+                              text=True, timeout=30)
+        theirs = subprocess.run(["git", "rev-parse", f"origin/main:{path}"], cwd=ROOT,
+                                capture_output=True, text=True, timeout=30)
+        if mine.returncode or theirs.returncode:
+            return None
+        return mine.stdout.strip() != theirs.stdout.strip()
+    except Exception:
+        return None
+
+
 def audit(sport, cfg, env):
     print(f"\n## {sport.upper()}")
     url, key = env.get("SUPABASE_URL"), env.get("SUPABASE_SERVICE_KEY")
     path = os.path.join(ROOT, cfg["board"])
     if not os.path.exists(path):
         return fail(f"{sport}: board file missing — {cfg['board']}")
+    if stale_vs_main(cfg["board"]):
+        return fail(f"{sport}: our copy of {cfg['board']} differs from origin/main, so this "
+                    f"check would measure a file nobody is served — every finding from it would "
+                    f"be about the checkout, not the board. NOTHING WAS AUDITED; merge main "
+                    f"(or run from a current checkout) and re-run.")
 
     pcol = cfg["player"]
     latest = page(url, key, cfg["table"],
