@@ -1,0 +1,56 @@
+name: Capture NBA props
+
+# NBA player-prop capture -> Supabase nba_prop_snapshots (points, rebounds, assists, threes,
+# steals, blocks, PRA, double-double, first basket).
+#
+# 🚨 PROP HISTORY CANNOT BE BACKFILLED. Books post these the morning of the game and the number
+# moves until tip-off, so a snapshot exists only if it was taken that day. Every day this is not
+# running is a day of validation data gone for good — the CFB, NFL and NHL prop pipelines each
+# learned that separately. This is the one part of an NBA module that loses value while anything
+# else is being decided, which is why it ships before any modelling.
+#
+# It writes to SUPABASE, not data/nba.db: a GitHub runner's filesystem is ephemeral and a SQLite
+# file written there is discarded when the job ends.
+#
+# COST, measured 2026-10-26 and NOT a rounding error — the honest number. 9 markets x 1 region = 9
+# credits per priced event, so a 9-game window cost 73 credits for 9,351 rows. A full two-night
+# window is ~20 games, so budget ~180 credits a sweep and ~1,450 a day at 8 sweeps. Across an
+# Oct-Jun season that is roughly 325k credits against 4.81M remaining — a few percent, affordable,
+# but worth knowing before alternate ladders are added (they would roughly quadruple it; see
+# ingest/nba_prop_snapshots.sql for why they are deliberately excluded for now).
+#
+# CADENCE. Every 3 hours. --within-days 2 keeps it to the near-term slate, and --max-events 24
+# covers two full NBA nights (10-14 games each) rather than the NHL's 20, which would silently drop
+# the back of tomorrow's slate. All times UTC.
+
+# 🚨 THE ODD MINUTE IS DELIBERATE — DO NOT "TIDY" IT BACK TO :00. GitHub runs scheduled workflows
+# on a best-effort queue and the top of the hour is its busiest moment, so a cron at minute 0 is
+# both delayed the most and dropped the most. Measured across this repo over several days: jobs
+# scheduled on the hour arrived a median 58-84 minutes late and delivered 34-75% of their declared
+# runs, and */30 delivered 10%. Minute 48 was free, and sits 29 minutes off capture-nba-odds so the
+# two do not contend. Check the whole repo before changing it. See EMPIRICAL_REFERENCE §17.
+on:
+  schedule:
+    - cron: "48 */3 * 10-12,1-6 *"   # every 3 hours, October - June (regular season + playoffs)
+  workflow_dispatch: {}              # manual "Run workflow" for testing
+
+concurrency:
+  group: capture-nba-props
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi -c requirements.txt
+      - name: Capture NBA props -> Supabase
+        env:
+          ODDS_API_KEY:         ${{ secrets.ODDS_API_KEY }}
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python nba_props.py --supabase --within-days 2 --max-events 24

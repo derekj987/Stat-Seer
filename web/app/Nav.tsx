@@ -45,7 +45,7 @@ export function DayBadge({ pin, tip }: { pin?: import("react").ReactNode; tip?: 
  *  MLB is live for The Model and the Value Finder; its Context route is empty here so the flow
  *  renders the same three steps and says plainly which one is not built yet, rather than the nav
  *  pretending it is missing. */
-export type Sport = "nfl" | "ncaaf" | "mlb" | "nhl";
+export type Sport = "nfl" | "ncaaf" | "mlb" | "nhl" | "nba";
 export const SPORT_PATHS: Record<Sport, { analyze: string; context: string; value: string }> = {
   nfl:   { analyze: "/model",       context: "/context",              value: "/lines" },
   ncaaf: { analyze: "/ncaaf/model", context: "/ncaaf/context",       value: "/ncaaf/lines" },
@@ -59,6 +59,12 @@ export const SPORT_PATHS: Record<Sport, { analyze: string; context: string; valu
   // here, and the starting goalie was measured as already priced into the close (§18d), so there
   // is nothing to put on a game board that the market has not already said.
   nhl:   { analyze: "/nhl/model",   context: "",                      value: "/nhl/lines" },
+  // NBA arrived Value-Finder-first too, for the same reason: the Value Finder is arithmetic and
+  // needs no model, so it ships the week the capture starts rather than a season later. `analyze`
+  // is honestly blank — there is no NBA model, and the three-section architecture says a model
+  // earns its panel by beating the closing line out of sample, which nothing here has been
+  // measured against yet. FlowSteps renders it as "not built yet".
+  nba:   { analyze: "",             context: "",                      value: "/nba/lines" },
 };
 
 export function FlowSteps({ active, base = "nfl" }: {
@@ -111,7 +117,9 @@ export const SPORTS = [
   // home is The Model like every other live sport — the sameness of that journey across sports is
   // the product.
   { key: "nhl", label: "NHL", live: true, home: "/nhl/model" },
-  { key: "nba", label: "NBA", live: false, home: "" },
+  // NBA is LIVE for the Value Finder only, as NHL was before 2026-10-14, so its tab points at
+  // Player Props rather than The Model — there is no NBA model to send a reader to.
+  { key: "nba", label: "NBA", live: true, home: "/nba/props" },
   { key: "wnba", label: "WNBA", live: false, home: "" },
   { key: "soccer", label: "Soccer", live: false, home: "" },
 ];
@@ -366,11 +374,14 @@ export function ModelSubnav({ active = "game", base = "nfl", only }: {
 
 /** Sub-tabs inside Value Finder (Game Lines · Player Props · Sweet Spots). */
 export function ShopSubnav({ active, base = "nfl", only }: {
-  active: "lines" | "props" | "best" | "auditor"; base?: "nfl" | "ncaaf" | "mlb" | "nhl";
+  active: "lines" | "props" | "best" | "auditor"; base?: "nfl" | "ncaaf" | "mlb" | "nhl" | "nba";
   /** Tabs this sport actually has. A subnav is a promise that the page exists; a new sport
    *  arrives one surface at a time, and a tab pointing at a 404 is worse than a missing tab.
    *  Omit to show all of them, which is what every established sport does. */
-  only?: Array<"lines" | "props" | "best">;
+  /** readonly, so a caller can hand this straight out of an `as const` table — which is where
+   *  BoardView now keeps it, one row per sport, instead of a hardcoded sport check at the
+   *  render site. */
+  only?: readonly ("lines" | "props" | "best")[];
 }) {
   const h = base === "nfl"
     ? { lines: "/lines", props: "/props", best: "/best" }

@@ -163,6 +163,31 @@ thing the ledger exists to prevent.
 must still be free to move while the facts move, as long as every version stays on the record and
 exactly one of them is the one you are graded on.
 
+### 🚨 BEFORE ANY NUMBERS CHECK: audit a CURRENT checkout, or every finding is about your branch
+
+```bash
+git fetch origin -q && git rev-list --count HEAD..origin/main   # must be 0, or merge first
+```
+
+The generated boards — `model-data.ts`, `*PlayerProjections.ts`, `teamRatings.ts`, `*Card.ts` — are
+written by the refresh workflows and land on `main` several times a day. **A branch does not touch
+them, so any difference from `origin/main` is your checkout being behind, not a board defect.**
+
+Measured 2026-10-26, from a worktree 24 commits behind: the cross-sport audit reported NCAAF and
+MLB as hard FAILURES — *"the board is built for 2026-10-24 and the book is pricing 2026-10-27, ZERO
+overlap, the board is a slate behind: regenerate it"* — and went looking for the broken cron. Both
+boards were already correct on `main` (`card.week` 9, not 8; `NCAAF_PROJ_WEEK` 9). Every refresh had
+run green. The stale file was mine. Two of the audit's three loudest findings were the checkout.
+
+This is the same lesson as *"a passing local build is not evidence"* and *"what this measures is the
+generated FILE, not the page"*, one level further out: **there are three artifacts, not two** — your
+working copy, what `main` ships, and what the page renders — and a finding is only real if you name
+which one you measured. `analysis/prop_alignment.py` now refuses to run on a board file that differs
+from `origin/main` rather than reporting findings about it.
+
+Corollary for the staleness checks below: *"is the projection week current?"* is a question about
+`main`, never about your worktree.
+
 ### ▶ RUN THIS FIRST for anything about the numbers
 
 ```bash

@@ -339,11 +339,12 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--days", type=int, default=8)
-    ap.add_argument("--sport", choices=["nfl", "ncaaf", "both"], default="both")
+    ap.add_argument("--sport", choices=["nfl", "ncaaf", "mlb", "nhl", "both", "all"],
+                    default="all", help='"both" is football only, kept for existing callers')
     args = ap.parse_args(argv)
 
     say(f"# Slate audit — {dt.datetime.now(dt.timezone.utc):%Y-%m-%d %H:%M} UTC")
-    if args.sport in ("ncaaf", "both"):
+    if args.sport in ("ncaaf", "both", "all"):
         nsched = ncaaf_schedule(args.days)
         # Every school in the season, not just the ones playing in the window: canonicalisation
         # must not depend on whether a team happens to have a game in the next 8 days, or a
@@ -351,9 +352,17 @@ def main(argv=None):
         schools = all_schools() or set()
         compare("NCAAF", nsched, ncaaf_market(args.days, schools),
                 ncaaf_board(args.days), args.days)
-    if args.sport in ("nfl", "both"):
+    if args.sport in ("nfl", "both", "all"):
         compare("NFL", nfl_schedule(args.days), nfl_market(args.days),
                 nfl_board(args.days), args.days)
+    if args.sport in ("nhl", "all"):
+        compare("NHL", nhl_schedule(args.days),
+                _odds_events("icehockey_nhl", args.days, "NHL"),
+                _snapshot_board("nhl_odds_snapshots", args.days, "NHL"), args.days)
+    if args.sport in ("mlb", "all"):
+        compare("MLB", mlb_schedule(args.days),
+                _odds_events("baseball_mlb", args.days, "MLB"),
+                _snapshot_board("mlb_odds_snapshots", args.days, "MLB"), args.days)
 
     say("\n---")
     if FAILS:
@@ -378,6 +387,137 @@ def nfl_market(days):
         return None
     return {(nfl_key(g["away_team"]), nfl_key(g["home_team"])): g["commence_time"]
             for g in data if within(g.get("commence_time"), days)}
+
+
+# ---------------- MLB and NHL ----------------
+#
+# 🚨 THESE TWO KEY ON (away, home, DATE), not on the team pair alone. Football's key is the pair,
+# which is safe when two teams meet once a season. Baseball and hockey play SERIES: over an 8-day
+# window the same pair meets two, three or four times, and a pair-only key collapses them into one
+# game — so a slate with three Rays-at-Guardians games would audit as one and the other two would
+# read as neither missing nor present. The ET calendar date separates them.
+#
+# WHAT THAT STILL CANNOT SEPARATE is a doubleheader: two games, one date, one pair. statsapi gives
+# a gamePk that survives it (mlb_availability.py already keys on that), but the odds feed carries no
+# such id, so there is nothing to join them on. Rather than silently merge the pair, `mlb_schedule`
+# COUNTS the doubleheaders it saw and the audit reports them as a known blind spot. Same shape as
+# the lesson in the visual-audit skill: a board keyed on day + matchup lost one game of a
+# doubleheader, and the fix there was nearest-first-pitch pairing on a board that HAD both rows.
+
+def _daykey(away, home, iso):
+    """Key a game by both clubs and its ET calendar date — see the note above."""
+    try:
+        d = dt.datetime.fromisoformat(str(iso).replace("Z", "+00:00")).astimezone(ET).date()
+    except Exception:  # noqa: BLE001
+        return (norm(away), norm(home), "?")
+    return (norm(away), norm(home), d.isoformat())
+
+
+def _odds_events(sport_key, days, label):
+    """Upcoming events for a sport key. `/events` rather than `/odds`: it costs no credits and the
+    question here is which games exist on the book, never what they are priced at."""
+    key = oc.load_env().get("ODDS_API_KEY")
+    if not key:
+        return None
+    oc.ensure_ssl_certs()
+    url = f"https://api.the-odds-api.com/v4/sports/{sport_key}/events?apiKey={key}"
+    try:
+        with urllib.request.urlopen(url, timeout=60) as r:
+            data = json.loads(r.read())
+    except Exception as e:  # noqa: BLE001
+        warn(f"{label} odds fetch failed: {e}")
+        return None
+    return {_daykey(g["away_team"], g["home_team"], g["commence_time"]): g["commence_time"]
+            for g in data if within(g.get("commence_time"), days)}
+
+
+def _snapshot_board(table, days, label):
+    """Games our capture recorded PREGAME, which is what the page can show.
+
+    Narrowed to one row per (event, sweep) the way nfl_board is: these tables hold a row per
+    book x market x outcome x sweep, so an unnarrowed read truncates mid-slate and reports real
+    games as missing — the exact failure documented on nfl_board above.
+    """
+    lo = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=6)).isoformat()
+    hi = (dt.datetime.now(dt.timezone.utc) + dt.timedelta(days=days)).isoformat()
+    try:
+        rows = _sb(table,
+                   "?book=eq.fanduel&market=eq.totals&outcome_name=eq.Over"
+                   f"&commence_time=gte.{quote(lo)}&commence_time=lte.{quote(hi)}"
+                   "&select=commence_time,home_team,away_team,snapshot_at&limit=5000")
+    except Exception as e:  # noqa: BLE001
+        warn(f"{label} board read failed: {e}")
+        return None
+    out = {}
+    for r in rows:
+        if within(r.get("commence_time"), days) and r.get("snapshot_at", "") < r["commence_time"]:
+            out[_daykey(r["away_team"], r["home_team"], r["commence_time"])] = r["commence_time"]
+    # 🚨 SAY HOW OLD THE NEWEST SWEEP IS, because for these two sports that is usually the answer.
+    # A game can be priced on the book right now and absent from this table purely because the
+    # capture has not run since the book posted it — which is a CADENCE fact, not a board defect,
+    # and without this line the audit reports it as "dropped from the board" and cries wolf.
+    # Measured 2026-10-24: capture-nhl-odds declares every 30 min (cron "14,44") and delivered
+    # 3 runs in the 14 hours before this audit, so the newest sweep was 2.4 h old and the five
+    # games the books had just priced for Sunday were legitimately not in it yet.
+    if rows:
+        newest = max(r.get("snapshot_at", "") for r in rows)
+        try:
+            age = (dt.datetime.now(dt.timezone.utc)
+                   - dt.datetime.fromisoformat(newest.replace("Z", "+00:00"))).total_seconds() / 3600
+            say(f"  [info] {label}: newest capture sweep is {age:.1f} h old ({newest[:16]}Z) — "
+                f"anything the books priced since then cannot be on the board yet")
+        except Exception:  # noqa: BLE001
+            pass
+    return out
+
+
+def nhl_schedule(days):
+    """The NHL's own schedule, as nhl_results holds it — it carries future games (its forward
+    schedule runs to the end of the season), so it is a schedule source and not only a results
+    table."""
+    lo = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=6)).isoformat()
+    hi = (dt.datetime.now(dt.timezone.utc) + dt.timedelta(days=days)).isoformat()
+    try:
+        rows = _sb("nhl_results",
+                   f"?start_time_utc=gte.{quote(lo)}&start_time_utc=lte.{quote(hi)}"
+                   "&select=start_time_utc,home_team,away_team&limit=5000")
+    except Exception as e:  # noqa: BLE001
+        warn(f"NHL schedule read failed: {e}")
+        return None
+    return {_daykey(r["away_team"], r["home_team"], r["start_time_utc"]): r["start_time_utc"]
+            for r in rows if within(r.get("start_time_utc"), days)}
+
+
+def mlb_schedule(days):
+    """statsapi.mlb.com — public, no key, and the same source mlb_availability.py uses."""
+    lo = dt.datetime.now(ET).date()
+    hi = lo + dt.timedelta(days=days)
+    url = ("https://statsapi.mlb.com/api/v1/schedule?sportId=1"
+           f"&startDate={lo:%Y-%m-%d}&endDate={hi:%Y-%m-%d}")
+    try:
+        with urllib.request.urlopen(url, timeout=60) as r:
+            data = json.loads(r.read())
+    except Exception as e:  # noqa: BLE001
+        warn(f"MLB schedule fetch failed: {e}")
+        return None
+    out, seen, dh = {}, set(), 0
+    for day in data.get("dates", []):
+        for g in day.get("games", []):
+            iso = g.get("gameDate")
+            a = (g.get("teams", {}).get("away", {}).get("team", {}) or {}).get("name")
+            h = (g.get("teams", {}).get("home", {}).get("team", {}) or {}).get("name")
+            if not (iso and a and h) or not within(iso, days):
+                continue
+            k = _daykey(a, h, iso)
+            if k in seen:
+                dh += 1                      # second game of a doubleheader — see the note above
+                continue
+            seen.add(k)
+            out[k] = iso
+    if dh:
+        warn(f"MLB: {dh} doubleheader game(s) in the window cannot be told apart from their "
+             f"first game — the odds feed carries no gamePk, so they are a known blind spot")
+    return out
 
 
 if __name__ == "__main__":
