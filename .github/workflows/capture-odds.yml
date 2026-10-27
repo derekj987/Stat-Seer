@@ -64,17 +64,38 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: |
-          case "${{ github.event.schedule }}" in
-            "*/15 16-23 * 8-12,1 0,1,4"|"*/15 0-1 * 8-12,1 1,2,5")
+          # 🚨 MATCH ON THE HOUR FIELD, NEVER THE WHOLE CRON STRING. This branched on the exact
+          # schedule text, and the 2026-10-14 minute change (§17: every cron moved off :00) renamed
+          # every pattern out from under it. `*/15 16-23 ...` became `7,22,37,52 16-23 ...`, which
+          # matched nothing, so the closing-line sweeps fell silently through to the near-term
+          # branch: ZERO PRE_KICKOFF rows from 2026-10-12 to 2026-10-27 while the job ran green
+          # every game day. CLV is measured against the closing line, so that is the one capture
+          # whose loss costs the most, and nothing failed to say so.
+          #
+          # The hour field is what actually distinguishes these sweeps, and it is the part nobody
+          # edits for scheduling-queue reasons. A minute change can no longer alter behaviour.
+          SCHED="${{ github.event.schedule }}"
+          case "$SCHED" in
+            *" 16-23 "*|*" 0-1 "*)
               # Closing line: only games about to kick off.
               python odds_client.py --live --write --reason PRE_KICKOFF --commence-within 45
               ;;
-            "0 10 * 8-12,1 *")
+            *" 10 "*)
               # Once daily: the whole season, unwindowed, for long-range opening lines.
               python odds_client.py --live --write --reason SCHEDULED
               ;;
+            *" */3 "*|"")
+              # The 3-hourly near-term sweep, and manual runs. Listed EXPLICITLY rather than left
+              # to the default so that the default can be what it should be: an alarm. Without
+              # this arm the ordinary case warns on every run and the warning means nothing.
+              python odds_client.py --live --write --reason SCHEDULED --commence-within 14400
+              ;;
             *)
-              # Every 3 hours (and manual runs): near-term only, 10 days = 14400 minutes.
+              # An UNRECOGNISED schedule says so rather than quietly taking a default — that
+              # silence is exactly what hid the bug above for two weeks. It still captures, with
+              # the safe near-term window, because a noisy run beats a missed one.
+              echo "::warning::schedule '$SCHED' matched no branch in capture-odds.yml — fell back \
+          to the near-term sweep. If a cron was edited, update the case to match it."
               python odds_client.py --live --write --reason SCHEDULED --commence-within 14400
               ;;
           esac
