@@ -1,0 +1,161 @@
+name: Sweep game lines
+
+# Every sport's game lines (moneyline, spread/puck line/run line, total), every 15 minutes, from
+# ONE scheduled run that loops for most of six hours.
+#
+# 🚨 WHY A LOOP AND NOT A CRON — THE SCARCE THING IS SCHEDULED RUNS, NOT MINUTES. Measured
+# 2026-10-26 (EMPIRICAL_REFERENCE §17a): this repo DELIVERS about 66 scheduled runs a day while
+# DECLARING roughly 180, a ceiling that held to ±11% across eleven consecutive days. Declaring more
+# does not get you more — capture-odds declares 17/day and receives 6.9, capture-nhl-odds declares
+# 48/day and receives 5.7. A `*/30` cron is not a cadence; it is a claim on a pool that cannot
+# honour it. capture-nhl-odds therefore swept every ~4.2 hours with gaps of 5-6, which is how the
+# NHL board came to be missing a whole night's priced games while every run was green (§17b).
+#
+# Runner MINUTES, by contrast, are free: this repository is PUBLIC, and standard GitHub-hosted
+# runners are free and unlimited on public repos. A job may run for up to six hours. So one
+# scheduled run, looping, buys ~23 sweeps where a cron buys one.
+#
+#   4 declared runs/day x ~90% delivery (the measured rate for a 4/day cron) x 5h45m
+#     = ~21 hours of coverage a day, swept every 15 minutes = ~84 sweeps/day
+#   against the ~5.7/day a 30-minute cron actually delivers.
+#
+# COST. The bulk odds endpoint is priced per CALL, not per game: regions x markets = 2 x 3 = 6
+# credits per sport per sweep whatever the slate size. Five sports in season is 30 credits a sweep,
+# ~2,500 a day, against a 5M plan. That is why this is game lines ONLY — player props are priced
+# per EVENT (an NBA props sweep measured 73 credits) and a 15-minute cadence on them would cost
+# two orders of magnitude more for a number that moves far less. Props stay on their own crons.
+#
+# THIS IS ADDITIVE. The per-sport odds crons are deliberately left in place: they are cheap, they
+# cover the gaps between sweeper runs, and if this workflow turns out to misbehave the boards keep
+# their existing feed. Once it has proven out, dropping them frees ~22 runs/day of the scheduled
+# pool for the prop captures, which cannot be backfilled and are the ones that need it.
+
+on:
+  schedule:
+    # FOUR runs a day, deliberately LOW-frequency. §17a's table is unambiguous: a workflow
+    # declaring 1-4 runs/day is delivered ~87-100% of the time, while one declaring 48 is delivered
+    # 11%. The whole design depends on these four actually arriving, so this must stay in the band
+    # that does. Minute 26 was free at these hours; see the odd-minute note in capture-nba-odds.yml.
+    - cron: "26 1,7,13,19 * * *"
+  workflow_dispatch:
+    inputs:
+      minutes:
+        description: "How long to sweep for (minutes). Default 345."
+        required: false
+        default: "345"
+      interval:
+        description: "Seconds between sweeps. Default 900 (15 min)."
+        required: false
+        default: "900"
+
+concurrency:
+  group: sweep-game-lines
+  # 🚨 TRUE, UNLIKE EVERY OTHER CAPTURE IN THIS REPO, AND FOR A REASON THAT ONLY APPLIES HERE.
+  # The others use false because a run is seconds long and must never be interrupted mid-write.
+  # This one holds a runner for nearly six hours, so a queued successor would start its own six
+  # hours only after this one ended, drifting the schedule further every day until the four runs
+  # collapsed into a train. A new run should replace the old; the loser is cancelled between
+  # sweeps, never mid-write, because each sweep is a separate short python process.
+  cancel-in-progress: true
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest   # NOT ubuntu-slim: single-CPU runners cap at 15 minutes, not 6 hours
+    # The hard platform limit is 360. Stopping at 352 leaves the loop room to exit cleanly and
+    # report, because a job KILLED at the limit is marked failed and would email every six hours.
+    timeout-minutes: 352
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi -c requirements.txt
+
+      - name: Sweep every sport in season
+        env:
+          ODDS_API_KEY:         ${{ secrets.ODDS_API_KEY }}
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          set -u
+          MINUTES="${{ github.event.inputs.minutes || '345' }}"
+          INTERVAL="${{ github.event.inputs.interval || '900' }}"
+          # Both are typed by a human in the Run-workflow dialog, so they are untrusted. A
+          # non-integer ("5.5", a stray space, an empty box) makes the arithmetic below fail and —
+          # under `set -u` — leaves END unset, which kills the job with a shell error instead of
+          # sweeping. Fall back to the defaults loudly rather than failing a six-hour run on a typo.
+          case "$MINUTES" in ''|*[!0-9]*) echo "::warning::minutes='$MINUTES' is not a whole number — using 345"; MINUTES=345 ;; esac
+          case "$INTERVAL" in ''|*[!0-9]*) echo "::warning::interval='$INTERVAL' is not a whole number — using 900"; INTERVAL=900 ;; esac
+          # A zero interval would spin the loop as fast as the API allows and burn the credit plan.
+          [ "$INTERVAL" -lt 60 ] && { echo "::warning::interval ${INTERVAL}s is below the 60s floor — using 60"; INTERVAL=60; }
+          [ "$MINUTES" -gt 350 ] && { echo "::warning::minutes $MINUTES exceeds the job limit — using 345"; MINUTES=345; }
+          END=$(( $(date -u +%s) + MINUTES * 60 ))
+          echo "sweeping until $(date -u -d "@$END" +%H:%M:%SZ), every ${INTERVAL}s"
+
+          # Season gating by UTC month, matching each capture's own cron months. An out-of-season
+          # sport would still cost 6 credits a sweep to capture nothing, which at ~84 sweeps a day
+          # is ~500 credits a day for a table that gains no rows.
+          in_season() {
+            m=$(date -u +%-m)
+            case "$1" in
+              nfl|cfb) [ "$m" -ge 8 ] || [ "$m" -le 1 ] ;;        # Aug-Jan
+              nhl|nba) [ "$m" -ge 10 ] || [ "$m" -le 6 ] ;;       # Oct-Jun
+              mlb)     [ "$m" -ge 3 ] && [ "$m" -le 10 ] ;;       # Mar-Oct
+            esac
+          }
+
+          run_sport() {
+            case "$1" in
+              nfl) python odds_client.py --live --write --reason SCHEDULED --commence-within 14400 ;;
+              cfb) python cfb_capture.py --supabase --within-days 8 ;;
+              nhl) python nhl_capture.py --supabase --within-days 2 ;;
+              nba) python nba_capture.py --supabase --within-days 3 ;;
+              mlb) python mlb_capture.py --supabase --within-days 2 --max-events 20 ;;
+            esac
+          }
+
+          n=0
+          consecutive_total_failures=0
+          while [ "$(date -u +%s)" -lt "$END" ]; do
+            n=$((n + 1))
+            ran=0; failed=0
+            echo "::group::sweep $n  $(date -u +%H:%M:%SZ)"
+            for s in nfl cfb nhl nba mlb; do
+              if in_season "$s"; then
+                ran=$((ran + 1))
+                # One sport's failure must not end a six-hour run. The capture scripts already
+                # exit 0 on a transient blip and raise only on a real problem (401 bad key, 429
+                # quota, Supabase 4xx), so a non-zero here is worth counting — but it is counted,
+                # not fatal, because the other four sports still have lines to collect.
+                if ! run_sport "$s"; then
+                  failed=$((failed + 1))
+                  echo "::warning::$s capture exited non-zero on sweep $n"
+                fi
+              fi
+            done
+            echo "::endgroup::"
+
+            # 🚨 EVERY SPORT FAILING TWICE RUNNING IS A REAL OUTAGE, AND MUST EMAIL. A bad key or
+            # an exhausted quota fails all five identically, and a six-hour loop that swallowed
+            # that would retry it ~23 times and report success — the precise shape of "a green job
+            # that is the problem" this project has been bitten by before. One sport failing, or
+            # one sweep failing, is noise and stays a warning.
+            if [ "$ran" -gt 0 ] && [ "$failed" -eq "$ran" ]; then
+              consecutive_total_failures=$((consecutive_total_failures + 1))
+              if [ "$consecutive_total_failures" -ge 2 ]; then
+                echo "::error::every in-season capture failed on two consecutive sweeps — \
+          stopping so this reports as a failure rather than looping quietly"
+                exit 1
+              fi
+            else
+              consecutive_total_failures=0
+            fi
+
+            # Sleep to the next interval BOUNDARY rather than for a fixed interval, so the sweeps
+            # do not drift later by however long each one took. Never sleep past END.
+            now=$(date -u +%s)
+            next=$(( (now / INTERVAL + 1) * INTERVAL ))
+            [ "$next" -ge "$END" ] && break
+            sleep $(( next - now ))
+          done
+          echo "completed $n sweep(s) over $MINUTES minutes"
