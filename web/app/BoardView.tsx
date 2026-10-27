@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { bookLabel } from "@/lib/bookLabel";
+import { SHOPPING_VALUE } from "@/lib/shoppingValue";
 import type { Game } from "@/lib/board";
 import { ShopSubnav, Brand, ValueFinderDrawer, FlowSteps, WeekBadge, DayBadge } from "./Nav";
 import { WeekNav } from "./WeekNav";
@@ -279,6 +280,29 @@ export default function BoardView({
                   <div className="stat"><span className="stat__v">+{maxEdge.toFixed(2)}%</span><span className="stat__l">best shopping edge</span></div>
                   <div className="stat"><span className="stat__v">{books}</span><span className="stat__l">US books compared</span></div>
                 </section>
+                {/* The measured companion to the live tiles above. Those four read the CURRENT
+                    slate — what is on offer right now. This one is a TRACK RECORD: what shopping
+                    has actually been worth across a season of published prices, graded against
+                    the closing line. Keep them distinct; averaging a live reading into a graded
+                    one would make both meaningless.
+
+                    It renders only for a sport that has been graded, so a board with no measured
+                    history says nothing rather than borrowing another sport's number. */}
+                {SHOPPING_VALUE[sport] && (
+                  <p className="statnote">
+                    Across <b>{SHOPPING_VALUE[sport].prices.toLocaleString()}</b> prices published
+                    on {SHOPPING_VALUE[sport].events} {S.label} games
+                    {SHOPPING_VALUE[sport].season ? ` in ${SHOPPING_VALUE[sport].season}` : ""},{" "}
+                    {/* 🚨 "%" HERE, NEVER "POINTS". The underlying quantity is probability
+                        points, but on a betting board "points" means SPREAD points — so "+1.0
+                        points of price" reads as a full point of spread, a far larger claim than
+                        the one being made. The four tiles directly above already state shopping
+                        edge as a percentage; matching them is both honest and consistent. */}
+                    taking the best of these books instead of a typical one has been worth{" "}
+                    <b>+{SHOPPING_VALUE[sport].gainVsTypical.toFixed(1)}%</b> per bet
+                    &mdash; graded against the closing line.
+                  </p>
+                )}
               </div>
             </details>
 
