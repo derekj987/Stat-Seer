@@ -34,6 +34,22 @@ on:
     # in capture-odds.yml, so the next week's event ids exist before we try to map predictions
     # onto them.
     - cron: "21 14 * 8-12,1 *"
+    # 🚨 TUESDAY CATCH-UP, AND IT EXISTS BECAUSE THE WEEK ROLLS AT A MOMENT NO DAILY CRON CAN
+    # COVER. current_week() returns the lowest week with a kickoff still in the FUTURE, so the
+    # moment Monday night's game kicks off (00:15 UTC Tuesday) the site's /model board switches to
+    # the new week — and that week has no predictions until this job next runs. On the daily
+    # schedule alone that is 14 hours of blank Model Spread every single Tuesday, which is exactly
+    # what Derek saw: fourteen games reading "—" and "No model read yet" while the board itself
+    # had already moved on.
+    #
+    # Measured 2026-10-27: week 7's last game kicked off 00:15 UTC, the 14:21 run had still not
+    # been delivered at 17:23 (the scheduled-run pool, EMPIRICAL_REFERENCE §17a), and the NFL
+    # model board was blank for all 14 week-8 games. A manual dispatch published them in seconds.
+    #
+    # 02:29 UTC Tuesday is after every realistic Monday-night kickoff and before anyone in the US
+    # is awake to see the gap. It costs one extra declared run A WEEK, which is nothing against a
+    # ~66/day pool, and it is a no-op on any Tuesday whose week is already published.
+    - cron: "29 2 * 8-12,1 2"
   workflow_dispatch:
     inputs:
       week:
