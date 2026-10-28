@@ -1,0 +1,77 @@
+name: Refresh NBA model
+
+# Regenerates web/lib/nbaGameModel.ts and commits it (which triggers a Vercel redeploy).
+#
+# 🚨 THIS ONE IS NOT OPTIONAL THE WAY A RATING REFRESH USUALLY IS. The generated file holds the
+# UPCOMING slate, not just the ratings, so a stale file does not merely publish slightly old
+# numbers — it publishes games that have already been played. /nba/model would show last night's
+# fixtures as though they were still to come. Every other refresh in this repo degrades quietly;
+# this one degrades visibly, which is why it runs daily rather than weekly.
+#
+# TWICE A DAY. Once early (07:33 UTC, ~3am ET) so the morning board is built on last night's
+# results, and once in the afternoon (18:17 UTC) to pick up schedule changes and any game that
+# finished late. The ratings themselves move slowly; the slate does not.
+#
+# COST: none beyond runner minutes, which are free on a public repo. The model reads ESPN's public
+# scoreboard, no key and no quota, and caches completed dates under data/ so a run re-fetches only
+# the days that are new or not yet final.
+#
+# 🚨 07:33 and 18:17 were free repo-wide, checked against every cron in the repo — 18:33 was
+# NOT: capture-odds.yml runs "33 */3", which includes hour 18. See the odd-minute note in
+# capture-nba-odds.yml for why this matters and why a cron here must never sit on :00.
+on:
+  schedule:
+    - cron: "33 7 * 10-12,1-6 *"
+    - cron: "17 18 * 10-12,1-6 *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: refresh-nba-model
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write   # commit the regenerated model file
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so the rebase-before-push works cleanly
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet certifi -c requirements.txt
+
+      # The script refuses to build a rating with no prior-season games, so a degraded ESPN
+      # response fails the job here rather than quietly publishing a model fitted on nothing.
+      - name: Rebuild the NBA model
+        run: python nba_game_model.py --export
+
+      - name: Commit if changed
+        run: |
+          FILE="web/lib/nbaGameModel.ts"
+          # The generated header carries a timestamp, so the file differs on every run even when
+          # nothing moved. Compare everything EXCEPT that line, or this commits twice a day
+          # forever and buries the real changes in noise.
+          if git diff -- "$FILE" | grep -E '^[+-]' | grep -vE '^[+-]{3}' | grep -qv '^[+-]// Generated '; then
+            echo "model changed:"
+            git diff --stat -- "$FILE"
+          else
+            echo "No change (timestamp only) — nothing to commit."
+            git checkout -- "$FILE"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$FILE"
+          git commit -m "chore: refresh NBA model (auto)"
+          # Several bots push this branch; a push can lose the race (non-fast-forward) even right
+          # after a rebase. Retry before failing, so a lost race does not email a FAILURE.
+          for i in 1 2 3 4 5; do
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || git rebase --abort || true
+            if git push; then echo "pushed on attempt $i"; exit 0; fi
+            echo "push attempt $i lost the race; retrying..."; sleep $((RANDOM % 5 + 2))
+          done
+          echo "push still rejected after 5 attempts"; exit 1
