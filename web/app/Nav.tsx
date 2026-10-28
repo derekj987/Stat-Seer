@@ -59,12 +59,16 @@ export const SPORT_PATHS: Record<Sport, { analyze: string; context: string; valu
   // here, and the starting goalie was measured as already priced into the close (§18d), so there
   // is nothing to put on a game board that the market has not already said.
   nhl:   { analyze: "/nhl/model",   context: "",                      value: "/nhl/lines" },
-  // NBA arrived Value-Finder-first too, for the same reason: the Value Finder is arithmetic and
-  // needs no model, so it ships the week the capture starts rather than a season later. `analyze`
-  // is honestly blank — there is no NBA model, and the three-section architecture says a model
-  // earns its panel by beating the closing line out of sample, which nothing here has been
-  // measured against yet. FlowSteps renders it as "not built yet".
-  nba:   { analyze: "",             context: "",                      value: "/nba/lines" },
+  // NBA arrived Value-Finder-first, like NHL. `analyze` was honestly blank for a day, then the
+  // game model landed: opponent-adjusted scoring margin, held out at 12.08 MAE against a 15.11
+  // home-court baseline on 247 unseen games.
+  //
+  // 🚨 IT SHIPS UNGRADED AGAINST THE CLOSING LINE, WHICH IS A DEPARTURE AND IS MARKED AS ONE.
+  // The architecture says a model earns its panel by beating the CLOSING LINE out of sample, and
+  // NBA price history began 2026-10-26 so that cannot be tested yet. The board itself carries a
+  // "not graded yet" note stating what is and is not known, rather than borrowing the trust the
+  // other sports' graded records have earned.
+  nba:   { analyze: "/nba/model",   context: "",                      value: "/nba/lines" },
 };
 
 export function FlowSteps({ active, base = "nfl" }: {
@@ -117,9 +121,10 @@ export const SPORTS = [
   // home is The Model like every other live sport — the sameness of that journey across sports is
   // the product.
   { key: "nhl", label: "NHL", live: true, home: "/nhl/model" },
-  // NBA is LIVE for the Value Finder only, as NHL was before 2026-10-14, so its tab points at
-  // Player Props rather than The Model — there is no NBA model to send a reader to.
-  { key: "nba", label: "NBA", live: true, home: "/nba/props" },
+  // NBA's tab pointed at Player Props while it had no model. It has one as of 2026-10-28, so its
+  // home is The Model like every other live sport — the sameness of that journey across sports is
+  // the product.
+  { key: "nba", label: "NBA", live: true, home: "/nba/model" },
   { key: "wnba", label: "WNBA", live: false, home: "" },
   { key: "soccer", label: "Soccer", live: false, home: "" },
 ];
