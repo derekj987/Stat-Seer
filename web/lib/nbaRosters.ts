@@ -4,7 +4,7 @@
 //
 // Resolution lives in lib/nbaTeamTag.ts, NOT here — a helper added to a generated file is
 // wiped by the next refresh, which has taken this project's build down before.
-// Generated 2026-10-30T17:15:41+00:00 — 30 teams, 521 players.
+// Generated 2026-10-31T16:20:59+00:00 — 30 teams, 522 players.
 
 /** Team name as the ODDS FEED spells it, keyed on letters+digits only, to its
  *  abbreviation. Keyed rather than literal so a feed that writes 'LA Clippers' for
@@ -99,7 +99,7 @@ export const NBA_ROSTER: Record<string, string[]> = {
   "MIN": ["anthony edwards", "ayo dosunmu", "bones hyland", "cody williams", "donte divincenzo", "enrique freeman", "isaiah evans", "jaden mcdaniels", "jaylen clark", "joan beringer", "jonathan kuminga", "lamelo ball", "rocco zikarsky", "rudy gobert", "terrence shannon", "trey lyles", "zyon pullin"],
   "NO": ["aj johnson", "bennedict mathurin", "bryce mcgowens", "deandre jordan", "dejounte murray", "derik queen", "herbert jones", "jaron pierre", "jeremiah fears", "jordan poole", "julian reese", "karlo matkovic", "malik dia", "saddiq bey", "trendon watford", "trey murphy", "yves missi", "zion williamson"],
   "NY": ["andre drummond", "dalton knecht", "jaden akins", "jalen brunson", "james wiseman", "jordan clarkson", "jose alvarado", "josh hart", "karl anthony towns", "landry shamet", "mikal bridges", "miles mcbride", "mohamed diawara", "og anunoby", "pacome dadiet", "tyler kolek", "tyler nickel"],
-  "OKC": ["aday mara", "ajay mitchell", "alex caruso", "bennett stirtz", "brooks barnhizer", "cason wallace", "chet holmgren", "isaiah hartenstein", "jalen williams", "jared mccain", "jaylin williams", "josh dix", "kenrich williams", "micah peavy", "nikola topic", "shai gilgeous alexander", "thomas sorber"],
+  "OKC": ["aday mara", "ajay mitchell", "alex caruso", "bennett stirtz", "brooks barnhizer", "cason wallace", "chet holmgren", "isaiah hartenstein", "jalen williams", "jared mccain", "jaylin williams", "josh dix", "kenrich williams", "micah peavy", "nikola topic", "ochai agbaji", "shai gilgeous alexander", "thomas sorber"],
   "ORL": ["alex morales", "anthony black", "colin castleton", "desmond bane", "franz wagner", "goga bitadze", "izaiyah nelson", "jalen suggs", "jamal cain", "jase richardson", "jevon carter", "jonathan isaac", "nikola vucevic", "noah penda", "paolo banchero", "tristan da silva", "wendell carter"],
   "PHI": ["adem bona", "anfernee simons", "ariel hukporti", "caleb love", "dean wade", "dominick barlow", "jabari walker", "jaylen brown", "joel embiid", "justin edwards", "kentavious caldwell pope", "labaron philon", "lebron james", "rayan rupert", "tacko fall", "tyrese maxey", "vj edgecombe"],
   "PHX": ["collin gillespie", "devin booker", "dillon brooks", "drew timme", "duop reath", "jalen green", "jamaree bouyea", "jordan goodwin", "khaman maluach", "koa peat", "luke kennard", "mark williams", "miles bridges", "oso ighodaro", "pat spencer", "rasheer fleming", "ryan dunn"],
