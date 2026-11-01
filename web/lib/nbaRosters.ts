@@ -4,7 +4,7 @@
 //
 // Resolution lives in lib/nbaTeamTag.ts, NOT here — a helper added to a generated file is
 // wiped by the next refresh, which has taken this project's build down before.
-// Generated 2026-10-31T16:20:59+00:00 — 30 teams, 522 players.
+// Generated 2026-11-01T17:16:13+00:00 — 30 teams, 521 players.
 
 /** Team name as the ODDS FEED spells it, keyed on letters+digits only, to its
  *  abbreviation. Keyed rather than literal so a feed that writes 'LA Clippers' for
@@ -99,7 +99,7 @@ export const NBA_ROSTER: Record<string, string[]> = {
   "MIN": ["anthony edwards", "ayo dosunmu", "bones hyland", "cody williams", "donte divincenzo", "enrique freeman", "isaiah evans", "jaden mcdaniels", "jaylen clark", "joan beringer", "jonathan kuminga", "lamelo ball", "rocco zikarsky", "rudy gobert", "terrence shannon", "trey lyles", "zyon pullin"],
   "NO": ["aj johnson", "bennedict mathurin", "bryce mcgowens", "deandre jordan", "dejounte murray", "derik queen", "herbert jones", "jaron pierre", "jeremiah fears", "jordan poole", "julian reese", "karlo matkovic", "malik dia", "saddiq bey", "trendon watford", "trey murphy", "yves missi", "zion williamson"],
   "NY": ["andre drummond", "dalton knecht", "jaden akins", "jalen brunson", "james wiseman", "jordan clarkson", "jose alvarado", "josh hart", "karl anthony towns", "landry shamet", "mikal bridges", "miles mcbride", "mohamed diawara", "og anunoby", "pacome dadiet", "tyler kolek", "tyler nickel"],
-  "OKC": ["aday mara", "ajay mitchell", "alex caruso", "bennett stirtz", "brooks barnhizer", "cason wallace", "chet holmgren", "isaiah hartenstein", "jalen williams", "jared mccain", "jaylin williams", "josh dix", "kenrich williams", "micah peavy", "nikola topic", "ochai agbaji", "shai gilgeous alexander", "thomas sorber"],
+  "OKC": ["aday mara", "ajay mitchell", "alex caruso", "bennett stirtz", "brooks barnhizer", "cason wallace", "chet holmgren", "isaiah hartenstein", "jalen williams", "jared mccain", "jaylin williams", "josh dix", "kenrich williams", "micah peavy", "nikola topic", "shai gilgeous alexander", "thomas sorber"],
   "ORL": ["alex morales", "anthony black", "colin castleton", "desmond bane", "franz wagner", "goga bitadze", "izaiyah nelson", "jalen suggs", "jamal cain", "jase richardson", "jevon carter", "jonathan isaac", "nikola vucevic", "noah penda", "paolo banchero", "tristan da silva", "wendell carter"],
   "PHI": ["adem bona", "anfernee simons", "ariel hukporti", "caleb love", "dean wade", "dominick barlow", "jabari walker", "jaylen brown", "joel embiid", "justin edwards", "kentavious caldwell pope", "labaron philon", "lebron james", "rayan rupert", "tacko fall", "tyrese maxey", "vj edgecombe"],
   "PHX": ["collin gillespie", "devin booker", "dillon brooks", "drew timme", "duop reath", "jalen green", "jamaree bouyea", "jordan goodwin", "khaman maluach", "koa peat", "luke kennard", "mark williams", "miles bridges", "oso ighodaro", "pat spencer", "rasheer fleming", "ryan dunn"],
@@ -107,6 +107,6 @@ export const NBA_ROSTER: Record<string, string[]> = {
   "SA": ["carter bryant", "david jones garcia", "deaaron fox", "devin vassell", "dylan harper", "harrison barnes", "jakobi gillespie", "jayden quaintance", "jordan mclaughlin", "julian champagnie", "keldon johnson", "luke kornet", "maliq brown", "stephon castle", "tarris reed", "tobias harris", "victor wembanyama"],
   "SAC": ["alex karaban", "ben simmons", "daeqwon plowden", "darius acuff", "deandre hunter", "domantas sabonis", "dylan cardwell", "emanuel sharp", "jonathan mogbo", "keegan murray", "leaky black", "malik monk", "maxime raynaud", "nique clifford", "precious achiuwa", "sean pedulla", "zach lavine"],
   "TOR": ["alijah martin", "allen graves", "collin murray boyles", "immanuel quickley", "jaden bradley", "jakob poeltl", "jakobe walter", "jamal shead", "jamison battle", "kawhi leonard", "kyle anderson", "malachi smith", "nate bittle", "rj barrett", "scottie barnes", "trayce jackson davis"],
-  "UTAH": ["ace bailey", "blake hinson", "brice sensabaugh", "darryn peterson", "harrison ingram", "isaiah collier", "jaren jackson", "jaxson hayes", "josh green", "josh okogie", "jusuf nurkic", "keyonte george", "kyle filipowski", "lauri markkanen", "mo bamba", "svi mykhailiuk", "tony bradley", "trey alexander"],
+  "UTAH": ["ace bailey", "brice sensabaugh", "darryn peterson", "harrison ingram", "isaiah collier", "jaren jackson", "jaxson hayes", "josh green", "josh okogie", "jusuf nurkic", "keyonte george", "kobe bufkin", "kyle filipowski", "lauri markkanen", "mo bamba", "svi mykhailiuk", "tony bradley", "trey alexander"],
   "WSH": ["aj dybantsa", "alex sarr", "anthony davis", "anthony gill", "bilal coulibaly", "bub carrington", "deandre ayton", "felix okpara", "jamir watkins", "justin champagnie", "khris middleton", "kyshawn george", "reece beekman", "trae young", "tre johnson", "tre mann", "tristan vukcevic", "will riley"],
 };
