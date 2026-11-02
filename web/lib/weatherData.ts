@@ -7,7 +7,7 @@ export interface GameWeather { eventId: string; game: string; home: string; away
   gustMph: number|null; precipPct: number|null; conditions: string|null; windFlag: boolean }
 export const WEATHER_SEASON = 2026;
 export const WEATHER_WEEK = 8;
-export const WEATHER_UPDATED = "2026-11-02T08:45Z";
+export const WEATHER_UPDATED = "2026-11-02T16:45Z";
 export const GAME_WEATHER: GameWeather[] = [
-  {"eventId": "7d664fbcd39350e559d83c0068ba7169", "game": "CHI @ SEA", "home": "SEA", "away": "CHI", "commence": "2026-11-03T01:20:00+00:00", "neutral": false, "venue": "Lumen Field", "city": "Seattle", "state": "WA", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 50, "windMph": 3, "gustMph": 4, "precipPct": 1, "conditions": "Overcast", "windFlag": false},
+  {"eventId": "7d664fbcd39350e559d83c0068ba7169", "game": "CHI @ SEA", "home": "SEA", "away": "CHI", "commence": "2026-11-03T01:20:00+00:00", "neutral": false, "venue": "Lumen Field", "city": "Seattle", "state": "WA", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 48, "windMph": 2, "gustMph": 2, "precipPct": 2, "conditions": "Overcast", "windFlag": false},
 ];
