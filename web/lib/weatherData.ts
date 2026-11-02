@@ -7,8 +7,7 @@ export interface GameWeather { eventId: string; game: string; home: string; away
   gustMph: number|null; precipPct: number|null; conditions: string|null; windFlag: boolean }
 export const WEATHER_SEASON = 2026;
 export const WEATHER_WEEK = 8;
-export const WEATHER_UPDATED = "2026-11-02T00:52Z";
+export const WEATHER_UPDATED = "2026-11-02T08:45Z";
 export const GAME_WEATHER: GameWeather[] = [
-  {"eventId": "b9c60db63b1a19ad319f24b33c0defe8", "game": "PHI @ WAS", "home": "WAS", "away": "PHI", "commence": "2026-11-02T01:20:00+00:00", "neutral": false, "venue": "Northwest Stadium", "city": "Landover", "state": "MD", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 52, "windMph": 4, "gustMph": 8, "precipPct": 0, "conditions": "Clear", "windFlag": false},
-  {"eventId": "7d664fbcd39350e559d83c0068ba7169", "game": "CHI @ SEA", "home": "SEA", "away": "CHI", "commence": "2026-11-03T01:20:00+00:00", "neutral": false, "venue": "Lumen Field", "city": "Seattle", "state": "WA", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 50, "windMph": 2, "gustMph": 2, "precipPct": 1, "conditions": "Overcast", "windFlag": false},
+  {"eventId": "7d664fbcd39350e559d83c0068ba7169", "game": "CHI @ SEA", "home": "SEA", "away": "CHI", "commence": "2026-11-03T01:20:00+00:00", "neutral": false, "venue": "Lumen Field", "city": "Seattle", "state": "WA", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 50, "windMph": 3, "gustMph": 4, "precipPct": 1, "conditions": "Overcast", "windFlag": false},
 ];
