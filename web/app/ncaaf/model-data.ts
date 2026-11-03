@@ -1539,7 +1539,7 @@ export const NCAAF_MODEL = {
           "fav": "Nebraska",
           "num": -4.5
         },
-        "marketTotal": 49.5,
+        "marketTotal": 50.5,
         "projSpread": {
           "fav": "Nebraska",
           "num": -3.9
@@ -3076,7 +3076,7 @@ export const NCAAF_MODEL = {
         "conf": "Conference USA",
         "marketSpread": {
           "fav": "Liberty",
-          "num": -16.5
+          "num": -17.5
         },
         "marketTotal": 46.5,
         "projSpread": {
@@ -3088,7 +3088,7 @@ export const NCAAF_MODEL = {
         "awayRiser": 35,
         "pick": {
           "side": "Liberty",
-          "num": -16.5
+          "num": -17.5
         },
         "totalLean": {
           "dir": "OVER",
@@ -22696,8 +22696,8 @@ export const NCAAF_MODEL = {
             "homeRiser": 17,
             "awayRiser": 9,
             "pick": {
-              "side": "Air Force",
-              "num": -0.8
+              "side": "UConn",
+              "num": 0.8
             },
             "totalLean": {
               "dir": "OVER",
@@ -24063,7 +24063,7 @@ export const NCAAF_MODEL = {
               "fav": "Nebraska",
               "num": -4.5
             },
-            "marketTotal": 49.5,
+            "marketTotal": 50.5,
             "projSpread": {
               "fav": "Nebraska",
               "num": -3.9
@@ -25600,7 +25600,7 @@ export const NCAAF_MODEL = {
             "conf": "Conference USA",
             "marketSpread": {
               "fav": "Liberty",
-              "num": -16.5
+              "num": -17.5
             },
             "marketTotal": 46.5,
             "projSpread": {
@@ -25612,7 +25612,7 @@ export const NCAAF_MODEL = {
             "awayRiser": 35,
             "pick": {
               "side": "Liberty",
-              "num": -16.5
+              "num": -17.5
             },
             "totalLean": {
               "dir": "OVER",
