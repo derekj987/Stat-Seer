@@ -9,7 +9,7 @@
 // the ACTUAL MARGIN, which is a different and weaker claim: beating a naive baseline
 // says the rating carries information, beating the market says it carries information
 // the market has not already priced. /nba/model says so on its face.
-// Generated 2026-11-03T07:38:11+00:00
+// Generated 2026-11-04T07:38:23+00:00
 
 export interface NbaModelGame {
   commence: string; away: string; home: string; awayName: string; homeName: string;
@@ -79,4 +79,14 @@ export const NBA_MODEL: NbaModelGame[] = [
   {"commence": "2026-11-11T02:00Z", "away": "MIA", "home": "UTAH", "awayName": "Miami Heat", "homeName": "Utah Jazz", "margin": -7.6, "favored": "MIA", "spread": "MIA -7.6", "total": 248.2},
   {"commence": "2026-11-11T03:00Z", "away": "ORL", "home": "SAC", "awayName": "Orlando Magic", "homeName": "Sacramento Kings", "margin": -7.7, "favored": "ORL", "spread": "ORL -7.7", "total": 230.7},
   {"commence": "2026-11-11T04:00Z", "away": "OKC", "home": "POR", "awayName": "Oklahoma City Thunder", "homeName": "Portland Trail Blazers", "margin": -6.4, "favored": "OKC", "spread": "OKC -6.4", "total": 224.1},
+  {"commence": "2026-11-12T00:00Z", "away": "WSH", "home": "IND", "awayName": "Washington Wizards", "homeName": "Indiana Pacers", "margin": 3.2, "favored": "IND", "spread": "IND -3.2", "total": 231.6},
+  {"commence": "2026-11-12T00:00Z", "away": "CLE", "home": "NY", "awayName": "Cleveland Cavaliers", "homeName": "New York Knicks", "margin": 3.4, "favored": "NY", "spread": "NY -3.4", "total": 227.2},
+  {"commence": "2026-11-12T00:00Z", "away": "BOS", "home": "TOR", "awayName": "Boston Celtics", "homeName": "Toronto Raptors", "margin": -1.8, "favored": "BOS", "spread": "BOS -1.8", "total": 221.6},
+  {"commence": "2026-11-12T01:00Z", "away": "SA", "home": "CHI", "awayName": "San Antonio Spurs", "homeName": "Chicago Bulls", "margin": -13.6, "favored": "SA", "spread": "SA -13.6", "total": 239.3},
+  {"commence": "2026-11-12T01:00Z", "away": "DEN", "home": "MEM", "awayName": "Denver Nuggets", "homeName": "Memphis Grizzlies", "margin": -5.4, "favored": "DEN", "spread": "DEN -5.4", "total": 240.9},
+  {"commence": "2026-11-12T01:00Z", "away": "LAL", "home": "MIL", "awayName": "Los Angeles Lakers", "homeName": "Milwaukee Bucks", "margin": -9.0, "favored": "LAL", "spread": "LAL -9.0", "total": 234.9},
+  {"commence": "2026-11-12T01:00Z", "away": "BKN", "home": "NO", "awayName": "Brooklyn Nets", "homeName": "New Orleans Pelicans", "margin": 7.4, "favored": "NO", "spread": "NO -7.4", "total": 229.8},
+  {"commence": "2026-11-12T02:00Z", "away": "ORL", "home": "UTAH", "awayName": "Orlando Magic", "homeName": "Utah Jazz", "margin": -5.9, "favored": "ORL", "spread": "ORL -5.9", "total": 234.9},
+  {"commence": "2026-11-12T02:30Z", "away": "GS", "home": "HOU", "awayName": "Golden State Warriors", "homeName": "Houston Rockets", "margin": 8.0, "favored": "HOU", "spread": "HOU -8.0", "total": 227.2},
+  {"commence": "2026-11-12T03:00Z", "away": "OKC", "home": "POR", "awayName": "Oklahoma City Thunder", "homeName": "Portland Trail Blazers", "margin": -6.4, "favored": "OKC", "spread": "OKC -6.4", "total": 224.1},
 ];
