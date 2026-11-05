@@ -21,5 +21,7 @@ export interface ShoppingValue {
 }
 
 export const SHOPPING_VALUE: Record<string, ShoppingValue> = {
+  "mlb": {"sport": "mlb", "season": null, "prices": 1758, "events": 283, "books": 10, "gainVsTypical": 0.66, "gainVsLineBook": 0.61, "generated": "2026-10-28T14:44:04+00:00"},
   "nfl": {"sport": "nfl", "season": 2026, "prices": 9612, "events": 89, "books": 10, "gainVsTypical": 1.0, "gainVsLineBook": 0.84, "generated": "2026-10-27T15:24:47+00:00"},
+  "nhl": {"sport": "nhl", "season": null, "prices": 9778, "events": 5363, "books": 10, "gainVsTypical": 0.65, "gainVsLineBook": 0.82, "generated": "2026-10-28T14:46:54+00:00"},
 };
