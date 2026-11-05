@@ -137,111 +137,46 @@ def load_games():
     return pd.read_csv(GAMES_LOCAL, low_memory=False)
 
 
-def current_week(env, season):
-    """The nearest week that still has a game to come — the same rule the site's week nav uses
-    (`currentWeek()` in web/lib/board.ts): the lowest week with a kickoff still in the future.
+def current_week(games, season):
+    """The lowest week of `season` that still has a game to come, from the SCHEDULE.
 
-    This is what makes a DAILY cron correct without a hardcoded week. The week only rolls forward
-    once the last game of the current week has kicked off, so week N+1 becomes publishable on the
-    Monday night / Tuesday after week N finishes -- comfortably before its own Thursday kickoff,
-    which the ledger requires (published_at < commence_time is enforced at the database).
+    🚨 THIS USED TO ASK odds_snapshots, AND THAT WAS THE WRONG SOURCE FOR THE QUESTION. Four
+    separate fixes went into that query -- the range expressed as two bare filters on one column,
+    a filter on the unindexed `collected_at`, a fortnight-wide read paged for a single minimum,
+    and the retry budget -- and the fifth dispatch still returned HTTP 500 on a `limit=1` indexed
+    lookup that runs 10/10 clean from a laptop in 0.18-0.47s. Each fix was real and none was
+    sufficient, because the dependency itself was wrong: "which week is it?" was being asked of a
+    1.3M-row snapshot table that has to be fast enough to answer, from a runner that evidently
+    gets different treatment than a laptop does.
 
-    Returns None when no future game has odds yet; the caller treats that as "nothing to do today"
-    rather than an error, so the run is a clean no-op and retries tomorrow.
+    Four consecutive scheduled runs failed on it, so NFL week 9 went unpublished and the Model
+    Spread column sat blank on the live site -- the whole visible symptom traced back to asking
+    the odds table a question the schedule answers.
 
-    🚨 BOUNDED WINDOW, AND THE MINIMUM TAKEN IN CODE. This asked the server for
-    `commence_time > now ... order=week.asc&limit=1`, which is a filter plus a SORT over every row
-    odds_snapshots holds for the season. That is fine in September and fatal by October: the table
-    only grows, and on 2026-10-11 the query started returning HTTP 500 and did so on four
-    consecutive daily runs, so no week-6 prediction was ever published. Measured afterwards, the
-    same query still took 2.2 SECONDS to return ONE ROW — a scan that had simply crossed the
-    statement timeout under load.
+    WHICH WEEK IT IS, IS A SCHEDULE FACT. games.csv is downloaded by this script anyway, cached on
+    disk, and already the source every other part of this run trusts for kickoff times. One pandas
+    comparison, no network, nothing that can 500.
 
-    A fortnight is more than enough to find the next kickoff (the NFL never has a 14-day gap
-    in-season), it is an indexed range rather than a sort, and min() over a few hundred rows costs
-    nothing. Measured: 2.2s -> 0.2s. Same answer, week 6 either way.
+    Kickoff times are Eastern in nflverse's feed (`gameday` + `gametime`), so they are localised
+    before comparing against now. A row with no gametime yet -- a late-season slot the league has
+    not assigned -- defaults to 13:00 ET, which is the earliest an NFL game realistically starts
+    and therefore errs toward treating the week as still live rather than skipping past it.
 
-    This is the third shape of the same lesson already in this file: never ask PostgREST to order a
-    snapshot table. Pin or bound it, then resolve in code.
-
-    🚨 AND ONE ROW PER EVENT, because dropping the sort was only half of it. `_get` pages until a
-    SHORT page comes back, so a bare `select=week` over a fortnight pulls every book x market x
-    outcome x sweep — about thirty pages. The same mistake in the web app's copy of this function
-    took /model from ~1s to 34 SECONDS to render. Narrowing to one book/market/outcome gives one
-    row per event per sweep: 90 rows in a single page, 0.98s measured."""
-    now = datetime.datetime.now(datetime.timezone.utc)
-    # (the fortnight bound is now first_week_from's day_offset_limit, not a timestamp)
-    # (the 36h recency bound that used to live here is gone — see the note on the query below)
-    # 🚨 THE RANGE GOES IN ONE `and=(...)`, NOT TWO BARE FILTERS ON THE SAME COLUMN. This is the
-    # FOURTH shape of the 500 this function has hit, and the first one whose cause was isolated
-    # rather than worked around. Two `commence_time=` params express the range correctly and
-    # PostgREST accepts them, but the plan they produce crosses the statement timeout on a table
-    # this size. Measured 2026-11-05 against odds_snapshots, same window, same filters, varying
-    # ONLY the shape:
-    #
-    #     &commence_time=gt.X&commence_time=lt.Y          -> HTTP 500 after 9.2s
-    #     &and=(commence_time.gt.X,commence_time.lt.Y)    -> OK, 1000 rows in 1.3s
-    #
-    # Publish-predictions had failed its four most recent runs on this, retrying twice each time
-    # and raising -- so no NFL week was published while it lasted, which is the same member-facing
-    # hole as the Tuesday gap (a blank Model Spread column) arriving by a different road.
-    #
-    # The timestamps must be FULLY percent-encoded inside the group (safe=''), or the `+00:00`
-    # offset arrives as a space and PostgREST answers 400. The bounded window and the one
-    # book/market/outcome narrowing below are still load-bearing for their own reasons; this is
-    # additional to them, not a replacement.
-    _q = lambda s: urllib.parse.quote(s, safe="")   # noqa: E731
-
-    # 🚨 WALK FORWARD A DAY AT A TIME AND STOP AT THE FIRST HIT, rather than pulling the whole
-    # fortnight and taking a min. The answer is the EARLIEST future kickoff's week, and NFL weeks
-    # do not overlap, so the first day that has any priced game already decides it -- everything
-    # after that day was being fetched only to be discarded.
-    #
-    # It is not a style preference; the old shape was too slow to survive. `_get` pages, so one
-    # fortnight-wide query pulled thousands of rows to compute a single minimum: measured
-    # 2026-11-05, current_week took 7-35 SECONDS locally and 500'd through both retries on a
-    # GitHub runner, failing four consecutive scheduled runs and leaving NFL week 9 unpublished
-    # with the Model Spread column blank. A single `limit=1` day query measured 0.18-0.47s over
-    # ten consecutive trials, 10/10 clean, and the whole walk now runs in 1.7-2.7s.
-    #
-    # Usually one request answers this; at most `day_offset_limit` tiny ones do. The limit is the
-    # old fortnight bound, kept for the same reason it was chosen: the NFL never has a 14-day gap
-    # in-season, so failing to find a kickoff inside it means there genuinely is not one.
-    def first_week_from(day_offset_limit=15):
-        for d in range(day_offset_limit):
-            lo_d = now if d == 0 else now + datetime.timedelta(days=d)
-            hi_d = now + datetime.timedelta(days=d + 1)
-            q = (f"?season=eq.{season}"
-                 f"&and=(commence_time.gte.{_q(lo_d.isoformat())},"
-                 f"commence_time.lt.{_q(hi_d.isoformat())})"
-                 "&book=eq.fanduel&market=eq.totals&outcome_name=eq.Over&select=week&limit=1")
-            for r in _get(env, "odds_snapshots", q):
-                if r.get("week") is not None:
-                    return r["week"]
+    Returns None when no game of the season is still to come, which the caller treats as "nothing
+    to do" rather than an error.
+    """
+    rows = games[games["season"] == season]
+    if rows.empty:
         return None
-
-    # 🚨 ONE QUERY, AND IT DOES NOT TOUCH `collected_at`. There were two: a primary filtered on
-    # `collected_at > now-36h`, and a fallback without it for when a paused sweep made the primary
-    # empty. Both are gone, because the recency filter was never load-bearing for THIS question
-    # and was the most expensive thing in it.
-    #
-    # WHY IT IS NOT NEEDED. The answer is "the lowest week with a kickoff still in the future",
-    # which `commence_time` alone decides. WHEN a row was captured has no bearing on which week
-    # its game belongs to, so filtering on capture recency could only ever remove rows that would
-    # have given the same answer.
-    #
-    # WHY IT WAS EXPENSIVE. `collected_at` is not indexed. Measured 2026-11-05, every bounded
-    # count on it alone — 6h, 12h, 24h, 36h, 72h — returned HTTP 500, because without a
-    # `commence_time` bound to plan against it is a full scan of a 1.3M-row table. Inside this
-    # function it was survivable but slow and load-dependent: three trials of the same query took
-    # 3.2s / 0.5s / 0.9s with the filter against 0.8s / 0.7s / 0.2s without it, and on a GitHub
-    # runner it 500'd through both retries and took the whole publish down. Four consecutive runs
-    # failed that way, so NFL week 9 was never published and the Model Spread column went blank.
-    #
-    # Dropping it also removes the fallback, and with it a second failure mode: the fallback was
-    # the ONLY path that could recover from a quiet capture, and it raised rather than returning
-    # None, so the recovery path was itself fatal.
-    return first_week_from()
+    kick = pd.to_datetime(
+        rows["gameday"].astype(str) + " " + rows["gametime"].fillna("13:00").astype(str),
+        errors="coerce",
+    ).dt.tz_localize("America/New_York", nonexistent="shift_forward", ambiguous="NaT")
+    future = rows.assign(_kick=kick)
+    future = future[future["_kick"] > pd.Timestamp.now(tz="UTC")]
+    if future.empty:
+        return None
+    return int(future.loc[future["_kick"].idxmin(), "week"])
 
 
 def main(argv=None):
@@ -255,19 +190,29 @@ def main(argv=None):
     env = oc.load_env()
     oc.ensure_ssl_certs()
 
-    if str(args.week).lower() == "auto":
-        week = current_week(env, args.season)
-        if week is None:
-            print(f"No upcoming {args.season} game has odds captured yet — nothing to publish.")
-            return 0
-        print(f"auto week -> {week}")
-    else:
-        week = int(args.week)
-
+    # 🚨 THE SCHEDULE IS LOADED FIRST NOW, BECAUSE THE WEEK COMES FROM IT. It used to come from
+    # odds_snapshots, which made "which week is it?" depend on a 1.3M-row snapshot table being
+    # fast enough to answer -- and on a GitHub runner it repeatedly was not. FOUR fixes went into
+    # that query (shape, an unindexed column, read size, retries) and the fifth dispatch still
+    # 500'd on a limit=1 indexed lookup that runs 10/10 clean from a laptop. At that point the
+    # query was not the problem: the dependency was.
+    #
+    # Which week it is, is a SCHEDULE fact. games.csv is already downloaded by this very script a
+    # few lines below, already cached on disk, and already the source every other part of the run
+    # trusts for kickoff times. Asking it costs one pandas comparison and cannot 500.
     g = load_games()
     if g is None:
         print("games.csv unavailable (transient) — skipping today; the next run retries.")
         return 0
+
+    if str(args.week).lower() == "auto":
+        week = current_week(g, args.season)
+        if week is None:
+            print(f"No {args.season} game is still to come — nothing to publish.")
+            return 0
+        print(f"auto week -> {week}")
+    else:
+        week = int(args.week)
     # Log what the injury correction did before publishing. An adjustment that silently moves a
     # published, locked number is the kind of thing that should never be discovered later from a
     # diff — the same reason the off-team drops are printed rather than appended to a list nobody
