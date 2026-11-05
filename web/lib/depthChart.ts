@@ -524,7 +524,7 @@ export const DEPTH: Record<string, DepthEntry> = {
   'joe fagnano': { team: 'BAL', pos: 'QB', rank: 2 },
   'joe flacco': { team: 'CIN', pos: 'QB', rank: 2 },
   'joe milton': { team: 'PHI', pos: 'QB', rank: 2 },
-  'joe royer': { team: 'CLE', pos: 'TE', rank: 3 },
+  'joe royer': { team: 'CLE', pos: 'TE', rank: 4 },
   'joel wilson': { team: 'TEN', pos: 'TE', rank: 5 },
   'joey aguilar': { team: 'JAX', pos: 'QB', rank: 5 },
   'john bates': { team: 'WAS', pos: 'TE', rank: 3 },
