@@ -170,7 +170,7 @@ def current_week(env, season):
     took /model from ~1s to 34 SECONDS to render. Narrowing to one book/market/outcome gives one
     row per event per sweep: 90 rows in a single page, 0.98s measured."""
     now = datetime.datetime.now(datetime.timezone.utc)
-    hi = now + datetime.timedelta(days=14)
+    # (the fortnight bound is now first_week_from's day_offset_limit, not a timestamp)
     # (the 36h recency bound that used to live here is gone — see the note on the query below)
     # 🚨 THE RANGE GOES IN ONE `and=(...)`, NOT TWO BARE FILTERS ON THE SAME COLUMN. This is the
     # FOURTH shape of the 500 this function has hit, and the first one whose cause was isolated
@@ -191,13 +191,34 @@ def current_week(env, season):
     # book/market/outcome narrowing below are still load-bearing for their own reasons; this is
     # additional to them, not a replacement.
     _q = lambda s: urllib.parse.quote(s, safe="")   # noqa: E731
-    window = (f"?season=eq.{season}"
-              f"&and=(commence_time.gt.{_q(now.isoformat())},"
-              f"commence_time.lt.{_q(hi.isoformat())})")
 
-    def earliest(q):
-        weeks = [r["week"] for r in _get(env, "odds_snapshots", q) if r.get("week") is not None]
-        return min(weeks) if weeks else None
+    # 🚨 WALK FORWARD A DAY AT A TIME AND STOP AT THE FIRST HIT, rather than pulling the whole
+    # fortnight and taking a min. The answer is the EARLIEST future kickoff's week, and NFL weeks
+    # do not overlap, so the first day that has any priced game already decides it -- everything
+    # after that day was being fetched only to be discarded.
+    #
+    # It is not a style preference; the old shape was too slow to survive. `_get` pages, so one
+    # fortnight-wide query pulled thousands of rows to compute a single minimum: measured
+    # 2026-11-05, current_week took 7-35 SECONDS locally and 500'd through both retries on a
+    # GitHub runner, failing four consecutive scheduled runs and leaving NFL week 9 unpublished
+    # with the Model Spread column blank. A single `limit=1` day query measured 0.18-0.47s over
+    # ten consecutive trials, 10/10 clean, and the whole walk now runs in 1.7-2.7s.
+    #
+    # Usually one request answers this; at most `day_offset_limit` tiny ones do. The limit is the
+    # old fortnight bound, kept for the same reason it was chosen: the NFL never has a 14-day gap
+    # in-season, so failing to find a kickoff inside it means there genuinely is not one.
+    def first_week_from(day_offset_limit=15):
+        for d in range(day_offset_limit):
+            lo_d = now if d == 0 else now + datetime.timedelta(days=d)
+            hi_d = now + datetime.timedelta(days=d + 1)
+            q = (f"?season=eq.{season}"
+                 f"&and=(commence_time.gte.{_q(lo_d.isoformat())},"
+                 f"commence_time.lt.{_q(hi_d.isoformat())})"
+                 "&book=eq.fanduel&market=eq.totals&outcome_name=eq.Over&select=week&limit=1")
+            for r in _get(env, "odds_snapshots", q):
+                if r.get("week") is not None:
+                    return r["week"]
+        return None
 
     # 🚨 ONE QUERY, AND IT DOES NOT TOUCH `collected_at`. There were two: a primary filtered on
     # `collected_at > now-36h`, and a fallback without it for when a paused sweep made the primary
@@ -220,7 +241,7 @@ def current_week(env, season):
     # Dropping it also removes the fallback, and with it a second failure mode: the fallback was
     # the ONLY path that could recover from a quiet capture, and it raised rather than returning
     # None, so the recovery path was itself fatal.
-    return earliest(window + "&book=eq.fanduel&market=eq.totals&outcome_name=eq.Over&select=week")
+    return first_week_from()
 
 
 def main(argv=None):
