@@ -171,7 +171,7 @@ def current_week(env, season):
     row per event per sweep: 90 rows in a single page, 0.98s measured."""
     now = datetime.datetime.now(datetime.timezone.utc)
     hi = now + datetime.timedelta(days=14)
-    lo = now - datetime.timedelta(hours=36)
+    # (the 36h recency bound that used to live here is gone — see the note on the query below)
     # 🚨 THE RANGE GOES IN ONE `and=(...)`, NOT TWO BARE FILTERS ON THE SAME COLUMN. This is the
     # FOURTH shape of the 500 this function has hit, and the first one whose cause was isolated
     # rather than worked around. Two `commence_time=` params express the range correctly and
@@ -199,25 +199,27 @@ def current_week(env, season):
         weeks = [r["week"] for r in _get(env, "odds_snapshots", q) if r.get("week") is not None]
         return min(weeks) if weeks else None
 
-    # Fully encoded, same as the window above: quote() with its default safe='/' leaves the `+`
-    # of the `+00:00` offset alone, and a bare `+` in a query string decodes to a SPACE. The
-    # filter then compares against a malformed timestamp instead of the one intended.
-    wk = earliest(window + f"&collected_at=gt.{_q(lo.isoformat())}"
-                  "&book=eq.fanduel&market=eq.totals&outcome_name=eq.Over&select=week")
-    if wk is not None:
-        return wk
-    # Nothing captured in the last 36h. Widen rather than report "nothing to publish" — a paused
-    # sweep should not look identical to an empty schedule.
+    # 🚨 ONE QUERY, AND IT DOES NOT TOUCH `collected_at`. There were two: a primary filtered on
+    # `collected_at > now-36h`, and a fallback without it for when a paused sweep made the primary
+    # empty. Both are gone, because the recency filter was never load-bearing for THIS question
+    # and was the most expensive thing in it.
     #
-    # 🚨 WIDEN THE RECENCY CONDITION ONLY, AND KEEP THE BOOK NARROWING. This dropped
-    # `book=eq.fanduel` as well, which is not "widening the window" -- it multiplies the scan by
-    # every book in the table for an answer that needs one row per event per sweep. That is the
-    # same mistake the docstring above already warns about ("a bare select=week over a fortnight
-    # pulls every book x market x outcome x sweep"), reintroduced in the fallback path where it
-    # was easy to miss because the fallback only runs when the primary found nothing. Measured
-    # 2026-11-05: the primary query returned in ~1s while this one 500'd after two retries, and
-    # because it raises rather than returning None it took the whole run down with it -- on the
-    # one path that exists to RECOVER from a quiet capture.
+    # WHY IT IS NOT NEEDED. The answer is "the lowest week with a kickoff still in the future",
+    # which `commence_time` alone decides. WHEN a row was captured has no bearing on which week
+    # its game belongs to, so filtering on capture recency could only ever remove rows that would
+    # have given the same answer.
+    #
+    # WHY IT WAS EXPENSIVE. `collected_at` is not indexed. Measured 2026-11-05, every bounded
+    # count on it alone — 6h, 12h, 24h, 36h, 72h — returned HTTP 500, because without a
+    # `commence_time` bound to plan against it is a full scan of a 1.3M-row table. Inside this
+    # function it was survivable but slow and load-dependent: three trials of the same query took
+    # 3.2s / 0.5s / 0.9s with the filter against 0.8s / 0.7s / 0.2s without it, and on a GitHub
+    # runner it 500'd through both retries and took the whole publish down. Four consecutive runs
+    # failed that way, so NFL week 9 was never published and the Model Spread column went blank.
+    #
+    # Dropping it also removes the fallback, and with it a second failure mode: the fallback was
+    # the ONLY path that could recover from a quiet capture, and it raised rather than returning
+    # None, so the recovery path was itself fatal.
     return earliest(window + "&book=eq.fanduel&market=eq.totals&outcome_name=eq.Over&select=week")
 
 
