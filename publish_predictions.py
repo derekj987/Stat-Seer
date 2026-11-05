@@ -172,21 +172,53 @@ def current_week(env, season):
     now = datetime.datetime.now(datetime.timezone.utc)
     hi = now + datetime.timedelta(days=14)
     lo = now - datetime.timedelta(hours=36)
+    # 🚨 THE RANGE GOES IN ONE `and=(...)`, NOT TWO BARE FILTERS ON THE SAME COLUMN. This is the
+    # FOURTH shape of the 500 this function has hit, and the first one whose cause was isolated
+    # rather than worked around. Two `commence_time=` params express the range correctly and
+    # PostgREST accepts them, but the plan they produce crosses the statement timeout on a table
+    # this size. Measured 2026-11-05 against odds_snapshots, same window, same filters, varying
+    # ONLY the shape:
+    #
+    #     &commence_time=gt.X&commence_time=lt.Y          -> HTTP 500 after 9.2s
+    #     &and=(commence_time.gt.X,commence_time.lt.Y)    -> OK, 1000 rows in 1.3s
+    #
+    # Publish-predictions had failed its four most recent runs on this, retrying twice each time
+    # and raising -- so no NFL week was published while it lasted, which is the same member-facing
+    # hole as the Tuesday gap (a blank Model Spread column) arriving by a different road.
+    #
+    # The timestamps must be FULLY percent-encoded inside the group (safe=''), or the `+00:00`
+    # offset arrives as a space and PostgREST answers 400. The bounded window and the one
+    # book/market/outcome narrowing below are still load-bearing for their own reasons; this is
+    # additional to them, not a replacement.
+    _q = lambda s: urllib.parse.quote(s, safe="")   # noqa: E731
     window = (f"?season=eq.{season}"
-              f"&commence_time=gt.{urllib.parse.quote(now.isoformat())}"
-              f"&commence_time=lt.{urllib.parse.quote(hi.isoformat())}")
+              f"&and=(commence_time.gt.{_q(now.isoformat())},"
+              f"commence_time.lt.{_q(hi.isoformat())})")
 
     def earliest(q):
         weeks = [r["week"] for r in _get(env, "odds_snapshots", q) if r.get("week") is not None]
         return min(weeks) if weeks else None
 
-    wk = earliest(window + f"&collected_at=gt.{urllib.parse.quote(lo.isoformat())}"
+    # Fully encoded, same as the window above: quote() with its default safe='/' leaves the `+`
+    # of the `+00:00` offset alone, and a bare `+` in a query string decodes to a SPACE. The
+    # filter then compares against a malformed timestamp instead of the one intended.
+    wk = earliest(window + f"&collected_at=gt.{_q(lo.isoformat())}"
                   "&book=eq.fanduel&market=eq.totals&outcome_name=eq.Over&select=week")
     if wk is not None:
         return wk
     # Nothing captured in the last 36h. Widen rather than report "nothing to publish" — a paused
     # sweep should not look identical to an empty schedule.
-    return earliest(window + "&market=eq.totals&outcome_name=eq.Over&select=week")
+    #
+    # 🚨 WIDEN THE RECENCY CONDITION ONLY, AND KEEP THE BOOK NARROWING. This dropped
+    # `book=eq.fanduel` as well, which is not "widening the window" -- it multiplies the scan by
+    # every book in the table for an answer that needs one row per event per sweep. That is the
+    # same mistake the docstring above already warns about ("a bare select=week over a fortnight
+    # pulls every book x market x outcome x sweep"), reintroduced in the fallback path where it
+    # was easy to miss because the fallback only runs when the primary found nothing. Measured
+    # 2026-11-05: the primary query returned in ~1s while this one 500'd after two retries, and
+    # because it raises rather than returning None it took the whole run down with it -- on the
+    # one path that exists to RECOVER from a quiet capture.
+    return earliest(window + "&book=eq.fanduel&market=eq.totals&outcome_name=eq.Over&select=week")
 
 
 def main(argv=None):
