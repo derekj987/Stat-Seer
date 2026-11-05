@@ -56,6 +56,8 @@ import os
 import re
 import statistics
 import sys
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from collections import defaultdict
@@ -70,7 +72,23 @@ US_BOOKS = {"draftkings", "fanduel", "betmgm", "williamhill_us", "fanatics", "be
 
 SPORTS = {
     "nfl":   dict(table="odds_snapshots",     commence="commence_time", has_season=True),
-    "ncaaf": dict(table="cfb_odds_snapshots", commence="commence",      has_season=False),
+    # cfb_odds_snapshots uses commence_time, NOT `commence` — unlike cfb_PROP_snapshots, which
+    # does use `commence`. The two CFB tables disagree with each other, so introspect rather than
+    # assume from the sport: `?select=*&limit=1`. Guessing it cost a 400 and a wasted run.
+    #
+    # 🚨 NCAAF IS NOT GRADABLE THROUGH THIS SCRIPT TODAY, AND THE REASON IS THE TABLE, NOT THE
+    # METHOD. cfb_odds_snapshots holds ~1.27M rows (394k of them h2h) and answers HTTP 500 — a
+    # server-side statement timeout — on these reads no matter how the client chunks them.
+    # Tried and failed, 2026-10-28..11-05: unbounded; --days 120; --days 75 with 7-day windows;
+    # --days 30 with 1-DAY windows. A hand probe of a single 2-day window DOES succeed in ~3s
+    # with the same filters and the same parameter shape, including at offset 4000, so the query
+    # is serviceable in isolation and not in a sequence of hundreds.
+    #
+    # The remaining fixes are server-side, not client-side: an index on (market, commence_time)
+    # or a Postgres view/RPC that returns one row per (event, snapshot, side) instead of making
+    # this script page the raw rows. More chunking has been tried to exhaustion and is not it.
+    # Until then /ncaaf/lines correctly shows no measured number rather than a borrowed one.
+    "ncaaf": dict(table="cfb_odds_snapshots", commence="commence_time", has_season=False),
     "nhl":   dict(table="nhl_odds_snapshots", commence="commence_time", has_season=False),
     "mlb":   dict(table="mlb_odds_snapshots", commence="commence_time", has_season=False),
     "nba":   dict(table="nba_odds_snapshots", commence="commence_time", has_season=False),
@@ -117,9 +135,17 @@ def load_env():
     return env
 
 
-def page(url, key, table, params):
+def page(url, key, table, params, tries=5):
     """Paged PostgREST read. `limit=` does not raise the 1000-row ceiling, and a response sitting
-    exactly at it is indistinguishable from a complete one."""
+    exactly at it is indistinguishable from a complete one.
+
+    🚨 EACH PAGE RETRIES, BECAUSE THESE READS ARE LONG ENOUGH FOR A BLIP TO BE LIKELY. The NHL
+    table holds five years of moneylines — about 280 pages — and a single
+    `[WinError 10054] connection forcibly closed` two hundred pages in threw the whole run away,
+    which is exactly what happened on the first MLB attempt. A transient network error is not a
+    result; retrying the page costs seconds and losing the run costs minutes. A 4xx still raises
+    immediately, because a bad column or a bad filter must fail loudly rather than be retried
+    five times and reported as a network problem."""
     out, start = [], 0
     while True:
         q = urllib.parse.urlencode(params, safe="*.,()")
@@ -127,12 +153,76 @@ def page(url, key, table, params):
             f"{url.rstrip('/')}/rest/v1/{table}?{q}",
             headers={"apikey": key, "Authorization": f"Bearer {key}",
                      "Range": f"{start}-{start + 999}", "Accept": "application/json"})
-        with urllib.request.urlopen(req, timeout=120) as r:
-            rows = json.loads(r.read().decode())
+        rows = None
+        for attempt in range(tries):
+            try:
+                with urllib.request.urlopen(req, timeout=120) as r:
+                    rows = json.loads(r.read().decode())
+                break
+            except urllib.error.HTTPError as e:
+                if e.code < 500:
+                    raise
+                if attempt == tries - 1:
+                    raise
+                time.sleep(2 * (attempt + 1))
+            except Exception:  # noqa: BLE001  — URLError, socket reset, truncated read
+                if attempt == tries - 1:
+                    raise
+                time.sleep(2 * (attempt + 1))
         out += rows
         if len(rows) < 1000:
             return out
         start += 1000
+
+
+def page_windows(url, key, table, params, ccol, lo, hi, step_days=14):
+    """Read a date range in WINDOWS, paging each one separately.
+
+    🚨 A DEEP `Range:` OFFSET IS WHAT TIMES OUT, NOT THE FILTER — and that distinction took two
+    failed runs to find. cfb_odds_snapshots (1.27M rows) answered HTTP 500 on every retry, so the
+    first guess was an unbounded scan and the fix was `--days 120`. It still 500'd. Probing
+    directly showed the FIRST page returns in 0.3-0.5s at 7, 30 and 60 days, with or without the
+    book filter: the query is fine. It is the later pages. PostgREST turns `Range: 40000-40999`
+    into `OFFSET 40000`, and Postgres must walk and discard every one of those rows to answer,
+    so each successive page costs more than the last until one crosses the statement timeout.
+    Bounding the WINDOW does nothing about that, because a narrower window still paginates from 0
+    to however many rows it holds.
+
+    Chunking the range keeps every offset shallow: a fortnight of one sport's moneylines is a few
+    thousand rows, so no single page reaches a depth that can time out, and the number of requests
+    grows linearly rather than the cost per request growing quadratically.
+
+    The alternative is keyset pagination (order by a key, filter `> last seen`), which is the
+    textbook answer and is better for a hot path. It is not used here because it needs a stable
+    unique ordering this table has no index for, and because these runs are a handful of minutes
+    either way. If this ever becomes a scheduled job rather than an occasional measurement,
+    revisit that.
+    """
+    out = []
+    cur = lo
+    while cur < hi:
+        nxt = min(cur + dt.timedelta(days=step_days), hi)
+        p = dict(params)
+        # 🚨 BOTH BOUNDS IN ONE `and=(...)`, NEVER ONE AS A BARE PARAM AND THE OTHER IN `and`.
+        # This is the actual cause of the HTTP 500s on cfb_odds_snapshots, and it is NOT what it
+        # looked like. Measured on one 2-day window of the same table:
+        #
+        #   commence_time=gte.X  &  and=(commence_time.lt.Y)   -> HTTP 500 after 8.8s
+        #   and=(commence_time.lt.Y)  &  commence_time=gte.X   -> HTTP 500 after 8.7s
+        #   and=(commence_time.gte.X,commence_time.lt.Y)       -> OK, 1000 rows in 3.1s
+        #                                        ... at offset 4000 -> OK in 8.4s
+        #
+        # So it was the parameter SHAPE, not the window and not the offset depth. Splitting a
+        # range across a bare filter and an `and` group on the SAME column gives the planner
+        # something it handles badly enough to cross the statement timeout; expressed as one
+        # range it plans fine and pages fine. The first two diagnoses here were wrong -- an
+        # unbounded scan, then deep offsets -- and each looked convincing because a smaller
+        # request happened to succeed while the server was quieter. The probe that settled it
+        # varied ONLY the shape, holding the window and the offset fixed.
+        p["and"] = f"({ccol}.gte.{cur.isoformat()},{ccol}.lt.{nxt.isoformat()})"
+        out += page(url, key, table, p)
+        cur = nxt
+    return out
 
 
 def fair_at(rows_at_snapshot):
@@ -189,11 +279,27 @@ def main(argv=None):
     ap.add_argument("--sport", choices=list(SPORTS), default="nfl")
     ap.add_argument("--season", type=int, help="only for sports whose table carries a season")
     ap.add_argument("--weeks", help="comma-separated, e.g. 5,6,7,8 (NFL only)")
-    ap.add_argument("--days", type=int, default=0, help="only events kicking off in the last N days")
+    # 🚨 BOUND THE WINDOW ON A BIG TABLE OR THE SERVER GIVES UP. An unbounded run on
+    # cfb_odds_snapshots (1.27M rows, 394k of them h2h) returned HTTP 500 on every retry: a scan
+    # that crossed PostgREST's statement timeout, not a network problem, which is why the retry
+    # loop could not save it. `--days 120` covers a football season and returns in minutes. This
+    # is the same lesson publish_predictions.current_week() already carries in triplicate -- never
+    # ask PostgREST for an unbounded scan of a snapshot table; bound it, then resolve in code.
+    # NFL avoids this with --season, which is indexed; the sports with no season column need this.
+    ap.add_argument("--days", type=int, default=0,
+                    help="only events kicking off in the last N days — REQUIRED on big tables "
+                         "(cfb_odds_snapshots times out unbounded)")
     ap.add_argument("--tagged", action="store_true",
                     help="grade ONLY the prices the board tags as beating fair (best beats de-vigged)")
     ap.add_argument("--export", action="store_true",
                     help="write the measured shopping value to web/lib/shoppingValue.ts for the board")
+    # 🚨 SIZE THIS TO THE SPORT'S ROW RATE, NOT TO TASTE. The window only helps if it is small
+    # enough that no single window's paging reaches a timing-out offset — see page_windows. NFL,
+    # NHL and MLB are fine at the default. NCAAF is not: ~130 FBS teams across 10 books at several
+    # sweeps a day puts roughly 4,000 moneyline rows a DAY in the table, so a fortnight is ~60,000
+    # rows and the last pages of each window are back in the same hole. Two days is ~9 pages.
+    ap.add_argument("--window-days", type=int, default=14,
+                    help="read the range in windows this many days wide (use 2 for NCAAF)")
     a = ap.parse_args(argv)
     if a.export and a.tagged:
         sys.exit("--export writes the SIDE-AGNOSTIC number; it must not be run with --tagged, "
@@ -208,21 +314,20 @@ def main(argv=None):
     cc = cfg["commence"]
     params = {"select": f"snapshot_at,event_id,{cc},home_team,away_team,book,outcome_name,price_american",
               "market": "eq.h2h",
-              "book": f"in.({','.join(sorted(US_BOOKS))})",
-              f"{cc}": f"lt.{dt.datetime.now(dt.timezone.utc).isoformat()}"}
+              "book": f"in.({','.join(sorted(US_BOOKS))})"}
     if a.season and cfg["has_season"]:
         params["season"] = f"eq.{a.season}"
     if a.weeks and cfg["has_season"]:
         params["week"] = f"in.({a.weeks})"
-    if a.days:
-        lo = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=a.days)).isoformat()
-        params["and"] = f"({cc}.gte.{lo})"
 
     print(f"# Value Finder vs the closing line — {a.sport.upper()} moneyline"
           + (f", season {a.season}" if a.season else "")
           + (f", weeks {a.weeks}" if a.weeks else "")
           + (f", last {a.days} days" if a.days else ""))
-    rows = page(url, key, cfg["table"], params)
+    now = dt.datetime.now(dt.timezone.utc)
+    lo = now - dt.timedelta(days=a.days if a.days else 365 * 8)
+    rows = page_windows(url, key, cfg["table"], params, cc, lo, now,
+                        step_days=a.window_days)
     if not rows:
         sys.exit("no rows matched — NOTHING WAS GRADED")
     print(f"  {len(rows):,} US-book moneyline rows")
