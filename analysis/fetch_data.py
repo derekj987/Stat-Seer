@@ -9,6 +9,7 @@ before any script in analysis/.
 Writes to ./data/ (gitignored). Roughly 150 MB, a few minutes on a decent
 connection.
 """
+import datetime
 import os
 import sys
 import time
@@ -17,7 +18,29 @@ import urllib.request
 DATA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                     "data")
 BASE = "https://github.com/nflverse/nflverse-data/releases/download"
-SEASONS = range(2016, 2026)
+
+
+def current_season(today=None):
+    """NFL season year: Mar-Dec is that year, Jan-Feb is the prior year's playoffs.
+
+    Same rule as ingest/injuries_nflverse.current_season and nhl_results.current_season."""
+    today = today or datetime.date.today()
+    return today.year if today.month >= 3 else today.year - 1
+
+
+# 🚨 THROUGH THE CURRENT SEASON, COMPUTED — NEVER A HARDCODED END YEAR. This read
+# `range(2016, 2026)`, which stops at 2025, so from the moment the 2026 season began this script
+# downloaded every season EXCEPT the one being played. It still printed "All data present",
+# because every file it knew about was indeed present.
+#
+# What that cost: data/stats_2026.csv never existed, so weekly_report.py could not grade a single
+# 2026 prop and said so ("has no rows for 2026 week 9 (it has weeks [1,2,3,4,5])" — those five
+# weeks came from an older partial copy). The report card for the current season was unrunnable
+# and the reason looked like a stale cache rather than a range that could never include today.
+#
+# An end year that has to be edited each August is a bug with a timer on it. Deriving it means the
+# season rolls over on its own.
+SEASONS = range(2016, current_season() + 1)
 
 
 def get(url, dest, retries=3):
