@@ -7,8 +7,7 @@ export interface GameWeather { eventId: string; game: string; home: string; away
   gustMph: number|null; precipPct: number|null; conditions: string|null; windFlag: boolean }
 export const WEATHER_SEASON = 2026;
 export const WEATHER_WEEK = 9;
-export const WEATHER_UPDATED = "2026-11-09T00:53Z";
+export const WEATHER_UPDATED = "2026-11-09T08:45Z";
 export const GAME_WEATHER: GameWeather[] = [
-  {"eventId": "9760d8f19f84bfee300a74ceb656c95d", "game": "TB @ CHI", "home": "CHI", "away": "TB", "commence": "2026-11-09T01:20:00+00:00", "neutral": false, "venue": "Soldier Field", "city": "Chicago", "state": "IL", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 48, "windMph": 7, "gustMph": 16, "precipPct": 0, "conditions": "Clear", "windFlag": false},
   {"eventId": "17ad7eff2f7875e20a8109abe40470e3", "game": "BUF @ MIN", "home": "MIN", "away": "BUF", "commence": "2026-11-10T01:15:00+00:00", "neutral": false, "venue": "U.S. Bank Stadium", "city": "Minneapolis", "state": "MN", "roof": "dome", "indoor": true, "status": "indoor", "tempF": null, "windMph": null, "gustMph": null, "precipPct": null, "conditions": null, "windFlag": false},
 ];
