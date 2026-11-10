@@ -1224,7 +1224,7 @@ export const NCAAF_MODEL = {
     ],
     "bookShop": {
       "games": 5606,
-      "avgRange": 0.73,
+      "avgRange": 0.72,
       "pctGap1": 29
     }
   },
@@ -1245,7 +1245,7 @@ export const NCAAF_MODEL = {
           "fav": "Bowling Green",
           "num": -5.5
         },
-        "marketTotal": 44.5,
+        "marketTotal": 43.5,
         "projSpread": {
           "fav": "Bowling Green",
           "num": -7.3
@@ -1259,7 +1259,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "OVER",
-          "num": 44.5
+          "num": 43.5
         },
         "off": false,
         "rated": true,
@@ -1278,7 +1278,7 @@ export const NCAAF_MODEL = {
           "fav": "Western Michigan",
           "num": -14.5
         },
-        "marketTotal": 47.5,
+        "marketTotal": 49.5,
         "projSpread": {
           "fav": "Western Michigan",
           "num": -20.6
@@ -1292,7 +1292,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "UNDER",
-          "num": 47.5
+          "num": 49.5
         },
         "off": false,
         "rated": true,
@@ -1438,7 +1438,7 @@ export const NCAAF_MODEL = {
         "conf": "American Athletic",
         "marketSpread": {
           "fav": "Memphis",
-          "num": -4.5
+          "num": -3.5
         },
         "marketTotal": 50.5,
         "projSpread": {
@@ -1450,7 +1450,7 @@ export const NCAAF_MODEL = {
         "awayRiser": 8,
         "pick": {
           "side": "South Florida",
-          "num": 4.5
+          "num": 3.5
         },
         "totalLean": {
           "dir": "OVER",
@@ -1599,7 +1599,7 @@ export const NCAAF_MODEL = {
           "fav": "Ohio State",
           "num": -12.5
         },
-        "marketTotal": 46.5,
+        "marketTotal": 45.5,
         "projSpread": {
           "fav": "Ohio State",
           "num": -9.3
@@ -1613,7 +1613,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "UNDER",
-          "num": 46.5
+          "num": 45.5
         },
         "off": false,
         "rated": true,
@@ -2827,7 +2827,7 @@ export const NCAAF_MODEL = {
         "conf": "Sun Belt",
         "marketSpread": {
           "fav": "App State",
-          "num": -2.5
+          "num": -1.5
         },
         "marketTotal": 53.5,
         "projSpread": {
@@ -2839,7 +2839,7 @@ export const NCAAF_MODEL = {
         "awayRiser": 15,
         "pick": {
           "side": "Marshall",
-          "num": 2.5
+          "num": 1.5
         },
         "totalLean": {
           "dir": "OVER",
@@ -2926,7 +2926,7 @@ export const NCAAF_MODEL = {
         "conf": "Big Ten",
         "marketSpread": {
           "fav": "Penn State",
-          "num": -9.5
+          "num": -8.5
         },
         "marketTotal": 41.5,
         "projSpread": {
@@ -2938,7 +2938,7 @@ export const NCAAF_MODEL = {
         "awayRiser": 1,
         "pick": {
           "side": "Penn State",
-          "num": -9.5
+          "num": -8.5
         },
         "totalLean": {
           "dir": "OVER",
@@ -2994,7 +2994,7 @@ export const NCAAF_MODEL = {
           "fav": "South Alabama",
           "num": -3.5
         },
-        "marketTotal": 56.5,
+        "marketTotal": 55.5,
         "projSpread": {
           "fav": "South Alabama",
           "num": -3.5
@@ -3008,7 +3008,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "UNDER",
-          "num": 56.5
+          "num": 55.5
         },
         "off": false,
         "rated": true,
@@ -3405,14 +3405,6 @@ export const NCAAF_MODEL = {
     ],
     "upsets": [
       {
-        "dog": "Marshall",
-        "matchup": "vs App State",
-        "spread": "+2.5",
-        "modelPct": 55,
-        "marketPct": 44,
-        "byPoints": 2.1
-      },
-      {
         "dog": "Texas Tech",
         "matchup": "at Oklahoma State",
         "spread": "+3.5",
@@ -3427,6 +3419,14 @@ export const NCAAF_MODEL = {
         "modelPct": 54,
         "marketPct": 44,
         "byPoints": 1.8
+      },
+      {
+        "dog": "Marshall",
+        "matchup": "vs App State",
+        "spread": "+1.5",
+        "modelPct": 55,
+        "marketPct": 47,
+        "byPoints": 2.1
       },
       {
         "dog": "Mississippi State",
@@ -26129,7 +26129,7 @@ export const NCAAF_MODEL = {
               "fav": "Bowling Green",
               "num": -5.5
             },
-            "marketTotal": 44.5,
+            "marketTotal": 43.5,
             "projSpread": {
               "fav": "Bowling Green",
               "num": -7.3
@@ -26143,7 +26143,7 @@ export const NCAAF_MODEL = {
             },
             "totalLean": {
               "dir": "OVER",
-              "num": 44.5
+              "num": 43.5
             },
             "off": false,
             "rated": true,
@@ -26162,7 +26162,7 @@ export const NCAAF_MODEL = {
               "fav": "Western Michigan",
               "num": -14.5
             },
-            "marketTotal": 47.5,
+            "marketTotal": 49.5,
             "projSpread": {
               "fav": "Western Michigan",
               "num": -20.6
@@ -26176,7 +26176,7 @@ export const NCAAF_MODEL = {
             },
             "totalLean": {
               "dir": "UNDER",
-              "num": 47.5
+              "num": 49.5
             },
             "off": false,
             "rated": true,
@@ -26322,7 +26322,7 @@ export const NCAAF_MODEL = {
             "conf": "American Athletic",
             "marketSpread": {
               "fav": "Memphis",
-              "num": -4.5
+              "num": -3.5
             },
             "marketTotal": 50.5,
             "projSpread": {
@@ -26334,7 +26334,7 @@ export const NCAAF_MODEL = {
             "awayRiser": 8,
             "pick": {
               "side": "South Florida",
-              "num": 4.5
+              "num": 3.5
             },
             "totalLean": {
               "dir": "OVER",
@@ -26483,7 +26483,7 @@ export const NCAAF_MODEL = {
               "fav": "Ohio State",
               "num": -12.5
             },
-            "marketTotal": 46.5,
+            "marketTotal": 45.5,
             "projSpread": {
               "fav": "Ohio State",
               "num": -9.3
@@ -26497,7 +26497,7 @@ export const NCAAF_MODEL = {
             },
             "totalLean": {
               "dir": "UNDER",
-              "num": 46.5
+              "num": 45.5
             },
             "off": false,
             "rated": true,
@@ -27711,7 +27711,7 @@ export const NCAAF_MODEL = {
             "conf": "Sun Belt",
             "marketSpread": {
               "fav": "App State",
-              "num": -2.5
+              "num": -1.5
             },
             "marketTotal": 53.5,
             "projSpread": {
@@ -27723,7 +27723,7 @@ export const NCAAF_MODEL = {
             "awayRiser": 15,
             "pick": {
               "side": "Marshall",
-              "num": 2.5
+              "num": 1.5
             },
             "totalLean": {
               "dir": "OVER",
@@ -27810,7 +27810,7 @@ export const NCAAF_MODEL = {
             "conf": "Big Ten",
             "marketSpread": {
               "fav": "Penn State",
-              "num": -9.5
+              "num": -8.5
             },
             "marketTotal": 41.5,
             "projSpread": {
@@ -27822,7 +27822,7 @@ export const NCAAF_MODEL = {
             "awayRiser": 1,
             "pick": {
               "side": "Penn State",
-              "num": -9.5
+              "num": -8.5
             },
             "totalLean": {
               "dir": "OVER",
@@ -27878,7 +27878,7 @@ export const NCAAF_MODEL = {
               "fav": "South Alabama",
               "num": -3.5
             },
-            "marketTotal": 56.5,
+            "marketTotal": 55.5,
             "projSpread": {
               "fav": "South Alabama",
               "num": -3.5
@@ -27892,7 +27892,7 @@ export const NCAAF_MODEL = {
             },
             "totalLean": {
               "dir": "UNDER",
-              "num": 56.5
+              "num": 55.5
             },
             "off": false,
             "rated": true,
@@ -28289,14 +28289,6 @@ export const NCAAF_MODEL = {
         ],
         "upsets": [
           {
-            "dog": "Marshall",
-            "matchup": "vs App State",
-            "spread": "+2.5",
-            "modelPct": 55,
-            "marketPct": 44,
-            "byPoints": 2.1
-          },
-          {
             "dog": "Texas Tech",
             "matchup": "at Oklahoma State",
             "spread": "+3.5",
@@ -28311,6 +28303,14 @@ export const NCAAF_MODEL = {
             "modelPct": 54,
             "marketPct": 44,
             "byPoints": 1.8
+          },
+          {
+            "dog": "Marshall",
+            "matchup": "vs App State",
+            "spread": "+1.5",
+            "modelPct": 55,
+            "marketPct": 47,
+            "byPoints": 2.1
           },
           {
             "dog": "Mississippi State",
@@ -28417,7 +28417,7 @@ export const NCAAF_MODEL = {
             "away": "Akron",
             "home": "Massachusetts",
             "neutral": 0,
-            "commence": "2026-11-18T05:00:00.000Z",
+            "commence": "2026-11-19T00:00:00.000Z",
             "apAway": null,
             "apHome": null,
             "conf": "Mid-American",
@@ -28630,36 +28630,6 @@ export const NCAAF_MODEL = {
             "featured": false
           },
           {
-            "away": "LSU",
-            "home": "Tennessee",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": 24,
-            "apHome": 9,
-            "conf": "SEC",
-            "marketSpread": {
-              "fav": "LSU",
-              "num": -1.5
-            },
-            "marketTotal": 57.5,
-            "projSpread": {
-              "fav": "Tennessee",
-              "num": -0.4
-            },
-            "projTotal": 56.8,
-            "homeRiser": 11,
-            "awayRiser": 22,
-            "pick": {
-              "side": "Tennessee",
-              "num": 1.5
-            },
-            "totalLean": null,
-            "off": true,
-            "rated": true,
-            "crossDiv": false,
-            "featured": true
-          },
-          {
             "away": "Ohio State",
             "home": "Nebraska",
             "neutral": 0,
@@ -28708,60 +28678,6 @@ export const NCAAF_MODEL = {
             "featured": true
           },
           {
-            "away": "Georgia",
-            "home": "South Carolina",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": 1,
-            "apHome": 20,
-            "conf": "SEC",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "Georgia",
-              "num": -13.8
-            },
-            "projTotal": 51.3,
-            "homeRiser": 16,
-            "awayRiser": 4,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": true
-          },
-          {
-            "away": "Texas A&M",
-            "home": "Oklahoma",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "SEC",
-            "marketSpread": {
-              "fav": "Oklahoma",
-              "num": -2.5
-            },
-            "marketTotal": 51.5,
-            "projSpread": {
-              "fav": "Oklahoma",
-              "num": -2.5
-            },
-            "projTotal": 52.2,
-            "homeRiser": 0,
-            "awayRiser": 0,
-            "pick": {
-              "side": "Oklahoma",
-              "num": -2.5
-            },
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": true
-          },
-          {
             "away": "Utah",
             "home": "TCU",
             "neutral": 0,
@@ -28776,30 +28692,6 @@ export const NCAAF_MODEL = {
               "num": -11.7
             },
             "projTotal": 60.0,
-            "homeRiser": 0,
-            "awayRiser": 0,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": true
-          },
-          {
-            "away": "Iowa",
-            "home": "Illinois",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": 16,
-            "apHome": null,
-            "conf": "Big Ten",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "Iowa",
-              "num": -5.2
-            },
-            "projTotal": 52.7,
             "homeRiser": 0,
             "awayRiser": 0,
             "pick": null,
@@ -28915,102 +28807,6 @@ export const NCAAF_MODEL = {
             "featured": true
           },
           {
-            "away": "Arkansas",
-            "home": "Texas",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": null,
-            "apHome": 8,
-            "conf": "SEC",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "Texas",
-              "num": -27.9
-            },
-            "projTotal": 61.4,
-            "homeRiser": 8,
-            "awayRiser": 0,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": true
-          },
-          {
-            "away": "Vanderbilt",
-            "home": "Florida",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "SEC",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "Florida",
-              "num": -13.5
-            },
-            "projTotal": 56.7,
-            "homeRiser": 11,
-            "awayRiser": 0,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": true
-          },
-          {
-            "away": "South Florida",
-            "home": "Florida Atlantic",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "American Athletic",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "South Florida",
-              "num": -2.4
-            },
-            "projTotal": 65.9,
-            "homeRiser": 31,
-            "awayRiser": 0,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": true
-          },
-          {
-            "away": "Maryland",
-            "home": "USC",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": null,
-            "apHome": 15,
-            "conf": "Big Ten",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "USC",
-              "num": -21.5
-            },
-            "projTotal": 57.0,
-            "homeRiser": 0,
-            "awayRiser": 5,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": true
-          },
-          {
             "away": "Rutgers",
             "home": "Penn State",
             "neutral": 0,
@@ -29059,30 +28855,6 @@ export const NCAAF_MODEL = {
             "featured": true
           },
           {
-            "away": "Kentucky",
-            "home": "Missouri",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": 13,
-            "apHome": null,
-            "conf": "SEC",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "Missouri",
-              "num": -6.8
-            },
-            "projTotal": 52.0,
-            "homeRiser": 0,
-            "awayRiser": 20,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": false
-          },
-          {
             "away": "UCLA",
             "home": "Michigan",
             "neutral": 0,
@@ -29099,30 +28871,6 @@ export const NCAAF_MODEL = {
             "projTotal": 53.1,
             "homeRiser": 0,
             "awayRiser": 59,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": false
-          },
-          {
-            "away": "North Carolina",
-            "home": "Virginia",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "ACC",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "North Carolina",
-              "num": -3.9
-            },
-            "projTotal": 49.9,
-            "homeRiser": 0,
-            "awayRiser": 43,
             "pick": null,
             "totalLean": null,
             "off": false,
@@ -29155,54 +28903,6 @@ export const NCAAF_MODEL = {
             "featured": false
           },
           {
-            "away": "Wisconsin",
-            "home": "Purdue",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "Big Ten",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "Wisconsin",
-              "num": -6.6
-            },
-            "projTotal": 46.6,
-            "homeRiser": 15,
-            "awayRiser": 26,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": false
-          },
-          {
-            "away": "Northwestern",
-            "home": "Minnesota",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "Big Ten",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "Northwestern",
-              "num": -11.0
-            },
-            "projTotal": 47.5,
-            "homeRiser": 1,
-            "awayRiser": 20,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": false
-          },
-          {
             "away": "Arizona",
             "home": "Kansas State",
             "neutral": 0,
@@ -29219,150 +28919,6 @@ export const NCAAF_MODEL = {
             "projTotal": 55.8,
             "homeRiser": 0,
             "awayRiser": 5,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": false
-          },
-          {
-            "away": "Oklahoma State",
-            "home": "Arizona State",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "Big 12",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "Oklahoma State",
-              "num": -12.6
-            },
-            "projTotal": 52.7,
-            "homeRiser": 0,
-            "awayRiser": 77,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": false
-          },
-          {
-            "away": "Syracuse",
-            "home": "Boston College",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "ACC",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "Boston College",
-              "num": -0.8
-            },
-            "projTotal": 57.1,
-            "homeRiser": 9,
-            "awayRiser": 21,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": false
-          },
-          {
-            "away": "NC State",
-            "home": "Florida State",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "ACC",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "Florida State",
-              "num": -14.7
-            },
-            "projTotal": 57.6,
-            "homeRiser": 4,
-            "awayRiser": 0,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": false
-          },
-          {
-            "away": "Colorado",
-            "home": "Cincinnati",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "Big 12",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "Cincinnati",
-              "num": -11.8
-            },
-            "projTotal": 56.1,
-            "homeRiser": 4,
-            "awayRiser": 0,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": false
-          },
-          {
-            "away": "Coastal Carolina",
-            "home": "Louisiana",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "Sun Belt",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "Louisiana",
-              "num": -12.0
-            },
-            "projTotal": 60.1,
-            "homeRiser": 23,
-            "awayRiser": 6,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": false
-          },
-          {
-            "away": "Arkansas State",
-            "home": "Louisiana Tech",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "Conference USA",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "Louisiana Tech",
-              "num": -17.6
-            },
-            "projTotal": 54.0,
-            "homeRiser": 12,
-            "awayRiser": 1,
             "pick": null,
             "totalLean": null,
             "off": false,
@@ -29419,172 +28975,58 @@ export const NCAAF_MODEL = {
             "featured": false
           },
           {
-            "away": "Stanford",
-            "home": "California",
+            "away": "Texas A&M",
+            "home": "Oklahoma",
             "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
+            "commence": "2026-11-21T17:00:00.000Z",
             "apAway": null,
             "apHome": null,
-            "conf": "ACC",
+            "conf": "SEC",
+            "marketSpread": {
+              "fav": "Oklahoma",
+              "num": -2.5
+            },
+            "marketTotal": 51.5,
+            "projSpread": {
+              "fav": "Oklahoma",
+              "num": -2.5
+            },
+            "projTotal": 52.2,
+            "homeRiser": 0,
+            "awayRiser": 0,
+            "pick": {
+              "side": "Oklahoma",
+              "num": -2.5
+            },
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": true
+          },
+          {
+            "away": "Vanderbilt",
+            "home": "Florida",
+            "neutral": 0,
+            "commence": "2026-11-21T17:00:00.000Z",
+            "apAway": null,
+            "apHome": null,
+            "conf": "SEC",
             "marketSpread": null,
             "marketTotal": null,
             "projSpread": {
-              "fav": "California",
-              "num": -2.9
+              "fav": "Florida",
+              "num": -13.5
             },
-            "projTotal": 54.1,
-            "homeRiser": 0,
+            "projTotal": 56.7,
+            "homeRiser": 11,
             "awayRiser": 0,
             "pick": null,
             "totalLean": null,
             "off": false,
             "rated": true,
             "crossDiv": false,
-            "featured": false
-          },
-          {
-            "away": "Georgia Southern",
-            "home": "Troy",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "Sun Belt",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "Georgia Southern",
-              "num": -10.0
-            },
-            "projTotal": 56.3,
-            "homeRiser": 0,
-            "awayRiser": 19,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": false
-          },
-          {
-            "away": "Hawai'i",
-            "home": "Nevada",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "Mountain West",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "Nevada",
-              "num": -8.7
-            },
-            "projTotal": 54.0,
-            "homeRiser": 17,
-            "awayRiser": 0,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": false
-          },
-          {
-            "away": "Georgia State",
-            "home": "Marshall",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "Sun Belt",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "Georgia State",
-              "num": -4.3
-            },
-            "projTotal": 62.2,
-            "homeRiser": 0,
-            "awayRiser": 26,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": false
-          },
-          {
-            "away": "South Alabama",
-            "home": "Southern Miss",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "Sun Belt",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "South Alabama",
-              "num": -6.2
-            },
-            "projTotal": 59.1,
-            "homeRiser": 0,
-            "awayRiser": 0,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": false
-          },
-          {
-            "away": "UL Monroe",
-            "home": "App State",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "Sun Belt",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "App State",
-              "num": -16.9
-            },
-            "projTotal": 56.1,
-            "homeRiser": 15,
-            "awayRiser": 1,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": false
-          },
-          {
-            "away": "Charlotte",
-            "home": "Tulsa",
-            "neutral": 0,
-            "commence": "2026-11-21T05:00:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "American Athletic",
-            "marketSpread": null,
-            "marketTotal": null,
-            "projSpread": {
-              "fav": "Tulsa",
-              "num": -26.8
-            },
-            "projTotal": 54.0,
-            "homeRiser": 42,
-            "awayRiser": 0,
-            "pick": null,
-            "totalLean": null,
-            "off": false,
-            "rated": true,
-            "crossDiv": false,
-            "featured": false
+            "featured": true
           },
           {
             "away": "Wofford",
@@ -29611,6 +29053,54 @@ export const NCAAF_MODEL = {
             "featured": true
           },
           {
+            "away": "Wisconsin",
+            "home": "Purdue",
+            "neutral": 0,
+            "commence": "2026-11-21T17:00:00.000Z",
+            "apAway": null,
+            "apHome": null,
+            "conf": "Big Ten",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "Wisconsin",
+              "num": -6.6
+            },
+            "projTotal": 46.6,
+            "homeRiser": 15,
+            "awayRiser": 26,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": false
+          },
+          {
+            "away": "Northwestern",
+            "home": "Minnesota",
+            "neutral": 0,
+            "commence": "2026-11-21T17:00:00.000Z",
+            "apAway": null,
+            "apHome": null,
+            "conf": "Big Ten",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "Northwestern",
+              "num": -11.0
+            },
+            "projTotal": 47.5,
+            "homeRiser": 1,
+            "awayRiser": 20,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": false
+          },
+          {
             "away": "Memphis",
             "home": "Navy",
             "neutral": 0,
@@ -29635,6 +29125,30 @@ export const NCAAF_MODEL = {
             "featured": false
           },
           {
+            "away": "Syracuse",
+            "home": "Boston College",
+            "neutral": 0,
+            "commence": "2026-11-21T17:00:00.000Z",
+            "apAway": null,
+            "apHome": null,
+            "conf": "ACC",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "Boston College",
+              "num": -0.8
+            },
+            "projTotal": 57.1,
+            "homeRiser": 9,
+            "awayRiser": 21,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": false
+          },
+          {
             "away": "East Carolina",
             "home": "Army",
             "neutral": 0,
@@ -29651,6 +29165,54 @@ export const NCAAF_MODEL = {
             "projTotal": 51.9,
             "homeRiser": 0,
             "awayRiser": 0,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": false
+          },
+          {
+            "away": "Colorado",
+            "home": "Cincinnati",
+            "neutral": 0,
+            "commence": "2026-11-21T17:00:00.000Z",
+            "apAway": null,
+            "apHome": null,
+            "conf": "Big 12",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "Cincinnati",
+              "num": -11.8
+            },
+            "projTotal": 56.1,
+            "homeRiser": 4,
+            "awayRiser": 0,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": false
+          },
+          {
+            "away": "North Carolina",
+            "home": "Virginia",
+            "neutral": 0,
+            "commence": "2026-11-21T17:30:00.000Z",
+            "apAway": null,
+            "apHome": null,
+            "conf": "ACC",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "North Carolina",
+              "num": -3.9
+            },
+            "projTotal": 49.9,
+            "homeRiser": 0,
+            "awayRiser": 43,
             "pick": null,
             "totalLean": null,
             "off": false,
@@ -29779,6 +29341,126 @@ export const NCAAF_MODEL = {
             "featured": false
           },
           {
+            "away": "Charlotte",
+            "home": "Tulsa",
+            "neutral": 0,
+            "commence": "2026-11-21T19:00:00.000Z",
+            "apAway": null,
+            "apHome": null,
+            "conf": "American Athletic",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "Tulsa",
+              "num": -26.8
+            },
+            "projTotal": 54.0,
+            "homeRiser": 42,
+            "awayRiser": 0,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": false
+          },
+          {
+            "away": "Iowa",
+            "home": "Illinois",
+            "neutral": 0,
+            "commence": "2026-11-21T19:30:00.000Z",
+            "apAway": 16,
+            "apHome": null,
+            "conf": "Big Ten",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "Iowa",
+              "num": -5.2
+            },
+            "projTotal": 52.7,
+            "homeRiser": 0,
+            "awayRiser": 0,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": true
+          },
+          {
+            "away": "South Florida",
+            "home": "Florida Atlantic",
+            "neutral": 0,
+            "commence": "2026-11-21T19:30:00.000Z",
+            "apAway": null,
+            "apHome": null,
+            "conf": "American Athletic",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "South Florida",
+              "num": -2.4
+            },
+            "projTotal": 65.9,
+            "homeRiser": 31,
+            "awayRiser": 0,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": true
+          },
+          {
+            "away": "UL Monroe",
+            "home": "App State",
+            "neutral": 0,
+            "commence": "2026-11-21T19:30:00.000Z",
+            "apAway": null,
+            "apHome": null,
+            "conf": "Sun Belt",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "App State",
+              "num": -16.9
+            },
+            "projTotal": 56.1,
+            "homeRiser": 15,
+            "awayRiser": 1,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": false
+          },
+          {
+            "away": "Coastal Carolina",
+            "home": "Louisiana",
+            "neutral": 0,
+            "commence": "2026-11-21T20:00:00.000Z",
+            "apAway": null,
+            "apHome": null,
+            "conf": "Sun Belt",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "Louisiana",
+              "num": -12.0
+            },
+            "projTotal": 60.1,
+            "homeRiser": 23,
+            "awayRiser": 6,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": false
+          },
+          {
             "away": "Florida International",
             "home": "Kennesaw State",
             "neutral": 0,
@@ -29818,6 +29500,84 @@ export const NCAAF_MODEL = {
             },
             "projTotal": 58.9,
             "homeRiser": 0,
+            "awayRiser": 0,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": false
+          },
+          {
+            "away": "LSU",
+            "home": "Tennessee",
+            "neutral": 0,
+            "commence": "2026-11-21T20:30:00.000Z",
+            "apAway": 24,
+            "apHome": 9,
+            "conf": "SEC",
+            "marketSpread": {
+              "fav": "LSU",
+              "num": -1.5
+            },
+            "marketTotal": 57.5,
+            "projSpread": {
+              "fav": "Tennessee",
+              "num": -0.4
+            },
+            "projTotal": 56.8,
+            "homeRiser": 11,
+            "awayRiser": 22,
+            "pick": {
+              "side": "Tennessee",
+              "num": 1.5
+            },
+            "totalLean": null,
+            "off": true,
+            "rated": true,
+            "crossDiv": false,
+            "featured": true
+          },
+          {
+            "away": "Arkansas",
+            "home": "Texas",
+            "neutral": 0,
+            "commence": "2026-11-21T20:30:00.000Z",
+            "apAway": null,
+            "apHome": 8,
+            "conf": "SEC",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "Texas",
+              "num": -27.9
+            },
+            "projTotal": 61.4,
+            "homeRiser": 8,
+            "awayRiser": 0,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": true
+          },
+          {
+            "away": "NC State",
+            "home": "Florida State",
+            "neutral": 0,
+            "commence": "2026-11-21T20:30:00.000Z",
+            "apAway": null,
+            "apHome": null,
+            "conf": "ACC",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "Florida State",
+              "num": -14.7
+            },
+            "projTotal": 57.6,
+            "homeRiser": 4,
             "awayRiser": 0,
             "pick": null,
             "totalLean": null,
@@ -29875,6 +29635,78 @@ export const NCAAF_MODEL = {
             "featured": false
           },
           {
+            "away": "Georgia Southern",
+            "home": "Troy",
+            "neutral": 0,
+            "commence": "2026-11-21T21:00:00.000Z",
+            "apAway": null,
+            "apHome": null,
+            "conf": "Sun Belt",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "Georgia Southern",
+              "num": -10.0
+            },
+            "projTotal": 56.3,
+            "homeRiser": 0,
+            "awayRiser": 19,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": false
+          },
+          {
+            "away": "Georgia State",
+            "home": "Marshall",
+            "neutral": 0,
+            "commence": "2026-11-21T21:00:00.000Z",
+            "apAway": null,
+            "apHome": null,
+            "conf": "Sun Belt",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "Georgia State",
+              "num": -4.3
+            },
+            "projTotal": 62.2,
+            "homeRiser": 0,
+            "awayRiser": 26,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": false
+          },
+          {
+            "away": "South Alabama",
+            "home": "Southern Miss",
+            "neutral": 0,
+            "commence": "2026-11-21T21:00:00.000Z",
+            "apAway": null,
+            "apHome": null,
+            "conf": "Sun Belt",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "South Alabama",
+              "num": -6.2
+            },
+            "projTotal": 59.1,
+            "homeRiser": 0,
+            "awayRiser": 0,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": false
+          },
+          {
             "away": "Northern Illinois",
             "home": "North Dakota State",
             "neutral": 0,
@@ -29923,6 +29755,30 @@ export const NCAAF_MODEL = {
             "featured": false
           },
           {
+            "away": "Maryland",
+            "home": "USC",
+            "neutral": 0,
+            "commence": "2026-11-21T23:15:00.000Z",
+            "apAway": null,
+            "apHome": 15,
+            "conf": "Big Ten",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "USC",
+              "num": -21.5
+            },
+            "projTotal": 57.0,
+            "homeRiser": 0,
+            "awayRiser": 5,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": true
+          },
+          {
             "away": "UNLV",
             "home": "San Jos\u00e9 State",
             "neutral": 0,
@@ -29945,6 +29801,54 @@ export const NCAAF_MODEL = {
             "rated": true,
             "crossDiv": false,
             "featured": false
+          },
+          {
+            "away": "Arkansas State",
+            "home": "Louisiana Tech",
+            "neutral": 0,
+            "commence": "2026-11-22T00:00:00.000Z",
+            "apAway": null,
+            "apHome": null,
+            "conf": "Conference USA",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "Louisiana Tech",
+              "num": -17.6
+            },
+            "projTotal": 54.0,
+            "homeRiser": 12,
+            "awayRiser": 1,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": false
+          },
+          {
+            "away": "Georgia",
+            "home": "South Carolina",
+            "neutral": 0,
+            "commence": "2026-11-22T00:30:00.000Z",
+            "apAway": 1,
+            "apHome": 20,
+            "conf": "SEC",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "Georgia",
+              "num": -13.8
+            },
+            "projTotal": 51.3,
+            "homeRiser": 16,
+            "awayRiser": 4,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": true
           },
           {
             "away": "SMU",
@@ -29978,6 +29882,54 @@ export const NCAAF_MODEL = {
             "rated": true,
             "crossDiv": false,
             "featured": true
+          },
+          {
+            "away": "Kentucky",
+            "home": "Missouri",
+            "neutral": 0,
+            "commence": "2026-11-22T00:30:00.000Z",
+            "apAway": 13,
+            "apHome": null,
+            "conf": "SEC",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "Missouri",
+              "num": -6.8
+            },
+            "projTotal": 52.0,
+            "homeRiser": 0,
+            "awayRiser": 20,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": false
+          },
+          {
+            "away": "Stanford",
+            "home": "California",
+            "neutral": 0,
+            "commence": "2026-11-22T00:30:00.000Z",
+            "apAway": null,
+            "apHome": null,
+            "conf": "ACC",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "California",
+              "num": -2.9
+            },
+            "projTotal": 54.1,
+            "homeRiser": 0,
+            "awayRiser": 0,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": false
           },
           {
             "away": "Colorado State",
@@ -30028,6 +29980,30 @@ export const NCAAF_MODEL = {
             "featured": false
           },
           {
+            "away": "Oklahoma State",
+            "home": "Arizona State",
+            "neutral": 0,
+            "commence": "2026-11-22T03:15:00.000Z",
+            "apAway": null,
+            "apHome": null,
+            "conf": "Big 12",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "Oklahoma State",
+              "num": -12.6
+            },
+            "projTotal": 52.7,
+            "homeRiser": 0,
+            "awayRiser": 77,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": false
+          },
+          {
             "away": "Utah State",
             "home": "Oregon State",
             "neutral": 0,
@@ -30043,6 +30019,30 @@ export const NCAAF_MODEL = {
             },
             "projTotal": 56.4,
             "homeRiser": 49,
+            "awayRiser": 0,
+            "pick": null,
+            "totalLean": null,
+            "off": false,
+            "rated": true,
+            "crossDiv": false,
+            "featured": false
+          },
+          {
+            "away": "Hawai'i",
+            "home": "Nevada",
+            "neutral": 0,
+            "commence": "2026-11-22T03:30:00.000Z",
+            "apAway": null,
+            "apHome": null,
+            "conf": "Mountain West",
+            "marketSpread": null,
+            "marketTotal": null,
+            "projSpread": {
+              "fav": "Nevada",
+              "num": -8.7
+            },
+            "projTotal": 54.0,
+            "homeRiser": 17,
             "awayRiser": 0,
             "pick": null,
             "totalLean": null,
