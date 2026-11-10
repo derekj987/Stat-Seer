@@ -5627,3 +5627,57 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
   .hb-form--nhlgame th:nth-child(3),.hb-form--nhlgame td:nth-child(3){width:21%}
   .hb-form--nhlgame th:nth-child(5),.hb-form--nhlgame td:nth-child(5){width:19%}
 }
+
+
+/* ── Parlay of the Week ───────────────────────────────────────────────────────────────────────
+   Headline card at the top of a sport page. Our numbers are --model blue, the de-vigged market
+   number --mkt maroon, the book price green: colour by WHOSE claim it is, app-wide.
+
+   Columns are a shared calc() rather than fr-mixed-with-px. An `fr` track swallows ALL the
+   surplus at a wider viewport, which is how boards end up with one enormous name column and the
+   numbers crammed at the right; `calc(base + var(--pwx))` gives every column the same number of
+   extra pixels at every width. Budget below: 120+190+110+110+150 = 680 ink, + 4x14 gap, +
+   2x14 padding = 764. */
+.pw{border:1px solid var(--line);border-radius:14px;background:var(--card,transparent);
+  padding:14px;margin:0 0 18px}
+.pw__bar{display:flex;align-items:center;gap:12px;margin:0 0 10px}
+.pw__h{display:flex;align-items:center;gap:8px;margin:0;font-size:15px;font-weight:800;
+  letter-spacing:.02em;text-transform:uppercase;color:var(--ink)}
+.pw__price{margin-left:auto;display:flex;align-items:baseline;gap:8px}
+.pw__odds{font-size:28px;font-weight:800;line-height:1;color:var(--accent)}
+.pw__short{font-size:11px;font-style:normal;color:var(--muted)}
+
+.pw__legs{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.pw__leg{--pwx:max(0px, calc((100% - 764px) / 5));
+  display:grid;align-items:center;gap:14px;padding:10px 14px;
+  grid-template-columns:calc(120px + var(--pwx)) calc(190px + var(--pwx))
+    calc(110px + var(--pwx)) calc(110px + var(--pwx)) calc(150px + var(--pwx));
+  border-bottom:1px dotted var(--line);font-size:13px}
+.pw__pick{font-weight:700;color:var(--ink)}
+.pw__match{color:var(--muted);font-size:12px}
+.pw__ours{color:var(--model);font-weight:700}
+.pw__mkt{color:var(--mkt)}
+.pw__book{color:var(--accent);font-weight:700;text-align:right}
+.pw__book i{font-style:normal;font-weight:600;color:var(--muted);font-size:11px}
+
+.pw__foot{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;padding:10px 14px 0;
+  font-size:13px}
+.pw__combined{display:flex;align-items:center;gap:6px}
+/* The break-even is neither our claim nor the market's -- it is arithmetic on the price, so it
+   gets the muted ink rather than --model or --mkt. There is deliberately no "edge" badge here. */
+.pw__be{color:var(--muted)}
+.pw__bb,.pw__rec{color:var(--muted);font-size:12px}
+.pw__rec b{color:var(--ink)}
+
+/* Five columns do not fit a phone, so each leg becomes a card instead of a sideways scroller --
+   the same call the NCAAF boards make below 560px. Rows cannot be ragged when there are no rows. */
+@media (max-width:640px){
+  .pw__leg{grid-template-columns:1fr auto;gap:2px 10px;padding:10px 4px}
+  .pw__pick{grid-column:1;grid-row:1}
+  .pw__book{grid-column:2;grid-row:1;text-align:right}
+  .pw__match{grid-column:1 / -1;grid-row:2}
+  .pw__ours{grid-column:1;grid-row:3}
+  .pw__mkt{grid-column:2;grid-row:3;text-align:right}
+  .pw__odds{font-size:22px}
+  .pw__h{font-size:13px}
+}

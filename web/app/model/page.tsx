@@ -17,6 +17,8 @@ import AddToSlip from "../AddToSlip";
 import { capDayGroups, etToday, groupByGameDay, dayBasis, type DayGroup } from "@/lib/gameDays";
 import { DayHeader } from "../DayHeader";
 import PinButton from "../PinButton";
+import ParlayCard from "../ParlayCard";
+import { candidateLegs, pickParlay } from "@/lib/parlayOfWeek";
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -412,6 +414,16 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         <ModelSubnav active="game" />
       </div>
       <WeekNav min={min} max={max} current={week} base="/model" />
+
+      {/* Parlay of the Week — the top-of-page attention-grabber. Costs no extra database read:
+          `preds` (our published, graded win probabilities) and `built` (every book's moneyline)
+          are already fetched above for the board below. Renders null when the slate has no
+          pregame games left, which is the correct empty state rather than a stale ticket. */}
+      <ParlayCard
+        parlay={pickParlay(candidateLegs(built, preds))}
+        sportLabel="NFL"
+        graded="/report"
+      />
 
       {/* Week's numbers crunched — market spread/total beside our line-blind projection. */}
       <details className="hb-panel hb-panel--card" data-embedchart="numbers-crunched" open>
