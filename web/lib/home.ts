@@ -102,6 +102,13 @@ export interface HomeData {
   card: CardRow[];
   upsets: UpsetRow[];
   players: PlayerPick[]; // a few risers from Fan Stock — teaser into Fan Analysis
+  /** The built market board for `week`.
+   *
+   *  Returned so the homepage does not fetch and rebuild it a SECOND time for the Value Finder
+   *  teaser. It used to call `buildBoard(await fetchWeek(nfl.week))` itself, immediately after
+   *  this function had done exactly that — a duplicate probe, a duplicate paged read and a
+   *  duplicate buildBoard on the critical path, for a board that was already in memory. */
+  board: Game[];
 }
 
 /** "FAV -mag" from a home-perspective consensus spread (negative = home favored). */
@@ -124,10 +131,18 @@ export async function fetchHome(season = 2026): Promise<HomeData> {
   } catch { /* default week 1 */ }
 
   // Market board (present well before kickoff) + locked model predictions (may be empty).
-  let board: Game[] = [];
-  try { board = buildBoard(await fetchWeek(week, season)); } catch { board = []; }
-  let preds: ModelPrediction[] = [];
-  try { preds = await fetchModelWeek(week, season); } catch { preds = []; }
+  //
+  // CONCURRENT, because neither needs the other — both only need `week`, which is already
+  // resolved above. Awaiting them one after the other made the homepage pay the sum of two
+  // Supabase round trips for no reason; it now pays the slower of the two.
+  //
+  // Each keeps its own catch. `Promise.all` rejects on the FIRST failure and discards the other
+  // result, so a single bad read would have thrown away a good one — settling each promise to a
+  // safe value preserves the independent degradation the two try/catches used to give.
+  const [board, preds] = await Promise.all([
+    fetchWeek(week, season).then(buildBoard).catch((): Game[] => []),
+    fetchModelWeek(week, season).catch((): ModelPrediction[] => []),
+  ]);
 
   const predByEvent = new Map(preds.map((p) => [p.eventId, p]));
 
@@ -243,5 +258,5 @@ export async function fetchHome(season = 2026): Promise<HomeData> {
     });
   } catch { players = []; }
 
-  return { week, season, hasModel: preds.length > 0, card, upsets, players };
+  return { week, season, hasModel: preds.length > 0, card, upsets, players, board };
 }
