@@ -10,6 +10,10 @@ import { fetchCfbScores, scoreFor, type CfbScores } from "@/lib/cfbScores";
 import { NcaafWeekNav, NcaafWeekNote, NcaafLinesAsOf, readNcaafWeek } from "../NcaafWeek";
 import { liveNcaafCard } from "../liveCard";
 import PinButton from "../../PinButton";
+import ParlayCard from "../../ParlayCard";
+import { legsFrom, pickParlay } from "@/lib/parlayOfWeek";
+import { ncaafHomeWinProb, matchBoardGame } from "@/lib/ncaafWinProb";
+import { cfbBoard } from "@/lib/cfbBoard";
 import { marketGap } from "../lean";
 import { capDayGroups, etToday, groupByGameDay, type DayGroup } from "@/lib/gameDays";
 import { DayHeader } from "../../DayHeader";
@@ -79,6 +83,29 @@ export default async function Page({ searchParams }: {
   const c = await liveNcaafCard(week);
   // Live/final scores for this week (server-fetched, ~30s ISR) — rendered right in the game cells.
   const scores = await fetchCfbScores(week);
+
+  // Parlay of the Week. NCAAF publishes a margin and no probability, so the conversion is
+  // Phi(margin / 16.0) — fitted and validated in analysis/cfb_winprob_fit.py (held-out Brier
+  // 0.1875 vs 0.2442 for the home base rate, +23.2%, favourite won 71.1%). FBS-vs-FBS only:
+  // that is the population the SD was measured on, and cross-division blowouts would otherwise
+  // dominate a card that ranks by confidence. Degrades to no card if the board read fails.
+  let ncaafParlay = null;
+  try {
+    const { board } = await cfbBoard();
+    ncaafParlay = pickParlay(legsFrom(
+      (c.games ?? []).flatMap((g) => {
+        const p = ncaafHomeWinProb(g);
+        const bg = p === null ? null : matchBoardGame(g, board);
+        if (p === null || !bg) return [];
+        // Look the price up by the FEED's spelling; render the CARD's shorter names.
+        return [{
+          game: bg,
+          pick: p >= 0.5 ? bg.home : bg.away,
+          ourProb: Math.max(p, 1 - p),
+          label: { home: g.home, away: g.away, pick: p >= 0.5 ? g.home : g.away },
+        }];
+      })));
+  } catch { ncaafParlay = null; }
   const { today: todayEt, tomorrow: tomorrowEt } = etToday();
   // Every panel on this page renders the same day-grouped card tables (Today / Upcoming / Completed).
   const dayGroups = (games: readonly NcaafCardGame[]) =>
@@ -143,6 +170,8 @@ export default async function Page({ searchParams }: {
       <FlowSteps active="analyze" base="ncaaf" />
       <ModelSubnav active="game" base="ncaaf" />
       <NcaafWeekNav base="/ncaaf/model" week={week} />
+
+      <ParlayCard parlay={ncaafParlay} sportLabel="NCAAF" graded="/report" abbrev={abbrevTeam} />
       <NcaafWeekNote card={c} />
       <NcaafLinesAsOf card={c} />
 

@@ -32,6 +32,12 @@ export const LEG_COUNTS = [3, 4] as const;
 export interface ParlayLeg {
   eventId: string;
   matchup: string;
+  /** Both sides, so a sport with long feed names can abbreviate for display. NCAAF's feed spells
+   *  "North Dakota State Bison @ Hawaii Rainbow Warriors", which wraps the matchup cell and gives
+   *  one row a different height from its neighbours -- a ragged chart. Shortening the CONTENT is
+   *  the fix; ellipsizing it would trade one finding for several. */
+  home: string;
+  away: string;
   pick: string;
   ourProb: number;
   /** De-vigged fair probability of the SAME side, for the comparison column. */
@@ -100,7 +106,50 @@ export function candidateLegs(
     legs.push({
       eventId: p.eventId,
       matchup: g.matchup,
+      home: g.home,
+      away: g.away,
       pick,
+      ourProb,
+      marketProb: side.fairProb ?? null,
+      price: best,
+      books: Object.entries(side.byBook).filter(([, v]) => v === best).map(([b]) => b),
+      byBook: side.byBook,
+    });
+  }
+  return legs;
+}
+
+/** The same leg construction for any sport that can hand over (board game, our side, our prob).
+ *
+ *  Kept generic so NCAAF reuses the selector rather than forking it: the scoring, the +500
+ *  constraint and the market comparison must be identical across sports, or the two cards would
+ *  be answering different questions under one name. NFL arrives via candidateLegs() above, which
+ *  joins on event_id; NCAAF has no shared key with the feed and matches on normalised names, so
+ *  it resolves its own Game and calls this. */
+export function legsFrom(
+  picks: {
+    game: Game; pick: string; ourProb: number;
+    /** Display-only names. The lookup into `game.ml` must use the FEED's spelling, but the feed
+     *  spells NCAAF teams with their mascots ("North Dakota State Bison @ Hawaii Rainbow
+     *  Warriors") and that wraps the matchup cell, leaving the chart ragged. The card's own
+     *  shorter names render instead when supplied. */
+    label?: { home: string; away: string; pick: string };
+  }[],
+  now = new Date(),
+): ParlayLeg[] {
+  const legs: ParlayLeg[] = [];
+  for (const { game, pick, ourProb, label } of picks) {
+    if (Date.parse(game.commence) <= now.getTime()) continue;   // pregame prices only
+    if (!Number.isFinite(ourProb) || ourProb <= 0 || ourProb >= 1) continue;
+    const side = game.ml?.[pick];
+    if (!side?.byBook || !Object.keys(side.byBook).length) continue;
+    const best = Math.max(...Object.values(side.byBook));
+    legs.push({
+      eventId: game.eventId,
+      matchup: game.matchup,
+      home: label?.home ?? game.home,
+      away: label?.away ?? game.away,
+      pick: label?.pick ?? pick,
       ourProb,
       marketProb: side.fairProb ?? null,
       price: best,
@@ -125,11 +174,18 @@ const combos = <T,>(arr: T[], k: number): T[][] => {
  *
  *  An exhaustive search is fine here and cheaper than being clever: an NFL slate is 13-16 games,
  *  so C(16,4) + C(16,3) = 2,380 combinations of at most four multiplications each. Legs are capped
- *  at the 24 highest-probability candidates so a 60-game college slate cannot blow that up
- *  (C(24,4) = 10,626, still trivial, and nothing below our 24th-most-confident call belongs on a
- *  card about confidence). */
+ *  at POOL highest-probability candidates so a 60-game college slate cannot blow that up
+ *  (C(40,4) = 91,390, still trivial server-side). */
 export function pickParlay(legs: ParlayLeg[]): Parlay | null {
-  const pool = [...legs].sort((a, b) => b.ourProb - a.ourProb).slice(0, 24);
+  // 🚨 THE CAP IS A COMBINATORIAL GUARD, NOT A CONFIDENCE FILTER, AND 24 WAS TOO TIGHT. Keeping
+  // only the 24 most confident candidates keeps only the SHORTEST prices, and the +500 constraint
+  // needs some length: measured on the live NCAAF slate with 27 matched candidates, every 4-leg
+  // combination inside the top 24 topped out at +243 and the card had to fall back to "short of
+  // +500 this week", while the three discarded near-coin-flips were exactly what would have
+  // cleared it. Cost is the only reason to cap at all -- C(40,4) is 91,390 combinations of four
+  // multiplications, which is nothing server-side.
+  const POOL = 40;
+  const pool = [...legs].sort((a, b) => b.ourProb - a.ourProb).slice(0, POOL);
   if (pool.length < Math.min(...LEG_COUNTS)) return null;
 
   let best: { legs: ParlayLeg[]; prob: number; dec: number } | null = null;

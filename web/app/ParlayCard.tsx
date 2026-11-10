@@ -18,15 +18,19 @@ const pct = (p: number) => `${(p * 100).toFixed(1)}%`;
 export interface ParlayRecord { tickets: number; hit: number }
 
 export default function ParlayCard({
-  parlay, sportLabel, record, graded,
+  parlay, sportLabel, record, graded, abbrev,
 }: {
   parlay: Parlay | null;
   sportLabel: string;
+  /** Shorten team names for display. NCAAF's feed names are long enough to wrap the matchup cell
+   *  and leave the rows ragged; the fix is shorter CONTENT, not an ellipsis. */
+  abbrev?: (team: string) => string;
   /** Graded history. Omit until at least one ticket has been settled. */
   record?: ParlayRecord | null;
   /** Where the track record is published. */
   graded?: string;
 }) {
+  const short = (s: string) => (abbrev ? abbrev(s) : s);
   if (!parlay || parlay.legs.length === 0) return null;
   const { legs, ourProb, american, breakEven, marketProb, bestBook, belowTarget } = parlay;
 
@@ -76,8 +80,8 @@ export default function ParlayCard({
       <ol className="pw__legs">
         {legs.map((l) => (
           <li key={l.eventId} className="pw__leg">
-            <span className="pw__pick">{l.pick}</span>
-            <span className="pw__match">{l.matchup}</span>
+            <span className="pw__pick">{short(l.pick)}</span>
+            <span className="pw__match">{short(l.away)} @ {short(l.home)}</span>
             <span className="pw__ours">we rate {pct(l.ourProb)}</span>
             <span className="pw__mkt">
               {l.marketProb === null ? "—" : `market ${pct(l.marketProb)}`}
