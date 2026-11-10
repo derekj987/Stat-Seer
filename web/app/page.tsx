@@ -3,7 +3,7 @@
 // Model Card, Players We Like, Upsets) — the views that used to live on separate sport
 // homepages. Then the bet-slip + community invites. Sections live at /model, /ncaaf/model, …
 import { fetchHome, type CardRow, type UpsetRow, type PlayerPick } from "@/lib/home";
-import { fetchWeek, buildBoard } from "@/lib/board";
+import { type Game } from "@/lib/board";
 import { nhlBoard } from "@/lib/nhlBoard";
 import { NCAAF_MODEL, type NcaafCardGame, type NcaafUpset } from "./ncaaf/model-data";
 import LandingHub, { type VfRow } from "./LandingHub";
@@ -26,17 +26,30 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
   const initialSport = sp.sport === "ncaaf" ? "ncaaf" : sp.sport === "mlb" ? "mlb"
     : sp.sport === "nhl" ? "nhl" : "nfl";
 
+  // 🚨 THE THREE INDEPENDENT READS RUN CONCURRENTLY. This page used to await fetchHome, then
+  // fetchWeek, then nhlBoard, one after another, so its time-to-content was the SUM of three
+  // Supabase round trips even though only the middle one depended on anything. Measured in
+  // production before this change: time-to-first-byte 0.4s but a 9-19s complete document, because
+  // nothing downstream could start until fetchHome's own chain (currentWeek, then the board, then
+  // the predictions) had finished.
+  //
+  // `allSettled`, not `all`: `all` rejects on the first failure and throws away the other
+  // results, which would turn one empty feed into a blank homepage. Each panel already degrades
+  // to an empty state on its own, and that behaviour is preserved here.
+  const [homeRes, nhlRes] = await Promise.allSettled([fetchHome(SEASON), nhlBoard()]);
+
   let nfl: { week: number; card: CardRow[]; upsets: UpsetRow[]; players: PlayerPick[] } = { week: 0, card: [], upsets: [], players: [] };
-  try {
-    const home = await fetchHome(SEASON);
+  let nflBoard: Game[] = [];
+  if (homeRes.status === "fulfilled") {
+    const home = homeRes.value;
     nfl = { week: home.week, card: home.card, upsets: home.upsets, players: home.players };
-  } catch { /* board not up yet */ }
+    nflBoard = home.board;   // already built by fetchHome — do not fetch it again
+  }
 
   // Value Finder teaser — the first 4 games' best spread price across books (line shopping).
   let vf: VfRow[] = [];
   try {
-    const board = buildBoard(await fetchWeek(nfl.week, SEASON));
-    vf = board.slice(0, 4).flatMap((g) => {
+    vf = nflBoard.slice(0, 4).flatMap((g) => {
       const homeFav = (g.spread.consensus ?? 0) < 0;
       const line = homeFav ? g.spread.home : g.spread.away;
       if (!line || line.point === null) return [];
@@ -52,7 +65,7 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
   // lib/nhlBoard.ts), so that is the number worth teasing.
   let vfNhl: VfRow[] = [];
   try {
-    const { board } = await nhlBoard();
+    const board = nhlRes.status === "fulfilled" ? nhlRes.value.board : [];
     vfNhl = board.slice(0, 4).flatMap((g) => {
       const home = g.ml?.[g.home], away = g.ml?.[g.away];
       if (!home || !away) return [];
