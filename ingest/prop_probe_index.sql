@@ -47,9 +47,34 @@ create index concurrently if not exists prop_probe_idx
 create index concurrently if not exists odds_probe_idx
     on odds_snapshots (season, week, snapshot_at desc);
 
+-- THIRD INDEX, added after the first two were applied and /props was STILL down.
+--
+-- With the probes fixed, /props still rendered 491 characters. The cause was two layers away from
+-- the symptom: board.ts `currentWeek()` asks "which is the earliest week with a game still to
+-- play" as a commence_time range over odds_snapshots, and `commence_time` has NO index on that
+-- table either. So that query sits on the timeout, and when it trips EVERY caller does
+-- `try { cur = await currentWeek() } catch { cur = null }`, where null means `weekRange().min` --
+-- WEEK 1 all season. /props then loaded week 1, the heaviest week in the table, and died in its
+-- own paged read. The page that broke was not the page with the bad query.
+--
+-- Rewriting the range into one `and=(...)` group (done, in board.ts) takes it from 8.3s to ~1.4s
+-- warm, but it is still 6-9s cold and still 500s under load, because no shape fixes a missing
+-- index. Measured on this exact query:
+--
+--     commence_time=gt.X & commence_time=lt.Y        8.3s, 500 under load
+--     and=(commence_time.gt.X,commence_time.lt.Y)    1.4s warm / 9.2s cold -> 500
+--     ...and order=week.asc&limit=1 on top of that   hard 500 on all three trials
+--
+-- (That last one is why there is no ORDER BY in the fix: asking for just the one week we need
+-- forces a sort the range filter cannot share, which is strictly worse than reading the window.)
+create index concurrently if not exists odds_commence_idx
+    on odds_snapshots (season, commence_time);
+
 -- VERIFY -- both rows present, and `idx_scan` climbing once the boards have been loaded:
 --   select indexrelname, idx_scan from pg_stat_user_indexes where indexrelname like '%probe_idx';
 --
 -- And the behaviour the index is for -- these must all answer in well under a second afterwards:
 --   select max(collected_at) from prop_snapshots where season = 2026 and week = 1;
 --   select max(snapshot_at)  from odds_snapshots where season = 2026 and week = 1;
+--   select min(week) from odds_snapshots where season = 2026
+--     and commence_time > now() and commence_time < now() + interval '14 days';
