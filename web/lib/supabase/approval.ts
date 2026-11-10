@@ -1,6 +1,6 @@
 // Server-side beta-approval check for API routes. RLS (ingest/beta_gate_rls.sql) blocks a pending
 // member's direct database writes, but routes that call a PAID external API (the Anthropic assistant /
-// dashboard-chart) aren't a DB write, so they must check approval themselves before spending.
+// AI assistant) are not a DB write, so they must check approval themselves before spending.
 // profiles is world-readable, so the caller's own session client can read its status.
 import type { SupabaseClient } from "@supabase/supabase-js";
 

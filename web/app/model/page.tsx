@@ -16,7 +16,6 @@ import Tip from "../Tip";
 import AddToSlip from "../AddToSlip";
 import { capDayGroups, etToday, groupByGameDay, dayBasis, type DayGroup } from "@/lib/gameDays";
 import { DayHeader } from "../DayHeader";
-import PinButton from "../PinButton";
 import ParlayCard from "../ParlayCard";
 import { candidateLegs, pickParlay } from "@/lib/parlayOfWeek";
 
@@ -156,7 +155,6 @@ const kickFmt = new Intl.DateTimeFormat("en-US", {
   weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
 });
 const et = (iso: string) => kickFmt.format(new Date(iso)) + " ET";
-
 
 function PredictionCard({ p, slipPick }: { p: ModelPrediction; slipPick?: string }) {
   const favProb = p.favored === p.home ? p.homeWinProb : 1 - p.homeWinProb;
@@ -426,7 +424,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
       />
 
       {/* Week's numbers crunched — market spread/total beside our line-blind projection. */}
-      <details className="hb-panel hb-panel--card" data-embedchart="numbers-crunched" open>
+      <details className="hb-panel hb-panel--card" open>
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">Week {week} numbers crunched</span>
           <span className="hb-bar__count">{scored.length} games</span>
@@ -439,7 +437,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
             Line shopping — every book&apos;s number and the best price per side — is on{" "}
             <a href="/lines">Line Shopping</a>.
           </>} />
-          <PinButton size="sm" pin={{ id: "/model?only=numbers-crunched", kind: "model", label: "The Model · Numbers Crunched", detail: `NFL · Week ${week}`, href: `/model?week=${week}&only=numbers-crunched` }} />
+          
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
@@ -471,15 +469,14 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
         </div>
       </details>
 
-
       {preds.length === 0 ? (
         <p className="foot">No reads published for Week {week} yet.</p>
       ) : (
-        <details className="hb-panel hb-panel--card" data-embedchart="full-model" open>
+        <details className="hb-panel hb-panel--card" open>
           <summary className="hb-bar">
             <span className="hb-bar__title hb-bar__title--gold">Week {week} Full Model</span>
             <span className="hb-bar__count">{preds.length} games</span>
-            <PinButton size="sm" pin={{ id: "/model?only=full-model", kind: "model", label: "The Model · Full Model", detail: `NFL · Week ${week}`, href: `/model?week=${week}&only=full-model` }} />
+            
             <span className="hb-bar__chev" aria-hidden="true">▾</span>
           </summary>
           <div className="hb-body">

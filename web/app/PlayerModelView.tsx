@@ -12,7 +12,6 @@ import { NCAAF_PLAYER_PROJECTIONS, NCAAF_PROJ_WEEK } from "@/lib/ncaafPlayerProj
 import { isRealistic } from "@/lib/depthChart";
 import { projLean, leanCentres, hasProjSample, MIN_PROJ_GAMES } from "@/lib/projLean";
 import PropAdd, { type PricedSide } from "./PropAdd";
-import PinButton from "./PinButton";
 import { playerSlot, playerTeam, normName } from "@/lib/playerSlot";
 import { weekProps, fanduelLines } from "@/lib/props";
 import { bookLabel } from "@/lib/bookLabel";
@@ -38,7 +37,6 @@ export const PLAYER_CATS: PlayerCat[] = [
 
 export const playerCatByKey = (k: string): PlayerCat =>
   PLAYER_CATS.find((c) => c.key === k) ?? PLAYER_CATS[0];
-
 
 // Measured size of the matchup effect, per sport, in yards a player beats his own baseline by
 // between the worst and best tercile. Different numbers because they were measured separately —
@@ -364,7 +362,7 @@ export default async function PlayerModelView({ base, cat, week }: { base: "nfl"
       <WeekNav current={week} base={base === "ncaaf" ? "/ncaaf/model/players" : "/model/players"} params={`cat=${active.key}`} />
 
       <div className="pinrow">
-        <PinButton pin={{ id: `${home}?cat=${active.key}`, kind: "model", label: `Player Prop Model · ${active.label}`, detail: `${base === "ncaaf" ? "NCAAF" : "NFL"} · Week ${week}`, href: `${catHref(active.key)}` }} />
+        
       </div>
 
       <section className="pmcat">

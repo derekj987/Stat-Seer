@@ -5,7 +5,6 @@ import { ShopSubnav, Brand, FlowSteps, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
 import PropsView from "./PropsView";
 import Tip from "../Tip";
-import PinButton from "../PinButton";
 import { etToday } from "@/lib/gameDays";
 
 export const revalidate = 120;
@@ -85,7 +84,7 @@ export default async function Page({ searchParams }: PageProps<"/props">) {
           line-blind read on each player, see <a href="/model/players">The Model</a>; for the line-blind game
           read, <a href="/model">The Model</a>; for key numbers, <a href="/best">Sweet Spots</a>.
         </>} />
-      } pin={<PinButton size="sm" pin={{ id: `/props?cat=${cat.key}`, kind: "props", label: `Player Props · ${cat.label}`, detail: `NFL · Week ${week}`, href: `/props?cat=${cat.key}&week=${week}` }} />} />
+      } />
       <FlowSteps active="value" />
       <div className="subnavrow"><ShopSubnav active="props" /></div>
 

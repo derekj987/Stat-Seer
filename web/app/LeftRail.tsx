@@ -235,9 +235,6 @@ export default function LeftRail() {
   // ---- Bettor's Rail items: the betting tools -------------------------------
   const bettorItems = (
     <>
-      <a className="leftrail__it" href="/dashboard">
-        <RailIcon src="/analytics.png" /><span className="leftrail__lbl">My Analytics</span>
-      </a>
       <button type="button" className="leftrail__it" onClick={() => fire("ss:open-assistant")}>
         <span className="leftrail__ic leftrail__ic--asst" aria-hidden="true">
           {/* eslint-disable-next-line @next/next/no-img-element */}

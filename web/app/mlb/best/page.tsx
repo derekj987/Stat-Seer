@@ -3,7 +3,6 @@ import { bookLabel } from "@/lib/bookLabel";
 import { fmtOdds, type KeyPlay } from "@/lib/bestbets";
 import { ShopSubnav, Brand, FlowSteps, DayBadge } from "../../Nav";
 import SavableRow from "../../best/SavableRow";
-import PinButton from "../../PinButton";
 import { StatCard } from "../../ncaaf/StatCard";
 import { etToday, groupByGameDay, dayBasis } from "@/lib/gameDays";
 import { DayHeader } from "../../DayHeader";
@@ -115,7 +114,7 @@ export default async function Page() {
         />
       </header>
 
-      <DayBadge pin={<PinButton size="sm" pin={{ id: "/mlb/best", kind: "sweetspots", label: "MLB · Sweet Spots", detail: "today's slate", href: "/mlb/best" }} />} />
+      <DayBadge />
       <FlowSteps active="value" base="mlb" />
       <div className="subnavrow"><ShopSubnav active="best" base="mlb" /></div>
 
@@ -191,7 +190,6 @@ export default async function Page() {
               </div>
             </section>
           )}
-
 
           <section className="ctxsec">
             <h2 className="ctxsec__h">Best prices tonight <Tip label="What a shopping edge is" text={<>

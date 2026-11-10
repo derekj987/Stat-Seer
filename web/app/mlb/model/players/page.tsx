@@ -1,5 +1,4 @@
 import { Brand, FlowSteps, ModelSubnav } from "../../../Nav";
-import PinButton from "../../../PinButton";
 import { DayHeader } from "../../../DayHeader";
 import Tip from "../../../Tip";
 import { etToday, groupByGameDay } from "@/lib/gameDays";
@@ -206,14 +205,14 @@ export default async function Page({ searchParams }: PageProps<"/mlb/model/playe
         ))}
       </nav>
 
-      <details className="hb-panel hb-panel--card" data-embedchart="mlb-props" open>
+      <details className="hb-panel hb-panel--card" open>
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">
             {CATS.find((c) => c.key === cat)!.label}
           </span>
           <span className="hb-bar__count">{games.length} game{games.length === 1 ? "" : "s"}</span>
           <Honest cat={cat} />
-          <PinButton size="sm" pin={{ id: `/mlb/model/players?cat=${cat}`, kind: "model", label: `MLB · ${CATS.find((c) => c.key === cat)!.label}`, detail: "player props", href: `/mlb/model/players?cat=${cat}` }} />
+          
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">

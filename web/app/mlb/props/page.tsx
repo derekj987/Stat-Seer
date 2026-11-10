@@ -1,5 +1,4 @@
 import { Brand, FlowSteps, ShopSubnav, DayBadge } from "../../Nav";
-import PinButton from "../../PinButton";
 import PropsGrid from "../../PropsGrid";
 import { etToday } from "@/lib/gameDays";
 import { mlbPropBoard, MLB_CATEGORIES, MLB_PROP_LABELS, mlbCategoryByKey, norm } from "@/lib/mlbProps";
@@ -80,7 +79,7 @@ export default async function Page({ searchParams }: PageProps<"/mlb/props">) {
               strikeouts, see <a href="/mlb/model/players">The Model</a>; for run lines and totals,{" "}
               <a href="/mlb/lines">Line Shopping</a>; for where the half-run matters,{" "}
               <a href="/mlb/best">Sweet Spots</a>.
-            </>} />} pin={<PinButton size="sm" pin={{ id: `/mlb/props?cat=${cat.key}`, kind: "props", label: `MLB Props · ${cat.label}`, detail: "today's slate", href: `/mlb/props?cat=${cat.key}` }} />} />
+            </>} />} />
       <FlowSteps active="value" base="mlb" />
       <div className="subnavrow"><ShopSubnav active="props" base="mlb" /></div>
 

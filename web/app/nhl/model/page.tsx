@@ -1,5 +1,4 @@
 import { Brand, FlowSteps, ModelSubnav, DayBadge } from "../../Nav";
-import PinButton from "../../PinButton";
 import Tip from "../../Tip";
 import { DayHeader } from "../../DayHeader";
 import { etToday, groupByGameDay } from "@/lib/gameDays";
@@ -95,7 +94,7 @@ export default async function Page() {
             they are published so the record can be read rather than described.<br /><br />
             For prices on these games see <a href="/nhl/lines">Line Shopping</a>; for the player
             read, <a href="/nhl/model/players">Player Model</a>.
-          </>} />} pin={<PinButton size="sm" pin={{ id: "/nhl/model", kind: "model", label: "NHL · Game Model", detail: "line-blind", href: "/nhl/model" }} />} />
+          </>} />} />
       <FlowSteps active="analyze" base="nhl" />
       <div className="subnavrow"><ModelSubnav active="game" base="nhl" /></div>
 

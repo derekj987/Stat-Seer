@@ -1,6 +1,5 @@
 import { Brand, FlowSteps, ShopSubnav, WeekBadge } from "../../Nav";
 import { NcaafWeekNav, NcaafWeekNote, readNcaafWeek, ncaafCard } from "../NcaafWeek";
-import PinButton from "../../PinButton";
 import { NCAAF_MODEL } from "../model-data";
 import { NcaafSoon } from "../Soon";
 import PropsView from "../../props/PropsView";
@@ -76,7 +75,7 @@ export default async function Page({ searchParams }: PageProps<"/ncaaf/props">) 
               captured history exists they are graded, same as everything else.<br /><br />
               For the line-blind read, see <a href="/ncaaf/model">The Model</a>; for key numbers,{" "}
               <a href="/ncaaf/best">Sweet Spots</a>.
-            </>} />} pin={<PinButton size="sm" pin={{ id: `/ncaaf/props?cat=${cat.key}`, kind: "props", label: `NCAAF Props · ${cat.label}`, detail: `Week ${week}`, href: `/ncaaf/props?cat=${cat.key}&week=${week}` }} />} />
+            </>} />} />
       <FlowSteps active="value" base="ncaaf" />
       <ShopSubnav active="props" base="ncaaf" />
       <NcaafWeekNav base="/ncaaf/props" week={week} params={`cat=${cat.key}`} />

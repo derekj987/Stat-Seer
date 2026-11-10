@@ -1,5 +1,4 @@
 import { Brand, FlowSteps, ShopSubnav, DayBadge } from "../../Nav";
-import PinButton from "../../PinButton";
 import PropsGrid from "../../PropsGrid";
 import { etToday } from "@/lib/gameDays";
 import { nhlPropBoard, NHL_CATEGORIES, NHL_PROP_LABELS, nhlCategoryByKey, ONE_SIDED } from "@/lib/nhlProps";
@@ -103,7 +102,7 @@ export default async function Page({ searchParams }: PageProps<"/nhl/props">) {
               prop is the likeliest place a price is wrong. Shots on goal leads the tabs on purpose: it is
               the volume market, and volume is the part of a player&apos;s night that carries from game to
               game. For moneylines, puck lines and totals, see <a href="/nhl/lines">Line Shopping</a>.
-            </>} />} pin={<PinButton size="sm" pin={{ id: `/nhl/props?cat=${cat.key}`, kind: "props", label: `NHL Props · ${cat.label}`, detail: "upcoming slate", href: `/nhl/props?cat=${cat.key}` }} />} />
+            </>} />} />
       <FlowSteps active="value" base="nhl" />
       <div className="subnavrow"><ShopSubnav active="props" base="nhl" only={["lines", "props"]} /></div>
 
