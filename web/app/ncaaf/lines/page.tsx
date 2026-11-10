@@ -1,7 +1,6 @@
 import { Brand, FlowSteps, ShopSubnav, WeekBadge } from "../../Nav";
 import { NcaafWeekNav, NcaafWeekNote, readNcaafWeek } from "../NcaafWeek";
 import { liveNcaafCard } from "../liveCard";
-import PinButton from "../../PinButton";
 import Tip from "@/app/Tip";
 import { NCAAF_MODEL } from "../model-data";
 import { StatCard } from "../StatCard";
@@ -78,7 +77,7 @@ export default async function Page({ searchParams }: {
         with what the half-point is worth there. For our own line-blind read beside the market, see{" "}
         <a href="/ncaaf/model">The Model</a>.
       </>} />
-    } pin={<PinButton size="sm" pin={{ id: "/ncaaf/lines", kind: "lines", label: "NCAAF · Line Shopping", detail: `Week ${week}`, href: `/ncaaf/lines?week=${week}` }} />} />
+    } />
   );
   const nav = (
     <>

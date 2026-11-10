@@ -1,5 +1,4 @@
 import { Brand, FlowSteps, ModelSubnav, DayBadge } from "../../Nav";
-import PinButton from "../../PinButton";
 import Tip from "../../Tip";
 import { DayHeader } from "../../DayHeader";
 import { etToday, groupByGameDay } from "@/lib/gameDays";
@@ -95,7 +94,7 @@ export default async function Page() {
           For prices, see <a href="/nba/lines">Line Shopping</a> and{" "}
           <a href="/nba/props">Player Props</a>.
         </>} />}
-        pin={<PinButton size="sm" pin={{ id: "/nba/model", kind: "model", label: "NBA · The Model", detail: "spreads & totals", href: "/nba/model" }} />}
+       
       />
       <FlowSteps active="analyze" base="nba" />
       <div className="subnavrow"><ModelSubnav active="game" base="nba" only={["game"]} /></div>

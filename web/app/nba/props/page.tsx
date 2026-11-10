@@ -1,5 +1,4 @@
 import { Brand, FlowSteps, ShopSubnav, DayBadge } from "../../Nav";
-import PinButton from "../../PinButton";
 import PropsGrid from "../../PropsGrid";
 import { etToday } from "@/lib/gameDays";
 import { nbaPropBoard, NBA_CATEGORIES, NBA_PROP_LABELS, nbaCategoryByKey, THIN } from "@/lib/nbaProps";
@@ -95,7 +94,7 @@ export default async function Page({ searchParams }: PageProps<"/nba/props">) {
               prop is the likeliest place a price is wrong — and basketball posts more of them per game
               than any sport here. For moneylines, spreads and totals, see{" "}
               <a href="/nba/lines">Line Shopping</a>.
-            </>} />} pin={<PinButton size="sm" pin={{ id: `/nba/props?cat=${cat.key}`, kind: "props", label: `NBA Props · ${cat.label}`, detail: "upcoming slate", href: `/nba/props?cat=${cat.key}` }} />} />
+            </>} />} />
       <FlowSteps active="value" base="nba" />
       <div className="subnavrow"><ShopSubnav active="props" base="nba" only={["lines", "props"]} /></div>
 

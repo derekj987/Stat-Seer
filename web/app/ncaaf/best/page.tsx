@@ -1,7 +1,6 @@
 import { Brand, FlowSteps, ShopSubnav, WeekBadge } from "../../Nav";
 import { NcaafWeekNav, NcaafWeekNote, readNcaafWeek } from "../NcaafWeek";
 import { liveNcaafCard } from "../liveCard";
-import PinButton from "../../PinButton";
 import { NCAAF_MODEL, type NcaafKeyNum } from "../model-data";
 import { StatCard } from "../StatCard";
 import NcaafSweetSpots from "./NcaafSweetSpots";
@@ -33,7 +32,7 @@ export default async function Page({ searchParams }: {
         />
       </header>
 
-      <WeekBadge week={c.week} pin={<PinButton size="sm" pin={{ id: "/ncaaf/best", kind: "sweetspots", label: "NCAAF · Sweet Spots", detail: `Week ${week}`, href: `/ncaaf/best?week=${week}` }} />} />
+      <WeekBadge week={c.week} />
       <FlowSteps active="value" base="ncaaf" />
       <ShopSubnav active="best" base="ncaaf" />
       <NcaafWeekNav base="/ncaaf/best" week={week} />

@@ -5,8 +5,6 @@ import { Brand, FlowSteps, ShopSubnav, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
 import { etToday } from "@/lib/gameDays";
 import AuditView from "./AuditView";
-import PinButton from "../PinButton";
-
 export const revalidate = 120;
 const SEASON = 2026;
 
@@ -78,7 +76,7 @@ export default async function Page({ searchParams }: PageProps<"/audit">) {
         </h2>
 
         <div className="pinrow">
-          <PinButton pin={{ id: `/audit?cat=${cat.key}`, kind: "auditor", label: `Pick Auditor · ${cat.label}`, detail: `NFL · Week ${week}`, href: `/audit?cat=${cat.key}&week=${week}` }} />
+          
         </div>
 
         <CatNav current={cat.key} week={week} />

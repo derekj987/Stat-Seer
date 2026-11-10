@@ -574,13 +574,48 @@ def cfb_week_games(season, week, key):
 def cfb_close(season, week_games, key):
     """Closing FanDuel spread/total/ML per (away, home) from cfb_odds_snapshots -- the last
     pregame sweep per event. Odds-feed team names -> CFBD names via cfbd_team_map."""
-    lo = min(g["startDate"] for g in week_games)
-    hi = max(g["startDate"] for g in week_games)
-    lo_q = urllib.parse.quote((iso(lo) - dt.timedelta(days=1)).isoformat())
-    hi_q = urllib.parse.quote((iso(hi) + dt.timedelta(hours=1)).isoformat())
-    marks = cpp.sb_get(f"cfb_odds_snapshots?commence_time=gte.{lo_q}&commence_time=lte.{hi_q}"
-                       f"&book=eq.{LINE_BOOK}&market=eq.totals&outcome_name=eq.Over"
-                       f"&select=event_id,snapshot_at,commence_time,home_team,away_team")
+    # 🚨 NEVER RANGE-SCAN THIS TABLE. `cfb_odds_snapshots` carries only two indexes --
+    # `(event_id, market, book)` and `(snapshot_at)` -- and NOTHING on `commence_time`. Every
+    # earlier version of this function drove the read on a `commence_time` window, so the planner
+    # had to heap-scan the week to apply it, crossed PostgREST's statement timeout, and returned
+    # HTTP 500 through all four of sb_get's retries. The NCAAF report card died before grading a
+    # single game, every week, and it looked like a flaky database rather than a missing index.
+    #
+    # Two fixes were tried first and BOTH still 500, which is what finally named the cause: both
+    # were still asking for a range.
+    #
+    #     and=(commence_time.gte.X,commence_time.lt.Y)   one DAY at a time   -> 500 x 7 days
+    #     and=(snapshot_at.gte.X,snapshot_at.lt.Y)       the indexed column  -> 500
+    #     snapshot_at=eq.<one exact sweep>                                   -> OK, 0.5s
+    #
+    # Measured on this table: ONE Saturday of college football holds 200,000+ rows (~80 games x 10
+    # books x 3 markets x 2 outcomes x every sweep), so a range is hundreds of thousands of rows
+    # however the window is sliced. Equality on an indexed column is the only shape that stays
+    # inside the timeout, and it is also all this function needs.
+    #
+    # So: one sweep per DISTINCT KICKOFF INSTANT. For each kickoff K in the week (newest first),
+    # take the newest sweep strictly before K and read it. Every game kicking off at K is pregame
+    # in that sweep, which is exactly its closing mark; a sweep read for a later K either predates
+    # this one (and loses the reduction below) or has K's games already started (and is skipped by
+    # the pregame guard). ~20 distinct kickoff instants a week, ~2s each, against a query that
+    # never completed at all.
+    _q = lambda s: urllib.parse.quote(s, safe="")   # noqa: E731
+    kicks = sorted({iso(g["startDate"]) for g in week_games}, reverse=True)
+    marks, seen_sweeps = [], set()
+    for k in kicks:
+        probe = cpp.sb_get(f"cfb_odds_snapshots?select=snapshot_at"
+                           f"&snapshot_at=lt.{_q(k.isoformat())}"
+                           f"&order=snapshot_at.desc&limit=1")
+        if not probe:
+            continue
+        snap = probe[0]["snapshot_at"]
+        if snap in seen_sweeps:
+            continue
+        seen_sweeps.add(snap)
+        marks += cpp.sb_get(
+            f"cfb_odds_snapshots?snapshot_at=eq.{_q(snap)}"
+            f"&book=eq.{LINE_BOOK}&market=eq.totals&outcome_name=eq.Over"
+            f"&select=event_id,snapshot_at,commence_time,home_team,away_team")
     last = {}
     for m in marks:
         if m["snapshot_at"] >= m["commence_time"]:

@@ -11,8 +11,6 @@ import { GAME_WEATHER, type GameWeather } from "@/lib/weatherData";
 import { groupByGameDay, dayBasis, type DayGroup } from "@/lib/gameDays";
 import { DayHeader } from "./DayHeader";
 import { audit, VERDICT_LABEL } from "@/lib/fairValue";
-import PinButton from "./PinButton";
-
 const WX_BY_EVENT = new Map(GAME_WEATHER.map((w) => [w.eventId, w]));
 
 function wxPlace(wx: GameWeather): string {
@@ -89,7 +87,6 @@ function SavableChip({
     </button>
   );
 }
-
 
 // Games shown before "show more". EVEN, because the card grid is two across at the width the
 // rails leave (826px at 1440; `.grid` is auto-fill minmax(330px)): three visible cards put the
@@ -249,9 +246,9 @@ export default function BoardView({
         <ValueFinderDrawer />
 
         {badge ?? (S.weeks ? (
-          <WeekBadge week={week} pin={<PinButton size="sm" pin={{ id: S.pin, kind: "lines", label: "Value Finder · Line Shopping", detail: `${S.label} · Week ${week}`, href: `${S.pin}?week=${week}` }} />} />
+          <WeekBadge week={week} />
         ) : (
-          <DayBadge pin={<PinButton size="sm" pin={{ id: S.pin, kind: "lines", label: `${S.label} · Line Shopping`, detail: "today's slate", href: S.pin }} />} />
+          <DayBadge />
         ))}
         <FlowSteps active="value" base={sport} />
         <div className="subnavrow">

@@ -1,5 +1,4 @@
 import { Brand, FlowSteps, ModelSubnav, DayBadge } from "../../../Nav";
-import PinButton from "../../../PinButton";
 import Tip from "../../../Tip";
 import { NHL_MODEL_CATS, nhlCatByKey } from "../../NhlModelPanel";
 import NhlPlayerBoard from "../../NhlPlayerBoard";
@@ -85,7 +84,7 @@ export default async function Page({ searchParams }: PageProps<"/nhl/model/playe
             For the game itself, see the <a href="/nhl/model">Game Model</a>; for prices on these
             same players, <a href="/nhl/props">Player Props</a>; for game lines,{" "}
             <a href="/nhl/lines">Line Shopping</a>.
-          </>} />} pin={<PinButton size="sm" pin={{ id: `/nhl/model/players?cat=${cat.key}`, kind: "model", label: `NHL · Player Model · ${cat.label}`, detail: "line-blind", href: `/nhl/model/players?cat=${cat.key}` }} />} />
+          </>} />} />
       <FlowSteps active="analyze" base="nhl" />
       <div className="subnavrow"><ModelSubnav active="player" base="nhl" /></div>
 

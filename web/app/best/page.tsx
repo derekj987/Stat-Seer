@@ -4,7 +4,6 @@ import { fetchBets, fetchBestProps, fmtOdds, type KeyPlay, type PropPlay } from 
 import { ShopSubnav, Brand, FlowSteps, WeekBadge } from "../Nav";
 import { WeekNav } from "../WeekNav";
 import SavableRow from "./SavableRow";
-import PinButton from "../PinButton";
 import { etToday, groupByGameDay, dayBasis } from "@/lib/gameDays";
 import { DayHeader } from "../DayHeader";
 import Tip from "../Tip";
@@ -24,7 +23,6 @@ function BookTag({ books }: { books: string[] }) {
     ? <span className="book">{bookLabel(books[0])}</span>
     : <span className="book tie" title={books.map(bookLabel).join(", ")}>×{books.length} books</span>;
 }
-
 
 function KeyCard({ k }: { k: KeyPlay }) {
   const isSpread = k.market === "Spread";
@@ -89,7 +87,7 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
         />
       </header>
 
-      <WeekBadge week={week} pin={<PinButton size="sm" pin={{ id: "/best", kind: "sweetspots", label: "Sweet Spots · Best Prices", detail: `NFL · Week ${week}`, href: `/best?week=${week}` }} />} />
+      <WeekBadge week={week} />
       <FlowSteps active="value" />
       <div className="subnavrow"><ShopSubnav active="best" /></div>
       <WeekNav min={min} max={max} current={week} base="/best" />
@@ -129,7 +127,6 @@ export default async function Page({ searchParams }: PageProps<"/best">) {
               </div>
             </section>
           )}
-
 
           <section className="ctxsec">
             <h2 className="ctxsec__h">Best prices this week <Tip label="What a shopping edge is" text={<>

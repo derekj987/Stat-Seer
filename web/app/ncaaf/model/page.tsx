@@ -9,7 +9,10 @@ import { NcaafCardHead, NcaafGameCell, NcaafBottomCell } from "../CardCells";
 import { fetchCfbScores, scoreFor, type CfbScores } from "@/lib/cfbScores";
 import { NcaafWeekNav, NcaafWeekNote, NcaafLinesAsOf, readNcaafWeek } from "../NcaafWeek";
 import { liveNcaafCard } from "../liveCard";
-import PinButton from "../../PinButton";
+import ParlayCard from "../../ParlayCard";
+import { legsFrom, pickParlay } from "@/lib/parlayOfWeek";
+import { ncaafHomeWinProb, matchBoardGame } from "@/lib/ncaafWinProb";
+import { cfbBoard } from "@/lib/cfbBoard";
 import { marketGap } from "../lean";
 import { capDayGroups, etToday, groupByGameDay, type DayGroup } from "@/lib/gameDays";
 import { DayHeader } from "../../DayHeader";
@@ -79,6 +82,29 @@ export default async function Page({ searchParams }: {
   const c = await liveNcaafCard(week);
   // Live/final scores for this week (server-fetched, ~30s ISR) — rendered right in the game cells.
   const scores = await fetchCfbScores(week);
+
+  // Parlay of the Week. NCAAF publishes a margin and no probability, so the conversion is
+  // Phi(margin / 16.0) — fitted and validated in analysis/cfb_winprob_fit.py (held-out Brier
+  // 0.1875 vs 0.2442 for the home base rate, +23.2%, favourite won 71.1%). FBS-vs-FBS only:
+  // that is the population the SD was measured on, and cross-division blowouts would otherwise
+  // dominate a card that ranks by confidence. Degrades to no card if the board read fails.
+  let ncaafParlay = null;
+  try {
+    const { board } = await cfbBoard();
+    ncaafParlay = pickParlay(legsFrom(
+      (c.games ?? []).flatMap((g) => {
+        const p = ncaafHomeWinProb(g);
+        const bg = p === null ? null : matchBoardGame(g, board);
+        if (p === null || !bg) return [];
+        // Look the price up by the FEED's spelling; render the CARD's shorter names.
+        return [{
+          game: bg,
+          pick: p >= 0.5 ? bg.home : bg.away,
+          ourProb: Math.max(p, 1 - p),
+          label: { home: g.home, away: g.away, pick: p >= 0.5 ? g.home : g.away },
+        }];
+      })));
+  } catch { ncaafParlay = null; }
   const { today: todayEt, tomorrow: tomorrowEt } = etToday();
   // Every panel on this page renders the same day-grouped card tables (Today / Upcoming / Completed).
   const dayGroups = (games: readonly NcaafCardGame[]) =>
@@ -143,6 +169,8 @@ export default async function Page({ searchParams }: {
       <FlowSteps active="analyze" base="ncaaf" />
       <ModelSubnav active="game" base="ncaaf" />
       <NcaafWeekNav base="/ncaaf/model" week={week} />
+
+      <ParlayCard parlay={ncaafParlay} sportLabel="NCAAF" graded="/report" abbrev={abbrevTeam} />
       <NcaafWeekNote card={c} />
       <NcaafLinesAsOf card={c} />
 
@@ -181,10 +209,10 @@ export default async function Page({ searchParams }: {
       </details>
 
       {/* Marquee AP Top 25 board — the ranked matchups, in kickoff order. */}
-      <details className="hb-panel hb-panel--card" data-embedchart="ap-top-25" open>
+      <details className="hb-panel hb-panel--card" open>
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">The Model — AP Top 25 Matchups</span>
-          <PinButton size="sm" pin={{ id: "/ncaaf/model?only=ap-top-25", kind: "model", label: "NCAAF Model · AP Top 25 Matchups", detail: `Week ${week}`, href: `/ncaaf/model?week=${week}&only=ap-top-25` }} />
+          
           <Tip text={<>Every <b>ranked game</b> — one with an <b>AP Top 25</b> team (its poll rank shown beside it) — on the Week {c.week} board, in kickoff order, with the market&apos;s <b>Spread</b> and <b>O/U</b> beside <b>Our Projection</b>, our own line-blind spread &amp; total. A ◆ marks an <b>off-consensus</b> game. On big favorites we defer to the efficient market, so these mostly agree — the games where our read genuinely differs are in <b>Where We Differ Most</b> below. Published <b>line-blind</b> as context you can check.</>} />
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
@@ -194,11 +222,11 @@ export default async function Page({ searchParams }: {
       </details>
 
       {/* The FULL model — every game on the board, collapsed. */}
-      <details className="hb-panel hb-panel--card" data-embedchart="full-model" open>
+      <details className="hb-panel hb-panel--card" open>
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">Full Model — every game</span>
           <span className="hb-bar__count">{c.games.length} games</span>
-          <PinButton size="sm" pin={{ id: "/ncaaf/model?only=full-model", kind: "model", label: "NCAAF Model · Full Model", detail: `Week ${week}`, href: `/ncaaf/model?week=${week}&only=full-model` }} />
+          
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
@@ -207,10 +235,10 @@ export default async function Page({ searchParams }: {
       </details>
 
       {/* Then the biggest market divergences — where the model has an independent opinion. */}
-      <details className="hb-panel hb-panel--card" data-embedchart="where-we-differ" open>
+      <details className="hb-panel hb-panel--card" open>
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">The Model — Where We Differ Most</span>
-          <PinButton size="sm" pin={{ id: "/ncaaf/model?only=where-we-differ", kind: "model", label: "NCAAF Model · Where We Differ Most", detail: `Week ${week}`, href: `/ncaaf/model?week=${week}&only=where-we-differ` }} />
+          
           <Tip text={<><span className="tip__lead"><span className="hb-dia">Δ</span> How far our line-blind number sits from the market on this game.
                         <span className="hb-x"> · Big favorites don&apos;t appear here — on blowouts the market is efficient and we
                           defer to it. The games that lead are where <b>our read genuinely differs</b>. It&apos;s <b>context you can

@@ -130,7 +130,19 @@ def main(argv=None):
         if w not in wdays:
             continue
         first = dt.date.fromisoformat(wdays[w][0])
-        last = dt.date.fromisoformat(wdays[w][-1])
+        # 🚨 +1 DAY ON THE UPPER BOUND: the window comes from games.csv `gameday`, which is an
+        # EASTERN date, and it is compared below against the feed's commence_time, which is UTC.
+        # UTC runs ahead of Eastern, so every kickoff after 7-8pm ET lands on the NEXT UTC day and
+        # fell outside its own week. Measured on 2025: the plan covered 254 of 272 games, and the
+        # 18 it dropped were ALL late kickoffs -- 15 of them Monday Night Football, the single
+        # most-bet game of each week and exactly what CLV and reverse-line-movement work needs.
+        # A whole season would have been imported with no MNF in it, and nothing would have said so.
+        #
+        # One day is the right amount and is safe: a UTC kickoff date can be at most one day after
+        # its Eastern gameday, and the next week's earliest game is the following Thursday, ~3 days
+        # later, so this cannot pull a neighbouring week in. The lower bound needs no change --
+        # UTC being ahead means a game can never land on an EARLIER UTC date than its ET gameday.
+        last = dt.date.fromisoformat(wdays[w][-1]) + dt.timedelta(days=1)
         disc = iso_z(dt.datetime.combine(first - dt.timedelta(days=1), dt.time(12, 0), dt.timezone.utc))
         status, resp = hist_get("/odds", {"apiKey": key, "regions": args.regions,
                                           "markets": "h2h", "oddsFormat": "american", "date": disc})

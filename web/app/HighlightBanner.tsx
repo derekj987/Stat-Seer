@@ -17,9 +17,6 @@ function slides(sport: Sport): Slide[] {
   const value = sport === "ncaaf" ? "/ncaaf/lines" : "/lines";
   const model = sport === "ncaaf" ? "/ncaaf/model" : "/model";
   return [
-    { emoji: "🛠", kicker: "New · Your Dashboard", title: "Build your own board",
-      blurb: "Pin any chart across StatSeer — the model, value, props, sweet spots — into one personal view, or ask the AI to build one for you.",
-      path: "/dashboard", img: "/dashboard.jpg?v=1" },
     { emoji: "👑", kicker: "The Model", title: "Our line vs the market, graded",
       blurb: "Line-blind predictions, published and locked pre-kickoff, with a calibration record anyone can check.",
       path: model, img: "/model.jpg?v=7" },

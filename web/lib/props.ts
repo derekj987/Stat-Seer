@@ -104,23 +104,62 @@ const CAPTURE_WINDOW_MIN = 60;   // one sweep writes its batches within an hour
  *  This is the pattern `cfbProps.ts` has always used — ask for the latest timestamp, then read
  *  only rows at it — and the NFL side should have been doing the same. Two cheap requests instead
  *  of ~120 paged ones, and the scan drops from a whole week to a single sweep.
- *  Returns "" if the probe fails, so the caller falls back to the unbounded read. */
-async function sinceNewest(base: string, filters: string): Promise<string> {
+ *
+ *  🚨 IT MUST NOT FAIL OPEN. This used to return "" when the probe failed, and the callers then
+ *  ran the UNBOUNDED read — so a probe that merely got slow turned a two-request page into the
+ *  exact full-table scan this function exists to prevent. Measured on 2026-11-10, /props: the
+ *  probe crossed Supabase's ~8s statement timeout, sinceNewest swallowed the 500, and the page
+ *  pulled 32,000+ rows and was still paging when the measurement was cut off. The page rendered
+ *  94 characters and threw `57014 canceling statement due to statement timeout` out of pgAll —
+ *  so the symptom appeared one layer below the cause, in the reader rather than the probe.
+ *
+ *  🚨 AND THE PROBE NEEDS A COMPOSITE INDEX — no single-column one can serve it. The query is
+ *  `WHERE season=X AND week=Y ORDER BY <time> DESC LIMIT 1`, and measured per week on the live
+ *  table (statement timeout ~8s):
+ *
+ *      order=collected_at.desc   wk10 0.8s   wk9 8.0s   wk8 5.0s   wk1 6.2s   (unindexed: SORTS)
+ *      order=id.desc             wk10 0.2s   wk9 0.6s   wk8 500    wk1 500    (walks back past
+ *      order=snapshot_at.desc    wk10 0.9s   wk9 0.9s   wk8 500    wk1 500     every newer row)
+ *
+ *  The two indexed orders are fast on the CURRENT week and fail on completed ones, because the
+ *  planner scans that index backwards from the newest row and has to pass every later week before
+ *  it reaches the one asked for. `ingest/prop_probe_index.sql` adds (season, week, collected_at
+ *  desc), which turns all of the above into one index lookup. Until it is applied the current
+ *  week is fine and older weeks are marginal — which is why this was intermittent.
+ *
+ *  Returns null when the bound cannot be established; the caller must NOT read unbounded. */
+async function sinceNewest(base: string, filters: string): Promise<string | null> {
   const url = process.env.SUPABASE_URL, key = process.env.SUPABASE_SERVICE_KEY;
-  if (!url || !key) return "";
+  if (!url || !key) return null;
   try {
     const res = await fetch(
       `${url.replace(/\/$/, "")}/rest/v1/${base}${filters}` +
       `&select=collected_at&order=collected_at.desc&limit=1`,
       { headers: { apikey: key, Authorization: `Bearer ${key}` }, next: { revalidate: 120 } });
-    if (!res.ok) return "";
+    if (!res.ok) return null;
     const rows = (await res.json()) as { collected_at: string | null }[];
     const t = rows[0]?.collected_at ? Date.parse(rows[0].collected_at as string) : NaN;
-    if (Number.isNaN(t)) return "";
+    if (Number.isNaN(t)) return null;
     return `&collected_at=gte.${new Date(t - CAPTURE_WINDOW_MIN * 60_000).toISOString()}`;
   } catch {
-    return "";
+    return null;
   }
+}
+
+/** The bounded read, or an empty result — never the unbounded one.
+ *
+ *  Both callers used to run `if (!all.length && since) all = await pgAll(q)`, commented "probe was
+ *  stale — take whatever exists". That retry can only fire when the pinned window holds nothing,
+ *  which is near-impossible (the window is anchored on a row that exists, minus an hour), and its
+ *  cost when it DOES fire is the 32,000-row scan above. If the probe cannot pin a window, the
+ *  honest answer is no rows: the page shows its empty state instead of threatening the instance. */
+async function pgPinned(query: string, since: string | null): Promise<PropRow[]> {
+  if (since === null) {
+    console.warn("props: capture-window probe failed; refusing an unbounded prop_snapshots read " +
+                 "(apply ingest/prop_probe_index.sql)");
+    return [];
+  }
+  return pgAll(query + since);
 }
 
 async function pgAll(query: string): Promise<PropRow[]> {
@@ -214,8 +253,7 @@ export async function weekProps(week: number, season = 2026): Promise<PropGame[]
   // Ask the DATABASE for the recent rows rather than pulling the week and filtering here.
   const since = await sinceNewest("prop_snapshots",
     `?season=eq.${season}&week=eq.${week}&event_id=neq.test`);
-  let all = await pgAll(q + since);
-  if (!all.length && since) all = await pgAll(q);   // probe was stale — take whatever exists
+  const all = await pgPinned(q, since);
   if (!all.length) return [];
   const rows = usBooks(newestCapture(pregame(all)));   // US-licensed books only (bookLabel.ts)
 
@@ -326,8 +364,7 @@ export async function fanduelLines(week: number, season = 2026): Promise<Map<str
       `player_name,side,line,price_american&order=snapshot_at.desc`;
     const since = await sinceNewest("prop_snapshots",
       `?season=eq.${season}&week=eq.${week}&event_id=neq.test&book=eq.fanduel`);
-    let all = await pgAll(q + since);
-    if (!all.length && since) all = await pgAll(q);
+    const all = await pgPinned(q, since);
     const rows = usBooks(newestCapture(pregame(all)));   // US-licensed books only (bookLabel.ts)
     // A book posts a ladder of alternates on one market; its MAIN line is the rung priced closest
     // to even money, since an alternate is priced away from even by construction.

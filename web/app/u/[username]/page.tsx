@@ -13,7 +13,6 @@ import StoriesRail from "./StoriesRail";
 import SuggestedFriends from "./SuggestedFriends";
 import MessageButton from "./MessageButton";
 import ProfileTabs from "./ProfileTabs";
-import ProfileDashToggle from "../../ProfileDashToggle";
 import RichText from "./RichText";
 import FavoriteTeams from "./FavoriteTeams";
 import PostReactions from "./PostReactions";
@@ -94,7 +93,6 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     <main className="pmain" style={accentStyle}>
       {isOwner && (
         <div className="pdtogglerow pdtogglerow--profile">
-          <ProfileDashToggle active="profile" username={profile.username} />
         </div>
       )}
       {/* ---- Cover ---- */}

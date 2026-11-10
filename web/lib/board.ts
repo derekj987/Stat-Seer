@@ -317,17 +317,38 @@ const pg = (path: string) => pgFrom("odds_snapshots", path);
  *  by reloading the board five times: one load showed week 6, four showed week 1.
  *
  *  A fortnight is more than enough to find the next kickoff — the NFL never has a 14-day in-season
- *  gap — it is an indexed range rather than a sort, and min() over a few hundred rows is free.
+ *  gap — and min() over a few hundred rows is free.
  *  The publisher had the identical query and the identical failure; both are fixed the same way.
  *  The rule this keeps re-teaching: never ask PostgREST to ORDER a snapshot table. */
 export async function currentWeek(season = 2026): Promise<number | null> {
   const now = new Date();
   const hi = new Date(now.getTime() + 14 * 86_400_000);
   const lo = new Date(now.getTime() - 36 * 3_600_000);
+  // 🚨 BOTH BOUNDS IN ONE `and=(...)`, NEVER TWO BARE FILTERS ON THE SAME COLUMN. This read
+  // `commence_time=gt.X&commence_time=lt.Y`, which is valid, accepted, and on odds_snapshots
+  // produces a plan that sits right ON Supabase's ~8s statement timeout. Measured on this exact
+  // query, same window and filters, varying only the shape:
+  //
+  //     commence_time=gt.X & commence_time=lt.Y   8.3s, and 500s outright under load
+  //     and=(commence_time.gt.X,commence_time.lt.Y)   1.4-1.6s warm
+  //
+  // What a 500 here COSTS is the whole point, and it is not this function. `pg()` throws, every
+  // caller does `try { cur = await currentWeek() } catch { cur = null }`, and null sends them to
+  // `weekRange().min` — which is WEEK 1 all season. So /props quietly loaded week 1, the heaviest
+  // week in the table, and died in weekProps' paged read instead. The visible failure was two
+  // layers away from the cause, and the page that broke was not the one with the bad query.
+  //
+  // The comment that used to sit below called this "an indexed range rather than a sort". It is
+  // not: odds_snapshots carries (event_id, market, book), (snapshot_at) and the (season, week,
+  // snapshot_at desc) probe index — NOTHING on commence_time. Another comment asserting an
+  // invariant the schema does not provide.
+  //
+  // Do NOT add `order=week.asc&limit=1` to "only fetch the week we need". Measured: that forces a
+  // sort the range filter cannot share and goes back to a hard 500 on all three trials.
   const window =
     `?season=eq.${season}` +
-    `&commence_time=gt.${encodeURIComponent(now.toISOString())}` +
-    `&commence_time=lt.${encodeURIComponent(hi.toISOString())}`;
+    `&and=(commence_time.gt.${encodeURIComponent(now.toISOString())},` +
+    `commence_time.lt.${encodeURIComponent(hi.toISOString())})`;
   // 🚨 ONE ROW PER EVENT, NOT EVERY ROW IN THE WINDOW. Dropping the sort was only half the fix:
   // `pg()` pages until a SHORT page comes back, so a bare `select=week` over a fortnight pulls
   // every book x market x outcome x sweep — ~30 pages, and /model took 34 SECONDS to render.

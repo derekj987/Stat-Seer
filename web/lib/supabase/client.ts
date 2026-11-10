@@ -22,10 +22,30 @@ let client: ReturnType<typeof make> | undefined;
 // is signed in so gated client components (the LeftRail, dashboards, profile shells) hydrate and can
 // be visually audited — without a real Supabase session. We override ONLY auth.getUser/getSession;
 // every data read stays the real anon client (RLS just returns empty), so nothing throws and empty
-// states render for free. Production builds are NODE_ENV="production" → this is inert.
-const QA_PREVIEW =
+// states render for free.
+//
+// 🚨 THE NON-PRODUCTION GUARD IS ON THE WHOLE EXPRESSION, NOT ONE BRANCH. The comment here used
+// to end "Production builds are NODE_ENV='production' → this is inert", and that was false for
+// the FIRST clause: `NEXT_PUBLIC_QA_PREVIEW === "1"` had no NODE_ENV test of its own, so setting
+// that one variable in the Vercel project would have switched the mock on for every anonymous
+// visitor to the live site. Same shape as the hardcoded `is-online` class and the "well
+// calibrated" copy — a comment asserting an invariant the code does not enforce.
+//
+// What it would and would not have cost, because the difference decides the severity: the
+// override is browser-only and touches ONLY auth.getUser/getSession, every data read stays the
+// real anon client under RLS, and the fake access_token is the literal string "qa-preview" that
+// Supabase rejects. So no member DATA could leak — but member-only UI (the rails, dashboards,
+// profile shells) would render for signed-out visitors and the beta approval gate would look
+// open. A gate whose only guard is an environment variable nobody has set yet is one deploy
+// setting away from being off, so the guard belongs in the code.
+//
+// proxy.ts already does this correctly for the SERVER gate
+// (`NODE_ENV === "development" && VERCEL_ENV !== "production"`); this mirrors it.
+const QA_ALLOWED =
+  process.env.NODE_ENV !== "production" && process.env.VERCEL_ENV !== "production";
+const QA_PREVIEW = QA_ALLOWED && (
   process.env.NEXT_PUBLIC_QA_PREVIEW === "1" ||
-  (process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_QA_PREVIEW !== "0");
+  (process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_QA_PREVIEW !== "0"));
 
 export function createClient() {
   if (client) return client;

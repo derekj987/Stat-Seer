@@ -486,8 +486,6 @@ a.cw__fname:hover{text-decoration:underline}
 /* Keep the divider tight: the merged rail carries ~twice the rows, and at the homepage's lower
    starting offset every pixel here is a row that would otherwise fall behind a scroll. */
 .leftrail__rule{border:0;border-top:1px solid var(--line);margin:1px 4px}
-[data-embed] .leftrail{display:none!important}
-[data-embed] .siteshift{padding-left:0!important}
 /* Only reserve the column / hide the Dock when a member is signed in (LeftRail sets data-rail). */
 @media(min-width:1100px){
   /* Sits BELOW the masthead art and stretches down the page to fill its column. Both rails share
@@ -912,7 +910,6 @@ a.cw__fname:hover{text-decoration:underline}
 /* Value Finder disclaimer — this section is line-shopping, not picks */
 
 /* The Model: collapse the game cards into a dropdown so the page isn't a wall of games */
-
 
 /* Sport selector on The Model — NFL live, others on the roadmap */
 .sporttabs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 6px}
@@ -2145,102 +2142,7 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
   .aurow{grid-template-columns:minmax(104px,1.4fr) minmax(74px,1fr) minmax(62px,1fr) minmax(62px,1fr) 44px 36px;gap:10px;padding:9px 12px;font-size:12px}
   .aucell--num{font-size:12px}
 }
-
-/* --- Profile ⇄ Dashboard toggle (green pill, like the sport toggle) --- */
-.pdtogglerow{display:flex;justify-content:center;margin:6px 0 4px}
-.pdtogglerow--profile{position:relative;z-index:3;margin-bottom:10px}
-.pdtoggle{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--surface)}
-.pdtoggle__t{display:inline-flex;align-items:center;text-decoration:none;font-weight:800;font-size:13px;
-  letter-spacing:.03em;padding:6px 18px;border-radius:999px;color:var(--muted)}
-.pdtoggle__t.active{background:var(--accent);color:#fff}
-.pdtoggle__t:not(.active):hover{color:var(--ink)}
-
-/* --- Pin-to-dashboard button --- */
-.pinrow{display:flex;justify-content:flex-end;margin:2px 0 8px}
-.pinbtn{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:12.5px;font-weight:700;
-  cursor:pointer;padding:6px 13px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
-.pinbtn:hover{border-color:var(--accent);color:var(--accent)}
-.pinbtn.pinned{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 40%,var(--line));color:var(--accent)}
-.pinbtn--sm{font-size:11.5px;padding:4px 10px}
-.pinbtn__ic{font-weight:800}
-/* Board picker popover — shown when adding a pin and the member has more than one board. */
-.pinbtn-wrap{position:relative;display:inline-flex}
-.pinmenu{position:absolute;top:calc(100% + 6px);right:0;z-index:70;min-width:184px;padding:6px;
-  background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.16);
-  display:flex;flex-direction:column;gap:2px;text-align:left}
-.pinmenu__hd{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:4px 8px 6px}
-.pinmenu__item{display:flex;align-items:center;gap:8px;border:0;background:none;cursor:pointer;font:inherit;
-  font-size:13px;font-weight:700;color:var(--ink);text-align:left;padding:7px 9px;border-radius:8px;width:100%}
-.pinmenu__item:hover{background:var(--accent-soft)}
-.pinmenu__name{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pinmenu__n{font-size:10.5px;font-weight:800;color:var(--muted);background:var(--surface-2);border-radius:20px;padding:1px 6px}
-.pinmenu__on{color:var(--accent);font-weight:800}
-.pinmenu__item--new{color:var(--accent);border-top:1px solid var(--line);border-radius:0 0 8px 8px;margin-top:3px;padding-top:9px}
-/* Pin sitting inside a panel header/summary bar — pushed to the right, before the chevron. */
-/* .hb-bar's own pin push + chevron spacing live in the chart-header ordering block further down;
-   this adjacency rule assumed the pin was the chevron's previous sibling, which it isn't on panels
-   that render the Tip between them. */
-.ncf-h .pinbtn-wrap{margin-left:auto}
-@media(max-width:560px){.pinbtn--sm .pinbtn__lbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}}
-
-/* --- Embed mode (a page shown inside a Custom Dashboard card's iframe): hide all site chrome
-   so only the chart itself renders, full-width and flush. --- */
-[data-embed] .snav,[data-embed] .snav__bar,[data-embed] .sportstrip,[data-embed] .slipbar,
-[data-embed] .dock,[data-embed] .sitefoot,[data-embed] .masthead,[data-embed] .flow,
-[data-embed] .subnavrow,[data-embed] .pageweek,[data-embed] .pageweekrow,[data-embed] .weeknav,
-[data-embed] .catnav,[data-embed] .pinrow,[data-embed] .foot,[data-embed] .aiw,
-[data-embed] .lp-drawer,[data-embed] .vf-drawer,[data-embed] .pdtogglerow,
-[data-embed] .betslippromo{display:none!important}
-[data-embed] .pinbtn,[data-embed] .pinbtn-wrap{display:none!important}
-[data-embed] body{background:transparent}
-[data-embed] .wrap,[data-embed] main.wrap{padding:6px 10px 10px!important;max-width:none!important;margin:0!important}
-/* Preview cap: a fade over the clipped chart + a "Show all" dropdown (injected by EmbedMode). */
-.embed-fade{position:absolute;left:0;right:0;bottom:0;height:64px;pointer-events:none;
-  background:linear-gradient(to bottom,transparent,var(--bg))}
-.embed-showall{display:block;width:100%;border:0;border-top:1px solid var(--line);background:var(--surface);
-  color:var(--accent);font:inherit;font-weight:700;font-size:13px;padding:9px;cursor:pointer}
-.embed-showall:hover{background:var(--surface-2)}
-
-/* --- Custom Dashboard --- */
-.dash{margin-top:8px}
-.dash__lead{text-align:center;max-width:620px;margin:2px auto 20px}
-.dash__h{font-size:clamp(19px,3vw,26px);font-weight:800;letter-spacing:-.02em;margin:0 0 6px}
-.dash__p{font-size:14px;line-height:1.6;color:var(--muted)}
-.dash__p b{color:var(--ink)}
-.dash__pinex{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:6px;
-  padding:1px 7px;font-size:12px;font-weight:700}
-/* AI chart builder */
-.cbuild{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:14px 16px;margin:0 0 20px}
-.cbuild__head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;font-size:14px}
-.cbuild__headtxt{min-width:0}
-.cbuild__h{display:block;font-size:15px;font-weight:800;color:var(--ink)}
-.cbuild__sub{font-size:12.5px;color:var(--muted);line-height:1.5;margin:4px 0 0}
-.cbuild__reset{border:1px solid var(--line);background:var(--bg);color:var(--muted);border-radius:999px;
-  font:inherit;font-size:12px;font-weight:700;padding:4px 12px;cursor:pointer;flex:0 0 auto}
-.cbuild__reset:hover{border-color:var(--accent);color:var(--accent)}
-.cbuild__x{border:0;background:none;color:var(--muted);cursor:pointer;font-size:14px}
-.cbuild__form{display:flex;gap:8px}
-.cbuild__in{flex:1;min-width:0;border:1px solid var(--line);border-radius:9px;padding:9px 12px;font:inherit;font-size:13.5px;background:var(--bg);color:var(--ink)}
-.cbuild__in:focus{outline:2px solid var(--accent);outline-offset:1px}
-.cbuild__go{flex:0 0 auto;padding:9px 16px;font-size:13.5px}
-.cbuild__ex{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
-.cbuild__exbtn{border:1px solid var(--line);background:var(--bg);color:var(--muted);border-radius:999px;
-  font:inherit;font-size:12px;padding:4px 11px;cursor:pointer}
-.cbuild__exbtn:hover{border-color:var(--accent);color:var(--accent)}
-.cbuild__msg{font-size:13px;color:var(--muted);margin:10px 0 0;line-height:1.5}
-.cbuild__thread{display:flex;flex-direction:column;gap:7px;max-height:260px;overflow-y:auto;margin:10px 0;padding:2px}
-.cbmsg{max-width:82%;padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.5;white-space:pre-wrap}
-.cbmsg--user{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:4px}
-.cbmsg--assistant{align-self:flex-start;background:var(--surface-2);color:var(--ink);border-bottom-left-radius:4px}
-.cbmsg--typing{color:var(--muted);letter-spacing:2px}
-.cbuild__preview{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
-.cbuild__pvhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
-.cbuild__pvtitle{font-weight:800;font-size:14px}
 .btn--sm{padding:6px 12px;font-size:12.5px;border-radius:9px}
-.cbuild__warn{font-size:11.5px;color:var(--muted);margin:10px 0 0;font-style:italic}
-
-/* Rendered chart (table / bars), used in the builder preview + pinned chart cards */
-.dashchart{padding:12px 14px 14px}
 .chartscroll{overflow-x:auto}
 .charttbl{width:100%;border-collapse:collapse;font-size:13px;min-width:420px}
 .charttbl th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);
@@ -2256,27 +2158,6 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .chartbar__track{height:12px;border-radius:6px;background:var(--surface-2);overflow:hidden}
 .chartbar__fill{display:block;height:100%;background:#1e5bc4;forced-color-adjust:none}
 .chartbar__val{font-family:var(--font-mono);font-weight:700;color:var(--model);text-align:right}
-
-/* Live embeds: each pinned view is the actual chart in an auto-sized iframe, stacked full-width. */
-/* Board tabs — switch, add (＋ Board), rename via the active tab or ✎, delete via ✕. */
-.dashtabs{margin:0 0 16px}
-.dashtabs__row{display:flex;flex-wrap:wrap;align-items:center;gap:7px}
-.dashtabs__hint{font-size:11.5px;color:var(--muted);line-height:1.5;margin:9px 2px 0}
-.dashtabs__hint b{color:var(--ink)}
-.dashtab{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
-.dashtab.active{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
-.dashtab__name{border:0;background:none;cursor:pointer;font-weight:800;font-size:13px;color:var(--ink);
-  padding:7px 11px;display:inline-flex;align-items:center;gap:6px}
-.dashtab.active .dashtab__name{color:var(--accent);padding-right:6px}
-.dashtab__n{font-size:10.5px;font-weight:800;color:var(--muted);background:var(--surface-2);border-radius:20px;padding:1px 6px}
-.dashtab__act{border:0;background:none;color:var(--muted);cursor:pointer;font-size:12px;padding:6px 4px;line-height:1}
-.dashtab__act:hover{color:var(--accent)}
-.dashtab__del{border:0;background:none;color:var(--muted);cursor:pointer;font-size:11px;padding:6px 9px 6px 2px;line-height:1}
-.dashtab__del:hover{color:var(--key)}
-.dashtab__edit{border:1px solid var(--accent);border-radius:6px;font:inherit;font-weight:800;font-size:13px;
-  padding:5px 8px;margin:2px;width:132px;max-width:46vw;background:var(--surface);color:var(--ink)}
-.dashtab--add{border-style:dashed;color:var(--accent);font-weight:800;font-size:12.5px;cursor:pointer;padding:7px 11px}
-.dashtab--add:hover{background:var(--surface-2)}
 
 /* "Add StatSeer charts" catalog — a collapsible browser of every default chart by sport/category. */
 .chcat{margin:0 0 16px}
@@ -2303,82 +2184,12 @@ details.ctxdrop>summary.ctxsec__h{margin:0 0 8px}
 .chcat__itname{font-weight:700;font-size:13px;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chcat__add{flex:0 0 auto;font-size:11.5px;font-weight:800;color:var(--accent);white-space:nowrap}
 .chcat__add.move{color:var(--muted)}
-
-/* The board canvas: a 4-column grid where each card spans 1–4 columns by its size. */
-.dash__grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;align-items:start}
-.dashembed--sm{grid-column:span 1}
-.dashembed--md{grid-column:span 2}
-.dashembed--lg{grid-column:span 3}
-.dashembed--full{grid-column:span 4}
 @media(max-width:960px){.dash__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .dashembed--sm{grid-column:span 1}.dashembed--md,.dashembed--lg,.dashembed--full{grid-column:span 2}}
 @media(max-width:620px){.dash__grid{grid-template-columns:1fr}
   .dashembed--sm,.dashembed--md,.dashembed--lg,.dashembed--full{grid-column:span 1}}
-
-.dashembed{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);
-  transition:box-shadow .12s,opacity .12s,outline-color .12s}
-.dashembed--dragging{opacity:.45}
-.dashembed--over{outline:2px dashed var(--accent);outline-offset:3px}
-/* While a drag is in flight, let dragover/drop events reach the cards instead of the iframes. */
-.dash__grid--dragging .dashembed__frame iframe,.dash__grid--dragging .dashchart{pointer-events:none}
-.dashembed__bar{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--surface-2)}
-/* Prominent Move control — a clear ◀ MOVE ▶ pill (reorder is button-driven; native drag was
-   unreliable through the chart iframes). */
-.dashembed__move{display:inline-flex;align-items:stretch;flex:0 0 auto;border:1px solid var(--accent);border-radius:8px;overflow:hidden}
-.dashembed__mv{border:0;background:var(--accent-soft);color:var(--accent);cursor:pointer;font-size:12px;font-weight:800;
-  padding:4px 10px;display:grid;place-items:center;line-height:1}
-.dashembed__mv:hover:not(:disabled){background:var(--accent);color:#fff}
-.dashembed__mv:disabled{opacity:.3;cursor:default}
-.dashembed__movelbl{display:grid;place-items:center;font-size:9.5px;font-weight:800;color:var(--accent);text-transform:uppercase;
-  letter-spacing:.05em;padding:0 8px;background:var(--accent-soft);border-left:1px solid var(--accent);border-right:1px solid var(--accent)}
-.dashembed__icon{font-size:16px;flex:0 0 auto}
-.dashembed__label{font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}
-.dashembed__detail{font-size:11px;color:var(--muted);white-space:nowrap;flex:0 0 auto}
-.dashembed--sm .dashembed__detail{display:none}
-.dashsize{display:inline-flex;margin-left:auto;border:1px solid var(--line);border-radius:7px;overflow:hidden;flex:0 0 auto}
-.dashsize__b{border:0;border-left:1px solid var(--line);background:var(--surface);color:var(--muted);
-  font-size:10.5px;font-weight:800;padding:3px 6px;cursor:pointer;line-height:1.4}
-.dashsize__b:first-child{border-left:0}
-.dashsize__b.on{background:var(--accent);color:#fff}
-.dashembed__open{font-size:12px;font-weight:700;color:var(--accent);text-decoration:none;flex:0 0 auto}
-.dashembed__open:hover{text-decoration:underline}
-.dashembed__x{border:0;background:none;color:var(--muted);cursor:pointer;font-size:13px;line-height:1;padding:4px 6px;border-radius:6px;flex:0 0 auto}
-.dashembed__x:hover{color:var(--key);background:var(--surface)}
-.dashembed__frame{background:var(--bg)}
-.dashembed__frame iframe{display:block;width:100%;border:0;transition:height .2s}
-
-/* Dashboard AI Robot Knight + speech bubble */
-/* "Dashboard Creation Center" hero — the headline attraction: framed AI-knight mascot beside the
-   title + intro, with the AI builder CTA and the expandable how-it-works help. */
-.dashhero{display:flex;align-items:center;gap:20px;margin:2px 0 20px;padding:20px 24px;border-radius:18px;
-  border:1px solid color-mix(in srgb,var(--accent) 22%,var(--line));background:linear-gradient(135deg,var(--accent-soft),var(--surface) 62%)}
-.dashhero__mascot{flex:0 0 auto;width:112px;height:112px;border-radius:50%;overflow:hidden;
-  border:2px solid var(--accent);background:var(--surface);display:grid;place-items:center;box-shadow:0 8px 20px rgba(0,0,0,.14)}
-.dashhero__img{width:118%;height:118%;object-fit:cover;object-position:center 16%}
-.dashhero__body{flex:1 1 auto;min-width:0}
-.dashhero__kicker{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--accent)}
-.dashhero__title{font-size:24px;font-weight:900;color:var(--gold,#b8860b);margin:2px 0 6px;letter-spacing:-.01em;line-height:1.1}
-.dashhero__sub{font-size:13.5px;color:var(--muted);line-height:1.55;margin:0 0 14px;max-width:62ch}
-.dashhero__row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-.dashhero__cta{padding:9px 17px;font-size:13.5px}
-.dashhero__more{border:0;background:none;cursor:pointer;font:inherit;font-weight:700;font-size:13px;color:var(--accent);padding:0}
-.dashhero__more:hover{text-decoration:underline}
-.dashhero__detail{margin-top:2px}
-.dashhero__say{font-size:13.5px;line-height:1.55;color:var(--ink);margin:0 0 8px}
-.dashhero__ex{margin:0 0 10px;padding-left:18px;font-size:13px;color:var(--muted);line-height:1.6}
-.dashhero__ex li{margin:2px 0}
-.dashhero__warn{font-size:12.5px;line-height:1.55;color:var(--muted);background:var(--spot-soft);
-  border:1px solid color-mix(in srgb,var(--spot) 40%,var(--line));border-radius:10px;padding:9px 12px;margin:0 0 12px}
-.dashhero__warn b{color:var(--ink)}
 @media(max-width:640px){.dashhero{flex-direction:column;text-align:center;gap:14px;padding:18px}
   .dashhero__sub{margin-inline:auto}.dashhero__row{justify-content:center}}
-
-.dash__empty{text-align:center;max-width:520px;margin:20px auto;padding:34px 24px;border:1px dashed var(--line);
-  border-radius:16px;background:var(--surface)}
-.dash__emptyicon{font-size:34px;display:block;margin-bottom:8px}
-.dash__emptyh{font-size:18px;font-weight:800;margin:0 0 8px}
-.dash__emptyp{font-size:13.5px;line-height:1.6;color:var(--muted);margin:0 0 18px}
-.dash__emptycta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 
 .pa__how{margin:18px 0 0;padding-top:14px;border-top:1px solid var(--line)}
 .pa__howsum{cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);list-style:none;display:flex;align-items:center;gap:7px}
@@ -3880,16 +3691,20 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
 /* Chart-header layout, fixed HERE rather than per panel, because each panel writes its header
    children in a different source order (some put the Tip before the pin, some after). Flex `order`
    makes the rendered arrangement identical on every chart app-wide:
-     title (+count) and the scroll tooltip together on the LEFT, then free space,
-     then "Add to dashboard" hard right, then the chevron.
-   Only the pin carries `margin-left:auto` — giving the chevron one too would split the free space
-   between them and leave the pin stranded mid-header, which is the bug this replaces. Panels with no
-   pin hand that job to the chevron instead. */
+     title (+count) and the scroll tooltip together on the LEFT, then free space, then the chevron.
+
+   The pin ("Add to dashboard") used to sit hard right with `margin-left:auto`, and the chevron
+   took that job only on panels without one (`.hb-bar:not(:has(.pinbtn-wrap))`). With the Custom
+   Dashboard retired there is never a pin, so the chevron carries it unconditionally.
+
+   🚨 That `:not(:has(.pinbtn-wrap))` rule was deleted by a sweep that removed every rule whose
+   SELECTOR mentioned `.pinbtn` — which this one did, while being the rule that handled the
+   pin-less case. The chevron lost its auto margin and sat 475px short of the right edge on every
+   panel. Removing a feature's styles by matching its class name takes the fallback with it;
+   check what each deleted selector DID, not just which name it contains. */
 .hb-bar > *{order:2}
 .hb-bar__title,.hb-bar__count,.hb-bar .tip{order:1}
-.hb-bar .pinbtn-wrap{order:3;margin-left:auto}
-.hb-bar__chev{order:4;margin-left:11px}
-.hb-bar:not(:has(.pinbtn-wrap)) .hb-bar__chev{margin-left:auto}
+.hb-bar__chev{order:4;margin-left:auto}
 .hb-panel[open] .hb-bar__chev{transform:rotate(180deg)}
 
 /* ===== Scroll "?" tooltips (Tip.tsx) — explain what each table shows =====
@@ -4326,7 +4141,6 @@ details.tgteam[open] .tgteam__chev{transform:rotate(90deg)}
   .hb-tav__body > .hb-promo__h,
   .hb-tav__body > .hb-promo__cta{grid-column:1 / -1}
 }
-
 
 /* membership band — the over-the-shoulder seer + join CTA */
 .hb-promo{display:grid;grid-template-columns:1fr 230px;align-items:stretch}
@@ -5626,4 +5440,57 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
   .hb-form--nhlgame th:nth-child(2),.hb-form--nhlgame td:nth-child(2){width:20%}
   .hb-form--nhlgame th:nth-child(3),.hb-form--nhlgame td:nth-child(3){width:21%}
   .hb-form--nhlgame th:nth-child(5),.hb-form--nhlgame td:nth-child(5){width:19%}
+}
+
+/* ── Parlay of the Week ───────────────────────────────────────────────────────────────────────
+   Headline card at the top of a sport page. Our numbers are --model blue, the de-vigged market
+   number --mkt maroon, the book price green: colour by WHOSE claim it is, app-wide.
+
+   Columns are a shared calc() rather than fr-mixed-with-px. An `fr` track swallows ALL the
+   surplus at a wider viewport, which is how boards end up with one enormous name column and the
+   numbers crammed at the right; `calc(base + var(--pwx))` gives every column the same number of
+   extra pixels at every width. Budget below: 120+190+110+110+150 = 680 ink, + 4x14 gap, +
+   2x14 padding = 764. */
+.pw{border:1px solid var(--line);border-radius:14px;background:var(--card,transparent);
+  padding:14px;margin:0 0 18px}
+.pw__bar{display:flex;align-items:center;gap:12px;margin:0 0 10px}
+.pw__h{display:flex;align-items:center;gap:8px;margin:0;font-size:15px;font-weight:800;
+  letter-spacing:.02em;text-transform:uppercase;color:var(--ink)}
+.pw__price{margin-left:auto;display:flex;align-items:baseline;gap:8px}
+.pw__odds{font-size:28px;font-weight:800;line-height:1;color:var(--accent)}
+.pw__short{font-size:11px;font-style:normal;color:var(--muted)}
+
+.pw__legs{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.pw__leg{--pwx:max(0px, calc((100% - 764px) / 5));
+  display:grid;align-items:center;gap:14px;padding:10px 14px;
+  grid-template-columns:calc(120px + var(--pwx)) calc(190px + var(--pwx))
+    calc(110px + var(--pwx)) calc(110px + var(--pwx)) calc(150px + var(--pwx));
+  border-bottom:1px dotted var(--line);font-size:13px}
+.pw__pick{font-weight:700;color:var(--ink)}
+.pw__match{color:var(--muted);font-size:12px}
+.pw__ours{color:var(--model);font-weight:700}
+.pw__mkt{color:var(--mkt)}
+.pw__book{color:var(--accent);font-weight:700;text-align:right}
+.pw__book i{font-style:normal;font-weight:600;color:var(--muted);font-size:11px}
+
+.pw__foot{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;padding:10px 14px 0;
+  font-size:13px}
+.pw__combined{display:flex;align-items:center;gap:6px}
+/* The break-even is neither our claim nor the market's -- it is arithmetic on the price, so it
+   gets the muted ink rather than --model or --mkt. There is deliberately no "edge" badge here. */
+.pw__be{color:var(--muted)}
+.pw__bb,.pw__rec{color:var(--muted);font-size:12px}
+.pw__rec b{color:var(--ink)}
+
+/* Five columns do not fit a phone, so each leg becomes a card instead of a sideways scroller --
+   the same call the NCAAF boards make below 560px. Rows cannot be ragged when there are no rows. */
+@media (max-width:640px){
+  .pw__leg{grid-template-columns:1fr auto;gap:2px 10px;padding:10px 4px}
+  .pw__pick{grid-column:1;grid-row:1}
+  .pw__book{grid-column:2;grid-row:1;text-align:right}
+  .pw__match{grid-column:1 / -1;grid-row:2}
+  .pw__ours{grid-column:1;grid-row:3}
+  .pw__mkt{grid-column:2;grid-row:3;text-align:right}
+  .pw__odds{font-size:22px}
+  .pw__h{font-size:13px}
 }

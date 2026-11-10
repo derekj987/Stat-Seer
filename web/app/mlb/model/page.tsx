@@ -1,5 +1,4 @@
 import { Brand, FlowSteps, ModelSubnav } from "../../Nav";
-import PinButton from "../../PinButton";
 import { DayHeader } from "../../DayHeader";
 import Tip from "../../Tip";
 import { etToday, etDayKey, groupByGameDay } from "@/lib/gameDays";
@@ -273,7 +272,7 @@ export default async function Page() {
       <FlowSteps active="analyze" base="mlb" />
       <div className="subnavrow"><ModelSubnav active="game" base="mlb" /></div>
 
-      <details className="hb-panel hb-panel--card" data-embedchart="mlb-game-model" open>
+      <details className="hb-panel hb-panel--card" open>
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">Runs crunched</span>
           <span className="hb-bar__count">{upcoming.length} game{upcoming.length === 1 ? "" : "s"}</span>
@@ -332,7 +331,7 @@ export default async function Page() {
               only began recording MLB odds on <b>7 September</b>. A gap here is a difference to
               notice, not an edge to act on.
             </>} />
-          <PinButton size="sm" pin={{ id: "/mlb/model", kind: "model", label: "MLB · Game Model", detail: "runs + totals", href: "/mlb/model" }} />
+          
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
@@ -462,7 +461,7 @@ export default async function Page() {
 
       {/* The Upset Meter, directly under the board it reads. A panel rather than a column in the
           chart above: the drivers ARE the meter, and that chart's cells are forbidden to wrap. */}
-      <details className="hb-panel hb-panel--card" data-embedchart="mlb-upset" open>
+      <details className="hb-panel hb-panel--card" open>
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">Upset meter</span>
           <span className="hb-bar__count">{upcoming.length} game{upcoming.length === 1 ? "" : "s"}</span>
@@ -475,7 +474,7 @@ export default async function Page() {
             (14) once both probables are posted. The full explanation, including what is
             deliberately left out and why, is on the scroll beside each game&apos;s meter.
           </>} />
-          <PinButton size="sm" pin={{ id: "/mlb/model#upset", kind: "model", label: "MLB · Upset Meter", detail: "context, not a pick", href: "/mlb/model" }} />
+          
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
@@ -484,7 +483,7 @@ export default async function Page() {
         </div>
       </details>
 
-      <details className="hb-panel hb-panel--card" data-embedchart="mlb-availability">
+      <details className="hb-panel hb-panel--card">
         <summary className="hb-bar">
           <span className="hb-bar__title hb-bar__title--gold">Who&apos;s playing tonight</span>
           <span className="hb-bar__count">{luGames.length} game{luGames.length === 1 ? "" : "s"}</span>
@@ -507,7 +506,7 @@ export default async function Page() {
               comfortably the strongest model on this page. Once a lineup posts, the row shows the
               lineup instead of our estimate.
             </>} />
-          <PinButton size="sm" pin={{ id: "/mlb/model#lineups", kind: "model", label: "MLB · Lineups", detail: "who starts tonight", href: "/mlb/model" }} />
+          
           <span className="hb-bar__chev" aria-hidden="true">▾</span>
         </summary>
         <div className="hb-body">
