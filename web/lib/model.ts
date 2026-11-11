@@ -68,21 +68,22 @@ export interface CalibrationRow {
   mean_clv: number | null;
 }
 
-async function pg(table: string, query: string, rv?: number): Promise<Record<string, unknown>[]> {
+async function pg(table: string, query: string): Promise<Record<string, unknown>[]> {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
   if (!url || !key) throw new Error("SUPABASE_URL / SUPABASE_SERVICE_KEY not set");
   const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/${table}${query}`, {
     headers: { apikey: key, Authorization: `Bearer ${key}` },
-    next: { revalidate: rv ?? 300 },
+    next: { revalidate: 300 },
   });
   if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
   return (await res.json()) as Record<string, unknown>[];
 }
 
-export async function fetchModelWeek(week: number, season = 2026, rv?: number): Promise<ModelPrediction[]> {
-  const preds = await pg("prediction_ledger", `?section=eq.MODEL&season=eq.${season}&week=eq.${week}&model_version=eq.${MODEL_VERSION}` +
-    `&select=event_id,subject,model_prob,commence_time,published_at,reasoning&order=published_at`, rv);
+export async function fetchModelWeek(week: number, season = 2026): Promise<ModelPrediction[]> {
+  const preds = await pg("prediction_ledger",
+    `?section=eq.MODEL&season=eq.${season}&week=eq.${week}&model_version=eq.${MODEL_VERSION}` +
+    `&select=event_id,subject,model_prob,commence_time,published_at,reasoning&order=published_at`);
   if (!preds.length) return [];
 
   // The ledger is append-only and a game is REPUBLISHED when its number genuinely moves -- a

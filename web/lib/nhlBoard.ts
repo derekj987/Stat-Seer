@@ -275,7 +275,7 @@ export const ONE_GOAL_SHARE = KEY_ONE_GOAL;
 /** PostgREST read, PAGED. `limit=` does not raise the 1000-row ceiling — a response sitting exactly
  *  at the cap is indistinguishable from a complete one, and one sweep of a 15-game slate across 19
  *  books runs well past it (a live sweep was 1,568 rows). */
-async function pg(path: string, rv?: number): Promise<OddsRow[]> {
+async function pg(path: string): Promise<OddsRow[]> {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
   if (!url || !key) throw new Error("SUPABASE_URL / SUPABASE_SERVICE_KEY not set");
@@ -288,7 +288,7 @@ async function pg(path: string, rv?: number): Promise<OddsRow[]> {
         apikey: key, Authorization: `Bearer ${key}`,
         "Range-Unit": "items", Range: `${off}-${off + PAGE - 1}`,
       },
-      next: { revalidate: rv ?? 120 },
+      next: { revalidate: 120 },
     });
     if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
     const rows = (await res.json()) as OddsRow[];
@@ -303,14 +303,14 @@ async function pg(path: string, rv?: number): Promise<OddsRow[]> {
  *  sweep a groupable thing, and it is why nhl_props.py was fixed to stamp once per run rather than
  *  once per event. Pinning to the latest gives a coherent board rather than prices taken hours
  *  apart. */
-export async function latestSnapshot(rv?: number): Promise<string | null> {
-  const rows = await pg("?select=snapshot_at&order=snapshot_at.desc&limit=1", rv);
+export async function latestSnapshot(): Promise<string | null> {
+  const rows = await pg("?select=snapshot_at&order=snapshot_at.desc&limit=1");
   return rows.length ? rows[0].snapshot_at : null;
 }
 
 /** The newest sweep's rows for games that have not started. */
-export async function nhlOddsRows(rv?: number): Promise<{ rows: OddsRow[]; snapshot: string | null }> {
-  const snapshot = await latestSnapshot(rv);
+export async function nhlOddsRows(): Promise<{ rows: OddsRow[]; snapshot: string | null }> {
+  const snapshot = await latestSnapshot();
   if (!snapshot) return { rows: [], snapshot: null };
   const rows = await pg(
     `?snapshot_at=eq.${encodeURIComponent(snapshot)}` +
@@ -330,10 +330,10 @@ export async function nhlOddsRows(rv?: number): Promise<{ rows: OddsRow[]; snaps
  *  rather than in each page. `buildBoard` is generic and its football side-assignment is wrong for
  *  hockey (nhlSpreadSides says why); fixing it at this one seam means /nhl/lines and the assistant's
  *  NHL menu — the two surfaces that read `game.spread` — cannot drift apart or be forgotten. */
-export async function nhlBoard(rv?: number): Promise<{
+export async function nhlBoard(): Promise<{
   board: Game[]; snapshot: string | null; lines: Map<string, PuckLine>;
 }> {
-  const { rows, snapshot } = await nhlOddsRows(rv);
+  const { rows, snapshot } = await nhlOddsRows();
   const board = buildBoard(rows);
   nhlSpreadSides(board, rows);
   return { board, snapshot, lines: nhlPuckLines(rows) };
