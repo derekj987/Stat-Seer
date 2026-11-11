@@ -333,56 +333,47 @@ const pg = (path: string) => pgFrom("odds_snapshots", path);
  *  COMPLETED September games under a "Week 1" badge, with no error anywhere. Caught on 2026-10-15
  *  by reloading the board five times: one load showed week 6, four showed week 1.
  *
- *  A fortnight is more than enough to find the next kickoff — the NFL never has a 14-day in-season
- *  gap — and min() over a few hundred rows is free.
  *  The publisher had the identical query and the identical failure; both are fixed the same way.
- *  The rule this keeps re-teaching: never ask PostgREST to ORDER a snapshot table. */
+ *
+ *  This used to scan a fortnight of commence_times and call min() over "a few hundred rows". That
+ *  stopped being true as the week's sweeps accumulated — 2,291 rows and 12.44s by midweek — so it
+ *  now pins to the newest sweep instead; see the note in the body.
+ *
+ *  Note the ORDER BY below is deliberate and is NOT the thing this file warns about. Ordering a
+ *  snapshot table is ruinous when it has to sort a filtered SET; `order=snapshot_at.desc&limit=1`
+ *  with no other filter is a single step along an index, which is why every other reader here
+ *  opens the same way. */
 export async function currentWeek(season = 2026): Promise<number | null> {
-  const now = new Date();
-  const hi = new Date(now.getTime() + 14 * 86_400_000);
-  const lo = new Date(now.getTime() - 36 * 3_600_000);
-  // 🚨 BOTH BOUNDS IN ONE `and=(...)`, NEVER TWO BARE FILTERS ON THE SAME COLUMN. This read
-  // `commence_time=gt.X&commence_time=lt.Y`, which is valid, accepted, and on odds_snapshots
-  // produces a plan that sits right ON Supabase's ~8s statement timeout. Measured on this exact
-  // query, same window and filters, varying only the shape:
+  // 🚨 PIN TO THE NEWEST SWEEP. DO NOT SCAN A WINDOW OF THEM.
   //
-  //     commence_time=gt.X & commence_time=lt.Y   8.3s, and 500s outright under load
-  //     and=(commence_time.gt.X,commence_time.lt.Y)   1.4-1.6s warm
+  // This used to read a 14-day commence_time window bounded by a 36h capture window and take the
+  // minimum week in JS. That is one row per event PER SWEEP, and sweeps accumulate all week: it
+  // measured 1.3s on a Tuesday and 12.44s by Wednesday on 2,291 rows, climbing as the week went
+  // on. It was 12.44s of the homepage's 14.86s of database time -- every other read on that page
+  // is under a second -- which is what made the homepage take 18s while /privacy took 0.36s.
   //
-  // What a 500 here COSTS is the whole point, and it is not this function. `pg()` throws, every
-  // caller does `try { cur = await currentWeek() } catch { cur = null }`, and null sends them to
-  // `weekRange().min` — which is WEEK 1 all season. So /props quietly loaded week 1, the heaviest
-  // week in the table, and died in weekProps' paged read instead. The visible failure was two
-  // layers away from the cause, and the page that broke was not the one with the bad query.
+  // The newest sweep already contains every upcoming game exactly once, so the whole window was
+  // redundant. Two requests, ~15 rows: probe the latest snapshot_at (unfiltered, served by
+  // prop_time_idx, instant), then read that one sweep. Measured 0.55-0.82s against 12.44s, same
+  // answer (week 10 on 2026-11-11, whose games run Nov 12-16).
   //
-  // The comment that used to sit below called this "an indexed range rather than a sort". It is
-  // not: odds_snapshots carries (event_id, market, book), (snapshot_at) and the (season, week,
-  // snapshot_at desc) probe index — NOTHING on commence_time. Another comment asserting an
-  // invariant the schema does not provide.
-  //
-  // Do NOT add `order=week.asc&limit=1` to "only fetch the week we need". Measured: that forces a
-  // sort the range filter cannot share and goes back to a hard 500 on all three trials.
-  const window =
-    `?season=eq.${season}` +
-    `&and=(commence_time.gt.${encodeURIComponent(now.toISOString())},` +
-    `commence_time.lt.${encodeURIComponent(hi.toISOString())})`;
-  // 🚨 ONE ROW PER EVENT, NOT EVERY ROW IN THE WINDOW. Dropping the sort was only half the fix:
-  // `pg()` pages until a SHORT page comes back, so a bare `select=week` over a fortnight pulls
-  // every book x market x outcome x sweep — ~30 pages, and /model took 34 SECONDS to render.
-  // Narrowing to one book/market/outcome collapses it to one row per event per sweep, and the
-  // capture bound keeps it to recent sweeps: 90 rows in one page, 0.98s measured.
-  const narrow = `&collected_at=gt.${encodeURIComponent(lo.toISOString())}` +
-    `&book=eq.fanduel&market=eq.totals&outcome_name=eq.Over&select=week`;
-  const pick = (rows: { week: number }[]) => {
-    const weeks = rows.map((r) => r.week).filter((w) => w != null);
-    return weeks.length ? Math.min(...weeks) : null;
-  };
-  const fast = pick((await pg(window + narrow)) as { week: number }[]);
-  if (fast !== null) return fast;
-  // Nothing captured in the last 36h (a paused sweep, or FanDuel absent from it). Widen rather
-  // than return null — null sends every caller to weekRange().min, which is week 1 all season,
-  // and that is the failure this whole function is about. Slower (~3.4s) and still one page.
-  return pick((await pg(window + "&market=eq.totals&outcome_name=eq.Over&select=week")) as { week: number }[]);
+  // This is the same shape every other reader in the app already uses -- fetchWeek, nhlBoard,
+  // mlbBoard, cfbBoard all probe-then-pin. currentWeek was the one that scanned.
+  const snap = (await pg("?select=snapshot_at&order=snapshot_at.desc&limit=1")) as { snapshot_at: string }[];
+  if (!snap.length) return null;
+  const sweep = `?snapshot_at=eq.${encodeURIComponent(snap[0].snapshot_at)}&season=eq.${season}`;
+  // One row per event: FanDuel's Over on the total. Any single book/market/outcome would do; this
+  // is the one LINE_BOOK already guarantees is present.
+  const narrow = "&book=eq.fanduel&market=eq.totals&outcome_name=eq.Over&select=week,commence_time";
+  const rows = (await pg(sweep + narrow)) as { week: number; commence_time: string }[];
+  const now = Date.now();
+  const upcoming = rows.filter((r) => r.week != null && Date.parse(r.commence_time) > now).map((r) => r.week);
+  if (upcoming.length) return Math.min(...upcoming);
+  // Every game in the newest sweep has kicked off. The current week is the one being PLAYED, so
+  // take the latest week present -- never null, because null sends callers to weekRange().min,
+  // which is week 1 all season, and that is the failure this whole function exists to prevent.
+  const all = rows.map((r) => r.week).filter((w) => w != null);
+  return all.length ? Math.max(...all) : null;
 }
 
 /** The min/max NFL week that currently has any odds captured, for the week nav. */
