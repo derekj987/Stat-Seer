@@ -269,7 +269,24 @@ async function pgFrom(table: string, path: string): Promise<unknown[]> {
         apikey: key, Authorization: `Bearer ${key}`,
         "Range-Unit": "items", Range: `${off}-${off + PAGE - 1}`,
       },
-      next: { revalidate: 120 }, // refresh at most every 2 min
+      // 🚨 `cache: "force-cache"` IS LOAD-BEARING. `next: { revalidate }` ON ITS OWN CACHES
+      // NOTHING HERE, so this window was decorative and every reader re-ran its whole chain on
+      // every request. Next 16's fetch reference, two lines that together explain it:
+      //
+      //   "Caching is opt-in. Set cache: 'force-cache' to cache any request, including POST and
+      //    requests that send authorization or cookie headers"   <- every read here sends
+      //                                                             `Authorization: Bearer`
+      //   "If Request-time APIs are detected on the route, Next.js will fetch the resource on
+      //    every request"                                        <- the homepage reads
+      //                                                             searchParams and cookies
+      //
+      // How it was found: the homepage took 18s while /privacy returned in 0.36s AT THE SAME
+      // INSTANT, so it was never the infrastructure. And widening this window from 120s to 600s
+      // changed the timings not at all -- which is the tell that nothing was cached at either
+      // value. A window that makes no difference when you change it is not in use.
+      //
+      // The comment below is now true rather than aspirational.
+      cache: "force-cache", next: { revalidate: 120 }, // refresh at most every 2 min
     });
     if (!res.ok) {
       // Retry a 5xx once before giving up. Supabase answers a heavy read with a 500 rather than a

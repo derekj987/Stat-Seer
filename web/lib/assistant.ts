@@ -142,7 +142,7 @@ async function cfbLatestProps(): Promise<CfbPropRow[]> {
   if (!url || !key) throw new Error("SUPABASE_URL / SUPABASE_SERVICE_KEY not set");
   const base = `${url.replace(/\/$/, "")}/rest/v1/cfb_prop_snapshots`;
   const headers = { apikey: key, Authorization: `Bearer ${key}` };
-  const latRes = await fetch(`${base}?select=snapshot_at&order=snapshot_at.desc&limit=1`, { headers, next: { revalidate: 120 } });
+  const latRes = await fetch(`${base}?select=snapshot_at&order=snapshot_at.desc&limit=1`, { headers, cache: "force-cache", next: { revalidate: 120 } });
   if (!latRes.ok) throw new Error(`Supabase ${latRes.status}`);
   const lat = (await latRes.json()) as { snapshot_at: string }[];
   if (!lat.length) return [];
@@ -156,7 +156,7 @@ async function cfbLatestProps(): Promise<CfbPropRow[]> {
   for (let off = 0; off < 200000; off += PAGE) {
     const res = await fetch(url2, {
       headers: { ...headers, "Range-Unit": "items", Range: `${off}-${off + PAGE - 1}` },
-      next: { revalidate: 120 },
+      cache: "force-cache", next: { revalidate: 120 },
     });
     if (!res.ok) throw new Error(`Supabase ${res.status}`);
     const rows = (await res.json()) as CfbPropRow[];

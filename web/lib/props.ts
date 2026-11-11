@@ -135,7 +135,7 @@ async function sinceNewest(base: string, filters: string): Promise<string | null
     const res = await fetch(
       `${url.replace(/\/$/, "")}/rest/v1/${base}${filters}` +
       `&select=collected_at&order=collected_at.desc&limit=1`,
-      { headers: { apikey: key, Authorization: `Bearer ${key}` }, next: { revalidate: 120 } });
+      { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: "force-cache", next: { revalidate: 120 } });
     if (!res.ok) return null;
     const rows = (await res.json()) as { collected_at: string | null }[];
     const t = rows[0]?.collected_at ? Date.parse(rows[0].collected_at as string) : NaN;
@@ -177,7 +177,7 @@ async function pgAll(query: string): Promise<PropRow[]> {
         Range: `${offset}-${offset + PAGE - 1}`,
         "Range-Unit": "items",
       },
-      next: { revalidate: 120 },
+      cache: "force-cache", next: { revalidate: 120 },
     });
     if (!res.ok && res.status !== 206) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
     const page = (await res.json()) as PropRow[];

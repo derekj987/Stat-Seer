@@ -60,7 +60,7 @@ async function pgAll(query: string): Promise<Row[]> {
         apikey: key, Authorization: `Bearer ${key}`,
         "Range-Unit": "items", Range: `${offset}-${offset + PAGE - 1}`,
       },
-      next: { revalidate: 120 },
+      cache: "force-cache", next: { revalidate: 120 },
     });
     if (!res.ok) return out;
     const rows = (await res.json()) as Row[];

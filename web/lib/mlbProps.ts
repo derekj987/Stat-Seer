@@ -33,7 +33,7 @@ async function pgAll(query: string): Promise<Row[]> {
         Range: `${offset}-${offset + PAGE - 1}`,
         "Range-Unit": "items",
       },
-      next: { revalidate: 300 },
+      cache: "force-cache", next: { revalidate: 300 },
     });
     if (!res.ok && res.status !== 206) return out;   // a board without book lines still renders
     const page = (await res.json()) as Row[];

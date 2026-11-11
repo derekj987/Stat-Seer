@@ -288,7 +288,7 @@ async function pg(path: string): Promise<OddsRow[]> {
         apikey: key, Authorization: `Bearer ${key}`,
         "Range-Unit": "items", Range: `${off}-${off + PAGE - 1}`,
       },
-      next: { revalidate: 120 },
+      cache: "force-cache", next: { revalidate: 120 },
     });
     if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
     const rows = (await res.json()) as OddsRow[];
