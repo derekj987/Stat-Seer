@@ -21,10 +21,6 @@ export const metadata = {
 
 const SEASON = 2026;
 
-/** Matches HOME_REVALIDATE in lib/home.ts — the NHL teaser is a homepage read like the rest, and
- *  /nhl/lines keeps the boards' default. */
-const HOME_TEASER_REVALIDATE = 600;
-
 export default async function Landing({ searchParams }: PageProps<"/">) {
   const sp = await searchParams;
   const initialSport = sp.sport === "ncaaf" ? "ncaaf" : sp.sport === "mlb" ? "mlb"
@@ -40,7 +36,7 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
   // `allSettled`, not `all`: `all` rejects on the first failure and throws away the other
   // results, which would turn one empty feed into a blank homepage. Each panel already degrades
   // to an empty state on its own, and that behaviour is preserved here.
-  const [homeRes, nhlRes] = await Promise.allSettled([fetchHome(SEASON), nhlBoard(HOME_TEASER_REVALIDATE)]);
+  const [homeRes, nhlRes] = await Promise.allSettled([fetchHome(SEASON), nhlBoard()]);
 
   let nfl: { week: number; card: CardRow[]; upsets: UpsetRow[]; players: PlayerPick[] } = { week: 0, card: [], upsets: [], players: [] };
   let nflBoard: Game[] = [];

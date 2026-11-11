@@ -29,7 +29,7 @@ async function pg(path: string): Promise<OddsRow[]> {
   for (let off = 0; off < 200000; off += PAGE) {
     const res = await fetch(base, {
       headers: { apikey: key, Authorization: `Bearer ${key}`, "Range-Unit": "items", Range: `${off}-${off + PAGE - 1}` },
-      next: { revalidate: 120 },
+      cache: "force-cache", next: { revalidate: 120 },
     });
     // 404 = the table has not been created yet (ingest/cfb_odds_snapshots.sql). Not an error
     // for the page: it renders the card's own numbers until the capture exists.

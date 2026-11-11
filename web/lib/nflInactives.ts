@@ -94,7 +94,7 @@ async function espn(url: string, revalidate: number): Promise<unknown | null> {
   try {
     const res = await fetch(url, {
       headers: { "User-Agent": "Mozilla/5.0" },
-      next: { revalidate },
+      cache: "force-cache", next: { revalidate },
     });
     if (!res.ok) {
       console.warn(`[nflInactives] ESPN ${res.status} for ${url}`);
@@ -136,7 +136,7 @@ async function addPracticeReports(out: Map<string, InjuryNote>, season: number, 
       `&season=eq.${season}&week=eq.${week}&order=report_date.asc`;
     const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/practice_reports${q}`, {
       headers: { apikey: key, Authorization: `Bearer ${key}`, Range: "0-4999", "Range-Unit": "items" },
-      next: { revalidate: 120 },
+      cache: "force-cache", next: { revalidate: 120 },
     });
     if (!res.ok && res.status !== 206) return;
     const rows = (await res.json()) as PracticeRow[];
@@ -227,7 +227,7 @@ async function sleeperRows(statusIsNull: boolean, since?: string): Promise<Sleep
         apikey: key, Authorization: `Bearer ${key}`,
         Range: "0-1999", "Range-Unit": "items",
       },
-      next: { revalidate: 300 },
+      cache: "force-cache", next: { revalidate: 300 },
     });
     if (!res.ok && res.status !== 206) {
       // 404 here means the table has not been created yet — run ingest/sleeper_availability.sql.
@@ -263,7 +263,7 @@ async function sleeperDirect(): Promise<SleeperRow[]> {
   try {
     const res = await fetch("https://api.sleeper.app/v1/players/nfl", {
       headers: { "User-Agent": "statseer/1.0" },
-      next: { revalidate: 3600 },
+      cache: "force-cache", next: { revalidate: 3600 },
     });
     if (!res.ok) return [];
     const all = (await res.json()) as Record<string, SleeperPlayer>;
@@ -360,7 +360,7 @@ export async function weekReturning(
         apikey: key, Authorization: `Bearer ${key}`,
         Range: "0-9999", "Range-Unit": "items",
       },
-      next: { revalidate: 300 },
+      cache: "force-cache", next: { revalidate: 300 },
     });
     if (res.ok || res.status === 206) {
       const rows = (await res.json()) as

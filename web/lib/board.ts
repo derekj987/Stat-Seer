@@ -256,20 +256,7 @@ export function buildBoard(rows: OddsRow[]): Game[] {
  *  assumption rather than re-tuning it — a snapshot only grows as books and markets are added.
  *
  *  A `limit=1` query still works: the first page comes back short and the loop stops. */
-/** `revalidate` is a PARAMETER, defaulting to the boards' 120s, because the homepage and the
- *  boards want different things from the same read.
- *
- *  The boards must stay fresh — a market column is read next to a sportsbook, and the project's
- *  standing rule is that a stale line is a bug. The HOMEPAGE only shows four-row teasers, and it
- *  is a dynamically-rendered page (it reads searchParams), so it has no page-level ISR to fall
- *  back on: every visit re-runs the render and the fetch cache is the only thing standing between
- *  a visitor and the full chain. With a 120s window and ordinary traffic, almost every visit paid
- *  it — measured on production, 12-18s on the first request after an idle period against 1.4-2.4s
- *  warm. Raising the window ONLY where the teasers read it moves that cost off the visitor
- *  without making a single board number staler. */
-const BOARD_REVALIDATE = 120;
-
-async function pgFrom(table: string, path: string, revalidate = BOARD_REVALIDATE): Promise<unknown[]> {
+async function pgFrom(table: string, path: string): Promise<unknown[]> {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
   if (!url || !key) throw new Error("SUPABASE_URL / SUPABASE_SERVICE_KEY not set");
@@ -282,7 +269,24 @@ async function pgFrom(table: string, path: string, revalidate = BOARD_REVALIDATE
         apikey: key, Authorization: `Bearer ${key}`,
         "Range-Unit": "items", Range: `${off}-${off + PAGE - 1}`,
       },
-      next: { revalidate }, // boards 120s; the homepage teasers pass a longer window
+      // 🚨 `cache: "force-cache"` IS LOAD-BEARING. `next: { revalidate }` ON ITS OWN CACHES
+      // NOTHING HERE, so this window was decorative and every reader re-ran its whole chain on
+      // every request. Next 16's fetch reference, two lines that together explain it:
+      //
+      //   "Caching is opt-in. Set cache: 'force-cache' to cache any request, including POST and
+      //    requests that send authorization or cookie headers"   <- every read here sends
+      //                                                             `Authorization: Bearer`
+      //   "If Request-time APIs are detected on the route, Next.js will fetch the resource on
+      //    every request"                                        <- the homepage reads
+      //                                                             searchParams and cookies
+      //
+      // How it was found: the homepage took 18s while /privacy returned in 0.36s AT THE SAME
+      // INSTANT, so it was never the infrastructure. And widening this window from 120s to 600s
+      // changed the timings not at all -- which is the tell that nothing was cached at either
+      // value. A window that makes no difference when you change it is not in use.
+      //
+      // The comment below is now true rather than aspirational.
+      cache: "force-cache", next: { revalidate: 120 }, // refresh at most every 2 min
     });
     if (!res.ok) {
       // Retry a 5xx once before giving up. Supabase answers a heavy read with a 500 rather than a
@@ -313,7 +317,7 @@ async function pgFrom(table: string, path: string, revalidate = BOARD_REVALIDATE
   }
   return out;
 }
-const pg = (path: string, revalidate?: number) => pgFrom("odds_snapshots", path, revalidate);
+const pg = (path: string) => pgFrom("odds_snapshots", path);
 
 /** The current NFL week: the earliest week that still has an un-kicked-off game.
  * Rotates automatically — once a week's games are all in the past it advances. */
@@ -333,7 +337,7 @@ const pg = (path: string, revalidate?: number) => pgFrom("odds_snapshots", path,
  *  gap — and min() over a few hundred rows is free.
  *  The publisher had the identical query and the identical failure; both are fixed the same way.
  *  The rule this keeps re-teaching: never ask PostgREST to ORDER a snapshot table. */
-export async function currentWeek(season = 2026, rv?: number): Promise<number | null> {
+export async function currentWeek(season = 2026): Promise<number | null> {
   const now = new Date();
   const hi = new Date(now.getTime() + 14 * 86_400_000);
   const lo = new Date(now.getTime() - 36 * 3_600_000);
@@ -373,18 +377,18 @@ export async function currentWeek(season = 2026, rv?: number): Promise<number | 
     const weeks = rows.map((r) => r.week).filter((w) => w != null);
     return weeks.length ? Math.min(...weeks) : null;
   };
-  const fast = pick((await pg(window + narrow, rv)) as { week: number }[]);
+  const fast = pick((await pg(window + narrow)) as { week: number }[]);
   if (fast !== null) return fast;
   // Nothing captured in the last 36h (a paused sweep, or FanDuel absent from it). Widen rather
   // than return null — null sends every caller to weekRange().min, which is week 1 all season,
   // and that is the failure this whole function is about. Slower (~3.4s) and still one page.
-  return pick((await pg(window + "&market=eq.totals&outcome_name=eq.Over&select=week", rv)) as { week: number }[]);
+  return pick((await pg(window + "&market=eq.totals&outcome_name=eq.Over&select=week")) as { week: number }[]);
 }
 
 /** The min/max NFL week that currently has any odds captured, for the week nav. */
-export async function weekRange(season = 2026, rv?: number): Promise<{ min: number; max: number } | null> {
-  const lo = (await pg(`?season=eq.${season}&select=week&order=week.asc&limit=1`, rv)) as { week: number }[];
-  const hi = (await pg(`?season=eq.${season}&select=week&order=week.desc&limit=1`, rv)) as { week: number }[];
+export async function weekRange(season = 2026): Promise<{ min: number; max: number } | null> {
+  const lo = (await pg(`?season=eq.${season}&select=week&order=week.asc&limit=1`)) as { week: number }[];
+  const hi = (await pg(`?season=eq.${season}&select=week&order=week.desc&limit=1`)) as { week: number }[];
   if (!lo.length || !hi.length) return null;
   return { min: lo[0].week, max: hi[0].week };
 }
@@ -416,13 +420,13 @@ export async function fetchPreseason(season = 2026): Promise<OddsRow[]> {
  * the odds hold no names). A completed game's line is its close, and the close is the number the
  * report card grades against, so it has to stay on the board after kickoff. Mirrors
  * the_board.fetch_week. */
-export async function fetchWeek(week: number, season = 2026, rv?: number): Promise<OddsRow[]> {
+export async function fetchWeek(week: number, season = 2026): Promise<OddsRow[]> {
   const wk = `?season=eq.${season}&week=eq.${week}&capture_reason=in.(SCHEDULED,MANUAL)`;
   const sel = `&select=snapshot_at,event_id,commence_time,home_team,away_team,book,market,` +
     `outcome_name,outcome_point,price_american`;
-  const latest = (await pg(`${wk}&select=snapshot_at&order=snapshot_at.desc&limit=1`, rv)) as { snapshot_at: string }[];
+  const latest = (await pg(`${wk}&select=snapshot_at&order=snapshot_at.desc&limit=1`)) as { snapshot_at: string }[];
   if (!latest.length) return [];
-  let rows = (await pg(`${wk}&snapshot_at=eq.${encodeURIComponent(latest[0].snapshot_at)}${sel}`, rv)) as OddsRow[];
+  let rows = (await pg(`${wk}&snapshot_at=eq.${encodeURIComponent(latest[0].snapshot_at)}${sel}`)) as OddsRow[];
   // One row per (event, sweep) — FanDuel's Over on the total — is enough to find each played
   // game's last pre-kickoff sweep. Only the odds table: the closing_lines view is not readable
   // with the service key (403), and PostgREST cannot compare snapshot_at to commence_time.
@@ -430,7 +434,7 @@ export async function fetchWeek(week: number, season = 2026, rv?: number): Promi
   // The newest FULL sweep must be SCHEDULED/MANUAL; a game's close may be a PRE_KICKOFF sweep.
   const wkAny = `?season=eq.${season}&week=eq.${week}&capture_reason=in.(SCHEDULED,MANUAL,PRE_KICKOFF)`;
   const marks = (await pg(`${wkAny}&book=eq.${LINE_BOOK}&market=eq.totals&outcome_name=eq.Over` +
-    `&select=event_id,snapshot_at,commence_time`, rv)) as { event_id: string; snapshot_at: string; commence_time: string }[];
+    `&select=event_id,snapshot_at,commence_time`)) as { event_id: string; snapshot_at: string; commence_time: string }[];
   const lastBy = new Map<string, string>();
   for (const m of marks) {
     if (present.has(m.event_id) || m.snapshot_at >= m.commence_time) continue;   // pregame only
@@ -439,7 +443,7 @@ export async function fetchWeek(week: number, season = 2026, rv?: number): Promi
   if (lastBy.size) {
     const ids = [...lastBy.keys()].map(encodeURIComponent).join(",");
     const snaps = [...new Set(lastBy.values())].map((s) => `"${encodeURIComponent(s)}"`).join(",");
-    const extra = (await pg(`${wkAny}&event_id=in.(${ids})&snapshot_at=in.(${snaps})${sel}`, rv)) as OddsRow[];
+    const extra = (await pg(`${wkAny}&event_id=in.(${ids})&snapshot_at=in.(${snaps})${sel}`)) as OddsRow[];
     rows = rows.concat(extra.filter((r) => r.snapshot_at === lastBy.get(r.event_id)));
   }
   return usBooks(rows);

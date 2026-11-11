@@ -120,27 +120,12 @@ function fmtMarketSpread(g: Game): string | null {
   return `${fav} -${Math.abs(c)}`;
 }
 
-/** How long the HOMEPAGE's teaser reads may be cached.
- *
- *  Ten minutes, against the boards' two. The homepage is dynamically rendered (it reads
- *  searchParams), so it has no page-level ISR: every visit re-runs this function and the fetch
- *  cache is the only thing between a visitor and the whole chain. At 120s, ordinary traffic meant
- *  almost every visit paid it -- measured on production, 12-18s on the first request after an idle
- *  period against 1.4-2.4s warm.
- *
- *  🚨 THIS WINDOW IS THE HOMEPAGE'S ALONE. The same readers serve the live boards, where a stale
- *  number is a bug: a market column is read next to a sportsbook, and the project has been burned
- *  by a board that was hours behind. The window is a PARAMETER with the boards' value as its
- *  default, so widening it here cannot widen it there. What goes stale by up to ten minutes is
- *  four teaser rows and a card on the landing page; every board still reads at 120s. */
-const HOME_REVALIDATE = 600;
-
 export async function fetchHome(season = 2026): Promise<HomeData> {
   // Show the CURRENT NFL week (rotates as the season moves), clamped to weeks we
   // actually have odds for. Falls back to the earliest available week.
   let week = 1;
   try {
-    const [cur, range] = await Promise.all([currentWeek(season, HOME_REVALIDATE), weekRange(season, HOME_REVALIDATE)]);
+    const [cur, range] = await Promise.all([currentWeek(season), weekRange(season)]);
     week = cur ?? range?.min ?? 1;
     if (range) week = Math.min(range.max, Math.max(range.min, week));
   } catch { /* default week 1 */ }
@@ -155,8 +140,8 @@ export async function fetchHome(season = 2026): Promise<HomeData> {
   // result, so a single bad read would have thrown away a good one — settling each promise to a
   // safe value preserves the independent degradation the two try/catches used to give.
   const [board, preds] = await Promise.all([
-    fetchWeek(week, season, HOME_REVALIDATE).then(buildBoard).catch((): Game[] => []),
-    fetchModelWeek(week, season, HOME_REVALIDATE).catch((): ModelPrediction[] => []),
+    fetchWeek(week, season).then(buildBoard).catch((): Game[] => []),
+    fetchModelWeek(week, season).catch((): ModelPrediction[] => []),
   ]);
 
   const predByEvent = new Map(preds.map((p) => [p.eventId, p]));

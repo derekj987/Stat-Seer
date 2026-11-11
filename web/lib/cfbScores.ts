@@ -26,7 +26,7 @@ export async function fetchCfbScores(week: number, year = 2026): Promise<Raw[]> 
   const url = `https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard` +
     `?year=${year}&seasontype=2&week=${week}&groups=80&limit=300`;
   try {
-    const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" }, next: { revalidate: 30 } });
+    const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" }, cache: "force-cache", next: { revalidate: 30 } });
     if (!res.ok) return [];
     const d = await res.json();
     const events = Array.isArray(d.events) ? d.events : [];

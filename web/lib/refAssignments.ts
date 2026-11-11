@@ -53,7 +53,7 @@ const TEAM_ALIAS: Record<string, string> = { LAR: "LA", WSH: "WAS" };
 async function addEspnCrews(out: Map<string, CrewFactor>, season: number, week: number) {
   const j = async (u: string, revalidate: number) => {
     try {
-      const r = await fetch(u, { headers: { "User-Agent": "Mozilla/5.0" }, next: { revalidate } });
+      const r = await fetch(u, { headers: { "User-Agent": "Mozilla/5.0" }, cache: "force-cache", next: { revalidate } });
       return r.ok ? await r.json() : null;
     } catch { return null; }
   };

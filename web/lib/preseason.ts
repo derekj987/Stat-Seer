@@ -25,7 +25,7 @@ async function pgFrom(table: string, path: string): Promise<unknown[]> {
   if (!url || !key) throw new Error("SUPABASE_URL / SUPABASE_SERVICE_KEY not set");
   const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/${table}${path}`, {
     headers: { apikey: key, Authorization: `Bearer ${key}` },
-    next: { revalidate: 300 },
+    cache: "force-cache", next: { revalidate: 300 },
   });
   if (!res.ok) throw new Error(`Supabase ${res.status}`);
   return (await res.json()) as unknown[];

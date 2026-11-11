@@ -79,7 +79,7 @@ async function fetchBuzz(week: number, season: number): Promise<Buzz[]> {
     `&select=id,player,team,matchup,angle,direction,heat,take,sources&order=heat.desc`;
   const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/cfb_tailgate_buzz${q}`, {
     headers: { apikey: key, Authorization: `Bearer ${key}` },
-    next: { revalidate: 300 },
+    cache: "force-cache", next: { revalidate: 300 },
   });
   if (!res.ok) throw new Error(`Supabase ${res.status}`);
   const rows = (await res.json()) as BuzzRow[];
