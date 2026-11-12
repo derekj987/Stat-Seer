@@ -21,6 +21,8 @@ import csv
 import os
 import statistics
 import sys
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from collections import defaultdict
@@ -68,7 +70,30 @@ def read_props(env, season, weeks):
             "apikey": key, "Authorization": f"Bearer {key}",
             "Range": f"{off}-{off+PAGE-1}", "Range-Unit": "items"})
         import json
-        page = json.loads(urllib.request.urlopen(req, timeout=90).read())
+        # 🚨 RETRY THE 5xx. A season of backfilled props is ~218 pages (217,742 rows for 2024),
+        # and this had no retry at all, so ONE transient Supabase 500 anywhere in that sequence
+        # killed the whole backtest after it had already done minutes of work. That is exactly
+        # what happened on the first run of this script since the 2025 backfill landed.
+        #
+        # Measured before adding this, because the obvious diagnosis was wrong: deep OFFSET
+        # paging is NOT the problem here -- offset 0/20k/60k/120k/180k all answered in 0.4-1.2s.
+        # And the "better" keyset shape (`order=id.asc&id=gt.N`) is WORSE: it 500s, because
+        # ordering by id makes the planner walk from id 0 through every row until it reaches this
+        # season's. The paging is fine; it was the missing retry.
+        #
+        # Same backoff the live readers use (odds_client / cfb_player_proj.sb_get).
+        for attempt in range(4):
+            try:
+                page = json.loads(urllib.request.urlopen(req, timeout=90).read())
+                break
+            except urllib.error.HTTPError as e:
+                if e.code < 500 or attempt == 3:
+                    raise
+                time.sleep(2 * (attempt + 1))
+            except urllib.error.URLError:
+                if attempt == 3:
+                    raise
+                time.sleep(2 * (attempt + 1))
         out += page
         if len(page) < PAGE:
             break
