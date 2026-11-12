@@ -10,7 +10,7 @@ import { fetchCfbScores, scoreFor, type CfbScores } from "@/lib/cfbScores";
 import { NcaafWeekNav, NcaafWeekNote, NcaafLinesAsOf, readNcaafWeek } from "../NcaafWeek";
 import { liveNcaafCard } from "../liveCard";
 import ParlayCard from "../../ParlayCard";
-import { legsFrom, pickParlay } from "@/lib/parlayOfWeek";
+import { legsFrom, pickParlays } from "@/lib/parlayOfWeek";
 import { ncaafHomeWinProb, matchBoardGame } from "@/lib/ncaafWinProb";
 import { cfbBoard } from "@/lib/cfbBoard";
 import { marketGap } from "../lean";
@@ -88,10 +88,10 @@ export default async function Page({ searchParams }: {
   // 0.1875 vs 0.2442 for the home base rate, +23.2%, favourite won 71.1%). FBS-vs-FBS only:
   // that is the population the SD was measured on, and cross-division blowouts would otherwise
   // dominate a card that ranks by confidence. Degrades to no card if the board read fails.
-  let ncaafParlay = null;
+  let ncaafParlays: ReturnType<typeof pickParlays> = [];
   try {
     const { board } = await cfbBoard();
-    ncaafParlay = pickParlay(legsFrom(
+    ncaafParlays = pickParlays(legsFrom(
       (c.games ?? []).flatMap((g) => {
         const p = ncaafHomeWinProb(g);
         const bg = p === null ? null : matchBoardGame(g, board);
@@ -104,7 +104,7 @@ export default async function Page({ searchParams }: {
           label: { home: g.home, away: g.away, pick: p >= 0.5 ? g.home : g.away },
         }];
       })));
-  } catch { ncaafParlay = null; }
+  } catch { ncaafParlays = []; }
   const { today: todayEt, tomorrow: tomorrowEt } = etToday();
   // Every panel on this page renders the same day-grouped card tables (Today / Upcoming / Completed).
   const dayGroups = (games: readonly NcaafCardGame[]) =>
@@ -170,7 +170,7 @@ export default async function Page({ searchParams }: {
       <ModelSubnav active="game" base="ncaaf" />
       <NcaafWeekNav base="/ncaaf/model" week={week} />
 
-      <ParlayCard parlay={ncaafParlay} sportLabel="NCAAF" graded="/report" abbrev={abbrevTeam} />
+      <ParlayCard parlays={ncaafParlays} sportLabel="NCAAF" graded="/report" abbrev={abbrevTeam} />
       <NcaafWeekNote card={c} />
       <NcaafLinesAsOf card={c} />
 

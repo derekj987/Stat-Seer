@@ -17,7 +17,7 @@ import AddToSlip from "../AddToSlip";
 import { capDayGroups, etToday, groupByGameDay, dayBasis, type DayGroup } from "@/lib/gameDays";
 import { DayHeader } from "../DayHeader";
 import ParlayCard from "../ParlayCard";
-import { candidateLegs, pickParlay } from "@/lib/parlayOfWeek";
+import { candidateLegs, pickParlays } from "@/lib/parlayOfWeek";
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -428,7 +428,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
           are already fetched above for the board below. Renders null when the slate has no
           pregame games left, which is the correct empty state rather than a stale ticket. */}
       <ParlayCard
-        parlay={pickParlay(candidateLegs(built, preds))}
+        parlays={pickParlays(candidateLegs(built, preds), 2)}
         sportLabel="NFL"
         graded="/report"
       />
