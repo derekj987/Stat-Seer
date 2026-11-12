@@ -43,6 +43,7 @@ import math
 import os
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -188,12 +189,109 @@ def toward_dog(mv, close_home_spread):
     return moved_to_home != home_is_fav
 
 
+# ---------------------------------------------------------------- NCAAF ----
+# 🚨 NCAAF IS A CONFIRMATION SET, NOT A SECOND TRAINING SET, and the reason is a data limit
+# rather than a choice: cfb_odds_snapshots only goes back to 2026-09-11, so there is exactly one
+# partial season and no way to split it by season. That turns out to be the ideal use for it --
+# the strategy was fixed on the NFL seasons and NOTHING is tuned here, so college is a genuine
+# out-of-sample test of the same rule in a different sport. An independent sport is stronger
+# evidence than more games of the same one.
+#
+# The reads are shaped around this table's two indexes, (event_id, market, book) and (snapshot_at),
+# because it has NO season/week columns and a commence_time range on it crosses the statement
+# timeout. So: find the sweep before each game day to learn that day's events, then ask each event
+# for its own first and last pregame price. Both shapes are index-served.
+import re as _re
+import sqlite3 as _sqlite
+import unicodedata as _ud
+
+
+def _norm(s):
+    s = _ud.normalize("NFKD", s or "")
+    s = "".join(c for c in s if not _ud.combining(c)).lower().replace("'", "").replace("’", "")
+    return _re.sub(r"[^a-z0-9]+", " ", s).strip()
+
+
+def cfb_results(db=None):
+    """(away_norm, home_norm, date) -> home margin, for completed FBS-vs-FBS 2026 games."""
+    db = db or os.path.join(ROOT, "data", "cfb.db")
+    con = _sqlite.connect(db)
+    out = {}
+    for away, home, ap, hp, start in con.execute(
+            """SELECT away_team, home_team, away_points, home_points, start_date FROM games
+                 WHERE season=2026 AND home_class='fbs' AND away_class='fbs'
+                   AND home_points IS NOT NULL"""):
+        out[(_norm(away), _norm(home), str(start)[:10])] = int(hp) - int(ap)
+    con.close()
+    return out
+
+
+def cfb_events(env, results):
+    """Every priced event on a day we have results for: the sweep before that day's first kickoff."""
+    days = sorted({d for (_, _, d) in results})
+    seen = {}
+    for day in days:
+        probe = sb(env, "cfb_odds_snapshots",
+                   f"?select=snapshot_at&snapshot_at=lt.{urllib.parse.quote(day + 'T12:00:00Z', safe='')}"
+                   f"&order=snapshot_at.desc&limit=1")
+        if not probe:
+            continue
+        rows = sb(env, "cfb_odds_snapshots",
+                  f"?snapshot_at=eq.{urllib.parse.quote(probe[0]['snapshot_at'], safe='')}"
+                  f"&book=eq.{BOOK}&market=eq.spreads"
+                  f"&select=event_id,home_team,away_team,commence_time")
+        for r in rows:
+            seen.setdefault(r["event_id"], r)
+    return seen
+
+
+def cfb_open_close(env, events, results):
+    """(move, close, margin) per event, via two index-served reads each."""
+    got, missed = [], 0
+    for eid, e in events.items():
+        base = (f"?event_id=eq.{urllib.parse.quote(eid, safe='')}&book=eq.{BOOK}&market=eq.spreads"
+                f"&outcome_name=eq.{urllib.parse.quote(e['home_team'], safe='')}"
+                f"&select=snapshot_at,outcome_point")
+        o = sb(env, "cfb_odds_snapshots", base + "&order=snapshot_at.asc&limit=1")
+        c = sb(env, "cfb_odds_snapshots",
+               base + f"&snapshot_at=lt.{urllib.parse.quote(e['commence_time'], safe='')}"
+                      f"&order=snapshot_at.desc&limit=1")
+        if not o or not c or o[0]["outcome_point"] is None or c[0]["outcome_point"] is None:
+            continue
+        m = _match_result(e, results)
+        if m is None:
+            missed += 1
+            continue
+        op, cl = float(o[0]["outcome_point"]), float(c[0]["outcome_point"])
+        got.append((cl - op, cl, float(m)))
+    return got, missed
+
+
+def _match_result(e, results):
+    """Feed spells 'Iowa State Cyclones'; cfb.db says 'Iowa State'. Containment, shortest wins --
+    the same rule cfb_export.match_odds uses, so the two agree on what a name means."""
+    a, h = _norm(e["away_team"]), _norm(e["home_team"])
+    day = str(e["commence_time"])[:10]
+    for delta in (0, -1, 1):          # a late kickoff lands on the next UTC day
+        import datetime as _dt
+        d = (_dt.date.fromisoformat(day) + _dt.timedelta(days=delta)).isoformat()
+        for (ra, rh, rd), m in results.items():
+            if rd != d:
+                continue
+            if (ra in a or a in ra) and (rh in h or h in rh):
+                return m
+    return None
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--seasons", type=int, nargs="+", default=[2024, 2025])
     ap.add_argument("--confirm-from", type=int, default=None,
                     help="seasons >= this are HELD OUT (default: the last one given)")
+    ap.add_argument("--ncaaf", action="store_true",
+                    help="also run college 2026 as an INDEPENDENT confirmation set (slow: ~2 "
+                         "index-served reads per game, several minutes)")
     args = ap.parse_args(argv)
 
     env = oc.load_env()
