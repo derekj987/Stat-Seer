@@ -225,6 +225,32 @@ export function pickParlay(legs: ParlayLeg[]): Parlay | null {
   };
 }
 
+/** Several tickets, each paying +500 or better, with NO GAME SHARED BETWEEN THEM.
+ *
+ *  🚨 DISJOINT IS THE WHOLE POINT. Two tickets that share legs are not two bets, they are one
+ *  bet sold twice: the shared game decides both, so a reader taking both has concentrated risk
+ *  while believing they diversified. Greedy by design — take the best ticket, remove its games
+ *  from the pool, take the best of what is left — so ticket 2 is the strongest parlay that is
+ *  genuinely independent of ticket 1, not the second-best variation on it.
+ *
+ *  Later tickets are honestly weaker: the first takes the most confident legs available. The card
+ *  shows each one's own probability rather than implying they are equivalent. */
+export function pickParlays(legs: ParlayLeg[], count = 2): Parlay[] {
+  const out: Parlay[] = [];
+  const used = new Set<string>();
+  for (let i = 0; i < count; i++) {
+    const pool = legs.filter((l) => !used.has(l.eventId));
+    if (pool.length < Math.min(...LEG_COUNTS)) break;
+    const p = pickParlay(pool);
+    // Stop rather than pad: a ticket that cannot reach +500 is not what was asked for, and
+    // showing a short one beside a good one invites taking it for the same thing.
+    if (!p || (i > 0 && p.belowTarget)) break;
+    out.push(p);
+    for (const l of p.legs) used.add(l.eventId);
+  }
+  return out;
+}
+
 /** Said on the card. Legs are in DIFFERENT games, so multiplying is defensible — but it is still
  *  an assumption, and a reader comparing our 16.8% to a book's price deserves to know which. */
 export const independenceCaveat =

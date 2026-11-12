@@ -17,7 +17,7 @@ import AddToSlip from "../AddToSlip";
 import { capDayGroups, etToday, groupByGameDay, dayBasis, type DayGroup } from "@/lib/gameDays";
 import { DayHeader } from "../DayHeader";
 import ParlayCard from "../ParlayCard";
-import { candidateLegs, pickParlay } from "@/lib/parlayOfWeek";
+import { candidateLegs, pickParlays } from "@/lib/parlayOfWeek";
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -392,7 +392,17 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
       ))}
     </div>
   );
-  const FULL_MODEL_CAP = 2;
+  // 🚨 SHOW EVERY GAME. This was 2, so the card panel rendered two games and put the other twelve
+  // behind "Show 11 more games" — Derek: "The NFL model page is almost completely blank... it
+  // should replicate the NCAAF card format for all games." Measured on the week-10 board: 14 game
+  // cards existed and 4 were visible.
+  //
+  // A cap earns its place on NCAAF, where a Saturday is 60+ games and an uncapped page is
+  // unreadable. The NFL plays 14-16 a week, which is exactly the length this card format was
+  // designed for, so the cap was borrowed from a sport with ten times the slate and cost the
+  // page its whole point. Infinity rather than a big number: the intent is "never truncate the
+  // NFL week", not "truncate it somewhere further down".
+  const FULL_MODEL_CAP = Number.POSITIVE_INFINITY;
 
   return (
     <main className="wrap">
@@ -418,7 +428,7 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
           are already fetched above for the board below. Renders null when the slate has no
           pregame games left, which is the correct empty state rather than a stale ticket. */}
       <ParlayCard
-        parlay={pickParlay(candidateLegs(built, preds))}
+        parlays={pickParlays(candidateLegs(built, preds), 2)}
         sportLabel="NFL"
         graded="/report"
       />
@@ -455,15 +465,8 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
                 in globals.css: it makes every row size to the phone, not the content, and the
                 model columns then draw outside the card border). */}
             <div className="imp-scroll">
-              <ImpTable rows={scored} cap={4} refs={refs} spec={spec} today={todayEt} tomorrow={tomorrowEt} />
+              <ImpTable rows={scored} cap={scored.length} refs={refs} spec={spec} today={todayEt} tomorrow={tomorrowEt} />
             </div>
-            {scored.length > 4 && (
-              <label htmlFor="imp-more" className="hb-moretbl__sum">
-                <span className="hb-more__chev" aria-hidden="true">▸</span>
-                <span className="hb-moretbl__more">Show {scored.length - 4} more game{scored.length - 4 === 1 ? "" : "s"}</span>
-                <span className="hb-moretbl__less">Collapse</span>
-              </label>
-            )}
           </div>
         )}
         </div>
