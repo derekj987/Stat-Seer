@@ -287,8 +287,15 @@ export default function BoardView({
                     history says nothing rather than borrowing another sport's number. */}
                 {SHOPPING_VALUE[sport] && (
                   <p className="statnote">
-                    Across <b>{SHOPPING_VALUE[sport].prices.toLocaleString()}</b> prices published
-                    on {SHOPPING_VALUE[sport].events} {S.label} games
+                    {/* 🚨 "MEASURED ON", NOT "PUBLISHED ON". It read "prices published on 5,363
+                        NHL games" — and StatSeer did not publish a board in 2021. Those are
+                        BACKFILLED captures of what the books were offering, which is a perfectly
+                        good thing to measure and a false thing to claim credit for. The NFL row
+                        happened to be honest because its sample is this season; the wording has
+                        to be true for every sport that can appear here, including the ones whose
+                        history predates the product. */}
+                    Measured on <b>{SHOPPING_VALUE[sport].prices.toLocaleString()}</b> prices
+                    across {SHOPPING_VALUE[sport].events.toLocaleString()} {S.label} games
                     {SHOPPING_VALUE[sport].season ? ` in ${SHOPPING_VALUE[sport].season}` : ""},{" "}
                     {/* 🚨 "%" HERE, NEVER "POINTS". The underlying quantity is probability
                         points, but on a betting board "points" means SPREAD points — so "+1.0
