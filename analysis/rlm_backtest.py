@@ -330,6 +330,21 @@ def main(argv=None):
     grade(train, "train, moved to fav", only="fav")
     grade(test, "HELD OUT, moved to fav", only="fav")
 
+    if args.ncaaf:
+        # Independent confirmation. NOTHING is tuned here -- the rule is the one fixed on the NFL
+        # seasons above. The capture starts 2026-09-11, so there is one partial season and no
+        # split to make: college IS the hold-out, in a different sport.
+        print("\n=== NCAAF 2026 - INDEPENDENT CONFIRMATION (nothing tuned here) ===")
+        res = cfb_results()
+        evs = cfb_events(env, res)
+        cfb, missed = cfb_open_close(env, evs, res)
+        moved = sum(1 for g in cfb if abs(g[0]) >= 0.5)
+        print(f"  {len(evs)} priced events, {len(cfb)} joined to a result "
+              f"({missed} unmatched), {moved} moved >= 0.5 pt")
+        grade(cfb, "NCAAF, follow the move")
+        grade(cfb, "NCAAF, moved to dog (proxy)", only="dog")
+        grade(cfb, "NCAAF, moved to fav (control)", only="fav")
+
     print(f"\n  Bar is {VIG*100:.1f}% (-110 break-even), not 50%. A 95% interval that straddles")
     print("  it means the sample cannot answer the question — see the power note in the header.")
     return 0
