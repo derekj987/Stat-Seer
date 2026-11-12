@@ -4,7 +4,7 @@
 //
 // Resolution lives in lib/nbaTeamTag.ts, NOT here — a helper added to a generated file is
 // wiped by the next refresh, which has taken this project's build down before.
-// Generated 2026-11-11T11:56:11+00:00 — 30 teams, 520 players.
+// Generated 2026-11-12T11:55:44+00:00 — 30 teams, 521 players.
 
 /** Team name as the ODDS FEED spells it, keyed on letters+digits only, to its
  *  abbreviation. Keyed rather than literal so a feed that writes 'LA Clippers' for
@@ -105,7 +105,7 @@ export const NBA_ROSTER: Record<string, string[]> = {
   "PHX": ["collin gillespie", "devin booker", "dillon brooks", "drew timme", "duop reath", "jalen green", "jamaree bouyea", "jordan goodwin", "khaman maluach", "koa peat", "luke kennard", "mark williams", "miles bridges", "oso ighodaro", "pat spencer", "rasheer fleming", "ryan dunn"],
   "POR": ["branden carlson", "chris youngblood", "damian lillard", "deni avdija", "donovan clingan", "ja morant", "jayson kent", "john tonje", "jrue holiday", "micah potter", "robert williams", "scoot henderson", "shaedon sharpe", "sidy cissoko", "toumani camara", "vit krejci", "yang hansen"],
   "SA": ["carter bryant", "david jones garcia", "deaaron fox", "devin vassell", "dylan harper", "harrison barnes", "jakobi gillespie", "jayden quaintance", "jordan mclaughlin", "julian champagnie", "keldon johnson", "luke kornet", "maliq brown", "stephon castle", "tarris reed", "tobias harris", "victor wembanyama"],
-  "SAC": ["alex karaban", "ben simmons", "daeqwon plowden", "darius acuff", "deandre hunter", "domantas sabonis", "dylan cardwell", "emanuel sharp", "jonathan mogbo", "keegan murray", "leaky black", "malik monk", "maxime raynaud", "precious achiuwa", "sean pedulla", "zach lavine"],
+  "SAC": ["alex karaban", "ben simmons", "daeqwon plowden", "darius acuff", "deandre hunter", "domantas sabonis", "dylan cardwell", "emanuel sharp", "jonathan mogbo", "keegan murray", "leaky black", "malik monk", "mason plumlee", "maxime raynaud", "precious achiuwa", "sean pedulla", "zach lavine"],
   "TOR": ["alijah martin", "allen graves", "collin murray boyles", "immanuel quickley", "jaden bradley", "jakob poeltl", "jakobe walter", "jamal shead", "jamison battle", "kawhi leonard", "kevin mccullar", "kyle anderson", "malachi smith", "nate bittle", "rj barrett", "scottie barnes", "trayce jackson davis"],
   "UTAH": ["ace bailey", "brice sensabaugh", "darryn peterson", "harrison ingram", "isaiah collier", "jaren jackson", "jaxson hayes", "josh green", "josh okogie", "jusuf nurkic", "keyonte george", "kobe bufkin", "kyle filipowski", "lauri markkanen", "mo bamba", "svi mykhailiuk", "tony bradley", "trey alexander"],
   "WSH": ["aj dybantsa", "alex sarr", "anthony davis", "anthony gill", "bilal coulibaly", "bub carrington", "deandre ayton", "felix okpara", "jamir watkins", "justin champagnie", "khris middleton", "kyshawn george", "reece beekman", "trae young", "tre johnson", "tre mann", "tristan vukcevic", "will riley"],
