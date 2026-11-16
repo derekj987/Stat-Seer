@@ -4,7 +4,7 @@
 //
 // Resolution lives in lib/nbaTeamTag.ts, NOT here — a helper added to a generated file is
 // wiped by the next refresh, which has taken this project's build down before.
-// Generated 2026-11-14T11:55:36+00:00 — 30 teams, 526 players.
+// Generated 2026-11-16T11:55:53+00:00 — 30 teams, 526 players.
 
 /** Team name as the ODDS FEED spells it, keyed on letters+digits only, to its
  *  abbreviation. Keyed rather than literal so a feed that writes 'LA Clippers' for
@@ -79,7 +79,7 @@ export const NBA_TEAM_NAME: Record<string, string> = {
 /** Abbreviation to that team's normalised player names (see player_norm in
  *  nba_rosters.py — nbaTeamTag.ts must normalise identically). */
 export const NBA_ROSTER: Record<string, string[]> = {
-  "ATL": ["aaron wiggins", "asa newell", "cj mccollum", "corey kispert", "dorian finney smith", "dyson daniels", "henri veesaar", "jalen johnson", "jalen wilson", "jock landale", "keshon gilbert", "kingston flemings", "luguentz dort", "mouhamed gueye", "nickeil alexander walker", "onyeka okongwu", "rayj dennis", "zuby ejiofor"],
+  "ATL": ["aaron wiggins", "asa newell", "cj mccollum", "corey kispert", "dorian finney smith", "dyson daniels", "henri veesaar", "jalen johnson", "jalen wilson", "jock landale", "kingston flemings", "luguentz dort", "mouhamed gueye", "nickeil alexander walker", "onyeka okongwu", "rafael castro", "rayj dennis", "zuby ejiofor"],
   "BKN": ["ben saraf", "chaney johnson", "danny wolf", "dayron sharpe", "drake powell", "egor demin", "grant nelson", "josh minott", "joshua jefferson", "julius randle", "keon ellis", "michael porter", "mikel brown", "moritz wagner", "noah clowney", "nolan traore", "terance mann", "tyler bilodeau"],
   "BOS": ["amari williams", "baylor scheierman", "chris cenac", "derrick white", "devin carter", "dillon mitchell", "hugo gonzalez", "jayson tatum", "jordan walsh", "luka garza", "mike conley", "mitchell robinson", "neemias queta", "paul george", "payton pritchard", "ron harper", "sam hauser"],
   "CHA": ["brandon miller", "christian anderson", "coby white", "dennis schroder", "grant williams", "grayson allen", "hannes steinbach", "kon knueppel", "kylan boswell", "liam mcneeley", "michael ajayi", "moussa diabate", "naz reid", "pj hall", "royce oneale", "ryan kalkbrenner", "sion james", "tidjane salaun"],
