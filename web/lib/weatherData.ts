@@ -7,8 +7,7 @@ export interface GameWeather { eventId: string; game: string; home: string; away
   gustMph: number|null; precipPct: number|null; conditions: string|null; windFlag: boolean }
 export const WEATHER_SEASON = 2026;
 export const WEATHER_WEEK = 10;
-export const WEATHER_UPDATED = "2026-11-16T00:57Z";
+export const WEATHER_UPDATED = "2026-11-16T08:52Z";
 export const GAME_WEATHER: GameWeather[] = [
-  {"eventId": "48e497c230e6c9afcb3b600091d28e17", "game": "PIT @ CIN", "home": "CIN", "away": "PIT", "commence": "2026-11-16T01:20:00+00:00", "neutral": false, "venue": "Paycor Stadium", "city": "Cincinnati", "state": "OH", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 40, "windMph": 3, "gustMph": 8, "precipPct": 0, "conditions": "Clear", "windFlag": false},
-  {"eventId": "35e3bdff558b5d1506251e814986f164", "game": "LAC @ BAL", "home": "BAL", "away": "LAC", "commence": "2026-11-17T01:15:00+00:00", "neutral": false, "venue": "M&T Bank Stadium", "city": "Baltimore", "state": "MD", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 42, "windMph": 5, "gustMph": 8, "precipPct": 0, "conditions": "Clear", "windFlag": false},
+  {"eventId": "35e3bdff558b5d1506251e814986f164", "game": "LAC @ BAL", "home": "BAL", "away": "LAC", "commence": "2026-11-17T01:15:00+00:00", "neutral": false, "venue": "M&T Bank Stadium", "city": "Baltimore", "state": "MD", "roof": "outdoor", "indoor": false, "status": "pending", "tempF": null, "windMph": null, "gustMph": null, "precipPct": null, "conditions": null, "windFlag": false},
 ];
