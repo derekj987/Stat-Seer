@@ -4,7 +4,7 @@
 //
 // Resolution lives in lib/nbaTeamTag.ts, NOT here — a helper added to a generated file is
 // wiped by the next refresh, which has taken this project's build down before.
-// Generated 2026-11-16T11:55:53+00:00 — 30 teams, 526 players.
+// Generated 2026-11-17T11:55:47+00:00 — 30 teams, 525 players.
 
 /** Team name as the ODDS FEED spells it, keyed on letters+digits only, to its
  *  abbreviation. Keyed rather than literal so a feed that writes 'LA Clippers' for
@@ -107,6 +107,6 @@ export const NBA_ROSTER: Record<string, string[]> = {
   "SA": ["carter bryant", "david jones garcia", "deaaron fox", "devin vassell", "dylan harper", "harrison barnes", "jakobi gillespie", "jayden quaintance", "jordan mclaughlin", "julian champagnie", "keldon johnson", "luke kornet", "maliq brown", "stephon castle", "tarris reed", "tobias harris", "victor wembanyama"],
   "SAC": ["alex karaban", "ben simmons", "daeqwon plowden", "darius acuff", "deandre hunter", "domantas sabonis", "dylan cardwell", "emanuel sharp", "jonathan mogbo", "keegan murray", "leaky black", "malik monk", "mason plumlee", "maxime raynaud", "precious achiuwa", "sean pedulla", "zach lavine"],
   "TOR": ["alijah martin", "allen graves", "collin murray boyles", "immanuel quickley", "jaden bradley", "jakob poeltl", "jakobe walter", "jamal shead", "jamison battle", "kawhi leonard", "kevin mccullar", "kyle anderson", "malachi smith", "nate bittle", "rj barrett", "scottie barnes", "trayce jackson davis"],
-  "UTAH": ["ace bailey", "brice sensabaugh", "darryn peterson", "harrison ingram", "isaiah collier", "jaren jackson", "jaxson hayes", "josh green", "josh okogie", "jusuf nurkic", "keyonte george", "kobe bufkin", "kyle filipowski", "lauri markkanen", "mo bamba", "svi mykhailiuk", "tony bradley", "trey alexander"],
+  "UTAH": ["ace bailey", "brice sensabaugh", "darryn peterson", "harrison ingram", "isaiah collier", "jaren jackson", "jaxson hayes", "josh green", "josh okogie", "jusuf nurkic", "keyonte george", "kobe bufkin", "kyle filipowski", "lauri markkanen", "mo bamba", "svi mykhailiuk", "tony bradley"],
   "WSH": ["aj dybantsa", "alex sarr", "anthony davis", "anthony gill", "bilal coulibaly", "bub carrington", "deandre ayton", "felix okpara", "jamir watkins", "justin champagnie", "khris middleton", "kyshawn george", "reece beekman", "trae young", "tre johnson", "tre mann", "tristan vukcevic", "will riley"],
 };
