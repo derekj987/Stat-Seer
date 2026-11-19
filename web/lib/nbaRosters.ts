@@ -4,7 +4,7 @@
 //
 // Resolution lives in lib/nbaTeamTag.ts, NOT here — a helper added to a generated file is
 // wiped by the next refresh, which has taken this project's build down before.
-// Generated 2026-11-18T11:55:37+00:00 — 30 teams, 527 players.
+// Generated 2026-11-19T11:55:44+00:00 — 30 teams, 528 players.
 
 /** Team name as the ODDS FEED spells it, keyed on letters+digits only, to its
  *  abbreviation. Keyed rather than literal so a feed that writes 'LA Clippers' for
@@ -84,7 +84,7 @@ export const NBA_ROSTER: Record<string, string[]> = {
   "BOS": ["amari williams", "baylor scheierman", "chris cenac", "derrick white", "devin carter", "dillon mitchell", "hugo gonzalez", "jayson tatum", "jordan walsh", "luka garza", "mike conley", "mitchell robinson", "neemias queta", "paul george", "payton pritchard", "ron harper", "sam hauser"],
   "CHA": ["brandon miller", "christian anderson", "coby white", "dennis schroder", "grant williams", "grayson allen", "hannes steinbach", "kon knueppel", "kylan boswell", "liam mcneeley", "michael ajayi", "moussa diabate", "naz reid", "pj hall", "royce oneale", "ryan kalkbrenner", "sion james", "tidjane salaun"],
   "CHI": ["buddy hield", "caleb wilson", "dailyn swain", "isaac okoro", "jalen smith", "jaylin sellers", "jordan hawkins", "josh giddey", "leonard miller", "matas buzelis", "nic claxton", "noa essengue", "norman powell", "orlando robinson", "patrick williams", "tobe awaka", "tre jones", "zach collins"],
-  "CLE": ["craig porter", "donovan mitchell", "ernest udeh", "evan mobley", "james harden", "jarrett allen", "jaylon tyson", "khalifa diop", "mario hezonja", "meleek thomas", "naeqwan tomlin", "norchad omier", "peyton watson", "riley minix", "sam merrill", "thomas bryant", "tyrese proctor"],
+  "CLE": ["craig porter", "donovan mitchell", "ernest udeh", "evan mobley", "james harden", "jarrett allen", "jaylon tyson", "khalifa diop", "mario hezonja", "meleek thomas", "naeqwan tomlin", "norchad omier", "peyton watson", "riley minix", "sam merrill", "thomas bryant", "tyrese proctor", "zack austin"],
   "DAL": ["caleb martin", "cooper flagg", "daniel gafford", "dereck lively", "jett howard", "kyrie irving", "marcus sasser", "max christie", "morez johnson", "moussa cisse", "naji marshall", "pj washington", "santi aldama", "sergio de larrea", "tarik biberovic", "tobi lawal", "walter clayton", "zaccharie risacher"],
   "DEN": ["aaron gordon", "alpha diallo", "bryce hopkins", "cam whitmore", "cameron johnson", "christian braun", "daron holmes", "demar derozan", "jamal murray", "julian strawther", "marvin bagley", "nikola jokic", "ryan nembhard", "spencer jones", "trevon brazile", "tyus jones", "zeke nnaji"],
   "DET": ["ausar thompson", "cade cunningham", "chaz lanier", "daniss jenkins", "duncan robinson", "ebuka okorie", "elijah harkless", "isaac jones", "isaiah joe", "jalen duren", "javonte green", "john collins", "kevin huerter", "paul reed", "ronald holland", "taurean prince", "tolu smith", "ugonna onyenso"],
