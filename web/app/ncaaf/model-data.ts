@@ -1428,10 +1428,10 @@ export const NCAAF_MODEL = {
         "apHome": null,
         "conf": "Big 12",
         "marketSpread": {
-          "fav": "UCF",
+          "fav": "Iowa State",
           "num": -1.5
         },
-        "marketTotal": 47.5,
+        "marketTotal": 48.5,
         "projSpread": {
           "fav": "UCF",
           "num": -1.9
@@ -1441,13 +1441,13 @@ export const NCAAF_MODEL = {
         "awayRiser": 0,
         "pick": {
           "side": "UCF",
-          "num": -1.5
+          "num": 1.5
         },
         "totalLean": {
           "dir": "UNDER",
-          "num": 47.5
+          "num": 48.5
         },
-        "off": false,
+        "off": true,
         "rated": true,
         "crossDiv": false,
         "featured": false
@@ -1497,7 +1497,7 @@ export const NCAAF_MODEL = {
           "fav": "Toledo",
           "num": -16.5
         },
-        "marketTotal": 47.5,
+        "marketTotal": 46.5,
         "projSpread": {
           "fav": "Toledo",
           "num": -14.3
@@ -1511,7 +1511,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "UNDER",
-          "num": 47.5
+          "num": 46.5
         },
         "off": false,
         "rated": true,
@@ -1594,7 +1594,7 @@ export const NCAAF_MODEL = {
         "conf": "Mountain West",
         "marketSpread": {
           "fav": "New Mexico",
-          "num": -7.5
+          "num": -8.5
         },
         "marketTotal": 37.5,
         "projSpread": {
@@ -1606,7 +1606,7 @@ export const NCAAF_MODEL = {
         "awayRiser": 35,
         "pick": {
           "side": "New Mexico",
-          "num": -7.5
+          "num": -8.5
         },
         "totalLean": {
           "dir": "OVER",
@@ -2406,7 +2406,7 @@ export const NCAAF_MODEL = {
           "fav": "Lehigh",
           "num": -10.5
         },
-        "marketTotal": 48.5,
+        "marketTotal": 49.5,
         "projSpread": {
           "fav": "Lehigh",
           "num": -11.5
@@ -2418,10 +2418,7 @@ export const NCAAF_MODEL = {
           "side": "Lehigh",
           "num": -10.5
         },
-        "totalLean": {
-          "dir": "OVER",
-          "num": 48.5
-        },
+        "totalLean": null,
         "off": false,
         "rated": true,
         "crossDiv": true,
@@ -3573,7 +3570,7 @@ export const NCAAF_MODEL = {
           "fav": "Delaware",
           "num": -3.5
         },
-        "marketTotal": 54.5,
+        "marketTotal": 53.5,
         "projSpread": {
           "fav": "Delaware",
           "num": -3.7
@@ -5242,6 +5239,14 @@ export const NCAAF_MODEL = {
         "modelPct": 50,
         "marketPct": 42,
         "byPoints": 0.1
+      },
+      {
+        "dog": "UCF",
+        "matchup": "vs Iowa State",
+        "spread": "+1.5",
+        "modelPct": 54,
+        "marketPct": 47,
+        "byPoints": 1.9
       },
       {
         "dog": "Florida Atlantic",
@@ -30318,10 +30323,10 @@ export const NCAAF_MODEL = {
             "apHome": null,
             "conf": "Big 12",
             "marketSpread": {
-              "fav": "UCF",
+              "fav": "Iowa State",
               "num": -1.5
             },
-            "marketTotal": 47.5,
+            "marketTotal": 48.5,
             "projSpread": {
               "fav": "UCF",
               "num": -1.9
@@ -30331,13 +30336,13 @@ export const NCAAF_MODEL = {
             "awayRiser": 0,
             "pick": {
               "side": "UCF",
-              "num": -1.5
+              "num": 1.5
             },
             "totalLean": {
               "dir": "UNDER",
-              "num": 47.5
+              "num": 48.5
             },
-            "off": false,
+            "off": true,
             "rated": true,
             "crossDiv": false,
             "featured": false
@@ -30387,7 +30392,7 @@ export const NCAAF_MODEL = {
               "fav": "Toledo",
               "num": -16.5
             },
-            "marketTotal": 47.5,
+            "marketTotal": 46.5,
             "projSpread": {
               "fav": "Toledo",
               "num": -14.3
@@ -30401,7 +30406,7 @@ export const NCAAF_MODEL = {
             },
             "totalLean": {
               "dir": "UNDER",
-              "num": 47.5
+              "num": 46.5
             },
             "off": false,
             "rated": true,
@@ -30484,7 +30489,7 @@ export const NCAAF_MODEL = {
             "conf": "Mountain West",
             "marketSpread": {
               "fav": "New Mexico",
-              "num": -7.5
+              "num": -8.5
             },
             "marketTotal": 37.5,
             "projSpread": {
@@ -30496,7 +30501,7 @@ export const NCAAF_MODEL = {
             "awayRiser": 35,
             "pick": {
               "side": "New Mexico",
-              "num": -7.5
+              "num": -8.5
             },
             "totalLean": {
               "dir": "OVER",
@@ -31296,7 +31301,7 @@ export const NCAAF_MODEL = {
               "fav": "Lehigh",
               "num": -10.5
             },
-            "marketTotal": 48.5,
+            "marketTotal": 49.5,
             "projSpread": {
               "fav": "Lehigh",
               "num": -11.5
@@ -31308,10 +31313,7 @@ export const NCAAF_MODEL = {
               "side": "Lehigh",
               "num": -10.5
             },
-            "totalLean": {
-              "dir": "OVER",
-              "num": 48.5
-            },
+            "totalLean": null,
             "off": false,
             "rated": true,
             "crossDiv": true,
@@ -32463,7 +32465,7 @@ export const NCAAF_MODEL = {
               "fav": "Delaware",
               "num": -3.5
             },
-            "marketTotal": 54.5,
+            "marketTotal": 53.5,
             "projSpread": {
               "fav": "Delaware",
               "num": -3.7
@@ -34132,6 +34134,14 @@ export const NCAAF_MODEL = {
             "modelPct": 50,
             "marketPct": 42,
             "byPoints": 0.1
+          },
+          {
+            "dog": "UCF",
+            "matchup": "vs Iowa State",
+            "spread": "+1.5",
+            "modelPct": 54,
+            "marketPct": 47,
+            "byPoints": 1.9
           },
           {
             "dog": "Florida Atlantic",
