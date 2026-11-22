@@ -424,13 +424,72 @@ export async function fetchWeek(week: number, season = 2026): Promise<OddsRow[]>
   const present = new Set(rows.map((r) => r.event_id));
   // The newest FULL sweep must be SCHEDULED/MANUAL; a game's close may be a PRE_KICKOFF sweep.
   const wkAny = `?season=eq.${season}&week=eq.${week}&capture_reason=in.(SCHEDULED,MANUAL,PRE_KICKOFF)`;
-  const marks = (await pg(`${wkAny}&book=eq.${LINE_BOOK}&market=eq.totals&outcome_name=eq.Over` +
-    `&select=event_id,snapshot_at,commence_time`)) as { event_id: string; snapshot_at: string; commence_time: string }[];
+  const mark = `&book=eq.${LINE_BOOK}&market=eq.totals&outcome_name=eq.Over`;
   const lastBy = new Map<string, string>();
-  for (const m of marks) {
-    if (present.has(m.event_id) || m.snapshot_at >= m.commence_time) continue;   // pregame only
-    if (m.snapshot_at > (lastBy.get(m.event_id) ?? "")) lastBy.set(m.event_id, m.snapshot_at);
-  }
+  //
+  // 🚨 THIS USED TO READ EVERY MARK IN THE WEEK AND TAKE A MAX IN CODE. It is the same disease
+  // currentWeek had one function up, and it had already gone terminal: **sweeps run every 15
+  // MINUTES**, not every 6 hours, so a week accumulates ~700 of them. Measured on week 10:
+  // 9,712 rows / 712 sweeps / 14 games, ~20s per call, on EVERY reader (/, /model, /lines,
+  // /best, /props). By week 11 game-day it stopped returning at all — HTTP 500 at 8.2s, the
+  // Supabase statement timeout.
+  //
+  // And a throw here does not show an error, it shows an EMPTY BOARD, because every caller
+  // swallows it. That is Derek's 2026-11-22 screenshot: "No lines captured for Week 11 yet"
+  // over a full model panel reading "? @ BUF", "? @ CHI", "? @ DAL" — the away team missing
+  // exactly as lib/model.ts falls back when the odds hold no names. The lines were captured
+  // the whole time; the query that reads them had outgrown its timeout. A slow page and a
+  // blank page were one bug.
+  //
+  // Three cheaper shapes were measured and rejected before this one, so do not re-try them:
+  //   * bounding the scan by snapshot_at  — CORRECT (matched on 5 weeks) but useless: the
+  //     sweeps are dense right through the week, so 9,712 rows only fell to 9,572.
+  //   * capture_reason=eq.PRE_KICKOFF     — 500s, and week 10 holds no PRE_KICKOFF rows at all.
+  //   * a keyset walk over distinct event_id — complete, and SLOWER than the scan (51s):
+  //     `event_id=gt.` cannot use the index that `event_id=eq.` can. That asymmetry is why the
+  //     per-game read below is an equality.
+  //
+  // What replaces it is two bounded waves, both parallel, neither growing with the sweep count:
+  //
+  //   1. ENUMERATE the week's games from ten single sweeps, one a day back from the earliest
+  //      kickoff we can see. A game sits in every sweep from the day the book posts it until it
+  //      kicks off, so ten days of daily probes cover both ends — a game posted late appears in
+  //      a later probe, one that kicked off early in an earlier one. One sweep alone does NOT
+  //      do it: a single probe seven days out missed 3 of week 10's games and 2 of week 8's.
+  //      The union was complete on weeks 1, 5, 8, 9 and 10.
+  //   2. For each game missing from the newest sweep, ONE indexed read of its own last rows.
+  //
+  // Stepping back by KICKOFF instead of by clock looks tidier and is wrong: a sweep taken just
+  // before kickoff K holds the games starting at K and later, never the earlier ones that have
+  // already dropped out, so it reveals nothing new and the walk halts at once. Measured: 0 of
+  // week 9's 14 closes found.
+  const first = rows.reduce<string>((m, r) => (!m || r.commence_time < m ? r.commence_time : m), "");
+  const base = Date.parse(first) || Date.parse(latest[0].snapshot_at);
+  const DAY = 86_400_000;
+  const sweeps = await Promise.all(
+    Array.from({ length: 10 }, (_, i) => i + 1).map(async (d) => {
+      const at = encodeURIComponent(new Date(base - d * DAY).toISOString());
+      const p = (await pg(`${wkAny}&snapshot_at=lte.${at}&select=snapshot_at` +
+        `&order=snapshot_at.desc&limit=1`)) as { snapshot_at: string }[];
+      if (!p.length) return [];
+      return (await pg(`${wkAny}&snapshot_at=eq.${encodeURIComponent(p[0].snapshot_at)}${mark}` +
+        `&select=event_id`)) as { event_id: string }[];
+    })
+  );
+  const missing = [...new Set(sweeps.flat().map((r) => r.event_id))].filter((id) => !present.has(id));
+  // Each read carries its OWN commence_time rather than one borrowed from the enumeration sweep.
+  // A kickoff can be rescheduled after a game is posted, and the stale copy picked a sweep 23
+  // minutes short of the real close on one week 9 game. A game's rows STOP when it kicks off and
+  // drops out of the feed, so its newest 50 always reach back past the close.
+  await Promise.all(missing.map(async (id) => {
+    const tail = (await pg(`${wkAny}&event_id=eq.${encodeURIComponent(id)}${mark}` +
+      `&select=snapshot_at,commence_time&order=snapshot_at.desc&limit=50`)) as
+      { snapshot_at: string; commence_time: string }[];
+    for (const r of tail) {
+      if (r.snapshot_at >= r.commence_time) continue;                            // pregame only
+      if (r.snapshot_at > (lastBy.get(id) ?? "")) lastBy.set(id, r.snapshot_at);
+    }
+  }));
   if (lastBy.size) {
     const ids = [...lastBy.keys()].map(encodeURIComponent).join(",");
     const snaps = [...new Set(lastBy.values())].map((s) => `"${encodeURIComponent(s)}"`).join(",");
