@@ -131,6 +131,11 @@ export function propLegs(games: PropGame[], markets: string[], now = new Date())
           price: best,
           books: Object.entries(q.byBook).filter(([, v]) => v === best).map(([b]) => b),
           byBook: q.byBook,
+          marketKey: block.market,
+          player: q.player,
+          side: q.side,
+          line: q.line ?? null,
+          commence: g.commence,
         };
         const held = bestPerGame.get(g.eventId);
         if (!held || leg.ourProb > held.ourProb) bestPerGame.set(g.eventId, leg);

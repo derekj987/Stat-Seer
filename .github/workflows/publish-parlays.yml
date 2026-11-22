@@ -1,0 +1,66 @@
+name: Publish parlays
+
+# Locks the week's Parlay of the Week tickets into parlay_ledger BEFORE the first kickoff.
+#
+# Until this existed the card recomputed its legs on every render, so the "published" ticket
+# drifted with the market all week and no version of it was ever written down. The card's own
+# tooltip promises "published before kickoff and graded at /report"; this is the first half.
+#
+# It calls the deployed app rather than running the selection here, because the selector lives in
+# TypeScript (pickParlays / candidateLegs / propLegs). A second implementation in CI would drift
+# from the one that renders the card, and a graded record that does not match what the reader was
+# shown is worse than no record -- it looks like evidence. See web/app/api/parlay/publish.
+#
+# TWO RUNS A WEEK, and that is deliberate on both counts:
+#   * Thursday, before the TNF kickoff, locks the week while every game is still ahead.
+#   * Sunday morning picks up any ticket Thursday could not build -- books post most player props
+#     late in the week, so the TD and props tickets are often unavailable on Thursday. It CANNOT
+#     disturb a ticket already locked: parlay_ledger has a unique index on
+#     (sport, season, week, ticket) and the route inserts with resolution=ignore-duplicates, so a
+#     second run is a no-op by construction rather than by remembering to check.
+# Scheduled runs are a repo-wide budget (~66/day), so this takes two slots, not twelve.
+
+on:
+  schedule:
+    - cron: "0 16 * * 4"      # Thu 16:00 UTC (~11am ET) — before Thursday Night Football
+    - cron: "0 15 * * 0"      # Sun 15:00 UTC (~10am ET) — before the 1pm ET window
+  workflow_dispatch:
+    inputs:
+      week:
+        description: "Week to publish (blank = the current week)"
+        required: false
+
+concurrency:
+  group: publish-parlays
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Lock this week's tickets
+        env:
+          SITE: ${{ vars.SITE_URL || 'https://statseeredge.com' }}
+          # The route gates itself on this key, so no new secret had to be created. It is passed
+          # as a header and never echoed: `--fail-with-body` prints the RESPONSE on an error, not
+          # the request, and curl is given the header via @- on stdin so it cannot appear in the
+          # process list of a shared runner.
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          WEEK: ${{ inputs.week }}
+        run: |
+          set -euo pipefail
+          url="$SITE/api/parlay/publish"
+          if [ -n "${WEEK:-}" ]; then url="$url?week=$WEEK"; fi
+          printf 'authorization: Bearer %s\n' "$SUPABASE_SERVICE_KEY" > "$RUNNER_TEMP/h"
+          code=$(curl -sS -o "$RUNNER_TEMP/out.json" -w '%{http_code}' \
+                   -X POST -H @"$RUNNER_TEMP/h" "$url")
+          rm -f "$RUNNER_TEMP/h"
+          echo "HTTP $code"
+          cat "$RUNNER_TEMP/out.json"; echo
+          # A 401 means the key the site holds and the key this job holds have diverged -- that is
+          # a real break and must not pass silently. Anything else non-2xx is likewise a failure;
+          # "no qualifying tickets" is a 200 with published:0, which is a normal early-week state.
+          case "$code" in 2*) ;; *) echo "publish failed"; exit 1;; esac

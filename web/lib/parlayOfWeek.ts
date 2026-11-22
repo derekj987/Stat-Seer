@@ -53,6 +53,25 @@ export interface ParlayLeg {
   price: number;
   books: string[];
   byBook: Record<string, number>;
+  /** ── Grading fields ────────────────────────────────────────────────────────────────────────
+   *  Structured so the grader never has to parse `pick`. That string is a DISPLAY string — it
+   *  reads "Alvin Kamara O6.5" — and grading a published record by regexing its own presentation
+   *  is how a cosmetic change silently becomes a wrong record. `pick` stays for showing the
+   *  ticket exactly as it was published; these say what to settle it against.
+   *
+   *  `marketKey` is the feed's own key: "h2h" for a moneyline, otherwise the prop market
+   *  ("player_anytime_td", "player_reception_yds", ...). */
+  marketKey?: string;
+  /** Moneyline: the team taken. */
+  team?: string;
+  /** Prop: the player, spelled as the feed spells him. */
+  player?: string;
+  /** Prop: "Over" | "Under" | "Yes". */
+  side?: string;
+  /** Prop: the line this leg was taken at. null for anytime TD, which has no line. */
+  line?: number | null;
+  /** Kickoff, so the ledger can compute the ticket's earliest leg without a second lookup. */
+  commence?: string;
 }
 
 export interface Parlay {
@@ -126,6 +145,9 @@ export function candidateLegs(
       price: best,
       books: Object.entries(side.byBook).filter(([, v]) => v === best).map(([b]) => b),
       byBook: side.byBook,
+      marketKey: "h2h",
+      team: pick,
+      commence: p.commence,
     });
   }
   return legs;
@@ -167,6 +189,11 @@ export function legsFrom(
       price: best,
       books: Object.entries(side.byBook).filter(([, v]) => v === best).map(([b]) => b),
       byBook: side.byBook,
+      marketKey: "h2h",
+      // The FEED's spelling, never `label`. A card may abbreviate "North Dakota State Bison" for
+      // display; the grader has to match the result feed.
+      team: pick,
+      commence: game.commence,
     });
   }
   return legs;
