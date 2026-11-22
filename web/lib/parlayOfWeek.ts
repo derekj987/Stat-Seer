@@ -39,8 +39,16 @@ export interface ParlayLeg {
   home: string;
   away: string;
   pick: string;
+  /** What is being bet, e.g. "Anytime TD" or "Rec Yds". Game legs are moneylines and leave this
+   *  unset, so the card falls back to "Moneyline". */
+  market?: string;
   ourProb: number;
-  /** De-vigged fair probability of the SAME side, for the comparison column. */
+  /** Games behind ourProb, on a prop leg whose probability is that player's own rate at this line.
+   *  Printed on the card: a 70% that rests on 9 games and one that rests on 60 are different
+   *  claims, and the reader cannot tell them apart from the percentage alone. */
+  sample?: number;
+  /** De-vigged fair probability of the SAME side, for the comparison column.
+   *  null when the market is quoted one-sided — anytime TD is, so TD legs never carry one. */
   marketProb: number | null;
   price: number;
   books: string[];
@@ -79,6 +87,10 @@ export interface Parlay {
   bestBook: { book: string; american: string } | null;
   /** True when no combination reached MIN_DECIMAL and this is the longest available instead. */
   belowTarget: boolean;
+  /** Slip heading — "Game lines", "Player touchdowns", "Player props". Three tickets built from
+   *  the same rule on different markets need to say which is which, or they read as one ticket
+   *  printed three times. */
+  title?: string;
 }
 
 /** One leg per GAME, for the side we rate higher, priced at the best US book.

@@ -18,6 +18,8 @@ import { capDayGroups, etToday, groupByGameDay, dayBasis, type DayGroup } from "
 import { DayHeader } from "../DayHeader";
 import ParlayCard from "../ParlayCard";
 import { candidateLegs, pickParlays } from "@/lib/parlayOfWeek";
+import { propLegs, TD_MARKETS, SKILL_MARKETS } from "@/lib/propParlay";
+import { weekProps, type PropGame } from "@/lib/props";
 
 export const revalidate = 300;
 const SEASON = 2026;
@@ -262,6 +264,10 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
 
   let preds: ModelPrediction[] = [];
   try { preds = await fetchModelWeek(week, SEASON); } catch { preds = []; }
+  // Player-prop quotes for the two player tickets. Swallowed like every other read on this page:
+  // a prop capture that is down must cost the player slips, never the whole board.
+  let propGames: PropGame[] = [];
+  try { propGames = await weekProps(week, SEASON); } catch { propGames = []; }
   let calibration: Awaited<ReturnType<typeof fetchCalibration>> = [];
   try { calibration = await fetchCalibration(SEASON); } catch { calibration = []; }
 
@@ -423,12 +429,20 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
       </div>
       <WeekNav min={min} max={max} current={week} base="/model" />
 
-      {/* Parlay of the Week — the top-of-page attention-grabber. Costs no extra database read:
-          `preds` (our published, graded win probabilities) and `built` (every book's moneyline)
-          are already fetched above for the board below. Renders null when the slate has no
-          pregame games left, which is the correct empty state rather than a stale ticket. */}
+      {/* Parlays of the Week — the top-of-page attention-grabber. Derek: "put 2-3 parlays on
+          there. Make one for player TDs and other player props."
+          Three tickets built by ONE rule on three different markets, so they are genuinely
+          different bets rather than one ticket printed three times. The game ticket costs no
+          extra database read (`preds` and `built` are already fetched for the board below); the
+          two player tickets share the single `weekProps` read above, which the props board
+          already caches. Each renders only if it can be filled — an empty slate drops its slip
+          rather than showing a stale one. */}
       <ParlayCard
-        parlays={pickParlays(candidateLegs(built, preds), 2)}
+        parlays={[
+          ...pickParlays(candidateLegs(built, preds), 1).map((p) => ({ ...p, title: "Game lines" })),
+          ...pickParlays(propLegs(propGames, TD_MARKETS), 1).map((p) => ({ ...p, title: "Player touchdowns" })),
+          ...pickParlays(propLegs(propGames, SKILL_MARKETS), 1).map((p) => ({ ...p, title: "Player props" })),
+        ]}
         sportLabel="NFL"
         graded="/report"
       />
