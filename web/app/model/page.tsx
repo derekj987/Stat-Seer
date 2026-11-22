@@ -17,8 +17,8 @@ import AddToSlip from "../AddToSlip";
 import { capDayGroups, etToday, groupByGameDay, dayBasis, type DayGroup } from "@/lib/gameDays";
 import { DayHeader } from "../DayHeader";
 import ParlayCard from "../ParlayCard";
-import { candidateLegs, pickParlays } from "@/lib/parlayOfWeek";
-import { propLegs, TD_MARKETS, SKILL_MARKETS } from "@/lib/propParlay";
+import { assembleParlays } from "@/lib/weekParlays";
+import { lockedParlays, parlayRecord } from "@/lib/parlayLedger";
 import { weekProps, type PropGame } from "@/lib/props";
 
 export const revalidate = 300;
@@ -275,6 +275,21 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
   let board: Awaited<ReturnType<typeof fetchWeek>> = [];
   try { board = await fetchWeek(week, SEASON); } catch { board = []; }
   const built = buildBoard(board);
+
+  // Parlay of the Week: the LOCKED ticket if the publisher has written one for this week, and the
+  // live selection only until it has. That order is the whole point of the ledger — once a ticket
+  // is published the board must show that ticket and not a fresh one computed from today's
+  // prices, or the graded record would describe something the reader was never shown. The live
+  // fallback keeps the panel working for a week that has not been locked yet (and before the
+  // publisher's first run) rather than showing an empty card.
+  let parlays: Awaited<ReturnType<typeof lockedParlays>> = [];
+  try { parlays = await lockedParlays("NFL", SEASON, week); } catch { parlays = []; }
+  if (!parlays.length) parlays = assembleParlays(built, preds, propGames);
+  // Graded tickets only; a week still in play is not a loss. Null leaves the card's own
+  // "first graded ticket pending" wording in place.
+  let parlayTally: Awaited<ReturnType<typeof parlayRecord>> | null = null;
+  try { parlayTally = await parlayRecord("NFL", SEASON); } catch { parlayTally = null; }
+
   const modelById = new Map<string, ModelPrediction>(preds.map((p) => [p.eventId, p]));
   let refs: Awaited<ReturnType<typeof weekRefs>> = new Map();
   try { refs = await weekRefs(week, SEASON); } catch { /* assignments post game-week */ }
@@ -438,11 +453,8 @@ export default async function Page({ searchParams }: PageProps<"/model">) {
           already caches. Each renders only if it can be filled — an empty slate drops its slip
           rather than showing a stale one. */}
       <ParlayCard
-        parlays={[
-          ...pickParlays(candidateLegs(built, preds), 1).map((p) => ({ ...p, title: "Game lines" })),
-          ...pickParlays(propLegs(propGames, TD_MARKETS), 1).map((p) => ({ ...p, title: "Player touchdowns" })),
-          ...pickParlays(propLegs(propGames, SKILL_MARKETS), 1).map((p) => ({ ...p, title: "Player props" })),
-        ]}
+        parlays={parlays}
+        record={parlayTally}
         sportLabel="NFL"
         graded="/report"
       />

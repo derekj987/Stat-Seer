@@ -37,6 +37,22 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: python grade_predictions.py --live --write
 
+      # The Parlay of the Week tickets, graded from the same nflverse results. It rides THIS job
+      # rather than taking a cron of its own because scheduled runs are a repo-wide budget (~66/
+      # day) and this needs exactly what the step above has already downloaded -- data/games.csv.
+      # Weekly player stats for the prop legs are fetched by the script itself.
+      #
+      # continue-on-error: the model's calibration record is the load-bearing artefact here and it
+      # has already been written above. A parlay grader that can break the job it rides on would
+      # trade the important record for the decorative one; anything it misses is picked up by
+      # tomorrow's run, because it only ever grades tickets that are not already graded.
+      - name: Grade -> parlay_results
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python grade_parlays.py --write
+
       # Does the RECORD hold up? The three model guardrails ask whether the numbers reflect the
       # news; this asks whether the track record we publish about ourselves was honestly computed.
       #
