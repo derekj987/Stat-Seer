@@ -5477,40 +5477,74 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
    The old card spent four lines per leg (selection / market+book / matchup / percentages) and one
    ticket ran taller than the board beneath it. The matchup line now carries the percentages
    inline, which removes a whole row per leg without dropping a single number. */
-.slip{border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
-.slip__top{display:flex;align-items:baseline;gap:8px;padding:6px 10px;
-  border-bottom:1px solid var(--line);background:var(--surface-2)}
-.slip__n{font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
-.slip__odds{margin-left:auto;font-size:16px;font-weight:800;line-height:1;color:var(--accent)}
+/* 🚨 THE SLIP CARRIES ITS OWN DARK PALETTE IN BOTH THEMES, and that is deliberate -- Derek, with
+   a FanDuel screenshot: "give them more of a dark mode look like fanduel". A betslip is a borrowed
+   object, and the thing that makes it read as one is the near-black surface it always has in the
+   apps people compare it against. The site's own dark theme is a FOREST GREEN (--surface #123a27),
+   so inheriting the page tokens would give a green card in dark mode and a pale one in light --
+   neither of which looks like a slip. These tokens are scoped to .slip, so the page keeps its
+   theme and only this component goes charcoal.
+
+   WHAT DID NOT CHANGE IS THE COLOUR LEGEND, because it is load-bearing: colour says WHOSE CLAIM a
+   number is -- blue for ours, maroon for the de-vigged market, green for a book price. FanDuel
+   prints its selections in blue, which is tempting and would have put a second blue on the card
+   competing with our own probability, so the selection takes plain white instead and blue keeps
+   meaning one thing. Every value below is the same role as before, re-picked for contrast on
+   charcoal rather than re-assigned. */
+.slip{
+  --slip-bg:#17181b;        /* card face */
+  --slip-bg-2:#101114;      /* header + footer strips, a shade down */
+  --slip-line:#2b2d33;      /* dividers */
+  --slip-ink:#f2f3f5;       /* selections, the one thing at full contrast */
+  --slip-muted:#9aa1a9;     /* labels, matchup, book -- 5.9:1 on the face */
+  --slip-accent:#3ddc84;    /* a BOOK price, same role as --accent */
+  --slip-model:#6ab0ff;     /* OUR number, same role as --model */
+  --slip-mkt:#e58aa1;       /* the MARKET's number, same role as --mkt */
+  border:1px solid var(--slip-line);border-radius:10px;
+  background:var(--slip-bg);color:var(--slip-ink);overflow:hidden;
+  /* The page sits on a light background in light mode, so the card needs its own edge to avoid
+     looking like a hole punched in the board. */
+  box-shadow:0 1px 3px rgb(0 0 0 / .28)
+}
+.slip__top{display:flex;align-items:center;gap:8px;padding:7px 10px;
+  border-bottom:1px solid var(--slip-line);background:var(--slip-bg-2)}
+.slip__n{font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--slip-muted)}
+/* The ticket price, as a pill. It is the one number a reader looks for first and it is the single
+   most recognisable thing on a real slip; it is a BOOK price, so it stays green rather than
+   borrowing FanDuel's yellow, which on this card would mean nothing. */
+.slip__odds{margin-left:auto;font-size:15px;font-weight:800;line-height:1;color:var(--slip-accent);
+  background:rgb(61 220 132 / .12);border:1px solid rgb(61 220 132 / .3);
+  border-radius:6px;padding:3px 7px;white-space:nowrap}
 
 .slip__legs{list-style:none;margin:0;padding:0}
 /* Two columns, two rows per leg: selection + price, then market/matchup/percentages + book.
    Fixed rows, so a long team name cannot make one leg taller than its neighbour. */
 .slip__leg{display:grid;grid-template-columns:1fr auto;gap:1px 8px;
-  padding:6px 10px;border-bottom:1px dotted var(--line);font-size:12px}
+  padding:7px 10px;border-bottom:1px solid var(--slip-line);font-size:12px}
 .slip__leg:last-child{border-bottom:0}
-.slip__pick{grid-column:1;font-weight:700;color:var(--ink);font-size:12.5px;line-height:1.25}
-.slip__price{grid-column:2;text-align:right;font-weight:800;color:var(--accent);font-size:12.5px}
-.slip__mkt{grid-column:1;font-size:10.5px;color:var(--muted)}
-.slip__book{grid-column:2;text-align:right;font-size:10px;color:var(--muted)}
+.slip__pick{grid-column:1;font-weight:700;color:var(--slip-ink);font-size:12.5px;line-height:1.25}
+.slip__price{grid-column:2;text-align:right;font-weight:800;color:var(--slip-accent);font-size:12.5px}
+.slip__mkt{grid-column:1;font-size:10px;color:var(--slip-muted);text-transform:uppercase;letter-spacing:.03em}
+.slip__book{grid-column:2;text-align:right;font-size:10px;color:var(--slip-muted)}
 /* The matchup row doubles as the numbers row -- that is where the height saving comes from. */
 .slip__match{grid-column:1 / -1;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 7px;
-  font-size:10.5px;color:var(--muted);line-height:1.3}
+  font-size:10.5px;color:var(--slip-muted);line-height:1.3}
 .slip__match i{font-style:normal;font-weight:700}
-.slip__ours{color:var(--model)}
-.slip__n2{color:var(--muted);font-weight:600!important}
-.slip__market{color:var(--mkt)}
+.slip__ours{color:var(--slip-model)}
+.slip__n2{color:var(--slip-muted);font-weight:600!important}
+.slip__market{color:var(--slip-mkt)}
 
 .slip__foot{display:flex;flex-wrap:wrap;align-items:center;gap:3px 10px;
-  padding:6px 10px;border-top:1px solid var(--line);background:var(--surface-2);font-size:11px}
+  padding:7px 10px;border-top:1px solid var(--slip-line);background:var(--slip-bg-2);font-size:11px;
+  color:var(--slip-muted)}
 .slip__sum{display:flex;align-items:center;gap:6px}
-.slip__dot{color:var(--muted)}
+.slip__dot{color:var(--slip-line)}
 /* The break-even is arithmetic on the price, neither our claim nor the market's, so it takes the
    muted ink. There is deliberately no "edge" badge anywhere on this card. */
-.slip__be{color:var(--muted)}
-.slip__bb{color:var(--muted)}
-.slip__bb b{color:var(--ink)}
-.slip__short{font-style:normal;font-size:11px;color:var(--mkt)}
+.slip__be{color:var(--slip-muted)}
+.slip__bb{color:var(--slip-muted)}
+.slip__bb b{color:var(--slip-ink)}
+.slip__short{font-style:normal;font-size:11px;color:var(--slip-mkt)}
 
 @media (max-width:640px){
   .slip__odds{font-size:15px}
