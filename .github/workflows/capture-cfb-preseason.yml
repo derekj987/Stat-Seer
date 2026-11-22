@@ -28,6 +28,14 @@ concurrency:
   group: capture-cfb-preseason
   cancel-in-progress: false
 
+# Least privilege: this workflow only READS the repository. Without a permissions block the
+# GITHUB_TOKEN gets the repository default, which on many repos is write to everything -- so a
+# compromised action or a malicious dependency in any step could push to the default branch.
+# The jobs that genuinely commit (the refresh-* family, weather, weekly-report,
+# player-projections) declare `contents: write` for themselves and are deliberately untouched.
+permissions:
+  contents: read
+
 jobs:
   capture:
     runs-on: ubuntu-latest
