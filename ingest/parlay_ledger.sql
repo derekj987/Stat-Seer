@@ -69,3 +69,17 @@ create table if not exists parlay_results (
 -- ingest/schema.sql's published artifacts.
 revoke update, delete on parlay_ledger  from public, anon, authenticated;
 revoke update, delete on parlay_results from public, anon, authenticated;
+
+-- 🚨 AND THEN GRANT, WHICH THE FIRST VERSION OF THIS FILE FORGOT. A new table in this project
+-- arrives with no privileges for service_role — every other ingest/*.sql grants them explicitly
+-- (cfb_odds_snapshots, consents, follows, ...) — so revoking without granting produced two tables
+-- nothing could read or write. It did not look like a missing grant either: PostgREST answers
+-- with 403 and code 42501, which reads like the key being wrong rather than the table being
+-- unprivileged. The tell is that 42501 means the table EXISTS; a missing table is PGRST205.
+--
+-- SELECT and INSERT only. UPDATE and DELETE are deliberately withheld from service_role too, so
+-- the append-only promise holds against the application's own key and not merely against anon:
+-- the publisher inserts, the grader inserts, and nothing in this codebase can rewrite a published
+-- ticket even by mistake.
+grant select, insert on parlay_ledger  to service_role;
+grant select, insert on parlay_results to service_role;
