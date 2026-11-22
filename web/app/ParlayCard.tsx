@@ -30,7 +30,7 @@ function Slip({
     <article className="slip">
       <div className="slip__top">
         <span className="slip__n">
-          {total > 1 ? `Parlay ${index + 1} of ${total}` : "Parlay"} · {legs.length} legs
+          {parlay.title ?? (total > 1 ? `Parlay ${index + 1} of ${total}` : "Parlay")} · {legs.length} legs
         </span>
         <b className="slip__odds">{american}</b>
       </div>
@@ -40,12 +40,15 @@ function Slip({
           <li key={l.eventId} className="slip__leg">
             <span className="slip__pick">{short(l.pick)}</span>
             <span className="slip__price">{fmtOdds(l.price)}</span>
-            <span className="slip__mkt">Moneyline</span>
+            <span className="slip__mkt">{l.market ?? "Moneyline"}</span>
             <span className="slip__book">{l.books.slice(0, 2).map(bookName).join(" / ")}</span>
-            <span className="slip__match">{short(l.away)} @ {short(l.home)}</span>
-            <span className="slip__probs">
-              <i className="slip__ours">we rate {pct(l.ourProb)}</i>
-              {l.marketProb !== null ? <i className="slip__market">market {pct(l.marketProb)}</i> : null}
+            <span className="slip__match">
+              {short(l.away)} @ {short(l.home)}
+              <i className="slip__ours">{pct(l.ourProb)}</i>
+              {/* A rate and the games behind it travel together: 70% off 9 games and 70% off 60
+                  are different claims, and the percentage alone hides which one this is. */}
+              {l.sample ? <i className="slip__n2">({l.sample} g)</i> : null}
+              {l.marketProb !== null ? <i className="slip__market">mkt {pct(l.marketProb)}</i> : null}
             </span>
           </li>
         ))}
@@ -92,21 +95,32 @@ export default function ParlayCard({
             text={
               <>
                 <span className="tip__lead">
-                  Our most confident calls this week, priced as {live.length > 1 ? "two tickets" : "one ticket"}.
+                  Our most confident calls this week, priced as{" "}
+                  {live.length > 1 ? `${live.length} tickets` : "one ticket"}.
                 </span>
                 <br /><br />
-                Legs are chosen by <b>our own published win probability</b> — the number locked
-                before kickoff and graded on the report card — never by how far we disagree with
-                the market. We take the most confident combination that still pays +500 or better.
-                {live.length > 1 ? (
-                  <> The second ticket <b>shares no game</b> with the first: two slips built from
-                  the same game would be one bet sold twice, concentrated rather than spread.</>
-                ) : null}
+                Legs are chosen by <b>our own published number</b>, never by how far we disagree
+                with the market. On the game ticket that is our win probability, locked before
+                kickoff and graded on the report card. On the player tickets it is{" "}
+                <b>how often that player has cleared that exact line</b> — the rate printed on the
+                props board, and only where the book is offering the same line the rate was
+                measured at. We take the most confident combination that still pays +500 or better.
                 <br /><br />
-                <b>&ldquo;We rate&rdquo;</b> is our chance for that side. <b>&ldquo;Market&rdquo;</b>{" "}
-                is the same side&rsquo;s de-vigged fair price across the US books we track.{" "}
+                Each ticket holds <b>one leg per game</b>, and the player tickets are built from
+                different markets than the game ticket. Two props from one game are not two legs:
+                the same script drives both, so the combined number below would be multiplying
+                them as though they were independent when they are not.
+                <br /><br />
+                The blue figure on each leg is <b>our chance for that side</b>, with the games
+                behind it in brackets on a player leg. <b>&ldquo;Mkt&rdquo;</b> is the same
+                side&rsquo;s de-vigged fair price across the US books we track.{" "}
                 <b>&ldquo;Pays&rdquo;</b> is what the ticket&rsquo;s price implies you must hit to
                 break even.
+                <br /><br />
+                Anytime touchdown is quoted <b>one-sided</b> — books post the Yes and almost never
+                the No — so there is no pair to strip the vig from and those legs carry no market
+                figure. That is the honest answer rather than showing the raw price with the vig
+                still in it and calling it fair.
                 <br /><br />
                 A parlay multiplies the vig on every leg, so it is the hardest ticket on the board
                 to beat — that is why the percentages are printed together rather than just the
