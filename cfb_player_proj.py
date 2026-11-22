@@ -21,6 +21,7 @@ Auth: CFBD_API_KEY + SUPABASE_URL/SUPABASE_SERVICE_KEY in .env. Stdlib + cfbd_cl
 import argparse
 import collections
 import concurrent.futures as cf
+import datetime as dt
 import json
 import os
 import re
@@ -36,6 +37,12 @@ import cfbd_client as cc
 import odds_client as oc
 
 CUR_SEASON = 2026
+# How old the newest prop snapshot may be, in hours, while every row in it is for a game already
+# under way, before that stops being "the books have not posted yet" and becomes "the capture has
+# stopped". capture-cfb-props runs every 2 hours but writes nothing when the feed posts nothing,
+# so the gap across a Saturday morning is legitimately ~14h; past a day the capture itself is the
+# suspect and the run should fail loudly rather than skip.
+STALE_PROPS_MAX_H = 24.0
 PRIOR_SEASON = 2025
 HIST_SEASONS = [2024, 2025]        # career = these; prior = PRIOR_SEASON only
 # The seasons whose game logs are PULLED. The cache/fetch code below always said "in-progress
@@ -280,12 +287,31 @@ def fetch_props():
     the median of those."""
     latest = sb_get("cfb_prop_snapshots?select=snapshot_at&order=snapshot_at.desc&limit=1")
     if not latest:
-        return []
+        return [], {"snap": None, "n_raw": 0, "n_stale": 0}
     snap = latest[0]["snapshot_at"]
     rows = sb_get("cfb_prop_snapshots?snapshot_at=eq." + urllib.parse.quote(snap) +
                   "&select=event_id,commence,home_team,away_team,market,player,side,line,price")
+    # 🚨 DROP PROPS WHOSE GAME HAS ALREADY KICKED OFF, and the reason is a whole failure mode.
+    # The newest snapshot is the newest the CAPTURE WROTE, which is not the same as the newest
+    # slate: the capture writes nothing when the feed posts nothing, so between the last Friday
+    # night kickoff and the books putting Saturday's props up, the newest snapshot holds ONLY
+    # games that are over. Those props cannot attach to an upcoming projection, and leaving them
+    # in made the publish guard mis-diagnose the run -- 2026-11-22 refused with "212 of 212 posted
+    # props found no row - props are being LOST ... the usual cause is a stale data/cfb.db" while
+    # cfb.db had been rebuilt from CFBD ninety seconds earlier by the workflow's own step. The
+    # props were the stale thing, not the database. It is also Derek's standing rule: every market
+    # number on StatSeer is PREGAME, so a line on a game in progress is not ours to carry.
+    n_stale = 0
+    now_iso = dt.datetime.now(dt.timezone.utc).isoformat()
     agg = {}
     for r in rows:
+        # A row with no commence at all is KEPT, not dropped: it cannot be shown to be stale, and
+        # silently discarding rows on a missing field is how a feed change turns into a quietly
+        # thinner board instead of a visible failure.
+        c = r.get("commence")
+        if c and c <= now_iso:
+            n_stale += 1
+            continue
         mk = r.get("market")
         if mk not in MARKETS:
             continue
@@ -318,7 +344,7 @@ def fetch_props():
         else:
             d["book"] = d["line"] if d["line"] is not None else 0
         out.append(d)
-    return out
+    return out, {"snap": snap, "n_raw": len(rows), "n_stale": n_stale}
 
 
 def _num(x):
@@ -1692,10 +1718,30 @@ def main(argv=None):
     # Posted props are OPTIONAL now: they attach a book line where a book has one, but the board is
     # driven by the upcoming schedule + depth charts, so it fills in even before any prop posts.
     try:
-        props = fetch_props()
+        props, pmeta = fetch_props()
     except TransientRead as e:
         print(f"{e} — skipping this run (the next scheduled run regenerates)")
         return 0
+    # Every prop the feed is holding belongs to a game that has already kicked off. That is a
+    # NORMAL, SELF-HEALING window, not a fault: it is every Saturday morning between the last
+    # Friday night game and the books posting the day's slate — the capture's own log for the run
+    # that triggered this said "45 NCAAF events posted ... 0/45 games had props". The board only
+    # publishes players a sportsbook lists, so there is nothing to publish and nothing to gain
+    # from ~172 CFBD calls. Leave the live board alone and exit 0, so a routine gap in the market
+    # does not mail a FAILURE that resolves itself two hours later.
+    #
+    # This does NOT silence a real outage: an empty table, or a snapshot old enough that the
+    # capture itself has stopped, still falls through to the publish guard below and fails.
+    if not props and pmeta["n_stale"]:
+        age_h = (dt.datetime.now(dt.timezone.utc)
+                 - dt.datetime.fromisoformat(pmeta["snap"].replace("Z", "+00:00"))).total_seconds() / 3600
+        if age_h <= STALE_PROPS_MAX_H:
+            print(f"  the newest prop snapshot ({pmeta['snap']}, {age_h:.1f}h old) holds "
+                  f"{pmeta['n_stale']} rows and every one is for a game already under way — the "
+                  f"books have not posted the next slate yet. Leaving the published board alone.")
+            return 0
+        print(f"  the newest prop snapshot is {age_h:.1f}h old and entirely stale — that is the "
+              f"capture having stopped, not an unpriced slate.", file=sys.stderr)
     if props:
         # Convert Odds API team names to CFBD school names so the game-log pull + match line up.
         cmap = cfbd_team_map([t for p in props for t in (p["home"], p["away"])], key)
