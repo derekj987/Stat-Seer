@@ -136,7 +136,7 @@ jobs:
             --exclude=node_modules --exclude=.next --exclude='*.min.js' \
             --metrics=off || true
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: semgrep-sarif
@@ -168,7 +168,7 @@ jobs:
           tar -xzf gitleaks.tgz gitleaks
           ./gitleaks git . --redact --report-format sarif --report-path gitleaks.sarif --exit-code 0 --verbose
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: gitleaks-sarif
