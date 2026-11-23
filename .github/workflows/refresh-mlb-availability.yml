@@ -55,7 +55,7 @@ jobs:
 
       # Completed days never change, so cache them rather than refetching ~180 dates every run.
       - name: Cache MLB lineup days
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: data/mlb_lineups
           key: mlb-lineups-2026-${{ github.run_id }}

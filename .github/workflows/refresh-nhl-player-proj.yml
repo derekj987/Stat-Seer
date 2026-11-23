@@ -49,7 +49,7 @@ jobs:
       # with the season — 1,312 games by April — and the first April run would be the slow one
       # every single day.
       - name: Cache NHL boxscores
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: data/nhl_cache
           key: nhl-boxscores-${{ github.run_id }}
