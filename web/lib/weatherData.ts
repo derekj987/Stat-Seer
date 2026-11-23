@@ -7,8 +7,7 @@ export interface GameWeather { eventId: string; game: string; home: string; away
   gustMph: number|null; precipPct: number|null; conditions: string|null; windFlag: boolean }
 export const WEATHER_SEASON = 2026;
 export const WEATHER_WEEK = 11;
-export const WEATHER_UPDATED = "2026-11-23T00:55Z";
+export const WEATHER_UPDATED = "2026-11-23T08:46Z";
 export const GAME_WEATHER: GameWeather[] = [
-  {"eventId": "60e1d27b083a335b722c2c852ea85612", "game": "MIN @ SF", "home": "SF", "away": "MIN", "commence": "2026-11-23T01:25:00+00:00", "neutral": true, "venue": "Estadio Banorte", "city": "Monterrey", "state": "Mexico", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 67, "windMph": 1, "gustMph": 11, "precipPct": 14, "conditions": "Mostly clear", "windFlag": false},
-  {"eventId": "3a60ed1d20004aa4d4772b2c1a2272e7", "game": "CIN @ WAS", "home": "WAS", "away": "CIN", "commence": "2026-11-24T01:15:00+00:00", "neutral": false, "venue": "Northwest Stadium", "city": "Landover", "state": "MD", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 51, "windMph": 13, "gustMph": 29, "precipPct": 26, "conditions": "Partly cloudy", "windFlag": true},
+  {"eventId": "3a60ed1d20004aa4d4772b2c1a2272e7", "game": "CIN @ WAS", "home": "WAS", "away": "CIN", "commence": "2026-11-24T01:15:00+00:00", "neutral": false, "venue": "Northwest Stadium", "city": "Landover", "state": "MD", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 54, "windMph": 10, "gustMph": 26, "precipPct": 3, "conditions": "Overcast", "windFlag": true},
 ];
