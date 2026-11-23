@@ -41,7 +41,7 @@ jobs:
       # runner re-downloads all of them every day. Cache them across runs; the key is pinned to the
       # season list so bumping HIST_SEASONS naturally invalidates it.
       - name: Cache CFBD completed-season game logs
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: data/cfb_logs
           key: cfb-logs-2024-2025-v1
