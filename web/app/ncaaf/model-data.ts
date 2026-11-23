@@ -1473,7 +1473,7 @@ export const NCAAF_MODEL = {
           "fav": "Buffalo",
           "num": -7.5
         },
-        "marketTotal": 49.5,
+        "marketTotal": 50.5,
         "projSpread": {
           "fav": "Buffalo",
           "num": -16.5
@@ -1485,7 +1485,10 @@ export const NCAAF_MODEL = {
           "side": "Buffalo",
           "num": -7.5
         },
-        "totalLean": null,
+        "totalLean": {
+          "dir": "UNDER",
+          "num": 50.5
+        },
         "off": false,
         "rated": true,
         "crossDiv": false,
@@ -1959,7 +1962,7 @@ export const NCAAF_MODEL = {
           "fav": "UConn",
           "num": -3.5
         },
-        "marketTotal": 48.5,
+        "marketTotal": 47.5,
         "projSpread": {
           "fav": "UConn",
           "num": -0.2
@@ -2085,7 +2088,7 @@ export const NCAAF_MODEL = {
           "fav": "LSU",
           "num": -13.5
         },
-        "marketTotal": 47.5,
+        "marketTotal": 48.5,
         "projSpread": {
           "fav": "LSU",
           "num": -14.2
@@ -2099,7 +2102,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "OVER",
-          "num": 47.5
+          "num": 48.5
         },
         "off": false,
         "rated": true,
@@ -2623,7 +2626,7 @@ export const NCAAF_MODEL = {
         "conf": "Big Ten",
         "marketSpread": {
           "fav": "USC",
-          "num": -7.5
+          "num": -6.5
         },
         "marketTotal": 45.5,
         "projSpread": {
@@ -2635,7 +2638,7 @@ export const NCAAF_MODEL = {
         "awayRiser": 0,
         "pick": {
           "side": "UCLA",
-          "num": 7.5
+          "num": 6.5
         },
         "totalLean": {
           "dir": "OVER",
@@ -3105,7 +3108,7 @@ export const NCAAF_MODEL = {
         "apHome": null,
         "conf": "Pac-12",
         "marketSpread": {
-          "fav": "San Diego State",
+          "fav": "Washington State",
           "num": -1.5
         },
         "marketTotal": 46.5,
@@ -3117,14 +3120,14 @@ export const NCAAF_MODEL = {
         "homeRiser": 0,
         "awayRiser": 0,
         "pick": {
-          "side": "Washington State",
+          "side": "San Diego State",
           "num": 1.5
         },
         "totalLean": {
           "dir": "UNDER",
           "num": 46.5
         },
-        "off": true,
+        "off": false,
         "rated": true,
         "crossDiv": false,
         "featured": false
@@ -3491,9 +3494,9 @@ export const NCAAF_MODEL = {
       {
         "dog": "UCLA",
         "matchup": "vs USC",
-        "spread": "+7.5",
+        "spread": "+6.5",
         "modelPct": 63,
-        "marketPct": 34,
+        "marketPct": 36,
         "byPoints": 5.8
       },
       {
@@ -3543,14 +3546,6 @@ export const NCAAF_MODEL = {
         "modelPct": 51,
         "marketPct": 47,
         "byPoints": 0.4
-      },
-      {
-        "dog": "Washington State",
-        "matchup": "vs San Diego State",
-        "spread": "+1.5",
-        "modelPct": 50,
-        "marketPct": 47,
-        "byPoints": 0.2
       }
     ],
     "weeks": [
@@ -31010,7 +31005,7 @@ export const NCAAF_MODEL = {
               "fav": "Buffalo",
               "num": -7.5
             },
-            "marketTotal": 49.5,
+            "marketTotal": 50.5,
             "projSpread": {
               "fav": "Buffalo",
               "num": -16.5
@@ -31022,7 +31017,10 @@ export const NCAAF_MODEL = {
               "side": "Buffalo",
               "num": -7.5
             },
-            "totalLean": null,
+            "totalLean": {
+              "dir": "UNDER",
+              "num": 50.5
+            },
             "off": false,
             "rated": true,
             "crossDiv": false,
@@ -31496,7 +31494,7 @@ export const NCAAF_MODEL = {
               "fav": "UConn",
               "num": -3.5
             },
-            "marketTotal": 48.5,
+            "marketTotal": 47.5,
             "projSpread": {
               "fav": "UConn",
               "num": -0.2
@@ -31622,7 +31620,7 @@ export const NCAAF_MODEL = {
               "fav": "LSU",
               "num": -13.5
             },
-            "marketTotal": 47.5,
+            "marketTotal": 48.5,
             "projSpread": {
               "fav": "LSU",
               "num": -14.2
@@ -31636,7 +31634,7 @@ export const NCAAF_MODEL = {
             },
             "totalLean": {
               "dir": "OVER",
-              "num": 47.5
+              "num": 48.5
             },
             "off": false,
             "rated": true,
@@ -32160,7 +32158,7 @@ export const NCAAF_MODEL = {
             "conf": "Big Ten",
             "marketSpread": {
               "fav": "USC",
-              "num": -7.5
+              "num": -6.5
             },
             "marketTotal": 45.5,
             "projSpread": {
@@ -32172,7 +32170,7 @@ export const NCAAF_MODEL = {
             "awayRiser": 0,
             "pick": {
               "side": "UCLA",
-              "num": 7.5
+              "num": 6.5
             },
             "totalLean": {
               "dir": "OVER",
@@ -32642,7 +32640,7 @@ export const NCAAF_MODEL = {
             "apHome": null,
             "conf": "Pac-12",
             "marketSpread": {
-              "fav": "San Diego State",
+              "fav": "Washington State",
               "num": -1.5
             },
             "marketTotal": 46.5,
@@ -32654,14 +32652,14 @@ export const NCAAF_MODEL = {
             "homeRiser": 0,
             "awayRiser": 0,
             "pick": {
-              "side": "Washington State",
+              "side": "San Diego State",
               "num": 1.5
             },
             "totalLean": {
               "dir": "UNDER",
               "num": 46.5
             },
-            "off": true,
+            "off": false,
             "rated": true,
             "crossDiv": false,
             "featured": false
@@ -33028,9 +33026,9 @@ export const NCAAF_MODEL = {
           {
             "dog": "UCLA",
             "matchup": "vs USC",
-            "spread": "+7.5",
+            "spread": "+6.5",
             "modelPct": 63,
-            "marketPct": 34,
+            "marketPct": 36,
             "byPoints": 5.8
           },
           {
@@ -33080,14 +33078,6 @@ export const NCAAF_MODEL = {
             "modelPct": 51,
             "marketPct": 47,
             "byPoints": 0.4
-          },
-          {
-            "dog": "Washington State",
-            "matchup": "vs San Diego State",
-            "spread": "+1.5",
-            "modelPct": 50,
-            "marketPct": 47,
-            "byPoints": 0.2
           }
         ]
       },
