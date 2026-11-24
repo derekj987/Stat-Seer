@@ -7,7 +7,7 @@ export interface GameWeather { eventId: string; game: string; home: string; away
   gustMph: number|null; precipPct: number|null; conditions: string|null; windFlag: boolean }
 export const WEATHER_SEASON = 2026;
 export const WEATHER_WEEK = 11;
-export const WEATHER_UPDATED = "2026-11-23T16:45Z";
+export const WEATHER_UPDATED = "2026-11-24T00:50Z";
 export const GAME_WEATHER: GameWeather[] = [
-  {"eventId": "3a60ed1d20004aa4d4772b2c1a2272e7", "game": "CIN @ WAS", "home": "WAS", "away": "CIN", "commence": "2026-11-24T01:15:00+00:00", "neutral": false, "venue": "Northwest Stadium", "city": "Landover", "state": "MD", "roof": "outdoor", "indoor": false, "status": "ok", "tempF": 55, "windMph": 13, "gustMph": 25, "precipPct": 4, "conditions": "Drizzle", "windFlag": true},
+  {"eventId": "3a60ed1d20004aa4d4772b2c1a2272e7", "game": "CIN @ WAS", "home": "WAS", "away": "CIN", "commence": "2026-11-24T01:15:00+00:00", "neutral": false, "venue": "Northwest Stadium", "city": "Landover", "state": "MD", "roof": "outdoor", "indoor": false, "status": "pending", "tempF": null, "windMph": null, "gustMph": null, "precipPct": null, "conditions": null, "windFlag": false},
 ];
