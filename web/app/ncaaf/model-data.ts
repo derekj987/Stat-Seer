@@ -1530,7 +1530,7 @@ export const NCAAF_MODEL = {
           "fav": "Florida",
           "num": -6.5
         },
-        "marketTotal": 52.5,
+        "marketTotal": 53.5,
         "projSpread": {
           "fav": "Florida State",
           "num": -1.3
@@ -1544,7 +1544,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "UNDER",
-          "num": 52.5
+          "num": 53.5
         },
         "off": true,
         "rated": true,
@@ -1860,7 +1860,7 @@ export const NCAAF_MODEL = {
           "fav": "Miami",
           "num": -25.5
         },
-        "marketTotal": 53.5,
+        "marketTotal": 54.5,
         "projSpread": {
           "fav": "Miami",
           "num": -28.2
@@ -1874,7 +1874,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "UNDER",
-          "num": 53.5
+          "num": 54.5
         },
         "off": false,
         "rated": true,
@@ -2184,7 +2184,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 53.5,
         "projSpread": {
           "fav": "North Dakota",
-          "num": -13.2
+          "num": -13.3
         },
         "projTotal": 51.5,
         "homeRiser": 0,
@@ -2307,7 +2307,7 @@ export const NCAAF_MODEL = {
           "fav": "Iowa State",
           "num": -4.5
         },
-        "marketTotal": 54.5,
+        "marketTotal": 53.5,
         "projSpread": {
           "fav": "Iowa State",
           "num": -3.3
@@ -2321,7 +2321,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "UNDER",
-          "num": 54.5
+          "num": 53.5
         },
         "off": false,
         "rated": true,
@@ -2562,7 +2562,7 @@ export const NCAAF_MODEL = {
         "marketTotal": 60.5,
         "projSpread": {
           "fav": "Grambling",
-          "num": -8.8
+          "num": -8.9
         },
         "projTotal": 51.5,
         "homeRiser": 0,
@@ -3064,39 +3064,6 @@ export const NCAAF_MODEL = {
         "featured": true
       },
       {
-        "away": "Austin Peay",
-        "home": "Illinois State",
-        "neutral": 0,
-        "commence": "2026-11-28T21:00:00.000Z",
-        "apAway": null,
-        "apHome": null,
-        "conf": "Other",
-        "marketSpread": {
-          "fav": "Austin Peay",
-          "num": -2.5
-        },
-        "marketTotal": 56.5,
-        "projSpread": {
-          "fav": "Illinois State",
-          "num": -6.6
-        },
-        "projTotal": 51.5,
-        "homeRiser": 0,
-        "awayRiser": 0,
-        "pick": {
-          "side": "Illinois State",
-          "num": 2.5
-        },
-        "totalLean": {
-          "dir": "UNDER",
-          "num": 56.5
-        },
-        "off": true,
-        "rated": true,
-        "crossDiv": true,
-        "featured": false
-      },
-      {
         "away": "Long Island University",
         "home": "Northern Arizona",
         "neutral": 0,
@@ -3341,7 +3308,7 @@ export const NCAAF_MODEL = {
           "fav": "Indiana",
           "num": -24.5
         },
-        "projTotal": 50.6,
+        "projTotal": 50.5,
         "homeRiser": 0,
         "awayRiser": 10,
         "pick": {
@@ -3500,7 +3467,7 @@ export const NCAAF_MODEL = {
           "fav": "UNLV",
           "num": -3.1
         },
-        "projTotal": 52.9,
+        "projTotal": 52.8,
         "homeRiser": 0,
         "awayRiser": 21,
         "pick": {
@@ -31221,7 +31188,7 @@ export const NCAAF_MODEL = {
               "fav": "Florida",
               "num": -6.5
             },
-            "marketTotal": 52.5,
+            "marketTotal": 53.5,
             "projSpread": {
               "fav": "Florida State",
               "num": -1.3
@@ -31235,7 +31202,7 @@ export const NCAAF_MODEL = {
             },
             "totalLean": {
               "dir": "UNDER",
-              "num": 52.5
+              "num": 53.5
             },
             "off": true,
             "rated": true,
@@ -31551,7 +31518,7 @@ export const NCAAF_MODEL = {
               "fav": "Miami",
               "num": -25.5
             },
-            "marketTotal": 53.5,
+            "marketTotal": 54.5,
             "projSpread": {
               "fav": "Miami",
               "num": -28.2
@@ -31565,7 +31532,7 @@ export const NCAAF_MODEL = {
             },
             "totalLean": {
               "dir": "UNDER",
-              "num": 53.5
+              "num": 54.5
             },
             "off": false,
             "rated": true,
@@ -31875,7 +31842,7 @@ export const NCAAF_MODEL = {
             "marketTotal": 53.5,
             "projSpread": {
               "fav": "North Dakota",
-              "num": -13.2
+              "num": -13.3
             },
             "projTotal": 51.5,
             "homeRiser": 0,
@@ -31998,7 +31965,7 @@ export const NCAAF_MODEL = {
               "fav": "Iowa State",
               "num": -4.5
             },
-            "marketTotal": 54.5,
+            "marketTotal": 53.5,
             "projSpread": {
               "fav": "Iowa State",
               "num": -3.3
@@ -32012,7 +31979,7 @@ export const NCAAF_MODEL = {
             },
             "totalLean": {
               "dir": "UNDER",
-              "num": 54.5
+              "num": 53.5
             },
             "off": false,
             "rated": true,
@@ -32253,7 +32220,7 @@ export const NCAAF_MODEL = {
             "marketTotal": 60.5,
             "projSpread": {
               "fav": "Grambling",
-              "num": -8.8
+              "num": -8.9
             },
             "projTotal": 51.5,
             "homeRiser": 0,
@@ -32755,39 +32722,6 @@ export const NCAAF_MODEL = {
             "featured": true
           },
           {
-            "away": "Austin Peay",
-            "home": "Illinois State",
-            "neutral": 0,
-            "commence": "2026-11-28T21:00:00.000Z",
-            "apAway": null,
-            "apHome": null,
-            "conf": "Other",
-            "marketSpread": {
-              "fav": "Austin Peay",
-              "num": -2.5
-            },
-            "marketTotal": 56.5,
-            "projSpread": {
-              "fav": "Illinois State",
-              "num": -6.6
-            },
-            "projTotal": 51.5,
-            "homeRiser": 0,
-            "awayRiser": 0,
-            "pick": {
-              "side": "Illinois State",
-              "num": 2.5
-            },
-            "totalLean": {
-              "dir": "UNDER",
-              "num": 56.5
-            },
-            "off": true,
-            "rated": true,
-            "crossDiv": true,
-            "featured": false
-          },
-          {
             "away": "Long Island University",
             "home": "Northern Arizona",
             "neutral": 0,
@@ -33032,7 +32966,7 @@ export const NCAAF_MODEL = {
               "fav": "Indiana",
               "num": -24.5
             },
-            "projTotal": 50.6,
+            "projTotal": 50.5,
             "homeRiser": 0,
             "awayRiser": 10,
             "pick": {
@@ -33191,7 +33125,7 @@ export const NCAAF_MODEL = {
               "fav": "UNLV",
               "num": -3.1
             },
-            "projTotal": 52.9,
+            "projTotal": 52.8,
             "homeRiser": 0,
             "awayRiser": 21,
             "pick": {
