@@ -1309,7 +1309,7 @@ export const NCAAF_MODEL = {
         "conf": "Big 12",
         "marketSpread": {
           "fav": "Texas Tech",
-          "num": -13.5
+          "num": -14.5
         },
         "marketTotal": 47.5,
         "projSpread": {
@@ -1321,7 +1321,7 @@ export const NCAAF_MODEL = {
         "awayRiser": 0,
         "pick": {
           "side": "TCU",
-          "num": 13.5
+          "num": 14.5
         },
         "totalLean": {
           "dir": "OVER",
@@ -2275,7 +2275,7 @@ export const NCAAF_MODEL = {
         "conf": "Sun Belt",
         "marketSpread": {
           "fav": "James Madison",
-          "num": -16.5
+          "num": -17.5
         },
         "marketTotal": 55.5,
         "projSpread": {
@@ -2287,7 +2287,7 @@ export const NCAAF_MODEL = {
         "awayRiser": 6,
         "pick": {
           "side": "James Madison",
-          "num": -16.5
+          "num": -17.5
         },
         "totalLean": null,
         "off": false,
@@ -2655,7 +2655,7 @@ export const NCAAF_MODEL = {
           "fav": "Arkansas State",
           "num": -3.5
         },
-        "marketTotal": 45.5,
+        "marketTotal": 46.5,
         "projSpread": {
           "fav": "Arkansas State",
           "num": -4.2
@@ -2667,10 +2667,7 @@ export const NCAAF_MODEL = {
           "side": "Arkansas State",
           "num": -3.5
         },
-        "totalLean": {
-          "dir": "OVER",
-          "num": 45.5
-        },
+        "totalLean": null,
         "off": false,
         "rated": true,
         "crossDiv": false,
@@ -3630,7 +3627,7 @@ export const NCAAF_MODEL = {
           "fav": "Hawai'i",
           "num": -13.5
         },
-        "marketTotal": 38.5,
+        "marketTotal": 39.5,
         "projSpread": {
           "fav": "Hawai'i",
           "num": -9.5
@@ -3644,7 +3641,7 @@ export const NCAAF_MODEL = {
         },
         "totalLean": {
           "dir": "OVER",
-          "num": 38.5
+          "num": 39.5
         },
         "off": false,
         "rated": true,
@@ -31003,7 +31000,7 @@ export const NCAAF_MODEL = {
             "conf": "Big 12",
             "marketSpread": {
               "fav": "Texas Tech",
-              "num": -13.5
+              "num": -14.5
             },
             "marketTotal": 47.5,
             "projSpread": {
@@ -31015,7 +31012,7 @@ export const NCAAF_MODEL = {
             "awayRiser": 0,
             "pick": {
               "side": "TCU",
-              "num": 13.5
+              "num": 14.5
             },
             "totalLean": {
               "dir": "OVER",
@@ -31969,7 +31966,7 @@ export const NCAAF_MODEL = {
             "conf": "Sun Belt",
             "marketSpread": {
               "fav": "James Madison",
-              "num": -16.5
+              "num": -17.5
             },
             "marketTotal": 55.5,
             "projSpread": {
@@ -31981,7 +31978,7 @@ export const NCAAF_MODEL = {
             "awayRiser": 6,
             "pick": {
               "side": "James Madison",
-              "num": -16.5
+              "num": -17.5
             },
             "totalLean": null,
             "off": false,
@@ -32349,7 +32346,7 @@ export const NCAAF_MODEL = {
               "fav": "Arkansas State",
               "num": -3.5
             },
-            "marketTotal": 45.5,
+            "marketTotal": 46.5,
             "projSpread": {
               "fav": "Arkansas State",
               "num": -4.2
@@ -32361,10 +32358,7 @@ export const NCAAF_MODEL = {
               "side": "Arkansas State",
               "num": -3.5
             },
-            "totalLean": {
-              "dir": "OVER",
-              "num": 45.5
-            },
+            "totalLean": null,
             "off": false,
             "rated": true,
             "crossDiv": false,
@@ -33324,7 +33318,7 @@ export const NCAAF_MODEL = {
               "fav": "Hawai'i",
               "num": -13.5
             },
-            "marketTotal": 38.5,
+            "marketTotal": 39.5,
             "projSpread": {
               "fav": "Hawai'i",
               "num": -9.5
@@ -33338,7 +33332,7 @@ export const NCAAF_MODEL = {
             },
             "totalLean": {
               "dir": "OVER",
-              "num": 38.5
+              "num": 39.5
             },
             "off": false,
             "rated": true,
