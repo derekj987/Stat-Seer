@@ -430,10 +430,10 @@ get cheaply; **P2** = needs acquisition; **P3** = speculative.
 | Attribute | Data needed | Priority |
 |---|---|---|
 | **Travel distance and time zones** | Stadium coordinates (have stadium_id) | ~~P1~~ **TESTED 2026-11-27 — NEGATIVE.** Fading the traveller: 46.8%/47.6% (body clock ≤10am), 47.3%/50.0% (≥2,500km), vs a 48.5%/49.9% control for fading ANY road team. Away teams actually *cover* 51.5% in the west→east early spot. EMPIRICAL_REFERENCE §9f, `analysis/travel_study.py`. |
-| **Look-ahead / let-down spots** | Schedule + spread magnitudes (have both) | **P1.** Definable purely from schedule — game before or after a marquee matchup. |
-| Consecutive road games | Schedule (have) | P1 |
-| Three games in 11 days | Schedule (have) | P1 |
-| Facing a team off a bye | Rest fields (have) | P1 |
+| **Look-ahead / let-down spots** | Schedule + spread magnitudes (have both) | ~~P1~~ **TESTED 2026-11-27 — NEGATIVE.** Both flip direction between splits (look-ahead back 51.9% train / fade 51.1% held-out). EMPIRICAL_REFERENCE §9g. |
+| Consecutive road games | Schedule (have) | ~~P1~~ **TESTED — NEGATIVE** (50.2% / 50.6%, flips). §9g |
+| Three games in 11 days | Schedule (have) | ~~P1~~ **TESTED as short week (≤4 days rest) — NEGATIVE** (50.0% / 50.5%). §9g |
+| Facing a team off a bye | Rest fields (have) | ~~P1~~ **TESTED — NEGATIVE** (50.0% / 52.7% on n=93, CI straddles). §9g |
 | Post-international game | Schedule + location (have) | P2 — small n |
 
 ### Environment

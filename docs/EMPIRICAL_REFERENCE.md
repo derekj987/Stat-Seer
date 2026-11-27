@@ -2534,3 +2534,40 @@ fade is a losing bet on ten seasons of data.
 PRINTED by the script, because a silently wrong time zone would manufacture exactly the effect
 being looked for. Eyeballed correct: Pacific LA/LAC/LV/SEA/SF, Mountain ARI/DEN, Central
 CHI/DAL/GB/HOU/KC/MIN/NO, the rest Eastern.
+
+---
+
+## 9g. Schedule spots — look-ahead, let-down, road trips, short weeks, opponent off a bye (`schedule_spots.py`)
+
+Four P1 rows in `ATTRIBUTE_CATALOG`, tested together in one pass because they share a dataset and
+because testing them one at a time and reporting the best is how a finding gets manufactured.
+2026-11-27, 5,148 team-games (2016–2025). **All negative.**
+
+**Definitions are pregame-knowable, which rules out the obvious one.** "Next week's game has a
+tighter spread" uses a spread that does not exist at this week's kickoff. Opponent strength here
+is the **prior season's win percentage**, fixed before a ball is thrown, so every spot could have
+been listed in August.
+
+| spot | TRAIN 2016–22 | HELD OUT 2023–25 |
+|---|---|---|
+| look-ahead | back 51.87% (n=615) | **fade** 51.09% (n=276) |
+| let-down | fade 51.62% (n=647) | **back** 51.84% (n=272) |
+| road trip (2nd+ away) | back 50.20% | fade 50.63% |
+| short week (≤4 days) | 50.00% | fade 50.48% |
+| opponent off a bye | 50.00% | back 52.69% (n=93, CI [42.6, 62.5]) |
+
+**0 of 6 cleared 52.38% on either split, and every spot flips direction between them.** The
+control is exactly 50.00% by construction — each game contributes both teams — which is what
+validates the arithmetic.
+
+**🚨 The placebo produced a better-looking "finding" than any real spot.** With the flags
+shuffled, let-down came out **back 53.15% on train and 53.67% held out — same direction, both
+splits**. By the naive standard ("it held up out of sample!") that is a signal. It is noise. What
+rejects it is the bar being the *lower confidence bound* above the vig, not the point estimate:
+neither interval cleared.
+
+Carry that: **"it worked on both splits" is not a criterion.** Two splits of a few hundred games
+agree by chance often enough that the interval has to do the work.
+
+**Reading.** Same as §9c, §9e, §9f. The schedule is public, the market reads it, and these spots
+are priced. Context at most.
