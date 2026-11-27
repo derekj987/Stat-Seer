@@ -223,6 +223,16 @@ def grade_leg(leg, season, week, games, actuals):
     # settlement.
     if actuals is None:
         return "PENDING", "weekly stats not available yet"
+    # 🚨 A STALE FILE IS THE SAME CLAIM AS A MISSING ONE. ensure_stats only downloads when
+    # data/stats_<season>.csv is ABSENT, so an environment that keeps data/ between runs can hold
+    # a file that stops at week 9 while week 11 is being graded — and every week-11 player would
+    # then look like "did not play" and VOID, permanently, on an append-only table. Found on
+    # 2026-11-27: the local copy had weeks [1..9] while week 11 was due. CI never hit it because a
+    # fresh runner has no data/ and downloads the full file, which is exactly the kind of luck that
+    # hides a bug until the day something caches. If the week is wholly absent, we have no
+    # evidence about it, which is PENDING.
+    if not any(w == week for (w, _p) in actuals):
+        return "PENDING", f"weekly stats hold no week {week} yet"
     act = actuals.get((week, norm(leg.get("player"))))
     if act is None:
         return "VOID", f"{leg.get('player')} did not play"

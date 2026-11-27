@@ -254,16 +254,38 @@ def nfl_board(days):
     # One row per (event, sweep): FanDuel's total Over, the same narrowing board.ts uses for its
     # marks lookup. Without it odds_snapshots returns a row per book x market x outcome x sweep and
     # any limit truncates mid-slate -- which is how this reported 7 real games as missing.
-    lo = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=6)).isoformat()
-    hi = (dt.datetime.now(dt.timezone.utc) + dt.timedelta(days=days)).isoformat()
-    rows = _sb("odds_snapshots",
-               "?book=eq.fanduel&market=eq.totals&outcome_name=eq.Over"
-               f"&commence_time=gte.{quote(lo)}&commence_time=lte.{quote(hi)}"
-               "&select=commence_time,home_team,away_team,snapshot_at&limit=5000")
+    # 🚨 AND EVEN NARROWED IT MUST BE PINNED TO SWEEPS, or the whole audit dies. Asking for a
+    # commence-time WINDOW returns every sweep of every game in it, and sweeps land every ~15
+    # minutes, so a week accumulates ~700 of them per game. Measured 2026-11-27: this query
+    # answered HTTP 500 (code 57014, statement timeout) at 8.5s -- with and without a season
+    # filter, and with and without the `limit=`. The audit could not run at all, and because it
+    # prints "All clear" whenever a source is missing, a dead query here reads as a clean slate.
+    #
+    # The coverage question is only "has the capture ever seen this game pregame", which is about
+    # DISTINCT GAMES, not about sweeps. So pin: the newest sweep holds every game still ahead, and
+    # a few daily probes behind it catch games that have already kicked off and dropped out of the
+    # feed. Same fix as board.ts fetchWeek, for the same reason.
+    now = dt.datetime.now(dt.timezone.utc)
     out = {}
-    for r in rows:
-        if within(r.get("commence_time"), days) and r.get("snapshot_at", "") < r["commence_time"]:
-            out[(norm(r["away_team"]), norm(r["home_team"]))] = r["commence_time"]
+    for back in (0, 1, 2, 3):
+        if back == 0:
+            pin = _sb("odds_snapshots", "?select=snapshot_at&order=snapshot_at.desc&limit=1")
+        else:
+            at = (now - dt.timedelta(days=back)).isoformat()
+            pin = _sb("odds_snapshots",
+                      f"?snapshot_at=lte.{quote(at)}&select=snapshot_at"
+                      "&order=snapshot_at.desc&limit=1")
+        if not pin:
+            continue
+        rows = _sb("odds_snapshots",
+                   f"?snapshot_at=eq.{quote(pin[0]['snapshot_at'])}"
+                   "&book=eq.fanduel&market=eq.totals&outcome_name=eq.Over"
+                   "&select=commence_time,home_team,away_team,snapshot_at")
+        for r in rows:
+            if not r.get("commence_time"):
+                continue
+            if within(r["commence_time"], days) and r.get("snapshot_at", "") < r["commence_time"]:
+                out.setdefault((norm(r["away_team"]), norm(r["home_team"])), r["commence_time"])
     return out
 
 
@@ -451,20 +473,45 @@ def _snapshot_board(table, days, label):
     book x market x outcome x sweep, so an unnarrowed read truncates mid-slate and reports real
     games as missing — the exact failure documented on nfl_board above.
     """
-    lo = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=6)).isoformat()
-    hi = (dt.datetime.now(dt.timezone.utc) + dt.timedelta(days=days)).isoformat()
+    # 🚨 PIN TO SWEEPS, exactly as nfl_board does, and for the same two reasons. A commence-time
+    # window returns every sweep of every game in it; with `limit=5000` against a `Range: 0-4999`
+    # header that comes back TRUNCATED rather than failing, and which 5,000 rows you get is
+    # arbitrary. Measured 2026-11-27 on NHL: this read reported 8 games on the board and the audit
+    # filed 20 real games as "priced but NOT on our board". Pinned, the newest sweep holds 27
+    # games, 15 of them priced by LINE_BOOK. Every one of those 20 failures was this function.
+    now = dt.datetime.now(dt.timezone.utc)
+    out = {}
+    rows = []
     try:
-        rows = _sb(table,
-                   "?book=eq.fanduel&market=eq.totals&outcome_name=eq.Over"
-                   f"&commence_time=gte.{quote(lo)}&commence_time=lte.{quote(hi)}"
-                   "&select=commence_time,home_team,away_team,snapshot_at&limit=5000")
+        for back in (0, 1, 2, 3):
+            if back == 0:
+                pin = _sb(table, "?select=snapshot_at&order=snapshot_at.desc&limit=1")
+            else:
+                at = (now - dt.timedelta(days=back)).isoformat()
+                pin = _sb(table, f"?snapshot_at=lte.{quote(at)}&select=snapshot_at"
+                                 "&order=snapshot_at.desc&limit=1")
+            if not pin:
+                continue
+            # 🚨 ANY US BOOK, NOT LINE_BOOK. The question is what the PAGE shows, and the NHL/NBA
+            # boards render every US book in the sweep — they do not require FanDuel. Keying on
+            # fanduel/totals made "FanDuel has posted a total" the proxy for "on our board", and
+            # on 2026-11-27 FanDuel had priced 15 of the 27 NHL games the sweep held, so the audit
+            # filed 12 Saturday games as missing from a board that renders all 27 (counted in the
+            # DOM: article.game = 27). Narrow on one MARKET to keep it to a few rows per game and
+            # dedupe by game below; do not narrow on a book.
+            sweep = _sb(table,
+                        f"?snapshot_at=eq.{quote(pin[0]['snapshot_at'])}&market=eq.h2h"
+                        "&select=commence_time,home_team,away_team,snapshot_at")
+            rows += sweep
     except Exception as e:  # noqa: BLE001
         warn(f"{label} board read failed: {e}")
         return None
-    out = {}
     for r in rows:
-        if within(r.get("commence_time"), days) and r.get("snapshot_at", "") < r["commence_time"]:
-            out[_daykey(r["away_team"], r["home_team"], r["commence_time"])] = r["commence_time"]
+        if not r.get("commence_time"):
+            continue
+        if within(r["commence_time"], days) and r.get("snapshot_at", "") < r["commence_time"]:
+            out.setdefault(_daykey(r["away_team"], r["home_team"], r["commence_time"]),
+                           r["commence_time"])
     # 🚨 SAY HOW OLD THE NEWEST SWEEP IS, because for these two sports that is usually the answer.
     # A game can be priced on the book right now and absent from this table purely because the
     # capture has not run since the book posted it — which is a CADENCE fact, not a board defect,
