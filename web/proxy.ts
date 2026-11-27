@@ -37,7 +37,13 @@ function isPendingAllowed(path: string): boolean {
 //                  their account. Locking the exit behind the paywall is the pattern consumer-
 //                  protection regulators single out, and /terms promises self-serve cancellation.
 //   * /pending, /welcome and the public paths, via isPendingAllowed.
-const SUBSCRIBER_EXEMPT = ["/pricing", "/settings"];
+//
+// /report is here by Derek's call, and it is the one entry that is a PRODUCT decision rather than
+// a mechanical necessity. It is the graded track record — the weeks we beat the close and the
+// weeks we did not — and it is the only claim this product makes that its competitors do not.
+// Behind the paywall, someone deciding whether to subscribe cannot see the evidence that the
+// record is honest, which is precisely the evidence that would make them subscribe.
+const SUBSCRIBER_EXEMPT = ["/pricing", "/settings", "/report"];
 function isSubscriberExempt(path: string): boolean {
   return isPendingAllowed(path)
     || SUBSCRIBER_EXEMPT.some((p) => path === p || path.startsWith(p + "/"));
