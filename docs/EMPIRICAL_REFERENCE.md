@@ -2450,3 +2450,44 @@ top-15% threshold silently became the third-smallest value — 0.2 mph instead o
 every game in the "windy" group and reported it at 52.2%. The tell was a cutoff printed in the
 output that was obviously wrong; printing the threshold rather than just using it is what made it
 visible.
+
+---
+
+## 9e. Offensive line continuity — no edge, and the placebo scored higher (`ol_continuity.py`)
+
+`ATTRIBUTE_CATALOG` called this "the highest-value untested roster item: widely believed, rarely
+tested", with the data already in `data/snaps_*.csv.gz`. Tested 2026-11-27. **Negative.**
+
+**Mechanism stated in advance:** five linemen who have played together pass off stunts and time
+combo blocks better than five who have not.
+
+**Definition, and the trap avoided.** Continuity entering week *w* is the number of consecutive
+PRIOR games the team started an identical five (top five by offensive snaps). The tempting
+definition — "did the same five start this week" — uses starters nobody knows until inactives
+drop, so it is hindsight dressed as a signal.
+
+**Result — backing the side with the steadier line, against the closing spread:**
+
+| edge | TRAIN 2016-22 | HELD OUT 2023-25 |
+|---|---|---|
+| ≥1 game | 49.75% (n=1,011) | 51.31% (n=497) |
+| ≥3 | 47.91% | 47.09% |
+| ≥5 | **53.54%** | **43.75%** |
+
+Nothing clears the 52.38% bar on either split, and the `≥5` bucket is *best on train and worst
+held-out* — the signature of noise. The margin residual for "home line much steadier" flips sign
+between splits (+1.61 → −1.01) and is non-monotonic across buckets in both.
+
+**🚨 The placebo is the finding.** Shuffling the continuity values — keeping the marginal
+distribution, destroying the pairing — scored **better on train than the real variable**: 60.63%
+at edge ≥5 against the real 53.54%, and 55.56% against 47.91% at ≥3. It then collapsed held-out
+(39.58%) exactly as the real one did.
+
+So a train-split number in the 53–60% range on samples of this size is **what this test produces
+from nothing**. Any future candidate scored this way has to beat that, not 52.38%. This is the
+same lesson as §9's QB-out haircut, arrived at from the other direction: there the placebo matched
+the real effect, here it beat it.
+
+**Reading.** Continuity is real football and the market already prices it — the same verdict as
+referees, weather, motivation, trends, streaks and upsets. It can be Context; it is not a pick
+driver.

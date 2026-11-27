@@ -408,7 +408,7 @@ get cheaply; **P2** = needs acquisition; **P3** = speculative.
 | Attribute | Data needed | Priority |
 |---|---|---|
 | ~~Prior-season injury burden~~ | — | **TESTED — nothing.** See injury burden section. |
-| **Offensive line continuity** | Snap counts by position (already have) — games with same 5 starters | **P1 — now the highest-value untested roster item.** Widely believed, rarely tested. |
+| **Offensive line continuity** | Snap counts by position (already have) — games with same 5 starters | ~~P1~~ **TESTED 2026-11-27 — NEGATIVE.** 49.8% / 51.3% ATS backing the steadier line (train / held-out); nothing clears the vig, and a PLACEBO on shuffled values scored *higher* on train (60.6% vs 53.5% at edge ≥5). See EMPIRICAL_REFERENCE §9e, `analysis/ol_continuity.py`. |
 | Cumulative in-season injury burden | Injury reports + Stage A availability model | P2 |
 | Overlooked free agent signings | Roster transactions + contract data (OverTheCap) | P2 — hard to define "overlooked" without circularity |
 | Draft needs addressed | Draft data + prior-season positional weakness | P3 — hard to operationalize |
