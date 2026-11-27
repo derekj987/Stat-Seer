@@ -429,7 +429,7 @@ get cheaply; **P2** = needs acquisition; **P3** = speculative.
 
 | Attribute | Data needed | Priority |
 |---|---|---|
-| **Travel distance and time zones** | Stadium coordinates (have stadium_id) | **P1.** West→east early kicks is the specific case. Computable today. |
+| **Travel distance and time zones** | Stadium coordinates (have stadium_id) | ~~P1~~ **TESTED 2026-11-27 — NEGATIVE.** Fading the traveller: 46.8%/47.6% (body clock ≤10am), 47.3%/50.0% (≥2,500km), vs a 48.5%/49.9% control for fading ANY road team. Away teams actually *cover* 51.5% in the west→east early spot. EMPIRICAL_REFERENCE §9f, `analysis/travel_study.py`. |
 | **Look-ahead / let-down spots** | Schedule + spread magnitudes (have both) | **P1.** Definable purely from schedule — game before or after a marquee matchup. |
 | Consecutive road games | Schedule (have) | P1 |
 | Three games in 11 days | Schedule (have) | P1 |
