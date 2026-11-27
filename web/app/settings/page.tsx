@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import ManageSubscription from "./ManageSubscription";
 
 export default function SettingsPage() {
   const [email, setEmail] = useState<string | null | undefined>(undefined);
@@ -186,6 +187,10 @@ export default function SettingsPage() {
           </p>
         </form>
       </section>
+
+      {/* Billing sits ABOVE the danger card: cancelling is the thing a member looks for here, and
+          making them scroll past "Delete account" to find it invites the wrong click. */}
+      <ManageSubscription />
 
       <section className="setcard setcard--danger">
         <h2 className="setcard__h">Delete account</h2>
