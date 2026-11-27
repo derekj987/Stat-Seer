@@ -5,7 +5,7 @@ export const metadata = {
   description: "The terms that govern your use of StatSeer.",
 };
 
-const UPDATED = "August 27, 2026";
+const UPDATED = "November 27, 2026";
 
 export default function Terms() {
   return (
@@ -58,8 +58,67 @@ export default function Terms() {
           </p>
         </section>
 
+        {/* 🚨 AUTO-RENEWAL IS THE REGULATED PART OF THIS SECTION, not the price. Several states
+            (California's Automatic Renewal Law is the strictest, and others follow it) require
+            that recurring terms are disclosed clearly and conspicuously BEFORE purchase, that the
+            member affirmatively consents to them, that an acknowledgement is sent afterwards, and
+            that cancellation is as easy as signing up. This section is the disclosure half; the
+            CHECKOUT PAGE has to carry the same terms next to the pay button, and settings has to
+            offer self-serve cancellation, or the words here do not help. Do not ship paid plans
+            without both. */}
         <section className="legal__sec">
-          <h2>4. Acceptable use</h2>
+          <h2>4. Subscriptions, billing &amp; cancellation</h2>
+          <p>
+            Parts of the Service require a paid subscription. What a plan includes and what it costs are shown on the
+            checkout page before you pay. Prices are in US dollars and do not include any taxes we are required to
+            collect.
+          </p>
+          <ul>
+            <li>
+              <b>Automatic renewal.</b> A subscription <b>renews automatically</b> at the end of each billing period —
+              monthly or annual, as shown at checkout — and your payment method is charged the then-current price for
+              each new period <b>until you cancel</b>. We tell you the billing period and the amount before you
+              subscribe, and we email you a confirmation after you do.
+            </li>
+            <li>
+              <b>Cancelling.</b> You can cancel at any time from your account settings, by yourself, without contacting
+              us. Cancellation takes effect at the end of the period you have already paid for — you keep access until
+              then and are not charged again.
+            </li>
+            <li>
+              <b>Refunds.</b> Payments are generally non-refundable, including for a period you did not use. We will
+              refund where the law requires it, and we may refund at our discretion — for example, a billing error on
+              our side.
+            </li>
+            <li>
+              <b>No refunds for betting results.</b> A subscription buys access to analysis and tools, not an outcome.
+              Losing a wager is not grounds for a refund, and neither is disagreeing with a number we published.
+            </li>
+            <li>
+              <b>Price changes.</b> We may change prices. We will give you notice before a change takes effect, and the
+              new price applies from your next billing period, so you can cancel first if you would rather not pay it.
+            </li>
+            <li>
+              <b>Failed payments.</b> If we cannot charge your payment method we may suspend or end paid access after
+              giving you a chance to fix it.
+            </li>
+            <li>
+              <b>Card details.</b> Payments are handled by our payment processor. <b>We never receive or store your
+              full card number.</b> See our <a href="/privacy">Privacy Policy</a> for what we do receive.
+            </li>
+            <li>
+              <b>Free and beta access.</b> Any free, trial or beta access is a courtesy. We may change or end it at any
+              time, and doing so is not a breach of these Terms.
+            </li>
+          </ul>
+          <p>
+            Cancelling a subscription does not delete your account, and deleting your account does not by itself refund
+            anything already paid. The two are separate, and both are available in your account settings.
+          </p>
+        </section>
+
+        <section className="legal__sec">
+          <h2>5. Acceptable use</h2>
           <p>You agree not to:</p>
           <ul>
             <li>Use the Service for any unlawful purpose or in violation of any applicable gambling, advertising, or other law;</li>
@@ -72,7 +131,7 @@ export default function Terms() {
         </section>
 
         <section className="legal__sec">
-          <h2>5. Community content</h2>
+          <h2>6. Community content</h2>
           <p>
             You retain ownership of what you post in our community areas, but you grant StatSeer a non-exclusive,
             worldwide, royalty-free license to host, display, and distribute that content in connection with operating
@@ -82,7 +141,7 @@ export default function Terms() {
         </section>
 
         <section className="legal__sec">
-          <h2>6. Intellectual property</h2>
+          <h2>7. Intellectual property</h2>
           <p>
             The StatSeer name, logo, models, analysis, code, design, and content are owned by StatSeer and protected by
             intellectual-property laws. We grant you a limited, personal, non-transferable license to use the Service for
@@ -92,7 +151,7 @@ export default function Terms() {
         </section>
 
         <section className="legal__sec">
-          <h2>7. Responsible gambling</h2>
+          <h2>8. Responsible gambling</h2>
           <p>
             If you choose to gamble, do so responsibly and only with money you can afford to lose. Gambling can be
             addictive. If it stops being fun, or you feel you may have a problem, help is available 24/7 — call or text
@@ -101,7 +160,7 @@ export default function Terms() {
         </section>
 
         <section className="legal__sec">
-          <h2>8. Disclaimers</h2>
+          <h2>9. Disclaimers</h2>
           <p>
             The Service is provided <b>&ldquo;as is&rdquo; and &ldquo;as available,&rdquo;</b> without warranties of any
             kind, express or implied, including accuracy, reliability, fitness for a particular purpose, or
@@ -111,7 +170,7 @@ export default function Terms() {
         </section>
 
         <section className="legal__sec">
-          <h2>9. Limitation of liability</h2>
+          <h2>10. Limitation of liability</h2>
           <p>
             To the fullest extent permitted by law, StatSeer and its owners will not be liable for any indirect,
             incidental, special, consequential, or punitive damages, or for any <b>gambling losses</b> or lost profits,
@@ -122,7 +181,7 @@ export default function Terms() {
         </section>
 
         <section className="legal__sec">
-          <h2>10. Indemnification</h2>
+          <h2>11. Indemnification</h2>
           <p>
             You agree to indemnify and hold StatSeer harmless from any claims, losses, or expenses (including reasonable
             legal fees) arising from your use of the Service, your content, or your violation of these Terms or any law.
@@ -130,7 +189,7 @@ export default function Terms() {
         </section>
 
         <section className="legal__sec">
-          <h2>11. Changes</h2>
+          <h2>12. Changes</h2>
           <p>
             We may update these Terms from time to time. Material changes will be reflected by the &ldquo;last
             updated&rdquo; date above; continued use after changes means you accept them.
@@ -138,7 +197,7 @@ export default function Terms() {
         </section>
 
         <section className="legal__sec">
-          <h2>12. Governing law &amp; contact</h2>
+          <h2>13. Governing law &amp; contact</h2>
           <p>
             These Terms are governed by the laws of the State of Indiana, without regard to conflict-of-laws rules.
             Questions? Reach us through the <b>&ldquo;Message Us&rdquo;</b> widget on the site.

@@ -5,7 +5,7 @@ export const metadata = {
   description: "How StatSeer collects, uses, and protects your information.",
 };
 
-const UPDATED = "September 25, 2026";
+const UPDATED = "November 27, 2026";
 
 export default function Privacy() {
   return (
@@ -29,8 +29,17 @@ export default function Privacy() {
             <li><b>Technical &amp; usage data</b> — standard information your browser sends (such as IP address, device/browser type) and basic, aggregate usage data used to keep the site running and understand overall traffic. We use your IP address to rate-limit requests and to exclude our own visits from traffic counts.</li>
             <li><b>Questions you ask our assistant</b> — if you use the in-app assistant, the text you type is sent to our AI provider (Anthropic) to generate a reply. Do not put anything sensitive in it.</li>
             <li><b>Push notifications</b> — if you turn them on, your browser gives us a subscription token so we can send them. You can revoke it at any time in your browser or device settings.</li>
+            <li><b>Subscription &amp; billing information</b> — if you buy a subscription, our payment processor collects your card details directly and <b>we never see or store your full card number</b>. What we receive back from them is limited: whether your subscription is active, the plan and billing period, the card brand and last four digits, your billing country, and the dates of past payments. We keep that so we can show you your own billing history and give you access to what you paid for.</li>
           </ul>
-          <p>We do not knowingly collect payment-card details, government IDs, or other sensitive personal data.</p>
+          {/* The old line here read "We do not knowingly collect payment-card details, government
+              IDs, or other sensitive personal data." The first clause stops being true the day
+              paid plans ship -- a privacy policy that overstates what you DON'T collect is the
+              same defect as a UI asserting a fact it never checked. Narrowed to what stays true:
+              the processor handles the card, we never hold the number. */}
+          <p>
+            Card numbers are held by our payment processor, not by us. We do not knowingly collect government IDs or
+            other sensitive personal data, and we never ask for the credentials of any sportsbook or financial account.
+          </p>
         </section>
 
         <section className="legal__sec">
@@ -40,6 +49,7 @@ export default function Privacy() {
             <li>To display your username and content in community areas;</li>
             <li>To respond to your feedback and support requests;</li>
             <li>To secure the Service, prevent abuse, and understand aggregate usage so we can improve; and</li>
+            <li>To take payment for a subscription, give you the access you paid for, and send you billing messages such as receipts, renewal notices and failed-payment warnings;</li>
             <li>To send account-related messages (such as email confirmation). We do not send marketing email without your consent.</li>
           </ul>
         </section>
@@ -64,6 +74,10 @@ export default function Privacy() {
             <li><b>Google</b> — only if you choose &ldquo;Sign in with Google&rdquo;, in which case Google handles that sign-in and tells us your email address.</li>
             <li><b>Resend</b> — email delivery. Receives your email address to send account and beta messages.</li>
             <li><b>Anthropic</b> — our AI provider, and only if you use the assistant. Receives the text of your question.</li>
+            {/* 🚨 NAME THE PROCESSOR YOU ACTUALLY USE. A privacy policy names its recipients; if
+                the payment processor ends up being someone other than Stripe, this line and the
+                billing bullet in section 1 both have to change with it, in the same commit. */}
+            <li><b>Stripe</b> — our payment processor, and only if you buy a subscription. Receives your card and billing details directly, and tells us whether the subscription is active.</li>
           </ul>
           <p>
             We also share information when required by law or to protect our rights and users&rsquo; safety. Your public
@@ -77,6 +91,11 @@ export default function Privacy() {
             We keep your information for as long as your account is active. You can <b>delete your account</b> at any
             time from your account settings; this removes your profile and cascades to your threads, replies, wall
             posts, and reports. Some records may persist briefly in backups or where retention is required by law.
+          </p>
+          <p>
+            <b>Billing records are the exception, and deliberately so.</b> If you have paid for a subscription, we keep
+            the record of those payments — amounts, dates and plan — even after you delete your account, because tax
+            and accounting law requires us to. That record does not include your card number, which we never hold.
           </p>
         </section>
 
