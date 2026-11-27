@@ -9,7 +9,7 @@
 // the ACTUAL MARGIN, which is a different and weaker claim: beating a naive baseline
 // says the rating carries information, beating the market says it carries information
 // the market has not already priced. /nba/model says so on its face.
-// Generated 2026-11-26T07:38:28+00:00
+// Generated 2026-11-27T07:38:24+00:00
 
 export interface NbaModelGame {
   commence: string; away: string; home: string; awayName: string; homeName: string;
@@ -81,4 +81,5 @@ export const NBA_MODEL: NbaModelGame[] = [
   {"commence": "2026-12-04T01:00Z", "away": "CLE", "home": "CHI", "awayName": "Cleveland Cavaliers", "homeName": "Chicago Bulls", "margin": -5.9, "favored": "CLE", "spread": "CLE -5.9", "total": 245.0},
   {"commence": "2026-12-04T01:00Z", "away": "TOR", "home": "SA", "awayName": "Toronto Raptors", "homeName": "San Antonio Spurs", "margin": 8.9, "favored": "SA", "spread": "SA -8.9", "total": 222.8},
   {"commence": "2026-12-04T03:00Z", "away": "UTAH", "home": "POR", "awayName": "Utah Jazz", "homeName": "Portland Trail Blazers", "margin": 11.8, "favored": "POR", "spread": "POR -11.8", "total": 231.8},
+  {"commence": "2026-12-04T05:00Z", "away": "TBD", "home": "TBD", "awayName": "TBD", "homeName": "TBD", "margin": 1.5, "favored": "TBD", "spread": "TBD -1.5", "total": 228.3},
 ];
