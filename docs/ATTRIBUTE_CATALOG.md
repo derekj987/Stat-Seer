@@ -451,7 +451,7 @@ get cheaply; **P2** = needs acquisition; **P3** = speculative.
 
 | Attribute | Data needed | Priority |
 |---|---|---|
-| **Reverse line movement** | Public betting % splits | **P1 — best market-behavior lead.** Line moving *against* public money. |
+| **Reverse line movement** | Public betting % splits — **WE DO NOT HAVE THESE** | ~~P1~~ **TESTED 2026-11-27 — NEGATIVE, and the literal metric is UNMEASURABLE.** RLM needs ticket percentages; the Odds API sells prices, not tickets. The computable proxy fails Layer 1 (46.5%/50.2%) and swings 38.2%→54.4% between splits. EMPIRICAL_REFERENCE §9h, `analysis/rlm_backtest.py`. |
 | **Cross-book line disagreement** | Multi-book odds feed | **P1** — falls out of the odds API you already need |
 | Sharp-book vs retail divergence | Pinnacle/Circa vs retail | P1 |
 | Opening vs closing differential | Have closing; need opening | P1 |

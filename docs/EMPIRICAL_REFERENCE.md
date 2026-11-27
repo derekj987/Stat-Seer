@@ -2571,3 +2571,41 @@ agree by chance often enough that the interval has to do the work.
 
 **Reading.** Same as §9c, §9e, §9f. The schedule is public, the market reads it, and these spots
 are priced. Context at most.
+
+---
+
+## 9h. Reverse line movement — the literal thing is unmeasurable, and the proxy shows nothing (`rlm_backtest.py`)
+
+Measured for PR #50 but **never recorded here**, so the catalog went on calling it "P1 — best
+market-behavior lead" for weeks after it had been tested. Written up 2026-11-27 from a re-run.
+
+**🚨 First, the part that is not a result but a constraint.** Reverse line movement is defined as
+the line moving *against the side taking most of the BETS*. That needs public ticket percentages.
+The Odds API sells prices, not tickets, and nothing in the schema carries a ticket or handle split.
+**The literal metric cannot be computed from data we own**, and any "RLM record" printed off these
+tables would be inventing the half it cannot see.
+
+**What is computable, in two layers, NFL 2024–2025 (546 games with an open and a close):**
+
+| | train (<2025) | held out (≥2025) |
+|---|---|---|
+| **Layer 1** — back the side the line moved toward | 46.5% (93-107-3) | 50.2% (103-102) |
+| **Layer 2** — moved toward the UNDERDOG (proxy for "against the public") | **38.2%** (21-34-2) | **54.4%** (37-31) |
+| control — moved toward the FAVOURITE | 49.7% | 48.2% |
+
+**Layer 1 is the prerequisite and it fails.** If the direction of movement carried information,
+backing it would beat 50% somewhere; it does not, on either split.
+
+Layer 2's swing — **38.2% to 54.4%, sixteen points, on n=57 and n=68** — is what noise looks like
+at this sample size, and the control sitting flat at ~49% on both splits confirms there is nothing
+to find in either half.
+
+**Reading.** Two independent reasons to stop: the data to do it properly does not exist, and the
+part that can be done shows nothing. Related market-behaviour rows (cross-book disagreement,
+sharp-vs-retail, opening-vs-closing) are **not** settled by this and remain open — they need only
+prices, which we have.
+
+**Process note.** The measurement existed in a PR body and a script for weeks while the catalog
+still advertised it as the top untested lead. A finding that lives only in a commit message is a
+finding the next person re-derives: it belongs HERE, and the catalog row belongs updated in the
+same change.
