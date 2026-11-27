@@ -5552,3 +5552,25 @@ body:has(.lp-hero) .snav:not(.snav--solid) .snav__link.active{background:rgba(25
   .pw__bar{flex-wrap:wrap}
   .pw__rec{margin-left:0;flex-basis:100%}
 }
+
+/* Pricing / subscribe page. Reuses the .legal measure so the terms block reads like the Terms
+   page it summarises — same column width, same rhythm — rather than inventing a second voice for
+   the same words. */
+.pricing{max-width:62ch;margin:0 auto;padding:0 0 28px}
+.pricing__lead{font-size:15.5px;line-height:1.65;color:var(--ink);margin:0 0 20px}
+.pricing__act{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 22px}
+.pricing__err{flex-basis:100%;margin:4px 0 0;color:var(--mkt);font-size:13px}
+/* The disclosure. Bordered and full-contrast ON PURPOSE -- "clear and conspicuous" is the legal
+   standard, so it must not read as fine print sitting under a button. */
+.pricing__terms{border:1px solid var(--line);border-radius:12px;background:var(--surface);
+  padding:16px 18px}
+.pricing__terms h2{margin:0 0 10px;font-size:14px;font-weight:800;letter-spacing:.02em;
+  text-transform:uppercase;color:var(--ink)}
+.pricing__terms ul{margin:0;padding-left:18px}
+.pricing__terms li{margin:0 0 9px;font-size:13.5px;line-height:1.6;color:var(--ink)}
+.pricing__terms li:last-child{margin-bottom:0}
+.pricing__fine{margin:12px 0 0;font-size:12.5px;line-height:1.6;color:var(--muted)}
+.pricing__fine a{color:var(--accent);font-weight:600}
+@media (max-width:640px){
+  .pricing__act .btn{flex:1 1 100%}
+}

@@ -30,6 +30,19 @@ function isPendingAllowed(path: string): boolean {
     || path === "/welcome";
 }
 
+// What an approved member may reach WITHOUT an active subscription. Three things have to be here
+// or the gate traps people:
+//   * /pricing   — where the gate sends them; gating it would be an infinite redirect.
+//   * /settings  — a lapsed member must still be able to manage billing, re-subscribe, or delete
+//                  their account. Locking the exit behind the paywall is the pattern consumer-
+//                  protection regulators single out, and /terms promises self-serve cancellation.
+//   * /pending, /welcome and the public paths, via isPendingAllowed.
+const SUBSCRIBER_EXEMPT = ["/pricing", "/settings"];
+function isSubscriberExempt(path: string): boolean {
+  return isPendingAllowed(path)
+    || SUBSCRIBER_EXEMPT.some((p) => path === p || path.startsWith(p + "/"));
+}
+
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
@@ -88,6 +101,32 @@ export async function proxy(request: NextRequest) {
       pending.pathname = "/pending";
       pending.search = "";
       return NextResponse.redirect(pending);
+    }
+  }
+
+  // Paid gate: an approved member without an active subscription sees the pricing page.
+  //
+  // 🚨 FAILS OPEN, TWICE OVER, AND BOTH ARE DELIBERATE. `STRIPE_SECRET_KEY` absent means billing
+  // is not switched on yet, so NOBODY is gated — this can merge before the keys exist without
+  // locking out all 29 members. And if the is_subscribed() call errors (the migration has not
+  // been run, Supabase hiccups), `subscribed` stays null and the member goes through. The private
+  // beta gate above takes exactly this posture for exactly this reason: the cost of wrongly
+  // letting someone in for one page view is a page view; the cost of wrongly locking everyone out
+  // is the product.
+  //
+  // THE EXEMPT LIST IS ONE LINE ON PURPOSE. Derek chose to gate the whole site; if the graded
+  // track record (/report) should later sit outside the paywall — it is the "calibration anyone
+  // can check" artifact, and a prospective member currently cannot see it before paying — add it
+  // to SUBSCRIBER_EXEMPT and nothing else changes.
+  if (user && process.env.STRIPE_SECRET_KEY && !isSubscriberExempt(path)) {
+    let subscribed: boolean | null = null;
+    const { data, error } = await supabase.rpc("is_subscribed", { uid: user.id });
+    if (!error && typeof data === "boolean") subscribed = data;
+    if (subscribed === false) {
+      const pricing = request.nextUrl.clone();
+      pricing.pathname = "/pricing";
+      pricing.search = "?next=" + encodeURIComponent(path + request.nextUrl.search);
+      return NextResponse.redirect(pricing);
     }
   }
 
