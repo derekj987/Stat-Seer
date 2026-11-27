@@ -2491,3 +2491,46 @@ the real effect, here it beat it.
 **Reading.** Continuity is real football and the market already prices it — the same verdict as
 referees, weather, motivation, trends, streaks and upsets. It can be Context; it is not a pick
 driver.
+
+---
+
+## 9f. Travel, time zones and the body clock — priced, and the folklore points the wrong way (`travel_study.py`)
+
+`ATTRIBUTE_CATALOG` P1, "west→east early kicks is the specific case". Tested 2026-11-27 on 2,519
+regular-season games (neutral sites dropped; coordinates imported from `weather_capture.STADIUMS`
+rather than copied). **Negative.**
+
+**Mechanism stated in advance:** a Pacific team kicking at 1pm Eastern plays at 10am by its own
+body clock, and three time zones costs sleep and routine.
+
+**The away team is FINE in that spot, which is the opposite of the folklore:**
+
+| away team's body clock at kickoff | n (train) | away covers | held-out | away covers |
+|---|---|---|---|---|
+| ≤ 10am (west→east early) | 97 | 51.5% | 64 | 51.6% |
+| 10–12 | 248 | 49.2% | 113 | 55.8% |
+| 12–15 | 725 | 49.5% | 284 | 48.6% |
+| > 15 (night) | 650 | 51.1% | 338 | 46.4% |
+
+**Fading the travelling team loses on both splits:**
+
+| bet | TRAIN | HELD OUT |
+|---|---|---|
+| fade away, body clock ≤ 10am | 46.81% | 47.62% |
+| fade away, travel ≥ 2,500 km | 47.30% | 50.00% |
+| fade away, ≥2 time zones east | 47.92% | 48.08% |
+| **fade ANY away team (control)** | **48.51%** | **49.87%** |
+
+**The control is the finding.** Every travel bucket sits *at* the baseline for fading road teams
+generally — within a couple of points of 48.5%/49.9%, with overlapping intervals. Travel adds
+nothing to simply knowing the team is on the road, which the spread already prices. The placebo
+(body clock, distance and time zone shuffled) lands in the same 44–50% range.
+
+**Reading.** Same verdict as §9c and §9e. Worth showing as Context — a reader likes knowing a team
+crossed three time zones — but it is not a pick driver, and a "west coast team in an early kick"
+fade is a losing bet on ten seasons of data.
+
+**Method note worth keeping:** the per-team UTC offsets are derived from longitude bands and
+PRINTED by the script, because a silently wrong time zone would manufacture exactly the effect
+being looked for. Eyeballed correct: Pacific LA/LAC/LV/SEA/SF, Mountain ARI/DEN, Central
+CHI/DAL/GB/HOU/KC/MIN/NO, the rest Eastern.
