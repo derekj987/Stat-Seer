@@ -4,7 +4,7 @@
 //
 // Resolution lives in lib/nbaTeamTag.ts, NOT here — a helper added to a generated file is
 // wiped by the next refresh, which has taken this project's build down before.
-// Generated 2026-11-26T11:55:52+00:00 — 30 teams, 530 players.
+// Generated 2026-11-28T11:55:43+00:00 — 30 teams, 531 players.
 
 /** Team name as the ODDS FEED spells it, keyed on letters+digits only, to its
  *  abbreviation. Keyed rather than literal so a feed that writes 'LA Clippers' for
@@ -93,7 +93,7 @@ export const NBA_ROSTER: Record<string, string[]> = {
   "IND": ["aaron nesmith", "andrew nembhard", "ben sheppard", "braden smith", "ivica zubac", "jalen slawson", "jarace walker", "jay huff", "johnny furphy", "kelly oubre", "kobe brown", "larry nance", "obi toppin", "pascal siakam", "quenton jackson", "tj mcconnell", "tyrese haliburton"],
   "LAC": ["baba miller", "blake wesley", "bradley beal", "brandon ingram", "brook lopez", "cam christie", "darius garland", "derrick jones", "gradey dick", "isaiah jackson", "jalen pickett", "jordan miller", "keaton wagler", "kobe sanders", "kris dunn", "max strus", "nick martinelli", "rui hachimura", "yanic konan niederhauser"],
   "LAL": ["adou thiero", "ak okereke", "arthur kaluma", "austin reaves", "bronny james", "cameron carr", "carson cooper", "chris manon", "collin sexton", "jaden hardy", "jake laravia", "jarred vanderbilt", "kevon looney", "luka doncic", "matisse thybulle", "quentin grimes", "sandro mamukelashvili", "walker kessler", "ziaire williams"],
-  "MEM": ["cam spencer", "cameron boozer", "cedric coward", "gg jackson", "isaiah stewart", "jahmai mashack", "javon small", "jaylen wells", "jerami grant", "karim lopez", "kris murray", "olivier maxence prosper", "quinten post", "richie saunders", "scotty pippen", "taylor hendricks", "ty jerome", "zach edey"],
+  "MEM": ["cam spencer", "cameron boozer", "cedric coward", "gg jackson", "isaiah stewart", "jahmai mashack", "javon small", "jaylen wells", "jerami grant", "karim lopez", "kris murray", "lawson lovering", "olivier maxence prosper", "quinten post", "richie saunders", "scotty pippen", "taylor hendricks", "ty jerome", "zach edey"],
   "MIA": ["andrew wiggins", "bam adebayo", "bobby portis", "davion mitchell", "dru smith", "giannis antetokounmpo", "keshad johnson", "klay thompson", "myron gardner", "nick richards", "nikola jovic", "pelle larsson", "ryan conwell", "simone fontecchio", "tim hardaway", "tre donaldson", "vladislav goldin"],
   "MIL": ["aj green", "bogoljub markovic", "brayden burries", "caris levert", "cormac ryan", "gary trent", "jaime jaquez", "jericho sims", "kam jones", "kasparas jakucionis", "kelel ware", "kyle kuzma", "myles turner", "nate ament", "ousmane dieng", "pete nance", "ryan rollins", "tyler herro"],
   "MIN": ["anthony edwards", "ayo dosunmu", "bones hyland", "cody williams", "donte divincenzo", "isaiah evans", "jaden mcdaniels", "jaylen clark", "joan beringer", "johni broome", "jonathan kuminga", "lamelo ball", "rocco zikarsky", "rudy gobert", "terrence shannon", "trey lyles", "zyon pullin"],
